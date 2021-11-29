@@ -11,7 +11,7 @@
 //                                                   //
 ///////////////////////////////////////////////////////
 
-HEADER_SEARCH_PATHS = ../lib ../lib/misc ../opt/blahdio/ext/drlibs
+HEADER_SEARCH_PATHS = ../lib ../lib/glm ../lib/misc ../opt/blahdio/ext/drlibs
 OTHER_CFLAGS = 
 OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__
 

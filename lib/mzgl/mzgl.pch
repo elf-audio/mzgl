@@ -1,0 +1,13 @@
+//
+//  mzgl.h
+//  samploid
+//
+//  Created by Marek Bereza on 07/03/2018.
+//  Copyright © 2018 Marek Bereza. All rights reserved.
+//
+
+#pragma once
+#ifdef __cplusplus
+#include <glm/glm.hpp>
+#endif
+ 
