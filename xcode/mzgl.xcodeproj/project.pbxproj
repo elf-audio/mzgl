@@ -4517,7 +4517,7 @@
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA1732B32459EAB3009E7B55 /* RecompilingAppDylib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecompilingAppDylib.h; sourceTree = "<group>"; };
 		EA1732BB245AD802009E7B55 /* DefaultFont.inc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefaultFont.inc.h; sourceTree = "<group>"; };
-		EA182D392432C15000A5C3E8 /* libmzgl macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA182D392432C15000A5C3E8 /* libmzgl-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA182D422432C18800A5C3E8 /* json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
 		EA182D432432C18800A5C3E8 /* readerwriterqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readerwriterqueue.h; sourceTree = "<group>"; };
 		EA182DC42432C18800A5C3E8 /* atomicops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atomicops.h; sourceTree = "<group>"; };
@@ -6503,7 +6503,7 @@
 		EA18369A2432C18B00A5C3E8 /* fontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstash.h; sourceTree = "<group>"; };
 		EA18369B2432C18B00A5C3E8 /* glfontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glfontstash.h; sourceTree = "<group>"; };
 		EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = mzgl.xcconfig; sourceTree = "<group>"; };
-		EA1840EA2432C33200A5C3E8 /* libmzgl iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA1840EA2432C33200A5C3E8 /* libmzgl-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA1842132433497300A5C3E8 /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
 		EA234ABD24A37022000F057B /* ReorderableGrid.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReorderableGrid.h; sourceTree = "<group>"; };
 		EA234AC524A609CA000F057B /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
@@ -7204,8 +7204,8 @@
 		EA182D3A2432C15000A5C3E8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EA182D392432C15000A5C3E8 /* libmzgl macOS.a */,
-				EA1840EA2432C33200A5C3E8 /* libmzgl iOS.a */,
+				EA182D392432C15000A5C3E8 /* libmzgl-macOS.a */,
+				EA1840EA2432C33200A5C3E8 /* libmzgl-iOS.a */,
 				EA2B8B3124E7093600EA12BD /* libmzgl macOS testing.a */,
 				EA6894A1261C633500F76B91 /* libmzgl iOS AUTO_TEST.a */,
 			);
@@ -15280,9 +15280,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		EA182D382432C15000A5C3E8 /* mzgl macOS */ = {
+		EA182D382432C15000A5C3E8 /* mzgl-macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EA182D3D2432C15000A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl macOS" */;
+			buildConfigurationList = EA182D3D2432C15000A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl-macOS" */;
 			buildPhases = (
 				EA182D352432C15000A5C3E8 /* Headers */,
 				EA182D362432C15000A5C3E8 /* Sources */,
@@ -15292,14 +15292,14 @@
 			);
 			dependencies = (
 			);
-			name = "mzgl macOS";
+			name = "mzgl-macOS";
 			productName = mzgl;
-			productReference = EA182D392432C15000A5C3E8 /* libmzgl macOS.a */;
+			productReference = EA182D392432C15000A5C3E8 /* libmzgl-macOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		EA1840E92432C33200A5C3E8 /* mzgl iOS */ = {
+		EA1840E92432C33200A5C3E8 /* mzgl-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EA1840F02432C33200A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl iOS" */;
+			buildConfigurationList = EA1840F02432C33200A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl-iOS" */;
 			buildPhases = (
 				EA1840E62432C33200A5C3E8 /* Sources */,
 				EA1840E72432C33200A5C3E8 /* Frameworks */,
@@ -15309,9 +15309,9 @@
 			);
 			dependencies = (
 			);
-			name = "mzgl iOS";
+			name = "mzgl-iOS";
 			productName = "mzgl iOS";
-			productReference = EA1840EA2432C33200A5C3E8 /* libmzgl iOS.a */;
+			productReference = EA1840EA2432C33200A5C3E8 /* libmzgl-iOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		EA2B826024E7093600EA12BD /* mzgl macOS testing */ = {
@@ -15378,8 +15378,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EA182D382432C15000A5C3E8 /* mzgl macOS */,
-				EA1840E92432C33200A5C3E8 /* mzgl iOS */,
+				EA182D382432C15000A5C3E8 /* mzgl-macOS */,
+				EA1840E92432C33200A5C3E8 /* mzgl-iOS */,
 				EA2B826024E7093600EA12BD /* mzgl macOS testing */,
 				EA68943E261C633500F76B91 /* mzgl iOS AUTO_TEST */,
 			);
@@ -16114,7 +16114,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EA182D3D2432C15000A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl macOS" */ = {
+		EA182D3D2432C15000A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA182D3E2432C15000A5C3E8 /* Debug */,
@@ -16123,7 +16123,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EA1840F02432C33200A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl iOS" */ = {
+		EA1840F02432C33200A5C3E8 /* Build configuration list for PBXNativeTarget "mzgl-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EA1840F12432C33200A5C3E8 /* Debug */,

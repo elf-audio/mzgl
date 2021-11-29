@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EA182D382432C15000A5C3E8"
-               BuildableName = "libmzgl macOS.a"
-               BlueprintName = "mzgl macOS"
+               BuildableName = "libmzgl-macOS.a"
+               BlueprintName = "mzgl-macOS"
                ReferencedContainer = "container:mzgl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -51,8 +51,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EA182D382432C15000A5C3E8"
-            BuildableName = "libmzgl macOS.a"
-            BlueprintName = "mzgl macOS"
+            BuildableName = "libmzgl-macOS.a"
+            BlueprintName = "mzgl-macOS"
             ReferencedContainer = "container:mzgl.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

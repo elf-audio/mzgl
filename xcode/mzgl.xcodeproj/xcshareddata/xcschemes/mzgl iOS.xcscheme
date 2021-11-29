@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EA1840E92432C33200A5C3E8"
-               BuildableName = "libmzgl iOS.a"
-               BlueprintName = "mzgl iOS"
+               BuildableName = "libmzgl-iOS.a"
+               BlueprintName = "mzgl-iOS"
                ReferencedContainer = "container:mzgl.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -51,8 +51,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EA1840E92432C33200A5C3E8"
-            BuildableName = "libmzgl iOS.a"
-            BlueprintName = "mzgl iOS"
+            BuildableName = "libmzgl-iOS.a"
+            BlueprintName = "mzgl-iOS"
             ReferencedContainer = "container:mzgl.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
