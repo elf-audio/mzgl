@@ -1,0 +1,55 @@
+///////////////////////////////////////////////////////
+//                                                   //
+//    $$\      $$\ $$$$$$$$\  $$$$$$\  $$\           //
+//    $$$\    $$$ |\____$$  |$$  __$$\ $$ |          //
+//    $$$$\  $$$$ |    $$  / $$ /  \__|$$ |          //
+//    $$\$$\$$ $$ |   $$  /  $$ |$$$$\ $$ |          //
+//    $$ \$$$  $$ |  $$  /   $$ |\_$$ |$$ |          //
+//    $$ |\$  /$$ | $$  /    $$ |  $$ |$$ |          //
+//    $$ | \_/ $$ |$$$$$$$$\ \$$$$$$  |$$$$$$$$\     //
+//    \__|     \__|\________| \______/ \________|    //
+//                                                   //
+///////////////////////////////////////////////////////
+
+
+//OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__
+// this MUST match the setting in mzgl.xcproj
+GL_VERSION[sdk=macosx*] = MZGL_GL2
+//USE_METALANGLE
+GCC_PREPROCESSOR_DEFINITIONS[config=Debug]=$(GL_VERSION) DEBUG=1
+//AUTO_TEST
+//USE_METALANGLE
+GCC_PREPROCESSOR_DEFINITIONS[config=Release]=$(GL_VERSION)
+//AUTO_TEST
+
+// HEADERS
+HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pugixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi $(MZGLROOT)/opt/gzip-hpp/include $(PROJECT_HEADERS) $(MZGLROOT)/opt/blahdio/blahdio/include $(MZGLROOT)/opt/blahdio/ext/drlibs
+HEADER_SEARCH_PATHS[sdk=macosx*] = $(HEADERS_COMMON) 
+HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
+HEADER_SEARCH_PATHS[sdk=iphonesimulator*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
+
+
+// LINKER
+//-framework MetalANGLE
+FRAMEWORKS_COMMON =  -framework WebKit -framework StoreKit -framework CoreMIDI -framework CoreMedia -framework Accelerate -framework AVFoundation -framework AudioToolbox -framework ImageIO -framework CoreGraphics
+FRAMEWORKS_MAC = -framework CoreAudio -framework CoreVideo -framework Cocoa -framework OpenGL
+FRAMEWORKS_IOS = -framework SystemConfiguration -framework UIKit -framework QuartzCore -framework Security -framework MobileCoreServices -framework NetworkExtension -framework GLKit -framework OpenGLES -framework CoreAudioKit
+
+FRAMEWORK_SEARCH_PATHS = $(MZGLROOT)/lib/MetalANGLE/
+
+OTHER_LDFLAGS[sdk=macosx*][config=Debug] = -all_load $(FRAMEWORKS_COMMON) $(FRAMEWORKS_MAC)
+OTHER_LDFLAGS[sdk=macosx*][config=Release] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_MAC)
+
+OTHER_LDFLAGS[sdk=iphoneos*] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_IOS)
+
+CLANG_CXX_LANGUAGE_STANDARD = gnu++14
+CLANG_CXX_LIBRARY = libc++
+GCC_C_LANGUAGE_STANDARD = gnu11
+GCC_UNROLL_LOOPS[config=Release] = Yes
+
+
+//DEAD_CODE_STRIPPING[config=Debug][sdk=macosx*] = No
+
+
+// in debug only build active arch
+//ONLY_ACTIVE_ARCH[config=Debug][sdk=*][arch=*] = YES

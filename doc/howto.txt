@@ -1,0 +1,13 @@
+How to make new project
+
+
+* Create a folder for your project
+* Copy "mzgl.xcodeproj" and "res" to your new project folder
+* Rename mzgl.xcodeproj
+* open it
+* Make all the red folders black by re-pointing to them (they're in the mzgl dir)
+
+* Change MZGLROOT in PROJECT settings (NOT TARGET SETTINGS!!) to point to the root of the mzgl dir. Must be absolute for live coding to work. Can use $(PROJECT_DIR) that give you the dir of the folder that contains the current xcodeproj.
+
+* click on the target chooser next to stop button, and choose manage schemes... - then rename the schemes
+* change target names by going to settings and pressing the little rectangle with a line on the left hand side, to the left of "General, Capabilities, etc", then click on each target and rename it.
