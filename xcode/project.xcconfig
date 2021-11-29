@@ -23,7 +23,7 @@ GCC_PREPROCESSOR_DEFINITIONS[config=Release]=$(GL_VERSION)
 //AUTO_TEST
 
 // HEADERS
-HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pugixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/glm $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi $(MZGLROOT)/opt/gzip-hpp/include $(PROJECT_HEADERS) $(MZGLROOT)/opt/blahdio/blahdio/include $(MZGLROOT)/opt/blahdio/ext/drlibs
+HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pugixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/glm $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi lib/opt/gzip-hpp/include $(PROJECT_HEADERS) lib/opt/blahdio/blahdio/include lib/opt/blahdio/ext/drlibs
 HEADER_SEARCH_PATHS[sdk=macosx*] = $(HEADERS_COMMON) 
 HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
 HEADER_SEARCH_PATHS[sdk=iphonesimulator*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
