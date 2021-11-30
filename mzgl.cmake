@@ -1,5 +1,10 @@
 set(CMAKE_VERBOSE_MAKEFILE ON)
+
+if(ANDROID)
+set(CMAKE_CXX_STANDARD 17)
+else()
 set(CMAKE_CXX_STANDARD 14)
+endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -202,13 +207,16 @@ set(CMAKE_SHARED_LINKER_FLAGS
 # Gradle automatically packages shared libraries with your APK.
 include_directories(${ANDROID_NDK}/sources/android/native_app_glue/)
 
+find_package (oboe REQUIRED CONFIG)
+# target_link_libraries(${APP_NAME} oboe::oboe) # You may have other libraries here such as `log`.
 
-set(OBOE_DIR ${MZGL_ROOT}/lib/misc/oboe/)
-add_subdirectory(${OBOE_DIR} ./oboe)
-include_directories(
-        ${OBOE_DIR}/include
-        ${OBOE_DIR}/src
-        )
+
+# set(OBOE_DIR ${MZGL_ROOT}/lib/misc/oboe/)
+# add_subdirectory(${OBOE_DIR} ./oboe)
+# include_directories(
+#         ${OBOE_DIR}/include
+#         ${OBOE_DIR}/src
+#         )
 else()
 ###################################################################################################
 ## ALL OTHER PLATFORMS (todo: merge this with android)
