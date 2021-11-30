@@ -214,6 +214,10 @@ void loadCommandLineArgs(int argc, const char *argv[]) {
 	}
 }
 
+std::vector<std::string> getCommandLineArgs() {
+	return commandLineArgs;
+}
+
 namespace Globals {
 	float seconds = 0;
 	string launchUrl = "";

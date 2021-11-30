@@ -13,7 +13,7 @@
 #include <gtk/gtk.h>
 #endif
 #include "GLFWAppRunner.h"
-#include <glfw3.h>
+#include "glfw3.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <boost/filesystem/path.hpp>
@@ -147,6 +147,7 @@ void GLFWAppRunner::setCallbacks() {
 void GLFWAppRunner::run(int argc, char *argv[]) {
 
 
+	loadCommandLineArgs(argc, (const char **)argv);
 
 	for(int i =0; i < NUM_MOUSE_BUTTONS; i++) buttons.push_back(false);
 	

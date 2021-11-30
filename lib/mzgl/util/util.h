@@ -56,6 +56,7 @@ void initMZGL(App *app);
 void drawFrame(Graphics &g, EventDispatcher *eventDispatcher);
 void updateInternal();
 void loadCommandLineArgs(int argc, const char *argv[]);
+std::vector<std::string> getCommandLineArgs();
 
 void sleepMillis(long ms);
 // this makes sure a file path is unique by appending
