@@ -47,7 +47,7 @@ struct Blocks {
 	Blocks blocks;
 	BufferedInputBus _inputBus;
 	
-	vector<FloatBuffer> outputBusses;
+	vector<FloatBuffer> outputBuffers;
 	FloatBuffer inputBus;
 
 	AUAudioUnitPreset   *_currentPreset;
@@ -119,10 +119,10 @@ struct Blocks {
 	inputBus.reserve(8192);
 	
 	// create output busses
-	int numBusses = plugin->getNumOutputBusses();
-	outputBusses.resize(numBusses);
-	for(int i = 0; i < numBusses; i++) {
-		outputBusses.back().reserve(8192);
+	int numOutBusses = plugin->getNumOutputBusses();
+	outputBuffers.resize(numOutBusses);
+	for(auto &b : outputBuffers) {
+		b.reserve(8192);
 	}
 	
 	
@@ -248,7 +248,6 @@ struct Blocks {
 	_inputBus.init(defaultFormat, 8);
 	_inputBus.bus.name = @"Input";
 	
-	int numOutBusses = 8;
 	NSMutableArray *outBusses = [[NSMutableArray alloc] init];
 	for(int i = 0; i < numOutBusses; i++) {
 		AUAudioUnitBus *b = [[AUAudioUnitBus alloc] initWithFormat:defaultFormat error:nil];
@@ -260,7 +259,7 @@ struct Blocks {
 	// Create the input and output bus arrays (AUAudioUnitBusArray).
 	// @invalidname
 	_inputBusArray  = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self busType:AUAudioUnitBusTypeInput busses: @[_inputBus.bus]];
-	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self busType:AUAudioUnitBusTypeOutput busses: @[outBusses]];
+	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self busType:AUAudioUnitBusTypeOutput busses: outBusses];
 	
 	[_outputBusArray addObserverToAllBusses:self forKeyPath:@"format" options:0 context:(__bridge void * _Nullable)(self)];
 
@@ -526,15 +525,12 @@ struct Blocks {
 	
 	
 	// now run the plugin
-	vector<FloatBuffer> &outs = outputBusses;
+	vector<FloatBuffer> &outs = outputBuffers;
 	
 	bool _isInstrument = isInstrument;
 
 	return ^AUAudioUnitStatus(AudioUnitRenderActionFlags *actionFlags, const AudioTimeStamp *timestamp, AVAudioFrameCount frameCount, NSInteger outputBusNumber, AudioBufferList *outAudioBufferList, const AURenderEvent *realtimeEventListHead, AURenderPullInputBlock pullInputBlock) {
-		// Do event handling and signal processing here.
-//		NSLog(@"Process");
-//		return -1;
-//		blks->lastRenderTime.store(timestamp->mHostTime);
+
 		eff->hasStarted = true;
 		
 		AudioBufferList *inAudioBufferList = nullptr;
@@ -589,11 +585,9 @@ struct Blocks {
 				
 				inAudioBufferList = input->mutableAudioBufferList;
 
-				
 				if(inputBusData.size() != frameCount * inAudioBufferList->mNumberBuffers) {
 					inputBusData.resize(frameCount * inAudioBufferList->mNumberBuffers);
 				}
-				
 				
 				// do processing here
 				// interleave audio channels
@@ -614,12 +608,14 @@ struct Blocks {
 				if(outs[0].size()!=frameCount*inAudioBufferList->mNumberBuffers) {
 					int numSampsPerBuff = frameCount*inAudioBufferList->mNumberBuffers;
 					// as long as buffer size is less than 4096, memory is already allocated
-					for(int i = 0; i < outs.size(); i++) {
-						outs[i].resize(numSampsPerBuff);
+					for(auto &o : outs) {
+						o.resize(numSampsPerBuff);
 					}
 				}
+				
 				eff->process(&inputBusData, outs.data(), inAudioBufferList->mNumberBuffers);
 			} else {
+				
 				if(inputBusData.size() != frameCount * outAudioBufferList->mNumberBuffers) {
 					 inputBusData.resize(frameCount * outAudioBufferList->mNumberBuffers, 0);
 				}
@@ -627,8 +623,8 @@ struct Blocks {
 				if(outs[0].size()!=frameCount*outAudioBufferList->mNumberBuffers) {
 					int numSampsPerBuff = frameCount*outAudioBufferList->mNumberBuffers;
 					// as long as buffer size is less than 4096, memory is already allocated
-					for(int i = 0; i < outs.size(); i++) {
-						outs[i].resize(numSampsPerBuff);
+					for(auto &o : outs) {
+						o.resize(numSampsPerBuff);
 					}
 				}
 				
