@@ -32,7 +32,7 @@ public:
 	// this is for if you need to serialize a lot of data
 	virtual void serializeByNSDictionary(const void *nsdict) {}
 	virtual void deserializeByNSDictionary(const void *nsdict) {}
-	
+	virtual bool wantsToSerializeWithNSDictionary() { return false; }
 	
 	virtual void loadFromFile(std::string path) {
 		std::vector<uint8_t> data;
