@@ -687,24 +687,11 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, int type) {
 #endif
 	
 	
-	
-	
-	
-	
-	
-	
-	
 }
 
 
 void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, int type) {
-//	VboRef vbo = Vbo::create();
-//	vbo->setVertices(verts);
-//	vbo->setColors(cols);
-//	vbo->draw(*this, type);
-	
-	
-	
+
 	
 	colorShader->begin();
 	
@@ -714,8 +701,6 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4>
 	}
 	
 	// now draw
-	
-	
 	
 #ifndef MZGL_GL2
 	if (immediateVertexArray == 0) return;

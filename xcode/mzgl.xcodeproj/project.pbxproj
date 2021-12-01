@@ -4259,18 +4259,10 @@
 		EA7855682472DBF40072FD05 /* nanovg_gl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */; };
 		EA78556E2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
 		EA78556F2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
-		EA81A9562756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
-		EA81A9582756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
-		EA81A9592756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA81A95A2756F0AC009C911E /* AudioUnitViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9522756F0AC009C911E /* AudioUnitViewController.h */; };
 		EA81A95B2756F0AC009C911E /* AudioUnitViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9522756F0AC009C911E /* AudioUnitViewController.h */; };
-		EA81A95C2756F0AC009C911E /* MZGLEffectAU.h in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9532756F0AC009C911E /* MZGLEffectAU.h */; };
-		EA81A95D2756F0AC009C911E /* MZGLEffectAU.h in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9532756F0AC009C911E /* MZGLEffectAU.h */; };
-		EA81A95E2756F0AC009C911E /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9542756F0AC009C911E /* AudioUnitViewController.mm */; };
 		EA81A95F2756F0AC009C911E /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9542756F0AC009C911E /* AudioUnitViewController.mm */; };
-		EA81A9602756F0AC009C911E /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9542756F0AC009C911E /* AudioUnitViewController.mm */; };
-		EA81A9612756F0AC009C911E /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9542756F0AC009C911E /* AudioUnitViewController.mm */; };
 		EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA9242A8273EE0C300311C98 /* scoped_ptr.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA92424E273EE0C300311C98 /* scoped_ptr.hpp */; };
@@ -12713,7 +12705,6 @@
 				EA1839282432C18C00A5C3E8 /* is_unsigned.hpp in Headers */,
 				EA183F592432C18D00A5C3E8 /* while.hpp in Headers */,
 				EA183F092432C18D00A5C3E8 /* bitxor.hpp in Headers */,
-				EA81A95C2756F0AC009C911E /* MZGLEffectAU.h in Headers */,
 				EA183F972432C18D00A5C3E8 /* DrawingFunction.h in Headers */,
 				EA183F442432C18D00A5C3E8 /* local.hpp in Headers */,
 				EA183CBB2432C18C00A5C3E8 /* full_lambda.hpp in Headers */,
@@ -14673,7 +14664,6 @@
 				EA2B883424E7093600EA12BD /* traits_lambda_spec.hpp in Headers */,
 				EA2B883524E7093600EA12BD /* partition_op.hpp in Headers */,
 				EA64AD8926A1C03A001427AD /* MZGLWebView.h in Headers */,
-				EA81A95D2756F0AC009C911E /* MZGLEffectAU.h in Headers */,
 				EA2B883624E7093600EA12BD /* is_member_pointer.hpp in Headers */,
 				EA2B883724E7093600EA12BD /* reverse_fold_impl.hpp in Headers */,
 				EAA0146B2719825B004E8A3D /* pugiconfig.hpp in Headers */,
@@ -15485,7 +15475,6 @@
 				EA183FC02432C18D00A5C3E8 /* util.cpp in Sources */,
 				EA297C6E25C954E600F890AE /* pa_allocation.c in Sources */,
 				EA183FE72432C18D00A5C3E8 /* AudioSystem.cpp in Sources */,
-				EA81A9562756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
 				EA234B1824A63513000F057B /* YogaLayout.cpp in Sources */,
 				EA18403C2432C18D00A5C3E8 /* zipper.cpp in Sources */,
 				EA1840272432C18D00A5C3E8 /* fileenc.c in Sources */,
@@ -15544,7 +15533,6 @@
 				EA183FCF2432C18D00A5C3E8 /* DateTime.cpp in Sources */,
 				EA64AD7426A186D7001427AD /* MZGLWebView.mm in Sources */,
 				EA183F9E2432C18D00A5C3E8 /* PadGrid.cpp in Sources */,
-				EA81A95E2756F0AC009C911E /* AudioUnitViewController.mm in Sources */,
 				EA2B8B3224E7095D00EA12BD /* mainMac.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -15678,7 +15666,6 @@
 				EA2B8ADA24E7093600EA12BD /* ioapi.c in Sources */,
 				EA2B8ADB24E7093600EA12BD /* MacAppDelegate.mm in Sources */,
 				EA2B8ADC24E7093600EA12BD /* YGLayout.cpp in Sources */,
-				EA81A9602756F0AC009C911E /* AudioUnitViewController.mm in Sources */,
 				EA2B8ADD24E7093600EA12BD /* events.cpp in Sources */,
 				EA2B8ADE24E7093600EA12BD /* aestab.c in Sources */,
 				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
@@ -15691,7 +15678,6 @@
 				EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */,
 				EA2B8AE424E7093600EA12BD /* TextConsole.mm in Sources */,
 				EA2B8AE524E7093600EA12BD /* ioapi_buf.c in Sources */,
-				EA81A9582756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
 				EA2B8AE624E7093600EA12BD /* MitredLine.cpp in Sources */,
 				EA2B8AE824E7093600EA12BD /* event.cpp in Sources */,
 				EA2B8AEA24E7093600EA12BD /* Texture.cpp in Sources */,
@@ -15798,10 +15784,8 @@
 				EA68944C261C633500F76B91 /* Drawer.cpp in Sources */,
 				EAF99AB2267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
 				EA68944D261C633500F76B91 /* Utils.cpp in Sources */,
-				EA81A9612756F0AC009C911E /* AudioUnitViewController.mm in Sources */,
 				EA68944E261C633500F76B91 /* windows_file_codecvt.cpp in Sources */,
 				EA68944F261C633500F76B91 /* YGNodePrint.cpp in Sources */,
-				EA81A9592756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
 				EA689450261C633500F76B91 /* sha1.c in Sources */,
 				EA689451261C633500F76B91 /* YGValue.cpp in Sources */,
 				EA689452261C633500F76B91 /* ioapi.c in Sources */,
