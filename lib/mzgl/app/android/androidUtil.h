@@ -94,11 +94,9 @@ std::string jstringToString(JNIEnv *jni, jstring text);
 class ScopedJni {
 public:
     ScopedJni() {
-        if(jni==nullptr) {
-            printf("Creating jni\n");
+//        if(jni==nullptr) {
             success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, nullptr)==JNI_OK;
-            printf("Created JNI\n");
-        }
+//        }
     }
     JNIEnv *j() {
         return jni;
@@ -119,7 +117,7 @@ public:
     }
 private:
     bool success = false;
-    static JNIEnv *jni;
+    JNIEnv *jni;
 };
 
 
