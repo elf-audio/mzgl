@@ -113,6 +113,7 @@ bool Layer::removeFromParent() {
 bool Layer::removeChild(Layer *layer) {
 	for(int i = 0; i < children.size(); i++) {
 		if(children[i]==layer) {
+			children[i]->parent = nullptr;
 			children.erase(children.begin() + i);
 			return true;
 		}
