@@ -4467,6 +4467,8 @@
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
+		EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
+		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
@@ -7146,6 +7148,7 @@
 		EAAA5AB92755437000021ACA /* rotate_normalized_axis.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rotate_normalized_axis.hpp; sourceTree = "<group>"; };
 		EAAA5ABA2755437000021ACA /* projection.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = projection.inl; sourceTree = "<group>"; };
 		EAAA5ABB2755437000021ACA /* type_aligned.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = type_aligned.hpp; sourceTree = "<group>"; };
+		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
 		EACEB2E324DB81A400BF4D1A /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
 		EAD47FB125892D4100D2172A /* ThreadPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
@@ -10132,6 +10135,7 @@
 		EA1835E02432C18B00A5C3E8 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
 				EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */,
@@ -13103,6 +13107,7 @@
 				EA1839C22432C18C00A5C3E8 /* linux_error.hpp in Headers */,
 				EA1840192432C18D00A5C3E8 /* crypt.h in Headers */,
 				EA183AD92432C18C00A5C3E8 /* at_impl.hpp in Headers */,
+				EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */,
 				EA183A3F2432C18C00A5C3E8 /* workaround.hpp in Headers */,
 				EA183CBA2432C18C00A5C3E8 /* iter_fold_impl.hpp in Headers */,
 				EA297CAB25C954E600F890AE /* pa_mac_core_internal.h in Headers */,
@@ -14517,6 +14522,7 @@
 				EA2B879324E7093600EA12BD /* nanovg_gl.h in Headers */,
 				EA2B879424E7093600EA12BD /* numbered_c.hpp in Headers */,
 				EA2B879524E7093600EA12BD /* MZGLKitViewController.h in Headers */,
+				EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */,
 				EA2B879624E7093600EA12BD /* not_equal_to.hpp in Headers */,
 				EA2B879724E7093600EA12BD /* bitxor.hpp in Headers */,
 				EA2B879824E7093600EA12BD /* template_arity.hpp in Headers */,
