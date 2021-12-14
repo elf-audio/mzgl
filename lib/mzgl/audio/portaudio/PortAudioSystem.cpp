@@ -241,7 +241,7 @@ void PortAudioSystem::configureStream() {
     if(sampleRate==0) {
         if(this->numOutChannels>0) {
             sampleRate = outPort.defaultSampleRate;
-            Log::d() << "Using default output sample rate of " << outPort.defaultSampleRate;
+//            Log::d() << "Using default output sample rate of " << outPort.defaultSampleRate;
         } else if(this->numInChannels>0) {
             sampleRate = inPort.defaultSampleRate;
         }
