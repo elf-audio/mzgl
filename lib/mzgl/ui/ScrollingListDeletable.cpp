@@ -28,8 +28,6 @@ void ScrollingListDeletableView::draw() {
 		deleteDecidey = clampf(deleteDecidey + (shouldDelete?0.05:-0.05), 0, 1);
 		pos = mapf(easeInOutCubic(deleteDecidey), 0, 1, notDeletePos, deletePos);
 	}
-	
-	
 
 	if(horizontalScroll<0) {
 		if(settings.font==nullptr) {
