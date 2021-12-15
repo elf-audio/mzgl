@@ -838,6 +838,7 @@ void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
 
 
 #include "DefaultFont.inc.h"
+
 vector<unsigned char> Graphics::getDefaultFontTTFData() {
 	return getDefaultFontData();
 }
@@ -848,6 +849,13 @@ Font &Graphics::getFont() {
 		font->load(getDefaultFontData(), 42);
 	}
 	return *font;
+}
+
+void Graphics::unloadFont() {
+	if(font!=nullptr) {
+		delete font;
+		font = nullptr;
+	}
 }
 
 void Graphics::warpMaskForScissor(Rectf &a) {

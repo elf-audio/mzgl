@@ -198,10 +198,10 @@ void Font::draw(Graphics &g, const string &text, glm::vec2 c) {
 
 void Font::draw(Graphics &g, const string &text, float x, float y) {
 	
-//	if(fs==nullptr) {
-//		Log::e() << "Calling getRect on null Font";
-//		return;
-//	}
+	if(fs==nullptr) {
+		Log::e() << "Calling getRect on null Font";
+		return;
+	}
 	
 	GLFONScontext* gl = (GLFONScontext*)(fs->params.userPtr);
 	if(gl->VERTEX_ATTRIB==0) {
