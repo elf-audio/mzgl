@@ -123,12 +123,6 @@ static int engine_init_display(struct engine* engine) {
 
 
 
-
-
-
-
-
-
     engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     EGLint major;
@@ -216,13 +210,11 @@ shared_ptr<EventDispatcher> eventDispatcher;
 shared_ptr<App> app;
 static void engine_term_display(struct engine* engine);
 
-/**
- * Just the current frame in the display.
- */
-static void engine_draw_frame(struct engine* engine) {
+
+static bool prepareFrame(struct engine* engine) {
     if (engine->display == NULL) {
         // No display.
-        return;
+        return false;
     }
 
     GLint err = glGetError();
@@ -237,25 +229,45 @@ static void engine_draw_frame(struct engine* engine) {
     auto result = eglQueryContext(engine->display, engine->context, EGL_CONFIG_ID, &outInt);
     if(result==EGL_FALSE) {
         Log::e() << "Got false";
-        return;
+        return false;
     } else if(result==EGL_TRUE) {
 //        Log::d() << "Got true!";
     } else {
         Log::e() << "Got " << result;
+        return false;
+    }
+    return true;
+}
+//
+//static void engine_draw_blankFrame(struct engine* engine) {
+//    if(!prepareFrame(engine)) {
+//        return;
+//    }
+//
+//    // just draw *something* whilst loading... - doesn't seem to work
+//    graphics.clear(1.0, 0.1, 0.1, 1);
+//    eglSwapBuffers(engine->display, engine->surface);
+//}
+/**
+ * Just the current frame in the display.
+ */
+static void engine_draw_frame(struct engine* engine) {
+    if(!prepareFrame(engine)) {
         return;
     }
 
     if(!firstFrameAlreadyRendered) {
         firstFrameAlreadyRendered = true;
 
-
-        App *appPtr = instantiateApp(graphics);
-        initMZGL(appPtr);
-        app = shared_ptr<App>(appPtr);
         graphics.width = engine->width;
         graphics.height = engine->height;
         glViewport(0, 0, graphics.width, graphics.height);
-        eventDispatcher = make_shared<EventDispatcher>(appPtr);
+
+        eventDispatcher = make_shared<EventDispatcher>(app.get());
+        // just draw *something* whilst loading... - doesn't seem to work
+        eventDispatcher->androidDrawLoading();
+        eglSwapBuffers(engine->display, engine->surface);
+
 
         eventDispatcher->setup();
     }
@@ -274,14 +286,7 @@ static void engine_draw_frame(struct engine* engine) {
             eventDispatcher->resized();
         }
     }
-/*
-    graphics.setupView();
-    updateInternal();
-    eventDispatcher->update();
-    callUpdateListeners();
-    eventDispatcher->draw();
-    callDrawListeners();
-*/
+
     eventDispatcher->runFrame();
 
     eglSwapBuffers(engine->display, engine->surface);
@@ -534,6 +539,13 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                 engineReady = true;
 
                 graphics.initGraphics();
+               if(eventDispatcher!=nullptr && prepareFrame(engine)) {
+//                    engine_draw_blankFrame(engine);
+                   graphics.width = engine->width;
+                   graphics.height = engine->height;
+                    eventDispatcher->androidDrawLoading();
+                    eglSwapBuffers(engine->display, engine->surface);
+               }
                 if(clearedUpGLResources) {
 
                     eventDispatcher->resized();
@@ -610,16 +622,11 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
             eventDispatcher->memoryWarning();
             break;
 
-
         case APP_CMD_PAUSE:
             Log::d() << "APP_CMD_PAUSE";
             break;
-
-
     }
 }
-
-
 
 
 android_app *globalAppPtr;
@@ -645,6 +652,10 @@ void android_main(struct android_app* state) {
     state->onInputEvent = engine_handle_input;
     engine.app = state;
 
+    App *appPtr = instantiateApp(graphics);
+    initMZGL(appPtr);
+    app = shared_ptr<App>(appPtr);
+
     // loop waiting for stuff to do.
 
     while (1) {
@@ -653,16 +664,12 @@ void android_main(struct android_app* state) {
         int events;
         struct android_poll_source* source;
 
-
         while ((ident=ALooper_pollAll(engineReady?0:-1, NULL, &events,
                                       (void**)&source)) >= 0) {
-
             // Process this event.
             if (source != NULL) {
                 source->process(state, source);
             }
-
-
 
             // Check if we are exiting.
             if (state->destroyRequested != 0) {
@@ -670,8 +677,6 @@ void android_main(struct android_app* state) {
                 return;
             }
         }
-
-
 
         engine_draw_frame(&engine);
     }

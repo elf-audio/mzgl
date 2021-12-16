@@ -21,7 +21,8 @@ public:
 		printf("Bye bye event dispatcher\n");
 	}
 	
-	
+	void androidDrawLoading() { app->androidDrawLoading(); }
+
 	// KEYS
 	void keyDown(int key) {
 		app->keyDown(key);

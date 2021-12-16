@@ -94,7 +94,7 @@ public:
 	virtual void fileDragCancelled(int touchId) {}
 	
     
-    
+    virtual void androidDrawLoading() {}
     
     
 	// return true if you can open, false if you can't
