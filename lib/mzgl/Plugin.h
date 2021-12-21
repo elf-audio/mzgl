@@ -297,6 +297,6 @@ private:
 	double sampleRate = 0.f;
 };
 
-Plugin *instantiatePlugin();
+::Plugin *instantiatePlugin();
 int getNumParams();
 int getNumPresets();

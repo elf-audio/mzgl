@@ -24,5 +24,5 @@ public:
 
 
 // entry point for plugin editor
-PluginEditor *instantiatePluginEditor(Graphics &g, Plugin *plugin);
+PluginEditor *instantiatePluginEditor(Graphics &g, ::Plugin *plugin);
 bool isPlugin();
