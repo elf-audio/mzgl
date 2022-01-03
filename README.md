@@ -16,8 +16,6 @@ There are submodules, be sure to
 git submodule init
 git submodule update
 ```
-## INSTALLING KOALA
-the koala repo needs to go in projects/music/ - you will need to make the 'music' folder.
 
 ## WINDOWS
 
