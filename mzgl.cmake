@@ -151,6 +151,13 @@ add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pugixml OBJECT ${MZGL_ROOT}/lib/pugixml/src/pugixml.cpp)
 
 
+# set(OPENSSL_BRANCH OpenSSL_1_1_1m)
+# set(BUILD_OPENSSL ON)
+# set(OPENSSL_BUILD_VERSION 1.1.1m)
+# add_subdirectory(${MZGL_ROOT}/lib/openssl-cmake)
+
+
+
 include_directories(${HEADERS})
 
 # Apple platforms have a special audio file reader

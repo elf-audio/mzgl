@@ -170,9 +170,8 @@ public:
 		midiOutMessages.reserve(100);
 	}
 	
-	virtual ~Plugin() {
-		printf("Deleting plugin\n");
-	}
+	virtual ~Plugin() {}
+	
 	friend class PluginEditor;
 	
 	// allocate memory here
