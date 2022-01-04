@@ -295,16 +295,23 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	// this is an issue because people are loading .mp3 extensions that are actually m4a's from youtube.
 	// check to see if Dr Lib fails on AAC and if it does, send it to NDK decoder and see if that works.
 	// (e.g. do a test with an AAC renamed to MP3
-    if(ext==".wav" || ext==".flac" || ext==".mp3") {
+
+
+
+	if(ext==".wav" || ext==".flac" || ext==".mp3") {
         // if it's a wav file, use dr wav
         Log::d() << "USING drlib decoding " << path;
         int outSampleRate = 0;
-        return AudioFile_loadDrLib(path, buff, outNumChannels, &outSampleRate, newSampleRate);
-    } else {
-        Log::d() << "USING ndk media decoder to open " << path;
-        int outSampleRate = 0;
-        return AudioFileAndroid_load(path, buff, outNumChannels, &outSampleRate, newSampleRate);
+        bool successOpening = AudioFile_loadDrLib(path, buff, outNumChannels, &outSampleRate,
+                                                  newSampleRate);
+        if (successOpening) return true;
     }
+
+	// fallback to ndk decoder if nothing else can open it.
+	Log::d() << "USING ndk media decoder to open " << path;
+	int outSampleRate = 0;
+	return AudioFileAndroid_load(path, buff, outNumChannels, &outSampleRate, newSampleRate);
+
 #else
     int outSampleRate = 0;
     return AudioFile_loadDrLib(path, buff, outNumChannels, &outSampleRate, newSampleRate);
