@@ -124,10 +124,14 @@ public:
 	void pushMatrix();
 	void popMatrix();
 
+
+	
+	
 	void loadIdentity();
 	void translate(glm::vec2 d);
 	void translate(glm::vec3 d);
 
+	
 	void translate(float x, float y, float z = 0);
 	void scale(float amt);
 	void scale(float x, float y, float z = 1);
@@ -217,8 +221,16 @@ struct ScopedTransform {
 struct ScopedMask {
 	bool scissorWasEnabled = false;
 	float vals[4];
+	bool masking = false;
 	
+	// you can initialize with empty constructor
+	// so there's no mask actually happening
+	// this is handy when you want conditinal masks
+	ScopedMask() {
+		masking = false;
+	}
 	ScopedMask(Graphics &g, const Rectf &r) {
+		masking = true;
 		if(glIsEnabled(GL_SCISSOR_TEST)) {
 			scissorWasEnabled = true;
 			glGetFloatv(GL_SCISSOR_BOX, vals);
@@ -240,6 +252,7 @@ struct ScopedMask {
 	}
 
 	virtual ~ScopedMask() {
+		if(!masking) return;
 		if(scissorWasEnabled) {
 			glScissor(vals[0], vals[1], vals[2], vals[3]);
 		} else {

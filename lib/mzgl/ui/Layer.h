@@ -132,8 +132,12 @@ private:
 	Layer *parent;
 	std::vector<Layer*> children;
 	void setup(std::string name);
-	
-	
+	void pushMask();
+	void popMask();
+	// this gets abused because its not
+	// really scoped usage, but it helps
+	// to not reuse some code.
+	ScopedMask scopedMask;
 	
 	
 	//static void transformFocusedMouse(float &x, float &y);

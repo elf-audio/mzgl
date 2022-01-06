@@ -53,8 +53,15 @@ string Layer::toString() {
 	return string(c);
 }
 void Layer::maskOn() {
+	
+	
+	
+	
+	
+	
 	glEnable(GL_SCISSOR_TEST);
 	auto r = getAbsoluteRect();
+	
 	// dang this still not working!!!
 	//g.warpMaskForScissor(r);
 	glScissor(r.x, g.height-(r.y+r.height), r.width, r.height);
@@ -67,12 +74,25 @@ void Layer::maskOn() {
 
 void Layer::maskOff() {
 	glDisable(GL_SCISSOR_TEST);
+	
 }
+
+void Layer::pushMask() {
+	scopedMask = ScopedMask(g, *this);
+}
+
+
+void Layer::popMask() {
+	scopedMask = ScopedMask();
+}
+
 
 void Layer::_draw() {
 	if(!visible) return;
+	
+	
 	if(clipToBounds) {
-		maskOn();
+		pushMask();
 	}
 	
 	if(x!=0 || y!=0) g.pushMatrix();
@@ -83,9 +103,13 @@ void Layer::_draw() {
 	}
 	if(x!=0 || y!=0) g.popMatrix();
 	if(clipToBounds) {
-		maskOff();
+		popMask();
 	}
 }
+
+
+
+
 
 void Layer::_doLayout() {
 	doLayout_();
