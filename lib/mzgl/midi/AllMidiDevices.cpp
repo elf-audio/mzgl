@@ -136,20 +136,26 @@ private:
 
 std::shared_ptr<AllMidiDevicesImpl> impl;
 
-AllMidiDevices::AllMidiDevices() {
-#ifdef __ANDROID__
-    impl = std::make_shared<AllMidiDevicesAndroidImpl>();
-#elif defined(__APPLE__)
-    impl = std::make_shared<AllMidiDevicesAppleImpl>();
-#else
-    impl = std::make_shared<AllMidiDevicesRtMidiImpl();
-#endif
+AllMidiDevices::AllMidiDevices(bool online) : online(online) {
+	if(online) {
+	#ifdef __ANDROID__
+		impl = std::make_shared<AllMidiDevicesAndroidImpl>();
+	#elif defined(__APPLE__)
+		impl = std::make_shared<AllMidiDevicesAppleImpl>();
+	#else
+		impl = std::make_shared<AllMidiDevicesRtMidiImpl();
+	#endif
+	}
 }
 
 void AllMidiDevices::setup() {
-    impl->setup();
+	if(online) {
+		impl->setup();
+	}
 }
 void AllMidiDevices::addListener(MidiListener *listener) {
-    impl->addListener(listener);
+	if(online) {
+		impl->addListener(listener);
+	}
 }
 

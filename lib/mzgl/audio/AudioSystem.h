@@ -98,6 +98,9 @@ public:
 	void addSampleRateChangeListener(SampleRateChangeListener *listener);
 	void removeSampleRateChangeListener(SampleRateChangeListener *listener);
 	void notifySampleRateChanged();
+	
+	// 
+	virtual double getTimeAtBufferBegin() { return 0; }
 protected:
 	
 	std::vector<SampleRateChangeListener*> listeners;

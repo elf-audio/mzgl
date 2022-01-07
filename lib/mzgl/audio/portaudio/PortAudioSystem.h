@@ -36,7 +36,7 @@ public:
 
     double getLatency() override;
     double getOutputLatency();
-    double getTimeAtBufferBegin();
+    double getTimeAtBufferBegin() override;
     double getHostTime();
     
     

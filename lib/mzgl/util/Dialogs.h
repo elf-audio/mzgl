@@ -59,6 +59,7 @@ public:
 
 
 #ifdef UNIT_TEST
+
 namespace unit_test {
     bool isDialogOpen();
     void dismissAlert();
