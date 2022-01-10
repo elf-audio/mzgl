@@ -34,8 +34,8 @@ public:
 	AudioPort getInput() override { return inPort; }
 	AudioPort getOutput() override { return outPort; }
 
-    double getLatency() override;
-    double getOutputLatency();
+    double getLatency();
+    double getOutputLatency() override;
     double getTimeAtBufferBegin() override;
     double getHostTime();
     

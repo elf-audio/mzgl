@@ -21,7 +21,7 @@ class AllMidiDevicesImpl;
 
 class AllMidiDevices {
 public:
-    AllMidiDevices(bool online = false);
+    AllMidiDevices(bool online = true);
     std::shared_ptr<AllMidiDevicesImpl> impl;
     void setup();
     void addListener(MidiListener *listener);

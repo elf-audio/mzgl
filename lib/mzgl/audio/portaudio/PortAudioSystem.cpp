@@ -289,7 +289,7 @@ void PortAudioSystem::configureStream() {
 void PortAudioSystem::start() {
 	auto err = Pa_StartStream(stream);
 	checkPaError(err, "start stream");
-	Log::d() << to_string(getLatency()*1000.0, 0) << "ms latency";
+	Log::d() << to_string(getOutputLatency()*1000.0, 0) << "ms output latency";
 }
 
 void PortAudioSystem::stop() {

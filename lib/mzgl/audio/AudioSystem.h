@@ -85,7 +85,8 @@ public:
 	virtual AudioPort getInput();
 	virtual AudioPort getOutput();
 
-    virtual double getLatency();
+	virtual double getOutputLatency();
+
 	// this should restart the system and try to set the samplerate
 	virtual void setSampleRate(float sampleRate);
 	virtual void setBufferSize(int size);
