@@ -399,6 +399,7 @@ set(LIBS
     glfw
     boostfs
     yoga
+    Ableton::Link
     blahdio
 )
 
