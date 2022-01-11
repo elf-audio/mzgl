@@ -59,39 +59,6 @@ set(MZGL_SOURCES
 
 )
 
-# file( GLOB HEADERS  
-
-# 	lib/mzgl/*.h
-# 	lib/mzgl/animation/*.h
-# 	lib/mzgl/app/android/*.h
-# 	lib/mzgl/app/mac/*.h
-# 	lib/mzgl/app/glfw/*.h
-# 	lib/mzgl/audio/*.h
-# 	lib/mzgl/audio/portaudio/*.h
-# 	lib/mzgl/file/*.h
-# 	lib/mzgl/geom/*.h
-# 	lib/mzgl/gl/*.h
-# 	lib/mzgl/gl/drawing/*.h
-# 	lib/mzgl/midi/*.h
-# 	lib/mzgl/music/*.h
-# 	lib/mzgl/ui/*.h
-# 	lib/mzgl/util/*.h
-# 	lib/glm/*.h
-# 	lib/*.h
-# 	lib/glfw/include/GLFW/*.h
-# 	lib/glew/include/GL/*.h
-# 	lib/glew/include/*.h
-# 	lib/portaudio/include/*.h
-# 	lib/fontstash/*.h
-# 	lib/rtmidi/*.h
-# 	lib/pugixml/src/*.h
-# 	lib/misc/*.h
-# 	lib/zipper/zipper/*.h
-#     lib/zipper/minizip/*.h
-# 	lib/yoga/*.h
-# )
-
-
 set(HEADERS 
 	lib/mzgl
 	lib/mzgl/animation
@@ -318,9 +285,6 @@ list(APPEND MZGL_SOURCES
 endif()
 
 
-
-
-
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib-windows/release-${OF_PLATFORM}-${ARCH_BIT}")
 #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
 
@@ -343,7 +307,6 @@ if(APPLE)
 endif(APPLE)
 
 
-
 if(LINUX)
     add_compile_definitions(__LINUX_ALSA__)
     find_package(ALSA REQUIRED)
@@ -361,8 +324,6 @@ if(LINUX)
        # add_compile_definitions(__LINUX_PULSE__)
 endif(LINUX)
 
-
-
 add_library(libmzgl STATIC ${MZGL_SOURCES})
 add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
 
@@ -373,8 +334,9 @@ include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
-
 add_subdirectory(lib/glfw "glfw-build")
+
+
 if(WIN32)
 	# windows portaudio: can't seem to get the cmake build working (WASAPI doesn't work)
 	# so I built it in visual studio and am attempting to link it here (need to copy dll into bin)
@@ -393,11 +355,7 @@ add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
 
 find_package(OpenGL REQUIRED)
 
-
 add_dependencies(libmzgl pugixml)
 add_dependencies(libmzgl RtMidi)
-
-
-
 
 endif() ## ALL OTHER PLATFORMS
