@@ -85,6 +85,9 @@ void AllMidiDevicesAppleImpl::autoPoll() {
     // keep checking for new ports
     running = true;
     portScannerThread = std::thread([this]() {
+#if defined(__APPLE__) && DEBUG
+				pthread_setname_np("AllMidiIns::portScanner");
+#endif
         while(running) {
             runOnMainThread([this] {
                 dispatch_async(dispatch_get_main_queue(), ^{
