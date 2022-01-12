@@ -1,3 +1,5 @@
+# TODO: can make a CPM of nlohmann json
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 if(ANDROID)
@@ -7,6 +9,32 @@ set(CMAKE_CXX_STANDARD 14)
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(CPM.cmake)
+
+CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
+
+# CPMAddPackage("gh:boostorg/boost#5110237")
+
+
+
+# CPMAddPackage(
+#   NAME nlohmann_json
+#   VERSION 3.9.1
+#   OPTIONS 
+#     "JSON_BuildTests OFF"
+# )
+
+
+
+
+
+
+
+
+
+
+
 
 # PRINT EVERYTHING!!!
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -56,7 +84,6 @@ set(MZGL_SOURCES
 	lib/mzgl/util/maths.cpp
 	lib/mzgl/util/util.cpp
 	lib/mzgl/util/ZipFile.cpp
-
 )
 
 set(HEADERS 
@@ -116,38 +143,42 @@ set(BOOST_SOURCES
 )
 
 set(ZIPPER_SOURCES
-      lib/zipper/minizip/ioapi_buf.c
-      lib/zipper/minizip/ioapi_mem.c
-		lib/zipper/minizip/ioapi.c
-        #lib/zipper/minizip/miniunz.c
-       # lib/zipper/minizip/minizip.c
-       lib/zipper/minizip/unzip.c
-       lib/zipper/minizip/zip.c
-       lib/zipper/zipper/CDirEntry.cpp
-       lib/zipper/zipper/tools.cpp
-       # lib/zipper/zipper/tps/dirent.c
-        lib/zipper/zipper/unzipper.cpp
-        lib/zipper/zipper/zipper.cpp
-        )
+	lib/zipper/minizip/ioapi_buf.c
+	lib/zipper/minizip/ioapi_mem.c
+	lib/zipper/minizip/ioapi.c
+	lib/zipper/minizip/unzip.c
+	lib/zipper/minizip/zip.c
+	lib/zipper/zipper/CDirEntry.cpp
+	lib/zipper/zipper/tools.cpp
+	lib/zipper/zipper/unzipper.cpp
+	lib/zipper/zipper/zipper.cpp
+ )
+
 if(WIN32)
 	list(APPEND ZIPPER_SOURCES lib/zipper/minizip/iowin32.c)
 	list(APPEND HEADERS lib/zipper/zipper/tps)
+endif()
 
-endif(WIN32)
+option(MZGL_UNIT_TEST "should this be a unit testing build - omits a main, so catch2 can take control" OFF)
+
+if(MZGL_UNIT_TEST)
+	add_compile_definitions(UNIT_TEST DEBUG=1)
+	add_compile_options(-g)
+endif(MZGL_UNIT_TEST)
+
+
 
 add_library(zipper STATIC ${ZIPPER_SOURCES})
 add_library(boostfs STATIC ${BOOST_SOURCES})
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pugixml OBJECT lib/pugixml/src/pugixml.cpp)
 
+# add_dependencies(libmzgl pugixml)
 
 # set(OPENSSL_BRANCH OpenSSL_1_1_1m)
 # set(BUILD_OPENSSL ON)
 # set(OPENSSL_BUILD_VERSION 1.1.1m)
 # add_subdirectory(lib/openssl-cmake)
-
-
-
 
 # Apple platforms have a special audio file reader
 if(APPLE) 
@@ -155,141 +186,10 @@ if(APPLE)
 		lib/mzgl/audio/AudioFileApple.cpp
 		lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
 		lib/mzgl/midi/appleMidiUtils.cpp
+		lib/mzgl/app/mac/MacMenuBar.mm
+		lib/mzgl/app/mac/LayerExplorer.mm
 	)
-else(APPLE)
-	list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileAndroid.cpp)
-endif(APPLE)
 
-# if(APPLE) 
-#    list(APPEND MZGL_SOURCES
-#    lib/mzgl/app/mac/mainMac.mm)
-# endif(APPLE)
-
-if(ANDROID)
-###################################################################################################
-## ANDROID SPECIFIC
-###################################################################################################
-
-list(APPEND MZGL_SOURCES
-    lib/mzgl/app/android/mainAndroid.cpp
-    lib/mzgl/app/android/androidUtil.cpp
-)
-include_directories(${ANDROID_NDK}/sources/android/native_app_glue/)
-
-add_library(libmzgl STATIC ${MZGL_SOURCES})
-add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
-target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
-
-
-# build native_app_glue as a static lib
-
-#is this line needed??
-set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
-
-add_library(native_app_glue STATIC
-        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
-
-
-#-DAUTO_TEST
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Ofast -fno-stack-protector")
-
-# Export ANativeActivity_onCreate(),
-# Refer to: https://github.com/android-ndk/ndk/issues/381.
-set(CMAKE_SHARED_LINKER_FLAGS
-        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
-
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
-
-
-else()
-###################################################################################################
-## ALL OTHER PLATFORMS (todo: merge this with android)
-###################################################################################################
-#set(CMAKE_C_COMPILER clang)
-#set(CMAKE_CPP_COMPILER clang)
-
-
-option(MZGL_UNIT_TEST "should this be a unit testing build - omits a main, so catch2 can take control" OFF)
-
-list(APPEND MZGL_SOURCES
-	lib/mzgl/app/glfw/GLFWAppRunner.cpp
-	lib/mzgl/audio/portaudio/PortAudioSystem.cpp
-)
-
-# if(NOT MZGL_UNIT_TEST)
-	list(APPEND MZGL_SOURCES
-		lib/mzgl/app/glfw/mainGlfw.cpp)
-# endif(NOT MZGL_UNIT_TEST)
-
-if(MZGL_UNIT_TEST)
-	add_compile_definitions(UNIT_TEST DEBUG=1)
-	add_compile_options(-g)
-endif(MZGL_UNIT_TEST)
-
-set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
-set(PA_BUILD_SHARED OFF) # CACHE BOOL "build portaudio shared library")
-
-if(WIN32)
-
-list(APPEND MZGL_SOURCES
-		lib/glew/src/glew.c
-		#lib/mzgl/app/win64/mainWin.cpp
-		lib/mzgl/util/winUtil.cpp
-		lib/mzgl/util/AlignedAllocator.cpp
-)
-list(APPEND HEADERS
-		lib/zipper/zipper/tps)
-
-list(APPEND ZIPPER_SOURCES
-		lib/zipper/zipper/tps/dirent.c)
-
-include(CPM.cmake)
-CPMAddPackage("gh:madler/zlib#cacf7f1")
-CPMAddPackage("gh:PortAudio/portaudio#16884fc")
-CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-include_directories(${zlib_SOURCE_DIR})
-
-# because zlib is managed by CPM on windows, I can't get zconf.h.cmakein to process to zconf.h
-# so I just put it in the folder zlib-win - bit of a hack but whatevz
-include_directories(lib/zlib-win)
-
-	add_compile_definitions(_WIN32_WINNT=0x0501 GLEW_STATIC)
-	add_compile_definitions(__WINDOWS_WASAPI__)
-	add_compile_definitions(__WINDOWS_MM__)
-	add_compile_definitions(PA_USE_WASAPI=1)
-	add_compile_definitions(NOMINMAX)
-# don't need c++14 because I think it's set by cmake, same with O3
-	#add_compile_options(-std:c++14 -O3)
-# https://forum.juce.com/t/cmake-cannot-use-try-with-exceptions-disabled/40983
-# /MT embeds static runtime
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
-
-# this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html
-#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -Xclang -fexceptions -Xclang -fcxx-exceptions ")#-Xclang -fnew-ms-eh ")
-#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -Xlinker /subsystem:windows ")
-endif(WIN32)
-
-if(UNIX AND NOT APPLE)
-	set(LINUX TRUE)
-endif()
-
-if(LINUX)
-list(APPEND MZGL_SOURCES
-	#lib/mzgl/app/linux/mainLinux.cpp
-	lib/mzgl/util/linuxUtil.cpp
-)
-endif()
-
-
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib-windows/release-${OF_PLATFORM}-${ARCH_BIT}")
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
-
-
-if(APPLE)
 	# these are the files that have objective-c in them
 	set_source_files_properties(
 		lib/mzgl/App.cpp
@@ -298,20 +198,128 @@ if(APPLE)
 		lib/mzgl/audio/AudioFileApple.cpp
 		PROPERTIES COMPILE_FLAGS "-x objective-c++"
 	)
+else()
+	list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileAndroid.cpp)
+endif()
 
-	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
-	# add_library(PGMidi STATIC ${PGMIDI_SOURCES})
 
-	list(APPEND MZGL_SOURCES lib/mzgl/app/mac/MacMenuBar.mm)
-	list(APPEND MZGL_SOURCES lib/mzgl/app/mac/LayerExplorer.mm)
-endif(APPLE)
+if(ANDROID)
 
+	list(APPEND MZGL_SOURCES
+	    lib/mzgl/app/android/mainAndroid.cpp
+	    lib/mzgl/app/android/androidUtil.cpp
+	)
+else()
+	list(APPEND MZGL_SOURCES
+		lib/mzgl/app/glfw/GLFWAppRunner.cpp
+		lib/mzgl/audio/portaudio/PortAudioSystem.cpp
+		lib/mzgl/app/glfw/mainGlfw.cpp
+	)
+endif()
+
+if(WIN32)
+
+	list(APPEND MZGL_SOURCES
+			lib/glew/src/glew.c
+			#lib/mzgl/app/win64/mainWin.cpp
+			lib/mzgl/util/winUtil.cpp
+			lib/mzgl/util/AlignedAllocator.cpp
+	)
+	list(APPEND HEADERS
+			lib/zipper/zipper/tps)
+
+	list(APPEND ZIPPER_SOURCES
+				lib/zipper/zipper/tps/dirent.c)
+endif()
+
+set(LINUX FALSE)
+if(NOT ANDROID AND UNIX AND NOT APPLE)
+		set(LINUX TRUE)
+endif()
 
 if(LINUX)
+	list(APPEND MZGL_SOURCES
+		#lib/mzgl/app/linux/mainLinux.cpp
+		lib/mzgl/util/linuxUtil.cpp
+	)
+endif()
+
+add_library(libmzgl STATIC ${MZGL_SOURCES})
+add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
+target_include_directories(libmzgl PUBLIC ${HEADERS})
+target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
+include_directories(libmzgl PUBLIC ${HEADERS})
+include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
+target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
+
+set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
+set(PA_BUILD_SHARED OFF) # CACHE BOOL "build portaudio shared library")
+
+	#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib-windows/release-${OF_PLATFORM}-${ARCH_BIT}")
+	#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
+
+if(NOT ANDROID) 
+	add_subdirectory(lib/glfw "glfw-build")
+
+	add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
+	# add_subdirectory("lib/RtMidi" "rtmidi-build")
+
+	find_package(OpenGL REQUIRED)
+	add_dependencies(libmzgl RtMidi)
+endif()
+
+if(ANDROID)
+
+	include_directories(${ANDROID_NDK}/sources/android/native_app_glue/)
+
+	# is this line needed??
+	set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
+
+	add_library(native_app_glue STATIC
+	        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+
+	#-DAUTO_TEST
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Ofast -fno-stack-protector")
+
+	# Export ANativeActivity_onCreate(),
+	# Refer to: https://github.com/android-ndk/ndk/issues/381.
+	set(CMAKE_SHARED_LINKER_FLAGS
+	        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+
+elseif(APPLE)
+
+	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
+elseif(WIN32)
+
+	CPMAddPackage("gh:madler/zlib#cacf7f1")
+	CPMAddPackage("gh:PortAudio/portaudio#16884fc")
+	
+	include_directories(${zlib_SOURCE_DIR})
+
+	# because zlib is managed by CPM on windows, I can't get zconf.h.cmakein to process to zconf.h
+	# so I just put it in the folder zlib-win - bit of a hack but whatevz
+	include_directories(lib/zlib-win)
+
+	add_compile_definitions(_WIN32_WINNT=0x0501 GLEW_STATIC)
+	add_compile_definitions(__WINDOWS_WASAPI__)
+	add_compile_definitions(__WINDOWS_MM__)
+	add_compile_definitions(PA_USE_WASAPI=1)
+	add_compile_definitions(NOMINMAX)
+	# don't need c++14 because I think it's set by cmake, same with O3
+		#add_compile_options(-std:c++14 -O3)
+	# https://forum.juce.com/t/cmake-cannot-use-try-with-exceptions-disabled/40983
+	# /MT embeds static runtime
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
+	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
+
+	# this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html
+	#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -Xclang -fexceptions -Xclang -fcxx-exceptions ")#-Xclang -fnew-ms-eh ")
+	#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -Xlinker /subsystem:windows ")
+elseif(LINUX)
     add_compile_definitions(__LINUX_ALSA__)
     find_package(ALSA REQUIRED)
     
- #-mfpu=neon-vfpv4
+	 # -mfpu=neon-vfpv4
     if(__ARMEL__)
         add_compile_options(-mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon -O3)
 
@@ -324,20 +332,6 @@ if(LINUX)
        # add_compile_definitions(__LINUX_PULSE__)
 endif(LINUX)
 
-add_library(libmzgl STATIC ${MZGL_SOURCES})
-add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
-
-target_include_directories(libmzgl PUBLIC ${HEADERS})
-target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
-include_directories(libmzgl PUBLIC ${HEADERS})
-include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
-
-target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
-
-add_subdirectory(lib/glfw "glfw-build")
-
-
-if(WIN32)
 	# windows portaudio: can't seem to get the cmake build working (WASAPI doesn't work)
 	# so I built it in visual studio and am attempting to link it here (need to copy dll into bin)
 	#include_directories(lib/portaudio/build/msvc/Win32/Release/) ## this line may not be needed
@@ -346,16 +340,8 @@ if(WIN32)
 #	these 2 apis don't seem to compile with clang-cl for now, can't be bothered to work it out
 #	set(PA_USE_WASAPI OFF)
 #	set(PA_USE_WDMKS OFF)
-else(WIN32)
-add_subdirectory(lib/portaudio "portaudio-build")
+if(NOT ANDROID AND NOT WIN32)
+	add_subdirectory(lib/portaudio "portaudio-build")
 endif()
 
-add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
-# add_subdirectory("lib/RtMidi" "rtmidi-build")
 
-find_package(OpenGL REQUIRED)
-
-add_dependencies(libmzgl pugixml)
-add_dependencies(libmzgl RtMidi)
-
-endif() ## ALL OTHER PLATFORMS

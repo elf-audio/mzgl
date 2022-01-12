@@ -137,18 +137,18 @@ void printLayer(Layer *l, int indent = 0) {
 	LayerNode *l = item;
 	Layer *layer = [l getLayer];
 	
-	if(tableColumn.identifier==@"Layer") {
+	if([tableColumn.identifier  isEqualToString: @"Layer"]) {
 		NSString *s = [NSString stringWithFormat:@"%s", demangle(typeid(*layer).name()).c_str()];
 		[v.textField setStringValue: s];
-	} else if(tableColumn.identifier==@"Name") {
+	} else if([tableColumn.identifier isEqualToString: @"Name"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%s", layer->name.c_str()]];
-	} else if(tableColumn.identifier==@"x") {
+	} else if([tableColumn.identifier isEqualToString: @"x"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->x]];
-	} else if(tableColumn.identifier==@"y") {
+	} else if([tableColumn.identifier isEqualToString: @"y"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->y]];
-	} else if(tableColumn.identifier==@"width") {
+	} else if([tableColumn.identifier isEqualToString: @"width"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->width]];
-	} else if(tableColumn.identifier==@"height") {
+	} else if([tableColumn.identifier isEqualToString: @"height"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->height]];
 	}
 	if(!layer->visible) {
