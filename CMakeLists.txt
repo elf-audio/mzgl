@@ -1,4 +1,5 @@
-# TODO: can make a CPM of nlohmann json
+# TODO: can make a CPM of nlohmann json, moodycamel stuff
+# TODO: swap out boost fs for https://github.com/gulrak/filesystem
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -24,14 +25,6 @@ CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
 #   OPTIONS 
 #     "JSON_BuildTests OFF"
 # )
-
-
-
-
-
-
-
-
 
 
 
