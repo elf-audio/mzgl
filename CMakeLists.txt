@@ -280,7 +280,6 @@ if(ANDROID)
 	        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 elseif(APPLE)
-
 	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
 elseif(WIN32)
 
