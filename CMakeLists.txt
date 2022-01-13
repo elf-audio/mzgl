@@ -79,6 +79,14 @@ set(MZGL_SOURCES
 	lib/mzgl/util/ZipFile.cpp
 )
 
+
+
+foreach(source IN LISTS MZGL_SOURCES)
+    get_filename_component(source_path "${source}" PATH)
+    string(REPLACE "/" "\\" source_path_group "${source_path}")
+    source_group("${source_path_group}" FILES "${source}")
+endforeach()
+
 set(HEADERS 
 	lib/mzgl
 	lib/mzgl/animation
