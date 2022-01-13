@@ -255,17 +255,20 @@ include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 
-target_link_libraries(libmzgl 
+set(MZGL_LIBS
 	zipper 
 	boostfs 
 	yoga 
 	pugixml
 )
 
+
 if(WIN32)
-	target_link_libraries(libmzgl zlib)
+	list(APPEND MZGL_LIBS zlib)
+	# target_link_libraries(libmzgl zlib)
 else()
-	target_link_libraries(libmzgl z)
+	list(APPEND MZGL_LIBS z)
+	# target_link_libraries(libmzgl z)
 endif()
 
 set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
@@ -279,7 +282,6 @@ if(NOT ANDROID)
 
 	add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
 	# add_subdirectory("lib/RtMidi" "rtmidi-build")
-	target_link_libraries(libmzgl glfw)
 	find_package(OpenGL REQUIRED)
 	add_dependencies(libmzgl RtMidi)
 endif()
@@ -304,7 +306,7 @@ if(ANDROID)
 	# Refer to: https://github.com/android-ndk/ndk/issues/381.
 	set(CMAKE_SHARED_LINKER_FLAGS
 	        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
-	target_link_libraries(libmzgl
+	list(APPEND MZGL_LIBS
 		# android specific
 		android
 		native_app_glue
@@ -345,6 +347,16 @@ elseif(WIN32)
 	# this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html
 	#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -Xclang -fexceptions -Xclang -fcxx-exceptions ")#-Xclang -fnew-ms-eh ")
 	#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -Xlinker /subsystem:windows ")
+
+	list(APPEND MZGL_LIBS 
+		${GLFW_LIBRARIES}
+		${OPENGL_gl_LIBRARY}
+		winmm
+		dsound
+		ole32	
+	)
+
+
 elseif(LINUX)
     add_compile_definitions(__LINUX_ALSA__)
     find_package(ALSA REQUIRED)
@@ -360,7 +372,29 @@ elseif(LINUX)
 
     #probably want pulseaudio because the latency is supposedly better
        # add_compile_definitions(__LINUX_PULSE__)
+
+
+       find_package(PkgConfig REQUIRED)
+		pkg_ckeck_modules(GTK REQUIRED gtk+-3.0)
+
+		# Setup CMake to use GTK+, tell the compiler where to look for headers
+		# and to the linker where to look for libraries
+		include_directories(${GTK_INCLUDE_DIRS})
+		link_directories(${GTK_LIBRARY_DIRS})
+
+		# Add other flags to the compiler
+		add_definitions(${GTK_CFLAGS_OTHER})
+
+		list(APPEND MZGL_LIBS 
+			jack 
+			atomic # needed for raspberry pi
+			GLESv2
+			EGL
+			${GTK_LIBRARIES}
+			${ALSA_LIBRARIES}
+		)
 endif()
+
 
 	# windows portaudio: can't seem to get the cmake build working (WASAPI doesn't work)
 	# so I built it in visual studio and am attempting to link it here (need to copy dll into bin)
@@ -372,9 +406,15 @@ endif()
 #	set(PA_USE_WDMKS OFF)
 if(NOT ANDROID AND NOT WIN32)
 	add_subdirectory(lib/portaudio "portaudio-build")
-	target_link_libraries(libmzgl portaudio_static)
+	list(APPEND MZGL_LIBS portaudio_static)
 endif()
 
 if(NOT ANDROID)
-	target_link_libraries(libmzgl RtMidi)
+	list(APPEND MZGL_LIBS RtMidi glfw)
+endif()
+
+target_link_libraries(libmzgl ${MZGL_LIBS})
+
+if(NOT ANDROID)
+	target_link_libraries(libmzgl_unit_test  ${MZGL_LIBS})
 endif()
