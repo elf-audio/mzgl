@@ -174,6 +174,7 @@ add_library(boostfs STATIC ${BOOST_SOURCES})
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pugixml OBJECT lib/pugixml/src/pugixml.cpp)
 
+
 # add_dependencies(libmzgl pugixml)
 
 # set(OPENSSL_BRANCH OpenSSL_1_1_1m)
@@ -253,6 +254,20 @@ include_directories(libmzgl PUBLIC ${HEADERS})
 include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
+
+target_link_libraries(libmzgl 
+	zipper 
+	boostfs 
+	yoga 
+	pugixml
+)
+
+if(WIN32)
+	target_link_libraries(libmzgl zlib)
+else()
+	target_link_libraries(libmzgl z)
+endif()
+
 set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
 set(PA_BUILD_SHARED OFF) # CACHE BOOL "build portaudio shared library")
 
@@ -264,7 +279,7 @@ if(NOT ANDROID)
 
 	add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
 	# add_subdirectory("lib/RtMidi" "rtmidi-build")
-
+	target_link_libraries(libmzgl glfw)
 	find_package(OpenGL REQUIRED)
 	add_dependencies(libmzgl RtMidi)
 endif()
@@ -279,6 +294,9 @@ if(ANDROID)
 	add_library(native_app_glue STATIC
 	        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
+	find_package (oboe REQUIRED CONFIG)
+
+
 	#-DAUTO_TEST
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Ofast -fno-stack-protector")
 
@@ -286,9 +304,21 @@ if(ANDROID)
 	# Refer to: https://github.com/android-ndk/ndk/issues/381.
 	set(CMAKE_SHARED_LINKER_FLAGS
 	        "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+	target_link_libraries(libmzgl
+		# android specific
+		android
+		native_app_glue
+		EGL
+		oboe::oboe
+		GLESv3
+		log
+		mediandk
+	)
 
 elseif(APPLE)
 	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
+	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreMidi -framework AVFoundation -framework CoreMedia")
+
 elseif(WIN32)
 
 	CPMAddPackage("gh:madler/zlib#cacf7f1")
@@ -330,7 +360,7 @@ elseif(LINUX)
 
     #probably want pulseaudio because the latency is supposedly better
        # add_compile_definitions(__LINUX_PULSE__)
-endif(LINUX)
+endif()
 
 	# windows portaudio: can't seem to get the cmake build working (WASAPI doesn't work)
 	# so I built it in visual studio and am attempting to link it here (need to copy dll into bin)
@@ -342,6 +372,9 @@ endif(LINUX)
 #	set(PA_USE_WDMKS OFF)
 if(NOT ANDROID AND NOT WIN32)
 	add_subdirectory(lib/portaudio "portaudio-build")
+	target_link_libraries(libmzgl portaudio_static)
 endif()
 
-
+if(NOT ANDROID)
+	target_link_libraries(libmzgl RtMidi)
+endif()
