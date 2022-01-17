@@ -206,8 +206,8 @@ bool checkGlError(const char* funcName) {
 bool firstFrameAlreadyRendered = false;
 Graphics graphics;
 
-shared_ptr<EventDispatcher> eventDispatcher;
-shared_ptr<App> app;
+shared_ptr<EventDispatcher> eventDispatcher = nullptr;
+shared_ptr<App> app = nullptr;
 static void engine_term_display(struct engine* engine);
 
 
@@ -629,7 +629,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 }
 
 
-android_app *globalAppPtr;
+android_app *globalAppPtr = nullptr;
 
 android_app *getAndroidAppPtr() {
     return globalAppPtr;
@@ -643,6 +643,9 @@ EventDispatcher *getAndroidEventDispatcher() {
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app* state) {
+    app = nullptr;
+   eventDispatcher = nullptr;
+
     globalAppPtr = state;
     struct engine engine;
 

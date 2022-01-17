@@ -38,6 +38,7 @@ bool isUsingBluetoothHeadphones() {
 
 
 std::vector<std::string> androidGetMidiDeviceNames() {
+    if(getAndroidAppPtr()==nullptr) return std::vector<std::string>();
     std::vector<std::string> outDevs;
     JNIEnv *jni;
     int success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, NULL);
@@ -68,6 +69,7 @@ std::string androidGetAppVersionString() {
     return callJNIForString("getAppVersionString");
 }
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData) {
+    if(getAndroidAppPtr()==nullptr) return false;
 
     //LOGE("loadAndroidAsset('%s')", path.c_str());
     AAsset* pAsset = AAssetManager_open(getAndroidAppPtr()->activity->assetManager, path.c_str(), AASSET_MODE_BUFFER);
@@ -94,6 +96,8 @@ bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outDa
 }
 
 void listAndroidAssetDir(const std::string &path, vector<std::string> &outPaths) {
+    if(getAndroidAppPtr()==nullptr) return;
+
     AAssetDir *assetDir = AAssetManager_openDir(getAndroidAppPtr()->activity->assetManager, path.c_str());
     const char *filePath;
     while((filePath = AAssetDir_getNextFileName(assetDir))!=nullptr) {
@@ -106,9 +110,12 @@ std::string getAndroidTempDir() {
 }
 
 std::string getAndroidInternalDataPath() {
+    if(getAndroidAppPtr()==nullptr) return "";
+
     return std::string(getAndroidAppPtr()->activity->internalDataPath);
 }
 std::string getAndroidExternalDataPath() {
+    if(getAndroidAppPtr()==nullptr) return "";
     return std::string(getAndroidAppPtr()->activity->externalDataPath);
 }
 

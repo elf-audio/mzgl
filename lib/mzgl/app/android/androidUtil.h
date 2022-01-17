@@ -94,20 +94,29 @@ std::string jstringToString(JNIEnv *jni, jstring text);
 class ScopedJni {
 public:
     ScopedJni() {
-//        if(jni==nullptr) {
-            success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, nullptr)==JNI_OK;
-//        }
+        auto *appPtr = getAndroidAppPtr();
+        if(appPtr==nullptr) {
+            success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr)==JNI_OK;
+        }
     }
     JNIEnv *j() {
         return jni;
     }
     jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
-        return jni->GetMethodID(getClass(), methodName.c_str(), signature.c_str());
+        auto *cl = getClass();
+        if(cl==nullptr) return nullptr;
+        return jni->GetMethodID(cl, methodName.c_str(), signature.c_str());
     }
 
     jclass getClass() {
-        jclass clazz = jni->GetObjectClass(getAndroidAppPtr()->activity->clazz);
-        return clazz;
+        if(!success) return nullptr;
+        auto *appPtr = getAndroidAppPtr();
+        if(appPtr!=nullptr) {
+            jclass clazz = jni->GetObjectClass(appPtr->activity->clazz);
+
+            return clazz;
+        }
+        return nullptr;
     }
     ~ScopedJni() {
         if(success) {

@@ -230,6 +230,10 @@ struct ScopedMask {
 		masking = false;
 	}
 	ScopedMask(Graphics &g, const Rectf &r) {
+		startMask(g, r);
+	}
+
+	void startMask(Graphics &g, const Rectf &r) {
 		masking = true;
 		if(glIsEnabled(GL_SCISSOR_TEST)) {
 			scissorWasEnabled = true;
@@ -239,24 +243,28 @@ struct ScopedMask {
 
 #if defined(__linux__) && !defined(__ANDROID__)
 		if(g.pixelScale!=1) {
-            auto a = r; 
-            //g.warpMaskForScissor(a);
+			auto a = r;
+			//g.warpMaskForScissor(a);
 
-            glScissor(a.x, g.height-(a.bottom()), a.width, a.height);
-        } else {
-            glScissor(r.x, g.height-(r.bottom()), r.width, r.height);
+			glScissor(a.x, g.height-(a.bottom()), a.width, a.height);
+		} else {
+			glScissor(r.x, g.height-(r.bottom()), r.width, r.height);
 		}
 #else
 		glScissor(r.x, g.height-(r.bottom()), r.width, r.height);
 #endif
 	}
-
-	virtual ~ScopedMask() {
+	
+	void stopMask() {
 		if(!masking) return;
 		if(scissorWasEnabled) {
 			glScissor(vals[0], vals[1], vals[2], vals[3]);
 		} else {
 			glDisable(GL_SCISSOR_TEST);
 		}
+	}
+	
+	virtual ~ScopedMask() {
+		stopMask();
 	}
 };

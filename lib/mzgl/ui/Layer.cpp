@@ -78,12 +78,12 @@ void Layer::maskOff() {
 }
 
 void Layer::pushMask() {
-	scopedMask = ScopedMask(g, *this);
+	scopedMask.startMask(g, getAbsoluteRect());
 }
 
 
 void Layer::popMask() {
-	scopedMask = ScopedMask();
+	scopedMask.stopMask();
 }
 
 
