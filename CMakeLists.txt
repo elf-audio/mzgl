@@ -27,6 +27,16 @@ CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
 # )
 
 
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    add_compile_definitions(DEBUG=1)
+
+endif()
+
+set(LINUX FALSE)
+if(NOT ANDROID AND UNIX AND NOT APPLE)
+		set(LINUX TRUE)
+endif()
+
 
 
 # PRINT EVERYTHING!!!
@@ -234,10 +244,7 @@ if(WIN32)
 				lib/zipper/zipper/tps/dirent.c)
 endif()
 
-set(LINUX FALSE)
-if(NOT ANDROID AND UNIX AND NOT APPLE)
-		set(LINUX TRUE)
-endif()
+
 
 if(LINUX)
 	list(APPEND MZGL_SOURCES

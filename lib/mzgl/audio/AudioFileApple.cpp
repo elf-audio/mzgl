@@ -14,9 +14,59 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #endif
+
+#include <fstream>
+
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#include "util.h"
+#include "log.h"
+
+
+
+/**
+ * This checks the magic numbers of a file if it has .mp3 extension.
+ * If it turns out to be an m4a, it will add .m4a to the end of the path
+ */
+std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
+	fs::path p(path);
+	if(p.extension()==".mp3") {
+		Log::d() << "Its an mp3 alright";
+		int bytesToRead = 11;
+		if(fs::file_size(p)>bytesToRead) {
+			char data[bytesToRead];
+			std::ifstream fstr;
+			fstr.open(path);
+			fstr.read(data, bytesToRead);
+			fstr.close();
+
+			if(data[0]==0 && data[1]==0 && data[2]==0
+			   && data[4]=='f'
+			   && data[5]=='t'
+			   && data[6]=='y'
+			   && data[7]=='p') {
+				// ok this is probably an mp4
+				Log::d() << "It's an mp4 in mp3's clothing";
+				
+				auto outPath = tempDir() + "/" +  p.filename().string() + ".m4a";
+				try {
+					fs::copy(path, outPath);
+					return outPath;
+				} catch(fs::filesystem_error &err) {
+					Log::e() << "Couldn't copy mp3 to m4a";
+					return path;
+				}
+			}
+		}
+	}
+	
+	return path;
+}
+
 bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate) {
 #ifdef __APPLE__
-	
+	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
+
 	CFURLRef audioFileURL = CFURLCreateWithBytes (
 												  NULL,
 												  (const UInt8 *)path.c_str(),
@@ -117,6 +167,11 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 //												  NULL
 //												  );
 //
+	
+	
+	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
+	
+	
 	
 	CFURLRef audioFileURL = (__bridge CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String: path.c_str()]];
 

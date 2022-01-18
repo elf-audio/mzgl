@@ -150,7 +150,9 @@ std::string getOSVersion();
 std::string getPlatformName();
 #include <assert.h>
 #if DEBUG==1
-#define mzAssert(A) if(mzAssertEnabled()) { bool a = (A); if(!a) { printf("ASSERTION FAILED IN %s at line %d\n", __FILE__, __LINE__);} assert(a);}
+#include "log.h"
+
+#define mzAssert(A) if(mzAssertEnabled()) { bool a = (A); if(!a) { Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line "<< __LINE__;} assert(a);}
 #else
 #define mzAssert(A) {};
 #endif

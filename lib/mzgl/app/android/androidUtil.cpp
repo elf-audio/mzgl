@@ -41,7 +41,7 @@ std::vector<std::string> androidGetMidiDeviceNames() {
     if(getAndroidAppPtr()==nullptr) return std::vector<std::string>();
     std::vector<std::string> outDevs;
     JNIEnv *jni;
-    int success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, NULL);
+    int success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, nullptr);
     if(success != JNI_OK) {
         Log::e() << "Got a problem with androidGetMidiDeviceNames";
     }

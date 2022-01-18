@@ -94,8 +94,12 @@ std::string jstringToString(JNIEnv *jni, jstring text);
 class ScopedJni {
 public:
     ScopedJni() {
+//        Log::d() << "ScopedJni()";
+        mzAssert(jni==nullptr);
         auto *appPtr = getAndroidAppPtr();
-        if(appPtr==nullptr) {
+        if(appPtr!=nullptr) {
+//            Log::d() << "attaching";
+
             success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr)==JNI_OK;
         }
     }
@@ -119,14 +123,16 @@ public:
         return nullptr;
     }
     ~ScopedJni() {
+//        Log::d() << "~ScopedJni()";
         if(success) {
+//            Log::d() << "detatching";
             getAndroidAppPtr()->activity->vm->DetachCurrentThread();
             jni = nullptr;
         }
     }
 private:
     bool success = false;
-    JNIEnv *jni;
+    JNIEnv *jni = nullptr;
 };
 
 

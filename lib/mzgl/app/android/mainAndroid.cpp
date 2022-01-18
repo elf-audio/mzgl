@@ -660,17 +660,16 @@ void android_main(struct android_app* state) {
     app = shared_ptr<App>(appPtr);
 
     // loop waiting for stuff to do.
-
     while (1) {
         // Read all pending events.
         int ident;
         int events;
         struct android_poll_source* source;
 
-        while ((ident=ALooper_pollAll(engineReady?0:-1, NULL, &events,
+        while ((ident=ALooper_pollAll(engineReady?0:-1, nullptr, &events,
                                       (void**)&source)) >= 0) {
             // Process this event.
-            if (source != NULL) {
+            if (source != nullptr) {
                 source->process(state, source);
             }
 
