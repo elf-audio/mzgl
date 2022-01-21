@@ -13,8 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(CPM.cmake)
 
-CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-
+# CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
 # CPMAddPackage("gh:boostorg/boost#5110237")
 
 
@@ -303,7 +302,16 @@ if(ANDROID)
 	add_library(native_app_glue STATIC
 	        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
-	find_package (oboe REQUIRED CONFIG)
+	# find_package (oboe REQUIRED CONFIG)
+
+
+
+	set (OBOE_DIR ../../android/oboe)
+	add_subdirectory (${OBOE_DIR} ./oboe)
+	include_directories (${OBOE_DIR}/include)
+
+
+
 
 
 	#-DAUTO_TEST
@@ -318,7 +326,8 @@ if(ANDROID)
 		android
 		native_app_glue
 		EGL
-		oboe::oboe
+		# oboe::oboe
+		oboe
 		GLESv3
 		log
 		mediandk
