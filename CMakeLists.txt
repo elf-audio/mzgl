@@ -14,10 +14,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CPM.cmake)
 
 # CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-<<<<<<< HEAD
-
-=======
->>>>>>> fix
 # CPMAddPackage("gh:boostorg/boost#5110237")
 
 
