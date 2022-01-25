@@ -161,7 +161,7 @@ public:
 	void doLayout() {
 		YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
 		for(auto c : children) {
-			c->update();
+			c->update(0, 0);
 		}
 	}
 	
