@@ -16,7 +16,10 @@ void LayoutBase::addChild(LayoutNodeRef child) {
 }
 
 void LayoutBase::update(float xOffset, float yOffset) {
-	
+
+	if(isnan(xOffset)) xOffset = 0.0;
+	if(isnan(yOffset)) yOffset = 0.0;
+
 	if(layer!=nullptr) {
 		layer->x = YGNodeLayoutGetLeft(node) + xOffset;
 		layer->y = YGNodeLayoutGetTop(node) + yOffset;
@@ -71,7 +74,6 @@ void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribut
 		} else if(a.name=="min-height") {
 			if(a.isPercent()) YGNodeStyleSetMinHeightPercent(l->node, a.getValue());
 			else YGNodeStyleSetMinHeight(l->node, a.getValue());
-			
 				
 		} else if(a.name=="max-width") {
 			if(a.isPercent()) YGNodeStyleSetMaxWidthPercent(l->node, a.getValue());

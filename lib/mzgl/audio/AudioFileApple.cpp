@@ -158,29 +158,12 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 
 
 bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
-//	CFURLRef audioFileURL = CFURLCreateWithBytes (
-//												  NULL,
-//												  (const UInt8 *)path.c_str(),
-//												  path.size(),
-//												  kCFStringEncodingUTF8,
-//												 // kCFStringEncodingASCII,
-//												  NULL
-//												  );
-//
-	
-	
+
 	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
-	
 	
 	
 	CFURLRef audioFileURL = (__bridge CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String: path.c_str()]];
 
-//	{
-//		// debug
-//
-//		std::string str(CFStringGetCStringPtr(CFURLGetString(audioFileURL),kCFStringEncodingUTF8));
-//
-//	}
 	ExtAudioFileRef xafref = nullptr;
 	
 	OSStatus err = noErr;
