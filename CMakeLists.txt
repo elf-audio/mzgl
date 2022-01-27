@@ -2,6 +2,8 @@
 # TODO: swap out boost fs for https://github.com/gulrak/filesystem
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 3.18)
+project(mzgl)
 
 if(ANDROID)
 set(CMAKE_CXX_STANDARD 17)
@@ -13,10 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(CPM.cmake)
 
-# CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-# CPMAddPackage("gh:boostorg/boost#5110237")
-
-
+CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
 
 # CPMAddPackage(
 #   NAME nlohmann_json
@@ -34,6 +33,11 @@ endif()
 set(LINUX FALSE)
 if(NOT ANDROID AND UNIX AND NOT APPLE)
 		set(LINUX TRUE)
+endif()
+
+set(IOS FALSE)
+if(${PLATFORM} STREQUAL "OS64")
+	set(IOS TRUE)
 endif()
 
 
@@ -104,6 +108,7 @@ set(HEADERS
 	lib/mzgl/app/glfw
 	lib/mzgl/audio
 	lib/mzgl/audio/portaudio
+	lib/mzgl/audio/iOS
 	lib/mzgl/file
 	lib/mzgl/geom
 	lib/mzgl/gl
@@ -288,7 +293,9 @@ if(NOT ANDROID)
 
 	add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
 	# add_subdirectory("lib/RtMidi" "rtmidi-build")
-	find_package(OpenGL REQUIRED)
+	if(NOT APPLE) # we just link the framework I think
+		find_package(OpenGL REQUIRED)
+	endif()
 	add_dependencies(libmzgl RtMidi)
 endif()
 
@@ -335,7 +342,7 @@ if(ANDROID)
 
 elseif(APPLE)
 	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
-	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreMidi -framework AVFoundation -framework CoreMedia")
+	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia")
 
 elseif(WIN32)
 
@@ -420,12 +427,13 @@ endif()
 #	these 2 apis don't seem to compile with clang-cl for now, can't be bothered to work it out
 #	set(PA_USE_WASAPI OFF)
 #	set(PA_USE_WDMKS OFF)
-if(NOT ANDROID AND NOT WIN32)
+if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
 	add_subdirectory(lib/portaudio "portaudio-build")
 	list(APPEND MZGL_LIBS portaudio_static)
 endif()
 
-if(NOT ANDROID)
+
+if(NOT ANDROID AND NOT IOS)
 	list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
 

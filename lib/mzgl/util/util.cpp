@@ -384,19 +384,26 @@ string dataPath(string path, string appBundleId) {
 #endif
 
 #if defined(__APPLE__) && defined(MZGL_MAC_GLFW)
+	
 	return "data/" + path;
 #elif defined(__APPLE__)
+	
 	if(appBundleId=="") {
+//		Log::e() << "Going for main bundle";
 		NSString *a = [[NSBundle mainBundle] resourcePath];
 		string s = [a UTF8String];
 		s += "/data/" + path;
+		Log::e() << s;
 		return s;
 	} else {
+		Log::e() << "Going for bundle" << appBundleId;
 		NSBundle* pBundle = [NSBundle bundleWithIdentifier:[NSString stringWithCString:appBundleId.c_str() encoding:NSUTF8StringEncoding]];
 		if(pBundle==nil) {
 			return path;
 		} else {
 			string returnPath = string([[pBundle resourcePath] UTF8String]) + "/data/" + path;
+			Log::e() << "final path: " << returnPath;
+
 			return returnPath;
 		}
 	}
