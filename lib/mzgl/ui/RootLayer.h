@@ -15,7 +15,7 @@ public:
 		color.a = 0.f;
 	}
 	virtual ~RootLayer() {
-		// printf("Killing root layer\n");
+		 printf("Killing root layer\n");
 	}
 	
 	void drawDebug(Layer *layer = nullptr) {
