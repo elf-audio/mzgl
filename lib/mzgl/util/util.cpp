@@ -332,9 +332,9 @@ void setWindowSize(int w, int h) {
 void setWindowTitle(string title) {
 
 #if defined(__APPLE__) && !TARGET_OS_IOS
-	NSWindow *win = [NSApp mainWindow];
 	
 	dispatch_async(dispatch_get_main_queue(), ^(void){
+		NSWindow *win = [NSApp mainWindow];
 		[win setTitle: [NSString stringWithUTF8String:title.c_str()]];
 	});
 #endif

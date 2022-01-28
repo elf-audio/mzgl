@@ -91,7 +91,6 @@ int nsEventToKey(NSEvent *evt) {
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
 	float pixelScale = eventDispatcher->app->g.pixelScale;
 
-
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	int id = (int)[event buttonNumber];

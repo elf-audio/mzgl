@@ -62,23 +62,24 @@ public:
 		app->touchOver(x, y);
 		app->root->_touchOver(x, y);
 	}
+	
 	void touchDown(float x, float y, int id) {
 		mouse = glm::vec2(x, y);
 		downTouches[id] = true;
 		app->touchDown(x, y, id);
 		app->root->_touchDown(x, y, id);
-		
 	}
+	
 	void touchMoved(float x, float y, int id) {
 		mouse = glm::vec2(x, y);
 		downTouches[id] = true;
 		app->touchMoved(x, y, id);
 		app->root->_touchMoved(x, y, id);
 	}
+	
 	void touchUp(float x, float y, int id) {
 		mouse = glm::vec2(x, y);
 		downTouches[id] = false;
-		
 		app->touchUp(x, y, id);
 		app->root->_touchUp(x, y, id);
 	}
