@@ -393,7 +393,7 @@ string dataPath(string path, string appBundleId) {
 		NSString *a = [[NSBundle mainBundle] resourcePath];
 		string s = [a UTF8String];
 		s += "/data/" + path;
-		Log::e() << s;
+//		Log::e() << s;
 		return s;
 	} else {
 		Log::e() << "Going for bundle" << appBundleId;
