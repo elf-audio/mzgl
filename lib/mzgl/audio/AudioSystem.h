@@ -66,7 +66,7 @@ public:
 
 	int numInChannels = 2;
 	int numOutChannels = 2;
-	
+	virtual void setVerbose(bool) {}
 	std::function<void(float*, int, int)> inputCallback = [](float*, int, int){};
 	std::function<void(float*, int, int)> outputCallback = [](float*, int, int){};
 
@@ -116,7 +116,7 @@ public:
     void stop() override {}
     bool isRunning() override { return false; }
 
-    void setVerbose(bool v) { }
+    void setVerbose(bool v) override { }
 
 	std::vector<AudioPort> getInputs()  override { return {}; }
 	std::vector<AudioPort> getOutputs() override { return {}; }

@@ -23,7 +23,7 @@ public:
 	void stop() override;
 	bool isRunning() override;
 	
-	void setVerbose(bool verbose) { this->verbose = verbose; }
+	void setVerbose(bool verbose) override { this->verbose = verbose; }
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
 
