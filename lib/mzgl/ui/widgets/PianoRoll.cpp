@@ -44,13 +44,25 @@ void PianoRoll::drawGrid(Rectf &r, int majorX, int minorX, int ys) {
 
 void PianoRoll::draw() {
 
-	printf("%f", offset);
+//	printf("%f", offset);
     float beatWidth = this->width/(float)(pattern->numBars * pattern->beatsPerBar);
     
     float noteHeight = this->height / (float) BANK_SIZE;
-	
+
+
+
+
+
 	glEnable(GL_SCISSOR_TEST);
-	glScissor(x*2, (g.height-(y+height)*2), width*2, height*2);
+    Rectf scissorRect(x*2, (g.height-(y+height)*2), width*2, height*2);
+	glScissor(scissorRect.x, scissorRect.y, scissorRect.width, scissorRect.height);
+    //printf("%.0f %.0f %.0f %.0f\n", scissorRect.x, scissorRect.y, scissorRect.width, scissorRect.height);
+    //g.clear(1, 0, 0);
+
+
+
+
+
 	g.pushMatrix();
 	g.translate(this->x + offset, 0, 0);
 	g.scale(zoom, 1, 1);

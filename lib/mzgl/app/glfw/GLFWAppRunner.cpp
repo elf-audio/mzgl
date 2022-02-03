@@ -31,6 +31,12 @@ float mouseY = 0;
 std::vector<bool> buttons;
 bool mouseIsDown = false;
 
+bool leftAltDown = false;
+bool rightAltDown = false;
+
+bool leftShiftDown = false;
+bool rightShiftDown = false;
+
 EventDispatcher *getEventDispatcher(GLFWwindow *window) {
 	auto *app = (GLFWAppRunner*)glfwGetWindowUserPointer(window);
 	return app->eventDispatcher;
@@ -50,8 +56,27 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	// if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	//    glfwSetWindowShouldClose(window, GLFW_TRUE);
 	if(action==GLFW_PRESS || action==GLFW_REPEAT) {
+        if(key==GLFW_KEY_LEFT_ALT) {
+            leftAltDown = true;
+        } else if(key==GLFW_KEY_RIGHT_ALT) {
+            rightAltDown = true;
+        } else if(key==GLFW_KEY_LEFT_SHIFT) {
+            leftShiftDown = true;
+        } else if(key==GLFW_KEY_RIGHT_SHIFT) {
+            rightShiftDown = true;
+        }
 		getEventDispatcher(window)->keyDown(key);
+
 	} else if(action==GLFW_RELEASE) {
+        if(key==GLFW_KEY_LEFT_ALT) {
+            leftAltDown = false;
+        } else if(key==GLFW_KEY_RIGHT_ALT) {
+            rightAltDown = false;
+        } else if(key==GLFW_KEY_LEFT_SHIFT) {
+            leftShiftDown = false;
+        } else if(key==GLFW_KEY_RIGHT_SHIFT) {
+            rightShiftDown = false;
+        }
 		getEventDispatcher(window)->keyUp(key);
 	}
 }
@@ -77,10 +102,12 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	mouseX = xpos*g.pixelScale;
 	mouseY = ypos*g.pixelScale;
 	if(!mouseIsDown) {
-		getEventDispatcher(window)->touchOver(mouseX, mouseY);
+		getEventDispatcher(window)->touchOver(mouseX, mouseY*0.1);
+
 	} else {
 		for(int i = 0; i < buttons.size(); i++) {
 			if(buttons[i]) {
+
 				getEventDispatcher(window)->touchMoved(mouseX, mouseY, i);
 
 			}
@@ -89,7 +116,21 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	getEventDispatcher(window)->mouseScrolled(mouseX, mouseY, xoffset, yoffset);
+    if (leftAltDown || rightAltDown) {
+        printf("yoffset: %.2f\n", yoffset);
+        getEventDispatcher(window)->mouseZoomed(mouseX, mouseY, yoffset*-0.03);
+    } else {
+#ifdef WIN32
+        // speed up windows scrolling.
+        // should really have acceleration here...
+        xoffset *= 3;
+        yoffset *= 3;
+#endif
+        if(leftShiftDown || rightShiftDown) {
+            std::swap(xoffset, yoffset);
+        }
+        getEventDispatcher(window)->mouseScrolled(mouseX, mouseY, xoffset, yoffset);
+    }
 }
 
 

@@ -61,15 +61,17 @@ void Layer::maskOn() {
 	
 	glEnable(GL_SCISSOR_TEST);
 	auto r = getAbsoluteRect();
-	
+	r.y = g.height - (r.y+r.height);
 	// dang this still not working!!!
 	//g.warpMaskForScissor(r);
-	glScissor(r.x, g.height-(r.y+r.height), r.width, r.height);
-	//printf("%.0f %.0f %.0f   %.0d\n", g.height-(r.y + r.height), r.y, r.height, g.height);
+//	glScissor(r.x, r.y, r.width, r.height);
+//	printf("%.0f %.0f %.0f   %.0d \n", g.height-(r.y + r.height), r.y, r.height, g.height);
+
 	//glScissor(r.x, 0, r.width, r.height);
-//	float fctr = g.pixelScale / 2.f;
+//	float fctr = g.pixelScale;
+    glScissor(r.x/g.pixelScale, r.y/g.pixelScale, r.width/g.pixelScale, r.height/g.pixelScale);
 //	glScissor(r.x*fctr, g.height*fctr-(r.y*fctr+r.height*fctr), r.width*fctr, r.height*fctr);
-//	g.clear({0, 1, 0, 1});
+	//g.clear({0, 1, 0, 1});
 }
 
 void Layer::maskOff() {

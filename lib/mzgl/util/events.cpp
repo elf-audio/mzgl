@@ -57,8 +57,10 @@ void removeListener(int type, void *obj) {
 }
 
 void callUpdateListeners() {
-	for(auto &u : updateListeners) {
-		u.second();
+	//for(auto &u : updateListeners) { // this crashes on windows??
+    for(int i = 0; i < updateListeners.size(); i++) {
+        updateListeners[i].second();
+	//	u.second();
 	}
 }
 
