@@ -32,7 +32,7 @@ class AllMidiDevicesAndroidImpl : public AllMidiDevicesImpl {
 #else
 
 class AllMidiDevicesRtMidiImpl : public MidiListener, public AllMidiDevicesImpl {
-
+public:
 
     void setup() override {
         autoPoll();
@@ -143,7 +143,7 @@ AllMidiDevices::AllMidiDevices(bool online) : online(online) {
 	#elif defined(__APPLE__)
 		impl = std::make_shared<AllMidiDevicesAppleImpl>();
 	#else
-		impl = std::make_shared<AllMidiDevicesRtMidiImpl();
+		impl = std::make_shared<AllMidiDevicesRtMidiImpl>();
 	#endif
 	}
 }

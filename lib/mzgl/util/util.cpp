@@ -87,6 +87,8 @@ std::string convertWideToNarrow( const wchar_t *s, char dfault = '?',
 
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifndef _WIN32
 #include <pwd.h>
 #include <unistd.h>
 
@@ -100,7 +102,7 @@ std::string getHomeDirectory() {
     }
     return homeDir;
 }
-
+#endif
 
 
 
