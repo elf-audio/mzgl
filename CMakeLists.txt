@@ -276,10 +276,9 @@ set(MZGL_LIBS
 
 if(WIN32)
 	list(APPEND MZGL_LIBS zlib)
-	# target_link_libraries(libmzgl zlib)
+	target_include_directories(libmzgl PUBLIC lib/zlib-win)
 else()
 	list(APPEND MZGL_LIBS z)
-	# target_link_libraries(libmzgl z)
 endif()
 
 set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
@@ -431,7 +430,9 @@ if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
 	add_subdirectory(lib/portaudio "portaudio-build")
 	list(APPEND MZGL_LIBS portaudio_static)
 endif()
-
+if(WIN32)
+	list(APPEND MZGL_LIBS portaudio_static)
+endif()
 
 if(NOT ANDROID AND NOT IOS)
 	list(APPEND MZGL_LIBS RtMidi glfw)
