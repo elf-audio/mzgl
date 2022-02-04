@@ -133,10 +133,10 @@ public:
 	void exit() override { if(d) d->exit(); }
 	// FILE DROP
 //	virtual void fileDragBegin(float x, float y) override {if(d) d->fileDragBegin(x,y);}
-	virtual void fileDragUpdate(float x, float y) override {if(d) d->fileDragUpdate(x,y);}
+	virtual void fileDragUpdate(float x, float y, int touchId, int numFiles) override {if(d) d->fileDragUpdate(x,y, touchId, numFiles);}
 	
 	// return true to accept, false to reject
-	virtual void filesDropped(const std::vector<std::string> &paths, int touchId, function<void()> completionHandler) override {if(d) d->filesDropped(paths); }
+	virtual void filesDropped(const std::vector<std::string> &paths, int touchId, std::function<void()> completionHandler) override {if(d) d->filesDropped(paths, touchId, completionHandler); }
 	
 	// return true if you can open, false if you can't
 	virtual bool canOpenFiles(const std::vector<std::string> &paths) override {if(d) return d->canOpenFiles(paths); else return false; }

@@ -23,7 +23,9 @@
 #pragma once
 #include "FileWatcher.h"
 #include "Dylib.h"
-#include "Directory.h"
+
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 #include <sys/stat.h>
 #include "util.h"
@@ -76,7 +78,7 @@ public:
 	
 	
 	void precompileHeaders() {
-		auto libroot = std::string(SRCROOT) + "/../" + MZGL_LIBROOT;
+		auto libroot = /*std::string(SRCROOT) + "/../" +*/ MZGL_LIBROOT;
 		
 		printf("pwd: %s\n", execute("pwd").c_str());
 		auto cmd = "g++ -std=c++14 -DDEBUG -stdlib=libc++ "
@@ -131,15 +133,16 @@ private:
 		//printf("Obj name %s\n", objectName.c_str());
 		makeCppFile(cppFile, objectName);
 
-		auto libroot = std::string(SRCROOT) + "/../" + MZGL_LIBROOT;
+		std::string libroot = /*std::string(SRCROOT) + "/../" +*/ MZGL_LIBROOT;
 
 		auto includes =  getAllIncludes(SRCROOT)
 		+ " -include " + libroot + "/mzgl/App.h"
 		+ getAllIncludes(libroot, macExcludes) + "/mzgl/ "
-		+ getAllIncludes(libroot+"/../opt/imgui/")
+//		+ getAllIncludes(libroot+"/../opt/imgui/")
 		
 		
-		+ getAllIncludes(libroot+"/../opt/dsp/");
+//		+ getAllIncludes(libroot+"/../opt/dsp/")
+        ;
 		//+ " -I"+string(SRCROOT)+"/sf2cute/include";
 		
 			
@@ -161,38 +164,40 @@ private:
 		}
 	}
 	
-	void recursivelyFindAllDirs(Directory curr, std::vector<Directory> &dirs) {
+	void recursivelyFindAllDirs(fs::path curr, std::vector<fs::path> &dirs) {
 		dirs.push_back(curr);
-		curr.list();
-		for(int i = 0; i < curr.size(); i++) {
-			if(curr[i].isDirectory()) {
-				recursivelyFindAllDirs(Directory(curr[i]), dirs);
+		for(const auto &entry : fs::directory_iterator(curr)) {
+//		for(int i = 0; i < curr.size(); i++) {
+            if(entry.path().filename().string()=="..") continue;
+            printf(">> %s\n", entry.path().filename().string().c_str());
+			if(fs::is_directory(entry.path())) {
+				recursivelyFindAllDirs(entry.path(), dirs);
 			}
 		}
 	}
 	
 	std::string getAllIncludes(std::string basePath, const std::vector<std::string> &excludes = {}) {
 		std::string includes = "";
-		std::vector<Directory> dirs;
-		Directory dir(basePath);
+		std::vector<fs::path> dirs;
+		fs::path dir(basePath);
 		recursivelyFindAllDirs(dir, dirs);
 		for(int i = 0; i < dirs.size(); i++) {
 		//	printf("%s\n", dirs[i].path.c_str());
 			bool exclude = false;
 			for(const auto &ex: excludes) {
-				if(dirs[i].path.find(ex)!=-1) {
+				if(dirs[i].string().find(ex)!=-1) {
 					exclude = true;
 					printf("Excluding %s\n", ex.c_str());
 					break;
 				} else {
-					printf("path does not contain %s: %s\n", ex.c_str(), dirs[i].path.c_str());
+					printf("path does not contain %s: %s\n", ex.c_str(), dirs[i].string().c_str());
 				}
 			}
 			if(!exclude) {
-				printf("Include: %s\n", dirs[i].path.c_str());
-				includes += " -I\"" + dirs[i].path +"\"";
+				printf("Include: %s\n", dirs[i].string().c_str());
+				includes += " -I\"" + dirs[i].string() +"\"";
 			} else {
-				printf("Exclude: %s\n", dirs[i].path.c_str());
+				printf("Exclude: %s\n", dirs[i].string().c_str());
 			}
 		}
 		return includes;

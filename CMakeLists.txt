@@ -204,6 +204,7 @@ if(APPLE)
 		lib/mzgl/midi/appleMidiUtils.cpp
 		lib/mzgl/app/mac/MacMenuBar.mm
 		lib/mzgl/app/mac/LayerExplorer.mm
+		lib/mzgl/app/mac/TextConsole.mm
 	)
 
 	# these are the files that have objective-c in them
