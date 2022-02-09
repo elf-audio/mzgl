@@ -20,7 +20,6 @@ class EffectPlugin;
 class EventDispatcher;
 @interface MZGLView : NSOpenGLView {
 	EventDispatcher *eventDispatcher;
-	
 }
 
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
