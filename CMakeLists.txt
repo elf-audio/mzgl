@@ -106,6 +106,7 @@ set(HEADERS
 	lib/mzgl/animation
 	lib/mzgl/app/android
 	lib/mzgl/app/mac
+	lib/mzgl/app/mac/GL
 	lib/mzgl/app/glfw
 	lib/mzgl/audio
 	lib/mzgl/audio/portaudio
@@ -204,7 +205,10 @@ if(APPLE)
 		lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
 		lib/mzgl/midi/appleMidiUtils.cpp
 		lib/mzgl/app/mac/MacMenuBar.mm
+		lib/mzgl/app/mac/EventsView.mm
+		lib/mzgl/app/mac/GL/MZGLView.mm
 		lib/mzgl/app/mac/LayerExplorer.mm
+		lib/mzgl/app/mac/TextConsole.mm
 	)
 
 	# these are the files that have objective-c in them
@@ -344,7 +348,7 @@ if(ANDROID)
 
 elseif(APPLE)
 	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
-	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia")
+	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia")
 
 elseif(WIN32)
 
