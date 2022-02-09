@@ -124,6 +124,10 @@ public:
 		return presetNames;
 	}
 
+	size_t getNumPresets() {
+		return factoryPresets.size();
+	}
+
 	std::string getUserPresetDir() {
 		return docsPath(plugin->getIdentifier() + "/presets");
 	}
@@ -200,6 +204,9 @@ public:
 		return params.size();
 	}
 	
+	size_t getNumPresets() {
+		return getPresetManager()->getNumPresets();
+	}
 	std::shared_ptr<PluginParameter> getParam(unsigned int i) {
 		return params[i];
 	}
@@ -297,5 +304,5 @@ private:
 };
 
 ::Plugin *instantiatePlugin();
-int getNumParams();
-int getNumPresets();
+
+

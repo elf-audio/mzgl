@@ -37,6 +37,10 @@ using namespace std;
 	return YES;
 }
 
+- (BOOL) acceptsFirstMouse:(NSEvent *)theEvent {
+	return YES;
+}
+
 - (BOOL) isOpaque {
 	return YES;
 }
