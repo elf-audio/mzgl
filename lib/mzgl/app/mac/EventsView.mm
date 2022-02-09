@@ -37,6 +37,8 @@ using namespace std;
 	return YES;
 }
 
+// this is for vst so the window becomes focused and accepts
+// the first mouse event when unfocussed.
 - (BOOL) acceptsFirstMouse:(NSEvent *)theEvent {
 	return YES;
 }
