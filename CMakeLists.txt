@@ -47,7 +47,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(MZGL_SOURCES
 	lib/mzgl/animation/Tween.cpp
-	lib/mzgl/audio/AudioSystem.cpp
+		lib/mzgl/audio/AudioSystem.cpp
+		lib/mzgl/audio/DrAudioFileReader.cpp
 	lib/mzgl/geom/Rectf.cpp
 	lib/mzgl/geom/RoundedRect.cpp
 	lib/mzgl/geom/SVG.cpp
@@ -215,6 +216,8 @@ if(APPLE)
 		PROPERTIES COMPILE_FLAGS "-x objective-c++"
 	)
 else()
+	list(APPEND MZGL_SOURCES lib/misc/speex_resampler.cpp)
+	list(APPEND MZGL_SOURCES lib/mzgl/audio/Resampler.cpp)
 	list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileAndroid.cpp)
 endif()
 
