@@ -188,6 +188,8 @@ void PortAudioSystem::setup(int numIns, int numOuts) {
 	}
 	this->numInChannels = numIns;
 	this->numOutChannels = numOuts;
+	this->desiredNumInChannels = numIns;
+	this->desiredNumOutChannels = numOuts;
 	
 	configureStream();
 	isSetup = true;
@@ -197,6 +199,8 @@ void PortAudioSystem::configureStream() {
 	if(verbose) {
 		Log::d() << "PortAudioSystem::configureStream()";
 	}
+	numInChannels = desiredNumInChannels;
+	numOutChannels = desiredNumOutChannels;
     // just make sure our ports are up to date
     rescanPorts();
     PaStreamParameters inputParameters, outputParameters;

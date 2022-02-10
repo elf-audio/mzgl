@@ -65,6 +65,10 @@ private:
 	
 	// don't hold onto this port for too long
 	AudioPort getPort(int dev);
+	
+private:
+	int desiredNumInChannels = 2;
+	int desiredNumOutChannels = 2;
 };
 
 typedef PortAudioSystem AudioSystem;
