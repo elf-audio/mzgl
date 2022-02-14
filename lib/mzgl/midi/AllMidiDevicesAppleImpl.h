@@ -55,6 +55,7 @@ public:
 };
 
 
+
 class AllMidiDevicesAppleImpl : public AllMidiDevicesImpl {
 public:
 
