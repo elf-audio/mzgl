@@ -359,3 +359,11 @@ AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
     }
 }
 
+void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {
+	const auto b = m.getBytes();
+	if(b.size()>0) {
+		sendBytes(b.data(), b.size());
+	} else {
+		Log::e() << "Midi message contained no bytes!";
+	}
+}

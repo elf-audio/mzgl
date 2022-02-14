@@ -24,9 +24,9 @@ class AllMidiDevicesAndroidImpl : public AllMidiDevicesImpl {
         androidAddMidiListener(listener);
     }
 //    void midiReceived(const MidiMessage &m, uint64_t timestamp) override {}
-    
-    void send(const MidiMessage &m) {
-        
+    // sends to all
+    void sendMessage(const MidiMessage &m) override {
+        Log::e() << "Unimplemented";
     }
 };
 #else
@@ -40,6 +40,10 @@ public:
 
     void addListener(MidiListener *listener) override {
         listeners.push_back(listener);
+    }
+    // sends to all
+    void sendMessage(const MidiMessage &m) override {
+        Log::e() << "Unimplemented";
     }
     
     void autoPoll() {
@@ -134,7 +138,7 @@ private:
 
 
 
-std::shared_ptr<AllMidiDevicesImpl> impl;
+
 
 AllMidiDevices::AllMidiDevices(bool online) : online(online) {
 	if(online) {
@@ -159,3 +163,9 @@ void AllMidiDevices::addListener(MidiListener *listener) {
 	}
 }
 
+
+void AllMidiDevices::sendMessage(const MidiMessage &m) {
+	if(online) {
+		impl->sendMessage(m);
+	}
+}

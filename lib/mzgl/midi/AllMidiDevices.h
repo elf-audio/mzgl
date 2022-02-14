@@ -25,8 +25,12 @@ public:
     std::shared_ptr<AllMidiDevicesImpl> impl;
     void setup();
     void addListener(MidiListener *listener);
+	
+	// sends to all connected midi devices that have an input
+	void sendMessage(const MidiMessage &m);
 private:
 	const bool online;
+	
 };
 
 	

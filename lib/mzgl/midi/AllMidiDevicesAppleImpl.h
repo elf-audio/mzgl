@@ -81,7 +81,8 @@ public:
     
     void midiReceived(const MidiMessage &msg, uint64_t timestamp);
 
-    void sendMessage(const MidiMessage &m);
+    void sendMessage(const MidiMessage &m) override;
+	
     virtual ~AllMidiDevicesAppleImpl();
     
 
