@@ -13,5 +13,4 @@ projects/*
 !projects/dev/cmake-template/*
 .DS_Store
 lib/glfw/*
-lib/glew/*
 opt/iPlug2
