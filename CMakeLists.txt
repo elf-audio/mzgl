@@ -5,7 +5,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.18)
 project(mzgl)
 
-if(ANDROID)
+if(ANDROID OR WIN32)
 set(CMAKE_CXX_STANDARD 17)
 else()
 set(CMAKE_CXX_STANDARD 14)
@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CPM.cmake)
 
 CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
+# CPMAddPackage("gh:gulrak/filesystem#f437344")
 
 # CPMAddPackage(
 #   NAME nlohmann_json
@@ -275,7 +276,7 @@ target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 set(MZGL_LIBS
 	zipper 
-	boostfs 
+ 	boostfs 
 	yoga 
 	pugixml
 )
@@ -366,12 +367,13 @@ elseif(WIN32)
 	add_compile_definitions(__WINDOWS_MM__)
 	add_compile_definitions(PA_USE_WASAPI=1)
 	add_compile_definitions(NOMINMAX)
+	# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 	# don't need c++14 because I think it's set by cmake, same with O3
 		#add_compile_options(-std:c++14 -O3)
 	# https://forum.juce.com/t/cmake-cannot-use-try-with-exceptions-disabled/40983
 	# /MT embeds static runtime
 	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
-	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
+	# set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
 
 	# this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html
 	#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -Xclang -fexceptions -Xclang -fcxx-exceptions ")#-Xclang -fnew-ms-eh ")

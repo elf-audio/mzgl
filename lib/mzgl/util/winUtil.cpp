@@ -1,6 +1,5 @@
 #include "winUtil.h"
 
-using namespace std;
 
 // This sample will work either with or without UNICODE, it looks like
 // it's recommended now to use UNICODE for all new code, but I left
@@ -13,32 +12,38 @@ using namespace std;
 // tchar.h, for example, makes heavy use of _UNICODE, and windows.h
 // makes heavy use of UNICODE.
 
+
+
+#include <locale>
+#include <codecvt>
+
+std::string w2n(const std::wstring& w)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::string narrow = converter.to_bytes(w);
+    return narrow;
+}
+
+std::wstring n2w(const std::string& n)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wide = converter.from_bytes(n);
+    return wide;
+}
+
+
+
 #define UNICODE
 #define _UNICODE
 //#undef UNICODE
 //#undef _UNICODE
 
 
-#include <locale>
-#include <string>
-#include <codecvt>
-
-string w2n(const wstring &w) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  std::string narrow = converter.to_bytes(w);
-  return narrow;
-}
-
-wstring n2w(const string &n) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  std::wstring wide = converter.from_bytes(n);
-  return wide;
-}
 
 
-
-#include <tchar.h>
 #include <windows.h>
+#include <tchar.h>
+
 #include "log.h"
 #include "Rectf.h"
 
@@ -67,8 +72,8 @@ const Rectf dialogWindow = {150, 150, 500, 220};
 
 HWND txtEditHandle = NULL;
 
-function<void(string, bool)> textboxCallback;
-string textboxDefaultText = "";
+std::function<void(std::string, bool)> textboxCallback;
+std::string textboxDefaultText = "";
 // hwnd:    All window processes are passed the handle of the window
 //         that they belong to in hwnd.
 // msg:     Current message (e.g., WM_*) from the OS.
@@ -126,7 +131,7 @@ LRESULT CALLBACK textboxWndProc(HWND hwnd, UINT msg, WPARAM wParam,
                 // MessageBox(hwnd, textBoxText, TEXT("Here's what you typed"), MB_OK);
                 char output[512];
                 sprintf(output, "%ws", textBoxText);
-                textboxCallback(string(output), true);
+                textboxCallback(std::string(output), true);
                 Log::d() << "Completed textbox with " << output;
                 free(textBoxText);
                 DestroyWindow(hwnd);
@@ -149,10 +154,10 @@ LRESULT CALLBACK textboxWndProc(HWND hwnd, UINT msg, WPARAM wParam,
 std::function<void()> buttonOneCallback;
 std::function<void()> buttonTwoCallback;
 std::function<void()> buttonThreeCallback;
-string buttonOneName, buttonTwoName, buttonThreeName;
+std::string buttonOneName, buttonTwoName, buttonThreeName;
 std::function<void()> cancelCallback;
-string dialogTitle;
-string dialogMsg;
+std::string dialogTitle;
+std::string dialogMsg;
 int numOptions = 2;
 
 
@@ -269,7 +274,8 @@ LRESULT CALLBACK optionCancelDialogProc(HWND hwnd, UINT msg, WPARAM wParam,
 
 
 void windowsTextboxDialog(std::string title, std::string msg, std::string text,
-                          function<void(string, bool)> completionCallback) {
+                          std::function<void(std::string, bool)> completionCallback)
+{
   textboxCallback = completionCallback;
   textboxDefaultText = text;
   auto hInstance = GetModuleHandle(NULL);

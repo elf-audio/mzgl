@@ -12,8 +12,7 @@
 
 using namespace zipper;
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+
 
 Zipper::zipFlags ZipFileFlagsToZipperFlags(ZipFile::Compression compression) {
 	switch(compression) {

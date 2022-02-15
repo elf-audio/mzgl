@@ -13,7 +13,7 @@
 #include "media/NdkMediaExtractor.h"
 #endif
 
-#include <boost/filesystem.hpp>
+#include "filesystem.h"
 #include "util.h"
 #include "util/log.h"
 
@@ -23,7 +23,6 @@
 
 using namespace std;
 
-namespace fs = boost::filesystem;
 #define RESAMPLING_QUALITY 5
 bool AudioFile_loadDrLib(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate, int desiredSampleRate = 0) {
     Resampler resampler;

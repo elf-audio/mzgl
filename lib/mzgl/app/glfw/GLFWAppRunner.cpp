@@ -16,7 +16,7 @@
 #include "glfw3.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <boost/filesystem/path.hpp>
+
 #include "util.h"
 #include "log.h"
 

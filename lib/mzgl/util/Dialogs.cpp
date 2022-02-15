@@ -20,15 +20,7 @@
 
 using namespace std;
 
-
-
-
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-
-
-
-
+#include "filesystem.h"
 
 
 #ifdef UNIT_TEST
