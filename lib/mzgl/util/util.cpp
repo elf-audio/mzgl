@@ -798,12 +798,7 @@ string getAppVersionString() {
 
 #include <Cocoa/Cocoa.h>
 
-static void restoreAppWindowFocus(){
-//	NSWindow * appWindow = (NSWindow *)ofGetCocoaWindow();
-//	if(appWindow) {
-//		[appWindow makeKeyAndOrderFront:nil];
-//	}
-}
+
 
 #endif
 
@@ -829,7 +824,7 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 			buttonClicked = [saveDialog runModal];
 			
 			
-			restoreAppWindowFocus();
+			
 			[context makeCurrentContext];
 			
             if([[[saveDialog URL] path] compare: [[saveDialog directoryURL] path]]==NSOrderedSame) {
@@ -877,13 +872,13 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 
 
 #if defined(__APPLE__) && !TARGET_OS_IOS
-@interface FilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
+@interface MyFilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
 	
 }
 -(void) setAllowedExtensions:(NSArray *)extensions;
 @end
 
-@implementation FilePickerDelegate {
+@implementation MyFilePickerDelegate {
 	NSArray *allowedExts;
 	BOOL allowAll;
 }
@@ -921,7 +916,7 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 
 
 @end
-FilePickerDelegate *impikD = nil;
+MyFilePickerDelegate *impik_D = nil;
 #endif
 
 
@@ -972,16 +967,16 @@ void loadFileDialog(string msg, const vector<string> &allowedExtensions, functio
 			
 			
 			if(allowedExts.size()>0) {
-				if(impikD==nil) {
-					impikD = [[FilePickerDelegate alloc] init];
+				if(impik_D==nil) {
+					impik_D = [[MyFilePickerDelegate alloc] init];
 				}
 				vector<NSString*> nsExts;
 				for(const auto &ext: allowedExts) {
 					nsExts.push_back([NSString stringWithUTF8String:ext.c_str()]);
 				}
 				NSArray *exts = [NSArray arrayWithObjects:&nsExts[0] count: nsExts.size()];
-				[impikD setAllowedExtensions:exts];
-				loadDialog.delegate = impikD;
+				[impik_D setAllowedExtensions:exts];
+				loadDialog.delegate = impik_D;
 			}
 			
 			NSOpenGLContext *context = [NSOpenGLContext currentContext];
@@ -989,7 +984,7 @@ void loadFileDialog(string msg, const vector<string> &allowedExtensions, functio
 //			[Dialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
 			
 			buttonClicked = [loadDialog runModal];
-			restoreAppWindowFocus();
+			
 			[context makeCurrentContext];
 			
 			if(buttonClicked == NSModalResponseOK){
@@ -1005,12 +1000,6 @@ void loadFileDialog(string msg, const vector<string> &allowedExtensions, functio
 #endif
 
 }
-
-
-
-
-
-
 
 
 void setCursor(Cursor cursor) {
@@ -1058,7 +1047,6 @@ bool isMainThread() {
 
 #include <list>
 #include <future>
-
 
 class Task {
 public:

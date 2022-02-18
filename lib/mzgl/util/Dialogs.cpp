@@ -137,7 +137,6 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 //		handleResult(returnCode, label);
 //
 		
-		//restoreAppWindowFocus();
 		// if OK was clicked, assign value to text
 		
 	});
@@ -150,8 +149,6 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 	linuxTextboxDialog(title, msg, text, completionCallback);
 #endif
 }
-
-
 
 
 void Dialogs::confirm(std::string title, std::string msg,
@@ -920,3 +917,144 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 #endif
 	
 }
+
+
+
+
+#if defined(__APPLE__) && !TARGET_OS_IOS
+@interface FilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
+
+}
+-(void) setAllowedExtensions:(NSArray *)extensions;
+@end
+
+@implementation FilePickerDelegate {
+NSArray *allowedExts;
+BOOL allowAll;
+}
+
+-(id) init {
+self = [super init];
+if(self != nil) {
+	allowAll = YES;
+	allowedExts = @[@"png", @"tiff", @"jpg", @"gif", @"jpeg"];
+}
+return self;
+}
+-(void) setAllowedExtensions: (NSArray *)exts {
+allowedExts = exts;
+allowAll = NO;
+}
+
+
+
+- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url {
+if(allowAll) return YES;
+
+NSString* ext = [url pathExtension];
+if ([ext isEqualToString: @""] || [ext isEqualToString: @"/"] || ext == nil || ext == nil || [ext length] < 1) {
+	return YES;
+}
+
+for(NSString *e in allowedExts) {
+	if ([ext caseInsensitiveCompare:e] == NSOrderedSame) {
+		return YES;
+	}
+}
+return NO;
+}
+
+
+@end
+FilePickerDelegate *impikD = nil;
+#endif
+
+void Dialogs::loadFile(std::string msg, std::function<void(std::string, bool)> completionCallback) {
+	loadFile(msg, {}, completionCallback);
+}
+
+void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback) {
+
+
+
+#ifdef AUTO_TEST
+	return;
+#endif
+	
+	
+	
+	
+#ifdef _WIN32
+
+	OPENFILENAME ofn;
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	HWND hwnd = WindowFromDC(wglGetCurrentDC());
+	ofn.hwndOwner = hwnd;
+
+  //  wchar_t szFileName[MAX_PATH] = L"";
+	char szFileName[MAX_PATH] = "";
+	ofn.lpstrFilter = "All\0";
+	ofn.lpstrFile = szFileName;
+
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = 0;
+
+	if(GetOpenFileName(&ofn)) {
+		completionCallback(szFileName, true);
+//completionCallback(convertWideToNarrow(szFileName), true);
+	} else {
+		completionCallback("", false);
+	}
+
+#elif defined(__APPLE__)
+
+#	if !TARGET_OS_IOS
+	auto allowedExts = allowedExtensions;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		// do work here
+		NSInteger buttonClicked;
+		string filePath = "";
+		@autoreleasepool {
+			NSOpenPanel * loadDialog = [NSOpenPanel openPanel];
+			
+			
+			if(allowedExts.size()>0) {
+				if(impikD==nil) {
+					impikD = [[FilePickerDelegate alloc] init];
+				}
+				vector<NSString*> nsExts;
+				for(const auto &ext: allowedExts) {
+					nsExts.push_back([NSString stringWithUTF8String:ext.c_str()]);
+				}
+				NSArray *exts = [NSArray arrayWithObjects:&nsExts[0] count: nsExts.size()];
+				[impikD setAllowedExtensions:exts];
+				loadDialog.delegate = impikD;
+			}
+			
+			NSOpenGLContext *context = [NSOpenGLContext currentContext];
+			[loadDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
+//			[Dialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
+			
+			buttonClicked = [loadDialog runModal];
+			
+			[context makeCurrentContext];
+			
+			if(buttonClicked == NSModalResponseOK){
+				filePath = string([[[loadDialog URL] path] UTF8String]);
+			}
+		}
+		completionCallback(filePath, buttonClicked == NSModalResponseOK);
+		
+	});
+#	endif
+#elif !defined(__ANDROID__) && defined(__linux__)
+	linuxLoadFileDialog(msg, allowedExtensions, completionCallback);
+#endif
+
+}
+
+
+

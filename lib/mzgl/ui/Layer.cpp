@@ -98,13 +98,16 @@ void Layer::_draw() {
 		pushMask();
 	}
 	
-	if(x!=0 || y!=0) g.pushMatrix();
-	draw();
-	if(x!=0 || y!=0) g.translate(x, y);
-	for(auto &c : children) {
-		c->_draw();
+	if(x!=0 || y!=0) {
+		g.pushMatrix();
+		draw();
+		g.translate(x, y);
+		for(auto &c : children) c->_draw();
+		g.popMatrix();
+	} else {
+		draw();
+		for(auto &c : children) c->_draw();
 	}
-	if(x!=0 || y!=0) g.popMatrix();
 	if(clipToBounds) {
 		popMask();
 	}
@@ -396,6 +399,7 @@ Rectf Layer::getAbsoluteRect() {
 	return getAbsoluteRect(*this);
 }
 
+
 glm::vec2 Layer::getAbsolutePosition() {
 	return getAbsolutePosition(position());
 }
@@ -407,6 +411,8 @@ glm::vec2 Layer::getAbsolutePosition(glm::vec2 pos) {
 	}
 	return pos;
 }
+
+
 
 Rectf Layer::getAbsoluteRect(const Rectf &rr) {
 	Rectf r;
