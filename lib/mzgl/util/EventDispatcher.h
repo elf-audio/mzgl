@@ -149,8 +149,14 @@ public:
 	#endif
 		app->g.setupView();
 		updateInternal();
+		
 		update();
 		callUpdateListeners();
+		
+		auto s = getSeconds();
+		app->g.frameDelta = s - app->g.currFrameTime;
+		app->g.currFrameTime = s;
+		
 		draw();
 		callDrawListeners();
 	}

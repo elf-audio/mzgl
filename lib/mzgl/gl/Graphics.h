@@ -40,7 +40,8 @@ public:
 	int width = 0;
 	int height = 0;
 	float pixelScale = 2.f;
-
+	double frameDelta = 0.f;
+	double currFrameTime = 0.f;
 	
 	void setColor(float r, float g, float b, float a = 1);
 	void setColor(glm::vec3 c);

@@ -174,6 +174,14 @@ void Drawer::drawChevronDown(vec2 c, int radius, int thickness) {
 	drawQuad(c, c + vec2(-p, -p), c + vec2(-p+t, -t-p), c+ vec2(t, -t));
 	drawQuad(c, c + vec2(-t, -t), c + vec2(p-t, -p-t), c + vec2(p, -p));
 }
+void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
+	float s2 = 0.707106781186548;
+	float p = radius * s2;
+	float t = thickness * s2;
+	
+	drawQuad(c, c + vec2(-p, p), c + vec2(-p+t, t+p), c+ vec2(t, t));
+	drawQuad(c, c + vec2(-t, t), c + vec2(p-t, p+t), c + vec2(p, p));
+}
 
 
 

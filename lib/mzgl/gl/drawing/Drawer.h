@@ -49,6 +49,7 @@ public:
 	void drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, bool br, bool bl);
 	void drawPlus(vec2 c, int diameter, int thickness);
 	void drawCross(vec2 c, int diameter, int thickness);
+	void drawChevronUp(vec2 c, int radius, int thickness);
 	void drawChevronDown(vec2 c, int radius, int thickness);
 	void drawChevronLeft(vec2 c, int radius, int thickness);
 	void drawChevronRight(vec2 c, int radius, int thickness);
