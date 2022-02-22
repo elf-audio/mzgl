@@ -76,6 +76,9 @@ struct MidiMessage {
 	bool isCC() const {
 		return status==MIDI_CONTROL_CHANGE;
 	}
+    bool isSysex() const {
+        return status==MIDI_SYSEX;
+    }
 	
 	void noteOn(int channel, int pitch, int velocity) {
 		this->status = MIDI_NOTE_ON;
@@ -115,6 +118,9 @@ struct MidiMessage {
 	
 	std::vector<uint8_t> getBytes() const {
 		
+        if(status==MIDI_SYSEX) {
+            return sysexData;
+        }
 		std::vector<uint8_t> bytes;
 		
 		bytes.push_back(status + (channel-1));
@@ -172,10 +178,17 @@ struct MidiMessage {
 	}
 	
 private:
+    std::vector<uint8_t> sysexData;
 	void setFromBytes(const uint8_t *bytes, int length) {
-		if(bytes[0] >= MIDI_SYSEX) {
+		if(bytes[0] > MIDI_SYSEX) {
 			status = (bytes[0] & 0xFF);
 			channel = 0;
+        } else if(bytes[0]==MIDI_SYSEX) {
+            status = MIDI_SYSEX;
+            channel = 0;
+            sysexData.resize(length);
+            memcpy(sysexData.data(), bytes, length);
+            
 		} else {
 			status = (bytes[0] & 0xF0);
 			channel = (int) (bytes[0] & 0x0F)+1;

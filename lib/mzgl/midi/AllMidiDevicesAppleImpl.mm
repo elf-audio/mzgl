@@ -10,6 +10,7 @@
 #include <Foundation/Foundation.h>
 
 #include "appleMidiUtils.h"
+#include <memory.h>
 
 void NSLogError(OSStatus c,const std::string &str) {
     if(c!=noErr) {
@@ -321,6 +322,8 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 
 void AllMidiDevicesAppleImpl::sendPacketList(const MIDIPacketList *packetList) {
     for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
+        printf("sending message\n");
+
         MIDIEndpointRef outputEndpoint = MIDIGetDestination(index);
         if (outputEndpoint) {
             // Send it
@@ -340,6 +343,49 @@ void AllMidiDevicesAppleImpl::sendBytes(const UInt8*data, UInt32 size) {
     packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, size, data);
 
     sendPacketList(packetList);
+}
+
+/*
+ struct MIDISysexSendRequest
+ {
+     MIDIEndpointRef        destination;
+     const Byte *          data;
+     UInt32                bytesToSend;
+     Boolean                complete;
+     Byte                reserved[3];
+     MIDICompletionProc     completionProc;
+     void * __nullable    completionRefCon;
+ };
+ */
+
+static void cleanupSysex(MIDISysexSendRequest *request) {
+//    delete [] request->data;
+    printf("cleanup %d\n", request->complete);
+    delete request;
+}
+
+void AllMidiDevicesAppleImpl::sendSysex(const UInt8 *data, UInt32 size) {
+    NSLog(@"%s(%u sysex bytes to core MIDI)", __func__, unsigned(size));
+    assert(size < 65536);
+    
+    
+    for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
+        MIDISysexSendRequest *request = new MIDISysexSendRequest();
+        
+        request->data = new Byte[size];
+        memcpy((void*)request->data, (void*)data, size);
+        request->bytesToSend = size;
+        request->completionProc = &cleanupSysex;
+        request->completionRefCon = request;
+        request->complete = false;
+        request->destination = MIDIGetDestination(index);
+        OSStatus res = MIDISendSysex( request);
+        if(res!=noErr) {
+            printf("error sending sysex\n");
+        }
+    }
+
+
 }
 
 AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
@@ -362,7 +408,11 @@ AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
 void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {
 	const auto b = m.getBytes();
 	if(b.size()>0) {
-		sendBytes(b.data(), b.size());
+        if(m.isSysex()) {
+            sendSysex(b.data(), b.size());
+        } else {
+            sendBytes(b.data(), b.size());
+        }
 	} else {
 		Log::e() << "Midi message contained no bytes!";
 	}

@@ -117,4 +117,5 @@ private:
 
     void sendPacketList(const MIDIPacketList *packetList);
     void sendBytes(const UInt8 *data, UInt32 size);
+    void sendSysex(const UInt8 *data, UInt32 size);
 };
