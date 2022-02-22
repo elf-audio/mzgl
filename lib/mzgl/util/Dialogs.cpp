@@ -793,7 +793,7 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 	androidImageDialog(docsPath("tmpImg.jpg"), completionCallback);
 
 #else // defined(__APPLE__)
-	loadFileDialog("Please choose an image", {"jpg", "jpeg", "bmp", "gif", "png", "tif", "tiff"}, [&, completionCallback](string path, bool success) {
+	loadFile("Please choose an image", {"jpg", "jpeg", "bmp", "gif", "png", "tif", "tiff"}, [&, completionCallback](string path, bool success) {
 		if(!success) completionCallback(false, "");
 
 		fs::path p(path);
@@ -921,7 +921,43 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 
 
 
-#if defined(__APPLE__) && !TARGET_OS_IOS
+#if defined(__APPLE__)
+
+#if TARGET_OS_IOS
+
+
+@interface FilePickerDelegate : NSObject <UIDocumentPickerDelegate> {
+	
+	@public std::function<void(std::string, bool)> completionCallback;
+}
+@end
+
+@implementation FilePickerDelegate {
+}
+
+-(void) documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {}
+
+-(void) documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+	for(int i = 0; i < [urls count]; i++) {
+		NSURL *url = [urls objectAtIndex:i];
+		std::string path = [[url path] UTF8String];
+		completionCallback(path, true);
+	}
+}
+
+@end
+
+
+
+
+FilePickerDelegate *fpd = nil;
+
+
+
+
+
+
+#else
 @interface FilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
 
 }
@@ -947,7 +983,6 @@ allowAll = NO;
 }
 
 
-
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url {
 if(allowAll) return YES;
 
@@ -968,12 +1003,12 @@ return NO;
 @end
 FilePickerDelegate *impikD = nil;
 #endif
-
-void Dialogs::loadFile(std::string msg, std::function<void(std::string, bool)> completionCallback) {
+#endif
+void Dialogs::loadFile(std::string msg, std::function<void(std::string, bool)> completionCallback) const {
 	loadFile(msg, {}, completionCallback);
 }
 
-void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback) {
+void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback) const {
 
 
 
@@ -1011,7 +1046,115 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 
 #elif defined(__APPLE__)
 
-#	if !TARGET_OS_IOS
+#	if TARGET_OS_IOS
+	
+	
+	
+	
+	
+	
+	if(fpd==nil) {
+		fpd = [[FilePickerDelegate alloc] init];
+	}
+	fpd->completionCallback = completionCallback;
+
+	
+	
+	
+	
+
+	NSMutableArray<NSString*> *docTypes = [[NSMutableArray alloc] init];
+	
+	// catchall
+	if(allowedExtensions.size()==0) {
+		[docTypes addObject:(NSString*)kUTTypeData];
+	}
+	
+	for(const auto &ext: allowedExtensions) {
+		if(ext=="json") {
+			[docTypes addObject:(NSString*)kUTTypeJSON];
+		} else if(ext=="bmp") {
+			[docTypes addObject:(NSString*)kUTTypeBMP];
+		} else if(ext=="gif") {
+			[docTypes addObject:(NSString*)kUTTypeGIF];
+		} else if(ext=="pdf") {
+			[docTypes addObject:(NSString*)kUTTypePDF];
+		} else if(ext=="png") {
+			[docTypes addObject:(NSString*)kUTTypePNG];
+		} else if(ext=="rtf") {
+			[docTypes addObject:(NSString*)kUTTypeRTF];
+		} else if(ext=="xml") {
+			[docTypes addObject:(NSString*)kUTTypeXML];
+		} else if(ext=="mp3") {
+			[docTypes addObject:(NSString*)kUTTypeMP3];
+		} else if(ext=="ttf") {
+			[docTypes addObject:(NSString*)kUTTypeFont];
+		} else if(ext=="html" || ext=="htm") {
+			[docTypes addObject:(NSString*)kUTTypeHTML];
+		} else if(ext=="jpg" || ext=="jpeg") {
+			[docTypes addObject:(NSString*)kUTTypeJPEG];
+		} else if(ext=="mov") {
+			[docTypes addObject:(NSString*)kUTTypeMPEG];
+		} else if(ext=="tiff") {
+			[docTypes addObject:(NSString*)kUTTypeTIFF];
+		} else if(ext=="txt") {
+			[docTypes addObject:(NSString*)kUTTypeText];
+		} else if(ext=="mp4" || ext=="mov") {
+			[docTypes addObject:(NSString*)kUTTypeMPEG4];
+		} else if(ext=="avi") {
+			[docTypes addObject:(NSString*)kUTTypeAVIMovie];
+		} else if(ext=="wav") {
+			[docTypes addObject:(NSString*)kUTTypeWaveformAudio];
+		} else if(ext=="aif" || ext=="aiff") {
+			[docTypes addObject:(NSString*)kUTTypeAudioInterchangeFileFormat];
+		} else if(ext=="m4a") {
+			[docTypes addObject:(NSString*)kUTTypeMPEG4Audio];
+		} else {
+			Log::e() << "Can't find uttype for extension" << ext;
+			mzAssert(false);
+		}
+	}
+	//= @[(NSString*)kUTTypeAudio, (NSString*)kUTTypeVideo, (NSString*)kUTTypeQuickTimeMovie, (NSString*)kUTTypeMPEG4];
+	UIDocumentPickerViewController *filePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeImport];
+
+	filePicker.delegate = fpd;
+
+//	if (@available(iOS 11.0, *)) {
+//		filePicker.allowsMultipleSelection = YES;
+//	}
+
+	UIViewController *vc = (__bridge UIViewController*) app.viewController;
+
+	[vc presentViewController:filePicker animated: YES completion:^{
+//		if (@available(iOS 11.0, *)) {
+//			filePicker.allowsMultipleSelection = YES;
+//		}
+	}];
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+#	else
 	auto allowedExts = allowedExtensions;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		// do work here

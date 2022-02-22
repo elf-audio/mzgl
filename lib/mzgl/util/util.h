@@ -93,8 +93,8 @@ void replaceAll(std::string & data, std::string toSearch, std::string replaceStr
 void saveFileDialog(std::string msg, std::string defaultFileName, std::function<void(std::string, bool)> completionCallback);
 
 // only works on mac, this one.
-void loadFileDialog(std::string msg, std::function<void(std::string, bool)> completionCallback);
-void loadFileDialog(std::string msg, const std::vector<std::string> &allowedExts, std::function<void(std::string, bool)> completionCallback);
+//void loadFileDialog(std::string msg, std::function<void(std::string, bool)> completionCallback);
+//void loadFileDialog(std::string msg, const std::vector<std::string> &allowedExts, std::function<void(std::string, bool)> completionCallback);
 
 //void alertDialog(string title, string msg);
 

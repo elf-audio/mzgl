@@ -54,8 +54,8 @@ public:
 	
 	void share(std::string message, std::string path, std::function<void(bool)> completionCallback) const;
 	
-	void loadFile(std::string msg, std::function<void(std::string, bool)> completionCallback);
-	void loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback);
+	void loadFile(std::string msg, std::function<void(std::string, bool)> completionCallback) const;
+	void loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback) const;
 	
 	void launchUrlInWebView(std::string url, std::function<void()> completionCallback) const;
 };
