@@ -322,7 +322,7 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 
 void AllMidiDevicesAppleImpl::sendPacketList(const MIDIPacketList *packetList) {
     for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
-        printf("sending message\n");
+//        printf("sending message\n");
 
         MIDIEndpointRef outputEndpoint = MIDIGetDestination(index);
         if (outputEndpoint) {
@@ -360,12 +360,12 @@ void AllMidiDevicesAppleImpl::sendBytes(const UInt8*data, UInt32 size) {
 
 static void cleanupSysex(MIDISysexSendRequest *request) {
 //    delete [] request->data;
-    printf("cleanup %d\n", request->complete);
+//    printf("cleanup %d\n", request->complete);
     delete request;
 }
 
 void AllMidiDevicesAppleImpl::sendSysex(const UInt8 *data, UInt32 size) {
-    NSLog(@"%s(%u sysex bytes to core MIDI)", __func__, unsigned(size));
+//    NSLog(@"%s(%u sysex bytes to core MIDI)", __func__, unsigned(size));
     assert(size < 65536);
     
     

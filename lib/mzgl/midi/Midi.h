@@ -30,7 +30,6 @@ public:
 };
 
 
-
 class MidiPort {
 public:
 	virtual RtMidi *getPort() = 0;
