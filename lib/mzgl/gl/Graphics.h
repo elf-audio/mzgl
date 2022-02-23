@@ -46,6 +46,7 @@ public:
 	void setColor(float r, float g, float b, float a = 1);
 	void setColor(glm::vec3 c);
 	void setColor(glm::vec4 c);
+	void setColor(glm::vec4 c, float alpha);
 	void setColor(float bri);
 	void setHexColor(int hex, float a = 1);
 	void saveScreen(std::string pngPath);

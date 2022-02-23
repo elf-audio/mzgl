@@ -528,6 +528,11 @@ void Graphics::setColor(glm::vec4 c) {
 	color = c;
 }
 
+void Graphics::setColor(glm::vec4 c, float alpha) {
+	color = c;
+	color.a = alpha;
+}
+
 glm::vec4 Graphics::getColor() {
 	return color;
 }

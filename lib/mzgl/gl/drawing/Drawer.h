@@ -27,6 +27,7 @@ public:
 	void setColor(float grey);
 	void setColor(float r, float g, float b, float a = 1.f);
 	void setColor(glm::vec4 c);
+	void setColor(glm::vec4 c, float alpha);
 	
 	void drawTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 	// triangle with colours

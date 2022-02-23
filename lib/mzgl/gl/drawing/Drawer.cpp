@@ -11,6 +11,11 @@ void Drawer::setColor(glm::vec4 c) {
 	this->color = c;
 }
 
+void Drawer::setColor(glm::vec4 c, float alpha) {
+	this->color = c;
+	color.a = alpha;
+}
+
 bool Drawer::isEmpty() {
 	return geom.verts.size()==0;
 }
