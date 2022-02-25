@@ -29,6 +29,11 @@ public:
 	void setColor(glm::vec4 c);
 	void setColor(glm::vec4 c, float alpha);
 	
+	// only working for rects an rounded rects at the moment, and also only vertical
+	// and horizontal gradients work really nicely - for a better diagonal gradient
+	// you'd need a colour gradient matrix sent to the shader to transform all the colours
+	void setGradient(glm::vec4 c1, glm::vec2 pos1, glm::vec4 c2, glm::vec2 pos2);
+	
 	void drawTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 	// triangle with colours
 	void drawTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec4 ca, glm::vec4 cb, glm::vec4 cc);
@@ -67,7 +72,20 @@ private:
 						  bool tl, bool tr, bool br, bool bl);
 	
 	void createRoundedRectCache(std::vector<glm::vec2> &cache, int numSteps);
-
+	bool isDoingGradient = false;
+	vec4 lookupGradient(vec2 pos);
+	
+	
+	vec4 gradientStartColor;
+	vec4 gradientStopColor;
+	vec2 gradientStartPoint;
+	vec2 gradientStopPoint;
+	
+	vec2 v2;
+	float v2_ls;
+	
+	// rounded rect vector so we don't have to keep reallocating
+	std::vector<glm::vec2> rrv;
 };
 
 

@@ -9,11 +9,13 @@ using namespace std;
 
 void Drawer::setColor(glm::vec4 c) {
 	this->color = c;
+	isDoingGradient = false;
 }
 
 void Drawer::setColor(glm::vec4 c, float alpha) {
 	this->color = c;
 	color.a = alpha;
+	isDoingGradient = false;
 }
 
 bool Drawer::isEmpty() {
@@ -29,10 +31,64 @@ void Drawer::noFill() {
 
 void Drawer::setColor(float grey) {
 	setColor({grey, grey, grey, 1});
+	isDoingGradient = false;
 }
+
+
+
+void Drawer::setGradient(vec4 c1, vec2 pos1, vec4 c2, vec2 pos2) {
+	gradientStartColor = c1;
+	gradientStopColor = c2;
+	gradientStartPoint = pos1;
+	gradientStopPoint = pos2;
+	isDoingGradient = true;
+	v2 = gradientStopPoint - gradientStartPoint;
+	v2_ls = v2.x * v2.x + v2.y * v2.y;
+}
+
+//
+//
+// // projection of vector v1 onto v2
+// static vec2 project( const vec2& v1, const vec2& v2 ) {
+//	 float v2_ls = v2.x * v2.x + v2.y * v2.y;
+//	 return v2 * ( dot( v2, v1 )/v2_ls );
+//
+// }
+//vec4 Drawer::lookupGradient(vec2 pos) {
+//	vec2 v2 = gradientStopPoint - gradientStartPoint;
+//	vec2 v1 = pos - gradientStartPoint;
+//	vec2 proj = gradientStartPoint + project(v1, v2);
+//
+//	if(gradientStartPoint.x==gradientStopPoint.x) { // vertical
+//		float amt = mapf(proj.y, gradientStartPoint.y, gradientStopPoint.y, 0, 1, true);
+//		return gradientStartColor * (1.f - amt) + gradientStopColor * amt;
+//	} else {
+//		float amt = mapf(proj.x, gradientStartPoint.x, gradientStopPoint.x, 0, 1, true);
+//		return gradientStartColor * (1.f - amt) + gradientStopColor * amt;
+//	}
+//}
+//
+
+vec4 Drawer::lookupGradient(vec2 pos) {
+	vec2 v1 = pos - gradientStartPoint;
+	vec2 proj = gradientStartPoint + v2 * ( dot( v2, v1 )/v2_ls );
+
+	if(gradientStartPoint.x==gradientStopPoint.x) { // vertical
+		float amt = mapf(proj.y, gradientStartPoint.y, gradientStopPoint.y, 0, 1, true);
+		return gradientStartColor * (1.f - amt) + gradientStopColor * amt;
+	} else {
+		float amt = mapf(proj.x, gradientStartPoint.x, gradientStopPoint.x, 0, 1, true);
+		return gradientStartColor * (1.f - amt) + gradientStopColor * amt;
+	}
+}
+
+
 void Drawer::setColor(float r, float g, float b, float a) {
 	setColor({r, g, b, a});
+	isDoingGradient = false;
 }
+
+
 
 void Drawer::drawTriangle(glm::vec2 a, glm::vec2 b, glm::vec2 c) {
 	
@@ -124,7 +180,13 @@ void Drawer::drawRect(const Rectf &r) {
 		vector<unsigned int> i = {n, n+1, n+2, n+2, n+3, n};
 		geom.verts.insert(geom.verts.end(), v.begin(), v.end());
 		geom.indices.insert(geom.indices.end(), i.begin(), i.end());
-		geom.cols.insert(geom.cols.end(), 4, color);
+		if(isDoingGradient) {
+			for(const auto &ve : v) {
+				geom.cols.push_back(lookupGradient(ve));
+			}
+		} else {
+			geom.cols.insert(geom.cols.end(), 4, color);
+		}
 	} else {
 		lineDrawer.thickness = strokeWeight;
 		int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
@@ -237,25 +299,33 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 void Drawer::drawRect(float x, float y, float width, float height) {
 	drawRect({x, y, width, height});
 }
+
 void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 	if(radius<4.1f) radius = 4.1f;
-	vector<glm::vec2> v;
-	::getPerfectRoundedRectVerts(r, radius, v);
+	rrv.clear();
+	::getPerfectRoundedRectVerts(r, radius, rrv);
 	
 	
 	if(filled) {
 		auto start = geom.verts.size();
-		geom.verts.insert(geom.verts.end(), v.begin(), v.end());
-		for(unsigned int i = 0; i < v.size()-2; i++) {
+		geom.verts.insert(geom.verts.end(), rrv.begin(), rrv.end());
+		for(unsigned int i = 0; i < rrv.size()-2; i++) {
 			geom.indices.push_back(start);
 			geom.indices.push_back(start + i + 1);
 			geom.indices.push_back(start + i + 2);
 		}
-		geom.cols.insert(geom.cols.end(), v.size(), color);
+		if(isDoingGradient) {
+			geom.cols.reserve(geom.cols.size() + rrv.size());
+			for(const auto &v : rrv) {
+				geom.cols.push_back(lookupGradient(v));
+			}
+		} else {
+			geom.cols.insert(geom.cols.end(), rrv.size(), color);
+		}
 	} else {
-		v.pop_back();
+		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 		
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
@@ -263,14 +333,14 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 
 void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 	if(radius<4.1f) radius = 4.1f;
-	vector<glm::vec2> v;
-	::getPerfectRoundedRectVerts(r, radius, v);
+	rrv.clear();
+	::getPerfectRoundedRectVerts(r, radius, rrv);
 	
-	v.pop_back();
+	rrv.pop_back();
 	lineDrawer.outside = true;
 	lineDrawer.thickness = shadow;
 	Geometry geom;
-	int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+	int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 	
 	auto c = color;
@@ -349,22 +419,29 @@ void Drawer::getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm
 
 void Drawer::drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, bool br, bool bl) {
 	if(radius<4.1) radius = 4.1f;
-	vector<glm::vec2> v;
-	getPerfectRoundedRectVerts(r, radius, v, tl, tr, br, bl);
+	rrv.clear();
+	getPerfectRoundedRectVerts(r, radius, rrv, tl, tr, br, bl);
 	
 	if(filled) {
 		unsigned int start = geom.verts.size();
-		geom.verts.insert(geom.verts.end(), v.begin(), v.end());
-		for(unsigned int i = 0; i < v.size()-2; i++) {
+		geom.verts.insert(geom.verts.end(), rrv.begin(), rrv.end());
+		for(unsigned int i = 0; i < rrv.size()-2; i++) {
 			geom.indices.push_back(start);
 			geom.indices.push_back(start + i + 1);
 			geom.indices.push_back(start + i + 2);
 		}
-		geom.cols.insert(geom.cols.end(), v.size(), color);
+		if(isDoingGradient) {
+			geom.cols.reserve(geom.cols.size() + rrv.size());
+			for(const auto &v : rrv) {
+				geom.cols.push_back(lookupGradient(v));
+			}
+		} else {
+			geom.cols.insert(geom.cols.end(), rrv.size(), color);
+		}
 	} else {
-		v.pop_back();
+		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 		
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
