@@ -33,7 +33,19 @@ double mapd(double inp, double inMin, double inMax, double outMin, double outMax
 		}
 	}
 	return f;
+}
 
+
+float clampi(int inp, int from, int to) {
+	if(inp < from) return from;
+	if(inp>to) return to;
+	return inp;
+}
+
+float clampl(long inp, long from, long to) {
+	if(inp < from) return from;
+	if(inp>to) return to;
+	return inp;
 }
 
 double clampd(double inp, double from, double to) {
@@ -47,6 +59,7 @@ float clampf(float inp, float from, float to) {
 	if(inp>to) return to;
 	return inp;
 }
+
 float randuf() {
 	return rand() / (float)  RAND_MAX;
 }

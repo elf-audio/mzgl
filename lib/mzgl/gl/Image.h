@@ -20,7 +20,7 @@ class Image {
 public:
 	
 
-	static ImageRef create(std::string path) {
+	static ImageRef create(const std::string &path) {
 		return ImageRef(new Image(path));
 	}
 	
@@ -28,16 +28,16 @@ public:
 		return ImageRef(new Image(w, h, numChannels, bytesPerChannel, isFloat));
 	}
 	
-	static bool save(std::string path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat = false);
-	static bool load(std::string path, std::vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat);
+	static bool save(const std::string &path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat = false);
+	static bool load(const std::string &path, std::vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat);
 
 	static bool loadPngFromData(const std::vector<uint8_t> &inData, std::vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat);
 
 
-	bool load(std::string path) {
+	bool load(const std::string &path) {
 		return load(path, data, width, height, numChannels, bytesPerChannel, isFloat);
 	}
-	void save(std::string path) {
+	void save(const std::string &path) {
 		save(path, data.data(), width, height, numChannels, bytesPerChannel, isFloat);
 	}
 	
@@ -54,9 +54,7 @@ public:
 	
 private:
 	
-	Image(std::string filePath) {
-		load(filePath);
-	}
+    Image(const std::string &filePath);
 	Image() {}
 	
 	// allocates an image with parameters.

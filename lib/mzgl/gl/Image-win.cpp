@@ -19,7 +19,7 @@
 using namespace std;
 
 
-bool Image::save(string path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat) {
+bool Image::save(const string &path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat) {
     if(path.find(".png")!=-1) {
         return stbi_write_png(path.c_str(), width, height, numChannels, data, width * numChannels);
     } else if(path.find(".bmp")!=-1) {
@@ -35,12 +35,13 @@ bool Image::save(string path, uint8_t *data, int width, int height, int numChann
 
 
 
-bool Image::load(string path, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
+bool Image::load(const string &path, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
     unsigned char *image = stbi_load(path.c_str(),
                                      &outWidth,
                                      &outHeight,
                                      &outNumChannels,
                                      STBI_default);
+    if(image==nullptr) return false;
     outBytesPerChannel = 1;
 //    printf("%d %d %d\n", outWidth, outHeight, outNumChannels);
     outData.resize(outWidth * outHeight * outNumChannels);

@@ -47,7 +47,7 @@ void Image__deleteData ( void *info, const void *data, size_t size ) {
 }
 
 
-bool Image::save(string path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat) {
+bool Image::save(const string &path, uint8_t *data, int width, int height, int numChannels, int bytesPerChannel, bool isFloat) {
 
 	int bitsPerPixel = 8 * bytesPerChannel*numChannels;
 	int bytesPerRow = width * bytesPerChannel*numChannels;
@@ -124,7 +124,7 @@ bool Image::save(string path, uint8_t *data, int width, int height, int numChann
 
 
 
-bool Image::load(string path, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
+bool Image::load(const string &path, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
 	
 	
 	CFStringRef       myKeys[1];

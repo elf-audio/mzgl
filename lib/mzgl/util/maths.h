@@ -11,6 +11,10 @@
 float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false);
 
 double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp = false);
+
+
+float clampi(int inp, int from, int to);
+float clampl(long inp, long from, long to);
 float clampf(float inp, float from, float to);
 double clampd(double inp, double from, double to);
 

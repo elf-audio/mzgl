@@ -103,6 +103,11 @@ std::string getHomeDirectory() {
 #endif
 
 
+std::string getCWD() {
+    char c[512];
+    getcwd(c, 512);
+    return c;
+}
 
 
 bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg) {

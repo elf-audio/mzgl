@@ -19,6 +19,7 @@ std::string dataPath(std::string path, std::string bundleId = "");//com.elf-audi
 std::string docsPath(std::string path = "");
 std::string appSupportPath(std::string path);
 
+std::string getCWD();
 #ifdef __APPLE__
 void oslog(std::string s);
 #endif

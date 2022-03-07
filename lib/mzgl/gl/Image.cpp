@@ -15,9 +15,15 @@
 #include <algorithm>
 
 #include <cstring>
+#include "util.h"
 
 using namespace std;
 
+Image::Image(const std::string &filePath) {
+    if(!load(filePath)) {
+        throw std::runtime_error("Can't load file at "+filePath + " cwd is: " + getCWD());
+    }
+}
 
 bool Image::loadPngFromData(const vector<uint8_t> &inData, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
 
