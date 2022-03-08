@@ -61,15 +61,23 @@ public:
 	void setCentre(float x, float y) { setFromCentre(x, y, this->width, this->height); }
 	void setCentre(const glm::vec2 &c) { setCentre(c.x, c.y); }
 	
+	void scale(float amt) {auto c = centre(); setFromCentre(c, width * amt, height * amt); }
+	void scale(float amtX, float amtY) {auto c = centre(); setFromCentre(c, width * amtX, height * amtY); }
 	
-	void setRight(float right) { this->x = right - this->width; }
-	void setBottom(float bottom) { this->y = bottom - this->height; }
+	// repositions the rect so its right or bottom edge is at the argument - doesn't change the box size
+	void setRight(float right) {x = right - width; }
+	void setBottom(float bottom) { y = bottom - height; }
 	
+	// sets left/right without moving the other edge (grows or shrinks the box)
+	void setLeftEdge(float left) { width += x - left; x = left; }
+	void setRightEdge(float right) { width = right - x; }
+	void setTopEdge(float top) { height += y - top; y = top; }
+	void setBottomEdge(float bottom) { height = bottom - y; }
 	
 	void setTopLeft(float x, float y) { position(x, y); }
 	void setTopLeft(glm::vec2 p) { position(p); }
 	
-	void setBottomLeft(float x, float y) { set(x, y-this->height, this->width, this->height); }
+	void setBottomLeft(float x, float y) { set(x, y-height, width, height); }
 	void setBottomLeft(glm::vec2 p) { set(p.x, p.y-this->height, this->width, this->height); }
 	
 	void setBottomRight(float x, float y) { set(x - this->width, y-this->height, this->width, this->height); }
