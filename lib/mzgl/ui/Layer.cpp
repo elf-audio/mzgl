@@ -66,7 +66,7 @@ void Layer::maskOn() {
 	// my suspicion is the way mac and ios set up pixel scaling
 	// means that this works for them but not others. I should make others work
 	// with this.
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
 	glScissor(r.x, r.y, r.width, r.height);
 #else
     glScissor(r.x/g.pixelScale, r.y/g.pixelScale, r.width/g.pixelScale, r.height/g.pixelScale);
