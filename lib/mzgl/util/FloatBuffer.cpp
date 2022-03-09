@@ -578,13 +578,13 @@ void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept
 	}
 #ifdef DEBUG
 	if(isnan((*this)[a*2])) {
-		printf("Nan a*2 - pos: %d, size %d\n", a*2, size());
+		printf("Nan a*2 - pos: %d, size %lu\n", a*2, size());
 	} else if(isnan((*this)[a*2+1])) {
-		printf("Nan a*2+1 - pos: %d, size %d\n", a*2+1, size());
+		printf("Nan a*2+1 - pos: %d, size %lu\n", a*2+1, size());
 	} else if(isnan((*this)[b*2])) {
-		printf("Nan b*2 - pos: %d, size %d\n", b*2, size());
+		printf("Nan b*2 - pos: %d, size %lu\n", b*2, size());
 	} else if(isnan((*this)[b*2+1])) {
-		printf("Nan b*2+1 - pos: %d, size %d\n", b*2+1, size());
+		printf("Nan b*2+1 - pos: %d, size %lu\n", b*2+1, size());
 	}
 #endif
 	L = (*this)[a*2]*(1.f - m) + (*this)[b*2] * m;

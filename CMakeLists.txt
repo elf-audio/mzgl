@@ -5,6 +5,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.18)
 project(mzgl)
 
+# makes clang output colours
+add_compile_options (-fcolor-diagnostics)
 if(ANDROID OR WIN32)
 set(CMAKE_CXX_STANDARD 17)
 else()
