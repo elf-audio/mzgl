@@ -10,24 +10,10 @@
 #include <string>
 #include <memory>
 #include <vector>
-
-
 #include "mzOpenGL.h"
-
-
-
-
-
-
-
-
-
-
-
+#include "Image.h"
 
 #include "Rectf.h"
-
-
 
 class Graphics;
 class Texture;
@@ -55,7 +41,12 @@ public:
 	static TextureRef create(const std::vector<unsigned char> &pngData) {
 		return TextureRef(new Texture(pngData));
 	}
-	
+	// WARNING - img gets modified inplace if it's an incompatible number of channels
+	static TextureRef create(ImageRef img) {
+		auto tex = TextureRef(new Texture());
+		tex->loadFromPixels(img->data, img->width, img->height, img->numChannels, img->bytesPerChannel, img->isFloat);
+		return tex;
+	}
 	
 	void enableWrap(bool wrapX = true, bool wrapY = true);
 	
@@ -64,7 +55,7 @@ public:
 	void deallocate();
 	bool load(const std::string &imgFilePath);
 
-		int width  = 0;
+	int width  = 0;
 	int height = 0;
 	GLuint getId() { return textureID; }
 	// TODO: this owns thing is a bit messy, surely we want shared_ptr

@@ -158,7 +158,7 @@ int nsEventToKey(NSEvent *evt) {
 
 - (void) magnifyWithEvent: (NSEvent*) event { // Trackpad pinch gesture
 	NSEventDispatcher::instance().dispatch(event, self);
-	
+
 	if(event.phase==NSEventPhaseChanged) {
 		float zoom = event.magnification;
 		float pixelScale = eventDispatcher->app->g.pixelScale;

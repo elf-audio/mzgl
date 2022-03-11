@@ -34,7 +34,7 @@
 
 			NSOpenGLPFAOpenGLProfile,
 	#ifdef MZGL_GL2
-			NSOpenGLProfileVersionLegacy,
+            NSOpenGLProfileVersionLegacy,
 	#else
 			NSOpenGLProfileVersion4_1Core,
 	#endif

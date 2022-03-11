@@ -350,7 +350,8 @@ if(ANDROID)
 	)
 
 elseif(APPLE)
-	add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
+	# MZGL_GL2
+	add_compile_definitions(GL_SILENCE_DEPRECATION  MZGL_MAC_GLFW __MACOSX_CORE__)
 	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia")
 
 elseif(WIN32)

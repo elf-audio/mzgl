@@ -208,10 +208,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     // on linux window is really small, so lets bump it up.
     graphics.width *= graphics.pixelScale;
     graphics.height *= graphics.pixelScale;
-
+	
 	glfwWindowHint(GLFW_SAMPLES, 16);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    
+    // this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
 
     window = glfwCreateWindow(graphics.width/graphics.pixelScale, graphics.height/graphics.pixelScale, "mzgl", NULL, NULL);
@@ -222,6 +225,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	app->windowHandle = window;
 
 #ifdef __linux__
     gtk_init(&argc, &argv);
