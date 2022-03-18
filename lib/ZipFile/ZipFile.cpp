@@ -41,7 +41,7 @@ bool ZipFile::zip(const fs::path &dirToZip, const fs::path &outZipFile, Compress
 }
 
 
-bool ZipFile::zip(const fs::path &dirToZip, std::vector<unsigned char> &outZipData, Compression compression) {
+bool ZipFile::zip(const fs::path &dirToZip, std::vector<uint8_t> &outZipData, Compression compression) {
 	Zipper zipper(outZipData);
 	return addFilesToZipAndClose(zipper, dirToZip, compression);
 }
@@ -51,7 +51,7 @@ bool ZipFile::unzip(const fs::path &zipFile, const fs::path &outDir) {
 	return unzipper.extract(outDir.string());
 }
 
-bool ZipFile::unzip(const std::vector<unsigned char> &inZipData, const fs::path &outDir) {
+bool ZipFile::unzip(const std::vector<uint8_t> &inZipData, const fs::path &outDir) {
 	// have to unconst it here, not cool but it's not my library
 	Unzipper unzipper((std::vector<unsigned char> &)inZipData);
 	return unzipper.extract(outDir.string());
@@ -79,7 +79,7 @@ bool ZipFile::getTextFileFromZip(const fs::path &pathToZip, const fs::path &file
 
 }
 
-bool ZipFile::getBinaryFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::vector<unsigned char> &data) {
+bool ZipFile::getBinaryFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::vector<uint8_t> &data) {
 	Unzipper unzipper(pathToZip.string());
 	
 	if(unzipper.extractEntryToMemory(filePath.string(), data)) {

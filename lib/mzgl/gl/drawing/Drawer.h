@@ -43,6 +43,7 @@ public:
 	void drawLine(glm::vec2 a, glm::vec2 b);
 	void drawLine(float ax, float ay, float bx, float by);
 	void drawLineStrip(const std::vector<vec2> &strip);
+    void drawLineStrip(const std::vector<vec2> &strip, const std::vector<vec4> &cols);
 	void drawTriangleStrip(const std::vector<vec2> &strip);
 	
 	void drawRect(const Rectf &r);

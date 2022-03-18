@@ -28,5 +28,4 @@ public:
 	static void listZip(const fs::path &pathToZip, std::vector<std::string> &fileList);
 	static bool getTextFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::string &outData);
 	static bool getBinaryFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::vector<unsigned char> &data);
-
 };

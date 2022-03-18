@@ -30,6 +30,22 @@ Texture::Texture() {
 
 #include "Image.h"
 
+
+void Texture::setSamplingMethod(Texture::SamplingMethod sampling) {
+    bind();
+    if(sampling==Texture::SamplingMethod::Linear) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    } else if(sampling==Texture::SamplingMethod::Nearest) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    } else {
+        Log::e() << "unknown sampling method";
+    }
+}
+
+
+
 Texture::Texture(const std::vector<unsigned char> &pngData) {
 #ifdef __ANDROID__
 	textures.push_back(this);

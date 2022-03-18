@@ -25,6 +25,12 @@ typedef std::shared_ptr<Texture> TextureRef;
 class Texture {
 public:
 
+    enum class SamplingMethod {
+        Nearest,
+        Linear
+    };
+    
+    void setSamplingMethod(SamplingMethod sampling);
 	static TextureRef create(GLuint textureID = 0, int width = 0, int height = 0) {
 		return TextureRef(new Texture(textureID, width, height));
 	}

@@ -93,7 +93,22 @@ set(MZGL_SOURCES
 	lib/mzgl/util/log.cpp
 	lib/mzgl/util/maths.cpp
 	lib/mzgl/util/util.cpp
-	lib/mzgl/util/ZipFile.cpp
+	lib/mzgl/app/glfw/GLFWAppRunner.cpp
+	
+
+	$<$<PLATFORM_ID:Darwin>:
+		lib/mzgl/audio/AudioFileApple.cpp
+		lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
+		lib/mzgl/midi/appleMidiUtils.cpp
+		lib/mzgl/app/mac/MacAppDelegate.mm
+		lib/mzgl/app/mac/MacMenuBar.mm
+		lib/mzgl/app/mac/EventsView.mm
+		lib/mzgl/app/mac/GL/MZGLView.mm
+		lib/mzgl/app/mac/LayerExplorer.mm
+		lib/mzgl/app/mac/TextConsole.mm
+		lib/mzgl/app/mac/mainMac.mm
+		lib/mzgl/app/apple/MZGLWebView.mm
+	>
 )
 
 
@@ -108,6 +123,7 @@ set(HEADERS
 	lib/mzgl
 	lib/mzgl/animation
 	lib/mzgl/app/android
+	lib/mzgl/app/apple
 	lib/mzgl/app/mac
 	lib/mzgl/app/mac/GL
 	lib/mzgl/app/glfw
@@ -132,8 +148,6 @@ set(HEADERS
 	lib/rtmidi
 	lib/pugixml/src
 	lib/misc
-	lib/zipper/zipper
-    lib/zipper/minizip
 	lib/yoga
 )
 
@@ -162,22 +176,12 @@ set(BOOST_SOURCES
     lib/boost/src/filesystem/portability.cpp
 )
 
-set(ZIPPER_SOURCES
-	lib/zipper/minizip/ioapi_buf.c
-	lib/zipper/minizip/ioapi_mem.c
-	lib/zipper/minizip/ioapi.c
-	lib/zipper/minizip/unzip.c
-	lib/zipper/minizip/zip.c
-	lib/zipper/zipper/CDirEntry.cpp
-	lib/zipper/zipper/tools.cpp
-	lib/zipper/zipper/unzipper.cpp
-	lib/zipper/zipper/zipper.cpp
- )
 
-if(WIN32)
-	list(APPEND ZIPPER_SOURCES lib/zipper/minizip/iowin32.c)
-	list(APPEND HEADERS lib/zipper/zipper/tps)
-endif()
+# need to move to ZipFile CMakeLists
+# if(WIN32)
+# 	list(APPEND ZIPPER_SOURCES lib/zipper/minizip/iowin32.c)
+# 	list(APPEND HEADERS lib/zipper/zipper/tps)
+# endif()
 
 option(MZGL_UNIT_TEST "should this be a unit testing build - omits a main, so catch2 can take control" OFF)
 
@@ -188,12 +192,12 @@ endif(MZGL_UNIT_TEST)
 
 
 
-add_library(zipper STATIC ${ZIPPER_SOURCES})
+# add_library(zipper STATIC ${ZIPPER_SOURCES})
 add_library(boostfs STATIC ${BOOST_SOURCES})
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pugixml OBJECT lib/pugixml/src/pugixml.cpp)
 
-
+add_subdirectory(lib/ZipFile)
 # add_dependencies(libmzgl pugixml)
 
 # set(OPENSSL_BRANCH OpenSSL_1_1_1m)
@@ -203,16 +207,7 @@ add_library(pugixml OBJECT lib/pugixml/src/pugixml.cpp)
 
 # Apple platforms have a special audio file reader
 if(APPLE) 
-	list(APPEND MZGL_SOURCES 
-		lib/mzgl/audio/AudioFileApple.cpp
-		lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
-		lib/mzgl/midi/appleMidiUtils.cpp
-		lib/mzgl/app/mac/MacMenuBar.mm
-		lib/mzgl/app/mac/EventsView.mm
-		lib/mzgl/app/mac/GL/MZGLView.mm
-		lib/mzgl/app/mac/LayerExplorer.mm
-		lib/mzgl/app/mac/TextConsole.mm
-	)
+	
 
 	# these are the files that have objective-c in them
 	set_source_files_properties(
@@ -237,10 +232,15 @@ if(ANDROID)
 	)
 else()
 	list(APPEND MZGL_SOURCES
-		lib/mzgl/app/glfw/GLFWAppRunner.cpp
 		lib/mzgl/audio/portaudio/PortAudioSystem.cpp
-		lib/mzgl/app/glfw/mainGlfw.cpp
 	)
+
+	if(NOT APPLE)
+		list(APPEND MZGL_SOURCES
+			lib/mzgl/app/glfw/mainGlfw.cpp
+		)
+	endif()
+
 endif()
 
 if(WIN32)
@@ -251,13 +251,11 @@ if(WIN32)
 			lib/mzgl/util/winUtil.cpp
 			lib/mzgl/util/AlignedAllocator.cpp
 	)
-	list(APPEND HEADERS
-			lib/zipper/zipper/tps)
+	#moved to ZipFile CMakeLists
+	# list(APPEND HEADERS
+	# 		lib/zipper/zipper/tps)
 
-	list(APPEND ZIPPER_SOURCES
-				lib/zipper/zipper/tps/dirent.c)
 endif()
-
 
 
 if(LINUX)
@@ -277,7 +275,7 @@ target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 
 set(MZGL_LIBS
-	zipper 
+	ZipFile 
  	boostfs 
 	yoga 
 	pugixml
@@ -351,8 +349,9 @@ if(ANDROID)
 
 elseif(APPLE)
 	# MZGL_GL2
-	add_compile_definitions(GL_SILENCE_DEPRECATION  MZGL_MAC_GLFW __MACOSX_CORE__)
-	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia")
+	#MZGL_MAC_GLFW
+	add_compile_definitions(GL_SILENCE_DEPRECATION   __MACOSX_CORE__)
+	target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit")
 
 elseif(WIN32)
 

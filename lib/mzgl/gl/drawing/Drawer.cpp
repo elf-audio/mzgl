@@ -128,9 +128,19 @@ void Drawer::drawLine(float ax, float ay, float bx, float by) {
 }
 
 void Drawer::drawLineStrip(const vector<vec2> &strip) {
-	lineDrawer.thickness = strokeWeight;
-	int numVerts = lineDrawer.getVerts(strip, geom.verts, geom.indices);
-	geom.cols.insert(geom.cols.end(), numVerts, color);
+    lineDrawer.thickness = strokeWeight;
+    int numVerts = lineDrawer.getVerts(strip, geom.verts, geom.indices);
+    geom.cols.insert(geom.cols.end(), numVerts, color);
+}
+
+void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) {
+    lineDrawer.thickness = strokeWeight;
+    int numVerts = lineDrawer.getVerts(strip, geom.verts, geom.indices);
+    for(const auto & a : cols) {
+        geom.cols.push_back(a);
+        geom.cols.push_back(a);
+    }
+    geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
 }
 
 

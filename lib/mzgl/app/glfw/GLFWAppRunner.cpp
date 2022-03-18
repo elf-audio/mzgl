@@ -102,7 +102,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	mouseX = xpos*g.pixelScale;
 	mouseY = ypos*g.pixelScale;
 	if(!mouseIsDown) {
-		getEventDispatcher(window)->touchOver(mouseX, mouseY*0.1);
+		getEventDispatcher(window)->touchOver(mouseX, mouseY);
 
 	} else {
 		for(int i = 0; i < buttons.size(); i++) {
