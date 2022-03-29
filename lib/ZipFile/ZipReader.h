@@ -26,8 +26,9 @@ public:
 		Entry() : valid(false) {}
 	};
 	std::vector<Entry> listEntries() const { return entries; }
+	std::string zipPath;
+
 private:
-    std::string zipPath;
 //	void printTextFile(const Entry &e);
 //	void seekToEntry(const Entry &e);
 	
@@ -55,6 +56,8 @@ public:
     bool seek(int offset, SeekOrigin origin = SeekOrigin::Start);
     size_t read(std::vector<int8_t> &d);
     size_t read(int8_t *d, uint32_t sz);
+	
+	void extract(const std::string &path);
 private:
     std::ifstream zip;
 };

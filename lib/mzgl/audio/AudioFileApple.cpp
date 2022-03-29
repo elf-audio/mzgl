@@ -186,8 +186,6 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	printf("sr: %d    numchans: %d\n", newSampleRate, *outNumChannels);
 	
 	
-	
-	
 	AudioStreamBasicDescription audioFormat;
 	audioFormat.mSampleRate = newSampleRate;
 	audioFormat.mFormatID = kAudioFormatLinearPCM;

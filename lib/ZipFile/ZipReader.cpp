@@ -121,6 +121,16 @@ size_t ZipReaderFile::read(std::vector<int8_t> &d) {
 
 
 
+void ZipReaderFile::extract(const std::string &path) {
+	seek(0);
+	std::ofstream f(path, std::ios_base::binary);
+	std::vector<int8_t> buff(4096);
+	while(1) {
+		auto amountRead = read(buff);
+		f.write((char*)buff.data(), amountRead);
+		if(amountRead!=buff.size()) break;
+	}
+}
 
 
 ZipEndOfCD readEndOfCD(std::ifstream &zip) {
