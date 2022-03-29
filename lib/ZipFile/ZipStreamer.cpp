@@ -20,7 +20,7 @@ void ZipStreamer::close() {
 	}
 }
 
-bool ZipStreamer::open(const std::string& zipFile, const std::string &pathInZip) {
+bool ZipStreamer::open(const std::string& zipFile) {
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
 	fill_win32_filefunc64A(&ffunc);
@@ -29,12 +29,15 @@ bool ZipStreamer::open(const std::string& zipFile, const std::string &pathInZip)
 	m_zf = unzOpen64(zipFile.c_str());
 #endif
 	if(m_zf == NULL) return false;
-
+	return true;
+}
+bool ZipStreamer::openFile(const std::string &pathInZip) {
 
 	if(unzLocateFile(m_zf, pathInZip.c_str(), nullptr)!=UNZ_OK) {
 		printf("Failed to locate\n");
 		return false;
 	}
+	
 	int raw = 0;
 	int method = 0;
 	if(unzOpenCurrentFile2(m_zf, &method, nullptr, raw)!=UNZ_OK) {

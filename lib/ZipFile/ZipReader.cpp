@@ -70,8 +70,54 @@ struct ZipCDEntry {
 
 
 
+ZipReaderFile::ZipReaderFile(const std::string &zipPath, const ZipReader::Entry &entry) {
+    zip.open(zipPath, std::ios::binary);
+    if(!zip.good()) {
+        printf("Can't read file");
+        throw std::runtime_error("Can't read zip file '"+zipPath+"'");
+    }
+    
+    zip.seekg(entry.offset + 26);
+    int16_t fnExtraLength[2];
+    zip.read((char*)fnExtraLength, 4);
+
+    fileStart = entry.offset + 30 + fnExtraLength[0] + fnExtraLength[1];
+    fileSize = entry.size;
+    zip.seekg(fileStart);
+}
+
+bool ZipReaderFile::seek(int offset, SeekOrigin origin) {
+    if(origin==SeekOrigin::Start) {
+        if(offset<0 || offset>=fileSize) return false;
+        zip.seekg(fileStart + offset);
+    } else if(origin==SeekOrigin::Current) {
+        int absolute = (int)zip.tellg() - fileStart;
+        if(absolute<0 || absolute>=fileSize) return false;
+        zip.seekg(offset, std::ios_base::cur);
+    } else {
+        throw std::runtime_error("Unknown seek origin in ZipReader");
+    }
+
+    return true;
+}
 
 
+size_t ZipReaderFile::read(int8_t *d, uint32_t sz) {
+    int pos = (int)zip.tellg() - fileStart;
+    if(fileSize - pos >= sz) {
+        zip.read((char*)d, sz);
+    } else if(pos>=fileSize) {
+        return 0;
+    } else {
+        zip.read((char*)d, fileSize - pos);
+    }
+    return zip.gcount();
+}
+
+
+size_t ZipReaderFile::read(std::vector<int8_t> &d) {
+    return read(d.data(), d.size());
+}
 
 
 
@@ -141,10 +187,10 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 
 
 
-
-
 ZipReader::ZipReader(const std::string &path) {
-	zip.open(path, std::ios::binary);
+    this->zipPath = path;
+    std::ifstream zip;
+	zip.open(zipPath, std::ios::binary);
 	if(!zip.good()) {
 		printf("Can't read file");
 		throw std::runtime_error("Can't read zip file '"+path+"'");
@@ -154,59 +200,24 @@ ZipReader::ZipReader(const std::string &path) {
 }
 
 
-bool ZipReader::open(std::string pathInZip) {
+std::shared_ptr<ZipReaderFile> ZipReader::open(std::string pathInZip) {
 	auto currEntry = findEntry(pathInZip);
-	if(!currEntry.valid) return false;
-	seekToEntry(currEntry);
-	return true;
+	if(!currEntry.valid) return nullptr;
+//	seekToEntry(currEntry);
+	return std::make_shared<ZipReaderFile>(zipPath, currEntry);
 	
 }
 
-bool ZipReader::seek(int offset, SeekOrigin origin) {
-	if(origin==SeekOrigin::Start) {
-		if(offset<0 || offset>=currEntryLength) return false;
-		zip.seekg(currEntryStart + offset);
-	} else if(origin==SeekOrigin::Current) {
-		int absolute = (int)zip.tellg() - currEntryStart;
-		if(absolute<0 || absolute>=currEntryLength) return false;
-		zip.seekg(offset, std::ios_base::cur);
-	} else {
-		throw std::runtime_error("Unknown seek origin in ZipReader");
-	}
-
-	return true;
-}
 
 
 
-
-size_t ZipReader::read(int8_t *d, uint32_t sz) {
-    int pos = (int)zip.tellg() - currEntryStart;
-
-
-    if(currEntryLength - pos >= sz) {
-        zip.read((char*)d, sz);
-    } else if(pos>=currEntryLength) {
-        return 0;
-    } else {
-        zip.read((char*)d, currEntryLength - pos);
-    }
-    return zip.gcount();
-}
-
-
-size_t ZipReader::read(std::vector<int8_t> &d) {
-    return read(d.data(), d.size());
-}
-
-
-
-bool ZipReader::printTextFile(const std::string &path) {
-	auto entry = findEntry(path);
-	if(!entry.valid) return false;
-	printTextFile(entry);
-	return true;
-}
+//
+//bool ZipReader::printTextFile(const std::string &path) {
+//	auto entry = findEntry(path);
+//	if(!entry.valid) return false;
+//	printTextFile(entry);
+//	return true;
+//}
 
 std::vector<std::string> ZipReader::list(bool print) {
 	std::vector<std::string> ret;
@@ -219,31 +230,31 @@ std::vector<std::string> ZipReader::list(bool print) {
 	return ret;
 }
 
+//
+//void ZipReader::printTextFile(const Entry &e) {
+//
+//	seekToEntry(e);
+//	std::vector<int8_t> d(e.size);
+//	read(d);
+//
+//	for(auto c : d) {			
+//		printf("%c", c);
+//	}
+//	printf("\n");
+//}
 
-void ZipReader::printTextFile(const Entry &e) {
 
-	seekToEntry(e);
-	std::vector<int8_t> d(e.size);
-	read(d);
-
-	for(auto c : d) {			
-		printf("%c", c);
-	}
-	printf("\n");
-}
-
-
-void ZipReader::seekToEntry(const Entry &e) {
-	zip.seekg(e.offset + 26);
-	int16_t fnExtraLength[2];
-	zip.read((char*)fnExtraLength, 4);
-
-	int fileStartOffset = e.offset + 30 + fnExtraLength[0] + fnExtraLength[1];
-
-	currEntryStart = fileStartOffset;
-	currEntryLength = e.size;
-	zip.seekg(fileStartOffset);
-}
+//void ZipReader::seekToEntry(const Entry &e) {
+//	zip.seekg(e.offset + 26);
+//	int16_t fnExtraLength[2];
+//	zip.read((char*)fnExtraLength, 4);
+//
+//	int fileStartOffset = e.offset + 30 + fnExtraLength[0] + fnExtraLength[1];
+//
+//	currEntryStart = fileStartOffset;
+//	currEntryLength = e.size;
+//	zip.seekg(fileStartOffset);
+//}
 
 
 ZipReader::Entry ZipReader::findEntry(const std::string &path) {

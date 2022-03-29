@@ -24,8 +24,9 @@ struct ZipStreamer {
 		Start,
 		Current
 	};
-	bool open(const std::string& zipFile, const std::string &pathInZip);
-
+	bool open(const std::string& zipFile);
+	bool openFile(const std::string &pathInZip);
+	
 	size_t read(std::vector<uint8_t> &d);	
 	size_t read(void *d, size_t sz);
 

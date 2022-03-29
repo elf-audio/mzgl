@@ -4264,6 +4264,12 @@
 		EA71A7B727E39E6C0081A5CB /* ZipStreamer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */; };
 		EA71A7B827E39E6C0081A5CB /* ZipFile.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A70527E39E6B0081A5CB /* ZipFile.h */; };
 		EA71A7B927E39E6C0081A5CB /* ZipFile.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A70527E39E6B0081A5CB /* ZipFile.h */; };
+		EA71FEE727F33B310005C47A /* ZipReader.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71FEE527F33B310005C47A /* ZipReader.h */; };
+		EA71FEE827F33B310005C47A /* ZipReader.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71FEE527F33B310005C47A /* ZipReader.h */; };
+		EA71FEE927F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
+		EA71FEEA27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
+		EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
+		EA71FEEC27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
 		EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
@@ -6652,6 +6658,8 @@
 		EA71A70327E39E6B0081A5CB /* ZipFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipFile.cpp; sourceTree = "<group>"; };
 		EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipStreamer.cpp; sourceTree = "<group>"; };
 		EA71A70527E39E6B0081A5CB /* ZipFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipFile.h; sourceTree = "<group>"; };
+		EA71FEE527F33B310005C47A /* ZipReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipReader.h; sourceTree = "<group>"; };
+		EA71FEE627F33B310005C47A /* ZipReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipReader.cpp; sourceTree = "<group>"; };
 		EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HierarchicalScrollingList.cpp; sourceTree = "<group>"; };
 		EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HierarchicalScrollingList.h; sourceTree = "<group>"; };
 		EA7855622472DBF40072FD05 /* nanovg_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl.h; sourceTree = "<group>"; };
@@ -10578,6 +10586,8 @@
 			isa = PBXGroup;
 			children = (
 				EA71A6A827E39E6B0081A5CB /* CMakeLists.txt */,
+				EA71FEE627F33B310005C47A /* ZipReader.cpp */,
+				EA71FEE527F33B310005C47A /* ZipReader.h */,
 				EA71A6A927E39E6B0081A5CB /* ZipStreamer.h */,
 				EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */,
 				EA71A6AA27E39E6B0081A5CB /* lib */,
@@ -13031,6 +13041,7 @@
 				EA183EB92432C18D00A5C3E8 /* replace.hpp in Headers */,
 				EA183F212432C18D00A5C3E8 /* wstringize.hpp in Headers */,
 				EA183B4C2432C18C00A5C3E8 /* set30_c.hpp in Headers */,
+				EA71FEE727F33B310005C47A /* ZipReader.h in Headers */,
 				EA183F532432C18D00A5C3E8 /* stringize.hpp in Headers */,
 				EA183B5D2432C18C00A5C3E8 /* erase_key_impl.hpp in Headers */,
 				EA183E702432C18D00A5C3E8 /* enum_binary_params.hpp in Headers */,
@@ -14989,6 +15000,7 @@
 				EA2B891E24E7093600EA12BD /* reverse_iter_fold_impl.hpp in Headers */,
 				EA2B891F24E7093600EA12BD /* set50_c.hpp in Headers */,
 				EA2B892024E7093600EA12BD /* has_trivial_copy.hpp in Headers */,
+				EA71FEE827F33B310005C47A /* ZipReader.h in Headers */,
 				EA2B892124E7093600EA12BD /* minus.hpp in Headers */,
 				EA2B892224E7093600EA12BD /* YGStyle.h in Headers */,
 				EA2B892324E7093600EA12BD /* always.hpp in Headers */,
@@ -15549,6 +15561,7 @@
 				EAF9A15126F8B42200698263 /* log.cpp in Sources */,
 				EA183FFB2432C18D00A5C3E8 /* MitredLine.cpp in Sources */,
 				EA71A73C27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
+				EA71FEE927F33B310005C47A /* ZipReader.cpp in Sources */,
 				EAF99AC0267A4DE800157A7C /* ScrollingList.cpp in Sources */,
 				EA71A7A027E39E6C0081A5CB /* tools.cpp in Sources */,
 				EA234B0D24A609CA000F057B /* event.cpp in Sources */,
@@ -15642,6 +15655,7 @@
 				EA1841282432C4F300A5C3E8 /* Midi.cpp in Sources */,
 				EA71A7B527E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
+				EA71FEEA27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA3120BD274143F900370205 /* appleMidiUtils.cpp in Sources */,
 				EA1841362432C51E00A5C3E8 /* Slider.cpp in Sources */,
 				EAF99AB6267A415200157A7C /* ScrollingListItem.cpp in Sources */,
@@ -15827,6 +15841,7 @@
 				EA71A79C27E39E6C0081A5CB /* zipper.cpp in Sources */,
 				EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */,
 				EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */,
+				EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA71A7A227E39E6C0081A5CB /* tools.cpp in Sources */,
 				EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */,
 				EA71A73427E39E6C0081A5CB /* ioapi_buf.c in Sources */,
@@ -15902,6 +15917,7 @@
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
 				EA71A73F27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA68945D261C633500F76B91 /* Texture.cpp in Sources */,
+				EA71FEEC27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA689460261C633500F76B91 /* ScrollingList.cpp in Sources */,
 				EA689462261C633500F76B91 /* AudioSystem.cpp in Sources */,
 				EA71A73527E39E6C0081A5CB /* ioapi_buf.c in Sources */,
