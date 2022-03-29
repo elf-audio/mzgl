@@ -7,9 +7,11 @@ project(ZipFile)
 
 
 add_library(ZipFile STATIC
+    ZipFile.h
+    ZipReader.h
     ZipFile.cpp
     ZipStreamer.cpp
-
+    ZipReader.cpp
 )
 option(BUILD_TEST "" OFF)
 add_subdirectory(lib/zipper "zipper-build")

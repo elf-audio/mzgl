@@ -10579,9 +10579,9 @@
 			children = (
 				EA71A6A827E39E6B0081A5CB /* CMakeLists.txt */,
 				EA71A6A927E39E6B0081A5CB /* ZipStreamer.h */,
+				EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */,
 				EA71A6AA27E39E6B0081A5CB /* lib */,
 				EA71A70327E39E6B0081A5CB /* ZipFile.cpp */,
-				EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */,
 				EA71A70527E39E6B0081A5CB /* ZipFile.h */,
 			);
 			path = ZipFile;

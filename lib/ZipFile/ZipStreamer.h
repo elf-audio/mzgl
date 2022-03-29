@@ -13,16 +13,23 @@
 #include "zipper/minizip/zip.h"
 
 
+/**
+ * This class is the old way or reading from zip files - it can't seek - ZipReader is the new version.
+ * Whilst minizip appears to let you seek, I couldn't get it to work properly, so ZipReader is
+ * my own implementation.
+ */
 struct ZipStreamer {
 
-	bool open(const std::string& filename);
-	
-	bool openFile(const std::string &path);
-	
-	size_t read(std::vector<uint8_t> &d);
-	
+	enum class SeekOrigin {
+		Start,
+		Current
+	};
+	bool open(const std::string& zipFile, const std::string &pathInZip);
+
+	size_t read(std::vector<uint8_t> &d);	
 	size_t read(void *d, size_t sz);
-	
+
+
 	void close();
 	~ZipStreamer();
 private:
