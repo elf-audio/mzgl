@@ -45,13 +45,14 @@ endif()
 
 
 
+
 # PRINT EVERYTHING!!!
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(MZGL_SOURCES
 	lib/mzgl/animation/Tween.cpp
-		lib/mzgl/audio/AudioSystem.cpp
-		lib/mzgl/audio/DrAudioFileReader.cpp
+	lib/mzgl/audio/AudioSystem.cpp
+	lib/mzgl/audio/DrAudioFileReader.cpp
 	lib/mzgl/geom/Rectf.cpp
 	lib/mzgl/geom/RoundedRect.cpp
 	lib/mzgl/geom/SVG.cpp
@@ -93,8 +94,7 @@ set(MZGL_SOURCES
 	lib/mzgl/util/log.cpp
 	lib/mzgl/util/maths.cpp
 	lib/mzgl/util/util.cpp
-	lib/mzgl/app/glfw/GLFWAppRunner.cpp
-	
+
 
 	$<$<PLATFORM_ID:Darwin>:
 		lib/mzgl/audio/AudioFileApple.cpp
@@ -110,7 +110,9 @@ set(MZGL_SOURCES
 		lib/mzgl/app/apple/MZGLWebView.mm
 	>
 )
-
+if(NOT ANDROID)
+	list(APPEND MZGL_SOURCES lib/mzgl/app/glfw/GLFWAppRunner.cpp)
+endif()
 
 
 foreach(source IN LISTS MZGL_SOURCES)
