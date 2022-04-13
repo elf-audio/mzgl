@@ -6,7 +6,7 @@
 #include "util.h"
 
 using namespace std;
-
+bool ScopedJniAttachmentBlocker::shouldBlock = false;
 
 struct android_statics {
     std::function<void()> okPressed;
@@ -118,7 +118,9 @@ std::string getAndroidExternalDataPath() {
     if(getAndroidAppPtr()==nullptr) return "";
     return std::string(getAndroidAppPtr()->activity->externalDataPath);
 }
-
+std::string getAndroidExternalStorageDirectory() {
+    return callJNIForString("getExternalStorageDirectory");
+}
 
 void androidLaunchUrl(const std::string &url) {
     callJNI("launchUrl", url);

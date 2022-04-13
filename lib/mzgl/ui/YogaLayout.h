@@ -113,7 +113,7 @@ public:
 	layer(l), attrs(attrs), children(children) {
 		
 	}
-	LayoutNodeCreator(Layer *l, const std::vector<LayoutAttribute> &attrs) :
+	LayoutNodeCreator(Layer *l = nullptr, const std::vector<LayoutAttribute> &attrs = {}) :
 	layer(l), attrs(attrs){
 		
 	}

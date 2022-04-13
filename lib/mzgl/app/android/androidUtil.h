@@ -20,6 +20,7 @@ void listAndroidAssetDir(const std::string &path, std::vector<std::string> &outP
 
 std::string getAndroidInternalDataPath();
 std::string getAndroidExternalDataPath();
+std::string getAndroidExternalStorageDirectory();
 void androidAlertDialog(const std::string &title, const std::string &msg);
 bool androidHasMicPermission();
 void androidConfirmDialog(std::string title, std::string msg,
@@ -87,7 +88,16 @@ void callJNI(std::string methodName, const std::string &arg1, int32_t arg2);
 std::string callJNIForString(std::string methodName);
 std::string callJNIForString(std::string methodName, std::string arg1);
 std::string jstringToString(JNIEnv *jni, jstring text);
-
+class ScopedJniAttachmentBlocker {
+public:
+    ScopedJniAttachmentBlocker() {
+        shouldBlock = true;
+    }
+    ~ScopedJniAttachmentBlocker() {
+        shouldBlock = false;
+    }
+    static bool shouldBlock;
+};
 // these can be nested - if you have a nested scoped jni, only the outer one
 // does anything, and the inner ones are ignored - handy if you need to make
 // a block of Jni calls, so you don't keep having to Attach and DetatchCurrentThread
@@ -99,8 +109,13 @@ public:
         auto *appPtr = getAndroidAppPtr();
         if(appPtr!=nullptr) {
 //            Log::d() << "attaching";
-
-            success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr)==JNI_OK;
+         //   int getEnvStat = appPtr->activity->vm->GetEnv((void**)&jni, JNI_VERSION_1_6);
+       //     if(getEnvStat==JNI_EDETACHED) {
+      // if(!ScopedJniAttachmentBlocker::shouldBlock)
+                success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr) == JNI_OK;
+          //  } else if (getEnvStat == JNI_EVERSION) {
+          //      std::cout << "GetEnv: version not supported" << std::endl;
+          //  }
         }
     }
     JNIEnv *j() {
@@ -124,8 +139,8 @@ public:
     }
     ~ScopedJni() {
 //        Log::d() << "~ScopedJni()";
-        if(success) {
-//            Log::d() << "detatching";
+        if(success && !ScopedJniAttachmentBlocker::shouldBlock) {
+//            Log::d() << "detaching";
             getAndroidAppPtr()->activity->vm->DetachCurrentThread();
             jni = nullptr;
         }

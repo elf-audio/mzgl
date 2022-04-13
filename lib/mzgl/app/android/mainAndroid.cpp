@@ -287,7 +287,11 @@ static void engine_draw_frame(struct engine* engine) {
         }
     }
 
-    eventDispatcher->runFrame();
+    if(eventDispatcher!=nullptr) {
+        eventDispatcher->runFrame();
+    } else {
+        firstFrameAlreadyRendered = false;
+    }
 
     eglSwapBuffers(engine->display, engine->surface);
 }
@@ -546,7 +550,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
                     eventDispatcher->androidDrawLoading();
                     eglSwapBuffers(engine->display, engine->surface);
                }
-                if(clearedUpGLResources) {
+                if(clearedUpGLResources && eventDispatcher!=nullptr) {
 
                     eventDispatcher->resized();
                     eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!

@@ -431,6 +431,26 @@ void setDocsPath(string path) {
 }
 #endif
 
+#ifdef __APPLE__
+#include <os/proc.h>
+#endif
+int64_t getAvailableMemory() {
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+	if (@available(iOS 13.0, *)) {
+	    return os_proc_available_memory();
+	} else {
+		return -1;
+	    
+	}
+#	else
+	return -1;
+#	endif
+#endif
+#ifdef __ANDROID__
+	return androidGetAvailableMemory();
+#endif
+}
 string docsPath(string path) {
 #ifdef UNIT_TEST
 	if(isOverridingDocsPath) {
@@ -1097,7 +1117,7 @@ public:
 				std::string ex = err.what();
 				runOnMainThread([ex]() {
 					Log::e() << "exception in runTask: " << ex;
-					//alertDialog("ERROR", "Got an error: '" + ex + "' - please make a screenshot and report to marek@elf-audio.com");
+					//alertDialog("ERROR", "Got an error: '" + ex + "' - please make a screenshot and report to koala.helpdesk@gmail.com");
 				});
 //				Log::e() << "Unhandled exception on runTask thread '" << err.what() << "'";
 ////				runOnMainThread([&err]() {

@@ -39,6 +39,9 @@ extern std::vector<std::string> commandLineArgs;
 uint64_t getStorageRemainingInBytes();
 std::string byteSizeToString(uint64_t bytes);
 
+// returns -1 if not supported
+int64_t getAvailableMemory();
+
 // on iOS this'll give the launched url
 std::string getLaunchUrl();
 
