@@ -135,6 +135,14 @@ public:
 		app->root->_draw();
 		app->drawAfterUI();
 	}
+
+	void androidOnPause() {
+		app->androidOnPause();
+	}
+
+	void androidOnResume() {
+		app->androidOnResume();
+	}
 	
 //	bool isReady() {return app!=nullptr;}
 	App *app = nullptr;

@@ -614,6 +614,9 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
         case APP_CMD_RESUME:
             Log::d() << "APP_CMD_RESUME";
+            if(eventDispatcher && eventDispatcher->app!=nullptr) {
+                eventDispatcher->androidOnResume();
+            }
             break;
 
         case APP_CMD_DESTROY:
@@ -628,6 +631,9 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
         case APP_CMD_PAUSE:
             Log::d() << "APP_CMD_PAUSE";
+            if(eventDispatcher && eventDispatcher->app!=nullptr) {
+                eventDispatcher->androidOnPause();
+            }
             break;
     }
 }

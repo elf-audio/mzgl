@@ -96,7 +96,8 @@ public:
     
     virtual void androidDrawLoading() {}
     
-    
+    virtual void androidOnPause() {}
+    virtual void androidOnResume() {}
 	// return true if you can open, false if you can't
 	virtual bool canOpenFiles(const std::vector<std::string> &paths) {return false;}
 	
