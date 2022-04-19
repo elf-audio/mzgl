@@ -52,6 +52,8 @@ void androidLaunchUrl(const std::string &url);
 std::string getAndroidTempDir();
 std::vector<std::string> androidGetMidiDeviceNames();
 
+bool androidIsOnWifi();
+
 bool isUsingHeadphones();
 bool isUsingUSBInterface();
 bool isUsingAirplay();

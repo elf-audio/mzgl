@@ -12,8 +12,6 @@
 
 using namespace zipper;
 
-
-
 Zipper::zipFlags ZipFileFlagsToZipperFlags(ZipFile::Compression compression) {
 	switch(compression) {
 		case ZipFile::Compression::SMALLER: return Zipper::zipFlags::Better;
@@ -33,9 +31,7 @@ bool addFilesToZipAndClose(Zipper &zipper, const fs::path &dirToZip, ZipFile::Co
 	return true;
 }
 
-
 bool ZipFile::zip(const fs::path &dirToZip, const fs::path &outZipFile, Compression compression) {
-	
 	Zipper zipper(outZipFile.string());
 	return addFilesToZipAndClose(zipper, dirToZip, compression);
 }

@@ -20,6 +20,9 @@ struct android_statics {
     std::function<void(bool success, string imgPath)> imgDialogCallback;
 } android_statics;
 
+bool androidIsOnWifi() {
+    return callJNIForBoolean("isOnWifi");
+}
 bool isUsingHeadphones() {
     return callJNIForBoolean("isUsingHeadphones");
 }
