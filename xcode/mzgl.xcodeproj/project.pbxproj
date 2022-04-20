@@ -4489,6 +4489,8 @@
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
+		EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
+		EAA59298281065D10068FD7B /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
@@ -15922,6 +15924,7 @@
 				EA689462261C633500F76B91 /* AudioSystem.cpp in Sources */,
 				EA71A73527E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EA689463261C633500F76B91 /* Image.cpp in Sources */,
+				EAA59298281065D10068FD7B /* MZGLEffectAU.mm in Sources */,
 				EA689464261C633500F76B91 /* DateTime.cpp in Sources */,
 				EA71A79727E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
 				EA689465261C633500F76B91 /* YGEnums.cpp in Sources */,
@@ -15971,6 +15974,7 @@
 				EA68948E261C633500F76B91 /* utf8_codecvt_facet.cpp in Sources */,
 				EA68948F261C633500F76B91 /* Layer.cpp in Sources */,
 				EA71A76527E39E6C0081A5CB /* Makefile in Sources */,
+				EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */,
 				EA71A72127E39E6B0081A5CB /* unzip.c in Sources */,
 				EA689490261C633500F76B91 /* AudioFileApple.cpp in Sources */,
 				EA689491261C633500F76B91 /* YGNode.cpp in Sources */,
