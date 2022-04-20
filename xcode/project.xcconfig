@@ -25,8 +25,8 @@ GCC_PREPROCESSOR_DEFINITIONS[config=Release]=$(GL_VERSION)
 // HEADERS
 HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/ZipFile $(MZGLROOT)/lib/ZipFile/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pugixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/glm $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi lib/opt/gzip-hpp/include $(PROJECT_HEADERS) lib/opt/blahdio/blahdio/include lib/opt/blahdio/ext/drlibs lib/opt/libflac/include lib/LibTorch-Lite/install/include/
 HEADER_SEARCH_PATHS[sdk=macosx*] = $(HEADERS_COMMON) 
-HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
-HEADER_SEARCH_PATHS[sdk=iphonesimulator*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare
+HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare $(MZGLROOT)/lib/Audiobus-SDK-3.0.15
+HEADER_SEARCH_PATHS[sdk=iphonesimulator*] = $(HEADERS_COMMON) $(MZGLROOT)/lib/AudioShare $(MZGLROOT)/lib/Audiobus-SDK-3.0.15
 
 
 // LINKER
