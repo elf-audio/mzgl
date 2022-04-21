@@ -4285,6 +4285,10 @@
 		EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81AA632757CBBB009C911E /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
+		EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
+		EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
+		EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
+		EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
 		EA9242A8273EE0C300311C98 /* scoped_ptr.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA92424E273EE0C300311C98 /* scoped_ptr.hpp */; };
 		EA9242A9273EE0C300311C98 /* scoped_ptr.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA92424E273EE0C300311C98 /* scoped_ptr.hpp */; };
 		EA9242AA273EE0C300311C98 /* enable_shared_from.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA92424F273EE0C300311C98 /* enable_shared_from.hpp */; };
@@ -6675,6 +6679,8 @@
 		EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BufferedAudioBus.hpp; sourceTree = "<group>"; };
 		EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AudioUnitViewController.mm; sourceTree = "<group>"; };
 		EA81AA622757CBBB009C911E /* AudioUnitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioUnitViewController.h; sourceTree = "<group>"; };
+		EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReorderableGrid.cpp; sourceTree = "<group>"; };
+		EA8CD3742811A3FA00CD1200 /* ReorderableItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReorderableItem.h; sourceTree = "<group>"; };
 		EA90051826AAB62C00F8634F /* PluginParameter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PluginParameter.h; sourceTree = "<group>"; };
 		EA92424E273EE0C300311C98 /* scoped_ptr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = scoped_ptr.hpp; sourceTree = "<group>"; };
 		EA92424F273EE0C300311C98 /* enable_shared_from.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = enable_shared_from.hpp; sourceTree = "<group>"; };
@@ -10113,7 +10119,9 @@
 		EA1835B52432C18B00A5C3E8 /* widgets */ = {
 			isa = PBXGroup;
 			children = (
+				EA8CD3742811A3FA00CD1200 /* ReorderableItem.h */,
 				EA234ABD24A37022000F057B /* ReorderableGrid.h */,
+				EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */,
 				EA1835B72432C18B00A5C3E8 /* PadGrid.h */,
 				EA1835B82432C18B00A5C3E8 /* PadGrid.cpp */,
 				EA1835BA2432C18B00A5C3E8 /* iOSStyleWidgets.h */,
@@ -15552,6 +15560,7 @@
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
 				EA71A76227E39E6C0081A5CB /* Makefile in Sources */,
 				EA71A78827E39E6C0081A5CB /* entropy.c in Sources */,
+				EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA18400C2432C18D00A5C3E8 /* Vbo.cpp in Sources */,
 				EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */,
 				EA297CAF25C954E600F890AE /* pa_mac_core.c in Sources */,
@@ -15726,6 +15735,7 @@
 				EA71A77D27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA924369274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA71A73327E39E6C0081A5CB /* ioapi_buf.c in Sources */,
+				EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA1841BB2432CCDC00A5C3E8 /* path.cpp in Sources */,
 				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
 				EA18412B2432C4FF00A5C3E8 /* events.cpp in Sources */,
@@ -15807,6 +15817,7 @@
 				EA2B8AF024E7093600EA12BD /* maths.cpp in Sources */,
 				EA2B8AF124E7093600EA12BD /* AudioFileApple.cpp in Sources */,
 				EA2B8AF324E7093600EA12BD /* experiments.cpp in Sources */,
+				EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA2B8AF424E7093600EA12BD /* MacMenuBar.mm in Sources */,
 				EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */,
 				EA2B8AF824E7093600EA12BD /* LayerExplorer.mm in Sources */,
@@ -15961,6 +15972,7 @@
 				EA92436B274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA689480261C633500F76B91 /* path.cpp in Sources */,
 				EA71A76D27E39E6C0081A5CB /* sha1.c in Sources */,
+				EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */,
 				EA689483261C633500F76B91 /* events.cpp in Sources */,
 				EA689485261C633500F76B91 /* Yoga.cpp in Sources */,
