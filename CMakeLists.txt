@@ -72,8 +72,9 @@ set(MZGL_SOURCES
 	lib/mzgl/gl/drawing/MitredLine.cpp
 	lib/mzgl/midi/Midi.cpp
 	lib/mzgl/midi/AllMidiDevices.cpp
-	lib/mzgl/music/NotePattern.cpp
+	# lib/mzgl/music/NotePattern.cpp
 	lib/mzgl/music/scales.cpp
+	lib/mzgl/ui/widgets/ReorderableGrid.cpp
 	lib/mzgl/ui/DropDown.cpp
 	lib/mzgl/ui/Layer.cpp
 	lib/mzgl/ui/Layout.cpp
@@ -139,6 +140,7 @@ set(HEADERS
 	lib/mzgl/midi
 	lib/mzgl/music
 	lib/mzgl/ui
+	lib/mzgl/ui/widgets
 	lib/mzgl/util
 	lib/glm
 	lib
