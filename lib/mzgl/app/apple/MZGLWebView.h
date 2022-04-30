@@ -16,7 +16,7 @@
 
 #import <WebKit/WebKit.h>
 
-@interface MZGLWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate>
+@interface MZGLWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate, NSWindowDelegate>
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
 - (void) shutdown;
 - (void*) getApp;

@@ -29,7 +29,7 @@
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
         
         NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
-        baseURL = [baseURL URLByAppendingPathComponent:@"web"];
+        baseURL = [baseURL URLByAppendingPathComponent:@"www"];
         
 //      NSString *path = [[NSFileManager defaultManager] currentDirectoryPath];
 //      path = [path stringByAppendingString: @"/index.html"];
@@ -37,6 +37,7 @@
 //      NSURL *url = [NSURL fileURLWithPath: path];
         
         NSURL *url = [baseURL URLByAppendingPathComponent:@"index.html"];
+		NSLog(@"%@", url);
         self.UIDelegate = self;
         [self loadFileURL:url allowingReadAccessToURL:baseURL];
 	}
@@ -53,6 +54,21 @@
     [alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) {
         completionHandler();
     }];
+}
+
+- (void)windowDidResize:(NSNotification *)notification {
+	Log::d() << "windowDidResize";
+	NSWindow *window = notification.object;
+	//WIDTH = window.frame.size.width;
+	//HEIGHT = window.frame.size.height;
+	
+	auto w = window.contentLayoutRect.size.width;
+	auto h = window.contentLayoutRect.size.height;
+//	auto pixelScale = [window backingScaleFactor];
+	Log::d() << w << " " << h;
+	self.frame.size = CGSizeMake(w, h);
+	
+	
 }
 
 - (BOOL) acceptsFirstResponder {

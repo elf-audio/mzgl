@@ -16,7 +16,7 @@
 
 #define SVG_CIRCLE_RESOLUTION 3
 #define SVG_CUBIC_RESOLUTION 1
-namespace pugi {
+namespace pu_gi {
 	class xml_node;
 };
 
@@ -83,7 +83,7 @@ private:
 	SVGGroupRef rootGroup;
 	
 	void parseViewBox(std::string s);
-	void parseDefs(const pugi::xml_node &root);
-	void parse(const pugi::xml_node &n, int depth = 0);
+	void parseDefs(const pu_gi::xml_node &root);
+	void parse(const pu_gi::xml_node &n, int depth = 0);
 	
 };

@@ -4481,14 +4481,14 @@
 		EA99490524730DB8004D0DB7 /* nanovg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA99490324730DB7004D0DB7 /* nanovg.cpp */; };
 		EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
 		EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
-		EAA0146A2719825B004E8A3D /* pugiconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pugiconfig.hpp */; };
-		EAA0146B2719825B004E8A3D /* pugiconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pugiconfig.hpp */; };
-		EAA0146C2719825B004E8A3D /* pugixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pugixml.hpp */; };
-		EAA0146D2719825B004E8A3D /* pugixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pugixml.hpp */; };
-		EAA0146E2719825B004E8A3D /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pugixml.cpp */; };
-		EAA0146F2719825B004E8A3D /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pugixml.cpp */; };
-		EAA014702719825B004E8A3D /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pugixml.cpp */; };
-		EAA014712719825B004E8A3D /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pugixml.cpp */; };
+		EAA0146A2719825B004E8A3D /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pu_giconfig.hpp */; };
+		EAA0146B2719825B004E8A3D /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pu_giconfig.hpp */; };
+		EAA0146C2719825B004E8A3D /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pu_gixml.hpp */; };
+		EAA0146D2719825B004E8A3D /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pu_gixml.hpp */; };
+		EAA0146E2719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
+		EAA0146F2719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
+		EAA014702719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
+		EAA014712719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -6776,9 +6776,9 @@
 		EA924367274000E300311C98 /* AllMidiDevices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllMidiDevices.cpp; sourceTree = "<group>"; };
 		EA92436C27400D8800311C98 /* AllMidiDevicesImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesImpl.h; sourceTree = "<group>"; };
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
-		EAA014672719825B004E8A3D /* pugiconfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pugiconfig.hpp; sourceTree = "<group>"; };
-		EAA014682719825B004E8A3D /* pugixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pugixml.hpp; sourceTree = "<group>"; };
-		EAA014692719825B004E8A3D /* pugixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pugixml.cpp; sourceTree = "<group>"; };
+		EAA014672719825B004E8A3D /* pu_giconfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_giconfig.hpp; sourceTree = "<group>"; };
+		EAA014682719825B004E8A3D /* pu_gixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_gixml.hpp; sourceTree = "<group>"; };
+		EAA014692719825B004E8A3D /* pu_gixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pu_gixml.cpp; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAAA590C2755436F00021ACA /* vec4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vec4.hpp; sourceTree = "<group>"; };
@@ -10845,9 +10845,9 @@
 		EAA014662719825B004E8A3D /* src */ = {
 			isa = PBXGroup;
 			children = (
-				EAA014672719825B004E8A3D /* pugiconfig.hpp */,
-				EAA014682719825B004E8A3D /* pugixml.hpp */,
-				EAA014692719825B004E8A3D /* pugixml.cpp */,
+				EAA014672719825B004E8A3D /* pu_giconfig.hpp */,
+				EAA014682719825B004E8A3D /* pu_gixml.hpp */,
+				EAA014692719825B004E8A3D /* pu_gixml.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -11872,7 +11872,7 @@
 				EA183B4B2432C18C00A5C3E8 /* set20.hpp in Headers */,
 				EA18400E2432C18D00A5C3E8 /* Font.h in Headers */,
 				EA1839572432C18C00A5C3E8 /* is_rvalue_reference_msvc10_fix.hpp in Headers */,
-				EAA0146A2719825B004E8A3D /* pugiconfig.hpp in Headers */,
+				EAA0146A2719825B004E8A3D /* pu_giconfig.hpp in Headers */,
 				EA183CB82432C18C00A5C3E8 /* bitxor.hpp in Headers */,
 				EA183B2F2432C18C00A5C3E8 /* distance_fwd.hpp in Headers */,
 				EA1839162432C18C00A5C3E8 /* has_left_shift_assign.hpp in Headers */,
@@ -12546,7 +12546,7 @@
 				EA71A73627E39E6C0081A5CB /* crypt.h in Headers */,
 				EA183BA82432C18C00A5C3E8 /* basic_bind.hpp in Headers */,
 				EA183C782432C18C00A5C3E8 /* and.hpp in Headers */,
-				EAA0146C2719825B004E8A3D /* pugixml.hpp in Headers */,
+				EAA0146C2719825B004E8A3D /* pu_gixml.hpp in Headers */,
 				EA183B072432C18C00A5C3E8 /* list50_c.hpp in Headers */,
 				EA1839E12432C18C00A5C3E8 /* reverse_iterator.hpp in Headers */,
 				EA183FC42432C18D00A5C3E8 /* maths.h in Headers */,
@@ -14072,7 +14072,7 @@
 				EA2B852D24E7093600EA12BD /* inherit.hpp in Headers */,
 				EA2B852E24E7093600EA12BD /* config.hpp in Headers */,
 				EA2B852F24E7093600EA12BD /* insert_impl.hpp in Headers */,
-				EAA0146D2719825B004E8A3D /* pugixml.hpp in Headers */,
+				EAA0146D2719825B004E8A3D /* pu_gixml.hpp in Headers */,
 				EA2B853024E7093600EA12BD /* YGNodePrint.h in Headers */,
 				EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */,
 				EA2B853324E7093600EA12BD /* deduce_r.hpp in Headers */,
@@ -14786,7 +14786,7 @@
 				EA64AD8926A1C03A001427AD /* MZGLWebView.h in Headers */,
 				EA2B883624E7093600EA12BD /* is_member_pointer.hpp in Headers */,
 				EA2B883724E7093600EA12BD /* reverse_fold_impl.hpp in Headers */,
-				EAA0146B2719825B004E8A3D /* pugiconfig.hpp in Headers */,
+				EAA0146B2719825B004E8A3D /* pu_giconfig.hpp in Headers */,
 				EA2B883824E7093600EA12BD /* reverse1.hpp in Headers */,
 				EA9242FB273EE0C300311C98 /* lightweight_thread.hpp in Headers */,
 				EA2B883924E7093600EA12BD /* to_array.hpp in Headers */,
@@ -15554,7 +15554,7 @@
 				EA183FB72432C18D00A5C3E8 /* MacAppDelegate.mm in Sources */,
 				EA234AF024A609CA000F057B /* YGLayout.cpp in Sources */,
 				EA183FCA2432C18D00A5C3E8 /* events.cpp in Sources */,
-				EAA0146E2719825B004E8A3D /* pugixml.cpp in Sources */,
+				EAA0146E2719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA234B1324A611AF000F057B /* ylog.cpp in Sources */,
 				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
@@ -15692,7 +15692,7 @@
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
 				EA234B1424A611AF000F057B /* ylog.cpp in Sources */,
 				EA1841192432C4A500A5C3E8 /* SvgVbo.cpp in Sources */,
-				EAA0146F2719825B004E8A3D /* pugixml.cpp in Sources */,
+				EAA0146F2719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
 				EA1841182432C4A500A5C3E8 /* Shader.cpp in Sources */,
 				EA18411E2432C4C500A5C3E8 /* SVG.cpp in Sources */,
@@ -15834,7 +15834,7 @@
 				EA2B8B0024E7093600EA12BD /* error.cpp in Sources */,
 				EA2B8B0224E7093600EA12BD /* Yoga.cpp in Sources */,
 				EA2B8B0424E7093600EA12BD /* path_traits.cpp in Sources */,
-				EAA014702719825B004E8A3D /* pugixml.cpp in Sources */,
+				EAA014702719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA2B8B0624E7093600EA12BD /* scales.cpp in Sources */,
 				EA71A72A27E39E6B0081A5CB /* Makefile in Sources */,
 				EA2B8B0724E7093600EA12BD /* Camera.cpp in Sources */,
@@ -15924,7 +15924,7 @@
 				EA689454261C633500F76B91 /* Font.cpp in Sources */,
 				EA689455261C633500F76B91 /* ylog.cpp in Sources */,
 				EA689457261C633500F76B91 /* SvgVbo.cpp in Sources */,
-				EAA014712719825B004E8A3D /* pugixml.cpp in Sources */,
+				EAA014712719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA689458261C633500F76B91 /* Layout.cpp in Sources */,
 				EA68945B261C633500F76B91 /* Shader.cpp in Sources */,
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
