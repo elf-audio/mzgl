@@ -66,7 +66,11 @@
 	auto h = window.contentLayoutRect.size.height;
 //	auto pixelScale = [window backingScaleFactor];
 	Log::d() << w << " " << h;
-	self.frame.size = CGSizeMake(w, h);
+	
+	NSRect f = self.frame;
+	f.size = CGSizeMake(w, h);;
+	self.frame = f;
+
 	
 	
 }

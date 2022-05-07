@@ -4481,14 +4481,6 @@
 		EA99490524730DB8004D0DB7 /* nanovg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA99490324730DB7004D0DB7 /* nanovg.cpp */; };
 		EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
 		EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
-		EAA0146A2719825B004E8A3D /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pu_giconfig.hpp */; };
-		EAA0146B2719825B004E8A3D /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014672719825B004E8A3D /* pu_giconfig.hpp */; };
-		EAA0146C2719825B004E8A3D /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pu_gixml.hpp */; };
-		EAA0146D2719825B004E8A3D /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAA014682719825B004E8A3D /* pu_gixml.hpp */; };
-		EAA0146E2719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
-		EAA0146F2719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
-		EAA014702719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
-		EAA014712719825B004E8A3D /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA014692719825B004E8A3D /* pu_gixml.cpp */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -4499,6 +4491,14 @@
 		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
+		EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
+		EAD177A9282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
+		EAD177AA282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
+		EAD177AB282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
+		EAD177AC282732A900E2AAE6 /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAD177A6282732A900E2AAE6 /* pu_giconfig.hpp */; };
+		EAD177AD282732A900E2AAE6 /* pu_giconfig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAD177A6282732A900E2AAE6 /* pu_giconfig.hpp */; };
+		EAD177AE282732A900E2AAE6 /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAD177A7282732A900E2AAE6 /* pu_gixml.hpp */; };
+		EAD177AF282732A900E2AAE6 /* pu_gixml.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EAD177A7282732A900E2AAE6 /* pu_gixml.hpp */; };
 		EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAD82ECA269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAD82ECB269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
@@ -6486,7 +6486,6 @@
 		EA1836432432C18B00A5C3E8 /* App.h.gch */ = {isa = PBXFileReference; lastKnownFileType = file; path = App.h.gch; sourceTree = "<group>"; };
 		EA1836902432C18B00A5C3E8 /* AudioShareSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioShareSDK.m; sourceTree = "<group>"; };
 		EA1836912432C18B00A5C3E8 /* AudioShareSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioShareSDK.h; sourceTree = "<group>"; };
-		EA1836962432C18B00A5C3E8 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		EA1836982432C18B00A5C3E8 /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_truetype.h; sourceTree = "<group>"; };
 		EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl3corefontstash.h; sourceTree = "<group>"; };
 		EA18369A2432C18B00A5C3E8 /* fontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstash.h; sourceTree = "<group>"; };
@@ -6776,9 +6775,6 @@
 		EA924367274000E300311C98 /* AllMidiDevices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllMidiDevices.cpp; sourceTree = "<group>"; };
 		EA92436C27400D8800311C98 /* AllMidiDevicesImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesImpl.h; sourceTree = "<group>"; };
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
-		EAA014672719825B004E8A3D /* pu_giconfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_giconfig.hpp; sourceTree = "<group>"; };
-		EAA014682719825B004E8A3D /* pu_gixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_gixml.hpp; sourceTree = "<group>"; };
-		EAA014692719825B004E8A3D /* pu_gixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pu_gixml.cpp; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAAA590C2755436F00021ACA /* vec4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vec4.hpp; sourceTree = "<group>"; };
@@ -7211,6 +7207,16 @@
 		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
 		EACEB2E324DB81A400BF4D1A /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
+		EAD1779B282732A900E2AAE6 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		EAD1779C282732A900E2AAE6 /* .codecov.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .codecov.yml; sourceTree = "<group>"; };
+		EAD1779D282732A900E2AAE6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		EAD1779E282732A900E2AAE6 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		EAD177A1282732A900E2AAE6 /* build.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = build.yml; sourceTree = "<group>"; };
+		EAD177A2282732A900E2AAE6 /* .gitattributes */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitattributes; sourceTree = "<group>"; };
+		EAD177A3282732A900E2AAE6 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pu_gixml.cpp; sourceTree = "<group>"; };
+		EAD177A6282732A900E2AAE6 /* pu_giconfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_giconfig.hpp; sourceTree = "<group>"; };
+		EAD177A7282732A900E2AAE6 /* pu_gixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_gixml.hpp; sourceTree = "<group>"; };
 		EAD47FB125892D4100D2172A /* ThreadPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
 		EAD82EC7269CA18000861BE3 /* Dialogs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Dialogs.h; sourceTree = "<group>"; };
 		EAD82EC8269CA19400861BE3 /* Dialogs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp.preprocessed; fileEncoding = 4; path = Dialogs.cpp; sourceTree = "<group>"; };
@@ -7296,8 +7302,8 @@
 				EA182DC82432C18800A5C3E8 /* rtmidi */,
 				EA182DCF2432C18800A5C3E8 /* boost */,
 				EA18368F2432C18B00A5C3E8 /* AudioShare */,
-				EA1836922432C18B00A5C3E8 /* pugixml */,
 				EA1836972432C18B00A5C3E8 /* fontstash */,
+				EAD1779A282732A900E2AAE6 /* pu_gixml */,
 				EA71A6A727E39E6B0081A5CB /* ZipFile */,
 			);
 			name = lib;
@@ -10371,15 +10377,6 @@
 			path = AudioShare;
 			sourceTree = "<group>";
 		};
-		EA1836922432C18B00A5C3E8 /* pugixml */ = {
-			isa = PBXGroup;
-			children = (
-				EAA014662719825B004E8A3D /* src */,
-				EA1836962432C18B00A5C3E8 /* readme.txt */,
-			);
-			path = pugixml;
-			sourceTree = "<group>";
-		};
 		EA1836972432C18B00A5C3E8 /* fontstash */ = {
 			isa = PBXGroup;
 			children = (
@@ -10840,16 +10837,6 @@
 				EA924297273EE0C300311C98 /* sp_counted_base_snc_ps3.hpp */,
 			);
 			path = detail;
-			sourceTree = "<group>";
-		};
-		EAA014662719825B004E8A3D /* src */ = {
-			isa = PBXGroup;
-			children = (
-				EAA014672719825B004E8A3D /* pu_giconfig.hpp */,
-				EAA014682719825B004E8A3D /* pu_gixml.hpp */,
-				EAA014692719825B004E8A3D /* pu_gixml.cpp */,
-			);
-			path = src;
 			sourceTree = "<group>";
 		};
 		EAAA54B02755436D00021ACA /* glm */ = {
@@ -11332,6 +11319,47 @@
 				EAAA5ABB2755437000021ACA /* type_aligned.hpp */,
 			);
 			path = gtx;
+			sourceTree = "<group>";
+		};
+		EAD1779A282732A900E2AAE6 /* pu_gixml */ = {
+			isa = PBXGroup;
+			children = (
+				EAD1779B282732A900E2AAE6 /* CMakeLists.txt */,
+				EAD1779C282732A900E2AAE6 /* .codecov.yml */,
+				EAD1779D282732A900E2AAE6 /* README.md */,
+				EAD1779E282732A900E2AAE6 /* .gitignore */,
+				EAD1779F282732A900E2AAE6 /* .github */,
+				EAD177A2282732A900E2AAE6 /* .gitattributes */,
+				EAD177A3282732A900E2AAE6 /* readme.txt */,
+				EAD177A4282732A900E2AAE6 /* src */,
+			);
+			path = pu_gixml;
+			sourceTree = "<group>";
+		};
+		EAD1779F282732A900E2AAE6 /* .github */ = {
+			isa = PBXGroup;
+			children = (
+				EAD177A0282732A900E2AAE6 /* workflows */,
+			);
+			path = .github;
+			sourceTree = "<group>";
+		};
+		EAD177A0282732A900E2AAE6 /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				EAD177A1282732A900E2AAE6 /* build.yml */,
+			);
+			path = workflows;
+			sourceTree = "<group>";
+		};
+		EAD177A4282732A900E2AAE6 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */,
+				EAD177A6282732A900E2AAE6 /* pu_giconfig.hpp */,
+				EAD177A7282732A900E2AAE6 /* pu_gixml.hpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -11872,7 +11900,6 @@
 				EA183B4B2432C18C00A5C3E8 /* set20.hpp in Headers */,
 				EA18400E2432C18D00A5C3E8 /* Font.h in Headers */,
 				EA1839572432C18C00A5C3E8 /* is_rvalue_reference_msvc10_fix.hpp in Headers */,
-				EAA0146A2719825B004E8A3D /* pu_giconfig.hpp in Headers */,
 				EA183CB82432C18C00A5C3E8 /* bitxor.hpp in Headers */,
 				EA183B2F2432C18C00A5C3E8 /* distance_fwd.hpp in Headers */,
 				EA1839162432C18C00A5C3E8 /* has_left_shift_assign.hpp in Headers */,
@@ -12546,7 +12573,6 @@
 				EA71A73627E39E6C0081A5CB /* crypt.h in Headers */,
 				EA183BA82432C18C00A5C3E8 /* basic_bind.hpp in Headers */,
 				EA183C782432C18C00A5C3E8 /* and.hpp in Headers */,
-				EAA0146C2719825B004E8A3D /* pu_gixml.hpp in Headers */,
 				EA183B072432C18C00A5C3E8 /* list50_c.hpp in Headers */,
 				EA1839E12432C18C00A5C3E8 /* reverse_iterator.hpp in Headers */,
 				EA183FC42432C18D00A5C3E8 /* maths.h in Headers */,
@@ -13264,6 +13290,7 @@
 				EA183D282432C18C00A5C3E8 /* apply_fwd.hpp in Headers */,
 				EA183E2D2432C18D00A5C3E8 /* vector40.hpp in Headers */,
 				EA183BD02432C18C00A5C3E8 /* full_lambda.hpp in Headers */,
+				EAD177AC282732A900E2AAE6 /* pu_giconfig.hpp in Headers */,
 				EA9242EA273EE0C300311C98 /* atomic_count.hpp in Headers */,
 				EA183BC62432C18C00A5C3E8 /* deque.hpp in Headers */,
 				EA183C752432C18C00A5C3E8 /* unpack_args.hpp in Headers */,
@@ -13365,6 +13392,7 @@
 				EA183E742432C18D00A5C3E8 /* enum_trailing_binary_params.hpp in Headers */,
 				EA924330273EE0C300311C98 /* sp_counted_base_gcc_ia64.hpp in Headers */,
 				EA183A612432C18C00A5C3E8 /* logical.hpp in Headers */,
+				EAD177AE282732A900E2AAE6 /* pu_gixml.hpp in Headers */,
 				EA1839362432C18C00A5C3E8 /* has_bit_and.hpp in Headers */,
 				EA183E6C2432C18D00A5C3E8 /* for.hpp in Headers */,
 				EA183E3C2432C18D00A5C3E8 /* vector10.hpp in Headers */,
@@ -13679,6 +13707,7 @@
 				EA2B838724E7093600EA12BD /* enum_shifted_binary_params.hpp in Headers */,
 				EA2B838824E7093600EA12BD /* full_lambda.hpp in Headers */,
 				EA2B838924E7093600EA12BD /* partition.hpp in Headers */,
+				EAD177AF282732A900E2AAE6 /* pu_gixml.hpp in Headers */,
 				EA2B838A24E7093600EA12BD /* elem.hpp in Headers */,
 				EA2B838B24E7093600EA12BD /* remove_extent.hpp in Headers */,
 				EA2B838C24E7093600EA12BD /* reverse_fold_impl.hpp in Headers */,
@@ -14072,7 +14101,6 @@
 				EA2B852D24E7093600EA12BD /* inherit.hpp in Headers */,
 				EA2B852E24E7093600EA12BD /* config.hpp in Headers */,
 				EA2B852F24E7093600EA12BD /* insert_impl.hpp in Headers */,
-				EAA0146D2719825B004E8A3D /* pu_gixml.hpp in Headers */,
 				EA2B853024E7093600EA12BD /* YGNodePrint.h in Headers */,
 				EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */,
 				EA2B853324E7093600EA12BD /* deduce_r.hpp in Headers */,
@@ -14786,7 +14814,6 @@
 				EA64AD8926A1C03A001427AD /* MZGLWebView.h in Headers */,
 				EA2B883624E7093600EA12BD /* is_member_pointer.hpp in Headers */,
 				EA2B883724E7093600EA12BD /* reverse_fold_impl.hpp in Headers */,
-				EAA0146B2719825B004E8A3D /* pu_giconfig.hpp in Headers */,
 				EA2B883824E7093600EA12BD /* reverse1.hpp in Headers */,
 				EA9242FB273EE0C300311C98 /* lightweight_thread.hpp in Headers */,
 				EA2B883924E7093600EA12BD /* to_array.hpp in Headers */,
@@ -15310,6 +15337,7 @@
 				EA2B8A5A24E7093600EA12BD /* bitand.hpp in Headers */,
 				EA2B8A5B24E7093600EA12BD /* lower3.hpp in Headers */,
 				EA2B8A5C24E7093600EA12BD /* remove.hpp in Headers */,
+				EAD177AD282732A900E2AAE6 /* pu_giconfig.hpp in Headers */,
 				EA2B8A5D24E7093600EA12BD /* arg.hpp in Headers */,
 				EA924355273EE0C300311C98 /* make_shared.hpp in Headers */,
 				EA2B8A5E24E7093600EA12BD /* vector50.hpp in Headers */,
@@ -15554,7 +15582,6 @@
 				EA183FB72432C18D00A5C3E8 /* MacAppDelegate.mm in Sources */,
 				EA234AF024A609CA000F057B /* YGLayout.cpp in Sources */,
 				EA183FCA2432C18D00A5C3E8 /* events.cpp in Sources */,
-				EAA0146E2719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA234B1324A611AF000F057B /* ylog.cpp in Sources */,
 				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
@@ -15650,6 +15677,7 @@
 				EA297C7A25C954E600F890AE /* pa_debugprint.c in Sources */,
 				EA18400A2432C18D00A5C3E8 /* SvgVbo.cpp in Sources */,
 				EA234B0324A609CA000F057B /* YGValue.cpp in Sources */,
+				EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */,
 				EA183FCF2432C18D00A5C3E8 /* DateTime.cpp in Sources */,
 				EA64AD7426A186D7001427AD /* MZGLWebView.mm in Sources */,
@@ -15672,6 +15700,7 @@
 				EAF99AB6267A415200157A7C /* ScrollingListItem.cpp in Sources */,
 				EA71A72D27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA1841212432C4C500A5C3E8 /* Triangulator.cpp in Sources */,
+				EAD177A9282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA1841222432C4C900A5C3E8 /* Camera.cpp in Sources */,
 				EA1840F62432C36300A5C3E8 /* iOSAppDelegate.mm in Sources */,
 				EA1841C42432CCE100A5C3E8 /* operations.cpp in Sources */,
@@ -15692,7 +15721,6 @@
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
 				EA234B1424A611AF000F057B /* ylog.cpp in Sources */,
 				EA1841192432C4A500A5C3E8 /* SvgVbo.cpp in Sources */,
-				EAA0146F2719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
 				EA1841182432C4A500A5C3E8 /* Shader.cpp in Sources */,
 				EA18411E2432C4C500A5C3E8 /* SVG.cpp in Sources */,
@@ -15782,6 +15810,7 @@
 				EA16DADC25FFAEA1001C0460 /* MZGLView.mm in Sources */,
 				EA2B8AD324E7093600EA12BD /* Graphics.cpp in Sources */,
 				EA2B8AD424E7093600EA12BD /* YGConfig.cpp in Sources */,
+				EAD177AA282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA71A78227E39E6C0081A5CB /* aestab.c in Sources */,
 				EA2B8AD524E7093600EA12BD /* Triangulator.cpp in Sources */,
 				EA71A77827E39E6C0081A5CB /* prng.c in Sources */,
@@ -15834,7 +15863,6 @@
 				EA2B8B0024E7093600EA12BD /* error.cpp in Sources */,
 				EA2B8B0224E7093600EA12BD /* Yoga.cpp in Sources */,
 				EA2B8B0424E7093600EA12BD /* path_traits.cpp in Sources */,
-				EAA014702719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA2B8B0624E7093600EA12BD /* scales.cpp in Sources */,
 				EA71A72A27E39E6B0081A5CB /* Makefile in Sources */,
 				EA2B8B0724E7093600EA12BD /* Camera.cpp in Sources */,
@@ -15909,6 +15937,7 @@
 				EA689449261C633500F76B91 /* Camera.cpp in Sources */,
 				EA68944A261C633500F76B91 /* iOSAppDelegate.mm in Sources */,
 				EA68944B261C633500F76B91 /* operations.cpp in Sources */,
+				EAD177AB282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA68944C261C633500F76B91 /* Drawer.cpp in Sources */,
 				EA71A78B27E39E6C0081A5CB /* entropy.c in Sources */,
 				EAF99AB2267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
@@ -15924,7 +15953,6 @@
 				EA689454261C633500F76B91 /* Font.cpp in Sources */,
 				EA689455261C633500F76B91 /* ylog.cpp in Sources */,
 				EA689457261C633500F76B91 /* SvgVbo.cpp in Sources */,
-				EAA014712719825B004E8A3D /* pu_gixml.cpp in Sources */,
 				EA689458261C633500F76B91 /* Layout.cpp in Sources */,
 				EA68945B261C633500F76B91 /* Shader.cpp in Sources */,
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
