@@ -10,11 +10,12 @@
 
 #include <string>
 #include "EventDispatcher.h"
-
+#include "log.h"
+#include "filesystem.h"
 @implementation MZGLWebView {
     EventDispatcher *eventDispatcher;
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr {
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr andUrl: (NSString*) url {
     eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
     
     ((WebViewApp*)eventDispatcher->app)->callJS = [self](const std::string &s) {
@@ -25,21 +26,41 @@
     [config.userContentController addScriptMessageHandler:self name:@"updateHandler"];
 
 	self = [super initWithFrame:frame configuration:config];
+	std::string customUrl = [url UTF8String];//"http://localhost:8080/";
 	if(self!=nil) {
+		
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
-        
-        NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
-        baseURL = [baseURL URLByAppendingPathComponent:@"www"];
-        
-//      NSString *path = [[NSFileManager defaultManager] currentDirectoryPath];
-//      path = [path stringByAppendingString: @"/index.html"];
-        
-//      NSURL *url = [NSURL fileURLWithPath: path];
-        
-        NSURL *url = [baseURL URLByAppendingPathComponent:@"index.html"];
-		NSLog(@"%@", url);
-        self.UIDelegate = self;
-        [self loadFileURL:url allowingReadAccessToURL:baseURL];
+		self.UIDelegate = self;
+		
+		if(customUrl!="" && customUrl.find("http")!=-1) {
+			NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%s", customUrl.c_str()]];
+			NSURLRequest *request = [NSURLRequest requestWithURL:url];
+			[self loadRequest:request];
+		} else {
+			
+		
+			NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
+			baseURL = [baseURL URLByAppendingPathComponent:@"www"];
+			NSURL *url = [baseURL URLByAppendingPathComponent:@"index.html"];
+			
+			
+			if(customUrl!="") {
+				NSLog(@"Got custom URL!!");
+				auto p = fs::path(customUrl);
+				baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String: p.parent_path().string().c_str()]];
+				url = [baseURL URLByAppendingPathComponent:[NSString stringWithUTF8String:p.filename().string().c_str()]];
+			}
+			NSLog(@"%@", url);
+			
+			[self loadFileURL:url allowingReadAccessToURL:baseURL];
+//		} else {
+//
+//			auto p = fs::path(customUrl);
+//			NSURL *baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String: p.parent_path().string().c_str()]];
+//			NSURL *url = [baseURL URLByAppendingPathComponent:[NSString stringWithUTF8String:p.filename().string().c_str()]];
+//			[self loadFileURL:url allowingReadAccessToURL:baseURL];
+//		}
+		}
 	}
 	return self;
 }

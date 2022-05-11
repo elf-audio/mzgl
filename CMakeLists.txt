@@ -150,7 +150,7 @@ set(HEADERS
 	lib/portaudio/include
 	lib/fontstash
 	lib/rtmidi
-	lib/pugixml/src
+	lib/pu_gixml/src
 	lib/misc
 	lib/yoga
 )
@@ -199,7 +199,7 @@ endif(MZGL_UNIT_TEST)
 # add_library(zipper STATIC ${ZIPPER_SOURCES})
 add_library(boostfs STATIC ${BOOST_SOURCES})
 add_library(yoga STATIC ${YOGA_SOURCES})
-add_library(pugixml OBJECT lib/pugixml/src/pugixml.cpp)
+add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
 
 add_subdirectory(lib/ZipFile)
 # add_dependencies(libmzgl pugixml)
@@ -282,7 +282,7 @@ set(MZGL_LIBS
 	ZipFile 
  	boostfs 
 	yoga 
-	pugixml
+	pu_gixml
 )
 
 

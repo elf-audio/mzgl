@@ -55,9 +55,9 @@ using namespace std;
 }
 #endif
 
-- (void) makeWebView {
+- (void) makeWebView: (NSString*) url {
     NSRect windowRect = [self setupWindow];
-    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher];
+    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher andUrl: url];
     [[window contentView] addSubview:view];
     [window makeKeyAndOrderFront:nil];
     [window makeMainWindow];
@@ -179,7 +179,10 @@ using namespace std;
 	if(!app->isHeadless()) {
 		[self makeMenus];
         if(app->isWebView()) {
-            [self makeWebView];
+			
+			auto *webViewApp = (WebViewApp*)app;
+			NSString *url = [NSString stringWithUTF8String:webViewApp->customUrl.c_str()];
+            [self makeWebView: url];
             eventDispatcher->setup();
             
             NSRunLoop *rl = [NSRunLoop currentRunLoop];
