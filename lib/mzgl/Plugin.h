@@ -248,7 +248,7 @@ public:
 	double getSampleRate() {
 		return sampleRate;
 	}
-	
+
 	virtual void sampleRateChanged() {}
 	
 	double bpm = 120.0;
