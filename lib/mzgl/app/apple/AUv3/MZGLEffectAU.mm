@@ -362,10 +362,16 @@ struct Blocks {
 	return YES;
 }
 
+// THIS LOOKS A BIT IFFY TO ME, NOT SURE IF IT REALLY WORKS...
 - (AUAudioUnitPreset *)currentPreset {
 	if (_currentPreset.number >= 0) {
-		NSLog(@"Returning Current Factory Preset: %ld\n", (long)_currentFactoryPresetIndex);
-		return [_factoryPresets objectAtIndex:_currentFactoryPresetIndex];
+		if(_currentFactoryPresetIndex>=0 && [_factoryPresets count] > _currentFactoryPresetIndex) {
+			NSLog(@"Returning Current Factory Preset: %ld\n", (long)_currentFactoryPresetIndex);
+			return [_factoryPresets objectAtIndex:_currentFactoryPresetIndex];
+		} else {
+			NSLog(@"Preset index out of range!");
+			return nil;
+		}
 	} else {
 		NSLog(@"Returning Current Custom Preset: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
 		return _currentPreset;
