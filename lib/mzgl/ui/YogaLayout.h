@@ -109,6 +109,11 @@ public:
 	std::vector<LayoutAttribute> attrs;
 	std::vector<LayoutNodeCreator> children;
 	
+	LayoutNodeCreator(const std::vector<LayoutAttribute> &attrs, const std::vector<LayoutNodeCreator> & children) :
+	layer(nullptr), attrs(attrs), children(children) {
+		
+	}
+	
 	LayoutNodeCreator(Layer *l, const std::vector<LayoutAttribute> &attrs, const std::vector<LayoutNodeCreator> & children) :
 	layer(l), attrs(attrs), children(children) {
 		
