@@ -24,6 +24,8 @@ class EventDispatcher;
 
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
 - (void)windowResized:(NSNotification *)notification;
+- (void) disableDrawing;
+- (void) enableDrawing;
 - (void) lock;
 - (void) unlock;
 - (void) shutdown;

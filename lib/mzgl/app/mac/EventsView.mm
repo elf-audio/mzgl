@@ -273,9 +273,14 @@ int nsEventToKey(NSEvent *evt) {
 - (void)windowWillClose:(NSNotification *)notification {
 	[[NSApplication sharedApplication] terminate:nil];
 }
-
-- (void)windowDidResize:(NSNotification *)notification {
+- (void)windowWillStartLiveResize:(NSNotification *)notification {
+	[super disableDrawing];
+}
+// this helps with crashing when resizing, but you don't get nice resizing
+- (void)windowDidEndLiveResize:(NSNotification *)notification {
+//- (void)windowDidResize:(NSNotification *)notification {
 	[super windowResized: notification];
+	[super enableDrawing];
 }
 
 

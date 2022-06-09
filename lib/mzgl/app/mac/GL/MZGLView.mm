@@ -23,6 +23,7 @@
 	CVDisplayLinkRef displayLink;
 	std::mutex evtMutex;
 	bool firstFrame;
+	bool drawing;
 }
 
 @synthesize view;
@@ -56,6 +57,7 @@
 			[self setWantsBestResolutionOpenGLSurface:YES];
 			[self createGLResources];
 			[self createDisplayLink];
+			drawing = true;
 			
 			firstFrame = true;
 		}
@@ -81,7 +83,10 @@
 
 CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow, const CVTimeStamp *inOutputTime, CVOptionFlags flagsIn, CVOptionFlags *flagsOut, void *displayLinkContext) {
 	MZGLView *view = (__bridge MZGLView *)(displayLinkContext);
-	[view renderForTime:*inOutputTime];
+
+	if(view->drawing) {
+		[view renderForTime:*inOutputTime];
+	}
 	return kCVReturnSuccess;
 }
 
@@ -135,29 +140,32 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 //	//EventDispatcher::instance()->exit();
 //}
 
+
 - (void)windowResized:(NSNotification *)notification {
 	Log::d() << "windowDidResize";
+
 	NSWindow *window = notification.object;
-	//WIDTH = window.frame.size.width;
-	//HEIGHT = window.frame.size.height;
+	
 	Graphics &g = eventDispatcher->app->g;
 	g.width = window.contentLayoutRect.size.width;
 	g.height = window.contentLayoutRect.size.height;
 	g.pixelScale = [window backingScaleFactor];
-//	Log::e() << "Pixel scale: "<< g.pixelScale;
 	auto f = self.frame;
 	f.size.width = g.width;
 	f.size.height = g.height;
-	glViewport(0, 0, g.width, g.height);
+	
+//	evtMutex.lock();
 	self.frame = f;
+	glViewport(0, 0, g.width, g.height);
 	g.width *= g.pixelScale;
 	g.height *= g.pixelScale;
-	evtMutex.lock();
-	auto evtDispatcher = eventDispatcher;
-	runOnMainThread(true, [evtDispatcher]() {
+
+	auto *evtDispatcher = eventDispatcher;
+	runOnMainThread(true, [evtDispatcher, &g]() {
+		
 		evtDispatcher->resized();
 	});
-	evtMutex.unlock();
+//	evtMutex.unlock();
 }
 
 - (void)renderForTime:(CVTimeStamp)time
@@ -183,6 +191,13 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 	evtMutex.unlock();
 }
 
+- (void) disableDrawing {
+	drawing = NO;
+}
+
+- (void) enableDrawing {
+	drawing = YES;
+}
 @end
 
 
