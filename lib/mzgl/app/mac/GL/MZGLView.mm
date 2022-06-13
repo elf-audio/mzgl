@@ -116,6 +116,8 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 
 - (void)createGLResources {
 	[[self openGLContext] makeCurrentContext];
+	Graphics &g = eventDispatcher->app->g;
+//	glViewport(0, 0, g.width/g.pixelScale, g.height/g.pixelScale);
 }
 
 //- (BOOL)windowShouldClose:(NSWindow *)sender {
@@ -155,7 +157,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 	f.size.height = g.height;
 	
 //	evtMutex.lock();
-	self.frame = f;
+ 	self.frame = f;
 	glViewport(0, 0, g.width, g.height);
 	g.width *= g.pixelScale;
 	g.height *= g.pixelScale;
@@ -179,6 +181,12 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 		eventDispatcher->setup();
 		eventDispatcher->app->g.firstFrame = false;
 	}
+//	if(self.window!=nil && (eventDispatcher->app->g.width!=self.frame.size.width ||
+//	   eventDispatcher->app->g.height!=self.frame.size.height)
+//	   ) {
+//		NSNotification *notif = [NSNotification notificationWithName:@"resized" object:self.window];
+//		[self windowResized: notif];
+//	}
 	eventDispatcher->runFrame();
 	[self unlock];
 	[[self openGLContext] flushBuffer];

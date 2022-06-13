@@ -118,7 +118,7 @@ void Layer::_draw() {
 
 
 void Layer::_doLayout() {
-	doLayout();
+	doLayout_();
 	for(auto &c : children) {
 		c->_doLayout();
 	}

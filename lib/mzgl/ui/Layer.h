@@ -53,7 +53,7 @@ public:
 	virtual bool hitTest(float x, float y);
 	
 	// override for when ui needs to be rebuilt
-	virtual void doLayout() {}
+	virtual void doLayout_() {}
 	
 	// override for touch events
 	virtual void touchOver(float x, float y) {}

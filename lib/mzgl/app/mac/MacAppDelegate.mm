@@ -72,18 +72,43 @@ using namespace std;
     
 }
 - (NSRect) setupWindow {
-    NSRect windowRect = NSMakeRect(0, 0, app->g.width/app->g.pixelScale, app->g.height/app->g.pixelScale);
+	
+	
+	
+	
+	NSScreen *mainScreen = [NSScreen mainScreen];
+	
+	
+	float w = app->g.width/app->g.pixelScale;
+	float h = app->g.height/app->g.pixelScale;
+	if(h > mainScreen.visibleFrame.size.height) {
+		h = mainScreen.visibleFrame.size.height;
+		app->g.height = h * app->g.pixelScale;
+	}
+	
+	if(w > mainScreen.visibleFrame.size.width) {
+		w = mainScreen.visibleFrame.size.width;
+		app->g.width = w * app->g.pixelScale;
+	}
+	
+	   
+    NSRect windowRect = NSMakeRect(0, 0, w, h);
     
     window = [[NSWindow alloc]
                  initWithContentRect:windowRect
                  styleMask:NSTitledWindowMask | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];
     window.acceptsMouseMovedEvents = YES;
-    
     id appName = [[NSProcessInfo processInfo] processName];
     
     
     [window cascadeTopLeftFromPoint:NSMakePoint(20,20)];
     [window setTitle:appName];
+//	NSLog(@"window frame size: %f x %f, pixelScale: %f", window.frame.size.width, window.frame.size.height, app->g.pixelScale);
+	
+	// if the screen isn't big enough to create the window, lets update graphics dims here.
+//	app->g.width = window.contentView.frame.size.width*app->g.pixelScale;
+//	app->g.height = window.contentView.frame.size.height*app->g.pixelScale;
+	
     return windowRect;
 }
 
