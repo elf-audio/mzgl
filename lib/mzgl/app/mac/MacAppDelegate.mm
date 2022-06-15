@@ -133,6 +133,9 @@ using namespace std;
 }
 
 - (void) about:(id) event {
+	
+	// THIS CRASHES WHEN YOU CLOSE THE WINDOW
+	
 	NSUInteger windowStyle = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
 	
 	// Window bounds (x, y, width, height).
@@ -157,12 +160,12 @@ using namespace std;
 	string appName = [[[NSProcessInfo processInfo] processName] UTF8String];
 	
 	auto appMenu = MacMenuBar::instance().getMenu(appName);
-	appMenu->addItem("About " + appName, "", [self]() {
-		[self about:nil];
-	});
-	
-	
-	appMenu->addSeparator();
+//	appMenu->addItem("About " + appName, "", [self]() {
+//		[self about:nil];
+//	});
+//
+//
+//	appMenu->addSeparator();
 	appMenu->addItem("Quit " + appName, "q", []() {
 		[[NSApplication sharedApplication] terminate:nil];
 	});

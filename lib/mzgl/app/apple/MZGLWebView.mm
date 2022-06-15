@@ -47,6 +47,9 @@
 			if(customUrl!="") {
 				NSLog(@"Got custom URL!!");
 				auto p = fs::path(customUrl);
+                if(!fs::exists(p)) {
+                    NSLog(@"Path does not exist! %s", p.string().c_str());
+                }
 				baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String: p.parent_path().string().c_str()]];
 				url = [baseURL URLByAppendingPathComponent:[NSString stringWithUTF8String:p.filename().string().c_str()]];
 			}
