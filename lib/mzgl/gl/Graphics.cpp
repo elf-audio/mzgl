@@ -805,12 +805,14 @@ void Graphics::drawLineStrip(const vector<vec2> &pts) {
 
 
 void Graphics::drawRoundedRect(const Rectf &r, float radius) {
+	if(radius<2) drawRect(r);
 	VboRef m = Vbo::create();
 	makeRoundedRectVbo(m, r, radius, isFilling());
 	m->draw(*this);
 }
 
 void Graphics::draw(const Rectf &r, float radius) {
+	if(radius<2) drawRect(r);
 	drawRoundedRect(r, radius);
 }
 
