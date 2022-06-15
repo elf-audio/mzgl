@@ -230,10 +230,11 @@ void printLayer(Layer *l, int indent = 0) {
 void LayerExplorer::setup(Layer *root) {
 //	printLayer(root);
 	rootLayer = root;
-	selectionLayer = new SelectionLayer(root->g);
+	selectionLayer = new SelectionLayer(root->getGraphics());
 	rootLayer->addChild(selectionLayer);
 	selectionLayer->visible = false;
 }
+
 NSOutlineView *browser;
 LayerExplorerDelegate *layerDelegate;
 LayerExplorerDataSource * layerDataSource;

@@ -19,7 +19,12 @@
 class Layer: public Rectf {
 public:
 	
-	Graphics &g;
+	std::string name;
+	glm::vec4 color { 1.f, 1.f, 1.f, 1.f };
+	
+	bool interactive = false;
+	bool visible = true;
+	
 	
 	Layer(Graphics &g, std::string name = "");
 	Layer(Graphics &g, std::string name, glm::vec4 c);
@@ -32,9 +37,8 @@ public:
 	bool removeChild(Layer *layer);
 	void addChildren(std::vector<Layer*> layers);
 	bool removeFromParent();
-	std::string name;
 	
-	glm::vec4 color;
+	
 	
 	virtual void clear();
 	
@@ -71,8 +75,7 @@ public:
 	Layer *getChild(int index);
 	Layer *getFirstChild();
 	Layer *getLastChild();
-	bool interactive;
-	bool visible;
+	
 	
 	// called by api, do not use
 	virtual void _draw();
@@ -102,9 +105,6 @@ public:
 	
 	void setBottomCenter(float x, float y) { set(x - this->width/2, y - this->height, this->width, this->height); }
 	
-	
-	
-	
 	// attempt to pass focus from this layer to another
 	// and return the touch id of the newly focused layer
 	int transferFocus(Layer *otherLayer);
@@ -117,6 +117,10 @@ public:
 	void positionRightOf(Layer *l, float padding = 0);
 	void layoutChildrenAsGrid(int cols, int rows, float padding = 0);
 	void alignChildrenToPixels();
+	
+	// used for hacky things, don't use
+	Graphics &getGraphics() { return g; }
+	
 protected:
 
 	void transformMouse(float &x, float &y);
@@ -127,11 +131,12 @@ protected:
 	void maskOn();
 	void maskOff();
 	
+	Graphics &g;
 	
 private:
-	Layer *parent;
+	Layer *parent = nullptr;
 	std::vector<Layer*> children;
-	void setup(std::string name);
+
 	void pushMask();
 	void popMask();
 	// this gets abused because its not

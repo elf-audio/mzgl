@@ -11,30 +11,12 @@
 
 using namespace std;
 
-Layer::Layer(Graphics &g, string name) : g(g) {
-	setup(name);
-	parent = NULL;
-}
-
-Layer::Layer(Graphics &g, string name, glm::vec4 c) : g(g) {
-	setup(name);
-	this->color = c;
-}
-
-void Layer::setup(string name) {
-	this->name = name;
-	visible  = true;
-	color = glm::vec4(1, 1, 1, 1);
-	interactive = false;
-}
+Layer::Layer(Graphics &g, string name) : g(g), name(name) {}
+Layer::Layer(Graphics &g, string name, glm::vec4 c) : g(g), name(name), color(c) {}
+Layer::Layer(Graphics &g, string name, float x, float y, float w, float h) : Rectf(x, y, w, h), g(g), name(name) {}
 
 Layer::~Layer() {
 	clear();
-}
-
-Layer::Layer(Graphics &g, string name, float x, float y, float w, float h) : g(g) {
-	setup(name);
-	set(x, y, w, h);
 }
 
 void Layer::draw() {
@@ -46,19 +28,14 @@ void Layer::draw() {
 	}
 }
 
-
 string Layer::toString() {
 	char c[512];
 	sprintf(c, "name: %s  (xy: %.0f,%.0f   %.0f x %.0f)", name.c_str(), x, y, width, height);
 	return string(c);
 }
+
+
 void Layer::maskOn() {
-	
-	
-	
-	
-	
-	
 	glEnable(GL_SCISSOR_TEST);
 	auto r = getAbsoluteRect();
 	r.y = g.height - (r.y+r.height);
@@ -93,7 +70,6 @@ void Layer::popMask() {
 void Layer::_draw() {
 	if(!visible) return;
 	
-	
 	if(clipToBounds) {
 		pushMask();
 	}
@@ -113,10 +89,6 @@ void Layer::_draw() {
 	}
 }
 
-
-
-
-
 void Layer::_doLayout() {
 	doLayout();
 	for(auto &c : children) {
@@ -132,7 +104,6 @@ Layer *Layer::addChild(Layer *layer) {
 
 bool Layer::removeFromParent() {
 	if(getParent()!=nullptr) {
-		
 		bool res = getParent()->removeChild(this);
 		parent = nullptr;
 		return res;
@@ -150,6 +121,7 @@ bool Layer::removeChild(Layer *layer) {
 	}
 	return false;
 }
+
 void Layer::addChildren(vector<Layer*> layers) {
 	for(auto l : layers) {
 		addChild(l);
