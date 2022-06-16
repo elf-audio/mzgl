@@ -128,21 +128,24 @@ bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
 		return true;
 	}
 	
+//	printf("=================================\n");
+//	printf("Not direct parent\n");
 	Layer *curr = parent;
 	Rectf out = *this;
 	
-	
+//	int i = 1;
 	while(1) {
-		if(curr->parent==nullptr) {
+//		printf("run %d\n", i++);
+		if(curr==nullptr) {
 			return false;
 		}
 		
 		out.x += curr->x;
 		out.y += curr->y;
-		
+//		printf("new xy: %.0f %.0f\n", out.x, out.y);
 		curr = curr->parent;
-		// DEFINITELY CRASHWORTHY!
-		if(curr->parent->parent==l) {
+		
+		if(curr==l) {
 			r = out;
 			return true;
 		}

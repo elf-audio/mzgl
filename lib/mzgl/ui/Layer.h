@@ -98,7 +98,6 @@ public:
 	
 	// rather than absolute coords, this tries to give you the rect
 	// relative to an ancestor. If it can't find the ancestor, it will return false
-	// WARNING WARNING!! NEEDS TESTING AND THERES A BUG see parent->parent
 	bool getRectRelativeTo(const Layer *l, Rectf &r);
 	
 	void globalToLocalCoords(float &xx, float &yy);
