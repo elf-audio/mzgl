@@ -28,7 +28,7 @@ void Layer::draw() {
 	}
 }
 
-string Layer::toString() {
+string Layer::toString() const {
 	char c[512];
 	sprintf(c, "name: %s  (xy: %.0f,%.0f   %.0f x %.0f)", name.c_str(), x, y, width, height);
 	return string(c);
@@ -89,12 +89,74 @@ void Layer::_draw() {
 	}
 }
 
-void Layer::_doLayout() {
+void Layer::layoutSelfAndChildren() {
 	doLayout();
 	for(auto &c : children) {
-		c->_doLayout();
+		c->layoutSelfAndChildren();
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
+	if(parent==nullptr) return false;
+	if(parent==l) {
+		r = *this;
+		return true;
+	}
+	
+	Layer *curr = parent;
+	Rectf out = *this;
+	
+	
+	while(1) {
+		if(curr->parent==nullptr) {
+			return false;
+		}
+		
+		out.x += curr->x;
+		out.y += curr->y;
+		
+		curr = curr->parent;
+		// DEFINITELY CRASHWORTHY!
+		if(curr->parent->parent==l) {
+			r = out;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+
+
+
+
+
+
 
 Layer *Layer::addChild(Layer *layer) {
 	layer->parent = this;
@@ -139,7 +201,7 @@ void Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY ) {
 		(*it)->_mouseScrolled(xx, yy, scrollX, scrollY);
 	}
 
-	if(interactive && hitTest(x, y)) {
+	if(interactive && inside(x, y)) {
 		mouseScrolled(x, y, scrollX, scrollY);
 	}
 }
@@ -154,7 +216,7 @@ void Layer::_mouseZoomed(float x, float y, float zoom) {
 		(*it)->_mouseZoomed(xx, yy, zoom);
 	}
 
-	if(interactive && hitTest(x, y)) {
+	if(interactive && inside(x, y)) {
 		mouseZoomed(x, y, zoom);
 	}
 }
@@ -237,7 +299,7 @@ void Layer::_touchMoved(float x, float y, int id) {
 		(*it)->_touchMoved(xx, yy, id);
 	}
 	
-	if(interactive && hitTest(x, y)) {
+	if(interactive && inside(x, y)) {
 		touchMoved(x, y, id);
 	}
 	
@@ -275,7 +337,7 @@ bool Layer::_touchDown(float x, float y, int id) {
 	}
 	
 
-	if(interactive && hitTest(x, y)) {
+	if(interactive && inside(x, y)) {
 		g.focusedLayers[id] = this;
 
 		return touchDown(x, y, id);
@@ -283,9 +345,6 @@ bool Layer::_touchDown(float x, float y, int id) {
 	return false;
 }
 
-bool Layer::hitTest(float x, float y) {
-	return inside(x, y);
-}
 
 
 
@@ -350,7 +409,7 @@ Layer *Layer::getRoot() {
 	}
 }
 
-int Layer::getNumChildren() {
+int Layer::getNumChildren() const {
 	return (int)children.size();
 }
 
@@ -411,7 +470,7 @@ void Layer::localToGlobalCoords(float &xx, float &yy) {
 	}
 }
 
-bool Layer::hasFocus() {
+bool Layer::hasFocus() const {
 	for(auto l : g.focusedLayers) {
 		if(l.second==this) {
 			return true;

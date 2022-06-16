@@ -16,7 +16,7 @@
 
 
 
-class Layer: public Rectf {
+class Layer : public Rectf {
 public:
 	
 	std::string name;
@@ -42,7 +42,7 @@ public:
 	
 	virtual void clear();
 	
-	std::string toString();
+	std::string toString() const;
 	
 	bool clipToBounds = false;
 
@@ -52,9 +52,6 @@ public:
 	// layer.
 	void sendToFront(Layer *child = NULL);
 	void sendToBack(Layer *child = NULL);
-	
-	// override to create custom (non-rectangular) hit area
-	virtual bool hitTest(float x, float y);
 	
 	// override for when ui needs to be rebuilt
 	virtual void doLayout() {}
@@ -71,7 +68,7 @@ public:
 	// override to have something to do before the draw
 	virtual void update() {}
 
-	int getNumChildren();
+	int getNumChildren() const;
 	Layer *getChild(int index);
 	Layer *getFirstChild();
 	Layer *getLastChild();
@@ -79,7 +76,7 @@ public:
 	
 	// called by api, do not use
 	virtual void _draw();
-	void _doLayout();
+	void layoutSelfAndChildren();
 	void _touchOver(float x, float y);
 	void _touchUp(float x, float y, int id);
 	void _touchMoved(float x, float y, int id);
@@ -99,6 +96,10 @@ public:
 	glm::vec2 getAbsolutePosition(glm::vec2 p);
 	Rectf getAbsoluteRect(const Rectf &r);
 	
+	// rather than absolute coords, this tries to give you the rect
+	// relative to an ancestor. If it can't find the ancestor, it will return false
+	// WARNING WARNING!! NEEDS TESTING AND THERES A BUG see parent->parent
+	bool getRectRelativeTo(const Layer *l, Rectf &r);
 	
 	void globalToLocalCoords(float &xx, float &yy);
 	void localToGlobalCoords(float &xx, float &yy);
@@ -108,7 +109,7 @@ public:
 	// attempt to pass focus from this layer to another
 	// and return the touch id of the newly focused layer
 	int transferFocus(Layer *otherLayer);
-	bool hasFocus();
+	bool hasFocus() const;
 	void removeFocus();
 	
 	void positionAbove(Layer *l, float padding = 0);
