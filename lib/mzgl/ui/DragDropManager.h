@@ -26,7 +26,7 @@ public:
 	// no drags before
 	virtual void dragsStarted() {}
 	
-	// gets called when all drags are over
+	// gets called when all drags are finished
 	virtual void dragsEnded() {}
 };
 
@@ -64,7 +64,11 @@ public:
 		}
 	}
 
-	void touchMoved(float x, float y, int id) {
+	bool hasTouch(int touchId) {
+		return draggers.find(touchId)!=draggers.end();
+	}
+	
+	bool touchMoved(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
 			
 			auto d = draggers[id];
@@ -84,17 +88,21 @@ public:
 						
 						bool wasInside = r.inside(prevPos);
 						bool isInside = r.inside(currPos);
-						
+//						printf("%sside %s\n", isInside?"in":"out", target->name.c_str());
 						if(isInside && !wasInside) target->draggedIn(d);
 						else if(!isInside && wasInside) target->draggedOut(d);
+	
+						
 					}
 					
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 	
-	void touchUp(float x, float y, int id) {
+	bool touchUp(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
 			
 			// make sure we've reached the drag threshold
@@ -115,7 +123,9 @@ public:
 					t->dragsEnded();
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 	
 	std::map<int,std::shared_ptr<T>> draggers;
