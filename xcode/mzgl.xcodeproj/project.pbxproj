@@ -6589,6 +6589,7 @@
 		EA64AD7226A186D7001427AD /* MZGLWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLWebView.mm; sourceTree = "<group>"; };
 		EA64AD7326A186D7001427AD /* MZGLWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLWebView.h; sourceTree = "<group>"; };
 		EA671992285A3D0E001800AA /* SoftEnable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SoftEnable.h; sourceTree = "<group>"; };
+		EA67199B285CB961001800AA /* DragDropManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragDropManager.h; sourceTree = "<group>"; };
 		EA6894A1261C633500F76B91 /* libmzgl iOS AUTO_TEST.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl iOS AUTO_TEST.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA6ACC642475DE7000BC0012 /* NVGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NVGUI.h; sourceTree = "<group>"; };
 		EA71A6A827E39E6B0081A5CB /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -10086,6 +10087,7 @@
 			isa = PBXGroup;
 			children = (
 				EAF9A15626F9C84900698263 /* LogViewer.h */,
+				EA67199B285CB961001800AA /* DragDropManager.h */,
 				EA1835AA2432C18B00A5C3E8 /* Scroller.h */,
 				EA1835A52432C18B00A5C3E8 /* Scroller.cpp */,
 				EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */,
