@@ -45,20 +45,32 @@ public:
 		dropTargets.push_back(target);
 	}
 	
+	
+	bool dragsStartedCalled = false;
+	
 	// add draggers as items are dragged
 	void addDragger(int touchId, std::shared_ptr<T> dragger) {
 		bool firstDragger = draggers.empty();
 		draggers[touchId] = dragger;
 		if(firstDragger) {
-			for(auto *d : dropTargets) {
-				d->dragsStarted();
-			}
+			
 		}
 	}
 	
+	
+
+public:
 	// call this explicitly - could make DragDropManager a layer
 	// so it can just be added
 	void drawDraggers() {
+		if(!dragsStartedCalled) {
+			for(auto &d : draggers) {
+				if(d.second->dragging) {
+					callDragsStarted();
+					break;
+				}
+			}
+		}
 		for(auto &d : draggers) {
 			d.second->draw();
 		}
@@ -119,9 +131,7 @@ public:
 			}
 			draggers.erase(id);
 			if(draggers.empty()) {
-				for(auto *t : dropTargets) {
-					t->dragsEnded();
-				}
+				callDragsEnded();
 			}
 			return true;
 		}
@@ -131,6 +141,21 @@ public:
 	std::map<int,std::shared_ptr<T>> draggers;
 	
 private:
+
+	void callDragsStarted() {
+		dragsStartedCalled = true;
+		for(auto *d : dropTargets) {
+			d->dragsStarted();
+		}
+	}
+	
+	void callDragsEnded() {
+		dragsStartedCalled = false;
+		for(auto *d : dropTargets) {
+			d->dragsEnded();
+		}
+	}
+	
 	Layer *dragRoot = nullptr;
 	std::vector<DropTarget<T>*> dropTargets;
 	
