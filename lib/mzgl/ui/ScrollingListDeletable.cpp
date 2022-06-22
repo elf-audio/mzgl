@@ -63,7 +63,7 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 	if(down) {
 		downCount++;
 	}
-	auto r = *this;
+	Rectf r = *this;
 	r.y = (int) r.y+2;
 	r.height = (int) r.height -1;
 	d.drawRect(r);

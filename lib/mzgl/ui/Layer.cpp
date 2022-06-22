@@ -78,11 +78,11 @@ void Layer::_draw() {
 		g.pushMatrix();
 		draw();
 		g.translate(x, y);
-		for(auto &c : children) c->_draw();
+		for(auto *c : children) c->_draw();
 		g.popMatrix();
 	} else {
 		draw();
-		for(auto &c : children) c->_draw();
+		for(auto *c : children) c->_draw();
 	}
 	if(clipToBounds) {
 		popMask();
@@ -91,7 +91,7 @@ void Layer::_draw() {
 
 void Layer::layoutSelfAndChildren() {
 	doLayout();
-	for(auto &c : children) {
+	for(auto *c : children) {
 		c->layoutSelfAndChildren();
 	}
 }
@@ -188,7 +188,7 @@ bool Layer::removeChild(Layer *layer) {
 }
 
 void Layer::addChildren(vector<Layer*> layers) {
-	for(auto l : layers) {
+	for(auto *l : layers) {
 		addChild(l);
 	}
 }
@@ -519,8 +519,8 @@ void Layer::clear() {
 	
 	
 	
-	for(int i = 0; i < children.size(); i++) {
-		delete children[i];
+	for(auto *c : children) {
+		delete c;
 	}
 	
 	children.clear();

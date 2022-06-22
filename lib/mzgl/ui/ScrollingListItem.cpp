@@ -8,17 +8,22 @@ void ScrollingListStringView::draw() {
 
 void ScrollingListStringView::draw(Drawer &d) {
 
-	if(selected) {
-		d.setColor(selectedColor);
-	} else {
-		d.setColor(unselectedColor);
-	}
+	if(hasBG) {
+		if(selected) {
+			d.setColor(selectedColor);
+		} else {
+			d.setColor(unselectedColor);
+		}
 
-	auto r = *this;
-	r.y = (int) r.y+2;
-	r.height = (int) r.height -1;
-	d.drawRect(r);
-	d.setColor(dividerColor);
-	d.drawRect(x, (int)(y + height), width, 2);
+		Rectf r = *this;
+		r.y = (int) r.y+2;
+		r.height = (int) r.height -1;
+		d.drawRect(r);
+	}
+	
+	if(hasDivider) {
+		d.setColor(dividerColor);
+		d.drawRect(x, (int)(y + height), width, 2);
+	}
 }
 

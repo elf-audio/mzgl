@@ -7,6 +7,7 @@ class Drawer;
 class ScrollingListItem {
 public:
 	std::string name;
+	
 	ScrollingListItem(std::string name) : name(name) {}
 };
 
@@ -20,6 +21,9 @@ public:
 	vec4 unselectedColor {0.1f, 0.1f, 0.1f, 1.f};
 	vec4 dividerColor {0.5, 0.5, 0.5, 1.f};
 	
+	bool hasDivider = true;
+	bool hasBG = true;
+	
 	// your subclass should respond to selected when drawing
 	// TODO: make this happen on a function call rather than variable
 	// so we can trigger animations.
@@ -28,6 +32,7 @@ public:
 	ScrollingListItemView(Graphics &g, std::shared_ptr<ScrollingListItem> item) : Layer(g), item(item) {
 		interactive = true;
 	}
+	virtual ~ScrollingListItemView() {}
 	
 	virtual bool hasCustomHeight() { return false; }
 	virtual int getCustomHeight() { return 0; }

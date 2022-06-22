@@ -34,7 +34,7 @@ public:
 	
 	void touchUp(float x, float y, int id) override;
 	
-	void doLayout();
+	void doLayout() override;
 
 	int selectedIndex = -1;
 

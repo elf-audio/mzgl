@@ -5,6 +5,7 @@ using namespace std;
 
 void ScrollingList::doLayout() {
 	updateItems();
+	
 	vbo = nullptr;
 }
 
@@ -103,6 +104,7 @@ void ScrollingList::updateItems() {
 			a->height = itemHeight;
 		}
 		
+		a->layoutSelfAndChildren();
 
 		a->selectedSelf = [this, a]() {
 			
