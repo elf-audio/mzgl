@@ -4491,6 +4491,8 @@
 		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
+		EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
+		EACF1E462863532B0086EE11 /* MacFilePickerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EACF1E442863532B0086EE11 /* MacFilePickerDelegate.h */; };
 		EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
 		EAD177A9282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
 		EAD177AA282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
@@ -6591,6 +6593,7 @@
 		EA671992285A3D0E001800AA /* SoftEnable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SoftEnable.h; sourceTree = "<group>"; };
 		EA67199B285CB961001800AA /* DragDropManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragDropManager.h; sourceTree = "<group>"; };
 		EA6894A1261C633500F76B91 /* libmzgl iOS AUTO_TEST.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl iOS AUTO_TEST.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EA6901802863954500ECD038 /* AppleFileBookmark.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppleFileBookmark.h; sourceTree = "<group>"; };
 		EA6ACC642475DE7000BC0012 /* NVGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NVGUI.h; sourceTree = "<group>"; };
 		EA71A6A827E39E6B0081A5CB /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		EA71A6A927E39E6B0081A5CB /* ZipStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipStreamer.h; sourceTree = "<group>"; };
@@ -7209,6 +7212,8 @@
 		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
 		EACEB2E324DB81A400BF4D1A /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
+		EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MacFilePickerDelegate.mm; sourceTree = "<group>"; };
+		EACF1E442863532B0086EE11 /* MacFilePickerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MacFilePickerDelegate.h; sourceTree = "<group>"; };
 		EAD1779B282732A900E2AAE6 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		EAD1779C282732A900E2AAE6 /* .codecov.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .codecov.yml; sourceTree = "<group>"; };
 		EAD1779D282732A900E2AAE6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -10199,6 +10204,8 @@
 				EA1835D52432C18B00A5C3E8 /* TextConsole.h */,
 				EA1835D62432C18B00A5C3E8 /* MacMenuBar.mm */,
 				EA1835D82432C18B00A5C3E8 /* mainMac.mm */,
+				EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */,
+				EACF1E442863532B0086EE11 /* MacFilePickerDelegate.h */,
 			);
 			path = mac;
 			sourceTree = "<group>";
@@ -10588,6 +10595,7 @@
 			children = (
 				EA81A9502756F0AC009C911E /* AUv3 */,
 				EA64AD7226A186D7001427AD /* MZGLWebView.mm */,
+				EA6901802863954500ECD038 /* AppleFileBookmark.h */,
 				EA64AD7326A186D7001427AD /* MZGLWebView.h */,
 			);
 			path = apple;
@@ -12782,6 +12790,7 @@
 				EA183CEA2432C18C00A5C3E8 /* full_lambda.hpp in Headers */,
 				EA183AA02432C18C00A5C3E8 /* set.hpp in Headers */,
 				EA183A042432C18C00A5C3E8 /* event.hpp in Headers */,
+				EACF1E462863532B0086EE11 /* MacFilePickerDelegate.h in Headers */,
 				EA9242BA273EE0C300311C98 /* make_shared_object.hpp in Headers */,
 				EA183B712432C18C00A5C3E8 /* traits_lambda_spec.hpp in Headers */,
 				EA183DC12432C18C00A5C3E8 /* partition_op.hpp in Headers */,
@@ -15573,6 +15582,7 @@
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
+				EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */,
 				EA234AEC24A609CA000F057B /* Utils.cpp in Sources */,
 				EA297BE625C954CD00F890AE /* PortAudioSystem.cpp in Sources */,
 				EA18400B2432C18D00A5C3E8 /* Graphics.cpp in Sources */,

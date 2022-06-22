@@ -17,8 +17,8 @@
 
 #include <fstream>
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include "filesystem.h"
+
 #include "util.h"
 #include "log.h"
 

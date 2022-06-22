@@ -958,49 +958,7 @@ FilePickerDelegate *fpd = nil;
 
 
 #else
-@interface FilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
-
-}
--(void) setAllowedExtensions:(NSArray *)extensions;
-@end
-
-@implementation FilePickerDelegate {
-NSArray *allowedExts;
-BOOL allowAll;
-}
-
--(id) init {
-self = [super init];
-if(self != nil) {
-	allowAll = YES;
-	allowedExts = @[@"png", @"tiff", @"jpg", @"gif", @"jpeg"];
-}
-return self;
-}
--(void) setAllowedExtensions: (NSArray *)exts {
-allowedExts = exts;
-allowAll = NO;
-}
-
-
-- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url {
-if(allowAll) return YES;
-
-NSString* ext = [url pathExtension];
-if ([ext isEqualToString: @""] || [ext isEqualToString: @"/"] || ext == nil || ext == nil || [ext length] < 1) {
-	return YES;
-}
-
-for(NSString *e in allowedExts) {
-	if ([ext caseInsensitiveCompare:e] == NSOrderedSame) {
-		return YES;
-	}
-}
-return NO;
-}
-
-
-@end
+#import "MacFilePickerDelegate.h"
 FilePickerDelegate *impikD = nil;
 #endif
 #endif
@@ -1132,24 +1090,6 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 	}];
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
