@@ -259,6 +259,15 @@ void Font::drawCentred(Graphics &g, const string &text, glm::vec2 c) {
 	draw(g, text, b.x, b.y);
 }
 
+
+// draws the string making c the bottom left corner
+void Font::drawBottomLeftAligned(Graphics &g, const std::string &text, glm::vec2 c) {
+	auto a = getRect(text, 0, 0);
+	auto b = c - a.bl();
+	draw(g, text, b.x, b.y);
+}
+
+
 Font::~Font() {
 #ifdef __ANDROID__
 	for(int i = 0; i < fonts.size(); i++) {

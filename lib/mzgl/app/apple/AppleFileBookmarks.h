@@ -14,24 +14,27 @@
 #include <memory>
 #include <Foundation/Foundation.h>
 #include <TargetConditionals.h>
-struct Bookmark {
-	NSData *bookmarkData;
-	NSURL *url;
-	std::string path;
-	Bookmark(NSData *bookmarkData, NSURL *url) : bookmarkData(bookmarkData), url(url) {
-		path = [[url path] UTF8String];
-	}
-	
-	virtual ~Bookmark() {
-		printf("STOPPING ACCESS FOR %s\n", path.c_str());
-		[url stopAccessingSecurityScopedResource];
-	}
-};
 
-class Bookmarks {
+
+class AppleFileBookmarks {
+	
+private:
+	struct Bookmark {
+		NSData *bookmarkData;
+		NSURL *url;
+		std::string path;
+		Bookmark(NSData *bookmarkData, NSURL *url) : bookmarkData(bookmarkData), url(url) {
+			path = [[url path] UTF8String];
+		}
+		
+		virtual ~Bookmark() {
+			printf("STOPPING ACCESS FOR %s\n", path.c_str());
+			[url stopAccessingSecurityScopedResource];
+		}
+	};
 public:
 	
-	Bookmarks() {
+	AppleFileBookmarks() {
 		NSArray *books = [[NSUserDefaults standardUserDefaults] arrayForKey:@"bookmarks"];
 		deserializeBookmarks(books);
 	}

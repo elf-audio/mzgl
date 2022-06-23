@@ -30,6 +30,8 @@ public:
 	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, TextAlign align = TextAlign::Left);
 	void drawHorizontallyCentred(Graphics &g, const std::string &text, glm::vec2 c);
 	
+	// draws the string making c the bottom left corner
+	void drawBottomLeftAligned(Graphics &g, const std::string &text, glm::vec2 c);
 	
 	std::string ellipsize(const std::string &t, int w) const;
 	Rectf getRect(const std::string &text, float x, float y) const;
