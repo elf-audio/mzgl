@@ -24,6 +24,7 @@ private:
 		NSURL *url;
 		std::string path;
 		Bookmark(NSData *bookmarkData, NSURL *url) : bookmarkData(bookmarkData), url(url) {
+			
 			path = [[url path] UTF8String];
 		}
 		
@@ -39,8 +40,15 @@ public:
 		deserializeBookmarks(books);
 	}
 	
-	void add(NSURL *url) {
+	bool add(NSURL *url) {
 		
+		
+#if TARGET_OS_IOS
+		if(![url startAccessingSecurityScopedResource]) {
+			printf("bookmarks::add() - Error accessing security scoped resource on %s\n", [[url path] UTF8String]);
+			return false;
+		}
+#endif
 		
 		NSError *err;
 		
@@ -54,9 +62,10 @@ public:
 		NSData *bookmarkData = [url bookmarkDataWithOptions:opts
 							 includingResourceValuesForKeys:nil relativeToURL:nil error:&err];
 		
+
 		if(err) {
 			NSLog(@"Error creating bookmark %@", err);
-			return;
+			return false;
 		}
 	
 		std::string keyPath = [[url path] UTF8String];
@@ -72,6 +81,7 @@ public:
 		}
 		bookies.emplace_back(new Bookmark(bookmarkData, url));
 		[[NSUserDefaults standardUserDefaults] setObject:serializeBookmarks() forKey:@"bookmarks"];
+		   return true;
 	}
 	
 	void clear() {
@@ -142,8 +152,10 @@ private:
 #endif
 				
 				
+				
 				NSURL *url = [NSURL URLByResolvingBookmarkData:b[@"data"] options:opts relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
 				
+				printf("Trying to deserialize bookmark '%s'\n", [[url path] UTF8String]);
 				if(!url) {
 					NSLog(@"Got error trying to resolve bookmark: %@", err);
 					continue;
