@@ -21,6 +21,7 @@ public:
 	
 	void push(const std::vector<std::shared_ptr<ScrollingListItem>> &items) {
 		
+		
 		if(isAnimating()) {
 			Log::e() << "Error: can't call push whilst animating";
 			mzAssert(false);
@@ -45,6 +46,7 @@ public:
 		animationAmt = 0;
 		content->x = width;
 		content->sendToFront();
+		
 	}
 	
 	float animationAmt = 0;
