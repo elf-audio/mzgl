@@ -34,7 +34,7 @@ public:
 	bool isOn() const {
 		return enabled || amt > 0.01f;
 	}
-	
+	bool &getBoolPtr() { return enabled; }
 private:
 	
 	float amt = 0.f;
