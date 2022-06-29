@@ -78,7 +78,7 @@
 		displayLink = NULL;
 	}
 	// can't do this apparently, but clang warns about it.
-	[super dealloc];
+//	[super dealloc];
 }
 
 CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow, const CVTimeStamp *inOutputTime, CVOptionFlags flagsIn, CVOptionFlags *flagsOut, void *displayLinkContext) {
