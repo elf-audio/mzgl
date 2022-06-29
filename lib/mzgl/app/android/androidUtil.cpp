@@ -180,7 +180,6 @@ void androidShareDialog(std::string message,
                         std::string path,
                         std::function<void(bool)> completionCallback) {
 
-
     android_statics.shareCompleteCallback = completionCallback;
 
     callJNI("shareDialog", message, path);

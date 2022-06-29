@@ -76,6 +76,7 @@ bool callJNIForBoolean(std::string methodName);
 bool callJNIForBoolean(std::string methodName, int arg1);
 bool callJNIForBoolean(std::string methodName, std::string arg1);
 bool callJNIForBoolean(std::string methodName, const std::string &arg1, int arg2);
+void callJNIForStringArray(std::string methodName, std::vector<std::string> &data);
 
 float callJNIForFloat(std::string methodName);
 

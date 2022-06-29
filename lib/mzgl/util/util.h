@@ -86,8 +86,13 @@ std::string trim(const std::string & src);
 glm::vec2 getMousePosition();
 bool isTouchDown(int which = 0);
 
-std::string to_string(float value, int precision);
 
+
+
+std::string urlencode(const std::string& value);
+std::string urldecode(const std::string& value);
+
+std::string to_string(float value, int precision);
 std::string to_string(double value, int precision);
 
 std::string tolower(std::string s);
@@ -152,6 +157,8 @@ bool writeStringToFile(const std::string &path, const std::string &data);
 bool readStringFromFile(const std::string &path, std::string &outStr);
 std::string getOSVersion();
 std::string getPlatformName();
+
+	
 #include <assert.h>
 #if DEBUG==1
 #include "log.h"
