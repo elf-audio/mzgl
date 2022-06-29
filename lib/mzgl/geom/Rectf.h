@@ -128,6 +128,12 @@ public:
 		return *this;
 	}
 	
+	Rectf &operator-=(const glm::vec2& offset) {
+		x -= offset.x;
+		y -= offset.y;
+		return *this;
+	}
+	
 	Rectf& operator*=(const float& rhs){
 		
 		x *= rhs;

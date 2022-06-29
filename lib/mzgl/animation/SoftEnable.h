@@ -17,7 +17,7 @@ public:
 		return true;
 	}
 	
-	float getAmt() {
+	float getAmt() const {
 		return amt;
 	}
 	
@@ -31,7 +31,7 @@ public:
 		}
 	}
 	// returns true if amt is more than zero or is going to be
-	bool isOn() {
+	bool isOn() const {
 		return enabled || amt > 0.01f;
 	}
 	

@@ -45,8 +45,7 @@ public:
 		isPushing = true;
 		animationAmt = 0;
 		content->x = width;
-		content->sendToFront();
-		
+		content->sendToFront();		
 	}
 	
 	float animationAmt = 0;

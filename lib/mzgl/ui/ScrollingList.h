@@ -44,11 +44,13 @@ public:
 	
 protected:
 	bool canSelect = true;
-	std::vector<std::shared_ptr<ScrollingListItem>> items;
 	void updateItems();
 	bool selecting = false;
 	vec2 startTouch;
 	VboRef vbo;
 	void collapseAndDeleteCell(ScrollingListItemView *collapsingCell);
 	std::vector<ScrollingListItemView*> collapsingCells;
+private:
+	std::vector<std::shared_ptr<ScrollingListItem>> items;
+
 };

@@ -246,9 +246,13 @@ void ScrollingList::touchUp(float x, float y, int id) {
 
 void ScrollingList::unselect() {
 	bool mustCallback = selectedIndex!=-1;
+	if(selectedIndex!=-1) {
+		auto *t = (ScrollingListItemView*)content->getChild(selectedIndex);
+		t->selected = false;
+	}
 	selecting = false;
 	selectedIndex = -1;
-	if(mustCallback) itemSelected(-1);
+	if(mustCallback) if(itemSelected) itemSelected(-1);
 }
 
 
