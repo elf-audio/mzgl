@@ -104,6 +104,7 @@ set(MZGL_SOURCES
 		lib/mzgl/app/mac/MacAppDelegate.mm
 		lib/mzgl/app/mac/MacMenuBar.mm
 		lib/mzgl/app/mac/EventsView.mm
+		lib/mzgl/app/mac/MacFilePickerDelegate.mm
 		lib/mzgl/app/mac/GL/MZGLView.mm
 		lib/mzgl/app/mac/LayerExplorer.mm
 		lib/mzgl/app/mac/TextConsole.mm

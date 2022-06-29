@@ -14,8 +14,9 @@
 #include "log.h"
 #include "RoundedRect.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "choc/platform/choc_DisableAllWarnings.h"
 #include "pu_gixml.hpp"
-
+#include "choc/platform/choc_ReenableAllWarnings.h"
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
 
@@ -601,7 +602,7 @@ void SVGDoc::parseViewBox(string s) {
 }
 
 void SVGDoc::parseDefs(const pu_gi::xml_node &root) {
-	auto xpathNode = root.select_single_node("defs");
+	auto xpathNode = root.select_node("defs");
 	if (xpathNode) {
 		auto defsNode = xpathNode.node();
 		for(auto &def : defsNode) {

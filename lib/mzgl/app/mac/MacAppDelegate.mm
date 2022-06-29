@@ -140,18 +140,18 @@ using namespace std;
 	
 	// Window bounds (x, y, width, height).
 	NSRect windowRect = NSMakeRect(100, 100, 200, 200);
-	NSWindow * window = [[NSWindow alloc] initWithContentRect:windowRect
+	NSWindow * win = [[NSWindow alloc] initWithContentRect:windowRect
 													styleMask:windowStyle
 													  backing:NSBackingStoreBuffered
 														defer:NO];
-	window.level = NSFloatingWindowLevel;
+	win.level = NSFloatingWindowLevel;
 	NSTextView * textView = [[NSTextView alloc] initWithFrame:windowRect];
 	
-	[window setContentView:textView];
+	[win setContentView:textView];
 	id appName = [[NSProcessInfo processInfo] processName];
-	[window cascadeTopLeftFromPoint:NSMakePoint(40,40)];
+	[win cascadeTopLeftFromPoint:NSMakePoint(40,40)];
 	[textView insertText:[@"About " stringByAppendingString:appName]];
-	[window orderFrontRegardless];
+	[win orderFrontRegardless];
 }
 
 

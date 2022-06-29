@@ -8,10 +8,6 @@
 
 #include "MacFilePickerDelegate.h"
 
-
-
-
-
 @implementation FilePickerDelegate {
 	NSArray *allowedExts;
 	BOOL allowAll;
@@ -20,6 +16,7 @@
 
 -(id) init {
 	self = [super init];
+	
 	if(self != nil) {
 		allowAll = YES;
 		allowFoldersOnly = YES;
@@ -27,6 +24,7 @@
 	}
 	return self;
 }
+
 -(void) enableFoldersOnly: (BOOL) _allowFoldersOnly {
 	allowFoldersOnly = _allowFoldersOnly;
 }

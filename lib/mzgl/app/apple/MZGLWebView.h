@@ -19,7 +19,7 @@
 @interface MZGLWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate, NSWindowDelegate>
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr andUrl: (NSString*) url;
 - (void) shutdown;
-- (void*) getApp;
+// - (void*) getApp;
 
 @end
 
