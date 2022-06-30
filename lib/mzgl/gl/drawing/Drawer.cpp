@@ -478,7 +478,7 @@ void Drawer::roundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &o
 	// top right
 	t = r.tr();
 	if(tr) {
-		for(int i = cache.size() - 1; i >= 0; i--) {
+		for(auto i = cache.size(); i --> 0;) {
 			outVerts.push_back(t + cache[i] * glm::vec2(-radius, radius));
 		}
 	} else {
@@ -497,7 +497,7 @@ void Drawer::roundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &o
 	// bottom left
 	t = r.bl();
 	if(bl) {
-		for(int i = cache.size() - 1; i >= 0; i--) {
+		for(auto i = cache.size(); i --> 0;) {
 			outVerts.push_back(t + cache[i] * glm::vec2(radius, -radius));
 		}
 	} else {

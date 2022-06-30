@@ -101,28 +101,13 @@ void replaceAll(std::string & data, std::string toSearch, std::string replaceStr
 // only works on mac, this one.
 void saveFileDialog(std::string msg, std::string defaultFileName, std::function<void(std::string, bool)> completionCallback);
 
-// only works on mac, this one.
-//void loadFileDialog(std::string msg, std::function<void(std::string, bool)> completionCallback);
-//void loadFileDialog(std::string msg, const std::vector<std::string> &allowedExts, std::function<void(std::string, bool)> completionCallback);
-
-//void alertDialog(string title, string msg);
-
-// this function makes a copy of the loaded image so be sure to delete the original file if it exists
-//void chooseImageDialog(std::function<void(bool success, string imgPath)>);
-
 
 // generates a UUID - not tied to the machine
 // but can be considered globally unique
 std::string generateUUID();
 
 // only works on iOS. this one
-//void shareDialog(std::string message, std::string path, std::function<void(bool)> completionCallback);
-
-// only works on iOS. this one
 void launchUrl(std::string url);
-
-// also only in iOS
-//void launchUrlInWebView(std::string url, std::function<void()> completionCallback);
 
 void showMouse();
 void hideMouse();
