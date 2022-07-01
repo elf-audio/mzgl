@@ -75,54 +75,49 @@ float Tween_<T>::ease(float v) {
 
 	
 	
-Tween &AnimationManager::tweenTo(float &val, float to, float duration, EaseType easing, float delay) {
+void AnimationManager::tweenTo(float &val, float to, float duration, EaseType easing, float delay) {
 	auto *t = new Tween();
 	
 	t->tweenTo(val, to, duration, easing, delay);
 	animations.push_back(t);
 	cleanUpCompletedAnimations();
-	return *t;
-	
 }
 
-Tween &AnimationManager::tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing, float delay) {
+void AnimationManager::tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing, float delay) {
 	
-	Tween &ref = tweenTo(val.x, to.x, duration, easing, delay);
+	tweenTo(val.x, to.x, duration, easing, delay);
 	tweenTo(val.y, to.y, duration, easing, delay);
 	
 	cleanUpCompletedAnimations();
-	return ref;
 }
 
-Tween &AnimationManager::tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing, float delay) {
+void AnimationManager::tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing, float delay) {
 	
-	Tween &ref = tweenTo(val.x, to.x, duration, easing, delay);
+	tweenTo(val.x, to.x, duration, easing, delay);
 	tweenTo(val.y, to.y, duration, easing, delay);
 	tweenTo(val.z, to.z, duration, easing, delay);
 	
 	cleanUpCompletedAnimations();
-	return ref;
 }
 
-Tween &AnimationManager::tweenTo(Rectf &val, Rectf to, float duration, EaseType easing, float delay) {
+void AnimationManager::tweenTo(Rectf &val, Rectf to, float duration, EaseType easing, float delay) {
 	
-	Tween &ref = tweenTo(val.x, to.x, duration, easing, delay);
+	tweenTo(val.x, to.x, duration, easing, delay);
 	tweenTo(val.y, to.y, duration, easing, delay);
 	tweenTo(val.width, to.width, duration, easing, delay);
 	tweenTo(val.height, to.height, duration, easing, delay);
 	
 	cleanUpCompletedAnimations();
-	return ref;
 }
-Tween &AnimationManager::tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing, float delay) {
+
+void AnimationManager::tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing, float delay) {
     
-    Tween &ref = tweenTo(val.r, to.r, duration, easing, delay);
+    tweenTo(val.r, to.r, duration, easing, delay);
     tweenTo(val.g, to.g, duration, easing, delay);
     tweenTo(val.b, to.b, duration, easing, delay);
     tweenTo(val.a, to.a, duration, easing, delay);
     
     cleanUpCompletedAnimations();
-    return ref;
 }
 
 void AnimationManager::animate(float duration, function<void(float)> progressFunc, function<void()> completionFunc) {

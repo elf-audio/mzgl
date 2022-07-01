@@ -90,19 +90,19 @@ public:
 	AnimationManager() {}
 
 	void animate(float duration, std::function<void(float)> progressFunc, std::function<void()> completionFunc);
-	Tween &tweenTo(float &val, float to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	Tween &tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	Tween &tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	Tween &tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(float &val, float to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
 	
-	Tween &tweenTo(Rectf &val, Rectf to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(Rectf &val, Rectf to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
 	
 	
-	Tween &easeInOut(float &var, float to, float duration) {
+	void easeInOut(float &var, float to, float duration) {
 		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
 	}
 	
-	Tween &easeInOut(Rectf &var, Rectf to, float duration) {
+	void easeInOut(Rectf &var, Rectf to, float duration) {
 		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
 	}
 	void update();
