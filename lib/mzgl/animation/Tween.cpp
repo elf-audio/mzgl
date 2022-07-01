@@ -23,7 +23,7 @@ void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float 
 template <class T>
 void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {
 	if(!running) {
-		addListener(UPDATE, this, [this]() { update(); });
+//		addListener(UPDATE, this, [this]() { update(); });
 		running = true;
 	}
 	this->type = type;
@@ -41,9 +41,8 @@ bool Tween_<T>::isDone() {
 	return (startTime < 0 || getSeconds() > endTime);
 }
 template <class T>
-void Tween_<T>::update() {
+void Tween_<T>::update(float t) {
 	if(!running) return;
-	float t = getSeconds();
 	float v = mapf(t, startTime, endTime, 0, 1, true);
 	v = ease(v);
 	*valuePtr = v*(to-from) + from;//ofMap(v, 0, 1, from, to, true);
@@ -53,7 +52,7 @@ void Tween_<T>::update() {
 		if(tweenComplete) {
 			tweenComplete();
 		}
-		removeListener(UPDATE, this);
+//		removeListener(UPDATE, this);
 	}
 }
 
@@ -143,16 +142,26 @@ void AnimationManager::cleanUpCompletedAnimations() {
 }
 
 
+void AnimationManager::update() {
+	if(!animations.empty()) {
+		float t = getSeconds();
+	
+		for(auto & a : animations) {
+			a->update(t);
+		}
+	}
+}
+
+
 FunctionAnimation::FunctionAnimation(float duration, function<void(float)> progressFunc, function<void()> completionFunc) :
 duration(duration), progressFunc(progressFunc), completionFunc(completionFunc) {
 	running = true;
 	startTime = getSeconds();
 	endTime = startTime + duration;
-	addListener(UPDATE, this, [this]() { update(); });
 }
-void FunctionAnimation::update() {
+void FunctionAnimation::update(float t) {
 	if(!running) return;
-	float t = getSeconds();
+	
 	float v = mapf(t, startTime, endTime, 0, 1, true);
 	progressFunc(v);
 	if(t>endTime) {
@@ -168,3 +177,6 @@ FunctionAnimation::~FunctionAnimation() {
 		removeListener(UPDATE, this);
 	}
 }
+
+
+

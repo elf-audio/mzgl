@@ -25,6 +25,7 @@ enum EaseType {
 class Animation {
 public:
 	virtual bool isRunning() = 0;
+	virtual void update(float currTime) = 0;
 	virtual ~Animation() {}
 };
 
@@ -45,7 +46,7 @@ public:
 	}
 	
 	bool isDone();
-	
+	void update(float currTime) override;
 private:
 	float startTime;
 	float endTime;
@@ -54,7 +55,7 @@ private:
 	bool running = false;
 	EaseType type;
 	
-	void update();
+	
 	
 	float ease(float v);
 };
@@ -63,6 +64,7 @@ typedef Tween_<float> Tween;
 
 // not sure if this works
 //typedef Tween_<glm::vec2> Tween2f;
+
 
 class FunctionAnimation: public Animation {
 public:
@@ -78,25 +80,15 @@ public:
 	bool isRunning() override {
 		return running;
 	}
-	void update();
+	void update(float currTime) override;
 	~FunctionAnimation();
 };
 
 
-
 class AnimationManager {
-private:
-	AnimationManager() {}
-	
 public:
-	
-	static AnimationManager *getInstance() {
-		static AnimationManager *instance = NULL;
-		if(instance==NULL) {
-			instance = new AnimationManager();
-		}
-		return instance;
-	}
+	AnimationManager() {}
+
 	void animate(float duration, std::function<void(float)> progressFunc, std::function<void()> completionFunc);
 	Tween &tweenTo(float &val, float to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
 	Tween &tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
@@ -105,6 +97,15 @@ public:
 	
 	Tween &tweenTo(Rectf &val, Rectf to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
 	
+	
+	Tween &easeInOut(float &var, float to, float duration) {
+		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
+	}
+	
+	Tween &easeInOut(Rectf &var, Rectf to, float duration) {
+		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
+	}
+	void update();
 private:
 	std::vector<Animation*> animations;
 public: // just for now to test functionality
