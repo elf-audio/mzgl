@@ -83,6 +83,12 @@ bool AudioFileAndroid_load(std::string path, FloatBuffer &buff, int *outNumChann
 
 
     FILE *fp = fopen(path.c_str(), "rb");
+
+    if(fp==nullptr) {
+        LOGE("Can't open file, maybe doesn't exist (path: %s)", path.c_str());
+        return false;
+    }
+
     fseek(fp, 0, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
