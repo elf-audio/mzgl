@@ -148,21 +148,50 @@ TextureRef Font::getAtlasTexture() {
 	return Texture::create(gl->tex, gl->width, gl->height);
 }
 
+// This had a bug in it that could cause a crash, so reimplemented below
+//std::string Font::ellipsize(const std::string &s, int w) const {
+//
+//	if(s.size()<8 || getWidth(s)<=w) return s;
+//
+//	// i is how many characters to remove
+//	auto centreIndex = s.size()/2;
+//	for(int i = 3; i < s.size() - 2; i++) {
+//		auto start = s.substr(0, centreIndex - i);
+//		auto end = s.substr(centreIndex + i + 1);
+//		auto newString = start + "..." + end;
+//		if(getWidth(newString)<=w) return newString;
+//	}
+//	return s;
+//}
+//
+//
+//
+//
 
-std::string Font::ellipsize(const std::string &s, int w) const {
+
+std::string Font::ellipsize(const std::string &str, int w) const {
 	
-	if(getWidth(s)<=w) return s;
+	if(str.size()<4 || getWidth(str)<=w) return str;
+	
+	auto s = str;
 
-	// i is how many characters to remove
 	auto centreIndex = s.size()/2;
-	for(int i = 3; i < s.size() - 2; i++) {
-		auto start = s.substr(0, centreIndex - i);
-		auto end = s.substr(centreIndex + i + 1);
-		auto newString = start + "..." + end;
-		if(getWidth(newString)<=w) return newString;
+	auto front = s.substr(0, centreIndex-2);
+	auto back = s.substr(centreIndex+1);
+
+	bool flipFlop = false;
+	while(front.size()>1 && back.size()>1) {
+
+		s = front + "..." + back;
+		if(getWidth(s)<=w) return s;
+		if(flipFlop) back.erase(0,1);
+		else front.pop_back();
+		flipFlop = !flipFlop;
 	}
 	return s;
 }
+
+
 
 Rectf Font::getRect(const string &text, float x, float y) const {
 	if(fs==nullptr) {
