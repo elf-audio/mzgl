@@ -67,7 +67,7 @@ void Shader::end() {
 	glUseProgram(0);
 	GetError();
 }
-void Shader::uniform(string name, glm::mat4 m) {
+void Shader::uniform(string name, const glm::mat4 &m) {
 	GetError();
 	GLuint matId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();

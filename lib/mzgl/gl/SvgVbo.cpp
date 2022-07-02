@@ -19,20 +19,17 @@ void SvgVbo::draw(Graphics &g, float x, float y) {
 	if(vbo==nullptr) {
 		Log::e() << "SvgVbo: vbo is null";
 	}
-	bool mustPop = false;
+
 	if(x!=0 || y!=0) {
-		g.pushMatrix();
-		g.translate(x,y);
-		mustPop = true;
-	}
-	vbo->draw(g);
-	
-	if(mustPop) {
-		g.popMatrix();
+		ScopedTranslate scp(g, x, y);
+		vbo->draw(g);
+	} else {
+		vbo->draw(g);
 	}
 }
-SvgVbo::SvgVbo(SVGDoc &d) {
-	loadFromSvg(d);
+
+SvgVbo::SvgVbo(SVGDoc &d, bool ignoreColor) {
+	loadFromSvg(d, ignoreColor);
 }
 
 

@@ -28,8 +28,8 @@ public:
 	static SvgVboRef create(std::string path, float scale, bool ignoreColor) {
 		return SvgVboRef(new SvgVbo(path, scale, ignoreColor));
 	}
-	static SvgVboRef create(SVGDoc &d) {
-		return SvgVboRef(new SvgVbo(d));
+	static SvgVboRef create(SVGDoc &d, bool ignoreColor = false) {
+		return SvgVboRef(new SvgVbo(d, ignoreColor));
 	}
 	
 	void draw(Graphics &g, float x = 0, float y = 0);
@@ -39,11 +39,11 @@ public:
 	float width = 0;
 	float height = 0;
 	
-	
+	VboRef getVbo() { return vbo; }
 private:
 	SvgVbo(std::string path, float scale, bool ignoreColor);
 	SvgVbo(const std::string &svgString, bool mustBeTrue, float scale, bool ignoreColor);
-	SvgVbo(SVGDoc &d); // d should be const
+	SvgVbo(SVGDoc &d, bool ignoreColor = false); // d should be const
 	VboRef vbo;
 	void loadFromSvg(SVGDoc &d, bool ignoreColor = false); // d should be const
 };

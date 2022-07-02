@@ -65,7 +65,7 @@ public:
 	
 	void begin();
 	void end();
-	void uniform(std::string name, glm::mat4 m);
+	void uniform(std::string name, const glm::mat4 &m);
 	
 	void uniform(std::string name, int     		p);
 	void uniform(std::string name, glm::ivec2  	p);
