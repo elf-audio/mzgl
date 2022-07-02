@@ -116,7 +116,9 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 				txt = [[label stringValue] UTF8String];
 //			[label resignFirstResponder];
 //			[[[NSApp mainWindow].contentView.subviews firstObject] becomeFirstResponder];
-			completionCallback(txt, returnCode == NSAlertFirstButtonReturn);
+			runOnMainThread(true, [txt, returnCode, completionCallback]() {
+				completionCallback(txt, returnCode == NSAlertFirstButtonReturn);
+			});
 		};
 #ifndef MZGLAU
 		[alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) {

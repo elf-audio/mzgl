@@ -66,6 +66,7 @@ struct LayoutAttribute {
 	}
 };
 
+typedef std::vector<LayoutAttribute> LayoutAttributeList;
 
 
 class LayoutBase {
@@ -106,19 +107,19 @@ protected:
 class LayoutNodeCreator {
 public:
 	Layer *layer;
-	std::vector<LayoutAttribute> attrs;
+	LayoutAttributeList attrs;
 	std::vector<LayoutNodeCreator> children;
 	
-	LayoutNodeCreator(const std::vector<LayoutAttribute> &attrs, const std::vector<LayoutNodeCreator> & children) :
+	LayoutNodeCreator(const LayoutAttributeList &attrs, const std::vector<LayoutNodeCreator> & children) :
 	layer(nullptr), attrs(attrs), children(children) {
 		
 	}
 	
-	LayoutNodeCreator(Layer *l, const std::vector<LayoutAttribute> &attrs, const std::vector<LayoutNodeCreator> & children) :
+	LayoutNodeCreator(Layer *l, const LayoutAttributeList &attrs, const std::vector<LayoutNodeCreator> & children) :
 	layer(l), attrs(attrs), children(children) {
 		
 	}
-	LayoutNodeCreator(Layer *l = nullptr, const std::vector<LayoutAttribute> &attrs = {}) :
+	LayoutNodeCreator(Layer *l = nullptr, const LayoutAttributeList &attrs = {}) :
 	layer(l), attrs(attrs){
 		
 	}
@@ -134,10 +135,10 @@ public:
 	}
 	
 	
-	static void setAttributes(LayoutNodeRef l, const std::vector<LayoutAttribute> &attrs) {
+	static void setAttributes(LayoutNodeRef l, const LayoutAttributeList &attrs) {
 		setAttributes(l.get(), attrs);
 	}
-	static void setAttributes(LayoutBase *l, const std::vector<LayoutAttribute> &attrs);
+	static void setAttributes(LayoutBase *l, const LayoutAttributeList &attrs);
 	
 };
 
@@ -151,7 +152,7 @@ public:
 		YGNodeStyleSetHeight(node, root->height);
 	}
 	
-	LayoutRoot(Layer *root, const std::vector<LayoutAttribute> &attrs, const std::vector<LayoutNodeCreator> & children) : LayoutRoot(root) {
+	LayoutRoot(Layer *root, const LayoutAttributeList &attrs, const std::vector<LayoutNodeCreator> & children) : LayoutRoot(root) {
 		LayoutNodeCreator::setAttributes(this, attrs);
 		for(auto &c : children) {
 			addChild(c.createNode());

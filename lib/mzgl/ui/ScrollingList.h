@@ -38,6 +38,7 @@ public:
 
 	int selectedIndex = -1;
 
+	float getContentHeight() { return content->height; }
 //	void draw() override;
 	virtual void _draw() override;
 	void update() override;
