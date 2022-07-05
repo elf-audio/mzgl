@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA35518C25CB05D5003DF2FB /* EventsView.mm */; };
 		EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; };
 		EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; };
@@ -15897,6 +15898,7 @@
 				EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */,
 				EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */,
 				EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */,
+				EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */,
 				EA71A7A227E39E6C0081A5CB /* tools.cpp in Sources */,
 				EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */,
 				EA71A73427E39E6C0081A5CB /* ioapi_buf.c in Sources */,
