@@ -36,13 +36,13 @@ double mapd(double inp, double inMin, double inMax, double outMin, double outMax
 }
 
 
-float clampi(int inp, int from, int to) {
+int clampi(int inp, int from, int to) {
 	if(inp < from) return from;
 	if(inp>to) return to;
 	return inp;
 }
 
-float clampl(long inp, long from, long to) {
+long clampl(long inp, long from, long to) {
 	if(inp < from) return from;
 	if(inp>to) return to;
 	return inp;
