@@ -54,20 +54,20 @@ public:
     if(self!=nil) {
         needsConnection = YES;
         
-//#if !TARGET_OS_IPHONE
-//        auto &g = appHolder.g;
-//        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
-//        self.view = [[NSView alloc] initWithFrame: CGRectMake(0, 0, g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-//        [self setPreferredContentSize: CGSizeMake(g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-//        appHolder.eventDispatcher = std::make_shared<EventDispatcher>(appHolder.app);
-//        glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: appHolder.eventDispatcher.get()];
-//
-//
-////        [self addGLView];
-////        [self connectViewToAU];
-//#else
+#if !TARGET_OS_IOS
+        auto &g = appHolder.g;
+        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
+        self.view = [[NSView alloc] initWithFrame: CGRectMake(0, 0, g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
+        [self setPreferredContentSize: CGSizeMake(g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
+        appHolder.eventDispatcher = std::make_shared<EventDispatcher>(appHolder.app);
+        glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: appHolder.eventDispatcher.get()];
+
+
+//        [self addGLView];
+//        [self connectViewToAU];
+#else
         [self setPreferredContentSize: CGSizeMake(500, 800)];
-//#endif
+#endif
     }
     return self;
 }
@@ -82,7 +82,6 @@ public:
         ed->memoryWarning();
     }
 }
-
 
 -(void) viewDidDisappear {
     [[self.view subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -119,11 +118,9 @@ public:
 
 //    [self doBoth];
 
-    
     //[glView setNeedsDisplay];
-    
-    
 }
+
 - (void) doBoth: (MZGLEffectAU*) audioUnit {
     if(app==nullptr && audioUnit!=nil) {
         app = instantiatePluginEditor(g, (Plugin*)[audioUnit getPlugin]);
@@ -133,7 +130,6 @@ public:
         glView = (MZGLKitView*)vc.view;
         glView.frame = self.view.frame;
         [self addGLView];
-        [self connectViewToAU];
     }
 }
 
@@ -147,26 +143,6 @@ public:
     NSLog(@"MZGL: Size change whaaa");
 }
 
-- (void) connectViewToAU {
-//    NSLog(@"connectViewToAU");
-//    if(!needsConnection || audioUnit==nil || glView==nil) {
-//        NSLog(@"already connected or nullz");
-//        return;
-//    }
-//
-//
-//    // here's where we'd have all our observers
-//    PluginEditor *editor = (PluginEditor*) [glView getApp];
-//    editor->viewController = (__bridge void*)self;
-//    Plugin *plugin = (Plugin*)[audioUnit getPlugin];
-//    runOnMainThread([editor, plugin]() {
-//        editor->setPlugin(plugin);
-//    });
-//
-//    needsConnection = NO;
-//    NSLog(@"finished connectViewToAU");
-}
-
 - (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
     
     NSLog(@"MZGL: createAudioUnitWithComponentDescription");
@@ -175,12 +151,10 @@ public:
     if([NSThread isMainThread]) {
         NSLog(@"main thread");
         [self doBoth: audioUnit];
-//        [self connectViewToAU];
     } else {
         NSLog(@"dispatch");
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"now on main thread");
-//           [self connectViewToAU];
             [self doBoth: audioUnit];
         });
         

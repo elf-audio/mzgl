@@ -49,6 +49,7 @@ public:
 	virtual void keyDown(int key) {}
 	virtual void keyUp(int key) {}
 	
+	virtual void iosViewWillPause(bool pausing) {}
 	
 	// TOUCHES
 	virtual void touchOver(float x, float y) {}

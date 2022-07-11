@@ -18,8 +18,11 @@ class EventDispatcher;
 @interface MZGLKitViewController : GLKViewController
 #ifdef MZGL_AU
 // NOT SURE IF WE NEED THESE, AS THERES A DIFFERENT CLASS DOING IT I THINK
-<AUAudioUnitFactory,NSExtensionRequestHandling>
+<AUAudioUnitFactory,NSExtensionRequestHandling,GLKViewControllerDelegate>
+#else
+<GLKViewControllerDelegate>
 #endif
+
 - (id) initWithApp: (App*) app;
 - (EventDispatcher*) getEventDispatcher;
 - (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;

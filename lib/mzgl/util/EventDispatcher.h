@@ -32,6 +32,10 @@ public:
 		app->keyUp(key);
 	}
 	
+	void iosViewWillPause(bool pausing) {
+		app->iosViewWillPause(pausing);
+	}
+	
 	virtual bool canOpenFiles(const std::vector<std::string> &paths) {
 		return app->canOpenFiles(paths);
 	}

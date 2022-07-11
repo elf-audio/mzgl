@@ -18,6 +18,7 @@
 #endif
 @implementation MZGLKitViewController {
 	MZGLKitView *mzView;
+	BOOL currentlyPaused;
 }
 
 // in an AUV3, all instances of the plugin run
@@ -31,6 +32,8 @@ EAGLContext *context = nil;
 - (id) initWithApp:(App*) _app {
 	self = [super init];
 	if(self!=nil) {
+		currentlyPaused = YES;
+		self.delegate = self;
 		self.preferredFramesPerSecond = 60.f;
 		mzView = [[MZGLKitView alloc] initWithApp: _app];
 		self.view = mzView;
@@ -93,6 +96,7 @@ EAGLContext *context = nil;
 	}
 }
 
+
 - (EventDispatcher*) getEventDispatcher {
 	return [mzView getEventDispatcher];
 }
@@ -103,5 +107,18 @@ EAGLContext *context = nil;
 -(void) dealloc {
 	NSLog(@"dealloc MZGLKitViewController");
 }
+
+- (void)glkViewController:(GLKViewController *)controller willPause:(BOOL)pause {
+	if(pause!=currentlyPaused) {
+		[self getEventDispatcher]->iosViewWillPause(pause);
+		currentlyPaused = pause;
+	}
+}
+
+- (void)glkViewControllerUpdate:(nonnull GLKViewController *)controller {
+	// do nothing but required
+}
+
+
 
 @end
