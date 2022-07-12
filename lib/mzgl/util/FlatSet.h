@@ -17,7 +17,11 @@ class FlatSet {
 public:
 	
 	FlatSet(size_t initialSize = 0) {
-		storage.reserve(initialSize);
+		reserve(initialSize);
+	}
+	
+	void reserve(size_t sz) {
+		storage.reserve(sz);
 	}
 	
 	void insert(T s) {
@@ -28,14 +32,14 @@ public:
 		storage.push_back(s);
 	}
 	
-	bool has(T *s) const {
+	bool contains(const T &s) const {
 		for(auto spd : storage) {
-			if(spd.get()==s) return true;
+			if(spd==s) return true;
 		}
 		return false;
 	}
 	
-	void remove(T p) {
+	void erase(T p) {
 		for(size_t i = 0; i < storage.size(); i++) {
 			if(storage[i]==p) {
 				storage.erase(storage.begin() + i);
