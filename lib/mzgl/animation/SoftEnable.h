@@ -20,13 +20,16 @@ public:
 	float getAmt() const {
 		return amt;
 	}
-	
+	void setDurationInFrames(int f) {
+		// default is 1 / 0.05 = 20
+		increment = 1.f / (float)f;
+	}
 	void update() {
 		if(enabled) {
-			amt += 0.05f;
+			amt += increment;
 			if(amt>1) amt = 1.f;
 		} else {
-			amt -= 0.05f;
+			amt -= increment;
 			if(amt<0.f) amt = 0.f;
 		}
 	}
@@ -36,7 +39,7 @@ public:
 	}
 	bool &getBoolPtr() { return enabled; }
 private:
-	
+	float increment = 0.05f;
 	float amt = 0.f;
 	bool enabled = false;
 };
