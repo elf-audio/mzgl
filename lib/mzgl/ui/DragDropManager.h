@@ -56,7 +56,10 @@ public:
 			
 		}
 	}
-	
+	void cancelAll() {
+		callDragsEnded();
+		draggers.clear();
+	}
 	
 
 public:

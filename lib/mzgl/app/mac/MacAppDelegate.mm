@@ -76,13 +76,36 @@ using namespace std;
 	
 	
 	
+	{
+	
+		NSWindow *___ = [[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,100,100)
+													   styleMask:NSTitledWindowMask
+														 backing:NSBackingStoreBuffered
+														   defer:YES
+														  screen:nil];
+		
+
+	
+	
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	NSScreen *mainScreen = [NSScreen mainScreen];
 	
 	
 	float w = app->g.width/app->g.pixelScale;
 	float h = app->g.height/app->g.pixelScale;
-	if(h > mainScreen.visibleFrame.size.height) {
-		h = mainScreen.visibleFrame.size.height;
+
+	if(h > mainScreen.visibleFrame.size.height*0.9) {
+		h = mainScreen.visibleFrame.size.height*0.9;
 		app->g.height = h * app->g.pixelScale;
 	}
 	

@@ -230,6 +230,7 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 			auto *t = (ScrollingListItemView*)content->getChild(selectedIndex);
 			t->selected = false;
 			selectedIndex = -1;
+			if(itemSelected) itemSelected(-1);
 		}
 	}
 }
