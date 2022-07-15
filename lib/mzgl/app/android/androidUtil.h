@@ -72,6 +72,8 @@ void callJNI(std::string methodName, std::string arg1, std::string arg2);
 void callJNI(std::string methodName, std::string arg1);
 void callJNI(std::string methodName);
 void callJNI(std::string methodName, int32_t arg1);
+void callJNI(std::string methodName, float arg1);
+
 bool callJNIForBoolean(std::string methodName);
 bool callJNIForBoolean(std::string methodName, int arg1);
 bool callJNIForBoolean(std::string methodName, std::string arg1);
