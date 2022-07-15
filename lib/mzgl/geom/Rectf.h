@@ -103,6 +103,8 @@ public:
 	float getMaxX() const { return (width  > 0 ? (x+width)  : x);};
 	float getMaxY() const { return (height > 0 ? (y+height) : y);};
 	
+	float getMaxDimension() const { return width > height ? width : height; }
+	float getMinDimension() const { return width < height ? width : height; }
 	
 	void growToInclude(glm::vec2 p);
 	void growToInclude(const Rectf &other);

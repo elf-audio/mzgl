@@ -65,7 +65,7 @@
 }
 
 - (void) shutdown {
-	[self lock];
+	[self lock]; // - marek commented this out on 15/07/22 - may cause problems
 	CVDisplayLinkStop(displayLink);
 	displayLink = NULL;
 	[self unlock];
