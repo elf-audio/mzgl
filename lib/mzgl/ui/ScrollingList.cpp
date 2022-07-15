@@ -198,6 +198,18 @@ void ScrollingList::_draw() {
 }
 
 
+
+void ScrollingList::setItemHeight(float itemHeight) {
+	this->itemHeight = itemHeight;
+	updateItems();
+}
+
+
+
+///////////////////////////////////////////////////////
+/// INTERACTIVITY
+///
+
 bool ScrollingList::touchDown(float x, float y, int id) {
 	if(!canSelect) return true;
 	Scroller::touchDown(x, y, id);
@@ -254,13 +266,6 @@ void ScrollingList::unselect() {
 	selecting = false;
 	selectedIndex = -1;
 	if(mustCallback) if(itemSelected) itemSelected(-1);
-}
-
-
-
-void ScrollingList::setItemHeight(float itemHeight) {
-	this->itemHeight = itemHeight;
-	updateItems();
 }
 
 
