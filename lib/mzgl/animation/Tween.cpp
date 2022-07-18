@@ -20,6 +20,9 @@ void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float 
 	start(valuePtr, valuePtr, to, duration, type, delay);
 }
 
+
+
+
 template <class T>
 void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {
 	if(!running) {
@@ -76,7 +79,7 @@ float Tween_<T>::ease(float v) {
 	
 	
 void AnimationManager::tweenTo(float &val, float to, float duration, EaseType easing, float delay) {
-	auto *t = new Tween();
+	auto t = std::make_shared<Tween>();
 	
 	t->tweenTo(val, to, duration, easing, delay);
 	animations.push_back(t);
@@ -121,14 +124,13 @@ void AnimationManager::tweenTo(glm::vec4 &val, glm::vec4 to, float duration, Eas
 }
 
 void AnimationManager::animate(float duration, function<void(float)> progressFunc, function<void()> completionFunc) {
-	auto *fa = new FunctionAnimation(duration, progressFunc, completionFunc);
+	auto fa = std::make_shared<FunctionAnimation>(duration, progressFunc, completionFunc);
 	animations.push_back(fa);
 	cleanUpCompletedAnimations();
 }
 void AnimationManager::cleanUpCompletedAnimations() {
 	for(int i = 0; i < animations.size(); i++) {
 		if(!animations[i]->isRunning()) {
-			delete animations[i];
 			animations.erase(animations.begin() + i);
 			i--;
 		}

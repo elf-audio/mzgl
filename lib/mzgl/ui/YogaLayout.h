@@ -164,7 +164,7 @@ public:
 		YGNodeFreeRecursive(node);
 		YGConfigFree(config);
 	}
-	void doLayout() {
+	void calculate() {
 		YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
 		for(auto c : children) {
 			c->update(0, 0);

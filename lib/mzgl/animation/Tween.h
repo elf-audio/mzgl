@@ -36,13 +36,19 @@ public:
 	T *valuePtr;
 	
 	std::function<void()> tweenComplete;
-	
+	T getValue() { return *valuePtr; }
 	void tweenTo(T &valuePtr, T to, float duration, EaseType type = EASE_LINEAR, float delay = 0);
 	
+	void easeInOutTo(T to, float duration) {
+		tweenTo(*valuePtr, to, duration, EaseType::EASE_IN_OUT_CUBIC);
+	}
 	void start(T &valuePtr, T from, T to, float duration, EaseType type = EASE_LINEAR, float delay = 0);
 
 	bool isRunning() override {
 		return running;
+	}
+	void pointTo(T &var) {
+		valuePtr = &var;
 	}
 	
 	bool isDone();
@@ -107,7 +113,7 @@ public:
 	}
 	void update();
 private:
-	std::vector<Animation*> animations;
+	std::vector<std::shared_ptr<Animation>> animations;
 public: // just for now to test functionality
 	void cleanUpCompletedAnimations();
 };

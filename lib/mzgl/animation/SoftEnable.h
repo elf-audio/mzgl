@@ -37,6 +37,11 @@ public:
 	bool isOn() const {
 		return enabled || amt > 0.01f;
 	}
+	
+	void toggle() {
+		set(!isOn());
+	}
+	
 	bool &getBoolPtr() { return enabled; }
 private:
 	float increment = 0.05f;
