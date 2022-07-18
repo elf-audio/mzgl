@@ -187,6 +187,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 //		NSNotification *notif = [NSNotification notificationWithName:@"resized" object:self.window];
 //		[self windowResized: notif];
 //	}
+	
 	eventDispatcher->runFrame();
 	[self unlock];
 	[[self openGLContext] flushBuffer];

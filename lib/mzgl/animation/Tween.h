@@ -50,7 +50,7 @@ public:
 	void pointTo(T &var) {
 		valuePtr = &var;
 	}
-	
+	T getToValue() { return to; }
 	bool isDone();
 	void update(float currTime) override;
 private:
