@@ -338,7 +338,6 @@ void FloatBuffer::print() const {
 void FloatBuffer::fadeIn(int length, int numChans) {
 	if(size()*numChans>length) {
 		
-		
 		if(numChans==1) {
 			for(int i = 0; i < length; i++) {
 				assignValue(i, (*this)[i] * i/(float)length);
@@ -350,30 +349,43 @@ void FloatBuffer::fadeIn(int length, int numChans) {
 				assignValue(i*2+1, (*this)[i*2+1]*fade);
 			}
 		} else {
-			throw std::runtime_error("Can't fade more than 2 channels!");
+			for(int i = 0; i < length; i++) {
+				const float fade = i/(float)length;
+				for(int ch = 0; ch < numChans; ch++) {
+					assignValue(i*numChans + ch, (*this)[i*numChans + ch]*fade);
+				}
+			}
 		}
+	} else {
+		printf("ERROR: FloatBuffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n", length, numChans, size());
 	}
 }
 
 
 void FloatBuffer::fadeOut(int length, int numChans) {
-	if(size()>length) {
+	if(size()>=length*numChans) {
 		if(numChans==1) {
 			for(int i = 0; i < length; i++) {
-	//				(*this)[size() - i - 1] *= i/(float)length;
 				assignValue(size() - i - 1, (*this)[size() - i - 1] * i/(float)length);
 			}
 		} else if(numChans==2) {
 			for(int i = 0; i < length; i++) {
 				float fade = i/(float)length;
-				int frameIndex = (size() / numChans) - i - 1;
+				int frameIndex = ((int)size() / numChans) - i - 1;
 				assignValue(frameIndex*2, (*this)[frameIndex*2] * fade);
 				assignValue(frameIndex*2+1, (*this)[frameIndex*2+1] * fade);
 			}
 		} else {
-			
-			throw std::runtime_error("Can't fade out more than 2 channels!");
+			for(int i = 0; i < length; i++) {
+				float fade = i/(float)length;
+				int frameIndex = ((int)size() / numChans) - i - 1;
+				for(int ch = 0; ch < numChans; ch++) {
+					assignValue(frameIndex*numChans+ch, (*this)[frameIndex*numChans+ch] * fade);
+				}
+			}
 		}
+	} else {
+		printf("ERROR: FloatBuffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n", length, numChans, size());
 	}
 }
 
