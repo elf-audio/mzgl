@@ -72,9 +72,9 @@ public:
 	FloatBuffer stereoToMono();
 	
 	void convertToMono(int originalNumChannels = 2);
-	void save(std::string path);
-    
-	void load(std::string path);
+	
+//	void save(std::string path);
+//	void load(std::string path);
 	
 	float sum() const;
 	float mean() const;

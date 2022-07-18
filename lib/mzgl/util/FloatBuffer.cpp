@@ -1,7 +1,7 @@
 
 #include "FloatBuffer.h"
 #include <assert.h>
-#include "util.h"
+//#include "util.h"
 #include "maths.h"
 #include <fstream>
 #ifdef __APPLE__
@@ -89,39 +89,39 @@ FloatBuffer FloatBuffer::stereoToMono() {
 	return ret;
 }
 
-void FloatBuffer::save(string path) {
-	ofstream myfile;
-	myfile.open (path.c_str());
-	
-	
-	for(int i = 0; i < size(); i++) {
-		if(i>0) myfile << ",";
-		myfile << to_string((*this)[i]);
-	}
-	
-	
-	myfile.close();
-}
+//void FloatBuffer::save(string path) {
+//	ofstream myfile;
+//	myfile.open (path.c_str());
+//
+//
+//	for(int i = 0; i < size(); i++) {
+//		if(i>0) myfile << ",";
+//		myfile << to_string((*this)[i]);
+//	}
+//
+//
+//	myfile.close();
+//}
 
-void FloatBuffer::load(string path) {
-	string line;
-	string f;
-	ifstream myfile (path.c_str());
-	if (myfile.is_open())
-	{
-		while ( getline (myfile,line) )
-		{
-			f += line + "\n";
-		}
-		myfile.close();
-	}
-	
-	vector<string> smps = split(f, ",");
-	resize(smps.size());
-	for(int i =0 ; i < smps.size(); i++) {
-		(*this)[i] = stof(smps[i]);
-	}
-}
+//void FloatBuffer::load(string path) {
+//	string line;
+//	string f;
+//	ifstream myfile (path.c_str());
+//	if (myfile.is_open())
+//	{
+//		while ( getline (myfile,line) )
+//		{
+//			f += line + "\n";
+//		}
+//		myfile.close();
+//	}
+//
+//	vector<string> smps = split(f, ",");
+//	resize(smps.size());
+//	for(int i =0 ; i < smps.size(); i++) {
+//		(*this)[i] = stof(smps[i]);
+//	}
+//}
 
 
 float FloatBuffer::sum() const {
