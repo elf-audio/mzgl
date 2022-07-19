@@ -69,6 +69,7 @@
 	CVDisplayLinkStop(displayLink);
 	displayLink = NULL;
 	[self unlock];
+	delete eventDispatcher->app;
 	
 }
 
