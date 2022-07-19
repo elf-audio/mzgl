@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <vector>
-
+#include <memory>
 
 class ZipReaderFile;
 

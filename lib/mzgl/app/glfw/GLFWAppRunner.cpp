@@ -16,6 +16,7 @@
 #include "glfw3.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "filesystem.h"
 
 #include "util.h"
 #include "log.h"
@@ -231,7 +232,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
     if(argc>0) {
-        glfwSetWindowTitle(window, boost::filesystem::path(argv[0]).filename().string().c_str());
+        glfwSetWindowTitle(window, fs::path(argv[0]).filename().string().c_str());
     }
 #endif
 

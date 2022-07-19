@@ -13,6 +13,7 @@
 //#include "util.h"
 #include "Rectf.h"
 #include <vector>
+#include <memory>
 
 enum EaseType {
  

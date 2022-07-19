@@ -4,6 +4,8 @@
 //#include "util.h"
 #include "maths.h"
 #include <fstream>
+#include <limits>       // std::numeric_limits
+#include <string.h>     // memset()
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
 #endif
@@ -182,7 +184,7 @@ int FloatBuffer::findAbsMaxPos() const {
 }
 
 int FloatBuffer::findMaxPos() const {
-	float maxVal = FLT_MIN;
+	float maxVal = std::numeric_limits<float>::min();
 #ifdef __APPLE__
 	vDSP_Length pos;
 	vDSP_maxvi(data(), 1, &maxVal,  &pos, size());
@@ -200,7 +202,7 @@ int FloatBuffer::findMaxPos() const {
 
 int FloatBuffer::findMinPos() const {
 	
-	float minVal = FLT_MAX;
+	float minVal = std::numeric_limits<float>::max();
 #ifdef __APPLE__
 	vDSP_Length pos;
 	vDSP_maxvi(data(), 1, &minVal,  &pos, size());
@@ -219,8 +221,8 @@ int FloatBuffer::findMinPos() const {
 
 void FloatBuffer::getMinMax(float &min, float &max) const {
 	if(size()==0) return;
-	min = FLT_MAX;
-	max = FLT_MIN;
+	min = std::numeric_limits<float>::max();
+	max = std::numeric_limits<float>::min();
 	
 	for(int i = 0; i < size(); i++) {
 		if(at(i)<min) {
@@ -250,7 +252,7 @@ void FloatBuffer::normalizeAudio() {
 	float inMin, inMax;
 	getMinMax(inMin, inMax);
 	
-	float loudest = fmax(abs(inMin), abs(inMax));
+	float loudest = std::max(abs(inMin), abs(inMax));
 	if(loudest<0.000001) {
 		loudest = 0.00001;
 	}

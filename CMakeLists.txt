@@ -413,7 +413,7 @@ elseif(LINUX)
 
 
        find_package(PkgConfig REQUIRED)
-		pkg_ckeck_modules(GTK REQUIRED gtk+-3.0)
+		pkg_check_modules(GTK REQUIRED gtk+-3.0)
 
 		# Setup CMake to use GTK+, tell the compiler where to look for headers
 		# and to the linker where to look for libraries

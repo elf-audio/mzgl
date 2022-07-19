@@ -499,6 +499,8 @@ int64_t getAvailableMemory() {
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
+    Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
+    return 10000000000;
 }
 string docsPath(string path) {
 #ifdef UNIT_TEST

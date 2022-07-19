@@ -38,7 +38,7 @@ public:
 		glm::vec2 a(1, getY(1));
 		glm::vec2 b(2, getY(2));
 		// from http://www.softsurfer.com/Archive/algorithm_0102/algorithm_0102.htm#Distance to 2-Point Line
-		return abs(((a.y - b.y)*p.x + (b.x - a.x)*p.y + (a.x*b.y - b.x*a.y))/
+		return std::abs(((a.y - b.y)*p.x + (b.x - a.x)*p.y + (a.x*b.y - b.x*a.y))/
 				   sqrt((b.x-a.x)*(b.x-a.x) + (b.y - a.y)*(b.y - a.y))
 				   );
 	}
@@ -60,7 +60,7 @@ public:
 		int minI = 0;
 		for(int i = 0; i < p.size(); i++) {
 			
-			float dist = abs((amby*p[i].x + bmax*p[i].y + axbymbxay));
+			float dist = std::abs((float)(amby*p[i].x + bmax*p[i].y + axbymbxay));
 			if(dist<minDist) {
 				minDist = dist;
 				minI = i;

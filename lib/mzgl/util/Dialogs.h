@@ -10,7 +10,7 @@
 class App;
 #include <string>
 #include <functional>
-
+#include <vector>
 
 class Dialogs {
 public:

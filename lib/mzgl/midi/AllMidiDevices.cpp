@@ -8,6 +8,7 @@
 
 #include "AllMidiDevices.h"
 #include "AllMidiDevicesImpl.h"
+#include <atomic>
 #ifdef __APPLE__
 #include "AllMidiDevicesAppleImpl.h"
 #endif

@@ -1,4 +1,5 @@
 #include "ZipReader.h"
+#include <string.h>
 
 #pragma pack(2)
 struct ZipEndOfCD {

@@ -10,6 +10,7 @@
 // always gives you floats
 #pragma once
 
+#include <cstring>
 
 class SampleProvider {
 public:
