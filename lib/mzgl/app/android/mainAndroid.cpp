@@ -317,7 +317,7 @@ static void engine_term_display(struct engine* engine) {
 }
 
 // get rid of this include, it's for fixing some touch problem in android koala
-#include "Global.h"
+//#include "Global.h"
 
 
 int keycodeToKey(int32_t k) {
@@ -445,13 +445,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
                         AMotionEvent_getX(event, pointerIndex),
                         AMotionEvent_getY(event, pointerIndex),
                         AMotionEvent_getPointerId(event, pointerIndex));
-//                G.offsetBugTestX = AMotionEvent_getX(event, pointerIndex);
-//                G.offsetBugTestY = AMotionEvent_getY(event, pointerIndex);
-//
-//                G.offsetBugTestOffsetX = AMotionEvent_getXOffset(event);
-//                G.offsetBugTestOffsetY = AMotionEvent_getYOffset(event);
-//                G.offsetBugTestRawX = AMotionEvent_getRawX(event, pointerIndex);
-//                G.offsetBugTestRawY = AMotionEvent_getRawY(event, pointerIndex);
+
 
                 break;
             case AMOTION_EVENT_ACTION_UP:
