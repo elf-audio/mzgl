@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include <CDirEntry.h>
+#include "CDirEntry.h"
 
 #include <cstdio>
 #include <iostream>
