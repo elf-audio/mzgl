@@ -66,6 +66,32 @@ private:
 	float ease(float v);
 };
 
+template <class T>
+void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float delay) {
+	start(valuePtr, valuePtr, to, duration, type, delay);
+}
+
+
+
+#include "util.h"
+
+template <class T>
+void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {
+	if(!running) {
+//		addListener(UPDATE, this, [this]() { update(); });
+		running = true;
+	}
+	this->type = type;
+	this->valuePtr = &valuePtr;
+	this->from = from;
+	this->to = to;
+	this->startTime = getSeconds() + delay;
+	this->endTime = startTime + duration;
+	
+}
+
+
+
 typedef Tween_<float> Tween;
 
 // not sure if this works

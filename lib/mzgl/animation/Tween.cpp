@@ -15,28 +15,6 @@
 
 using namespace std;
 
-template <class T>
-void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float delay) {
-	start(valuePtr, valuePtr, to, duration, type, delay);
-}
-
-
-
-
-template <class T>
-void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {
-	if(!running) {
-//		addListener(UPDATE, this, [this]() { update(); });
-		running = true;
-	}
-	this->type = type;
-	this->valuePtr = &valuePtr;
-	this->from = from;
-	this->to = to;
-	this->startTime = getSeconds() + delay;
-	this->endTime = startTime + duration;
-	
-}
 	
 	
 template <class T>

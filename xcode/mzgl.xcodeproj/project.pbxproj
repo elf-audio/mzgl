@@ -6665,7 +6665,6 @@
 		EA71A6FF27E39E6B0081A5CB /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		EA71A70027E39E6B0081A5CB /* VERSION.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VERSION.txt; sourceTree = "<group>"; };
 		EA71A70127E39E6B0081A5CB /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Doxyfile; sourceTree = "<group>"; };
-		EA71A70227E39E6B0081A5CB /* zipper.sln */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zipper.sln; sourceTree = "<group>"; };
 		EA71A70327E39E6B0081A5CB /* ZipFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipFile.cpp; sourceTree = "<group>"; };
 		EA71A70427E39E6B0081A5CB /* ZipStreamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipStreamer.cpp; sourceTree = "<group>"; };
 		EA71A70527E39E6B0081A5CB /* ZipFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipFile.h; sourceTree = "<group>"; };
@@ -10638,7 +10637,6 @@
 				EA71A6FF27E39E6B0081A5CB /* logo.png */,
 				EA71A70027E39E6B0081A5CB /* VERSION.txt */,
 				EA71A70127E39E6B0081A5CB /* Doxyfile */,
-				EA71A70227E39E6B0081A5CB /* zipper.sln */,
 			);
 			path = zipper;
 			sourceTree = "<group>";
