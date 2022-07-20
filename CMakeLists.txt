@@ -6,12 +6,15 @@ cmake_minimum_required(VERSION 3.18)
 project(mzgl)
 
 # makes clang output colours
-add_compile_options (-fcolor-diagnostics)
-if(ANDROID OR WIN32)
-set(CMAKE_CXX_STANDARD 17)
-else()
-set(CMAKE_CXX_STANDARD 14)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	add_compile_options (-fcolor-diagnostics)
 endif()
+
+# if(ANDROID OR WIN32)
+set(CMAKE_CXX_STANDARD 17)
+# else()
+# set(CMAKE_CXX_STANDARD 14)
+# endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
