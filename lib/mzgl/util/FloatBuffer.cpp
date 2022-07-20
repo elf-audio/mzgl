@@ -5,6 +5,7 @@
 #include "maths.h"
 #include <fstream>
 #include <limits>       // std::numeric_limits
+#include <cmath>		// std::isnan()
 #include <string.h>     // memset()
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
@@ -591,13 +592,13 @@ void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept
 		}
 	}
 #ifdef DEBUG
-	if(isnan((*this)[a*2])) {
+	if(std::isnan((*this)[a*2])) {
 		printf("Nan a*2 - pos: %d, size %lu\n", a*2, size());
-	} else if(isnan((*this)[a*2+1])) {
+	} else if(std::isnan((*this)[a*2+1])) {
 		printf("Nan a*2+1 - pos: %d, size %lu\n", a*2+1, size());
-	} else if(isnan((*this)[b*2])) {
+	} else if(std::isnan((*this)[b*2])) {
 		printf("Nan b*2 - pos: %d, size %lu\n", b*2, size());
-	} else if(isnan((*this)[b*2+1])) {
+	} else if(std::isnan((*this)[b*2+1])) {
 		printf("Nan b*2+1 - pos: %d, size %lu\n", b*2+1, size());
 	}
 #endif
