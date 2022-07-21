@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.18)
 project(mzgl)
 
 # makes clang output colours
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	add_compile_options (-fcolor-diagnostics)
 endif()
 
