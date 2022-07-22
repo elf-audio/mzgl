@@ -131,8 +131,6 @@ void runOnMainThreadAndWait(std::function<void()> fn);
 void setMainThreadId();
 
 
-void runTask(std::function<void()> fn);
-
 bool readFile(std::string filename, std::vector<unsigned char> &outData);
 std::vector<unsigned char> readFile(std::string filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
@@ -191,5 +189,5 @@ void setDataPath(std::string newDataPath);
 
 // dangerous to use in anything but testing
 void clearMainThreadQueue();
-void waitTilAllTasksAreDone();
+
 #endif
