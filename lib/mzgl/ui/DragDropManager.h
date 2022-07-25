@@ -14,10 +14,10 @@
 class Dragger {
 public:
 	
-	
+	Layer *sourceLayer;
 	Graphics &g;
-	Dragger(Graphics &g, glm::vec2 startTouch) :
-	g(g), startTouch(startTouch) {}
+	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch) :
+	g(g), startTouch(startTouch), sourceLayer(sourceLayer) {}
 	
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
@@ -84,14 +84,14 @@ public:
 };
 
 template <class T>
-class DragDropManager {
+class DragDropManager : public Layer {
 public:
 	
 	/**
 	 * The drag root is the root layer that all dragging happens from -
 	 * things can be nested but we need to know which is the bottom layer.
 	 */
-	DragDropManager(Layer *dragRoot) : dragRoot(dragRoot) {}
+	DragDropManager(Layer *dragRoot) : Layer(dragRoot->getGraphics()), dragRoot(dragRoot) {}
 	
 	// add all your targets ahead of time
 	void addTarget(DropTarget<T> *target) {
@@ -103,12 +103,10 @@ public:
 	
 	// add draggers as items are dragged
 	void addDragger(int touchId, std::shared_ptr<T> dragger) {
-		bool firstDragger = draggers.empty();
+		dragger->sourceLayer->transferFocus(this);
 		draggers[touchId] = dragger;
-		if(firstDragger) {
-			
-		}
 	}
+	
 	void cancelAll() {
 		callDragsEnded();
 		draggers.clear();
@@ -136,7 +134,15 @@ public:
 		return draggers.find(touchId)!=draggers.end();
 	}
 	
-	bool touchMoved(float x, float y, int id) {
+	void touchMoved(float x, float y, int id) override {
+		touchMoved__(x, y, id);
+	}
+	
+	void touchUp(float x, float y, int id) override {
+		touchUp__(x, y, id);
+	}
+	
+	bool touchMoved__(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
 			
 			auto d = draggers[id];
@@ -156,13 +162,10 @@ public:
 						
 						bool wasInside = r.inside(prevPos);
 						bool isInside = r.inside(currPos);
-//						printf("%sside %s\n", isInside?"in":"out", target->name.c_str());
+
 						if(isInside && !wasInside) target->draggedIn(d);
 						else if(!isInside && wasInside) target->draggedOut(d);
-	
-						
 					}
-					
 				}
 			}
 			return true;
@@ -170,7 +173,7 @@ public:
 		return false;
 	}
 	
-	bool touchUp(float x, float y, int id) {
+	bool touchUp__(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
 			
 			// make sure we've reached the drag threshold
@@ -193,6 +196,7 @@ public:
 		}
 		return false;
 	}
+
 	
 	std::map<int,std::shared_ptr<T>> draggers;
 	
@@ -214,7 +218,6 @@ private:
 	
 	Layer *dragRoot = nullptr;
 	std::vector<DropTarget<T>*> dropTargets;
-	
 };
 
 

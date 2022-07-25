@@ -262,7 +262,6 @@ void Layer::_touchUp(float x, float y, int id) {
 		
 	} else {
 		
-		
 		for(auto it = children.rbegin(); it != children.rend(); it++) {
 			(*it)->_touchUp(xx, yy, id);
 		}
@@ -495,7 +494,7 @@ void Layer::removeFocus() {
 
 
 int Layer::transferFocus(Layer *otherLayer) {
-	for(auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
+	for(auto it = g.focusedLayers.begin(); it != g.focusedLayers.end(); it++) {
 		if((*it).second==this) {
 			int id = (*it).first;
 			g.focusedLayers[id] = otherLayer;
