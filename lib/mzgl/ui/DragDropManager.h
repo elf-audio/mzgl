@@ -9,6 +9,59 @@
 #pragma once
 
 
+
+// this is what your dragger should inherit from
+class Dragger {
+public:
+	
+	
+	Graphics &g;
+	Dragger(Graphics &g, glm::vec2 startTouch) :
+	g(g), startTouch(startTouch) {}
+	
+	glm::vec2 touchDelta;
+	glm::vec2 startTouch;
+
+	// where is the touch now?
+	glm::vec2 touch;
+	
+	// denotes if the user has moved their finger far enough
+	// to initiate the drag due to hysteresisDistance
+	bool isActive() { return active; }
+	
+	virtual void draw() {}
+	
+	vec2 touchPos() const {
+		return startTouch + touchDelta;
+	}
+	
+	virtual vec2 getTouchDeltaOffset() { return {0.f, 0.f}; }
+	
+	void touchMoved(float x, float y) {
+		touch = glm::vec2(x, y);
+		touchDelta = touch - startTouch;
+		
+		// this is a hack - touch delta seemed to be wrong and was throwing off the hysteresis
+		auto realDelta = touchDelta + getTouchDeltaOffset();
+		if(!active) {
+			if(glm::length(realDelta)>hysteresisDistance) {//} * g.width / 750.f) {
+				active = true;
+			}
+		}
+	}
+	
+	void setHysteresisDistance(float f) {
+		hysteresisDistance = f;
+	}
+	
+private:
+	float hysteresisDistance = 0;
+	bool active = false;
+};
+
+
+
+
 template <class T>
 class DropTarget : public Layer {
 public:
@@ -68,7 +121,7 @@ public:
 	void drawDraggers() {
 		if(!dragsStartedCalled) {
 			for(auto &d : draggers) {
-				if(d.second->dragging) {
+				if(d.second->isActive()) {
 					callDragsStarted();
 					break;
 				}
@@ -91,7 +144,7 @@ public:
 			
 			d->touchMoved(x, y);
 			
-			if(d->dragging) {
+			if(d->isActive()) {
 				
 				auto currPos = d->touchPos();
 				
@@ -121,7 +174,7 @@ public:
 		if(draggers.find(id)!=draggers.end()) {
 			
 			// make sure we've reached the drag threshold
-			if(draggers[id]->dragging) {
+			if(draggers[id]->isActive()) {
 				auto touch = draggers[id]->touchPos();
 				for(auto *t : dropTargets) {
 					Rectf r;
