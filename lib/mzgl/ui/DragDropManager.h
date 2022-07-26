@@ -36,16 +36,12 @@ public:
 		return startTouch + touchDelta;
 	}
 	
-	virtual vec2 getTouchDeltaOffset() { return {0.f, 0.f}; }
-	
 	void touchMoved(float x, float y) {
 		touch = glm::vec2(x, y);
 		touchDelta = touch - startTouch;
 		
-		// this is a hack - touch delta seemed to be wrong and was throwing off the hysteresis
-		auto realDelta = touchDelta + getTouchDeltaOffset();
 		if(!active) {
-			if(glm::length(realDelta)>hysteresisDistance) {//} * g.width / 750.f) {
+			if(glm::length(touchDelta)>hysteresisDistance) {//} * g.width / 750.f) {
 				active = true;
 			}
 		}
@@ -59,8 +55,6 @@ private:
 	float hysteresisDistance = 0;
 	bool active = false;
 };
-
-
 
 
 template <class T>
@@ -198,6 +192,7 @@ public:
 					}
 				}
 			}
+			draggers[id]->sourceLayer->touchUp(x, y, id);
 			draggers.erase(id);
 			if(draggers.empty()) {
 				callDragsEnded();
