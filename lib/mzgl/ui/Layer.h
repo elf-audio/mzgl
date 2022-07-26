@@ -96,12 +96,17 @@ public:
 	glm::vec2 getAbsolutePosition(glm::vec2 p);
 	Rectf getAbsoluteRect(const Rectf &r);
 	
+	glm::vec2 getLocalPosition(glm::vec2 pp);
+
 	// rather than absolute coords, this tries to give you the rect
 	// relative to an ancestor. If it can't find the ancestor, it will return false
 	bool getRectRelativeTo(const Layer *l, Rectf &r);
 	
-	void globalToLocalCoords(float &xx, float &yy);
-	void localToGlobalCoords(float &xx, float &yy);
+	// same functionality as getLocalPosition()
+	void absoluteToLocalCoords(float &xx, float &yy);
+	
+	// same functionality as getAbsolutePosition()
+	void localToAbsoluteCoords(float &xx, float &yy);
 	
 	void setBottomCenter(float x, float y) { set(x - this->width/2, y - this->height, this->width, this->height); }
 	

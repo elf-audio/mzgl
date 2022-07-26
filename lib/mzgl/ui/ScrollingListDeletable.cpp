@@ -159,12 +159,12 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 		} else if(abs(delta.y)>20) {
 			
 			down = false;
-			localToGlobalCoords(x, y);
+			localToAbsoluteCoords(x, y);
 			
 			Layer *scrollingList = getParent()->getParent();
 			haptics = nullptr;
 			transferFocus(scrollingList);
-			scrollingList->globalToLocalCoords(x, y);
+			scrollingList->absoluteToLocalCoords(x, y);
 			scrollingList->touchDown(x, y, id);
 		}
 	}
@@ -176,8 +176,7 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 	if(horizontallyScrolling) {
 		
-		
-			
+
 		if(deleting) {
 			if(shouldDelete) {
 				horizontalScrollTarget = -width;

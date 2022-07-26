@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "DrawingFunction.h"
 
 
 // this is what your dragger should inherit from
@@ -114,6 +115,15 @@ public:
 	
 
 public:
+	
+	
+	DrawingFunction *createDraggerDrawingFunction() {
+		return new DrawingFunction(g, [this](Graphics &g) {
+			drawDraggers();
+		});
+	}
+	
+	
 	// call this explicitly - could make DragDropManager a layer
 	// so it can just be added
 	void drawDraggers() {

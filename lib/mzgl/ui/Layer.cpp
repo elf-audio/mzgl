@@ -257,7 +257,7 @@ void Layer::_touchUp(float x, float y, int id) {
 		float xxx = x;
 		float yyy = y;
 		
-		g.focusedLayers[id]->globalToLocalCoords(xxx, yyy);
+		g.focusedLayers[id]->absoluteToLocalCoords(xxx, yyy);
 		g.focusedLayers[id]->touchUp(xxx, yyy, id);
 		
 	} else {
@@ -292,7 +292,7 @@ void Layer::_touchMoved(float x, float y, int id) {
 		float xxx = x;
 		float yyy = y;
 		
-		g.focusedLayers[id]->globalToLocalCoords(xxx, yyy);
+		g.focusedLayers[id]->absoluteToLocalCoords(xxx, yyy);
 		g.focusedLayers[id]->touchMoved(xxx, yyy, id);
 		return;
 	}
@@ -432,20 +432,19 @@ Rectf Layer::getAbsoluteRect() {
 	return getAbsoluteRect(*this);
 }
 
-
 glm::vec2 Layer::getAbsolutePosition() {
 	return getAbsolutePosition(position());
 }
 
 glm::vec2 Layer::getAbsolutePosition(glm::vec2 pos) {
-	Layer *layer = this;
-	while((layer = layer->getParent())!=nullptr) {
-		pos += glm::vec2(layer->x, layer->y);
-	}
+	localToAbsoluteCoords(pos.x, pos.y);
 	return pos;
 }
 
-
+glm::vec2 Layer::getLocalPosition(glm::vec2 pos) {
+	absoluteToLocalCoords(pos.x, pos.y);
+	return pos;
+}
 
 Rectf Layer::getAbsoluteRect(const Rectf &rr) {
 	Rectf r;
@@ -457,14 +456,14 @@ Rectf Layer::getAbsoluteRect(const Rectf &rr) {
 	return r;
 }
 
-void Layer::globalToLocalCoords(float &xx, float &yy) {
+void Layer::absoluteToLocalCoords(float &xx, float &yy) {
 	Layer *layer = this;
 	while((layer = layer->getParent()) != nullptr) {
 		xx -= layer->x;
 		yy -= layer->y;
 	}
 }
-void Layer::localToGlobalCoords(float &xx, float &yy) {
+void Layer::localToAbsoluteCoords(float &xx, float &yy) {
 	Layer *layer = this;
 	while((layer = layer->getParent()) != nullptr) {
 		xx += layer->x;
