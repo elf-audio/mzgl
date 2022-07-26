@@ -15,10 +15,12 @@
 class Dragger {
 public:
 	
+	virtual ~Dragger() {}
 	Layer *sourceLayer;
 	Graphics &g;
-	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch) :
-	g(g), startTouch(startTouch), sourceLayer(sourceLayer) {}
+	int touchId;
+	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
+	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId) {}
 	
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
@@ -97,13 +99,21 @@ public:
 	bool dragsStartedCalled = false;
 	
 	// add draggers as items are dragged
-	void addDragger(int touchId, std::shared_ptr<T> dragger) {
+	void addDragger(std::shared_ptr<T> dragger) {
 		dragger->sourceLayer->transferFocus(this);
-		draggers[touchId] = dragger;
+		draggers[dragger->touchId] = dragger;
 	}
 	
 	void cancelAll() {
 		callDragsEnded();
+		for(auto &d : draggers) {
+			auto id = d.first;
+			auto dragger = d.second;
+			// got to fire the touchUp event in order for the
+			// original object to know we released it
+			auto c = dragger->sourceLayer->centre();
+			dragger->sourceLayer->touchUp(c.x, c.y, id);
+		}
 		draggers.clear();
 	}
 	
@@ -192,6 +202,8 @@ public:
 					}
 				}
 			}
+			// got to fire the touchUp event in order for the
+			// original object to know we released it
 			draggers[id]->sourceLayer->touchUp(x, y, id);
 			draggers.erase(id);
 			if(draggers.empty()) {

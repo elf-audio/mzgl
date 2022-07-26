@@ -11,9 +11,14 @@
 class SoftEnable {
 public:
 	
-	bool set(bool en) {
-		if(en==enabled) return false;
+	bool set(bool en, bool instant = false) {
+		
+		if(en==enabled) {
+			if(instant) amt = enabled?1:0;
+			return false;
+		}
 		enabled = en;
+		if(instant) amt = enabled?1:0;
 		return true;
 	}
 	
