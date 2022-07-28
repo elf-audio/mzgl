@@ -44,8 +44,6 @@
 			// move file to docs dir
 			// if it didn't fail, send to eventDispatcher, then delete it
 			
-			
-			
 			fs::path source([path UTF8String]);
 			fs::path destination = docsPath() / source.filename();
 			
@@ -60,31 +58,6 @@
 				return;
 			}
 			
-			
-			
-			
-			////////////////////////////////////////////////
-			
-			/*
-			NSString *destination = moveFileToDocsDir(path, false);
-
-			if(destination==nil) {
-				NSLog(@"temp file copy error %@", destination);
-				return;
-			}
-			
-			
-			fs::path p([destination UTF8String]);
-			try {
-				if(fs::exists(p) && fs::is_regular_file(p)) {
-					fs::remove(p);
-				}
-			} catch(const fs::filesystem_error &e) {
-				Log::e() << "Error deleting file: " << e.what();
-			}
-			*/
-			
-//			removeFileAtPathIfNotDir(destination);
 		}]) {
 			return YES;
 		} else {

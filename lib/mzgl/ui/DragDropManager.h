@@ -26,7 +26,7 @@ public:
 	 * @param the touch id of the touch dragging
 	 */
 	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
-	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId) {}
+	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId), touch(startTouch) {}
 	
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
