@@ -19,6 +19,12 @@ public:
 	Layer *sourceLayer;
 	Graphics &g;
 	int touchId;
+	
+	/**
+	 * @param sourceLayer the layer that received the touch (because we tranfer the touch away)
+	 * @param startTouch  must be in absolute coordinates
+	 * @param the touch id of the touch dragging
+	 */
 	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
 	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId) {}
 	

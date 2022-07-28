@@ -14,3 +14,5 @@ projects/*
 .DS_Store
 lib/glfw/*
 opt/iPlug2
+examples/build/*
+examples/bin/*
