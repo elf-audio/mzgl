@@ -331,12 +331,20 @@ bool Layer::_touchDown(float x, float y, int id) {
 	float yy = y;
 	transformMouse(xx, yy);
 
+	
+	// if we're clipping to bounds, reject any touches
+	// that aren't inside the bounds
+	if(clipToBounds) {
+		if(!inside(x, y)) return false;
+	}
+
 	for(auto it = children.rbegin(); it != children.rend(); it++) {
 		
 		if((*it)->_touchDown(xx, yy, id)) {
 			return true;
 		}
 	}
+
 	
 
 	if(interactive && inside(x, y)) {

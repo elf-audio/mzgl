@@ -4508,12 +4508,6 @@
 		EAD82ECC269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
-		EAF99AAD267A40CA00157A7C /* OldScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF99AAB267A40C900157A7C /* OldScrollingList.h */; };
-		EAF99AAE267A40CA00157A7C /* OldScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF99AAB267A40C900157A7C /* OldScrollingList.h */; };
-		EAF99AAF267A40CA00157A7C /* OldScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */; };
-		EAF99AB0267A40CA00157A7C /* OldScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */; };
-		EAF99AB1267A40CA00157A7C /* OldScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */; };
-		EAF99AB2267A40CA00157A7C /* OldScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */; };
 		EAF99AB5267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB6267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
@@ -7233,8 +7227,6 @@
 		EAE94825274C0BF300718B53 /* UIBlockButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIBlockButton.h; sourceTree = "<group>"; };
 		EAE94826274C0BF300718B53 /* UIBlockButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIBlockButton.m; sourceTree = "<group>"; };
 		EAF18F8E273BE69A00E1589E /* MidiMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MidiMessage.h; sourceTree = "<group>"; };
-		EAF99AAB267A40C900157A7C /* OldScrollingList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OldScrollingList.h; sourceTree = "<group>"; };
-		EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OldScrollingList.cpp; sourceTree = "<group>"; };
 		EAF99AB3267A40D200157A7C /* ScrollingListItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListItem.h; sourceTree = "<group>"; };
 		EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListItem.cpp; sourceTree = "<group>"; };
 		EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListDeletable.h; sourceTree = "<group>"; };
@@ -10097,8 +10089,6 @@
 				EA1835A52432C18B00A5C3E8 /* Scroller.cpp */,
 				EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */,
 				EAF99AB3267A40D200157A7C /* ScrollingListItem.h */,
-				EAF99AAB267A40C900157A7C /* OldScrollingList.h */,
-				EAF99AAC267A40CA00157A7C /* OldScrollingList.cpp */,
 				EA1835A22432C18B00A5C3E8 /* ScrollingList.h */,
 				EA1835B12432C18B00A5C3E8 /* ScrollingList.cpp */,
 				EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */,
@@ -12117,7 +12107,6 @@
 				EA183ACC2432C18C00A5C3E8 /* map50.hpp in Headers */,
 				EA1839DB2432C18C00A5C3E8 /* is_readable_iterator.hpp in Headers */,
 				EA1838E72432C18C00A5C3E8 /* iterator_adaptors.hpp in Headers */,
-				EAF99AAD267A40CA00157A7C /* OldScrollingList.h in Headers */,
 				EA183A0D2432C18C00A5C3E8 /* dll.hpp in Headers */,
 				EA183B8E2432C18C00A5C3E8 /* forwarding.hpp in Headers */,
 				EA183C682432C18C00A5C3E8 /* shift_right.hpp in Headers */,
@@ -15118,7 +15107,6 @@
 				EA2B896624E7093600EA12BD /* enum_binary_params.hpp in Headers */,
 				EA9242CB273EE0C300311C98 /* sp_counted_base_gcc_ppc.hpp in Headers */,
 				EA2B896724E7093600EA12BD /* is_even.hpp in Headers */,
-				EAF99AAE267A40CA00157A7C /* OldScrollingList.h in Headers */,
 				EA2B896924E7093600EA12BD /* largest_int.hpp in Headers */,
 				EA2B896A24E7093600EA12BD /* sp_typeinfo.hpp in Headers */,
 				EA2B896C24E7093600EA12BD /* rem.hpp in Headers */,
@@ -15576,7 +15564,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA35518E25CB05D5003DF2FB /* EventsView.mm in Sources */,
-				EAF99AAF267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
@@ -15719,7 +15706,6 @@
 				EA1841C42432CCE100A5C3E8 /* operations.cpp in Sources */,
 				EA18411D2432C4AC00A5C3E8 /* Drawer.cpp in Sources */,
 				EA71A75F27E39E6C0081A5CB /* fileenc.c in Sources */,
-				EAF99AB0267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
 				EA234AED24A609CA000F057B /* Utils.cpp in Sources */,
 				EA71A72327E39E6B0081A5CB /* zip.c in Sources */,
 				EA81AA632757CBBB009C911E /* AudioUnitViewController.mm in Sources */,
@@ -15852,7 +15838,6 @@
 				EA2B8AEC24E7093600EA12BD /* Font.cpp in Sources */,
 				EAF9A15326F8B42200698263 /* log.cpp in Sources */,
 				EA2B8AED24E7093600EA12BD /* nanovg.cpp in Sources */,
-				EAF99AB1267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
 				EA297BE725C954CD00F890AE /* PortAudioSystem.cpp in Sources */,
 				EA2B8AEE24E7093600EA12BD /* Scroller.cpp in Sources */,
 				EA2B8AEF24E7093600EA12BD /* errors.cpp in Sources */,
@@ -15954,7 +15939,6 @@
 				EAD177AB282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA68944C261C633500F76B91 /* Drawer.cpp in Sources */,
 				EA71A78B27E39E6C0081A5CB /* entropy.c in Sources */,
-				EAF99AB2267A40CA00157A7C /* OldScrollingList.cpp in Sources */,
 				EA68944D261C633500F76B91 /* Utils.cpp in Sources */,
 				EA68944E261C633500F76B91 /* windows_file_codecvt.cpp in Sources */,
 				EA68944F261C633500F76B91 /* YGNodePrint.cpp in Sources */,

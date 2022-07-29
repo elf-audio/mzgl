@@ -34,6 +34,10 @@ public:
 	
 	void touchUp(float x, float y, int id) override;
 	
+	// if you don't want to call touchUp because it might trigger
+	// a selection event, call this
+	void cancelTouches();
+	
 	void doLayout() override;
 
 	int selectedIndex = -1;
@@ -42,12 +46,19 @@ public:
 //	void draw() override;
 	virtual void _draw() override;
 	void update() override;
-	
 protected:
+	
+	void touchHeld();
+	
+	int touchingId = -1;
+
 	bool canSelect = true;
 	void updateItems();
 	bool selecting = false;
 	vec2 startTouch;
+	Rectf touchRect;
+	float touchDownTime = -1;
+	bool touchHeldCalled = false;
 	VboRef vbo;
 	void collapseAndDeleteCell(ScrollingListItemView *collapsingCell);
 	std::vector<ScrollingListItemView*> collapsingCells;

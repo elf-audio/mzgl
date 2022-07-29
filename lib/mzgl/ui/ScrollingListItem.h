@@ -9,6 +9,7 @@ public:
 	std::string name;
 	
 	ScrollingListItem(std::string name) : name(name) {}
+	
 };
 
 
@@ -44,6 +45,13 @@ public:
 	// can select yourself - not totally happy with this
 	std::function<void()> selectedSelf;
 	std::function<void()> deleteSelf;
+	
+	// gets called if you hold your finger on the list for too long and don't
+	// move it - useful for dragging.
+	virtual void touchHeld(Layer *list, float x, float y, int id) {}
+
+	
+	
 	bool collapsing = false;
 };
 

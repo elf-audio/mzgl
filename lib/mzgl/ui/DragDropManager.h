@@ -23,29 +23,41 @@ public:
 	/**
 	 * @param sourceLayer the layer that received the touch (because we tranfer the touch away)
 	 * @param startTouch  must be in absolute coordinates
-	 * @param the touch id of the touch dragging
+	 * @param touchId the touch id of the touch dragging
 	 */
 	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
-	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId), touch(startTouch) {}
+	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId) {
+		touchOffset = startTouch - sourceLayer->getAbsolutePosition();
+	}
 	
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
-
-	// where is the touch now?
-	glm::vec2 touch;
+	
+	// distance from finger to top-left of dragging object
+	vec2 touchOffset;
+	
 	
 	// denotes if the user has moved their finger far enough
 	// to initiate the drag due to hysteresisDistance
 	bool isActive() { return active; }
 	
+	void activate() { active = true; }
+	
 	virtual void draw() {}
+	
+	// reposition the drag origin
+	void setCentre(vec2 c) {
+		startTouch = c;
+		touchDelta = {0.f, 0.f};
+		touchOffset = {0.f, 0.f};
+	}
 	
 	vec2 touchPos() const {
 		return startTouch + touchDelta;
 	}
 	
 	void touchMoved(float x, float y) {
-		touch = glm::vec2(x, y);
+		auto touch = glm::vec2(x, y);
 		touchDelta = touch - startTouch;
 		
 		if(!active) {

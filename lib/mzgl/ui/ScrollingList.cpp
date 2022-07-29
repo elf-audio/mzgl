@@ -29,8 +29,29 @@ void ScrollingList::setItems(const vector<shared_ptr<ScrollingListItem>> &items)
 	unselect();
 }
 
+void ScrollingList::touchHeld() {
+	// work out which view the touch is on and send the touch.
+	
+	auto testTouch = startTouch - glm::vec2(this->x + content->x, this->y + content->y);//content->x, content->y);
+	
+	for(int i = 0; i < content->getNumChildren(); i++) {
+		auto *t = (ScrollingListItemView*)content->getChild(i);
+		if(t->inside(testTouch)) {
+			t->touchHeld(this, testTouch.x, testTouch.y, touchingId);
+			return;
+		}
+	}
+}
 void ScrollingList::update() {
 	Scroller::update();
+	
+	
+	if(touchingId!=-1 && touchRect.getMaxDimension()<10 && !touchHeldCalled && g.currFrameTime - touchDownTime>0.5) {
+		touchHeld();
+		touchHeldCalled = true;
+	}
+	
+	
 	if(collapsingCells.size()>0) {
 		
 		// collapse the collapsing cells
@@ -212,9 +233,15 @@ void ScrollingList::setItemHeight(float itemHeight) {
 
 bool ScrollingList::touchDown(float x, float y, int id) {
 	if(!canSelect) return true;
+	// its a new touch, we only want one touch here
+	if(touchingId!=-1) return true;
+	touchingId = id;
+	touchHeldCalled = false;
 	Scroller::touchDown(x, y, id);
 	selecting = true;
+	touchDownTime = g.currFrameTime;
 	startTouch = glm::vec2(x, y);
+	touchRect.setFromCentre(startTouch, 0, 0);
 	selectedIndex = -1;
 	auto testTouch = startTouch - glm::vec2(this->x + content->x, this->y + content->y);//content->x, content->y);
 	
@@ -234,9 +261,11 @@ bool ScrollingList::touchDown(float x, float y, int id) {
 
 void ScrollingList::touchMoved(float x, float y, int id) {
 	if(!canSelect) return;
+	if(id!=touchingId) return;
 	Scroller::touchMoved(x, y, id);
-	glm::vec2 t(x, y);
-	if(distance(startTouch, t)>10) {
+	
+	touchRect.growToInclude({x, y});
+	if(touchRect.getMaxDimension()>10) {
 		selecting = false;
 		if(selectedIndex!=-1) {
 			auto *t = (ScrollingListItemView*)content->getChild(selectedIndex);
@@ -247,7 +276,13 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 	}
 }
 
+void ScrollingList::cancelTouches() {
+	touchingId = -1;
+}
+
 void ScrollingList::touchUp(float x, float y, int id) {
+	if(touchingId!=id) return;
+	touchingId = -1;
 	if(!canSelect) return;
 	Scroller::touchUp(x, y, id);
 	if(selecting) {
