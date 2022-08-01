@@ -6,16 +6,16 @@
 //  Copyright © 2020 Marek Bereza. All rights reserved.
 //
 
-#include "YogaLayout.h"
+#include "FlexboxLayout.h"
 #include "log.h"
 
 using namespace std;
-void LayoutBase::addChild(LayoutNodeRef child) {
+void Flexbox::LayoutBase::addChild(LayoutNodeRef child) {
 	children.push_back(child);
 	YGNodeInsertChild(node, child->node, children.size()-1);
 }
 
-void LayoutBase::update(float xOffset, float yOffset) {
+void Flexbox::LayoutBase::update(float xOffset, float yOffset) {
 
 	if(isnan(xOffset)) xOffset = 0.0;
 	if(isnan(yOffset)) yOffset = 0.0;
@@ -34,7 +34,7 @@ void LayoutBase::update(float xOffset, float yOffset) {
 		c->update(xOffset, yOffset);
 	}
 }
-void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribute> &attrs) {
+void Flexbox::LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribute> &attrs) {
 
 	for(auto &a : attrs) {
 		// todo
@@ -118,8 +118,6 @@ void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribut
 				
 				if(a.isPercent(3)) YGNodeStyleSetMarginPercent(l->node, YGEdgeLeft, a.getValue(3));
 				else               YGNodeStyleSetMargin       (l->node, YGEdgeLeft, a.getValue(3));
-				
-				
 			}
 		} else if(a.name=="margin-top") {
 			if(a.isPercent()) YGNodeStyleSetMarginPercent(l->node, YGEdgeTop, a.getValue());
@@ -134,7 +132,6 @@ void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribut
 			if(a.isPercent()) YGNodeStyleSetMarginPercent(l->node, YGEdgeLeft, a.getValue());
 			else               YGNodeStyleSetMargin      (l->node, YGEdgeLeft, a.getValue());
 		
-
 		} else if(a.name=="padding") {
 			if(a.numVals()==1) {
 				if(a.isPercent()) YGNodeStyleSetPaddingPercent(l->node, YGEdgeAll, a.getValue());
@@ -168,8 +165,6 @@ void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribut
 				
 				if(a.isPercent(3)) YGNodeStyleSetPaddingPercent(l->node, YGEdgeLeft, a.getValue(3));
 				else               YGNodeStyleSetPadding       (l->node, YGEdgeLeft, a.getValue(3));
-				
-				
 			}
 		} else if(a.name=="padding-top") {
 			if(a.isPercent()) YGNodeStyleSetPaddingPercent(l->node, YGEdgeTop, a.getValue());
@@ -186,8 +181,5 @@ void LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribut
 		} else {
 			Log::e() << "ERROR! Layout - No such attribute name! ("<<a.name<<")";
 		}
-		
-		
-	
 	}
 }

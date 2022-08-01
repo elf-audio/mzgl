@@ -2033,8 +2033,8 @@
 		EA234B1324A611AF000F057B /* ylog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1124A611AE000F057B /* ylog.cpp */; };
 		EA234B1424A611AF000F057B /* ylog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1124A611AE000F057B /* ylog.cpp */; };
 		EA234B1524A611AF000F057B /* ylog.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234B1224A611AE000F057B /* ylog.h */; };
-		EA234B1824A63513000F057B /* YogaLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* YogaLayout.cpp */; };
-		EA234B1924A63513000F057B /* YogaLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* YogaLayout.cpp */; };
+		EA234B1824A63513000F057B /* FlexboxLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* FlexboxLayout.cpp */; };
+		EA234B1924A63513000F057B /* FlexboxLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* FlexboxLayout.cpp */; };
 		EA297BE425C954CD00F890AE /* PortAudioSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BE225C954CD00F890AE /* PortAudioSystem.h */; };
 		EA297BE525C954CD00F890AE /* PortAudioSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BE225C954CD00F890AE /* PortAudioSystem.h */; };
 		EA297BE625C954CD00F890AE /* PortAudioSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */; };
@@ -4007,7 +4007,7 @@
 		EA2B8AF824E7093600EA12BD /* LayerExplorer.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835CF2432C18B00A5C3E8 /* LayerExplorer.mm */; };
 		EA2B8AF924E7093600EA12BD /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E32432C18B00A5C3E8 /* util.cpp */; };
 		EA2B8AFA24E7093600EA12BD /* AudioSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836132432C18B00A5C3E8 /* AudioSystem.cpp */; };
-		EA2B8AFC24E7093600EA12BD /* YogaLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* YogaLayout.cpp */; };
+		EA2B8AFC24E7093600EA12BD /* FlexboxLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* FlexboxLayout.cpp */; };
 		EA2B8AFF24E7093600EA12BD /* Fbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836312432C18B00A5C3E8 /* Fbo.cpp */; };
 		EA2B8B0024E7093600EA12BD /* error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836352432C18B00A5C3E8 /* error.cpp */; };
 		EA2B8B0224E7093600EA12BD /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD124A609CA000F057B /* Yoga.cpp */; };
@@ -4094,7 +4094,7 @@
 		EA68946F261C633500F76B91 /* unique_path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835962432C18B00A5C3E8 /* unique_path.cpp */; };
 		EA689470261C633500F76B91 /* YGConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234ADF24A609CA000F057B /* YGConfig.cpp */; };
 		EA689472261C633500F76B91 /* mainiOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C82432C18B00A5C3E8 /* mainiOS.mm */; };
-		EA689473261C633500F76B91 /* YogaLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* YogaLayout.cpp */; };
+		EA689473261C633500F76B91 /* FlexboxLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1724A63513000F057B /* FlexboxLayout.cpp */; };
 		EA689474261C633500F76B91 /* Image.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1836342432C18B00A5C3E8 /* Image.mm */; };
 		EA689475261C633500F76B91 /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
 		EA689476261C633500F76B91 /* experiments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD524A609CA000F057B /* experiments.cpp */; };
@@ -6519,10 +6519,10 @@
 		EA234AE124A609CA000F057B /* YGValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGValue.h; sourceTree = "<group>"; };
 		EA234AE324A609CA000F057B /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
 		EA234AE424A609CA000F057B /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event.cpp; sourceTree = "<group>"; };
-		EA234B0F24A60BFA000F057B /* YogaLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YogaLayout.h; sourceTree = "<group>"; };
+		EA234B0F24A60BFA000F057B /* FlexboxLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlexboxLayout.h; sourceTree = "<group>"; };
 		EA234B1124A611AE000F057B /* ylog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ylog.cpp; sourceTree = "<group>"; };
 		EA234B1224A611AE000F057B /* ylog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ylog.h; sourceTree = "<group>"; };
-		EA234B1724A63513000F057B /* YogaLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YogaLayout.cpp; sourceTree = "<group>"; };
+		EA234B1724A63513000F057B /* FlexboxLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FlexboxLayout.cpp; sourceTree = "<group>"; };
 		EA297BE225C954CD00F890AE /* PortAudioSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortAudioSystem.h; sourceTree = "<group>"; };
 		EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = PortAudioSystem.cpp; sourceTree = "<group>"; };
 		EA297BED25C954E600F890AE /* pa_win_ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_ds.h; sourceTree = "<group>"; };
@@ -10099,8 +10099,8 @@
 				EA1835A62432C18B00A5C3E8 /* ToggleButton.h */,
 				EA1835A72432C18B00A5C3E8 /* Layer.h */,
 				EA1835A82432C18B00A5C3E8 /* Layer.cpp */,
-				EA234B0F24A60BFA000F057B /* YogaLayout.h */,
-				EA234B1724A63513000F057B /* YogaLayout.cpp */,
+				EA234B0F24A60BFA000F057B /* FlexboxLayout.h */,
+				EA234B1724A63513000F057B /* FlexboxLayout.cpp */,
 				EA1835AE2432C18B00A5C3E8 /* Layout.h */,
 				EA1835A92432C18B00A5C3E8 /* Layout.cpp */,
 				EA6ACC642475DE7000BC0012 /* NVGUI.h */,
@@ -15622,7 +15622,7 @@
 				EA183FC02432C18D00A5C3E8 /* util.cpp in Sources */,
 				EA297C6E25C954E600F890AE /* pa_allocation.c in Sources */,
 				EA183FE72432C18D00A5C3E8 /* AudioSystem.cpp in Sources */,
-				EA234B1824A63513000F057B /* YogaLayout.cpp in Sources */,
+				EA234B1824A63513000F057B /* FlexboxLayout.cpp in Sources */,
 				EA71A7A427E39E6C0081A5CB /* unzipper.cpp in Sources */,
 				EA1840002432C18D00A5C3E8 /* Fbo.cpp in Sources */,
 				EA71A7B427E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
@@ -15748,7 +15748,7 @@
 				EA234B0824A609CA000F057B /* YGConfig.cpp in Sources */,
 				EA71A73D27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA4B48FC24588303000E79BF /* mainiOS.mm in Sources */,
-				EA234B1924A63513000F057B /* YogaLayout.cpp in Sources */,
+				EA234B1924A63513000F057B /* FlexboxLayout.cpp in Sources */,
 				EA1841142432C4A500A5C3E8 /* Image.mm in Sources */,
 				EA71A75B27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA18412D2432C4FF00A5C3E8 /* FileWatcher.cpp in Sources */,
@@ -15854,7 +15854,7 @@
 				EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */,
 				EA2B8AF924E7093600EA12BD /* util.cpp in Sources */,
 				EA2B8AFA24E7093600EA12BD /* AudioSystem.cpp in Sources */,
-				EA2B8AFC24E7093600EA12BD /* YogaLayout.cpp in Sources */,
+				EA2B8AFC24E7093600EA12BD /* FlexboxLayout.cpp in Sources */,
 				EA2B8AFF24E7093600EA12BD /* Fbo.cpp in Sources */,
 				EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */,
 				EAF99ABD267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
@@ -15985,7 +15985,7 @@
 				EA689470261C633500F76B91 /* YGConfig.cpp in Sources */,
 				EA689472261C633500F76B91 /* mainiOS.mm in Sources */,
 				EA71A72B27E39E6B0081A5CB /* Makefile in Sources */,
-				EA689473261C633500F76B91 /* YogaLayout.cpp in Sources */,
+				EA689473261C633500F76B91 /* FlexboxLayout.cpp in Sources */,
 				EA71A75D27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA71A78327E39E6C0081A5CB /* aestab.c in Sources */,
 				EA689474261C633500F76B91 /* Image.mm in Sources */,
