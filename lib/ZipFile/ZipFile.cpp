@@ -9,6 +9,7 @@
 #include "ZipFile.h"
 #include "zipper.h"
 #include "unzipper.h"
+#include "mzgl/util/log.h"
 
 using namespace zipper;
 
@@ -62,17 +63,22 @@ void ZipFile::listZip(const fs::path &pathToZip, std::vector<std::string> &fileL
 		fileList.emplace_back(e.name);
 	}
 }
- 
+ // throws a runtime error if there was a problem
 bool ZipFile::getTextFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::string &outData) {
-	Unzipper unzipper(pathToZip.string());
-	std::vector<unsigned char> vec;
-	if(unzipper.extractEntryToMemory(filePath.string(), vec)) {
-		outData.assign(reinterpret_cast<char*>(&vec[0]), vec.size());
-		return true;
-	} else {
+
+	try {
+		Unzipper unzipper(pathToZip.string());
+		std::vector<unsigned char> vec;
+		if (unzipper.extractEntryToMemory(filePath.string(), vec)) {
+			outData.assign(reinterpret_cast<char *>(&vec[0]), vec.size());
+			return true;
+		} else {
+			return false;
+		}
+	} catch(const std::runtime_error &err) {
+		Log::e() << "Got error trying to getTextFileFromZip()" << err.what();
 		return false;
 	}
-
 }
 
 bool ZipFile::getBinaryFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::vector<uint8_t> &data) {
