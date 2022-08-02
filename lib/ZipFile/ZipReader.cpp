@@ -187,7 +187,7 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 		char fn[ent->fileNameLength+1];
 		fn[ent->fileNameLength] = 0;
 		memcpy(fn, fileNamePtr, ent->fileNameLength);
-		
+//		printf("Compression used: %d\n", ent->compression);
 		entries.emplace_back(std::string(fn), ent->localHeaderOffset, ent->uncompressedSize);
 		
 		offset += ent->getTotalLength();
