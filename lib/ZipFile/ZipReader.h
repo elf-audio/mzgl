@@ -13,8 +13,6 @@ public:
  
 	std::shared_ptr<ZipReaderFile> open(std::string pathInZip);
 	
-//	bool printTextFile(const std::string &path);
-
 	std::vector<std::string> list(bool print = false);
 	
 	struct Entry {
@@ -29,11 +27,7 @@ public:
 	std::string zipPath;
 
 private:
-//	void printTextFile(const Entry &e);
-//	void seekToEntry(const Entry &e);
-	
-//	int currEntryStart;
-//	int currEntryLength;
+
 
 	std::vector<Entry> entries;
 

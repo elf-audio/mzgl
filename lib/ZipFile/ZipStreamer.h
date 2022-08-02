@@ -18,7 +18,7 @@
  * Whilst minizip appears to let you seek, I couldn't get it to work properly, so ZipReader is
  * my own implementation.
  */
-struct ZipStreamer {
+struct ZipStreamer  {
 
 	enum class SeekOrigin {
 		Start,
