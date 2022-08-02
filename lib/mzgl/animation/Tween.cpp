@@ -17,10 +17,7 @@ using namespace std;
 
 	
 	
-template <class T>
-bool Tween_<T>::isDone() {
-	return (startTime < 0 || getSeconds() > endTime);
-}
+
 template <class T>
 void Tween_<T>::update(float t) {
 	if(!running) return;

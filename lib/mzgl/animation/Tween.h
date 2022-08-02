@@ -51,21 +51,27 @@ public:
 	void pointTo(T &var) {
 		valuePtr = &var;
 	}
+	void setToValue(T f) {
+		to = f;
+		if(isDone()) {
+			*valuePtr = to;
+		}
+	}
 	T getToValue() { return to; }
-	bool isDone();
+	bool isDone() { return !running && endTime!=0; }
 	void update(float currTime) override;
+	
 private:
-	float startTime;
-	float endTime;
+	float startTime = 0;
+	float endTime = 0;
 	T from;
 	T to;
 	bool running = false;
 	EaseType type;
 	
-	
-	
 	float ease(float v);
 };
+
 
 template <class T>
 void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float delay) {
