@@ -41,7 +41,9 @@ public:
 	// to initiate the drag due to hysteresisDistance
 	bool isActive() { return active; }
 	
-	void activate() { active = true; }
+	void activate() {
+		active = true;
+	}
 	
 	virtual void draw() {}
 	
