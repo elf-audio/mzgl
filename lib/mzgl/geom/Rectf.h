@@ -61,6 +61,9 @@ public:
 	void setCentre(float x, float y) { setFromCentre(x, y, this->width, this->height); }
 	void setCentre(const glm::vec2 &c) { setCentre(c.x, c.y); }
 	
+	void setCentreX(float cx) { x = cx - width*0.5f; }
+	void setCentreY(float cy) { x = cy - height*0.5f; }
+	
 	void scale(float amt) {auto c = centre(); setFromCentre(c, width * amt, height * amt); }
 	void scale(float amtX, float amtY) {auto c = centre(); setFromCentre(c, width * amtX, height * amtY); }
 	
