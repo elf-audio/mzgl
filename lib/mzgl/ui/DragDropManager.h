@@ -116,8 +116,7 @@ public:
 	}
 	
 	
-	bool dragsStartedCalled = false;
-	
+
 	// add draggers as items are dragged
 	void addDragger(std::shared_ptr<T> dragger) {
 		dragger->sourceLayer->transferFocus(this);
@@ -140,6 +139,10 @@ public:
 
 public:
 	
+	
+	bool isActive() {
+		return draggers.size()>0;
+	}
 	
 	DrawingFunction *createDraggerDrawingFunction() {
 		return new DrawingFunction(g, [this](Graphics &g) {
@@ -234,10 +237,11 @@ public:
 		return false;
 	}
 
-	
+
 	std::map<int,std::shared_ptr<T>> draggers;
 	
 private:
+	bool dragsStartedCalled = false;
 
 	void callDragsStarted() {
 		dragsStartedCalled = true;
