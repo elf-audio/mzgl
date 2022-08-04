@@ -4,6 +4,7 @@
 #include <string>
 #include <util/log.h>
 #include "util.h"
+#include "mainThread.h"
 
 using namespace std;
 bool ScopedJniAttachmentBlocker::shouldBlock = false;
@@ -23,22 +24,26 @@ struct android_statics {
 bool androidIsOnWifi() {
     return callJNIForBoolean("isOnWifi");
 }
+
 bool isUsingHeadphones() {
     return callJNIForBoolean("isUsingHeadphones");
 }
+
 bool isUsingUSBInterface() {
     return callJNIForBoolean("isUsingUSBInterface");
 }
+
 bool androidHasMicPermission() {
     return callJNIForBoolean("hasMicPermissions");
 }
+
 bool isUsingAirplay() {
     return false;
 }
+
 bool isUsingBluetoothHeadphones() {
     return callJNIForBoolean("isUsingBluetoothHeadphones");
 }
-
 
 std::vector<std::string> androidGetMidiDeviceNames() {
     if(getAndroidAppPtr()==nullptr) return std::vector<std::string>();
@@ -71,6 +76,7 @@ std::vector<std::string> androidGetMidiDeviceNames() {
 std::string androidGetAppVersionString() {
     return callJNIForString("getAppVersionString");
 }
+
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData) {
     if(getAndroidAppPtr()==nullptr) return false;
 
@@ -114,13 +120,14 @@ std::string getAndroidTempDir() {
 
 std::string getAndroidInternalDataPath() {
     if(getAndroidAppPtr()==nullptr) return "";
-
     return std::string(getAndroidAppPtr()->activity->internalDataPath);
 }
+
 std::string getAndroidExternalDataPath() {
     if(getAndroidAppPtr()==nullptr) return "";
     return std::string(getAndroidAppPtr()->activity->externalDataPath);
 }
+
 std::string getAndroidExternalStorageDirectory() {
     return callJNIForString("getExternalStorageDirectory");
 }
@@ -129,12 +136,9 @@ void androidLaunchUrl(const std::string &url) {
     callJNI("launchUrl", url);
 }
 
-
 void androidAlertDialog(const std::string &title, const std::string &message) {
     callJNI("alertDialog", title, message);
 }
-
-
 
 void androidConfirmDialog(std::string title, std::string msg,
                           std::function<void()> okPressed,
@@ -143,7 +147,6 @@ void androidConfirmDialog(std::string title, std::string msg,
     android_statics.cancelPressed = cancelPressed;
     callJNI("confirmDialog", title, msg);
 }
-
 
 void androidTwoOptionCancelDialog(std::string title, std::string msg,
                                   std::string buttonOneText, std::function<void()> buttonOnePressed,
@@ -175,17 +178,13 @@ void androidImageDialog(std::string copyToPath, std::function<void(bool success,
     callJNI("imageDialog", copyToPath);
 }
 
-
 void androidShareDialog(std::string message,
                         std::string path,
                         std::function<void(bool)> completionCallback) {
 
     android_statics.shareCompleteCallback = completionCallback;
-
     callJNI("shareDialog", message, path);
-
- }
-
+}
 
 void androidTextboxDialog(std::string title,
                           std::string msg,

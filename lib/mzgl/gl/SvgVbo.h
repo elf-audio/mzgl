@@ -31,6 +31,7 @@ public:
 	static SvgVboRef create(SVGDoc &d, bool ignoreColor = false) {
 		return SvgVboRef(new SvgVbo(d, ignoreColor));
 	}
+	static VboRef createVboWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor);
 	
 	void draw(Graphics &g, float x = 0, float y = 0);
 	void drawCentred(Graphics &g, glm::vec2 p) {

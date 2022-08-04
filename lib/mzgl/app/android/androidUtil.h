@@ -6,6 +6,7 @@
 #include <android/log.h>
 #include "App.h"
 #include "Midi.h"
+#include "mzAssert.h"
 
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "native-activity", __VA_ARGS__))

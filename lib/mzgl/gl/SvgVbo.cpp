@@ -13,6 +13,18 @@
 #include "log.h"
 
 using namespace std;
+VboRef SvgVbo::createVboWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor) {
+	SVGDoc doc;
+	doc.loadFromString(svgCode);
+	
+	vec2 tr = -vec2(doc.width/2, doc.height/2);
+	doc.translate(tr.x, tr.y);
+
+	float actualMaxDim = std::max(doc.width, doc.height);
+
+	doc.scale(maxDim / actualMaxDim);
+	return SvgVbo::create(doc, ignoreColor)->getVbo();
+}
 
 
 void SvgVbo::draw(Graphics &g, float x, float y) {
