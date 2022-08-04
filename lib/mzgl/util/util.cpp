@@ -88,6 +88,11 @@ std::string convertWideToNarrow( const wchar_t *s, char dfault = '?',
 #include <pwd.h>
 #include <unistd.h>
 
+#	ifdef __APPLE__
+std::string getHomeDirectory() {
+	return [NSHomeDirectory() UTF8String];
+}
+#	else
 std::string getHomeDirectory() {
     const char *homeDir = getenv("HOME");
 
@@ -97,9 +102,10 @@ std::string getHomeDirectory() {
            homeDir = pwd->pw_dir;
     }
     return homeDir;
-}
-#endif
 
+}
+#	endif
+#endif
 
 
 
@@ -241,6 +247,7 @@ void updateInternal() {
 #ifdef __APPLE__
 #if !TARGET_OS_IOS
 #include "MacAppDelegate.h"
+#include "EventsView.h"
 #endif
 #endif
 
@@ -254,8 +261,8 @@ void setWindowSize(int w, int h) {
 	
 	// these lines were commented out because we don't have SCALE_FACTOR any more.
 	// it's now g.pixelScale
-//	w /= SCALE_FACTOR;
-//	h /= SCALE_FACTOR;
+//	w /= g.pixelScale;
+//	h /= g.pixelScale;
 	
 	NSRect frame = win.frame;
 	NSSize newSize = CGSizeMake(w, h);
@@ -265,9 +272,15 @@ void setWindowSize(int w, int h) {
 	frame.size = newSize;
 	dispatch_async(dispatch_get_main_queue(), ^(void){
 		[win setFrame: frame display: YES animate: NO];
+//		// get window delegate which is events view
+//		EventsView *delegate = (EventsView*)win.delegate;
+//		// then call windowDidEndLiveResize:(NSNotification *)notification
+//		NSNotification *notif = [[NSNotification alloc] initWithName:@"" object:win userInfo:nil];
+//		[delegate windowDidEndLiveResize:notif];
 	});
 	
 
+	
 #endif
 #endif
 
