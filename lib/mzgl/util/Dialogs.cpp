@@ -17,7 +17,7 @@
 #elif defined(__linux__)
 #include "linuxUtil.h"
 #endif
-
+#include "mzAssert.h"
 using namespace std;
 
 #include "filesystem.h"
