@@ -12,7 +12,7 @@
 #include <fstream>
 #include <vector>
 #include "log.h"
-#include "util.h"
+#include "stringUtil.h"
 #include "Graphics.h"
 
 using namespace std;

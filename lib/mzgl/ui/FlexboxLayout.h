@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 #include "Layer.h"
-#include "util.h"
+#include "stringUtil.h"
 namespace Flexbox {
 
 	class LayoutNode;

@@ -49,7 +49,6 @@
 #include <fstream>
 
 #include "log.h"
-#include "concurrentqueue.h"
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
@@ -58,10 +57,9 @@
 #include "filesystem.h"
 
 #include "App.h"
-
-using namespace std;
+#include "mainThread.h"
 #include <thread>
-static std::thread::id		mainThreadId;
+using namespace std;
 
 
 
@@ -102,53 +100,6 @@ std::string getHomeDirectory() {
 }
 #endif
 
-
-
-std::string urlencode(const std::string& value) {
-	static auto hex_digt = "0123456789ABCDEF";
-	
-	std::string result;
-	result.reserve(value.size() << 1);
-	
-	for (auto ch : value) {
-		if ((ch >= '0' && ch <= '9')
-			|| (ch >= 'A' && ch <= 'Z')
-			|| (ch >= 'a' && ch <= 'z')
-			|| ch == '-' || ch == '_' || ch == '!'
-			|| ch == '\'' || ch == '(' || ch == ')'
-			|| ch == '*' || ch == '~' || ch == '.')  /*  !'()*-._~   */{
-			result.push_back(ch);
-		} else {
-			result += std::string("%") +
-					  hex_digt[static_cast<unsigned char>(ch) >> 4]
-					  +  hex_digt[static_cast<unsigned char>(ch) & 15];
-		}
-	}
-	
-	return result;
-}
-
-std::string urldecode(const std::string& value) {
-	std::string result;
-	result.reserve(value.size());
-	
-	for (std::size_t i = 0; i < value.size(); ++i) {
-		auto ch = value[i];
-		
-		if (ch == '%' && (i + 2) < value.size()) {
-			auto hex = value.substr(i + 1, 2);
-			auto dec = static_cast<char>(std::strtol(hex.c_str(), nullptr, 16));
-			result.push_back(dec);
-			i += 2;
-		} else if (ch == '+') {
-			result.push_back(' ');
-		} else {
-			result.push_back(ch);
-		}
-	}
-	
-	return result;
-}
 
 
 
@@ -219,13 +170,6 @@ bool is_number(const std::string& s)
 	return !s.empty() && std::find_if(s.begin(),
 									  s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
-template <typename T>
-std::string to_string(const T a_value, const int n)
-{
-	std::ostringstream out;
-	out << std::setprecision(n) << a_value;
-	return out.str();
-}
 
 string uniquerizePath(string path) {
 	fs::path p(path);
@@ -289,63 +233,10 @@ unsigned int getFrameNum() {
 	return Globals::frameNum;
 }
 
-moodycamel::ConcurrentQueue<function<void()>> mainThreadQueue;
-
-void runOnMainThread(function<void()> fn) {
-    mzAssert(!isMainThread());
-	mainThreadQueue.enqueue(fn);
-}
-
-
-void runOnMainThreadAndWait(function<void()> fn) {
-	if(isMainThread()) {
-		Log::e() << "runOnMainThreadAndWait() called from main thread";
-		fn();
-		return;
-	}
-	mzAssert(!isMainThread());
-	atomic<bool> done {false};
-	mainThreadQueue.enqueue([fn,&done]() {
-		fn();
-		done.store(true);
-	});
-	
-	while(!done.load()) {
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
-	}
-}
-
-
-void runOnMainThread(bool checkIfOnMainThread, function<void()> fn) {
-	if(checkIfOnMainThread && isMainThread()) {
-		fn();
-	} else {
-		runOnMainThread(fn);
-	}
-}
-#ifdef UNIT_TEST
-// dangerous to use in anything but testing
-void clearMainThreadQueue() {
-	mzAssert(isMainThread());
-	function<void()> fn;
-	while(mainThreadQueue.try_dequeue(fn)) {}
-}
-#endif
-
-void pollMainThreadQueue() {
-	function<void()> fn;
-	while(mainThreadQueue.try_dequeue(fn)) {
-		fn();
-	}
-}
-
 void updateInternal() {
 	++Globals::frameNum;
 	pollMainThreadQueue();
 }
-
-
-
 
 #ifdef __APPLE__
 #if !TARGET_OS_IOS
@@ -582,20 +473,6 @@ string appSupportPath(string path) {
 }
 
 
-string byteSizeToString(uint64_t bytes) {
-	
-	char buf[256];
-	double size = bytes;
-	int i = 0;
-	const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
-	while (size > 1024) {
-		size /= 1024;
-		i++;
-	}
-	sprintf(buf, "%.*f %s", i, size, units[i]);
-	return buf;
-}
-
 string getOSVersion() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
@@ -721,108 +598,6 @@ void initMZGL(App *app) {
 	setMainThreadId();
 }
 
-void setMainThreadId() {
-	mainThreadId = std::this_thread::get_id();
-}
-// TODO: DELETE THIS
-#include "EventDispatcher.h"
-/*
-void drawFrame(Graphics &g, EventDispatcher *eventDispatcher) {
-	
-	if(g.firstFrame) {
-		initMZGL(eventDispatcher->app->g);
-		eventDispatcher->setup();
-		g.firstFrame = false;
-	}
-
-
-	#ifdef DO_DRAW_STATS
-	Vbo::resetDrawStats();
-	#endif
-
-	g.setupView();
-	updateInternal();
-	eventDispatcher->update();
-	callUpdateListeners();
-	eventDispatcher->draw();
-	callDrawListeners();
-}
-*/
-
-
-
-
-void replaceAll(std::string & d, std::string toSearch, std::string replaceStr) {
-	
-	
-	// Get the first occurrence
-	size_t pos = d.find(toSearch);
-	
-	// Repeat till end is reached
-	while( pos != std::string::npos) {
-		// Replace this occurrence of Sub String
-		d.replace(pos, toSearch.size(), replaceStr);
-		// Get the next occurrence from the current position
-		pos = d.find(toSearch, pos + replaceStr.size());
-	}
-}
-
-//--------------------------------------------------
-vector <string> split(const string & source, const string & delimiter, bool ignoreEmpty, bool _trim) {
-	vector<string> result;
-	if (delimiter.empty()) {
-		result.push_back(source);
-		return result;
-	}
-	string::const_iterator substart = source.begin(), subend;
-	while (true) {
-		subend = search(substart, source.end(), delimiter.begin(), delimiter.end());
-		string sub(substart, subend);
-		if(_trim) {
-			sub = trim(sub);
-		}
-		if (!ignoreEmpty || !sub.empty()) {
-			result.push_back(sub);
-		}
-		if (subend == source.end()) {
-			break;
-		}
-		substart = subend + delimiter.size();
-	}
-	return result;
-}
-//--------------------------------------------------
-string trimFront(const string & src){
-	auto dst = src;
-	dst.erase(dst.begin(),std::find_if_not(dst.begin(),dst.end(),[&](char & c){return std::isspace(c);}));
-	return dst;
-}
-
-//--------------------------------------------------
-string trimBack(const string & src){
-	auto dst = src;
-	dst.erase(std::find_if_not(dst.rbegin(),dst.rend(),[&](char & c){return std::isspace(c);}).base(), dst.end());
-	return dst;
-}
-
-//--------------------------------------------------
-string trim(const string & src){
-	return trimFront(trimBack(src));
-}
-
-
-#include <sstream>
-#include <iomanip>
-
-std::string to_string(float value, int precision){
-	std::ostringstream out;
-	out << std::fixed << std::setprecision(precision) << value;
-	return out.str();
-}
-std::string to_string(double value, int precision){
-	return to_string((float)value, precision);
-}
-
 
 #if TARGET_OS_IOS
 #	include <UIKit/UIKit.h>
@@ -843,9 +618,7 @@ void launchUrl(string url) {
 #else
 	Log::e() << "Launch url not implemented";
 #endif
-
 }
-
 
 
 string getAppVersionString() {
@@ -864,7 +637,6 @@ string getAppVersionString() {
 }
 
 
-
 #if defined(__APPLE__) && !TARGET_OS_IOS
 // ofSystemUtils.cpp is configured to build as
 // objective-c++ so as able to use Cocoa dialog panels
@@ -873,8 +645,6 @@ string getAppVersionString() {
 // http://www.yakyak.org/viewtopic.php?p=1475838&sid=1e9dcb5c9fd652a6695ac00c5e957822#p1475838
 
 #include <Cocoa/Cocoa.h>
-
-
 
 #endif
 
@@ -983,12 +753,6 @@ void hideMouse() {
 #endif
 }
 
-// from cinder
-bool isMainThread() {
-	return std::this_thread::get_id() == mainThreadId;
-}
-
-
 
 string tolower(std::string s) {
 	std::transform(s.begin(), s.end(), s.begin(),
@@ -1076,16 +840,6 @@ void oslog(string s) {
 }
 #endif
 
-
-bool assertsEnabled = true;
-
-void mzEnableAssert(bool enabled) {
-	assertsEnabled = enabled;
-}
-
-bool mzAssertEnabled() {
-	return assertsEnabled;
-}
 
 
 

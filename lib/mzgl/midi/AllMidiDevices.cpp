@@ -9,8 +9,11 @@
 #include "AllMidiDevices.h"
 #include "AllMidiDevicesImpl.h"
 #include <atomic>
+#include "mainThread.h"
+#include "util.h"
+
 #ifdef __APPLE__
-#include "AllMidiDevicesAppleImpl.h"
+#	include "AllMidiDevicesAppleImpl.h"
 #endif
 
 #ifdef __ANDROID__

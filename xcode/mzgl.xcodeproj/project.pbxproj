@@ -4508,6 +4508,24 @@
 		EAD82ECC269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
+		EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
+		EAF67372289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
+		EAF67373289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
+		EAF67374289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
+		EAF67375289BC3DC001F778D /* mzAssert.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67370289BC3DC001F778D /* mzAssert.h */; };
+		EAF67376289BC3DC001F778D /* mzAssert.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67370289BC3DC001F778D /* mzAssert.h */; };
+		EAF67379289BC441001F778D /* stringUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF67377289BC441001F778D /* stringUtil.cpp */; };
+		EAF6737A289BC441001F778D /* stringUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF67377289BC441001F778D /* stringUtil.cpp */; };
+		EAF6737B289BC441001F778D /* stringUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF67377289BC441001F778D /* stringUtil.cpp */; };
+		EAF6737C289BC441001F778D /* stringUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF67377289BC441001F778D /* stringUtil.cpp */; };
+		EAF6737D289BC441001F778D /* stringUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67378289BC441001F778D /* stringUtil.h */; };
+		EAF6737E289BC441001F778D /* stringUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67378289BC441001F778D /* stringUtil.h */; };
+		EAF67381289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
+		EAF67382289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
+		EAF67383289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
+		EAF67384289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
+		EAF67385289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
+		EAF67386289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
 		EAF99AB5267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB6267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
@@ -7227,6 +7245,12 @@
 		EAE94825274C0BF300718B53 /* UIBlockButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIBlockButton.h; sourceTree = "<group>"; };
 		EAE94826274C0BF300718B53 /* UIBlockButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIBlockButton.m; sourceTree = "<group>"; };
 		EAF18F8E273BE69A00E1589E /* MidiMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MidiMessage.h; sourceTree = "<group>"; };
+		EAF6736F289BC3DB001F778D /* mzAssert.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mzAssert.cpp; sourceTree = "<group>"; };
+		EAF67370289BC3DC001F778D /* mzAssert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mzAssert.h; sourceTree = "<group>"; };
+		EAF67377289BC441001F778D /* stringUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stringUtil.cpp; sourceTree = "<group>"; };
+		EAF67378289BC441001F778D /* stringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stringUtil.h; sourceTree = "<group>"; };
+		EAF6737F289BC87E001F778D /* mainThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mainThread.cpp; sourceTree = "<group>"; };
+		EAF67380289BC87E001F778D /* mainThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainThread.h; sourceTree = "<group>"; };
 		EAF99AB3267A40D200157A7C /* ScrollingListItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListItem.h; sourceTree = "<group>"; };
 		EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListItem.cpp; sourceTree = "<group>"; };
 		EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListDeletable.h; sourceTree = "<group>"; };
@@ -10206,10 +10230,16 @@
 				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
+				EAF6736F289BC3DB001F778D /* mzAssert.cpp */,
+				EAF67370289BC3DC001F778D /* mzAssert.h */,
+				EAF6737F289BC87E001F778D /* mainThread.cpp */,
+				EAF67380289BC87E001F778D /* mainThread.h */,
 				EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */,
 				EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */,
 				EAA44CD3267A2BE50014C203 /* Haptics.cpp */,
 				EAA44CD2267A2BCB0014C203 /* Haptics.h */,
+				EAF67378289BC441001F778D /* stringUtil.h */,
+				EAF67377289BC441001F778D /* stringUtil.cpp */,
 				EA1835EC2432C18B00A5C3E8 /* util.h */,
 				EA1835E32432C18B00A5C3E8 /* util.cpp */,
 				EA1835E42432C18B00A5C3E8 /* events.h */,
@@ -11877,6 +11907,7 @@
 				EA1838842432C18B00A5C3E8 /* diab.hpp in Headers */,
 				EA1839F52432C18C00A5C3E8 /* named_template_params.hpp in Headers */,
 				EA183BA22432C18C00A5C3E8 /* reverse_fold_impl_body.hpp in Headers */,
+				EAF6737D289BC441001F778D /* stringUtil.h in Headers */,
 				EA183E922432C18D00A5C3E8 /* remove.hpp in Headers */,
 				EA924326273EE0C300311C98 /* spinlock.hpp in Headers */,
 				EA1839772432C18C00A5C3E8 /* is_default_constructible.hpp in Headers */,
@@ -12173,6 +12204,7 @@
 				EA924356273EE0C300311C98 /* enable_shared_from_this.hpp in Headers */,
 				EA183D442432C18C00A5C3E8 /* or.hpp in Headers */,
 				EA924354273EE0C300311C98 /* make_shared.hpp in Headers */,
+				EAF67375289BC3DC001F778D /* mzAssert.h in Headers */,
 				EA183A5A2432C18C00A5C3E8 /* min.hpp in Headers */,
 				EA1839542432C18C00A5C3E8 /* composite_pointer_type.hpp in Headers */,
 				EA183A552432C18C00A5C3E8 /* key_type_fwd.hpp in Headers */,
@@ -12217,6 +12249,7 @@
 				EA1838F22432C18C00A5C3E8 /* is_const.hpp in Headers */,
 				EA183D032432C18C00A5C3E8 /* vector_c.hpp in Headers */,
 				EA1839802432C18C00A5C3E8 /* make_unsigned.hpp in Headers */,
+				EAF67385289BC87E001F778D /* mainThread.h in Headers */,
 				EA18394F2432C18C00A5C3E8 /* common_type_impl.hpp in Headers */,
 				EA183D962432C18C00A5C3E8 /* placeholders.hpp in Headers */,
 				EA1839972432C18C00A5C3E8 /* alignment_of.hpp in Headers */,
@@ -13517,6 +13550,7 @@
 				EA2B82B424E7093600EA12BD /* make_void.hpp in Headers */,
 				EA2B82B524E7093600EA12BD /* irix.hpp in Headers */,
 				EA2B82B624E7093600EA12BD /* advance_forward.hpp in Headers */,
+				EAF67386289BC87E001F778D /* mainThread.h in Headers */,
 				EA9242E1273EE0C300311C98 /* sp_disable_deprecated.hpp in Headers */,
 				EA2B82B724E7093600EA12BD /* typeinfo.hpp in Headers */,
 				EA2B82B824E7093600EA12BD /* or.hpp in Headers */,
@@ -13925,6 +13959,7 @@
 				EA2B847324E7093600EA12BD /* DropDown.h in Headers */,
 				EA2B847424E7093600EA12BD /* config_undef.hpp in Headers */,
 				EA2B847524E7093600EA12BD /* is_abstract.hpp in Headers */,
+				EAF6737E289BC441001F778D /* stringUtil.h in Headers */,
 				EA2B847624E7093600EA12BD /* begin_end.hpp in Headers */,
 				EA2B847724E7093600EA12BD /* list30_c.hpp in Headers */,
 				EA2B847824E7093600EA12BD /* arity_spec.hpp in Headers */,
@@ -14366,6 +14401,7 @@
 				EA2B864F24E7093600EA12BD /* template_arity.hpp in Headers */,
 				EA2B865024E7093600EA12BD /* insert_range_impl.hpp in Headers */,
 				EA2B865124E7093600EA12BD /* fold_right.hpp in Headers */,
+				EAF67376289BC3DC001F778D /* mzAssert.h in Headers */,
 				EA2B865224E7093600EA12BD /* add_rvalue_reference.hpp in Headers */,
 				EA2B865324E7093600EA12BD /* basic_bind.hpp in Headers */,
 				EA2B865424E7093600EA12BD /* single_element_iter.hpp in Headers */,
@@ -15597,6 +15633,7 @@
 				EA71A79427E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
 				EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EAF9A15126F8B42200698263 /* log.cpp in Sources */,
+				EAF67381289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA183FFB2432C18D00A5C3E8 /* MitredLine.cpp in Sources */,
 				EA71A73C27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA71FEE927F33B310005C47A /* ZipReader.cpp in Sources */,
@@ -15657,12 +15694,14 @@
 				EA71A72C27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */,
 				EA297C7225C954E600F890AE /* pa_stream.c in Sources */,
+				EAF67379289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA183FF52432C18D00A5C3E8 /* RoundedRect.cpp in Sources */,
 				EA183FF42432C18D00A5C3E8 /* Rectf.cpp in Sources */,
 				EA1841B82432CCCC00A5C3E8 /* portability.cpp in Sources */,
 				EA71A74E27E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA924368274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA234AF624A609CA000F057B /* YGStyle.cpp in Sources */,
+				EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */,
 				EA71A72227E39E6B0081A5CB /* zip.c in Sources */,
 				EA297C7625C954E600F890AE /* pa_converters.c in Sources */,
@@ -15718,8 +15757,10 @@
 				EA234B0424A609CA000F057B /* YGValue.cpp in Sources */,
 				EAF99ABC267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
+				EAF67382289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA234B1424A611AF000F057B /* ylog.cpp in Sources */,
 				EA1841192432C4A500A5C3E8 /* SvgVbo.cpp in Sources */,
+				EAF67372289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
 				EA1841182432C4A500A5C3E8 /* Shader.cpp in Sources */,
 				EA18411E2432C4C500A5C3E8 /* SVG.cpp in Sources */,
@@ -15766,6 +15807,7 @@
 				EA1841BB2432CCDC00A5C3E8 /* path.cpp in Sources */,
 				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
 				EA18412B2432C4FF00A5C3E8 /* events.cpp in Sources */,
+				EAF6737A289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA234AF524A609CA000F057B /* Yoga.cpp in Sources */,
 				EA234AF124A609CA000F057B /* YGLayout.cpp in Sources */,
 				EA1841252432C4E800A5C3E8 /* Tween.cpp in Sources */,
@@ -15804,6 +15846,7 @@
 				EA2B8ACE24E7093600EA12BD /* Image.mm in Sources */,
 				EA2B8ACF24E7093600EA12BD /* YGNodePrint.cpp in Sources */,
 				EA2B8AD024E7093600EA12BD /* Drawer.cpp in Sources */,
+				EAF67383289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA2B8AD124E7093600EA12BD /* Utils.cpp in Sources */,
 				EA16DAD325FFABDA001C0460 /* pa_trace.c in Sources */,
 				EA16DADC25FFAEA1001C0460 /* MZGLView.mm in Sources */,
@@ -15881,6 +15924,7 @@
 				EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */,
 				EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */,
 				EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */,
+				EAF6737B289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */,
 				EA71A7A227E39E6C0081A5CB /* tools.cpp in Sources */,
 				EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */,
@@ -15918,6 +15962,7 @@
 				EA2B8B2B24E7093600EA12BD /* DateTime.cpp in Sources */,
 				EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA2B8B2C24E7093600EA12BD /* PadGrid.cpp in Sources */,
+				EAF67373289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -15954,8 +15999,10 @@
 				EA689458261C633500F76B91 /* Layout.cpp in Sources */,
 				EA68945B261C633500F76B91 /* Shader.cpp in Sources */,
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
+				EAF67384289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA71A73F27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA68945D261C633500F76B91 /* Texture.cpp in Sources */,
+				EAF67374289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA71FEEC27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA689460261C633500F76B91 /* ScrollingList.cpp in Sources */,
 				EA689462261C633500F76B91 /* AudioSystem.cpp in Sources */,
@@ -16002,6 +16049,7 @@
 				EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */,
 				EA689483261C633500F76B91 /* events.cpp in Sources */,
 				EA689485261C633500F76B91 /* Yoga.cpp in Sources */,
+				EAF6737C289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA71A7B727E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA689486261C633500F76B91 /* YGLayout.cpp in Sources */,
 				EA689487261C633500F76B91 /* Tween.cpp in Sources */,

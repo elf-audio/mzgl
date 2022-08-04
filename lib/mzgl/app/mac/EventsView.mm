@@ -9,7 +9,7 @@
 #import "EventsView.h"
 #include "util.h"
 #include "mzgl/util/log.h"
-
+#include "mainThread.h"
 
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"

@@ -8,7 +8,7 @@
 
 #import "MacAppDelegate.h"
 #import "EventsView.h"
-#include "util.h"
+#include "mainThread.h"
 #include "MacMenuBar.h"
 #include "App.h"
 #include "Graphics.h"

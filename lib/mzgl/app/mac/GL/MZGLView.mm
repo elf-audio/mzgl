@@ -8,7 +8,7 @@
 
 #import "MZGLView.h"
 #include "App.h"
-#include "util.h"
+#include "mainThread.h"
 #include "log.h"
 
 #include "mzOpenGL.h"
@@ -113,6 +113,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 	frame.origin.y += newSize.height;
 	frame.size = newSize;
 	[self.window setFrame: frame display: YES animate: NO];
+//	eventDispatcher->resized();
 }
 
 - (void)createGLResources {

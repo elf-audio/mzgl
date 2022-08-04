@@ -7,7 +7,7 @@
 //
 
 #include "SVG.h"
-#include "util.h"
+#include "stringUtil.h"
 #include "Triangulator.h"
 #include "MitredLine.h"
 #include <algorithm>
@@ -17,10 +17,9 @@
 #include "choc/platform/choc_DisableAllWarnings.h"
 #include "pu_gixml.hpp"
 #include "choc/platform/choc_ReenableAllWarnings.h"
+
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
-
-
 
 
 bool isNumeric(int c) {

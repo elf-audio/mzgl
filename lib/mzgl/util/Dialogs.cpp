@@ -21,6 +21,7 @@
 using namespace std;
 
 #include "filesystem.h"
+#include "mainThread.h"
 
 
 #ifdef UNIT_TEST
@@ -67,9 +68,6 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 	
 #ifdef __APPLE__
 #   if TARGET_OS_IOS
-
-	
-	
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		UITextField *alertTextField = alert.textFields.firstObject;

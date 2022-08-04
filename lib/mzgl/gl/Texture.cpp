@@ -13,7 +13,7 @@
 #include "Graphics.h"
 #include "error.h"
 #include "log.h"
-#include "util.h"
+#include "mzAssert.h"
 
 using namespace std;
 

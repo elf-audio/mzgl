@@ -10,6 +10,7 @@
 #include "ScrollingList.h"
 #include "animation.h"
 #include "log.h"
+#include "mzAssert.h"
 #include <list>
 class HierarchicalScrollingList : public ScrollingList {
 public:

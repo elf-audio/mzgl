@@ -15,6 +15,8 @@
 #include "Graphics.h"
 #include "util.h"
 #include "Geometry.h"
+#include "mzAssert.h"
+#include "mainThread.h"
 
 using namespace std;
 

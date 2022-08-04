@@ -98,6 +98,9 @@ set(MZGL_SOURCES
 	lib/mzgl/util/log.cpp
 	lib/mzgl/util/maths.cpp
 	lib/mzgl/util/util.cpp
+	lib/mzgl/util/mainThread.cpp
+	lib/mzgl/util/mzAssert.cpp
+	lib/mzgl/util/stringUtil.cpp
 
 
 	$<$<PLATFORM_ID:Darwin>:
