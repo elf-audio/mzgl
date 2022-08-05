@@ -50,6 +50,7 @@ public:
 	glm::vec2 size() const { return glm::vec2(width, height); }
 	void size(glm::vec2 s) { width = s.x; height = s.y; }
 	void size(float w, float h) { width = w; height = h; }
+	void size(float d) { width = d; height = d; }
 	
 	float centreX() const { return x + width*0.5f; }
 	float centreY() const { return y + height*0.5f; }
