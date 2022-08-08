@@ -176,8 +176,9 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void) shutdown {
-	[super shutdown];
 	eventDispatcher->exit();
+	[super shutdown];
+	
 }
 
 - (void*) getApp {
