@@ -16,8 +16,12 @@ class Dragger {
 public:
 	
 	virtual ~Dragger() {}
-	Layer *sourceLayer;
+	
+	
+	Rectf sourceLayerRect;
 	Graphics &g;
+	// the area on the screen that the drag has been dragged
+	Rectf dragRect;
 	int touchId;
 	
 	/**
@@ -26,8 +30,9 @@ public:
 	 * @param touchId the touch id of the touch dragging
 	 */
 	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
-	g(g), startTouch(startTouch), sourceLayer(sourceLayer), touchId(touchId) {
+	g(g), startTouch(startTouch), sourceLayer(sourceLayer), sourceLayerRect(sourceLayer->getAbsoluteRect()), touchId(touchId) {
 		touchOffset = startTouch - sourceLayer->getAbsolutePosition();
+		dragRect.set(startTouch.x, startTouch.y, 0, 0);
 	}
 	
 	glm::vec2 touchDelta;
@@ -60,6 +65,7 @@ public:
 	
 	void touchMoved(float x, float y) {
 		auto touch = glm::vec2(x, y);
+		dragRect.growToInclude(touch);
 		touchDelta = touch - startTouch;
 		
 		if(!active) {
@@ -73,6 +79,9 @@ public:
 		hysteresisDistance = f;
 	}
 	
+
+	// may be null, so always check
+	Layer *sourceLayer = nullptr;
 private:
 	float hysteresisDistance = 0;
 	bool active = false;
@@ -98,6 +107,8 @@ public:
 	
 	// gets called when all drags are finished
 	virtual void dragsEnded() {}
+
+
 };
 
 template <class T>
@@ -130,10 +141,28 @@ public:
 			auto dragger = d.second;
 			// got to fire the touchUp event in order for the
 			// original object to know we released it
-			auto c = dragger->sourceLayer->centre();
-			dragger->sourceLayer->touchUp(c.x, c.y, id);
+			if(dragger->sourceLayer!=nullptr) {
+				auto c = dragger->sourceLayer->centre();
+				dragger->sourceLayer->touchUp(c.x, c.y, id);
+			}
+			
 		}
 		draggers.clear();
+	}
+	
+	/**
+	 * DragDropManager assumes that all sourceLayers (e.g. the layer that originated
+	 * the drag) will still be alive when drag is finished - if they are deleted
+	 * sourceLayer in Dragger will become a dangling pointer, so we need to nullify it
+	 * if the actual sourceLayer gets deleted. Bit of a hack sorry.
+	 *
+	 * It happens when you start a drag with the mediabrowser open, but then close the
+	 * media browser or do anyhting to cause doLayout to recreate the layers.
+	 */
+	void removeAllSourceLayers() {
+		for(auto &d : draggers) {
+			d.second->sourceLayer = nullptr;
+		}
 	}
 	
 
@@ -227,7 +256,10 @@ public:
 			}
 			// got to fire the touchUp event in order for the
 			// original object to know we released it
-			draggers[id]->sourceLayer->touchUp(x, y, id);
+			if(draggers[id]->sourceLayer!=nullptr) {
+				draggers[id]->sourceLayer->touchUp(x, y, id);
+			}
+			
 			draggers.erase(id);
 			if(draggers.empty()) {
 				callDragsEnded();

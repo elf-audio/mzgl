@@ -107,6 +107,7 @@ public:
 	
 	void drawChevronLeft(vec2 c, int radius, int thickness);
 	void drawChevronRight(vec2 c, int radius, int thickness);
+	void drawChevronUp(vec2 c, int radius, int thickness);
 	void drawChevronDown(vec2 c, int radius, int thickness);
 
 	void drawShape(const std::vector<vec2> &shape);

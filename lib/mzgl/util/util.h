@@ -88,6 +88,7 @@ std::string getPlatformName();
 std::string getAppVersionString();
 uint64_t getStorageRemainingInBytes();
 
+bool isTabletDevice();
 // returns -1 if not supported
 int64_t getAvailableMemory();
 

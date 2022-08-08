@@ -55,6 +55,12 @@ public:
 	float centreX() const { return x + width*0.5f; }
 	float centreY() const { return y + height*0.5f; }
 	
+	glm::vec2 centreTop() const { return {centreX(), y}; }
+	glm::vec2 centreBottom() const { return {centreX(), bottom()}; }
+	
+	glm::vec2 centreLeft() const { return {x, centreY()}; }
+	glm::vec2 centreRight() const { return {right(), centreY()}; }
+	
 	void position(float x, float y) { this->x = x; this->y = y;}
 	
 	glm::vec2 position() const { return glm::vec2(x, y); }

@@ -37,13 +37,13 @@ void Tween_<T>::update(float t) {
 template <class T>
 float Tween_<T>::ease(float v) {
 	switch(type) {
-		case EASE_OUT_CUBIC:
+		case EaseType::EASE_OUT_CUBIC:
 			return easeOutCubic(v);
-		case EASE_IN_CUBIC:
+		case EaseType::EASE_IN_CUBIC:
 			return easeInCubic(v);
-		case EASE_IN_OUT_CUBIC:
+		case EaseType::EASE_IN_OUT_CUBIC:
 			return easeInOutCubic(v);
-		case EASE_LINEAR:
+		case EaseType::EASE_LINEAR:
 		default:
 			return v;
 	}

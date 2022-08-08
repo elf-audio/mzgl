@@ -10,12 +10,14 @@
 
 #include "animation.h"
 #include <functional>
-//#include "util.h"
 #include "Rectf.h"
 #include <vector>
+
 #include <memory>
 
-enum EaseType {
+
+
+enum class EaseType {
  
 	EASE_LINEAR,
 	EASE_OUT_CUBIC,
@@ -30,20 +32,22 @@ public:
 	virtual ~Animation() {}
 };
 
+
 template <class T>
 class Tween_: public Animation {
 public:
+	
 	
 	T *valuePtr;
 	
 	std::function<void()> tweenComplete;
 	T getValue() { return *valuePtr; }
-	void tweenTo(T &valuePtr, T to, float duration, EaseType type = EASE_LINEAR, float delay = 0);
+	void tweenTo(T &valuePtr, T to, float duration, EaseType type = EaseType::EASE_LINEAR, float delay = 0);
 	
 	void easeInOutTo(T to, float duration) {
 		tweenTo(*valuePtr, to, duration, EaseType::EASE_IN_OUT_CUBIC);
 	}
-	void start(T &valuePtr, T from, T to, float duration, EaseType type = EASE_LINEAR, float delay = 0);
+	void start(T &valuePtr, T from, T to, float duration, EaseType type = EaseType::EASE_LINEAR, float delay = 0);
 
 	bool isRunning() override {
 		return running;
@@ -129,20 +133,20 @@ public:
 	AnimationManager() {}
 
 	void animate(float duration, std::function<void(float)> progressFunc, std::function<void()> completionFunc);
-	void tweenTo(float &val, float to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	void tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	void tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
-	void tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(float &val, float to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec3 &val, glm::vec3 to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
+	void tweenTo(glm::vec4 &val, glm::vec4 to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
 	
-	void tweenTo(Rectf &val, Rectf to, float duration, EaseType easing = EASE_LINEAR, float delay = 0);
+	void tweenTo(Rectf &val, Rectf to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
 	
 	
 	void easeInOut(float &var, float to, float duration) {
-		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
+		return tweenTo(var, to, duration, EaseType::EASE_IN_OUT_CUBIC);
 	}
 	
 	void easeInOut(Rectf &var, Rectf to, float duration) {
-		return tweenTo(var, to, duration, EASE_IN_OUT_CUBIC);
+		return tweenTo(var, to, duration, EaseType::EASE_IN_OUT_CUBIC);
 	}
 	void update();
 private:

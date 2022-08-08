@@ -572,6 +572,12 @@ void Graphics::drawChevronDown(vec2 c, int radius, int thickness) {
 	d.createVbo(true)->draw(*this);
 }
 
+void Graphics::drawChevronUp(vec2 c, int radius, int thickness) {
+	Drawer d;
+	d.drawChevronUp(c, radius, thickness);
+	d.createVbo(true)->draw(*this);
+}
+
 
 void Graphics::drawChevronRight(vec2 c, int radius, int thickness) {
 	Drawer d;
