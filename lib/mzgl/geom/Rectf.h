@@ -30,6 +30,8 @@ public:
 	
 	void set(const Rectf &r);
 	
+	void translate(glm::vec2 t) { x += t.x; y += t.y; }
+	void translate(float tx, float ty) { x += tx; y += ty; }
 	
 	bool inside(float x, float y) const;
 	bool inside(glm::vec2 p) const;

@@ -31,7 +31,7 @@ public:
 class FloatSampleProvider : public SampleProvider {
 public:
 	virtual ~FloatSampleProvider() {}
-	FloatSampleProvider(const std::vector<float> &data) : data(data) {}
+	FloatSampleProvider(const FloatBuffer &data) : data(data) {}
 	
 	const float operator[] (int index) const override {
 		return data[index];
@@ -56,13 +56,15 @@ public:
 	}
 	
 	void findMinMax(int from, int to, float &min, float &max) const override {
-		min = 1;
-		max = -1;
+		float _min = 1;
+		float _max = -1;
 		for(int j = (int)from; j < to; j++) {
 			float v = data[j];
-			if(max<v) max = v;
-			if(min>v) min = v;
+			if(_max<v) _max = v;
+			if(_min>v) _min = v;
 		}
+		min = _min;
+		max = _max;
 	}
 	
 	
@@ -73,7 +75,7 @@ public:
 //	const std::vector<float> container() { return data; }
 	virtual SampleProvider *shallowCopy() const override { return new FloatSampleProvider(data); };
 private:
-	const std::vector<float> &data;
+	const FloatBuffer &data;
 };
 
 class Int16SampleProvider : public SampleProvider {
