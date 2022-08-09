@@ -50,6 +50,13 @@ public:
 		active = true;
 	}
 	
+	// call this if you don't want the
+	// sourceLayer to receive a touch up
+	// when you drop the drag.
+	void cancelTouchUpOnSourceLayer() {
+		sourceLayer = nullptr;
+	}
+	
 	virtual void draw() {}
 	
 	// reposition the drag origin
