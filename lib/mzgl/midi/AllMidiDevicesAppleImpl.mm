@@ -156,7 +156,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 }
 
 void AllMidiDevicesAppleImpl::connectDestination(MIDIEndpointRef endpoint) {
-    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
+//    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
     auto dest = MidiDestination::create(endpoint);
     destinations.push_back(dest);
     notifyChange();
