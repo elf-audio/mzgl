@@ -10,6 +10,7 @@
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
 #endif
+#include "xsimd/xsimd.hpp"
 
 using namespace std;
 
@@ -26,13 +27,9 @@ FloatBuffer::FloatBuffer(size_t sz) {
 	zeros(sz);
 }
 
-FloatBuffer::FloatBuffer() {
-	
-}
+FloatBuffer::FloatBuffer() {}
 
-FloatBuffer::~FloatBuffer() {
-	
-}
+FloatBuffer::~FloatBuffer() {}
 
 FloatBuffer::FloatBuffer(const float *arr, size_t size) {
 	set(arr, size);
@@ -144,7 +141,7 @@ float FloatBuffer::mean() const {
 }
 
 float FloatBuffer::absMax() const {
-	return abs(at(findAbsMaxPos()));
+	return abs((*this)[findAbsMaxPos()]);
 }
 
 float FloatBuffer::maxValue() const {
@@ -155,7 +152,7 @@ float FloatBuffer::maxValue() const {
 	return maxVal;
 #else
 	  
-	return at(findMaxPos());
+	return (*this)[findMaxPos()];
 #endif
 }
 
@@ -167,7 +164,7 @@ float FloatBuffer::minValue() const {
 	vDSP_maxvi(data(), 1, &minVal,  &pos, size());
 	return minVal;
 #else
-	return at(findMinPos());
+	return (*this)[findMinPos()];
 #endif
 }
 
@@ -176,8 +173,8 @@ int FloatBuffer::findAbsMaxPos() const {
 	float max = 0;
 	int pos = 0;
 	for(int i = 0; i < size(); i++) {
-		if(abs(at(i))>max) {
-			max = abs(at(i));
+		if(abs((*this)[i])>max) {
+			max = abs((*this)[i]);
 			pos = i;
 		}
 	}
@@ -192,8 +189,8 @@ int FloatBuffer::findMaxPos() const {
 #else
 	int pos = 0;
 	for(int i = 0; i < size(); i++) {
-		if(at(i)>maxVal) {
-			maxVal = at(i);
+		if((*this)[i]>maxVal) {
+			maxVal = (*this)[i];
 			pos = i;
 		}
 	}
@@ -211,8 +208,8 @@ int FloatBuffer::findMinPos() const {
 #else
 	int pos = 0;
 	for(int i = 0; i < size(); i++) {
-		if(at(i)<minVal) {
-			minVal = at(i);
+		if((*this)[i]<minVal) {
+			minVal = (*this)[i];
 			pos = i;
 		}
 	}
@@ -226,11 +223,11 @@ void FloatBuffer::getMinMax(float &min, float &max) const {
 	max = std::numeric_limits<float>::min();
 	
 	for(int i = 0; i < size(); i++) {
-		if(at(i)<min) {
-			min = at(i);
+		if((*this)[i]<min) {
+			min = (*this)[i];
 		}
-		if(at(i)>max) {
-			max = at(i);
+		if((*this)[i]>max) {
+			max = (*this)[i];
 		}
 	}
 }
@@ -243,7 +240,7 @@ void FloatBuffer::normalize(float min, float max) {
 	float scale = max - min;
 	
 	for(int i = 0; i < size(); i++) {
-		(*this)[i] = min + scale * (at(i) - inMin) * norm;
+		(*this)[i] = min + scale * ((*this)[i] - inMin) * norm;
 	}
 }
 
@@ -285,8 +282,46 @@ void FloatBuffer::mix(const FloatBuffer &other) {
 	if(size()<other.size()) {
 		resize(other.size(), 0.f);
 	}
+//
+#ifdef __APPLE__
+	 vDSP_vadd(other.data(), 1, data(), 1, data(), 1, size());
+#else
+
+	// needs -ffast-math - maybe the android build will benefit from this?
+	// you can apply it per file if you don't want it everywhere
+	// for some reason this is still slow on android - can't seem to get xsimd working
+//	auto sz = size();
+//	constexpr auto simd_size = xsimd::simd_type<float>::size;
+//	auto vec_size = sz - sz % simd_size;
+//
+//	for(std::size_t i = 0; i < vec_size; i += simd_size) {
+//		auto ba = xsimd::load_aligned(&(*this)[i]);
+//		auto bb = xsimd::load_aligned(&other[i]);
+//		auto bres = (ba + bb);
+//		bres.store_aligned(&(*this)[i]);
+//	}
+//
+//	for(std::size_t i = vec_size; i < sz; ++i) {
+//		(*this)[i] += other[i];
+//	}
 	
-	// TODO: Accelerate
+	
+	
+	for(int i = 0; i < other.size(); i++) {
+		(*this)[i] += other[i];
+	}
+#endif
+}
+
+// mix incoming sample into this one
+void FloatBuffer::mixNaive(const FloatBuffer &other) {
+	
+	// make sure both samples are
+	// as long as the longest one
+	if(size()<other.size()) {
+		resize(other.size(), 0.f);
+	}
+	
 	for(int i = 0; i < other.size(); i++) {
 		(*this)[i] += other[i];
 	}
@@ -408,17 +443,7 @@ void FloatBuffer::fadeOut(int length, int numChans) {
 //    }
 FloatBuffer& FloatBuffer::operator+=(const FloatBuffer& right) {
 	assert(size()==right.size());
-    
-#ifdef __APPLE__
-    vDSP_vadd(this->data(), 1,
-              right.data(), 1,
-              this->data(), 1,
-              this->size());
-#else
-	for(int i = 0; i < size(); i++) {
-		(*this)[i] += right[i];
-	}
-#endif
+	mix(right);
 	return *this;
 }
 
@@ -517,7 +542,6 @@ FloatBuffer& FloatBuffer::operator*=(const float& right) {
 FloatBuffer& FloatBuffer::operator/=(const float& right) {
 #ifdef __APPLE__
     vDSP_vsdiv(data(), 1, &right, data(), 1, size());
-
 #else
 	for(int i = 0; i < size(); i++) {
 		(*this)[i] /= right;

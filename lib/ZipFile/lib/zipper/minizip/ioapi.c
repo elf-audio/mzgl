@@ -20,16 +20,16 @@
 #  define snprintf _snprintf
 #endif
 
-#ifdef __APPLE__
+//#ifdef __APPLE__
 /* In darwin and perhaps other BSD variants off_t is a 64 bit value, hence no need for specific 64 bit functions */
 #  define FOPEN_FUNC(filename, mode) fopen(filename, mode)
 #  define FTELLO_FUNC(stream) ftello(stream)
 #  define FSEEKO_FUNC(stream, offset, origin) fseeko(stream, offset, origin)
-#else
-#  define FOPEN_FUNC(filename, mode) fopen64(filename, mode)
-#  define FTELLO_FUNC(stream) ftello64(stream)
-#  define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
-#endif
+//#else
+//#  define FOPEN_FUNC(filename, mode) fopen64(filename, mode)
+//#  define FTELLO_FUNC(stream) ftello64(stream)
+//#  define FSEEKO_FUNC(stream, offset, origin) fseeko64(stream, offset, origin)
+//#endif
 
 /* I've found an old Unix (a SunOS 4.1.3_U1) without all SEEK_* defined.... */
 #ifndef SEEK_CUR

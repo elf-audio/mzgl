@@ -17,10 +17,10 @@ public:
 	virtual ~SampleProvider() {}
 	virtual const float operator[] (int index) const = 0;
 	virtual size_t size() const = 0;
-	virtual void splice(int start, int end, std::vector<float> &outBuff) const = 0;
+	virtual void splice(int start, int end, FloatBuffer &outBuff) const = 0;
 	virtual bool isFloat() const = 0;
 	virtual SampleProvider *shallowCopy() const = 0;
-	virtual void getSamples(int startPos, std::vector<float> &buffToFill) const = 0;
+	virtual void getSamples(int startPos, FloatBuffer &buffToFill) const = 0;
 	virtual void getSamples(int start, int length, float *outData) const = 0;
 	
 	// from to to-1 (e.g. end bounds exclusive)
@@ -37,7 +37,7 @@ public:
 		return data[index];
 	}
 	
-	void getSamples(int startPos, std::vector<float> &buffToFill) const override {
+	void getSamples(int startPos, FloatBuffer &buffToFill) const override {
 		memcpy(buffToFill.data(), &data[startPos], buffToFill.size() * sizeof(float));
 //		sample.getSamples(start*numChannels + inWinStart, framed);
 	}
@@ -50,7 +50,7 @@ public:
 		return data.size();
 	}
 	
-	void splice(int start, int end, std::vector<float> &outBuff) const override {
+	void splice(int start, int end, FloatBuffer &outBuff) const override {
 		outBuff.clear();
 		outBuff.insert(outBuff.end(), data.begin() + start, data.begin() + end);
 	}
@@ -58,7 +58,7 @@ public:
 	void findMinMax(int from, int to, float &min, float &max) const override {
 		float _min = 1;
 		float _max = -1;
-		for(int j = (int)from; j < to; j++) {
+		for(int j = from; j < to; j++) {
 			float v = data[j];
 			if(_max<v) _max = v;
 			if(_min>v) _min = v;
@@ -106,7 +106,7 @@ public:
 		_max = maxVal * mult;
 	}
 	
-	void getSamples(int startPos, std::vector<float> &buffToFill) const override {
+	void getSamples(int startPos, FloatBuffer &buffToFill) const override {
 		for(int i = 0; i < buffToFill.size(); i++) {
 			buffToFill[i] = (*this)[i+startPos];
 		}
@@ -118,7 +118,7 @@ public:
 		}
 	}
 	
-	void splice(int start, int end, std::vector<float> &outBuff) const override {
+	void splice(int start, int end, FloatBuffer &outBuff) const override {
 		outBuff.resize(outBuff.size() + end - start);
 		for(int i = start; i < end; i++) {
 			outBuff[i-start] = data[i] / 32767.f;

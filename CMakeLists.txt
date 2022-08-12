@@ -235,8 +235,13 @@ else()
 endif()
 
 
+
 if(ANDROID)
 
+	set_source_files_properties(
+		lib/mzgl/util/FloatBuffer.cpp
+		PROPERTIES COMPILE_FLAGS "-ffast-math -O3  -mfpu=neon -mfloat-abi=softfp"
+	)
 	list(APPEND MZGL_SOURCES
 	    lib/mzgl/app/android/mainAndroid.cpp
 	    lib/mzgl/app/android/androidUtil.cpp

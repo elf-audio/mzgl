@@ -4282,6 +4282,8 @@
 		EA7855682472DBF40072FD05 /* nanovg_gl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */; };
 		EA78556E2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
 		EA78556F2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
+		EA7E2C9128A4003100F5DE9B /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7E2C8C28A4003100F5DE9B /* Timer.h */; };
+		EA7E2C9228A4003100F5DE9B /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7E2C8C28A4003100F5DE9B /* Timer.h */; };
 		EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
@@ -6690,6 +6692,7 @@
 		EA78556B2472DFC00072FD05 /* fontstash-nvg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fontstash-nvg.h"; sourceTree = "<group>"; };
 		EA78556C2472E31C0072FD05 /* NVG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NVG.h; sourceTree = "<group>"; };
 		EA78556D2472E3320072FD05 /* NVG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NVG.cpp; sourceTree = "<group>"; };
+		EA7E2C8C28A4003100F5DE9B /* Timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLEffectAU.mm; sourceTree = "<group>"; };
 		EA81A9532756F0AC009C911E /* MZGLEffectAU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLEffectAU.h; sourceTree = "<group>"; };
 		EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BufferedAudioBus.hpp; sourceTree = "<group>"; };
@@ -10231,6 +10234,7 @@
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
 				EAF6736F289BC3DB001F778D /* mzAssert.cpp */,
+				EA7E2C8C28A4003100F5DE9B /* Timer.h */,
 				EAF67370289BC3DC001F778D /* mzAssert.h */,
 				EAF6737F289BC87E001F778D /* mainThread.cpp */,
 				EAF67380289BC87E001F778D /* mainThread.h */,
@@ -13083,6 +13087,7 @@
 				EA1839422432C18C00A5C3E8 /* template_arity_spec.hpp in Headers */,
 				EA92434E273EE0C300311C98 /* atomic_shared_ptr.hpp in Headers */,
 				EA18394D2432C18C00A5C3E8 /* is_member_function_pointer_cxx_03.hpp in Headers */,
+				EA7E2C9128A4003100F5DE9B /* Timer.h in Headers */,
 				EA183CDC2432C18C00A5C3E8 /* times.hpp in Headers */,
 				EA183D372432C18C00A5C3E8 /* quote.hpp in Headers */,
 				EA183C5E2432C18C00A5C3E8 /* equal_to.hpp in Headers */,
@@ -13803,6 +13808,7 @@
 				EA2B83C624E7093600EA12BD /* bitor.hpp in Headers */,
 				EA2B83C924E7093600EA12BD /* vector40.hpp in Headers */,
 				EA2B83CA24E7093600EA12BD /* vector10_c.hpp in Headers */,
+				EA7E2C9228A4003100F5DE9B /* Timer.h in Headers */,
 				EA2B83CB24E7093600EA12BD /* has_unary_minus.hpp in Headers */,
 				EA2B83CC24E7093600EA12BD /* plus.hpp in Headers */,
 				EA2B83CD24E7093600EA12BD /* list.hpp in Headers */,

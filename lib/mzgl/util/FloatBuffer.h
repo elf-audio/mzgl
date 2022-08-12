@@ -20,9 +20,9 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "xsimd/xsimd.hpp"
 
-
-class FloatBuffer : public std::vector<float> {
+class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
 public:
 	
 	
@@ -34,7 +34,7 @@ public:
 	
 	FloatBuffer(const float *arr, size_t size);
 	
-	FloatBuffer(size_t size, float fillValue) : std::vector<float>(size, fillValue) {}
+	FloatBuffer(size_t size, float fillValue) : std::vector<float, xsimd::aligned_allocator<float>>(size, fillValue) {}
     /**
      * You can copy an array of floats into the buffer
      * by doing set(buff, length);
@@ -98,6 +98,7 @@ public:
 	void linspace(float a, float b, int N);
 	
 	void mix(const FloatBuffer &other);
+	void mixNaive(const FloatBuffer &other); // no optimization for neon testing
 	
 	void normalize(float min = -1, float max = 1);
     
