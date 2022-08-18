@@ -26,8 +26,8 @@ public:
 	void noFill();
 	void setColor(float grey);
 	void setColor(float r, float g, float b, float a = 1.f);
-	void setColor(glm::vec4 c);
-	void setColor(glm::vec4 c, float alpha);
+	void setColor(const glm::vec4 &c);
+	void setColor(const glm::vec4 &c, float alpha);
 	
 	// only working for rects an rounded rects at the moment, and also only vertical
 	// and horizontal gradients work really nicely - for a better diagonal gradient
@@ -45,7 +45,7 @@ public:
 	void drawLineStrip(const std::vector<vec2> &strip);
     void drawLineStrip(const std::vector<vec2> &strip, const std::vector<vec4> &cols);
 	void drawTriangleStrip(const std::vector<vec2> &strip);
-	
+	void drawTriangles(const std::vector<vec2> &verts, const std::vector<uint32_t> &indices);
 	void drawRect(const Rectf &r);
 	void drawRect(float x, float y, float width, float height);
 	

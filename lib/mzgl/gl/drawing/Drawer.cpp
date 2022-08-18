@@ -7,12 +7,12 @@
 
 using namespace std;
 
-void Drawer::setColor(glm::vec4 c) {
+void Drawer::setColor(const glm::vec4 &c) {
 	this->color = c;
 	isDoingGradient = false;
 }
 
-void Drawer::setColor(glm::vec4 c, float alpha) {
+void Drawer::setColor(const glm::vec4 &c, float alpha) {
 	this->color = c;
 	color.a = alpha;
 	isDoingGradient = false;
@@ -141,6 +141,20 @@ void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) 
         geom.cols.push_back(a);
     }
     geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
+}
+
+void Drawer::drawTriangles(const std::vector<vec2> &verts, const std::vector<uint32_t> &indices) {
+	uint32_t startIndex = 0;
+	if(geom.verts.size()>0) {
+		startIndex = (uint32_t)geom.verts.size();
+	}
+	geom.verts.insert(geom.verts.end(), verts.begin(), verts.end());
+	geom.indices.reserve(geom.indices.size() + indices.size());
+	
+	for(int i = 0; i < indices.size(); i++) {
+		geom.indices.push_back(indices[i] + startIndex);
+	}
+	geom.cols.insert(geom.cols.end(), verts.size(), color);
 }
 
 
