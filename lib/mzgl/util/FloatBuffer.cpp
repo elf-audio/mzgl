@@ -277,14 +277,14 @@ void FloatBuffer::setFromRightChannel(float *buff, int length) {
 // mix incoming sample into this one
 void FloatBuffer::mix(const FloatBuffer &other) {
 	
-	// make sure both samples are
-	// as long as the longest one
+	// make this sample is at least as long as the other
 	if(size()<other.size()) {
 		resize(other.size(), 0.f);
 	}
-//
+// mix the other in - note that we're going for a length of other.size()
+// - other might be shorter, but it mustn't be longer than this.
 #ifdef __APPLE__
-	 vDSP_vadd(other.data(), 1, data(), 1, data(), 1, size());
+	 vDSP_vadd(other.data(), 1, data(), 1, data(), 1, other.size());
 #else
 
 	// needs -ffast-math - maybe the android build will benefit from this?
