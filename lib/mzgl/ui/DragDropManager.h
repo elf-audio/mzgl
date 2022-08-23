@@ -137,7 +137,7 @@ public:
 
 	// add draggers as items are dragged
 	void addDragger(std::shared_ptr<T> dragger) {
-		dragger->sourceLayer->transferFocus(this);
+		dragger->sourceLayer->transferFocus(this, dragger->touchId);
 		draggers[dragger->touchId] = dragger;
 	}
 	

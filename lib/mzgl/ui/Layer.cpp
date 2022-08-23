@@ -499,17 +499,17 @@ void Layer::removeFocus() {
 }
 
 
-
-int Layer::transferFocus(Layer *otherLayer) {
-	for(auto it = g.focusedLayers.begin(); it != g.focusedLayers.end(); it++) {
-		if((*it).second==this) {
-			int id = (*it).first;
-			g.focusedLayers[id] = otherLayer;
-			return id;
-		}
+/**
+ * This used to take only the otherLayer as the parameter, but that meant
+ * that if a layer had 2 fingers focused on it, there would be no way to
+ * distinguish between the 2 fingers - so now you need to pass in a touchId
+ */
+void Layer::transferFocus(Layer *otherLayer, int touchId) {
+	if(g.focusedLayers.find(touchId)!=g.focusedLayers.end() && g.focusedLayers[touchId]==this) {
+		g.focusedLayers[touchId] = otherLayer;
+	} else {
+		cout << "Couldn't find the other layer to focus on" << endl;
 	}
-	cout << "Couldn't find the other layer to focus on" << endl;
-	return -1;
 }
 
 void Layer::clear() {

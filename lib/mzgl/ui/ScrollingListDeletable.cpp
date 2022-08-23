@@ -163,7 +163,7 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 			
 			Layer *scrollingList = getParent()->getParent();
 			haptics = nullptr;
-			transferFocus(scrollingList);
+			transferFocus(scrollingList, id);
 			scrollingList->absoluteToLocalCoords(x, y);
 			scrollingList->touchDown(x, y, id);
 		}

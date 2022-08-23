@@ -111,8 +111,8 @@ public:
 	void setBottomCenter(float x, float y) { set(x - this->width/2, y - this->height, this->width, this->height); }
 	
 	// attempt to pass focus from this layer to another
-	// and return the touch id of the newly focused layer
-	int transferFocus(Layer *otherLayer);
+	
+	void transferFocus(Layer *otherLayer, int touchId);
 	bool hasFocus() const;
 	void removeFocus();
 	
