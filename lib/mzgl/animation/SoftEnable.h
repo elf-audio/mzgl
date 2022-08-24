@@ -43,6 +43,9 @@ public:
 		return enabled || amt > 0.01f;
 	}
 	
+	bool getValue() const {
+		return enabled;
+	}
 	void toggle() {
 		set(!isOn());
 	}
