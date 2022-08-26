@@ -87,10 +87,10 @@ struct MidiMessage {
 		this->pitch = pitch;
 	}
 	
-	void noteOff(int channel, int pitch, int velocity) {
+	void noteOff(int channel, int pitch) {
 		this->status = MIDI_NOTE_OFF;
-		this->channel = channel;;
-		this->velocity = velocity;
+		this->channel = channel;
+		this->velocity = 0;
 		this->pitch = pitch;
 	}
 	

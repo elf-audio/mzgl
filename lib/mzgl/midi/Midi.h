@@ -226,9 +226,9 @@ public:
 		sendMessage(m);
 	}
 	
-	void noteOff(int channel, int pitch, int velocity) {
+	void noteOff(int channel, int pitch) {
 		MidiMessage m;
-		m.noteOff(channel, pitch, velocity);
+		m.noteOff(channel, pitch);
 		sendMessage(m);
 	}
 	
