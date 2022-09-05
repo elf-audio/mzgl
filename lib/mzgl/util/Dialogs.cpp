@@ -863,8 +863,33 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	launchUrl(url);
 #endif
 }
+#ifdef __APPLE__
+@interface OpenLinksInSafariDelegate : NSObject<WKNavigationDelegate>
+@end;
+@implementation OpenLinksInSafariDelegate
 
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+	
+	// this handles the initial case of the html being loaded, which uses a url of "about:blank"
+	// - all other links should go to safari by cancelling the navigation action.
+	if([[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"]) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+		return;
+	}
+	decisionHandler(WKNavigationActionPolicyCancel);
+	
+#	if TARGET_OS_IOS
+		[[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+	NSLog(@"%@", navigationAction.request.URL);
+#	else
+		[[NSWorkspace sharedWorkspace] openURL: navigationAction.request.URL];
+#	endif
 
+}
+
+@end
+OpenLinksInSafariDelegate *navDelegate = nil;
+#endif
 void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
@@ -876,7 +901,8 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
 	[wv loadHTMLString:htmlStr baseURL:nil];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
-	
+	navDelegate = [[OpenLinksInSafariDelegate alloc] init];
+	wv.navigationDelegate = navDelegate;
 	
 	UIViewController *targetController = [[UIViewController alloc] init];
 
