@@ -931,8 +931,9 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 
 	[((__bridge UIViewController*)app.viewController) presentViewController:targetController animated:YES completion:nil];
 
+#elif defined(__ANDROID__)
 #else
-	launchUrl(url);
+	// other impls here
 #endif
 }
 
