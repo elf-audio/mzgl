@@ -65,7 +65,7 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 	completionCallback(title, randi(2)==0);
 	return;
 #endif
-	
+
 #ifdef __APPLE__
 #   if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
@@ -79,19 +79,19 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 						  completionCallback("", false);
 					  }
 					  ]];
-	
-	
-	
+
+
+
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
 		textField.placeholder = [NSString stringWithUTF8String:text.c_str()];
 	}];
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
+
+
 #   else
 	dispatch_async(dispatch_get_main_queue(), ^{
 		// do work here
-	
+
 		// create alert dialog
 		NSAlert *alert = [[NSAlert alloc] init];
 		[alert addButtonWithTitle:@"OK"];
@@ -104,10 +104,10 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 												 encoding:NSUTF8StringEncoding]];
 		// add text field to alert dialog
 		[alert setAccessoryView:label];
-	
 
-		
-		
+
+
+
 		function<void(NSInteger, NSTextField*)> handleResult = [completionCallback](NSInteger returnCode, NSTextField *label) {
 			string txt = "";
 			if ( returnCode == NSAlertFirstButtonReturn )
@@ -126,19 +126,19 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 		[label becomeFirstResponder];
 #else
 		[label becomeFirstResponder];
-		
+
 		handleResult([alert runModal], label);
 #endif
-		
-		
-		
+
+
+
 //
 //		NSInteger returnCode = [alert runModal];
 //		handleResult(returnCode, label);
 //
-		
+
 		// if OK was clicked, assign value to text
-		
+
 	});
 #   endif
 #elif defined(__ANDROID__)
@@ -160,18 +160,18 @@ void Dialogs::confirm(std::string title, std::string msg,
 	else cancelPressed();
 	return;
 #endif
-	
+
 #ifdef UNIT_TEST
 	unit_test::dialogOkPressed = okPressed;
 	unit_test::dialogCancelPressed = cancelPressed;
 	unit_test::dialogOpen = true;
 	return;
 #endif
-	
+
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-	
+
 	[alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		okPressed();
 	}]];
@@ -181,11 +181,11 @@ void Dialogs::confirm(std::string title, std::string msg,
 						  cancelPressed();
 					  }
 					  ]];
-	
+
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
-	
+
+
+
 #	else
 	// this dispatch is slightly different from runOnMainThread on OS X
 	// runOnMainThread actually runs on the renderer thread not the real
@@ -198,7 +198,7 @@ void Dialogs::confirm(std::string title, std::string msg,
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
-		
+
 		function<void(NSInteger)> handleResult = [okPressed, cancelPressed](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				runOnMainThread(okPressed);
@@ -211,9 +211,9 @@ void Dialogs::confirm(std::string title, std::string msg,
 #		else
 		handleResult([alert runModal]);
 #		endif
-		
 
-		
+
+
 	});
 #	endif
 #elif defined(__ANDROID__)
@@ -232,7 +232,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 #ifdef AUTO_TEST
 	return;
 #endif
-	
+
 #if defined(UNIT_TEST)
 	unit_test::dialogOpen = true;
 	return;
@@ -254,18 +254,18 @@ void Dialogs::alert(std::string title, std::string msg) const {
 
 #	if TARGET_OS_IOS
 	dispatch_async(dispatch_get_main_queue(), ^{
-		
-		
+
+
 		UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-		
+
 		[alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 			//okPressed();
 		}]];
-		
+
 		[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
 	});
-	
-	
+
+
 #	else
 	dispatch_async(dispatch_get_main_queue(), ^{
 		NSAlert *alert = [[NSAlert alloc] init];
@@ -279,7 +279,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 #		else
 		[alert runModal];
 #		endif
-		
+
 	});
 #	endif
 #elif defined(__ANDROID__)
@@ -294,8 +294,8 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 						   std::string buttonOneText, std::function<void()> buttonOnePressed,
 						   std::string buttonTwoText, std::function<void()> buttonTwoPressed,
 				   std::function<void()> cancelPressed) const {
-	
-	
+
+
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
@@ -303,7 +303,7 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 	unit_test::dialogOpen = true;
 	return;
 #endif
-	
+
 #ifdef AUTO_TEST
 	int i = randi(100)%3;
 	if(i==0) buttonOnePressed();
@@ -314,7 +314,7 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-	
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonOnePressed();
@@ -323,28 +323,28 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonTwoPressed();
 											  }]];
-	
-	
+
+
 	[alert addAction:[UIAlertAction actionWithTitle: @"Cancel"
 											  style:UIAlertActionStyleCancel handler:
 					  ^(UIAlertAction * action) {
 						  cancelPressed();
 					  }
 					  ]];
-	
+
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
-	
+
+
+
 #	else
-	
+
 	// this dispatch is slightly different from runOnMainThread on OS X
 	// runOnMainThread actually runs on the renderer thread not the real
 	// main thread, but this Cocoa stuff needs the real main thread.
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		NSAlert *alert = [[NSAlert alloc] init];
-		
+
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonTwoText.c_str()]];
 		[alert addButtonWithTitle: @"Cancel"];
@@ -361,17 +361,17 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 				runOnMainThread(cancelPressed);
 			}
 		};
-		
+
 #		ifndef MZGLAU
 		[alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
-		
+
 	});
 #	endif
-	
-	
+
+
 #elif defined(__ANDROID__)
 	androidTwoOptionCancelDialog(title, msg,
 			buttonOneText, buttonOnePressed,
@@ -393,15 +393,15 @@ linuxTwoOptionCancelDialog(title, msg,
 void Dialogs::twoOptionDialog(std::string title, std::string msg,
 						   std::string buttonOneText, std::function<void()> buttonOnePressed,
 						   std::string buttonTwoText, std::function<void()> buttonTwoPressed) const {
-	
-	
+
+
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
 	unit_test::dialogOpen = true;
 	return;
 #endif
-	
+
 #ifdef AUTO_TEST
 	int i = randi(100)%2;
 	if(i==0) buttonOnePressed();
@@ -411,7 +411,7 @@ void Dialogs::twoOptionDialog(std::string title, std::string msg,
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-	
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonOnePressed();
@@ -420,22 +420,22 @@ void Dialogs::twoOptionDialog(std::string title, std::string msg,
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonTwoPressed();
 											  }]];
-	
-	
-	
+
+
+
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
-	
+
+
+
 #	else
-	
+
 	// this dispatch is slightly different from runOnMainThread on OS X
 	// runOnMainThread actually runs on the renderer thread not the real
 	// main thread, but this Cocoa stuff needs the real main thread.
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		NSAlert *alert = [[NSAlert alloc] init];
-		
+
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonTwoText.c_str()]];
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
@@ -449,17 +449,17 @@ void Dialogs::twoOptionDialog(std::string title, std::string msg,
 				runOnMainThread(buttonTwoPressed);
 			}
 		};
-		
+
 #		ifndef MZGLAU
 		[alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
-		
+
 	});
 #	endif
-	
-	
+
+
 #elif defined(__ANDROID__)
 //	androidTwoOptionCancelDialog(title, msg,
 //			buttonOneText, buttonOnePressed,
@@ -497,7 +497,7 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 	unit_test::dialogOpen = true;
 	return;
 #endif
-	
+
 #ifdef AUTO_TEST
 	int i = randi(100)%4;
 	if(i==0) buttonOnePressed();
@@ -509,7 +509,7 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-	
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonOnePressed();
@@ -518,34 +518,34 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 	style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		buttonTwoPressed();
 	}]];
-	
-	
+
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonThreeText.c_str()]
 	style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		buttonThreePressed();
 	}]];
-	
-	
+
+
 	[alert addAction:[UIAlertAction actionWithTitle: @"Cancel"
 											  style:UIAlertActionStyleCancel handler:
 					  ^(UIAlertAction * action) {
 						  cancelPressed();
 					  }
 					  ]];
-	
+
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
-	
+
+
+
 #	else
-	
+
 	// this dispatch is slightly different from runOnMainThread on OS X
 	// runOnMainThread actually runs on the renderer thread not the real
 	// main thread, but this Cocoa stuff needs the real main thread.
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		NSAlert *alert = [[NSAlert alloc] init];
-		
+
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonTwoText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonThreeText.c_str()]];
@@ -553,7 +553,7 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
-		
+
 		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
@@ -566,19 +566,19 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 				runOnMainThread(cancelPressed);
 			}
 		};
-		
+
 #		ifndef MZGLAU
 		[alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
-		
-		
-		
+
+
+
 	});
 #	endif
-	
-	
+
+
 #elif defined(__ANDROID__)
 	androidThreeOptionCancelDialog(title, msg,
 			buttonOneText, buttonOnePressed,
@@ -608,7 +608,7 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 	unit_test::dialogOpen = true;
 	return;
 #endif
-	
+
 #ifdef AUTO_TEST
 	int i = randi(100)%3;
 	if(i==0) buttonOnePressed();
@@ -619,7 +619,7 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String: title.c_str()] message:[NSString stringWithUTF8String: msg.c_str()] preferredStyle:UIAlertControllerStyleAlert];
-	
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 												  buttonOnePressed();
@@ -628,35 +628,35 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 	style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		buttonTwoPressed();
 	}]];
-	
-	
+
+
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String: buttonThreeText.c_str()]
 	style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
 		buttonThreePressed();
 	}]];
-	
 
-	
+
+
 	[((__bridge UIViewController*)app.viewController) presentViewController:alert animated:YES completion:nil];
-	
-	
-	
+
+
+
 #	else
-	
+
 	// this dispatch is slightly different from runOnMainThread on OS X
 	// runOnMainThread actually runs on the renderer thread not the real
 	// main thread, but this Cocoa stuff needs the real main thread.
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		NSAlert *alert = [[NSAlert alloc] init];
-		
+
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonOneText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonTwoText.c_str()]];
 		[alert addButtonWithTitle:[NSString stringWithUTF8String: buttonThreeText.c_str()]];
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
-		
+
 		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
@@ -667,19 +667,19 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 				runOnMainThread(buttonThreePressed);
 			}
 		};
-		
+
 #		ifndef MZGLAU
 		[alert beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
-		
-		
-		
+
+
+
 	});
 #	endif
-	
-	
+
+
 #else
 	mzAssert(0);
 #endif
@@ -724,7 +724,7 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 	if(img==nil) {
 		img = [info objectForKey:UIImagePickerControllerOriginalImage];
 	}
-	
+
 	if(img!=nil) {
 		// this fixes embedded rotations in the image
 		img = [self normalizedImage: img];
@@ -742,9 +742,9 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 							  filename
 						  ]
 						  ];
-		
+
 		[UIImagePNGRepresentation(img) writeToFile: path atomically:YES];
-		
+
 		[picker dismissViewControllerAnimated:NO completion:nil];
 		callback(true, [path UTF8String]);
 	} else {
@@ -783,12 +783,12 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 	picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 	picker.mediaTypes = [[NSArray alloc] initWithObjects: (NSString *) kUTTypeImage, nil];
 	picker.delegate = bgpd;
-	
+
 	[bgpd setCompletionCallback: completionCallback];
 	UIViewController *vc = ((__bridge UIViewController*)app.viewController);
 
 	[vc presentViewController:picker animated: YES completion:^{}];
-	
+
 #elif defined(__ANDROID__)
 	androidImageDialog(docsPath("tmpImg.jpg"), completionCallback);
 
@@ -809,7 +809,7 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 		}
 	});
 #endif
-	
+
 }
 
 #if TARGET_OS_IOS
@@ -820,18 +820,18 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	return;
 #endif
 
-	
-	
-	
+
+
+
 #if TARGET_OS_IOS
 	WKWebView *wv = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, 200, 200)];
 	NSURL *URL = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:url.c_str()]];
 	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
-	
-	
-	
+
+
+
 	UIViewController *targetController = [[UIViewController alloc] init];
 
 	UIBlockButton *butt = [UIBlockButton buttonWithType:UIButtonTypeSystem];
@@ -843,8 +843,8 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	}];
 	[butt setTranslatesAutoresizingMaskIntoConstraints:NO];
 	butt.tintColor = [UIColor redColor];
-	
-	
+
+
 	[targetController.view addSubview:wv];
 	[targetController.view addSubview:butt];
 	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
@@ -869,7 +869,7 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 @implementation OpenLinksInSafariDelegate
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-	
+
 	// this handles the initial case of the html being loaded, which uses a url of "about:blank"
 	// - all other links should go to safari by cancelling the navigation action.
 	if([[navigationAction.request.URL absoluteString] isEqualToString:@"about:blank"]) {
@@ -877,7 +877,7 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 		return;
 	}
 	decisionHandler(WKNavigationActionPolicyCancel);
-	
+
 #	if TARGET_OS_IOS
 		[[UIApplication sharedApplication] openURL:navigationAction.request.URL];
 	NSLog(@"%@", navigationAction.request.URL);
@@ -895,7 +895,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	return;
 #endif
 
-	
+
 #if TARGET_OS_IOS
 	WKWebView *wv = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, 200, 200)];
 	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
@@ -903,7 +903,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
 	navDelegate = [[OpenLinksInSafariDelegate alloc] init];
 	wv.navigationDelegate = navDelegate;
-	
+
 	UIViewController *targetController = [[UIViewController alloc] init];
 
 	UIBlockButton *butt = [UIBlockButton buttonWithType:UIButtonTypeSystem];
@@ -915,8 +915,8 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	}];
 	[butt setTranslatesAutoresizingMaskIntoConstraints:NO];
 	butt.tintColor = [UIColor redColor];
-	
-	
+
+
 	[targetController.view addSubview:wv];
 	[targetController.view addSubview:butt];
 	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
@@ -932,7 +932,8 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	[((__bridge UIViewController*)app.viewController) presentViewController:targetController animated:YES completion:nil];
 
 #else
-	launchUrl(url);
+	// FIXME: html instead of url?
+	//launchUrl(url);
 #endif
 }
 
@@ -944,15 +945,15 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 #ifdef AUTO_TEST
 	return;
 #endif
-	
+
 #if TARGET_OS_IOS
 	NSString *str = [NSString stringWithUTF8String:message.c_str()];
 	NSURL *URL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
-	
+
 	UIActivityViewController *activityViewController =
 	[[UIActivityViewController alloc] initWithActivityItems:@[URL]
 									  applicationActivities:nil];
-	
+
 	UIViewController *vc = ((__bridge UIViewController*)app.viewController);
 
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
@@ -966,30 +967,30 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 	else {
 		// Change Rect to position Popover
 		UIPopoverController *popup = [[UIPopoverController alloc] initWithContentViewController:activityViewController];
-		
+
 		[popup
-		 
+
 		 presentPopoverFromRect:
 		 CGRectMake(vc.view.frame.size.width/2,
 					vc.view.frame.size.height/4, 0, 0)
 		 inView:vc.view permittedArrowDirections:UIPopoverArrowDirectionAny
 		 animated:YES];
 	}
-	
+
 
 #elif defined(__ANDROID__)
 		androidShareDialog(message, path, completionCallback);
 #else
-	
+
 	string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
 	std::ifstream  src(path, std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
 	std::ofstream  dst(destPath.c_str(),   std::ios::binary);
-	
+
 	dst << src.rdbuf();
 #endif
-	
+
 }
 
 
@@ -1001,7 +1002,7 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 
 
 @interface FilePickerDelegate : NSObject <UIDocumentPickerDelegate> {
-	
+
 	@public std::function<void(std::string, bool)> completionCallback;
 }
 @end
@@ -1047,10 +1048,10 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 #ifdef AUTO_TEST
 	return;
 #endif
-	
-	
-	
-	
+
+
+
+
 #ifdef _WIN32
 
 	OPENFILENAME ofn;
@@ -1079,29 +1080,29 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 #elif defined(__APPLE__)
 
 #	if TARGET_OS_IOS
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	if(fpd==nil) {
 		fpd = [[FilePickerDelegate alloc] init];
 	}
 	fpd->completionCallback = completionCallback;
 
-	
-	
-	
-	
+
+
+
+
 
 	NSMutableArray<NSString*> *docTypes = [[NSMutableArray alloc] init];
-	
+
 	// catchall
 	if(allowedExtensions.size()==0) {
 		[docTypes addObject:(NSString*)kUTTypeData];
 	}
-	
+
 	for(const auto &ext: allowedExtensions) {
 		if(ext=="json") {
 			[docTypes addObject:(NSString*)kUTTypeJSON];
@@ -1164,10 +1165,10 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 	}];
 
 
-	
-	
-	
-	
+
+
+
+
 #	else
 	auto allowedExts = allowedExtensions;
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -1176,8 +1177,8 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 		string filePath = "";
 		@autoreleasepool {
 			NSOpenPanel * loadDialog = [NSOpenPanel openPanel];
-			
-			
+
+
 			if(allowedExts.size()>0) {
 				if(impikD==nil) {
 					impikD = [[FilePickerDelegate alloc] init];
@@ -1190,21 +1191,21 @@ void Dialogs::loadFile(std::string msg, const std::vector<std::string> &allowedE
 				[impikD setAllowedExtensions:exts];
 				loadDialog.delegate = impikD;
 			}
-			
+
 			NSOpenGLContext *context = [NSOpenGLContext currentContext];
 			[loadDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 //			[Dialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
-			
+
 			buttonClicked = [loadDialog runModal];
-			
+
 			[context makeCurrentContext];
-			
+
 			if(buttonClicked == NSModalResponseOK){
 				filePath = string([[[loadDialog URL] path] UTF8String]);
 			}
 		}
 		completionCallback(filePath, buttonClicked == NSModalResponseOK);
-		
+
 	});
 #	endif
 #elif !defined(__ANDROID__) && defined(__linux__)
