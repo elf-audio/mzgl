@@ -865,6 +865,54 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 }
 
 
+void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> completionCallback) const {
+#ifdef AUTO_TEST
+	return;
+#endif
+
+	
+#if TARGET_OS_IOS
+	WKWebView *wv = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, 200, 200)];
+	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
+	[wv loadHTMLString:htmlStr baseURL:nil];
+	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
+	
+	
+	UIViewController *targetController = [[UIViewController alloc] init];
+
+	UIBlockButton *butt = [UIBlockButton buttonWithType:UIButtonTypeSystem];
+	[butt setTitle: @"Close" forState:UIControlStateNormal];
+	butt.frame = CGRectMake(0, 0, 200, 40);
+	[butt handleControlEvent:UIControlEventTouchUpInside withBlock:^ {
+		[targetController dismissViewControllerAnimated:true completion:nil];
+		if(completionCallback) completionCallback();
+	}];
+	[butt setTranslatesAutoresizingMaskIntoConstraints:NO];
+	butt.tintColor = [UIColor redColor];
+	
+	
+	[targetController.view addSubview:wv];
+	[targetController.view addSubview:butt];
+	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
+	targetController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+
+	targetController.view.backgroundColor = [UIColor whiteColor];
+	NSDictionary *views = NSDictionaryOfVariableBindings(wv, butt);
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|" options:0 metrics:nil views:views]];
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|" options:0 metrics:nil views:views]];
+
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|" options:0 metrics:nil views:views]];
+
+	[((__bridge UIViewController*)app.viewController) presentViewController:targetController animated:YES completion:nil];
+
+#else
+	launchUrl(url);
+#endif
+}
+
+
+
+
 
 void Dialogs::share(std::string message, std::string path, function<void(bool)> completionCallback) const {
 #ifdef AUTO_TEST

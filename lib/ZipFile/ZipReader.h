@@ -48,10 +48,11 @@ public:
     };
     
     bool seek(int offset, SeekOrigin origin = SeekOrigin::Start);
-    size_t read(std::vector<int8_t> &d);
+    
     size_t read(int8_t *d, uint32_t sz);
-	
+	std::vector<int8_t> read();
 	void extract(const std::string &path);
 private:
+	size_t readSome(std::vector<int8_t> &d);
     std::ifstream zip;
 };

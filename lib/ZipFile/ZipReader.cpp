@@ -115,11 +115,20 @@ size_t ZipReaderFile::read(int8_t *d, uint32_t sz) {
     return zip.gcount();
 }
 
-
-size_t ZipReaderFile::read(std::vector<int8_t> &d) {
-    return read(d.data(), d.size());
+std::vector<int8_t> ZipReaderFile::read() {
+	std::vector<int8_t> data;
+	std::vector<int8_t> buff(4096);
+	while(1) {
+		auto amountRead = readSome(buff);
+		data.insert(data.end(), buff.begin(), buff.begin() + amountRead);
+		if(amountRead!=buff.size()) break;
+	}
+	return data;
 }
 
+size_t ZipReaderFile::readSome(std::vector<int8_t> &d) {
+    return read(d.data(), d.size());
+}
 
 
 void ZipReaderFile::extract(const std::string &path) {
@@ -127,7 +136,7 @@ void ZipReaderFile::extract(const std::string &path) {
 	std::ofstream f(path, std::ios_base::binary);
 	std::vector<int8_t> buff(4096);
 	while(1) {
-		auto amountRead = read(buff);
+		auto amountRead = readSome(buff);
 		f.write((char*)buff.data(), amountRead);
 		if(amountRead!=buff.size()) break;
 	}

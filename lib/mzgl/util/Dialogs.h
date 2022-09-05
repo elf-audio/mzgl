@@ -23,6 +23,8 @@ public:
 
 	void textbox(std::string title, std::string msg, std::string text, std::function<void(std::string, bool)> completionCallback) const;
 	
+	
+	
 	void confirm(std::string title, std::string msg,
 	std::function<void()> okPressed,
 	std::function<void()> cancelPressed = [](){}) const;
@@ -58,6 +60,7 @@ public:
 	void loadFile(std::string msg, const std::vector<std::string> &allowedExtensions, std::function<void(std::string, bool)> completionCallback) const;
 	
 	void launchUrlInWebView(std::string url, std::function<void()> completionCallback) const;
+	void displayHtmlInWebView(const std::string &html, std::function<void()> completionCallback) const;
 };
 
 
