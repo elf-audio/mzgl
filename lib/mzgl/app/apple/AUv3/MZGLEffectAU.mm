@@ -410,7 +410,7 @@ struct Blocks {
 - (NSArray<NSString*>*)MIDIOutputNames {
 	NSMutableArray *names = [[NSMutableArray alloc] init];
 	for(int i = 0; i < plugin->getNumMidiOuts(); i++) {
-		[names addObject:[NSString stringWithFormat:@"%s", plugin->getMidiOutName(i).c_str()]];
+		[names addObject:[NSString stringWithUTF8String: plugin->getMidiOutName(i).c_str()]];
 	}
 	return names;
 }

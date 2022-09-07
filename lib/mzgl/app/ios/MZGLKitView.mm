@@ -279,7 +279,7 @@ int uikeyToMz(UIKey *key) {
 		Log::e() << "Got exception trying to copy the file " << err.what();
 	}
 	
-	NSString *destination = [NSString stringWithFormat:@"%s", dst.c_str()];
+	NSString *destination = [NSString stringWithUTF8String: dst.c_str()];
 	
 //	NSString *destination = moveFileToDocsDir(path, /* copying: */ true);
 	if(![[NSFileManager defaultManager] fileExistsAtPath:destination]) {

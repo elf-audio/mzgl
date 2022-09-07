@@ -57,7 +57,6 @@ public:
 namespace fs = boost::filesystem;
 
 
-
 // presets are always files, their names are the file name
 class PresetManager {
 public:

@@ -99,7 +99,7 @@ bool Image::save(const string &path, uint8_t *data, int width, int height, int n
 	CGDataProviderRelease(provider);
 
 	// use the created CGImage
-	NSString *pathNSString = [NSString stringWithFormat:@"%s", path.c_str()];
+	NSString *pathNSString = [NSString stringWithUTF8String: path.c_str()];
 	NSURL *fileURL = [NSURL fileURLWithPath:pathNSString];
 
 
@@ -144,7 +144,7 @@ bool Image::load(const string &path, vector<uint8_t> &outData, int &outWidth, in
 	
 	
 	
-	NSString *pathNSString = [NSString stringWithFormat:@"%s", path.c_str()];
+	NSString *pathNSString = [NSString stringWithUTF8String: path.c_str()];
 	NSURL *fileURL = [NSURL fileURLWithPath:pathNSString];
 	CGImageSourceRef src = CGImageSourceCreateWithURL((CFURLRef)fileURL, myOptions);
 	

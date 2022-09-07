@@ -4,9 +4,9 @@
 
 #ifdef __APPLE__
 #	include <TargetConditionals.h>
+#	import <WebKit/WebKit.h>
 #	if TARGET_OS_IOS
 #		import <UIKit/UIKit.h>
-#		import <WebKit/WebKit.h>
 #	else
 #		import <AppKit/AppKit.h>
 #	endif
