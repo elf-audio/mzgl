@@ -42,7 +42,7 @@ namespace Log {
 		}
 		template <class T>
 		Logger& operator<<(const T& value){
-			msg << value << " ";
+			msg << value;
 			return *this;
 		}
 		
