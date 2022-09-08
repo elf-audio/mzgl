@@ -895,14 +895,19 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	return;
 #endif
 
+#ifdef __APPLE__
+	
 
-#if TARGET_OS_IOS
+#	if TARGET_OS_IOS
+	
 	WKWebView *wv = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, 200, 200)];
 	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
 	[wv loadHTMLString:htmlStr baseURL:nil];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
 	navDelegate = [[OpenLinksInSafariDelegate alloc] init];
 	wv.navigationDelegate = navDelegate;
+	//////////////////////////
+	
 
 	UIViewController *targetController = [[UIViewController alloc] init];
 
@@ -930,7 +935,15 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|" options:0 metrics:nil views:views]];
 
 	[((__bridge UIViewController*)app.viewController) presentViewController:targetController animated:YES completion:nil];
-
+#	else // mac
+	
+	NSString *tmpPath = [NSString stringWithFormat:@"%@/index.html", NSTemporaryDirectory()];
+	
+	writeStringToFile([tmpPath UTF8String], html);
+	NSURL *url = [NSURL fileURLWithPath:tmpPath];
+	launchUrl([[url absoluteString] UTF8String]);
+	if(completionCallback) completionCallback();
+#	endif
 #elif defined(__ANDROID__)
 
 	// android impl here

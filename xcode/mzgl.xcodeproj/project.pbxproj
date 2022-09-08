@@ -10615,8 +10615,8 @@
 			children = (
 				EA81A9502756F0AC009C911E /* AUv3 */,
 				EA64AD7226A186D7001427AD /* MZGLWebView.mm */,
-				EA6901802863954500ECD038 /* AppleFileBookmarks.h */,
 				EA64AD7326A186D7001427AD /* MZGLWebView.h */,
+				EA6901802863954500ECD038 /* AppleFileBookmarks.h */,
 			);
 			path = apple;
 			sourceTree = "<group>";

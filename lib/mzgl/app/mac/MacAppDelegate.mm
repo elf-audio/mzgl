@@ -153,6 +153,13 @@ using namespace std;
 	[[window contentView] addSubview:view];
 	[window makeKeyAndOrderFront:nil];
 	[window makeMainWindow];
+#ifdef USE_METALANGLE
+	app->viewController = controller;
+#else
+	// this doesn't work - there is no contentViewController
+	app->viewController = (__bridge void*)window.windowController.contentViewController;
+#endif
+	app->windowHandle = (__bridge void*)window;
 }
 
 - (void) about:(id) event {
