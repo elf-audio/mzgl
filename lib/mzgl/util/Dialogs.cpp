@@ -492,7 +492,7 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogButtonTwoPressed = buttonThreePressed;
+	unit_test::dialogButtonThreePressed = buttonThreePressed;
 	unit_test::dialogCancelPressed = cancelPressed;
 	unit_test::dialogOpen = true;
 	return;
@@ -604,7 +604,7 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogButtonTwoPressed = buttonThreePressed;
+	unit_test::dialogButtonThreePressed = buttonThreePressed;
 	unit_test::dialogOpen = true;
 	return;
 #endif
