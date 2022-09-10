@@ -945,8 +945,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	if(completionCallback) completionCallback();
 #	endif
 #elif defined(__ANDROID__)
-
-	// android impl here
+	androidDisplayHtml(html);
 #else
 	// other impls here
 #endif

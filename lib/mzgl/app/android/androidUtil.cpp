@@ -136,6 +136,10 @@ void androidLaunchUrl(const std::string &url) {
     callJNI("launchUrl", url);
 }
 
+void androidDisplayHtml(const std::string &html) {
+    callJNI("displayHtml", html);
+}
+
 void androidAlertDialog(const std::string &title, const std::string &message) {
     callJNI("alertDialog", title, message);
 }

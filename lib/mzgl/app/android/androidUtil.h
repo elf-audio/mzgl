@@ -49,7 +49,17 @@ void androidShareDialog(std::string message,
         std::string path,
         std::function<void(bool)> completionCallback);
 void androidImageDialog(std::string copyToPath, std::function<void(bool success, std::string imgPath)> completionCallback);
+
 void androidLaunchUrl(const std::string &url);
+
+//------------------------------------------------------------------------------------------------------------------------------
+///
+/// @brief Display html document in WebView for Android
+///
+/// @param html String containing HTML document to display.
+//------------------------------------------------------------------------------------------------------------------------------
+void androidDisplayHtml(const std::string &html);
+
 std::string getAndroidTempDir();
 std::vector<std::string> androidGetMidiDeviceNames();
 
