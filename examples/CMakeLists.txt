@@ -12,4 +12,5 @@ add_subdirectory(".." "mzgl-build")
 add_subdirectory(01_App)
 add_subdirectory(02_Drawing)
 add_subdirectory(03_Audio)
+add_subdirectory(04_Dialogs)
 
