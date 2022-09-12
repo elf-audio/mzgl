@@ -45,6 +45,61 @@ bool isUsingBluetoothHeadphones() {
     return callJNIForBoolean("isUsingBluetoothHeadphones");
 }
 
+////////////////////////////////////////////////////////////////////////////
+static int android_read(void* cookie, char* buf, int size) {
+  return AAsset_read((AAsset*)cookie, buf, size);
+}
+
+static int android_write(void* cookie, const char* buf, int size) {
+  return EACCES; // can't provide write access to the apk
+}
+
+static fpos_t android_seek(void* cookie, fpos_t offset, int whence) {
+  return AAsset_seek((AAsset*)cookie, offset, whence);
+}
+
+static int android_close(void* cookie) {
+  AAsset_close((AAsset*)cookie);
+  return 0;
+}
+
+FILE *android_asset_open(const char* fname, const char* mode) {
+  if(mode[0] == 'w') return NULL;
+
+  AAsset* asset = AAssetManager_open(getAndroidAppPtr()->activity->assetManager, fname, 0);
+  if(!asset) return NULL;
+
+  return funopen(asset, android_read, android_write, android_seek, android_close);
+}
+
+std::vector<std::string> androidListAssetDir(const std::string &path) {
+    std::vector<std::string> filenames;
+    auto *dir = AAssetManager_openDir(getAndroidAppPtr()->activity->assetManager, path.c_str());
+    while(const char *nextFile = AAssetDir_getNextFileName(dir)) {
+        filenames.emplace_back(nextFile);
+    }
+
+    AAssetDir_close(dir);
+    return filenames;
+}
+////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 std::vector<std::string> androidGetMidiDeviceNames() {
     if(getAndroidAppPtr()==nullptr) return std::vector<std::string>();
     std::vector<std::string> outDevs;
@@ -79,6 +134,7 @@ std::string androidGetAppVersionString() {
 
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData) {
     if(getAndroidAppPtr()==nullptr) return false;
+
 
     //LOGE("loadAndroidAsset('%s')", path.c_str());
     AAsset* pAsset = AAssetManager_open(getAndroidAppPtr()->activity->assetManager, path.c_str(), AASSET_MODE_BUFFER);

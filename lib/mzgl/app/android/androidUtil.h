@@ -16,6 +16,11 @@
 
 #include "android_native_app_glue.h"
 
+// use this instead of fopen if the file is in assets, then you can use fread() and fclose()
+// as normal - see http://www.50ply.com/blog/2013/01/19/loading-compressed-android-assets-with-file-pointer/#comment-1850768990
+FILE *android_asset_open(const char* fname, const char* mode);
+
+std::vector<std::string> androidListAssetDir(const std::string &path);
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData);
 void listAndroidAssetDir(const std::string &path, std::vector<std::string> &outPaths);
 
