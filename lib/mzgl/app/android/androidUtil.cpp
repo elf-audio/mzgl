@@ -131,6 +131,14 @@ std::vector<std::string> androidGetMidiDeviceNames() {
 std::string androidGetAppVersionString() {
     return callJNIForString("getAppVersionString");
 }
+std::string loadAndroidAssetAsString(const std::string &path) {
+    std::vector<unsigned char> outData;
+    if(loadAndroidAsset(path, outData)) {
+        return std::string(outData.begin(), outData.end());
+    }
+    return "";
+}
+
 
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData) {
     if(getAndroidAppPtr()==nullptr) return false;

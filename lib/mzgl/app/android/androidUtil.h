@@ -22,6 +22,8 @@ FILE *android_asset_open(const char* fname, const char* mode);
 
 std::vector<std::string> androidListAssetDir(const std::string &path);
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData);
+std::string loadAndroidAssetAsString(const std::string &path);
+
 void listAndroidAssetDir(const std::string &path, std::vector<std::string> &outPaths);
 
 std::string getAndroidInternalDataPath();
