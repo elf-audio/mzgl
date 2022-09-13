@@ -34,6 +34,7 @@
 #include <windows.h>
 #include <winuser.h>
 #include <commdlg.h>
+#include <direct.h>
 #define _WIN32_DCOM
 
 #include <shlobj.h>
@@ -109,12 +110,19 @@ std::string getHomeDirectory() {
 
 
 
+#ifdef _WIN32
+std::string getCWD() {
+    char c[512];
+    _getcwd(c, 512);
+    return c;
+}
+#else
 std::string getCWD() {
     char c[512];
     getcwd(c, 512);
     return c;
 }
-
+#endif
 
 bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg) {
 			
