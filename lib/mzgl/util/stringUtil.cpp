@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 std::string to_string(float value, int precision){
 	std::ostringstream out;
