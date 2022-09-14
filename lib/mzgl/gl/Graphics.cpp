@@ -927,6 +927,11 @@ void Graphics::saveScreen(string pngPath) {
 	
 	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, img->data.data());
 	img->flipVertical();
+	
+	// for some reason on OSX there is a bit of alpha - this makes it fully opaque
+	for(int i = 0; i < img->data.size(); i+=4) {
+		img->data[i+3] = 255;
+	}
 	img->save(pngPath);
 }
 
