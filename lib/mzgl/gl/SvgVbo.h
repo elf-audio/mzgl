@@ -31,8 +31,10 @@ public:
 	static SvgVboRef create(SVGDoc &d, bool ignoreColor = false) {
 		return SvgVboRef(new SvgVbo(d, ignoreColor));
 	}
-	static VboRef createVboWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor);
-	
+	static VboRef createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor);
+
+	static VboRef createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor);
+
 	void draw(Graphics &g, float x = 0, float y = 0);
 	void drawCentred(Graphics &g, glm::vec2 p) {
 		draw(g, p.x - width / 2, p.y - height / 2);

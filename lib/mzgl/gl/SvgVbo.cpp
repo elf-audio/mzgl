@@ -13,10 +13,9 @@
 #include "log.h"
 
 using namespace std;
-VboRef SvgVbo::createVboWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor) {
-	SVGDoc doc;
-	doc.loadFromString(svgCode);
-	
+
+
+static VboRef vboFromDoc(SVGDoc &doc, float maxDim, bool ignoreColor) {
 	vec2 tr = -vec2(doc.width/2, doc.height/2);
 	doc.translate(tr.x, tr.y);
 
@@ -25,6 +24,21 @@ VboRef SvgVbo::createVboWithMaxDim(const std::string &svgCode, float maxDim, boo
 	doc.scale(maxDim / actualMaxDim);
 	return SvgVbo::create(doc, ignoreColor)->getVbo();
 }
+
+
+VboRef SvgVbo::createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor) {
+	SVGDoc doc;
+	doc.load(path);
+	return vboFromDoc(doc, maxDim, ignoreColor);
+}
+
+
+VboRef SvgVbo::createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor) {
+	SVGDoc doc;
+	doc.loadFromString(svgCode);
+	return vboFromDoc(doc, maxDim, ignoreColor);
+}
+
 
 
 void SvgVbo::draw(Graphics &g, float x, float y) {
