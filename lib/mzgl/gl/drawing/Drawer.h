@@ -14,11 +14,11 @@
 
 class Drawer {
 public:
-	float strokeWeight = 1;
+	float strokeWeight = 1; // this should be private
 	bool filled = true;
 	glm::vec4 color;
 	
-	
+	void setStrokeWeight(float strokeWeight) { this->strokeWeight = strokeWeight; }
 	Geometry geom;
 	
 	MitredLine lineDrawer;

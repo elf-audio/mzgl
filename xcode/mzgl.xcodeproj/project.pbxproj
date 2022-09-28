@@ -4271,6 +4271,12 @@
 		EA71FEEA27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
 		EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
 		EA71FEEC27F33B310005C47A /* ZipReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA71FEE627F33B310005C47A /* ZipReader.cpp */; };
+		EA73F05F28E4670900395945 /* geomutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA73F05D28E4670900395945 /* geomutils.cpp */; };
+		EA73F06028E4670900395945 /* geomutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA73F05D28E4670900395945 /* geomutils.cpp */; };
+		EA73F06128E4670900395945 /* geomutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA73F05D28E4670900395945 /* geomutils.cpp */; };
+		EA73F06228E4670900395945 /* geomutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA73F05D28E4670900395945 /* geomutils.cpp */; };
+		EA73F06328E4670900395945 /* geomutils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA73F05E28E4670900395945 /* geomutils.h */; };
+		EA73F06428E4670900395945 /* geomutils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA73F05E28E4670900395945 /* geomutils.h */; };
 		EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
@@ -6682,6 +6688,8 @@
 		EA71A70527E39E6B0081A5CB /* ZipFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipFile.h; sourceTree = "<group>"; };
 		EA71FEE527F33B310005C47A /* ZipReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipReader.h; sourceTree = "<group>"; };
 		EA71FEE627F33B310005C47A /* ZipReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipReader.cpp; sourceTree = "<group>"; };
+		EA73F05D28E4670900395945 /* geomutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = geomutils.cpp; sourceTree = "<group>"; };
+		EA73F05E28E4670900395945 /* geomutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geomutils.h; sourceTree = "<group>"; };
 		EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HierarchicalScrollingList.cpp; sourceTree = "<group>"; };
 		EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HierarchicalScrollingList.h; sourceTree = "<group>"; };
 		EA7855622472DBF40072FD05 /* nanovg_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl.h; sourceTree = "<group>"; };
@@ -10331,11 +10339,13 @@
 			children = (
 				EA18361A2432C18B00A5C3E8 /* 3D */,
 				EA18361D2432C18B00A5C3E8 /* LineEquation.h */,
-				EA18361E2432C18B00A5C3E8 /* SVG.cpp */,
-				EA18361F2432C18B00A5C3E8 /* Rectf.h */,
-				EA1836202432C18B00A5C3E8 /* Triangulator.h */,
+				EA73F05D28E4670900395945 /* geomutils.cpp */,
+				EA73F05E28E4670900395945 /* geomutils.h */,
 				EA1836212432C18B00A5C3E8 /* SVG.h */,
+				EA18361E2432C18B00A5C3E8 /* SVG.cpp */,
+				EA1836202432C18B00A5C3E8 /* Triangulator.h */,
 				EA1836222432C18B00A5C3E8 /* QuadraticEquation.h */,
+				EA18361F2432C18B00A5C3E8 /* Rectf.h */,
 				EA1836232432C18B00A5C3E8 /* Rectf.cpp */,
 				EA1836242432C18B00A5C3E8 /* RoundedRect.cpp */,
 				EA1836252432C18B00A5C3E8 /* Triangulator.cpp */,
@@ -11681,6 +11691,7 @@
 				EA183F2F2432C18D00A5C3E8 /* upper2.hpp in Headers */,
 				EA18395E2432C18C00A5C3E8 /* copy_reference.hpp in Headers */,
 				EA183B702432C18C00A5C3E8 /* logical_op.hpp in Headers */,
+				EA73F06328E4670900395945 /* geomutils.h in Headers */,
 				EA183A4E2432C18C00A5C3E8 /* filter_view.hpp in Headers */,
 				EA183F5E2432C18D00A5C3E8 /* is_1.hpp in Headers */,
 				EA183E712432C18D00A5C3E8 /* deduce_z.hpp in Headers */,
@@ -13487,6 +13498,7 @@
 				EA2B827424E7093600EA12BD /* is_empty.hpp in Headers */,
 				EA9242D5273EE0C300311C98 /* sp_counted_base_vacpp_ppc.hpp in Headers */,
 				EA2B827524E7093600EA12BD /* reverse_iter_fold_impl.hpp in Headers */,
+				EA73F06428E4670900395945 /* geomutils.h in Headers */,
 				EA2B827624E7093600EA12BD /* bitxor.hpp in Headers */,
 				EA2B827824E7093600EA12BD /* Camera.h in Headers */,
 				EA2B827924E7093600EA12BD /* has_dereference.hpp in Headers */,
@@ -15614,6 +15626,7 @@
 				EA1841B32432CCCC00A5C3E8 /* operations.cpp in Sources */,
 				EA71A71E27E39E6B0081A5CB /* unzip.c in Sources */,
 				EAF99AB5267A415200157A7C /* ScrollingListItem.cpp in Sources */,
+				EA73F05F28E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A79A27E39E6C0081A5CB /* zipper.cpp in Sources */,
 				EA183FB72432C18D00A5C3E8 /* MacAppDelegate.mm in Sources */,
 				EA234AF024A609CA000F057B /* YGLayout.cpp in Sources */,
@@ -15730,6 +15743,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA18412E2432C4FF00A5C3E8 /* errors.cpp in Sources */,
+				EA73F06028E4670900395945 /* geomutils.cpp in Sources */,
 				EA1841282432C4F300A5C3E8 /* Midi.cpp in Sources */,
 				EA71A7B527E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
@@ -15871,6 +15885,7 @@
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
+				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A75C27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */,
 				EA2B8AE424E7093600EA12BD /* TextConsole.mm in Sources */,
@@ -15972,6 +15987,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA689440261C633500F76B91 /* errors.cpp in Sources */,
+				EA73F06228E4670900395945 /* geomutils.cpp in Sources */,
 				EA689441261C633500F76B91 /* Midi.cpp in Sources */,
 				EA759B3E2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EA3120BF274143F900370205 /* appleMidiUtils.cpp in Sources */,
