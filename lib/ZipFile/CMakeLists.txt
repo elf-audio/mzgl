@@ -44,7 +44,7 @@ target_include_directories(ZipFile PUBLIC
     lib
 )
 
-if(APPLE) 
+if(WIN32) 
 
 
 

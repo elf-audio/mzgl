@@ -1577,6 +1577,20 @@ namespace xsimd
             return vget_lane_f32(tmp, 0);
         }
 
+        /**************
+         * reduce_max *
+         **************/
+
+        // Using generic implementation because ARM doe snot provide intrinsics
+        // for this operation
+
+        /**************
+         * reduce_min *
+         **************/
+
+        // Using generic implementation because ARM doe snot provide intrinsics
+        // for this operation
+
         /**********
          * select *
          **********/
@@ -1915,7 +1929,7 @@ namespace xsimd
         inline batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires_arch<neon>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
-            assert(0 <= n && n < size && "index in bounds");
+            assert(n < size && "index in bounds");
             return detail::extract_pair_impl(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
         }
 
@@ -2053,7 +2067,7 @@ namespace xsimd
         template <class A, class T>
         inline batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires_arch<neon>) noexcept
         {
-            constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
+            constexpr int size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && n < size && "index in bounds");
             return detail::bitwise_lshift_impl(lhs, n, ::xsimd::detail::make_int_sequence<size>());
         }
@@ -2240,7 +2254,7 @@ namespace xsimd
         template <class A, class T>
         inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires_arch<neon>) noexcept
         {
-            constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
+            constexpr int size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && n < size && "index in bounds");
             return detail::bitwise_rshift_impl(lhs, n, ::xsimd::detail::make_int_sequence<size>());
         }
