@@ -444,11 +444,11 @@ namespace xsimd
 #if defined(_GNU_SOURCE) && !defined(__APPLE__) && !defined(__MINGW32__)
     inline float exp10(const float& x) noexcept
     {
-        return ::exp10f(x);
+        return exp10(x);
     }
     inline double exp10(const double& x) noexcept
     {
-        return ::exp10(x);
+        return exp10(x);
     }
 #endif
 
