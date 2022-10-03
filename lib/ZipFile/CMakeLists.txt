@@ -46,7 +46,7 @@ target_include_directories(ZipFile PUBLIC
 
 if(WIN32) 
 
-
+include_directories(lib/zipper/zlib)
 
 else()
 
