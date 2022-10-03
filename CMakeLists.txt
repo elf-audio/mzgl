@@ -293,8 +293,8 @@ set(MZGL_LIBS
 
 
 if(WIN32)
-	list(APPEND MZGL_LIBS zlib)
-	target_include_directories(libmzgl PUBLIC lib/zlib-win)
+	# list(APPEND MZGL_LIBS zlib)
+	# target_include_directories(libmzgl PUBLIC lib/zlib-win)
 else()
 	list(APPEND MZGL_LIBS z)
 endif()
@@ -365,14 +365,14 @@ elseif(APPLE)
 
 elseif(WIN32)
 
-	CPMAddPackage("gh:madler/zlib#cacf7f1")
+	# CPMAddPackage("gh:madler/zlib#cacf7f1")
 	CPMAddPackage("gh:PortAudio/portaudio#16884fc")
 	
-	include_directories(${zlib_SOURCE_DIR})
+	# include_directories(${zlib_SOURCE_DIR})
 
 	# because zlib is managed by CPM on windows, I can't get zconf.h.cmakein to process to zconf.h
 	# so I just put it in the folder zlib-win - bit of a hack but whatevz
-	include_directories(lib/zlib-win)
+	# include_directories(lib/zlib-win)
 
 	add_compile_definitions(_WIN32_WINNT=0x0501 GLEW_STATIC)
 	add_compile_definitions(__WINDOWS_WASAPI__)
@@ -384,7 +384,7 @@ elseif(WIN32)
 		#add_compile_options(-std:c++14 -O3)
 	# https://forum.juce.com/t/cmake-cannot-use-try-with-exceptions-disabled/40983
 	# /MT embeds static runtime
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
+	# set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
 	# set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
 
 	# this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html

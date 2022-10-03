@@ -44,9 +44,9 @@ target_include_directories(ZipFile PUBLIC
     lib
 )
 
-if(APPLE) 
+if(WIN32) 
 
-
+include_directories(lib/zipper/zlib)
 
 else()
 
