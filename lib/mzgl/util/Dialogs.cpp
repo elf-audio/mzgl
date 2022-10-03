@@ -801,7 +801,7 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 		Log::d() << "Copying image to " << outPath;
 
 		try {
-			fs::copy_file(p, outPath, fs::copy_option::overwrite_if_exists);
+			fs::copy_file(p, outPath, fs::copy_options::overwrite_existing);
 			completionCallback(true, outPath);
 		} catch(const fs::filesystem_error &err) {
 			Log::d() << "Got filesystem error " << err.what();

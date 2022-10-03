@@ -23,8 +23,7 @@
 #include "log.h"
 #define GLFONTSTASH_IMPLEMENTATION	// Expands implementation
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include "filesystem.h"
 using namespace std;
 
 #ifdef __ANDROID__

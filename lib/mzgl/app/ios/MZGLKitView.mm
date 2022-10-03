@@ -274,7 +274,7 @@ int uikeyToMz(UIKey *key) {
 	fs::path src([path UTF8String]);
 	fs::path dst = docsPath() / src.filename();
 	try {
-		fs::copy_file(src, dst, fs::copy_option::overwrite_if_exists);
+		fs::copy_file(src, dst, fs::copy_options::overwrite_existing);
 	} catch(const fs::filesystem_error &err) {
 		Log::e() << "Got exception trying to copy the file " << err.what();
 	}

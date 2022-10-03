@@ -23,7 +23,7 @@ GCC_PREPROCESSOR_DEFINITIONS[config=Release]=$(GL_VERSION)
 //AUTO_TEST
 
 // HEADERS
-HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/ZipFile $(MZGLROOT)/lib/AudioShare $(MZGLROOT)/lib/ZipFile/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pu_gixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/glm $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi lib/opt/gzip-hpp/include $(PROJECT_HEADERS) lib/opt/blahdio/blahdio/include lib/opt/blahdio/ext/drlibs lib/opt/libflac/include lib/LibTorch-Lite/install/include/
+HEADERS_COMMON = $(MZGLROOT)/lib/mzgl/** $(MZGLROOT)/lib $(MZGLROOT)/lib/ZipFile $(MZGLROOT)/lib/ghc-filesystem/include $(MZGLROOT)/lib/AudioShare $(MZGLROOT)/lib/ZipFile/lib $(MZGLROOT)/lib/misc $(MZGLROOT)/lib/pu_gixml/src $(MZGLROOT)/lib/rtmidi $(MZGLROOT)/lib/glm $(MZGLROOT)/lib/nanovg $(MZGLROOT)/lib/yoga $(MZGLROOT)/lib/PGMidi lib/opt/gzip-hpp/include $(PROJECT_HEADERS) lib/opt/blahdio/blahdio/include lib/opt/blahdio/ext/drlibs lib/opt/libflac/include lib/LibTorch-Lite/install/include/
 HEADER_SEARCH_PATHS = $(HEADERS_COMMON)
 
 

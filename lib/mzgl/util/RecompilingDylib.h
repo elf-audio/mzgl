@@ -24,8 +24,7 @@
 #include "FileWatcher.h"
 #include "Dylib.h"
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include "filesystem.h"
 
 #include <sys/stat.h>
 #include "util.h"

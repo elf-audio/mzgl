@@ -4,7 +4,6 @@
 set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.18)
 project(mzgl)
-
 # makes clang output colours
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	add_compile_options (-fcolor-diagnostics)
@@ -21,7 +20,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CPM.cmake)
 
 # CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-# CPMAddPackage("gh:gulrak/filesystem#f437344")
 
 # CPMAddPackage(
 #   NAME nlohmann_json
@@ -76,7 +74,6 @@ set(MZGL_SOURCES
 	lib/mzgl/gl/drawing/MitredLine.cpp
 	lib/mzgl/midi/Midi.cpp
 	lib/mzgl/midi/AllMidiDevices.cpp
-	# lib/mzgl/music/NotePattern.cpp
 	lib/mzgl/music/scales.cpp
 	lib/mzgl/ui/widgets/ReorderableGrid.cpp
 	lib/mzgl/ui/DropDown.cpp
@@ -161,8 +158,12 @@ set(HEADERS
 	lib/pu_gixml/src
 	lib/misc
 	lib/yoga
+	# lib/ghc-filesystem/include
 )
 
+add_subdirectory(lib/ghc-filesystem)
+# include_directories()
+# list(APPEND HEADERS "${filesystem_SOURCE_DIR}/include")
 set(YOGA_SOURCES
     lib/yoga/Utils.cpp
     lib/yoga/YGConfig.cpp
@@ -175,17 +176,6 @@ set(YOGA_SOURCES
     lib/yoga/Yoga.cpp
     lib/yoga/ylog.cpp
     lib/yoga/event/event.cpp
-)
-
-set(BOOST_SOURCES
-    lib/boost/src/filesystem/utf8_codecvt_facet.cpp
-    lib/boost/src/filesystem/codecvt_error_category.cpp
-    lib/boost/src/filesystem/path_traits.cpp
-    lib/boost/src/filesystem/operations.cpp
-    lib/boost/src/filesystem/path.cpp
-    lib/boost/src/filesystem/unique_path.cpp
-    lib/boost/src/filesystem/windows_file_codecvt.cpp
-    lib/boost/src/filesystem/portability.cpp
 )
 
 
@@ -205,7 +195,8 @@ endif(MZGL_UNIT_TEST)
 
 
 # add_library(zipper STATIC ${ZIPPER_SOURCES})
-add_library(boostfs STATIC ${BOOST_SOURCES})
+# add_library(boostfs STATIC ${BOOST_SOURCES})
+
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
 
@@ -286,6 +277,8 @@ add_library(libmzgl STATIC ${MZGL_SOURCES})
 add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
 target_include_directories(libmzgl PUBLIC ${HEADERS})
 target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
+target_include_directories(libmzgl PUBLIC ${HEADERS})
+target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 include_directories(libmzgl PUBLIC ${HEADERS})
 include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
@@ -293,9 +286,9 @@ target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 set(MZGL_LIBS
 	ZipFile 
- 	boostfs 
 	yoga 
 	pu_gixml
+	ghc_filesystem
 )
 
 
