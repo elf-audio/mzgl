@@ -519,10 +519,6 @@
 		EA71A72527E39E6B0081A5CB /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C027E39E6B0081A5CB /* zip.c */; };
 		EA71A72627E39E6B0081A5CB /* iowin32.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6C227E39E6B0081A5CB /* iowin32.h */; };
 		EA71A72727E39E6B0081A5CB /* iowin32.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6C227E39E6B0081A5CB /* iowin32.h */; };
-		EA71A72827E39E6B0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C327E39E6B0081A5CB /* Makefile */; };
-		EA71A72927E39E6B0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C327E39E6B0081A5CB /* Makefile */; };
-		EA71A72A27E39E6B0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C327E39E6B0081A5CB /* Makefile */; };
-		EA71A72B27E39E6B0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C327E39E6B0081A5CB /* Makefile */; };
 		EA71A72C27E39E6B0081A5CB /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C427E39E6B0081A5CB /* ioapi.c */; };
 		EA71A72D27E39E6B0081A5CB /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C427E39E6B0081A5CB /* ioapi.c */; };
 		EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C427E39E6B0081A5CB /* ioapi.c */; };
@@ -569,10 +565,6 @@
 		EA71A75F27E39E6C0081A5CB /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DC27E39E6B0081A5CB /* fileenc.c */; };
 		EA71A76027E39E6C0081A5CB /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DC27E39E6B0081A5CB /* fileenc.c */; };
 		EA71A76127E39E6C0081A5CB /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DC27E39E6B0081A5CB /* fileenc.c */; };
-		EA71A76227E39E6C0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DD27E39E6B0081A5CB /* Makefile */; };
-		EA71A76327E39E6C0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DD27E39E6B0081A5CB /* Makefile */; };
-		EA71A76427E39E6C0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DD27E39E6B0081A5CB /* Makefile */; };
-		EA71A76527E39E6C0081A5CB /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6DD27E39E6B0081A5CB /* Makefile */; };
 		EA71A76627E39E6C0081A5CB /* aesopt.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DE27E39E6B0081A5CB /* aesopt.h */; };
 		EA71A76727E39E6C0081A5CB /* aesopt.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DE27E39E6B0081A5CB /* aesopt.h */; };
 		EA71A76827E39E6C0081A5CB /* aes_via_ace.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DF27E39E6B0081A5CB /* aes_via_ace.h */; };
@@ -3365,7 +3357,6 @@
 				EA234B1324A611AF000F057B /* ylog.cpp in Sources */,
 				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
-				EA71A76227E39E6C0081A5CB /* Makefile in Sources */,
 				EA71A78827E39E6C0081A5CB /* entropy.c in Sources */,
 				EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA18400C2432C18D00A5C3E8 /* Vbo.cpp in Sources */,
@@ -3388,7 +3379,6 @@
 				EA78556E2472E3320072FD05 /* NVG.cpp in Sources */,
 				EA1840052432C18D00A5C3E8 /* Font.cpp in Sources */,
 				EA99490424730DB8004D0DB7 /* nanovg.cpp in Sources */,
-				EA71A72827E39E6B0081A5CB /* Makefile in Sources */,
 				EA183F8C2432C18D00A5C3E8 /* Scroller.cpp in Sources */,
 				EA71A75A27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA183FCE2432C18D00A5C3E8 /* errors.cpp in Sources */,
@@ -3489,7 +3479,6 @@
 				EA234AFE24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
 				EA71A76B27E39E6C0081A5CB /* sha1.c in Sources */,
-				EA71A72927E39E6B0081A5CB /* Makefile in Sources */,
 				EA234B0424A609CA000F057B /* YGValue.cpp in Sources */,
 				EAF99ABC267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
@@ -3561,7 +3550,6 @@
 				EA1840FB2432C3DB00A5C3E8 /* AVFoundationVideoGrabber.mm in Sources */,
 				EA18411F2432C4C500A5C3E8 /* Rectf.cpp in Sources */,
 				EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */,
-				EA71A76327E39E6C0081A5CB /* Makefile in Sources */,
 				EAF9A15226F8B42200698263 /* log.cpp in Sources */,
 				EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */,
 				EA71A78927E39E6C0081A5CB /* entropy.c in Sources */,
@@ -3594,7 +3582,6 @@
 				EA71A75427E39E6C0081A5CB /* hmac.c in Sources */,
 				EA2B8ADD24E7093600EA12BD /* events.cpp in Sources */,
 				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
-				EA71A76427E39E6C0081A5CB /* Makefile in Sources */,
 				EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */,
 				EA71A72427E39E6B0081A5CB /* zip.c in Sources */,
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
@@ -3634,7 +3621,6 @@
 				EA2B8B0024E7093600EA12BD /* error.cpp in Sources */,
 				EA2B8B0224E7093600EA12BD /* Yoga.cpp in Sources */,
 				EA2B8B0624E7093600EA12BD /* scales.cpp in Sources */,
-				EA71A72A27E39E6B0081A5CB /* Makefile in Sources */,
 				EA2B8B0724E7093600EA12BD /* Camera.cpp in Sources */,
 				EA71A78A27E39E6C0081A5CB /* entropy.c in Sources */,
 				EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */,
@@ -3752,7 +3738,6 @@
 				EA71A76127E39E6C0081A5CB /* fileenc.c in Sources */,
 				EA689470261C633500F76B91 /* YGConfig.cpp in Sources */,
 				EA689472261C633500F76B91 /* mainiOS.mm in Sources */,
-				EA71A72B27E39E6B0081A5CB /* Makefile in Sources */,
 				EA689473261C633500F76B91 /* FlexboxLayout.cpp in Sources */,
 				EA71A75D27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA71A78327E39E6C0081A5CB /* aestab.c in Sources */,
@@ -3777,7 +3762,6 @@
 				EA68948A261C633500F76B91 /* DropDown.cpp in Sources */,
 				EA68948D261C633500F76B91 /* NVG.cpp in Sources */,
 				EA68948F261C633500F76B91 /* Layer.cpp in Sources */,
-				EA71A76527E39E6C0081A5CB /* Makefile in Sources */,
 				EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */,
 				EA71A72127E39E6B0081A5CB /* unzip.c in Sources */,
 				EA689490261C633500F76B91 /* AudioFileApple.cpp in Sources */,

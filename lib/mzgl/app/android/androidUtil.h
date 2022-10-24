@@ -20,6 +20,8 @@
 // as normal - see http://www.50ply.com/blog/2013/01/19/loading-compressed-android-assets-with-file-pointer/#comment-1850768990
 FILE *android_asset_open(const char* fname, const char* mode);
 
+std::shared_ptr<App> androidGetApp();
+
 std::vector<std::string> androidListAssetDir(const std::string &path);
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData);
 std::string loadAndroidAssetAsString(const std::string &path);
@@ -164,7 +166,7 @@ public:
     }
     ~ScopedJni() {
 //        Log::d() << "~ScopedJni()";
-        if(success && !ScopedJniAttachmentBlocker::shouldBlock) {
+        if(success) {//} && !ScopedJniAttachmentBlocker::shouldBlock) {
 //            Log::d() << "detaching";
             getAndroidAppPtr()->activity->vm->DetachCurrentThread();
             jni = nullptr;

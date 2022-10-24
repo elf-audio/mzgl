@@ -67,7 +67,7 @@ int nsEventToKey(NSEvent *evt) {
 - (void) keyDown: (NSEvent*) event {
 
 	auto keyCode = nsEventToKey(event);
-	runOnMainThread(true, [self,keyCode]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self,keyCode]() {
 		eventDispatcher->keyDown(keyCode);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -75,7 +75,7 @@ int nsEventToKey(NSEvent *evt) {
 }
 - (void) keyUp: (NSEvent*) event {
 	auto keyCode = nsEventToKey(event);
-	runOnMainThread(true, [self,keyCode]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self,keyCode]() {
 		eventDispatcher->keyUp(keyCode);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -88,7 +88,7 @@ int nsEventToKey(NSEvent *evt) {
 	float pixelScale = eventDispatcher->app->g.pixelScale;
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight)  * pixelScale;
-	runOnMainThread(true, [self, x, y]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() {
 		eventDispatcher->touchOver(x,y);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -100,7 +100,7 @@ int nsEventToKey(NSEvent *evt) {
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	int id = (int)[event buttonNumber];
-	runOnMainThread(true, [self,x, y, id]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
 		eventDispatcher->touchDown(x, y,id);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -114,7 +114,7 @@ int nsEventToKey(NSEvent *evt) {
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	int id = (int)[event buttonNumber];
-	runOnMainThread(true, [self,x, y, id]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
 		eventDispatcher->touchUp(x, y,id);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -127,7 +127,7 @@ int nsEventToKey(NSEvent *evt) {
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	int id = (int)[event buttonNumber];
-	runOnMainThread(true, [self,x, y, id]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
 		eventDispatcher->touchMoved(x, y,id);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -141,7 +141,7 @@ int nsEventToKey(NSEvent *evt) {
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	float dx = event.deltaX;
 	float dy = event.deltaY;
-	runOnMainThread(true, [self, x, y, dx, dy]() {
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, dx, dy]() {
 		eventDispatcher->mouseScrolled(x,y, dx, dy);
 	});
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -169,7 +169,7 @@ int nsEventToKey(NSEvent *evt) {
 
 		auto evtDispatcher = eventDispatcher;
 
-		runOnMainThread(true, [x, y, zoom, evtDispatcher]() {
+		eventDispatcher->app->main.runOnMainThread(true, [x, y, zoom, evtDispatcher]() {
 			evtDispatcher->mouseZoomed(x, y, zoom);
 		});
 	}
@@ -197,11 +197,11 @@ int nsEventToKey(NSEvent *evt) {
 	dropped = false;
 	if(eventDispatcher->canOpenFiles(paths)) {
 		acceptedDraggingSequenceNo = sender.draggingSequenceNumber;
-		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
-		float pixelScale = eventDispatcher->app->g.pixelScale;
+//		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
+//		float pixelScale = eventDispatcher->app->g.pixelScale;
 
-		float x = sender.draggingLocation.x * pixelScale;
-		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
+//		float x = sender.draggingLocation.x * pixelScale;
+//		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
 //		runOnMainThread(true, [self,x, y]() {
 //			eventDispatcher->fileDragBegin(x,y,0);
 //		});
@@ -221,9 +221,9 @@ int nsEventToKey(NSEvent *evt) {
 		
 		float x = sender.draggingLocation.x * pixelScale;
 		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
-        int numItems = sender.numberOfValidItemsForDrop;
-		runOnMainThread(true, [self,x, y, numItems]() {
-			eventDispatcher->fileDragUpdate(x, y, 0, numItems);
+        auto numItems = sender.numberOfValidItemsForDrop;
+		eventDispatcher->app->main.runOnMainThread(true, [self,x, y, numItems]() {
+			eventDispatcher->fileDragUpdate(x, y, 0, (int)numItems);
 	   });
 
 		return NSDragOperationCopy;
@@ -244,7 +244,7 @@ int nsEventToKey(NSEvent *evt) {
 	
     
 //    [self lock];
-    runOnMainThreadAndWait([self, paths]() {
+    eventDispatcher->app->main.runOnMainThreadAndWait([self, paths]() {
         
         eventDispatcher->filesDropped(paths, 0, []() {});
         dropped = true;

@@ -65,7 +65,7 @@ using namespace std;
 	
 	// no runloop because no graphics, so lets make one for runOnMainThread
 	NSTimer *timer = [NSTimer timerWithTimeInterval:1.0/60.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-		updateInternal();
+		app->updateInternal();
 	}];
 	
 	[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
@@ -260,7 +260,7 @@ using namespace std;
 		   openFile:(NSString *)filename {
 	string fn = [filename UTF8String];
 	auto evtDispatcher = eventDispatcher;
-	runOnMainThread(true, [evtDispatcher, fn]() {
+	app->main.runOnMainThread(true, [evtDispatcher, fn]() {
 		evtDispatcher->openUrl(fn);
 	});
 	return YES;

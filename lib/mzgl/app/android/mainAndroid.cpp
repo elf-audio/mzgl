@@ -28,6 +28,18 @@ struct engine {
     int32_t height = 0;
 };
 
+
+#include "Graphics.h"
+
+bool firstFrameAlreadyRendered = false;
+Graphics graphics;
+
+shared_ptr<EventDispatcher> eventDispatcher = nullptr;
+shared_ptr<App> app = nullptr;
+shared_ptr<App> androidGetApp() {
+    return app;
+}
+
 //EGLint __WIDTH = 0;
 //EGLint __HEIGHT = 0;
 
@@ -201,13 +213,7 @@ bool checkGlError(const char* funcName) {
     return false;
 }
 
-#include "Graphics.h"
 
-bool firstFrameAlreadyRendered = false;
-Graphics graphics;
-
-shared_ptr<EventDispatcher> eventDispatcher = nullptr;
-shared_ptr<App> app = nullptr;
 static void engine_term_display(struct engine* engine);
 
 

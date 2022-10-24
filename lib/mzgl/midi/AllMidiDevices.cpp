@@ -37,7 +37,7 @@ class AllMidiDevicesAndroidImpl : public AllMidiDevicesImpl {
 
 class AllMidiDevicesRtMidiImpl : public MidiListener, public AllMidiDevicesImpl {
 public:
-
+	
     void setup() override {
         autoPoll();
     }
@@ -56,9 +56,10 @@ public:
         running = true;
         portScannerThread = std::thread([this]() {
             while(running) {
-                runOnMainThread([this] {
+//                main.runOnMainThread([this] {
+				// this could crash on some OS's if you need to call this on main thread
                     poll();
-                });
+//                });
                 for(int i = 0; i < 100; i++) {
                     sleepMillis(10);
                     if(!running) break;

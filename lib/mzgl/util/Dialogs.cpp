@@ -108,13 +108,13 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 
 
 
-		function<void(NSInteger, NSTextField*)> handleResult = [completionCallback](NSInteger returnCode, NSTextField *label) {
+		function<void(NSInteger, NSTextField*)> handleResult = [completionCallback,this](NSInteger returnCode, NSTextField *label) {
 			string txt = "";
 			if ( returnCode == NSAlertFirstButtonReturn )
 				txt = [[label stringValue] UTF8String];
 //			[label resignFirstResponder];
 //			[[[NSApp mainWindow].contentView.subviews firstObject] becomeFirstResponder];
-			runOnMainThread(true, [txt, returnCode, completionCallback]() {
+			app.main.runOnMainThread(true, [txt, returnCode, completionCallback]() {
 				completionCallback(txt, returnCode == NSAlertFirstButtonReturn);
 			});
 		};
@@ -199,11 +199,11 @@ void Dialogs::confirm(std::string title, std::string msg,
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
 
-		function<void(NSInteger)> handleResult = [okPressed, cancelPressed](NSInteger result) {
+		function<void(NSInteger)> handleResult = [okPressed, cancelPressed,this](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
-				runOnMainThread(okPressed);
+				app.main.runOnMainThread(okPressed);
 			} else {
-				runOnMainThread(cancelPressed);
+				app.main.runOnMainThread(cancelPressed);
 			}
 		};
 #		ifndef MZGLAU
@@ -351,14 +351,14 @@ void Dialogs::twoOptionCancelDialog(std::string title, std::string msg,
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
-		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, cancelPressed](NSInteger result) {
+		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, cancelPressed,this](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
-				runOnMainThread(buttonOnePressed);
+				app.main.runOnMainThread(buttonOnePressed);
 			} else if(result == NSAlertSecondButtonReturn) {
-				runOnMainThread(buttonTwoPressed);
+				app.main.runOnMainThread(buttonTwoPressed);
 			} else {
-				runOnMainThread(cancelPressed);
+				app.main.runOnMainThread(cancelPressed);
 			}
 		};
 
@@ -441,12 +441,12 @@ void Dialogs::twoOptionDialog(std::string title, std::string msg,
 		[alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
-		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed](NSInteger result) {
+		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, this](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
-				runOnMainThread(buttonOnePressed);
+				app.main.runOnMainThread(buttonOnePressed);
 			} else if(result == NSAlertSecondButtonReturn) {
-				runOnMainThread(buttonTwoPressed);
+				app.main.runOnMainThread(buttonTwoPressed);
 			}
 		};
 
@@ -554,16 +554,16 @@ void Dialogs::threeOptionCancelDialog(std::string title, std::string msg,
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
 
-		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
+		function<void(NSInteger)> handleResult = [this,buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
-				runOnMainThread(buttonOnePressed);
+				app.main.runOnMainThread(buttonOnePressed);
 			} else if(result == NSAlertSecondButtonReturn) {
-				runOnMainThread(buttonTwoPressed);
+				app.main.runOnMainThread(buttonTwoPressed);
 			} else if(result == NSAlertThirdButtonReturn) {
-				runOnMainThread(buttonThreePressed);
+				app.main.runOnMainThread(buttonThreePressed);
 			} else {
-				runOnMainThread(cancelPressed);
+				app.main.runOnMainThread(cancelPressed);
 			}
 		};
 
@@ -657,14 +657,14 @@ void Dialogs::threeOptionDialog(std::string title, std::string msg,
 		//[alert setInformativeText:@"Deleted records cannot be restored."];
 		[alert setAlertStyle:NSAlertStyleWarning];
 
-		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed](NSInteger result) {
+		function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed,this](NSInteger result) {
 			if (result == NSAlertFirstButtonReturn) {
 				// OK clicked, delete the record
-				runOnMainThread(buttonOnePressed);
+				app.main.runOnMainThread(buttonOnePressed);
 			} else if(result == NSAlertSecondButtonReturn) {
-				runOnMainThread(buttonTwoPressed);
+				app.main.runOnMainThread(buttonTwoPressed);
 			} else if(result == NSAlertThirdButtonReturn) {
-				runOnMainThread(buttonThreePressed);
+				app.main.runOnMainThread(buttonThreePressed);
 			}
 		};
 
@@ -921,13 +921,15 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	[butt setTranslatesAutoresizingMaskIntoConstraints:NO];
 	butt.tintColor = [UIColor redColor];
 
-
+	targetController.view.backgroundColor = [UIColor blackColor];
+//	wv.backgroundColor = [UIColor blackColor];
+	
 	[targetController.view addSubview:wv];
 	[targetController.view addSubview:butt];
 	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
 	targetController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
 
-	targetController.view.backgroundColor = [UIColor whiteColor];
+//	targetController.view.backgroundColor = [UIColor whiteColor];
 	NSDictionary *views = NSDictionaryOfVariableBindings(wv, butt);
 	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|" options:0 metrics:nil views:views]];
 	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|" options:0 metrics:nil views:views]];

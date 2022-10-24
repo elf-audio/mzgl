@@ -19,14 +19,31 @@
     eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
     
     ((WebViewApp*)eventDispatcher->app)->callJS = [self](const std::string &s) {
+        printf("callJS(%s)\n", s.c_str());
         [self evaluateJavaScript:[NSString stringWithUTF8String:s.c_str()] completionHandler:nil];
     };
 
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     [config.userContentController addScriptMessageHandler:self name:@"updateHandler"];
 
+    
+    
+    
+    
+    
+    
+    
+    [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"fullScreenEnabled"];
+        [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"DOMPasteAllowed"];
+        [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"javaScriptCanAccessClipboard"];
+#ifdef DEBUG
+//    blah
+        [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"developerExtrasEnabled"];
+#endif
+    
+    
 	self = [super initWithFrame:frame configuration:config];
-	std::string customUrl = [url UTF8String];//"http://localhost:8080/";
+	std::string customUrl = [url UTF8String];
 	if(self!=nil) {
 		
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];

@@ -22,7 +22,7 @@
 #define M_PI 3.14159265358979323846f
 #endif
 class Layer;
-
+class App;
 
 
 
@@ -154,7 +154,7 @@ public:
 	void initGraphics();
 	void setupView(bool flipped = true, int w = 0, int h = 0);
 	void setupViewOrtho(float w = 0.f, float h = 0.f);
-		
+	unsigned int getFrameNum() { return frameNum; }
 	// when you want to unbind a frame buffer (fbo) you need to bind to this
 	// as on iOS, the default framebuffer is not always 0
 	GLint getDefaultFrameBufferId();
@@ -175,6 +175,8 @@ public:
 	// needs to be here so it's not static
 	std::map<int,Layer*> focusedLayers;
 
+	friend class App;
+		
 private:
 	float strokeWeight = 1;
 	GLint defaultFBO;
@@ -194,7 +196,10 @@ private:
 	GLuint immediateVertexBuffer = 0;
 	GLuint immediateColorBuffer = 0;
 	GLuint immediateIndexBuffer = 0;
-
+	
+	
+	// was in Globals
+	unsigned int frameNum = 0;
 };
 
 class ScopedAlphaBlend {

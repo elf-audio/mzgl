@@ -20,7 +20,7 @@
 #include "AudioSystem.h"
 #include "RootLayer.h"
 #include "Dialogs.h"
-
+#include "mainThread.h"
 #define MZ_KEY_LEFT 		256
 #define MZ_KEY_RIGHT 		257
 #define MZ_KEY_DOWN 		258
@@ -107,6 +107,12 @@ public:
 	// only available on iOS
 	void *viewController = nullptr;
     void *windowHandle = nullptr;
+	MainThreadRunner main;
+	
+	void updateInternal() {
+		++g.frameNum;
+		main.pollMainThreadQueue();
+	}
 };
 
 App *instantiateApp(Graphics &g);

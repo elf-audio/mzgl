@@ -7,40 +7,44 @@
 //
 
 #include "mainThread.h"
-
-#include "concurrentqueue.h"
-#include <thread>
 #include "log.h"
 #include "mzAssert.h"
-static std::thread::id		mainThreadId;
-using namespace std;
+#include "concurrentqueue.h"
 
+
+class MainThreadRunner::LambdaQueue : public moodycamel::ConcurrentQueue<std::function<void()>> {};
 // from cinder
-bool isMainThread() {
+MainThreadRunner::MainThreadRunner() {
+	mainThreadQueue = std::make_shared<LambdaQueue>();
+}
+MainThreadRunner::~MainThreadRunner() {
+	//mzAssert(isMainThread());
+	clearMainThreadQueue();
+}
+bool MainThreadRunner::isMainThread() {
 	return std::this_thread::get_id() == mainThreadId;
 }
 
-void setMainThreadId() {
+void MainThreadRunner::setMainThreadId() {
 	mainThreadId = std::this_thread::get_id();
 }
 
-moodycamel::ConcurrentQueue<function<void()>> mainThreadQueue;
 
-void runOnMainThread(function<void()> fn) {
+void MainThreadRunner::runOnMainThread(std::function<void()> fn) {
 	mzAssert(!isMainThread());
-	mainThreadQueue.enqueue(fn);
+	mainThreadQueue->enqueue(fn);
 }
 
 
-void runOnMainThreadAndWait(function<void()> fn) {
+void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
 	if(isMainThread()) {
 		Log::e() << "runOnMainThreadAndWait() called from main thread";
 		fn();
 		return;
 	}
 	mzAssert(!isMainThread());
-	atomic<bool> done {false};
-	mainThreadQueue.enqueue([fn,&done]() {
+	std::atomic<bool> done {false};
+	mainThreadQueue->enqueue([fn,&done]() {
 		fn();
 		done.store(true);
 	});
@@ -51,25 +55,26 @@ void runOnMainThreadAndWait(function<void()> fn) {
 }
 
 
-void runOnMainThread(bool checkIfOnMainThread, function<void()> fn) {
+void MainThreadRunner::runOnMainThread(bool checkIfOnMainThread, std::function<void()> fn) {
 	if(checkIfOnMainThread && isMainThread()) {
 		fn();
 	} else {
 		runOnMainThread(fn);
 	}
 }
-#ifdef UNIT_TEST
-// dangerous to use in anything but testing
-void clearMainThreadQueue() {
-	mzAssert(isMainThread());
-	function<void()> fn;
-	while(mainThreadQueue.try_dequeue(fn)) {}
-}
-#endif
 
-void pollMainThreadQueue() {
-	function<void()> fn;
-	while(mainThreadQueue.try_dequeue(fn)) {
+// dangerous to use in anything but testing
+void MainThreadRunner::clearMainThreadQueue() {
+	//mzAssert(isMainThread());
+	std::function<void()> fn;
+	while(mainThreadQueue->try_dequeue(fn)) {}
+}
+
+
+void MainThreadRunner::pollMainThreadQueue() {
+	std::function<void()> fn;
+	while(mainThreadQueue->try_dequeue(fn)) {
 		fn();
 	}
 }
+

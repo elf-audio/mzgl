@@ -13,6 +13,7 @@ class MidiMessage;
 
 class AllMidiDevicesImpl {
 public:
+	
     virtual void setup() {}
     virtual void addListener(MidiListener *l) = 0;
 	

@@ -23,7 +23,7 @@ public:
 	}
 
 	// REWRITE THESE 2 METHODS:
-	void insert(const T *d, int len) {
+	void insert(const T *d, size_t len) {
 		if(writePos + len < buff.size()) {
 			// no wrap
 			memcpy(buff.data()+writePos+1,d, len*sizeof(T));
@@ -37,7 +37,7 @@ public:
 		}
 	}
 
-	void consume(T *d, int len) {
+	void consume(T *d, size_t len) {
 		for(int i = 0; i < len; i++) {
 			d[i] = consume();
 		}

@@ -37,16 +37,12 @@ inline ThreadPool::ThreadPool(size_t threads)
 	:   stop(false)
 {
 	for(size_t i = 0;i<threads;++i)
-		workers.emplace_back(
-			[this,i]
-			{
-			std::string threadName = "ThreadPool worker " + std::to_string(i);
+		workers.emplace_back([this,i] {
 #ifdef __APPLE__
+				std::string threadName = "ThreadPool worker " + std::to_string(i);
 				pthread_setname_np(threadName.c_str());
 #endif
-
-				for(;;)
-				{
+				for(;;) {
 					std::function<void()> task;
 
 					{

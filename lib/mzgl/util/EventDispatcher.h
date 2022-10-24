@@ -160,7 +160,7 @@ public:
 		Vbo::resetDrawStats();
 	#endif
 		app->g.setupView();
-		updateInternal();
+		app->updateInternal();
 		
 		update();
 		callUpdateListeners();

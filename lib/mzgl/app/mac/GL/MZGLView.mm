@@ -165,7 +165,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 	g.height *= g.pixelScale;
 
 	auto *evtDispatcher = eventDispatcher;
-	runOnMainThread(true, [evtDispatcher, &g]() {
+	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher, &g]() {
 		
 		evtDispatcher->resized();
 	});

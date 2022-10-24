@@ -44,7 +44,7 @@ void Vbo::printVbos() {
 #endif
 
 Vbo::Vbo() {
-	mzAssert(isMainThread());
+//	mzAssert(isMainThread());
 #ifndef MZGL_GL2
 	glGenVertexArrays(1, &vertexArrayObject);
 #endif

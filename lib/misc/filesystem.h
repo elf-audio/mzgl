@@ -1,11 +1,6 @@
-// on windows, use std::filesystem
-
-// #ifdef WIN32
-// #include <filesystem>
-// namespace fs = std::filesystem;
-// #else
-// #include <boost/filesystem.hpp>
-// namespace fs = boost::filesystem;
-// #endif
+// ghc filesystem has some warnings we want to suppress for a less noisy build
+#include "choc/platform/choc_DisableAllWarnings.h"
 #include <ghc/filesystem.hpp>
+#include "choc/platform/choc_ReenableAllWarnings.h"
+
 namespace fs = ghc::filesystem;

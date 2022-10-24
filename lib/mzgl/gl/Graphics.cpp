@@ -101,7 +101,7 @@ GLint Graphics::getDefaultFrameBufferId() {
 	return defaultFBO;
 }
 void Graphics::initGraphics() {
-	
+
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 	
 	const unsigned char *openglVersion = glGetString(GL_VERSION);

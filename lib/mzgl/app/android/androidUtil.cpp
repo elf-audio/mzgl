@@ -378,31 +378,31 @@ Java_com_elf_MZGLActivity_midiReceived(JNIEnv *env, jobject thiz, jbyteArray byt
 
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_okPressed(JNIEnv *, jobject) {
-    runOnMainThread([]() {
+    androidGetApp()->main.runOnMainThread([]() {
         android_statics.okPressed();
     });
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_cancelPressed(JNIEnv * , jobject) {
-    runOnMainThread([]() {
+    androidGetApp()->main.runOnMainThread([]() {
         android_statics.cancelPressed();
     });
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_button1Pressed(JNIEnv * , jobject) {
-    runOnMainThread([]() {
+    androidGetApp()->main.runOnMainThread([]() {
         android_statics.buttonOnePressed();
     });
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_button2Pressed(JNIEnv * , jobject) {
-    runOnMainThread([]() {
+    androidGetApp()->main.runOnMainThread([]() {
         android_statics.buttonTwoPressed();
     });
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_button3Pressed(JNIEnv * , jobject) {
-    runOnMainThread([]() {
+    androidGetApp()->main.runOnMainThread([]() {
         android_statics.buttonThreePressed();
     });
 }
@@ -414,22 +414,19 @@ Java_com_elf_MZGLActivity_imageDialogComplete(JNIEnv *env, jobject thiz, jboolea
     string path = jstringToString(env, img_path);
     bool succ = success;
 
-    runOnMainThread([succ, path]() {
+    androidGetApp()->main.runOnMainThread([succ, path]() {
         android_statics.imgDialogCallback(succ, path);
     });
 }
 
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_textboxDialogComplete(JNIEnv *jni, jobject, jboolean success, jstring text) {
-    //const char *nativeString = jni->GetStringUTFChars(text, nullptr);
 
-    //string s = string(nativeString);
     string s = jstringToString(jni, text);
     bool succ = success;
-    runOnMainThread([s, succ]() {
+    androidGetApp()->main.runOnMainThread([s, succ]() {
         android_statics.completionCallback(s, succ);
     });
-    //jni->ReleaseStringUTFChars(text, nativeString);
 }
 
 

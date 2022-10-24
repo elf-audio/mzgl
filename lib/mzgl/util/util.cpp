@@ -231,9 +231,7 @@ std::vector<std::string> getCommandLineArgs() {
 }
 
 namespace Globals {
-	float seconds = 0;
 	string launchUrl = "";
-	unsigned int frameNum = 0;
 	std::chrono::system_clock::time_point startTime;
 }
 
@@ -241,15 +239,6 @@ float getSeconds() {
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-Globals::startTime;
 	return elapsed_seconds.count();
-}
-
-unsigned int getFrameNum() {
-	return Globals::frameNum;
-}
-
-void updateInternal() {
-	++Globals::frameNum;
-	pollMainThreadQueue();
 }
 
 #ifdef __APPLE__
@@ -616,7 +605,6 @@ void initMZGL(App *app) {
 		app->g.initGraphics();
 	}
 	Globals::startTime = std::chrono::system_clock::now();
-	setMainThreadId();
 }
 
 

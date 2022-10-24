@@ -14,14 +14,14 @@ class App;
 
 class Dialogs {
 public:
-	const App &app;
+	App &app;
 
 	/**
 	 * Constructor must take the calling app because 
 	 * some dialog methods need references to the apps window
 	 * which can be stored in the App class.
 	 */
-	Dialogs(const App &app) : app(app) {
+	Dialogs(App &app) : app(app) {
 		
 	}
 

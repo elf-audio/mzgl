@@ -58,7 +58,6 @@ public:
 
 class AllMidiDevicesAppleImpl : public AllMidiDevicesImpl {
 public:
-
     std::vector<MidiDeviceListener*> deviceListeners;
 
     MIDIClientRef client = 0;

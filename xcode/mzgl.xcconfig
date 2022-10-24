@@ -11,7 +11,14 @@
 //                                                   //
 ///////////////////////////////////////////////////////
 
-HEADER_SEARCH_PATHS = ../lib ../lib/glm ../lib/misc ../opt/blahdio/ext/drlibs ../lib/ZipFile/lib ../lib/ghc-filesystem/include ../lib/ZipFile/lib/zipper
+HEADER_SEARCH_PATHS = 						\
+			../lib 							\
+			../lib/glm						\
+			../lib/misc						\
+			../opt/blahdio/ext/drlibs		\
+			../lib/ZipFile/lib				\
+			../lib/ghc-filesystem/include   \
+			../lib/ZipFile/lib/zipper
 OTHER_CFLAGS = 
 OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__
 

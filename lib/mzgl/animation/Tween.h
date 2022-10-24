@@ -98,16 +98,12 @@ void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, 
 	this->to = to;
 	this->startTime = getSeconds() + delay;
 	this->endTime = startTime + duration;
-	
 }
-
-
 
 typedef Tween_<float> Tween;
 
 // not sure if this works
 //typedef Tween_<glm::vec2> Tween2f;
-
 
 class FunctionAnimation: public Animation {
 public:

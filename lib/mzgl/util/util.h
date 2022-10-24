@@ -29,7 +29,6 @@ void oslog(std::string s);
 
 std::string getAppId();
 float getSeconds();
-unsigned int getFrameNum();
 
 bool copyDir(const std::string &source, const std::string &destination, std::string &errMsg);
 
@@ -107,19 +106,16 @@ enum class Cursor {
 	DOWN_RESIZE,
 	LEFT_RIGHT_RESIZE,
 	UP_DOWN_RESIZE,
-	
 };
-void setCursor(Cursor cursor);
 
+void setCursor(Cursor cursor);
 
 void showMouse();
 void hideMouse();
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ///// internal! Should definitely go elsewhere
 void initMZGL(App *app);
-void updateInternal();
 
 #ifdef UNIT_TEST
 

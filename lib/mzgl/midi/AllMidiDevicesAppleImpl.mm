@@ -92,10 +92,9 @@ void AllMidiDevicesAppleImpl::autoPoll() {
 				pthread_setname_np("AllMidiIns::portScanner");
 #endif
         while(running) {
-            runOnMainThread([this] {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    scanForDevices();
-                });
+            
+			dispatch_async(dispatch_get_main_queue(), ^{
+				scanForDevices();  
             });
             for(int i = 0; i < 100; i++) {
                 sleepMillis(10);

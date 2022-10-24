@@ -43,6 +43,6 @@ struct Stopwatch {
     //------------------------------------------------------------------------------------------------------------------------------
     void printTimeDeltaMs(const std::string &message) {
         auto ms = getTimeDeltaMs();
-        printf("%s took %d ms\n", message.c_str(), ms);
+        printf("%s took %lu ms\n", message.c_str(), ms);
     }
 };
