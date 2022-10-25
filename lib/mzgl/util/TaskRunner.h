@@ -22,67 +22,46 @@
  * now it lives within a class that has a defined lifetime.
  */
 class TaskRunner {
-public:
-    
-private:
-//	class Task {
-//	public:
-//
-//		std::future<void> taskFuture;
-//		std::atomic<bool> done { false };
-//
-//		Task(TaskRunner *runner, std::function<void()> taskFn) {
-//
-//			taskFuture = std::async(std::launch::async, [this, taskFn, runner](){
-// #if defined(__APPLE__) && DEBUG
-//				// sets a thread name that is readable in xcode when debugging
-//				pthread_setname_np("runTask()");
-// #endif
-//				try {
-//					taskFn();
-//				} catch(const std::exception& err) {
-//					std::string ex = err.what();
-////					runner->main.runOnMainThread([ex]() {
-//						Log::e() << "exception in runTask: " << ex;
-////					});
-//
-//				}
-//
-//				done.store(true);
-//
-//				// this could be a problem if we're the last task and things are getting destructed
-////				runner->main.runOnMainThread([runner]() {
-//					runner->clearAnyDoneTasks();
-////				});
-//			});
-//		}
-//	};
+
     
 public:
     
-//    std::future<void> fut;
+    std::future<void> fut;
     std::atomic<bool> shouldStop { false };
     std::thread thread;
-    TaskRunner() {
+    std::string name;
+    
+    TaskRunner(std::string name = "TaskRunner") : name(name) {
         
-        thread = std::thread([this](){
+        fut = std::async(std::launch::async, [this](){
 #ifdef __APPLE__
-            pthread_setname_np("TaskRunner");
+            pthread_setname_np(this->name.c_str());
 #endif
             std::function<void()> taskFn;
             
+            int ppp = 0;
             while(!shouldStop) {
+                
+                if(ppp++>10) {
+                    ppp = 0;
+                    clearAnyDoneTasks();
+                }
+                
                 while(taskQueue.try_dequeue(taskFn)) {
-        //            tasks.emplace_back(std::make_shared<Task>(taskFn));
-                    taskFn();
+                    tasks.emplace_back(std::make_shared<Task>(taskFn));
                 }
                 
                 std::this_thread::sleep_for(std::chrono::microseconds(100));
             }
         });
     }
+    
 	// runs taskFn asynchronously, run on any thread
 	void run(std::function<void()> taskFn) {
+        if(!fut.valid()) {
+            Log::e() << "TaskRunner '"<<name<<"' is finished!";
+            return;
+        }
         taskQueue.enqueue(taskFn);
         
 //		auto addTaskFn = [taskFn, this]() {
@@ -98,31 +77,61 @@ public:
 
 	// need to guarantee that ALL tasks are done before this dies.
 	~TaskRunner() {
-        shouldStop = true;
-        thread.join();
-//		waitTilAllTasksAreDone();
+        shouldStop.store(true);
+        fut.wait();
+		waitTilAllTasksAreDone();
 	}
     
-    void update() {
-        std::function<void()> taskFn;
-        while(taskQueue.try_dequeue(taskFn)) {
-//            tasks.emplace_back(std::make_shared<Task>(taskFn));
-            taskFn();
+//    void update() {
+//        std::function<void()> taskFn;
+//        while(taskQueue.try_dequeue(taskFn)) {
+////            tasks.emplace_back(std::make_shared<Task>(taskFn));
+//            taskFn();
+//        }
+//    }
+//
+	
+
+private:
+    
+    
+    class Task {
+    public:
+
+        std::future<void> taskFuture;
+        Task(std::function<void()> taskFn) {
+
+            taskFuture = std::async(std::launch::async, [this, taskFn](){
+ #if defined(__APPLE__) && DEBUG
+                // sets a thread name that is readable in xcode when debugging
+                pthread_setname_np("runTask()");
+ #endif
+                try {
+                    taskFn();
+                } catch(const std::exception& err) {
+                    std::string ex = err.what();
+                    Log::e() << "exception in runTask: " << ex;
+                }
+            });
+        }
+        
+        bool done() {
+            return !taskFuture.valid();
+        }
+    };
+    
+    
+    void waitTilAllTasksAreDone() {
+        while(tasks.size()>0) {
+            clearAnyDoneTasks();
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
     }
 
-	void waitTilAllTasksAreDone() {
-//		while(tasks.size()>0) {
-//			clearAnyDoneTasks();
-//			std::this_thread::sleep_for(std::chrono::microseconds(100));
-//		}
-	}
-
-	void clearAnyDoneTasks() {
-//		tasks.remove_if([](const std::shared_ptr<Task> task) { return task->done.load();});
-	}
-
-private:
+    void clearAnyDoneTasks() {
+        tasks.remove_if([](const std::shared_ptr<Task> task) { return task->done();});
+    }
+    
     moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
-//	std::list<std::shared_ptr<Task>> tasks;
+	std::list<std::shared_ptr<Task>> tasks;
 };
