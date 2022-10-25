@@ -10,6 +10,7 @@
 
 #pragma once
 #include <chrono>
+#include "log.h"
 struct Stopwatch {
 
     std::chrono::steady_clock::time_point startTime;
@@ -43,6 +44,7 @@ struct Stopwatch {
     //------------------------------------------------------------------------------------------------------------------------------
     void printTimeDeltaMs(const std::string &message) {
         auto ms = getTimeDeltaMs();
-        printf("%s took %lu ms\n", message.c_str(), ms);
+        Log::d() << message << " took " << ms << "ms";
+//        printf("%s took %lu ms\n", message.c_str(), ms);
     }
 };
