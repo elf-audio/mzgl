@@ -99,10 +99,16 @@ private:
     public:
 
         std::future<void> taskFuture;
+        
+//#if UNIT_TEST
+//        std::function<void()> tf;
+//#endif
         Task(std::function<void()> taskFn) {
-
+//#if UNIT_TEST
+//            tf = taskFn;
+//#endif
             taskFuture = std::async(std::launch::async, [this, taskFn](){
- #if defined(__APPLE__) && DEBUG
+ #if defined(__APPLE__) && (DEBUG || UNIT_TEST)
                 // sets a thread name that is readable in xcode when debugging
                 pthread_setname_np("runTask()");
  #endif
@@ -112,7 +118,10 @@ private:
                     std::string ex = err.what();
                     Log::e() << "exception in runTask: " << ex;
                 }
+                
+                // printf("finish task\n");
             });
+            
         }
         
         bool done() {
@@ -121,17 +130,28 @@ private:
     };
     
     
+   
+
+    void clearAnyDoneTasks() {
+        tasks.remove_if([](const std::shared_ptr<Task> task) {
+            return task->done();
+        });
+    }
+    
+    moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
+	std::list<std::shared_ptr<Task>> tasks;
+
+#ifdef UNIT_TEST
+public:
+    void clearTasks() {
+        // really dangerous, only for unit testing
+        tasks.clear();
+    }
+#endif
     void waitTilAllTasksAreDone() {
         while(tasks.size()>0) {
             clearAnyDoneTasks();
             std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
     }
-
-    void clearAnyDoneTasks() {
-        tasks.remove_if([](const std::shared_ptr<Task> task) { return task->done();});
-    }
-    
-    moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
-	std::list<std::shared_ptr<Task>> tasks;
 };
