@@ -306,24 +306,24 @@ struct Blocks {
 
 #pragma mark- AUAudioUnit (Optional Properties)
 
-
-- (NSDictionary<NSString *,id> *)presetStateFor:(AUAudioUnitPreset *)userPreset error:(NSError *__autoreleasing  _Nullable *)outError {
-	return [self fullStateForDocument];
-}
-
-- (NSDictionary<NSString *,id> *)fullStateForDocument {
-	return [self fullState];
-}
-
-- (void)setFullStateForDocument:(NSDictionary<NSString *,id> *)fullStateForDocument {
-	[self setFullState:fullStateForDocument];
-}
+//
+//- (NSDictionary<NSString *,id> *)presetStateFor:(AUAudioUnitPreset *)userPreset error:(NSError *__autoreleasing  _Nullable *)outError {
+//	return [self fullStateForDocument];
+//}
+//
+//- (NSDictionary<NSString *,id> *)fullStateForDocument {
+//	return [self fullState];
+//}
+//
+//- (void)setFullStateForDocument:(NSDictionary<NSString *,id> *)fullStateForDocument {
+//	[self setFullState:fullStateForDocument];
+//}
 
 - (NSDictionary<NSString *,id> *)fullState {
 	NSLog(@"Full state called");
-	NSDictionary<NSString*,id> *state = [super fullState];
-	
-	
+//	NSMutableDictionary<NSString*,id> *state = [super fullState];
+//	NSMutableDictionary<NSString*,id> *state = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary<NSString*,id> *state = [[super fullState] mutableCopy];
 	
 	if(!plugin->wantsToSerializeWithNSDictionary()) { // normal data serialize
 		vector<uint8_t> serialized;
@@ -362,7 +362,18 @@ struct Blocks {
 	return YES;
 }
 
-// THIS LOOKS A BIT IFFY TO ME, NOT SURE IF IT REALLY WORKS...
+// from Jonatan Liljedahl
+- (BOOL)saveUserPreset:(AUAudioUnitPreset *)userPreset error:(NSError *__autoreleasing  _Nullable *)outError {
+	BOOL ok = [super saveUserPreset:userPreset error:outError];
+	if(ok) {
+		[self willChangeValueForKey:@"currentPreset"];
+		super.currentPreset = userPreset; // why doesn't the base class already do this?
+		[self didChangeValueForKey:@"currentPreset"];
+	}
+	return ok;
+}
+//
+//// THIS LOOKS A BIT IFFY TO ME, NOT SURE IF IT REALLY WORKS...
 - (AUAudioUnitPreset *)currentPreset {
 	if (_currentPreset.number >= 0) {
 		if(_currentFactoryPresetIndex>=0 && [_factoryPresets count] > _currentFactoryPresetIndex) {
@@ -377,10 +388,10 @@ struct Blocks {
 		return _currentPreset;
 	}
 }
-
+//
 - (void)setCurrentPreset:(AUAudioUnitPreset *)currentPreset {
 	if (nil == currentPreset) { NSLog(@"nil passed to setCurrentPreset!"); return; }
-	
+
 	if (currentPreset.number >= 0) {
 		// factory preset
 		for (AUAudioUnitPreset *factoryPreset in _factoryPresets) {
@@ -390,7 +401,7 @@ struct Blocks {
 				_currentPreset = currentPreset;
 				_currentFactoryPresetIndex = factoryPreset.number;
 				NSLog(@"currentPreset Factory: %ld, %@\n", (long)_currentFactoryPresetIndex, factoryPreset.name);
-				
+
 				break;
 			}
 		}
@@ -399,7 +410,13 @@ struct Blocks {
 		_currentPreset = currentPreset;
 		NSError *err = nil;
 		id state = [self presetStateFor:currentPreset error:&err];
-		[self setFullState:state];
+		if(err) {
+			NSLog(@"Got error: %@", err);
+			return;
+		}
+		if(state!=nil) {
+			[self setFullState:state];
+		}
 		NSLog(@"currentPreset Custom: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
 	} else {
 		NSLog(@"setCurrentPreset not set! - invalid AUAudioUnitPreset\n");
