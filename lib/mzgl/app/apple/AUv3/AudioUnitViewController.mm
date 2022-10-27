@@ -23,13 +23,13 @@
 @end
 
 using namespace std;
-
-class AppHolder {
-public:
-    Graphics g;
-    PluginEditor *app;
-    shared_ptr<EventDispatcher> eventDispatcher;
-};
+//
+//class AppHolder {
+//public:
+//    Graphics g;
+//    PluginEditor *app;
+//    shared_ptr<EventDispatcher> eventDispatcher;
+//};
 
 
 @implementation AudioUnitViewController {
@@ -39,8 +39,9 @@ public:
     MZGLKitViewController *vc;
     MZGLKitView *glView;
     Graphics g;
-    PluginEditor *app;
-    Plugin *plugin;
+    
+	std::shared_ptr<Plugin> plugin;
+	std::shared_ptr<PluginEditor> app;
 //#else
 //    MZGLView *glView;
 //    AppHolder appHolder;
@@ -53,21 +54,23 @@ public:
     self = [super init];
     if(self!=nil) {
         needsConnection = YES;
-        
-#if !TARGET_OS_IOS
-        auto &g = appHolder.g;
-        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
-        self.view = [[NSView alloc] initWithFrame: CGRectMake(0, 0, g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-        [self setPreferredContentSize: CGSizeMake(g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-        appHolder.eventDispatcher = std::make_shared<EventDispatcher>(appHolder.app);
-        glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: appHolder.eventDispatcher.get()];
-
-
-//        [self addGLView];
-//        [self connectViewToAU];
-#else
+		app = nullptr;
+		plugin = nullptr;
+		
+//#if !TARGET_OS_IOS
+//        auto &g = appHolder.g;
+//        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
+//        self.view = [[NSView alloc] initWithFrame: CGRectMake(0, 0, g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
+//        [self setPreferredContentSize: CGSizeMake(g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
+//        appHolder.eventDispatcher = std::make_shared<EventDispatcher>(appHolder.app);
+//        glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: appHolder.eventDispatcher.get()];
+//
+//
+////        [self addGLView];
+////        [self connectViewToAU];
+//#else
         [self setPreferredContentSize: CGSizeMake(500, 800)];
-#endif
+//#endif
     }
     return self;
 }
@@ -123,8 +126,8 @@ public:
 
 - (void) doBoth: (MZGLEffectAU*) audioUnit {
     if(app==nullptr && audioUnit!=nil) {
-        app = instantiatePluginEditor(g, (Plugin*)[audioUnit getPlugin]);
-        vc = [[MZGLKitViewController alloc] initWithApp: app];
+        app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, (Plugin*)[audioUnit getPlugin].get()));
+        vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
         app->viewController = (__bridge void*)self;
 
         glView = (MZGLKitView*)vc.view;
@@ -147,7 +150,7 @@ public:
     
     NSLog(@"MZGL: createAudioUnitWithComponentDescription");
     MZGLEffectAU *audioUnit = [[MZGLEffectAU alloc] initWithComponentDescription:desc error:error];
-    plugin = (Plugin*)[audioUnit getPlugin];
+    plugin = [audioUnit getPlugin];
     if([NSThread isMainThread]) {
         NSLog(@"main thread");
         [self doBoth: audioUnit];
@@ -164,13 +167,13 @@ public:
     return audioUnit;
 }
 
-- (void) dealloc {
-    // don't delete the app, the view will delete it
-    // when it falls out of scope (shared ptr)
-//    if(app!=nullptr) delete app;
-    glView = nil;
-    delete app;
-    delete plugin;
-    printf("Finished\n");
-}
+//- (void) dealloc {
+//    // don't delete the app, the view will delete it
+//    // when it falls out of scope (shared ptr)
+////    if(app!=nullptr) delete app;
+//    glView = nil;
+////    if(app!=nullptr) delete app;
+////    if(plugin!=nullptr) delete plugin;
+//    printf("Finished\n");
+//}
 @end

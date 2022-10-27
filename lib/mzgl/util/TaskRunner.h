@@ -22,16 +22,16 @@
  * now it lives within a class that has a defined lifetime.
  */
 class TaskRunner {
-
-    
 public:
     
-    std::future<void> fut;
-    std::atomic<bool> shouldStop { false };
-    std::thread thread;
-    std::string name;
-    
-    TaskRunner(std::string name = "TaskRunner") : name(name) {
+    /**
+     * For testing you can set the task runner to be synchronous - which will
+     * just run functions passed to it rather than spinning up another thread
+     * and dsipatching more threads off that.
+     */
+    TaskRunner(std::string name = "TaskRunner", bool synchronous = false) :
+    name(name), synchronous(synchronous) {
+        if(synchronous) return;
         
         fut = std::async(std::launch::async, [this](){
 #ifdef __APPLE__
@@ -58,48 +58,33 @@ public:
     
 	// runs taskFn asynchronously, run on any thread
 	void run(std::function<void()> taskFn) {
+        if(synchronous) {
+            taskFn();
+            return;
+        }
         if(!fut.valid()) {
             Log::e() << "TaskRunner '"<<name<<"' is finished!";
             return;
         }
         taskQueue.enqueue(taskFn);
         
-//		auto addTaskFn = [taskFn, this]() {
-//			clearAnyDoneTasks();
-//			tasks.emplace_back(std::make_shared<Task>(this, taskFn));
-//		};
-
-		// this will run straight away if called on main
-		// thread or defer it to the mainThreadQueue if not.
-//		main.runOnMainThread(true, addTaskFn);
-//        addTaskFn();
 	}
 
 	// need to guarantee that ALL tasks are done before this dies.
 	~TaskRunner() {
+        if(synchronous) return;
         shouldStop.store(true);
         fut.wait();
 		waitTilAllTasksAreDone();
 	}
-    
-//    void update() {
-//        std::function<void()> taskFn;
-//        while(taskQueue.try_dequeue(taskFn)) {
-////            tasks.emplace_back(std::make_shared<Task>(taskFn));
-//            taskFn();
-//        }
-//    }
-//
-	
 
 private:
-    
     
     class Task {
     public:
 
         std::future<void> taskFuture;
-        
+        std::atomic<bool> isDone { false };
 //#if UNIT_TEST
 //        std::function<void()> tf;
 //#endif
@@ -118,14 +103,15 @@ private:
                     std::string ex = err.what();
                     Log::e() << "exception in runTask: " << ex;
                 }
-                
+                isDone.store(true);
                 // printf("finish task\n");
             });
             
         }
         
         bool done() {
-            return !taskFuture.valid();
+//            return !taskFuture.valid();
+            return isDone.load();
         }
     };
     
@@ -154,4 +140,10 @@ public:
             std::this_thread::sleep_for(std::chrono::microseconds(100));
         }
     }
+    
+    std::future<void> fut;
+    std::atomic<bool> shouldStop { false };
+    std::thread thread;
+    std::string name;
+    bool synchronous = false;
 };

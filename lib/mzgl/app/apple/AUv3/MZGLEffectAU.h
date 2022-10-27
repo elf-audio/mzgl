@@ -7,11 +7,12 @@
 //
 
 #import <AudioToolbox/AudioToolbox.h>
-
+#include <memory>
+#include "Plugin.h"
 // Define parameter addresses.
 extern const AudioUnitParameterID myParam1;
 
 @interface MZGLEffectAU : AUAudioUnit
--(void*) getPlugin;
+-(std::shared_ptr<Plugin>) getPlugin;
 
 @end

@@ -43,7 +43,7 @@ struct Blocks {
 };
 
 @implementation MZGLEffectAU {
-	Plugin *plugin;
+	std::shared_ptr<Plugin> plugin;
 	Blocks blocks;
 	BufferedInputBus _inputBus;
 	
@@ -59,7 +59,7 @@ struct Blocks {
 
 }
 
--(void*) getPlugin {
+-(std::shared_ptr<Plugin>) getPlugin {
 	return plugin;
 }
 
@@ -96,7 +96,7 @@ struct Blocks {
 	asbd = *defaultFormat.streamDescription;
 
 	
-	plugin = instantiatePlugin();
+	plugin = std::shared_ptr<Plugin>(instantiatePlugin());
 	
 	
 	
@@ -105,7 +105,7 @@ struct Blocks {
 //	TESTING COMMENTING THIS OUT, TO SEE IF IT FIXES SOMETHING!
 //
 	__weak __typeof__(self) weakSelf = self;
-	auto *plug = plugin;
+	auto *plug = plugin.get();
 	plugin->isRunning = [weakSelf, plug]() -> bool {
 		if([weakSelf respondsToSelector:@selector(isRunning)]) {
 			return [weakSelf isRunning];
@@ -200,7 +200,7 @@ struct Blocks {
 	// Create the parameter tree.
 	_parameterTree = [AUParameterTree createTreeWithChildren:paramList];
 	
-	Plugin *eff = plugin;
+	Plugin *eff = plugin.get();
 	
 	
 	
@@ -516,7 +516,7 @@ struct Blocks {
 	
 	__block BufferedInputBus *input = &_inputBus;
 	
-	Plugin *eff = plugin;
+	Plugin *eff = plugin.get();
 	Blocks *blks = &blocks;
 	
 	FloatBuffer &inputBusData = inputBus;
