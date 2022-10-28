@@ -342,6 +342,7 @@ struct Blocks {
 - (void) setFullState:(NSDictionary<NSString *,id> *)state {
 	//[super setFullState:state];
 	NSLog(@"Attempting to set full state");
+	Log::d() << "setFullState";
 	if(!plugin->wantsToSerializeWithNSDictionary()) {
 		NSData *data = [state objectForKey:@"data"];
 		if(data!=nil) {
@@ -354,6 +355,7 @@ struct Blocks {
 			}
 		}
 	} else {
+		
 		plugin->deserializeByNSDictionary((__bridge const void*)state);
 	}
 }

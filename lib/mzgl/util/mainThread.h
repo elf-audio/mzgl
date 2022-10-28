@@ -59,4 +59,7 @@ private:
 	class LambdaQueue;
 	std::thread::id		mainThreadId;
 	std::shared_ptr<LambdaQueue> mainThreadQueue;
+	bool mainThreadEverPolled = false;
+	std::mutex pollMutex;
+	void pollInternal();
 };

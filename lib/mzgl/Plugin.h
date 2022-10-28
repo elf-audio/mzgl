@@ -68,6 +68,10 @@ public:
 	void loadFactoryPresets() {
 		fs::path presetPath = dataPath("factory-presets");
 		try {
+			if(!fs::exists(presetPath)) {
+				Log::d() << "No factory presets to load";
+				return;
+			}
 			for(auto &p : fs::directory_iterator(presetPath)) {
 				if(p.path().extension()==getExt()) {
 					factoryPresets.push_back(p.path().stem().string());
