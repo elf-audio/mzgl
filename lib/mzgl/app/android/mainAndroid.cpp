@@ -481,24 +481,24 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
         //LOGE("touch : %d %d\n", x, y);
 
         return 1; // event handled
-//    } else if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
-//        int32_t keyAction = AKeyEvent_getAction(event);
-//        if(keyAction==AKEY_EVENT_ACTION_DOWN) {
-//            int32_t k = AKeyEvent_getKeyCode(event);
-//            int key = keycodeToKey(k);
-//            if(key!=0) {
-//                eventDispatcher->keyDown(key);
-//            }
-//        } else if(keyAction==AKEY_EVENT_ACTION_UP) {
-//            int32_t k = AKeyEvent_getKeyCode(event);
-//            int key = keycodeToKey(k);
-//            if(key!=0) {
-//                eventDispatcher->keyUp(key);
-//            }
-//        } else if(keyAction==AKEY_EVENT_ACTION_MULTIPLE) {
-//            Log::e() << "Unhandled AKEY_EVENT_ACTION_MULTIPLE";
-//        }
-//        return 1;
+    } else if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
+        int32_t keyAction = AKeyEvent_getAction(event);
+        if(keyAction==AKEY_EVENT_ACTION_DOWN) {
+            int32_t k = AKeyEvent_getKeyCode(event);
+            int key = keycodeToKey(k);
+            if(key!=0) {
+                eventDispatcher->keyDown(key);
+            }
+        } else if(keyAction==AKEY_EVENT_ACTION_UP) {
+            int32_t k = AKeyEvent_getKeyCode(event);
+            int key = keycodeToKey(k);
+            if(key!=0) {
+                eventDispatcher->keyUp(key);
+            }
+        } else if(keyAction==AKEY_EVENT_ACTION_MULTIPLE) {
+            Log::e() << "Unhandled AKEY_EVENT_ACTION_MULTIPLE";
+        }
+        return 1;
     }
     return 0; // event not handled
 }

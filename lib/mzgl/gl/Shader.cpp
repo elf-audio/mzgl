@@ -415,7 +415,12 @@ GLuint Shader::compileShader(GLenum type, string src) {
 		GLchar *log = (GLchar*)malloc((size_t)logLength);
 		glGetShaderInfoLog(shader, logLength, &logLength, log);
 		GetError();
-		Log::e() << typeString << "shader compilation failed with error:\n" << log;
+		std::string lm = log;
+		
+		// hide warning messages for now
+		if(lm.find("WARNING: 0:3: Overflow in implicit constant conversion")==-1) {
+			Log::e() << typeString << "shader compilation failed with error:\n" << log;
+		}
 		free(log);
 	}
 //#endif

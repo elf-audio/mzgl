@@ -20,14 +20,25 @@
 #include "Midi.h"
 
 using namespace std;
+static int instanceNumber = 0;
 
-@interface MZGLEffectAU ()
+@interface MZGLEffectAU () {
+	int inst;
+}
 @property (nonatomic, readwrite) AUParameterTree *parameterTree;
 @property AUAudioUnitBusArray *inputBusArray;
 @property AUAudioUnitBusArray *outputBusArray;
 @end
 
+#define AULog(fmt,...) NSLog(@"[MZGLEffectAU %d] %@", inst, [NSString stringWithFormat:(fmt), ##__VA_ARGS__]);
 
+//void AULog(NSString *s, va_list args) {
+////	NSString *fullString = [[NSString alloc] initWithFormat:s arguments:args];
+//	NSString *str = @"[MZGLEffectAU] ";
+//	str = [str stringByAppendingFormat:s, args];
+//	NSLog(str);
+//
+//}
 static AUAudioUnitPreset* NewAUPreset(NSInteger number, NSString *name)
 {
 	AUAudioUnitPreset *aPreset = [AUAudioUnitPreset new];
@@ -88,7 +99,7 @@ struct Blocks {
 	if (self == nil) {
 		return nil;
 	}
-
+	inst = instanceNumber++;
 	isInstrument = !(componentDescription.componentType=='aufx' || componentDescription.componentType=='aumf');
 
 	// @invalidname: Initialize a default format for the busses.
@@ -303,7 +314,6 @@ struct Blocks {
 	_factoryPresets = nil;
 }
 
-
 #pragma mark- AUAudioUnit (Optional Properties)
 
 //
@@ -320,7 +330,7 @@ struct Blocks {
 //}
 
 - (NSDictionary<NSString *,id> *)fullState {
-	NSLog(@"Full state called");
+	AULog(@"Full state called");
 //	NSMutableDictionary<NSString*,id> *state = [super fullState];
 //	NSMutableDictionary<NSString*,id> *state = [[NSMutableDictionary alloc] init];
 	NSMutableDictionary<NSString*,id> *state = [[super fullState] mutableCopy];
@@ -341,21 +351,30 @@ struct Blocks {
 
 - (void) setFullState:(NSDictionary<NSString *,id> *)state {
 	//[super setFullState:state];
-	NSLog(@"Attempting to set full state");
+	AULog(@"setFullState called");
 	Log::d() << "setFullState";
 	if(!plugin->wantsToSerializeWithNSDictionary()) {
+		AULog(@"plugin doesn't want nsdict serialization");
 		NSData *data = [state objectForKey:@"data"];
 		if(data!=nil) {
+			AULog(@"data not null");
+
 			uint32_t length = [data length];
 			vector<uint8_t> serialized;
 			const uint8_t *d = (const uint8_t*)[data bytes];
 			if(d!=nullptr) {
+				AULog(@"bytes not null");
+
 				serialized.insert(serialized.end(), d, d + length);
 				plugin->deserialize(serialized);
+			} else {
+				AULog(@"bytes null");
 			}
+		} else {
+			AULog(@"data null");
 		}
 	} else {
-		
+		AULog(@"Calling nsdictionary deserialization");
 		plugin->deserializeByNSDictionary((__bridge const void*)state);
 	}
 }
@@ -377,23 +396,34 @@ struct Blocks {
 //
 //// THIS LOOKS A BIT IFFY TO ME, NOT SURE IF IT REALLY WORKS...
 - (AUAudioUnitPreset *)currentPreset {
+//	return nil;
+	AULog(@"currentPreset called");
 	if (_currentPreset.number >= 0) {
 		if(_currentFactoryPresetIndex>=0 && [_factoryPresets count] > _currentFactoryPresetIndex) {
-			NSLog(@"Returning Current Factory Preset: %ld\n", (long)_currentFactoryPresetIndex);
+			AULog(@"Returning Current Factory Preset: %ld\n", (long)_currentFactoryPresetIndex);
 			return [_factoryPresets objectAtIndex:_currentFactoryPresetIndex];
 		} else {
-			NSLog(@"Preset index out of range!");
+			AULog(@"Preset index out of range!");
 			return nil;
 		}
 	} else {
-		NSLog(@"Returning Current Custom Preset: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
+//		AULog(@"currentPreset returning nil because its a custom preset");
+//		return nil;
+		AULog(@"Returning Current Custom Preset: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
 		return _currentPreset;
 	}
+	
 }
 //
 - (void)setCurrentPreset:(AUAudioUnitPreset *)currentPreset {
-	if (nil == currentPreset) { NSLog(@"nil passed to setCurrentPreset!"); return; }
-
+	if(currentPreset==nil) {
+		AULog(@"setCurrentPreset called with nil");
+	} else {
+		AULog(@"setCurrentPreset called with num %d ('%@')", currentPreset.number, currentPreset.name);
+	}
+	if (nil == currentPreset) { /*AULog(@"nil passed to setCurrentPreset!");*/ return; }
+//	AULog(@"preset number is %d", currentPreset.number);
+	
 	if (currentPreset.number >= 0) {
 		// factory preset
 		for (AUAudioUnitPreset *factoryPreset in _factoryPresets) {
@@ -402,7 +432,7 @@ struct Blocks {
 				// set factory preset as current
 				_currentPreset = currentPreset;
 				_currentFactoryPresetIndex = factoryPreset.number;
-				NSLog(@"currentPreset Factory: %ld, %@\n", (long)_currentFactoryPresetIndex, factoryPreset.name);
+				AULog(@"currentPreset Factory: %ld, %@\n", (long)_currentFactoryPresetIndex, factoryPreset.name);
 
 				break;
 			}
@@ -413,15 +443,15 @@ struct Blocks {
 		NSError *err = nil;
 		id state = [self presetStateFor:currentPreset error:&err];
 		if(err) {
-			NSLog(@"Got error: %@", err);
+			AULog(@"Got error: %@", err);
 			return;
 		}
 		if(state!=nil) {
 			[self setFullState:state];
 		}
-		NSLog(@"currentPreset Custom: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
+		AULog(@"currentPreset Custom: %ld, %@\n", (long)_currentPreset.number, _currentPreset.name);
 	} else {
-		NSLog(@"setCurrentPreset not set! - invalid AUAudioUnitPreset\n");
+		AULog(@"setCurrentPreset not set! - invalid AUAudioUnitPreset\n");
 	}
 }
 
