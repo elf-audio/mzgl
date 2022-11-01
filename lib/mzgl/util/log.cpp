@@ -83,3 +83,15 @@ Log::Logger::~Logger() {
 #endif
 	}
 }
+
+#ifdef __APPLE__
+#include <Foundation/Foundation.h>
+
+void iosLog(std::string msg) {
+	NSLog(@"[MZGLEffectAU ?]%s\n", msg.c_str());
+}
+#else
+void iosLog(std::string msg) {
+	Log::d() << msg;
+}
+#endif

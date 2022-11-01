@@ -1093,6 +1093,7 @@
 		EA78556B2472DFC00072FD05 /* fontstash-nvg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fontstash-nvg.h"; sourceTree = "<group>"; };
 		EA78556C2472E31C0072FD05 /* NVG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NVG.h; sourceTree = "<group>"; };
 		EA78556D2472E3320072FD05 /* NVG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NVG.cpp; sourceTree = "<group>"; };
+		EA8086CA29119DF60072148D /* filesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = filesystem.h; sourceTree = "<group>"; };
 		EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLEffectAU.mm; sourceTree = "<group>"; };
 		EA81A9532756F0AC009C911E /* MZGLEffectAU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLEffectAU.h; sourceTree = "<group>"; };
 		EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BufferedAudioBus.hpp; sourceTree = "<group>"; };
@@ -1569,7 +1570,7 @@
 		EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListItem.cpp; sourceTree = "<group>"; };
 		EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListDeletable.h; sourceTree = "<group>"; };
 		EAF99ABA267A43E400157A7C /* ScrollingListDeletable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListDeletable.cpp; sourceTree = "<group>"; };
-		EAF9A15026F8B42200698263 /* log.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
+		EAF9A15026F8B42200698263 /* log.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = log.cpp; sourceTree = "<group>"; };
 		EAF9A15626F9C84900698263 /* LogViewer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LogViewer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1651,6 +1652,7 @@
 			children = (
 				EA182D422432C18800A5C3E8 /* json.hpp */,
 				EA182D432432C18800A5C3E8 /* readerwriterqueue.h */,
+				EA8086CA29119DF60072148D /* filesystem.h */,
 				EA182DC42432C18800A5C3E8 /* atomicops.h */,
 				EACEB2E324DB81A400BF4D1A /* stb_image.h */,
 				EA182DC62432C18800A5C3E8 /* MPE_fastpoly2tri.h */,

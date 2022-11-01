@@ -108,3 +108,9 @@ namespace Log {
 		}
 	};
 };
+
+// this is for debugging when running as a plugin on iOS
+// because it comes up in the Console app on mac - its
+// the only way to do logging in that setup. On other platforms
+// it just logs to Log::d()
+void iosLog(std::string msg);
