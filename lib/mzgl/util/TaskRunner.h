@@ -78,6 +78,8 @@ public:
 		waitTilAllTasksAreDone();
 	}
 
+    
+   
 private:
     
     class Task {
@@ -118,11 +120,6 @@ private:
     
    
 
-    void clearAnyDoneTasks() {
-        tasks.remove_if([](const std::shared_ptr<Task> task) {
-            return task->done();
-        });
-    }
     
     moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
 	std::list<std::shared_ptr<Task>> tasks;
@@ -133,7 +130,15 @@ public:
         // really dangerous, only for unit testing
         tasks.clear();
     }
+   
 #endif
+    
+    // don't use this, for testing only
+    void clearAnyDoneTasks() {
+        tasks.remove_if([](const std::shared_ptr<Task> task) {
+            return task->done();
+        });
+    }
     void waitTilAllTasksAreDone() {
         while(tasks.size()>0) {
             clearAnyDoneTasks();
