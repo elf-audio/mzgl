@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <thread>
+#include <mutex>
 
 class MainThreadRunner {
 public:
