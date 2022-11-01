@@ -11,6 +11,7 @@
 #include <functional>
 #include <thread>
 #include <mutex>
+#include <memory>
 
 class MainThreadRunner {
 public:
