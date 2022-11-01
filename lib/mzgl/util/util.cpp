@@ -9,6 +9,7 @@
 #include "util.h"
 #include <algorithm>
 #include <cctype>
+#include <iterator>
 
 #include "mzgl_platform.h"
 #ifdef __APPLE__
