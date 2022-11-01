@@ -218,6 +218,7 @@ if(APPLE)
 		lib/mzgl/util/Dialogs.cpp
 		lib/mzgl/util/util.cpp
 		lib/mzgl/audio/AudioFileApple.cpp
+		lib/mzgl/util/log.cpp
 		PROPERTIES COMPILE_FLAGS "-x objective-c++"
 	)
 else()
