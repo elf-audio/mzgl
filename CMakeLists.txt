@@ -86,6 +86,7 @@ set(MZGL_SOURCES
 	lib/mzgl/ui/Slider.cpp
 	lib/mzgl/ui/FlexboxLayout.cpp
 	lib/mzgl/util/DateTime.cpp
+	lib/mzgl/util/UndoManager.cpp
 	lib/mzgl/util/Dialogs.cpp
 	lib/mzgl/util/Dylib.cpp
 	lib/mzgl/util/errors.cpp

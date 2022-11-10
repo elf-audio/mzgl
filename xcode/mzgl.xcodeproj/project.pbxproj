@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
+		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
+		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
+		EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
+		EA15B27F291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
+		EA15B280291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
+		EA15B281291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA35518C25CB05D5003DF2FB /* EventsView.mm */; };
 		EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; };
 		EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; };
@@ -766,6 +772,8 @@
 
 /* Begin PBXFileReference section */
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
+		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
+		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
 		EA1732B32459EAB3009E7B55 /* RecompilingAppDylib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecompilingAppDylib.h; sourceTree = "<group>"; };
 		EA1732BB245AD802009E7B55 /* DefaultFont.inc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefaultFont.inc.h; sourceTree = "<group>"; };
 		EA182D392432C15000A5C3E8 /* libmzgl-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1844,6 +1852,8 @@
 				EAF67377289BC441001F778D /* stringUtil.cpp */,
 				EA1835EC2432C18B00A5C3E8 /* util.h */,
 				EA1835E32432C18B00A5C3E8 /* util.cpp */,
+				EA15B27A291D49E70051570A /* UndoManager.cpp */,
+				EA15B27B291D49E70051570A /* UndoManager.h */,
 				EA1835E42432C18B00A5C3E8 /* events.h */,
 				EA1835E52432C18B00A5C3E8 /* errors.h */,
 				EA1835E62432C18B00A5C3E8 /* DateTime.h */,
@@ -3070,6 +3080,7 @@
 				EA183FE82432C18D00A5C3E8 /* AudioSystemIOS.h in Headers */,
 				EA18404A2432C18D00A5C3E8 /* fontstash.h in Headers */,
 				EA71A74027E39E6C0081A5CB /* ioapi.h in Headers */,
+				EA15B280291D49E70051570A /* UndoManager.h in Headers */,
 				EA183FF92432C18D00A5C3E8 /* error.h in Headers */,
 				EAD177AE282732A900E2AAE6 /* pu_gixml.hpp in Headers */,
 				EA297C7425C954E600F890AE /* pa_memorybarrier.h in Headers */,
@@ -3082,6 +3093,7 @@
 			files = (
 				EA2B826424E7093600EA12BD /* Scroller.h in Headers */,
 				EA71A73127E39E6C0081A5CB /* ioapi_mem.h in Headers */,
+				EA15B281291D49E70051570A /* UndoManager.h in Headers */,
 				EA71A79127E39E6C0081A5CB /* zipper.h in Headers */,
 				EA71A72727E39E6B0081A5CB /* iowin32.h in Headers */,
 				EA73F06428E4670900395945 /* geomutils.h in Headers */,
@@ -3363,6 +3375,7 @@
 				EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA18400C2432C18D00A5C3E8 /* Vbo.cpp in Sources */,
 				EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */,
+				EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */,
 				EA297CAF25C954E600F890AE /* pa_mac_core.c in Sources */,
 				EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA183FC82432C18D00A5C3E8 /* Dylib.cpp in Sources */,
@@ -3477,6 +3490,7 @@
 				EA234AED24A609CA000F057B /* Utils.cpp in Sources */,
 				EA71A72327E39E6B0081A5CB /* zip.c in Sources */,
 				EA81AA632757CBBB009C911E /* AudioUnitViewController.mm in Sources */,
+				EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */,
 				EA71A7B127E39E6C0081A5CB /* ZipFile.cpp in Sources */,
 				EA234AFE24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
@@ -3585,6 +3599,7 @@
 				EA2B8ADD24E7093600EA12BD /* events.cpp in Sources */,
 				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
 				EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */,
+				EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */,
 				EA71A72427E39E6B0081A5CB /* zip.c in Sources */,
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
@@ -3701,6 +3716,7 @@
 				EA71A77927E39E6C0081A5CB /* prng.c in Sources */,
 				EA689451261C633500F76B91 /* YGValue.cpp in Sources */,
 				EA71A75527E39E6C0081A5CB /* hmac.c in Sources */,
+				EA15B27F291D49E70051570A /* UndoManager.cpp in Sources */,
 				EA71A7A327E39E6C0081A5CB /* tools.cpp in Sources */,
 				EAF99ABE267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA689454261C633500F76B91 /* Font.cpp in Sources */,
