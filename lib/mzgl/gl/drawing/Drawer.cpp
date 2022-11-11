@@ -143,6 +143,12 @@ void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) 
     geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
 }
 
+void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip) {
+	lineDrawer.thickness = strokeWeight;
+	int numVerts = lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices);
+	geom.cols.insert(geom.cols.end(), numVerts, color);
+}
+
 void Drawer::drawTriangles(const std::vector<vec2> &verts, const std::vector<uint32_t> &indices) {
 	uint32_t startIndex = 0;
 	if(geom.verts.size()>0) {

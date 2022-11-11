@@ -44,6 +44,8 @@ public:
 	void drawLine(float ax, float ay, float bx, float by);
 	void drawLineStrip(const std::vector<vec2> &strip);
     void drawLineStrip(const std::vector<vec2> &strip, const std::vector<vec4> &cols);
+	void drawBevelledLineStrip(const std::vector<vec2> &strip);
+	
 	void drawTriangleStrip(const std::vector<vec2> &strip);
 	void drawTriangles(const std::vector<vec2> &verts, const std::vector<uint32_t> &indices);
 	void drawRect(const Rectf &r);

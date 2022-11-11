@@ -44,7 +44,7 @@ void MitredLine::getStripCoord(const glm::vec2 &before, const glm::vec2 &curr, c
 }
 
 
-int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts, vector<unsigned int> &indices, bool close) {
+int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts, vector<unsigned int> &indices, bool close, bool bevelled) {
 	
 	int originalVertCount = (int)outVerts.size();
 	
@@ -71,23 +71,35 @@ int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts
 	
 	
 	
-	for(int i = 1; i < p.size()-1; i++) {
-		glm::vec2 a;
-		glm::vec2 b;
-		getStripCoord(p[i-1], p[i], p[i+1], a, b);
-		if(mitreLimit) {
-			if(glm::distance(p[i], a)>thickness*0.5) {
-				auto da = glm::normalize(a - p[i]) * thickness*0.5f;
-				a = p[i] + da;
-			}
+	if(bevelled) {
+		for(int i = 1; i < p.size()-1; i++) {
+			auto n = getNormal(p[i] - p[i-1]);
+			strip.emplace_back(p[i] - n);
+			strip.emplace_back(p[i] + n);
 			
-			if(glm::distance(p[i], b)>thickness*0.5) {
-				auto db = glm::normalize(b - p[i]) * thickness*0.5f;
-				b = p[i] + db;
-			}
+			n = getNormal(p[i+1] - p[i]);
+			strip.emplace_back(p[i] - n);
+			strip.emplace_back(p[i] + n);
 		}
-		strip.emplace_back(a);
-		strip.emplace_back(b);
+	} else {
+		for(int i = 1; i < p.size()-1; i++) {
+			glm::vec2 a;
+			glm::vec2 b;
+			getStripCoord(p[i-1], p[i], p[i+1], a, b);
+			if(mitreLimit) {
+				if(glm::distance(p[i], a)>thickness*0.5) {
+					auto da = glm::normalize(a - p[i]) * thickness*0.5f;
+					a = p[i] + da;
+				}
+				
+				if(glm::distance(p[i], b)>thickness*0.5) {
+					auto db = glm::normalize(b - p[i]) * thickness*0.5f;
+					b = p[i] + db;
+				}
+			}
+			strip.emplace_back(a);
+			strip.emplace_back(b);
+		}
 	}
 	
 	if(close) {
@@ -130,3 +142,6 @@ int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts
 	return (int)outVerts.size() - originalVertCount;
 }
 
+int MitredLine::getVertsBevelled(const std::vector<glm::vec2> &p, std::vector<glm::vec2> &outVerts, std::vector<unsigned int> &indices, bool close) {
+	return getVerts(p, outVerts, indices, close, true);
+}

@@ -37,6 +37,7 @@ HEADERS_COMMON = 									\
 		$(MZGLROOT)/lib/nanovg						\
 		$(MZGLROOT)/lib/yoga						\
 		$(MZGLROOT)/lib/PGMidi						\
+		$(MZGLROOT)/lib/Polyline2D/include			\
 		lib/opt/gzip-hpp/include					\
 		$(PROJECT_HEADERS)							\
 		lib/opt/blahdio/blahdio/include				\
