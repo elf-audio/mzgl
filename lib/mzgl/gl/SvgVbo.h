@@ -19,6 +19,10 @@
 class SvgVbo;
 typedef std::shared_ptr<SvgVbo> SvgVboRef;
 
+/**
+ * I want to deprecate the SvgVbo object, and just have vbo's, and use the createVbo...()
+ * functions here, its a bit cleaner.
+ */
 class SvgVbo {
 public:
 	
