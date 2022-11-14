@@ -25,6 +25,13 @@ static VboRef vboFromDoc(SVGDoc &doc, float maxDim, bool ignoreColor) {
 	return SvgVbo::create(doc, ignoreColor)->getVbo();
 }
 
+static VboRef vboFromDocWithScale(SVGDoc &doc, float scale, bool ignoreColor) {
+	vec2 tr = -vec2(doc.width/2, doc.height/2);
+	doc.translate(tr.x, tr.y);
+	doc.scale(scale);
+	return SvgVbo::create(doc, ignoreColor)->getVbo();
+}
+
 
 VboRef SvgVbo::createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor) {
 	SVGDoc doc;
@@ -39,6 +46,11 @@ VboRef SvgVbo::createVboFromStringWithMaxDim(const std::string &svgCode, float m
 	return vboFromDoc(doc, maxDim, ignoreColor);
 }
 
+VboRef SvgVbo::createVboFromStringWithScale(const std::string &svgCode, float scale, bool ignoreColor) {
+	SVGDoc doc;
+	doc.loadFromString(svgCode);
+	return vboFromDocWithScale(doc, scale, ignoreColor);
+}
 
 
 void SvgVbo::draw(Graphics &g, float x, float y) {
