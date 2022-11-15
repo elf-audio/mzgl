@@ -226,6 +226,13 @@ struct ScopedTransform {
 	virtual ~ScopedTransform() { g.popMatrix(); }
 };
 
+
+struct ScopedShaderEnable {
+	ShaderRef sh;
+	ScopedShaderEnable(ShaderRef shader) : sh(shader) {sh->begin();}
+	virtual ~ScopedShaderEnable() { sh->end(); }
+};
+
 struct ScopedMask {
 	bool scissorWasEnabled = false;
 	float vals[4];
