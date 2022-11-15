@@ -27,7 +27,8 @@ public:
 @end
 
 @implementation Happer {
-	UIImpactFeedbackGenerator *feedbackGenerator;
+	UISelectionFeedbackGenerator *feedbackGenerator;
+	// use UIImpactFeedbackGenerator for more different types of haptics
 }
 
 
@@ -57,14 +58,14 @@ public:
 	
 	
 	
-	feedbackGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
+	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];//WithStyle:UIImpactFeedbackStyleLight];
 	[feedbackGenerator prepare];
 	return self;
 }
 
 - (void) lightTap {
 	// Trigger selection feedback.
-	[feedbackGenerator impactOccurred];
+	[feedbackGenerator selectionChanged];
 //	printf("light tap\n");
 	// Keep the generator in a prepared state.
 	[feedbackGenerator prepare];
