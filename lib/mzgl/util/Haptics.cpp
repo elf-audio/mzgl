@@ -22,7 +22,7 @@ public:
 #if TARGET_OS_IOS
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
+#include <AVFAudio/AVFAudio.h>
 @interface Happer : NSObject
 @end
 
@@ -33,7 +33,31 @@ public:
 
 - (id) init {
 	self = [super init];
-	feedbackGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleMedium];
+	
+	
+	
+	
+	
+	AVAudioSession * audioSession = [AVAudioSession sharedInstance];
+	
+
+
+//	NSError * err = nil;
+//	if (@available(iOS 13.0, *)) {
+//		[audioSession setAllowHapticsAndSystemSoundsDuringRecording:YES error:&err];
+//		if(err != nil) {
+//			NSLog(@"Haptics couldn't be enabled because %@", err);
+//			err = nil;
+//		}
+//	}
+//
+	
+	
+	
+	
+	
+	
+	feedbackGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
 	[feedbackGenerator prepare];
 	return self;
 }
@@ -41,7 +65,7 @@ public:
 - (void) lightTap {
 	// Trigger selection feedback.
 	[feedbackGenerator impactOccurred];
-	printf("light tap\n");
+//	printf("light tap\n");
 	// Keep the generator in a prepared state.
 	[feedbackGenerator prepare];
 }
