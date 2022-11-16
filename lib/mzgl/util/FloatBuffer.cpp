@@ -10,7 +10,9 @@
 #ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
 #endif
-#include "xsimd/xsimd.hpp"
+
+// xsimd disabled for MSVC build, it does not give performance boost for Android anyway - to be investigated
+//#include "xsimd/xsimd.hpp"
 
 using namespace std;
 

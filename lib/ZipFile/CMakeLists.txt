@@ -10,11 +10,11 @@ include_directories(
     lib/zipper/zipper
     lib/zipper/minizip
     lib/zipper/
+#    lib/zipper/zlib
     ..
-
 )
 
-
+if(WIN32)
 add_library(ZipFile STATIC
     ZipFile.h
     ZipReader.h
@@ -22,8 +22,42 @@ add_library(ZipFile STATIC
     ZipStreamer.cpp
     ZipReader.cpp
 
+    lib/zipper/zipper/CDirEntry.cpp
+    lib/zipper/zipper/tools.cpp
+    lib/zipper/zipper/unzipper.cpp
+    lib/zipper/zipper/zipper.cpp
 
+    lib/zipper/minizip/unzip.c
+    lib/zipper/minizip/zip.c
+    lib/zipper/minizip/ioapi.c
+    lib/zipper/minizip/ioapi_buf.c
+    lib/zipper/minizip/ioapi_mem.c
+    lib/zipper/minizip/iowin32.c
+    # lib/zipper/zipper/tps/dirent.c
 
+    lib/zipper/zlib/adler32.c
+    lib/zipper/zlib/compress.c
+    lib/zipper/zlib/crc32.c
+    lib/zipper/zlib/deflate.c
+    lib/zipper/zlib/gzclose.c
+    lib/zipper/zlib/gzlib.c
+    lib/zipper/zlib/gzread.c
+    lib/zipper/zlib/gzwrite.c
+    lib/zipper/zlib/infback.c
+    lib/zipper/zlib/inffast.c
+    lib/zipper/zlib/inflate.c
+    lib/zipper/zlib/inftrees.c
+    lib/zipper/zlib/trees.c
+    lib/zipper/zlib/uncompr.c
+    lib/zipper/zlib/zutil.c
+)
+else()
+add_library(ZipFile STATIC
+    ZipFile.h
+    ZipReader.h
+    ZipFile.cpp
+    ZipStreamer.cpp
+    ZipReader.cpp
 
     lib/zipper/zipper/CDirEntry.cpp
     lib/zipper/zipper/tools.cpp
@@ -38,6 +72,7 @@ add_library(ZipFile STATIC
     # lib/zipper/zipper/tps/dirent.c
 )
 
+endif()
 
 target_include_directories(ZipFile PUBLIC
     .
@@ -46,7 +81,7 @@ target_include_directories(ZipFile PUBLIC
 
 if(WIN32) 
 
-include_directories(lib/zipper/zlib)
+target_include_directories(ZipFile PUBLIC lib/zipper/zlib)
 
 else()
 

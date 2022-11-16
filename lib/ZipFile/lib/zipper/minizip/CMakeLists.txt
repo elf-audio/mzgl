@@ -17,6 +17,9 @@ project("minizip")
 
 # set cmake debug postfix to d
 set(CMAKE_DEBUG_POSTFIX "d")
+x
+message(STATUS "zlib: ${ZLIB}")
+message(STATUS "zlib found: ${ZLIB_FOUND}")
 
 if(BUILD_TEST OR BUILD_SHARED_LIBS)
    find_package(ZLIB REQUIRED)
