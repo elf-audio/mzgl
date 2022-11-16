@@ -107,6 +107,11 @@ void Graphics::initGraphics() {
 	const unsigned char *openglVersion = glGetString(GL_VERSION);
 	if(openglVersion!=nullptr) {
 		Log::d() << "OpenGL Version: " << openglVersion;
+#ifdef MZGL_GL2
+		Log::d() << "MZGL Compiled with MZGL_GL2==TRUE";
+#else
+		Log::d() << "MZGL Compiled with MZGL_GL2==FALSE";
+#endif
 	} else {
 		Log::d() << "OpenGL Version: null";
 	}

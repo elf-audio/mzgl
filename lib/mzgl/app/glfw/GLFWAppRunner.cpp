@@ -212,11 +212,14 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
-    
+#ifdef UNIT_TEST
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#else
     // this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-
+#endif
 
     window = glfwCreateWindow(graphics.width/graphics.pixelScale, graphics.height/graphics.pixelScale, "mzgl", NULL, NULL);
 

@@ -43,7 +43,7 @@
 			NSOpenGLPFAColorSize    , 24                           ,
 			NSOpenGLPFAAlphaSize    , 8                            ,
 			NSOpenGLPFADoubleBuffer ,
-			NSOpenGLPFADepthSize, 32,
+			NSOpenGLPFADepthSize    , 32                           ,
 			NSOpenGLPFAAccelerated  ,
 			NSOpenGLPFASampleBuffers, 1							   ,
 			NSOpenGLPFASamples		, 4                            ,

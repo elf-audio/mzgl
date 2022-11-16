@@ -419,7 +419,7 @@ GLuint Shader::compileShader(GLenum type, string src) {
 		
 		// hide warning messages for now
 		if(lm.find("WARNING: 0:3: Overflow in implicit constant conversion")==-1) {
-			Log::e() << typeString << "shader compilation failed with error:\n" << log;
+			Log::e() << typeString << " shader compilation failed with error:\n" << log;
 		}
 		free(log);
 	}
