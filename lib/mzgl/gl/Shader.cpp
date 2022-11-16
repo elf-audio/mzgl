@@ -392,16 +392,17 @@ GLuint Shader::compileShader(GLenum type, string src) {
 	const GLchar *source = (GLchar*)src.c_str();
 
 	
-	if (NULL == source) {
+	if (nullptr == source) {
 		//[NSException raise:@"FAILED" format:@"Failed to read shader file %s", file.c_str()];
 		// TODO: proper warning
 		Log::e() << "Failed to read shader text";
+		return 0;
 		//throw 0;
 	}
 	
 	shader = glCreateShader(type);
 	GetError();
-	glShaderSource(shader, 1, &source, NULL);
+	glShaderSource(shader, 1, &source, nullptr);
 	GetError();
 	glCompileShader(shader);
 	GetError();
