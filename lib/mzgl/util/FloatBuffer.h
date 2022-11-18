@@ -20,9 +20,10 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "xsimd/xsimd.hpp"
+//#include "xsimd/xsimd.hpp"
 
-class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
+//class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
+class FloatBuffer : public std::vector<float> {
 public:
 	
 	
@@ -33,9 +34,13 @@ public:
 	virtual ~FloatBuffer();
 	
 	FloatBuffer(const float *arr, size_t size);
-	
-	FloatBuffer(size_t size, float fillValue) : std::vector<float, xsimd::aligned_allocator<float>>(size, fillValue) {}
-    /**
+
+	// xsimd disabled for MSVC build, it does not give performance boost for Android anyway - to be investigated
+	//FloatBuffer(size_t size, float fillValue) : std::vector<float, xsimd::aligned_allocator<float>>(size, fillValue) {}
+
+	FloatBuffer(size_t size, float fillValue) : std::vector<float>(size, fillValue) {}
+
+	/**
      * You can copy an array of floats into the buffer
      * by doing set(buff, length);
      * or if you want to get just the left channel, you can

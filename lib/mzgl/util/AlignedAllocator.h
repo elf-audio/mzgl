@@ -11,10 +11,11 @@ enum class Alignment : size_t
 };
 
 
-namespace detail {
-    void* allocate_aligned_memory(size_t align, size_t size);
-    void deallocate_aligned_memory(void* ptr) noexcept;
-}
+namespace aligned_allocator_detail
+{
+void* allocate_aligned_memory(size_t align, size_t size);
+void deallocate_aligned_memory(void* ptr) noexcept;
+};
 
 
 template <typename T, Alignment Align = Alignment::AVX>
@@ -74,7 +75,8 @@ public:
     allocate(size_type n, typename AlignedAllocator<void, Align>::const_pointer = 0)
     {
         const size_type alignment = static_cast<size_type>( Align );
-        void* ptr = detail::allocate_aligned_memory(alignment , n * sizeof(T));
+        void* ptr = aligned_allocator_detail::allocate_aligned_memory(alignment,
+                                                                      n * sizeof(T));
         if (ptr == nullptr) {
             throw std::bad_alloc();
         }
@@ -84,7 +86,9 @@ public:
 
     void
     deallocate(pointer p, size_type) noexcept
-    { return detail::deallocate_aligned_memory(p); }
+    {
+        return aligned_allocator_detail::deallocate_aligned_memory(p);
+    }
 
     template <class U, class ...Args>
     void
@@ -134,7 +138,8 @@ public:
     allocate(size_type n, typename AlignedAllocator<void, Align>::const_pointer = 0)
     {
         const size_type alignment = static_cast<size_type>( Align );
-        void* ptr = detail::allocate_aligned_memory(alignment , n * sizeof(T));
+        void* ptr =
+            aligned_allocator_::allocate_aligned_memory(alignment, n * sizeof(T));
         if (ptr == nullptr) {
             throw std::bad_alloc();
         }
@@ -144,7 +149,9 @@ public:
 
     void
     deallocate(pointer p, size_type) noexcept
-    { return detail::deallocate_aligned_memory(p); }
+    {
+        return aligned_allocator_::deallocate_aligned_memory(p);
+    }
 
     template <class U, class ...Args>
     void

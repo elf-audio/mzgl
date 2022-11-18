@@ -107,6 +107,9 @@ or CMAKE_C_FLAGS are used), Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
 find_package(ZLIB)
+message(STATUS "zlib: ${ZLIB}")
+message(STATUS "zlib found: ${ZLIB_FOUND}")
+
 if(NOT ZLIB_FOUND)
 
   set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/zlib)
@@ -223,14 +226,17 @@ endif()
 
 set(USING_INTEL)
 if (WIN32 AND CMAKE_C_COMPILER AND ${CMAKE_C_COMPILER} MATCHES ".*icl.*$")
-  message(STATUS "Detected Intel Compiler")
+  message(STATUS "Detected Intel Compiler")   
   set(USING_INTEL TRUE)
 endif ()
+
+message(STATUS "BUILD_STATIC_VERSION ${BUILD_STATIC_VERSION}")
 
 if(MSVC OR USING_INTEL)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
     set(BUILD_DEFINITIONS "${BUILD_DEFINITIONS} -D_CRT_SECURE_NO_WARNINGS")
-    option(WITH_STATIC_RUNTIME "Compile using the static MSVC Runtime." OFF)
+    option(WITH_STATIC_RUNTIME "Compile using the static MSVC Runtime." ON)
+    message(STATUS "WITH_STATIC_RUNTIME: ${WITH_STATIC_RUNTIME}")
     if(WITH_STATIC_RUNTIME)
         foreach(flag_var
             CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE

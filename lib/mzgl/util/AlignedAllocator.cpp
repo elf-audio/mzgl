@@ -14,8 +14,7 @@ bool is_power_of_two(size_t x) {
 
 // taken from https://stackoverflow.com/questions/12942548/making-stdvector-allocate-aligned-memory
 // modified to work on windows by Marek
-void*
-detail::allocate_aligned_memory(size_t align, size_t size)
+void* aligned_allocator_detail::allocate_aligned_memory(size_t align, size_t size)
 {
     assert(align >= sizeof(void*));
     assert(is_power_of_two(align));
@@ -35,8 +34,7 @@ detail::allocate_aligned_memory(size_t align, size_t size)
 }
 
 
-void
-detail::deallocate_aligned_memory(void *ptr) noexcept
+void aligned_allocator_detail::deallocate_aligned_memory(void* ptr) noexcept
 {
 	#ifdef _WIN32
 	return _aligned_free(ptr);
