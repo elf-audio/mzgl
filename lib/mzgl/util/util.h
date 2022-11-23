@@ -22,6 +22,23 @@ std::string getCWD();
 void loadCommandLineArgs(int argc, const char *argv[]);
 std::vector<std::string> getCommandLineArgs();
 
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * creates a new vector with elements of old vector that satisfy predicate.
+ * e.g.
+ * filterVector(std::vector<int>{-1, -2, 0, 3, 4}, [](int a) {return a>=0;});
+ * this will return a vector with only positive numbers
+ *
+ * taken from here: https://www.cppstories.com/2021/filter-cpp-containers/
+ */
+template <typename T, typename Pred>
+auto filterVector(const std::vector<T>& vec, Pred p) {
+	std::vector<T> out;
+	std::copy_if(begin(vec), end(vec), std::back_inserter(out), p);
+	return out;
+}
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __APPLE__
 void oslog(std::string s);
