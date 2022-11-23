@@ -144,6 +144,7 @@ void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) 
 }
 
 void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip) {
+	if(strip.size()==0) return;
 	lineDrawer.thickness = strokeWeight;
 	int numVerts = lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices);
 	geom.cols.insert(geom.cols.end(), numVerts, color);
