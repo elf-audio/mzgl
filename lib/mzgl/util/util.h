@@ -38,6 +38,12 @@ auto filterVector(const std::vector<T>& vec, Pred p) {
 	std::copy_if(begin(vec), end(vec), std::back_inserter(out), p);
 	return out;
 }
+// from https://stackoverflow.com/questions/3424962/where-is-erase-if
+// for std::vector
+template <class T, class A, class Predicate>
+void eraseIf(std::vector<T, A>& c, Predicate pred) {
+	c.erase(std::remove_if(c.begin(), c.end(), pred), c.end());
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __APPLE__

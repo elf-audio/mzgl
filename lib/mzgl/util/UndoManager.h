@@ -49,7 +49,14 @@ public:
 
 	std::size_t size() const;
 	
-
+	/**
+	 * You can group multiple commits by sandwiching between
+	 * beginGroup() and endGroup() - so all the commits in between
+	 * act as a single undo-redo step.
+	 */
+	void beginGroup();
+	void endGroup();
+	
 	bool undo();
 	bool redo();
 	
@@ -59,6 +66,7 @@ public:
 	void clear();
 	
 private:
+	UndoableRef undoGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;
 };
