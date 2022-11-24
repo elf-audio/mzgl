@@ -52,7 +52,7 @@ bool UndoManager::undo() {
 	if(!canUndo()) return false;
 	undoPos--;
 	(*undoPos)->undo();
-	Log::d() << "UNDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
+//	Log::d() << "UNDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
 	return true;
 }
 
@@ -60,7 +60,7 @@ bool UndoManager::redo() {
 	if(!canRedo()) return false;
 	(*undoPos)->redo();
 	undoPos++;
-	Log::d() << "REDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
+//	Log::d() << "REDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
 	return true;
 }
 
@@ -113,7 +113,7 @@ void UndoManager::commit(UndoableRef item) {
 	while(undoStack.size()>MAX_UNDO_LEVELS) {
 		undoStack.pop_front();
 	}
-	Log::d() << "COMMIT: Stack size: " << undoStack.size();
+//	Log::d() << "COMMIT: Stack size: " << undoStack.size();
 	
 	item->redo();
 	undoPos = undoStack.end();

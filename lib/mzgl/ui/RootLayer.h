@@ -14,9 +14,7 @@ public:
 	RootLayer(Graphics &g) : Layer(g, "root") {
 		color.a = 0.f;
 	}
-	virtual ~RootLayer() {
-		 printf("Killing root layer\n");
-	}
+	virtual ~RootLayer() {}
 	
 	void drawDebug(Layer *layer = nullptr) {
 		if(layer==nullptr) {
