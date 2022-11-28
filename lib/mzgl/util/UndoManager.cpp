@@ -9,6 +9,7 @@
 #include "UndoManager.h"
 #include "log.h"
 #include "mzAssert.h"
+#include <algorithm>
 
 class LambdaUndoable : public Undoable {
 public:
