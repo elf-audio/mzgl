@@ -162,7 +162,7 @@ set(HEADERS
     # lib/ghc-filesystem/include
 )
 
-add_subdirectory(lib/ghc-filesystem)
+add_subdirectory(lib/ghc-filesystem EXCLUDE_FROM_ALL)
 # include_directories()
 # list(APPEND HEADERS "${filesystem_SOURCE_DIR}/include")
 set(YOGA_SOURCES
@@ -201,7 +201,7 @@ endif(MZGL_UNIT_TEST)
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
 
-add_subdirectory(lib/ZipFile)
+add_subdirectory(lib/ZipFile EXCLUDE_FROM_ALL)
 # add_dependencies(libmzgl pugixml)
 
 # set(OPENSSL_BRANCH OpenSSL_1_1_1m)
