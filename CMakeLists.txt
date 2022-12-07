@@ -368,31 +368,7 @@ elseif(APPLE)
 
 elseif(WIN32)
 
-    # CPMAddPackage("gh:madler/zlib#cacf7f1")
-    CPMAddPackage("gh:PortAudio/portaudio#16884fc")
-
-    # include_directories(${zlib_SOURCE_DIR})
-
-    # because zlib is managed by CPM on windows, I can't get zconf.h.cmakein to process to zconf.h
-    # so I just put it in the folder zlib-win - bit of a hack but whatevz
-    # include_directories(lib/zlib-win)
-
-    add_compile_definitions(_WIN32_WINNT=0x0501 GLEW_STATIC)
-    add_compile_definitions(__WINDOWS_WASAPI__)
-    add_compile_definitions(__WINDOWS_MM__)
-    add_compile_definitions(PA_USE_WASAPI=1)
-    add_compile_definitions(NOMINMAX)
-    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
-    # don't need c++14 because I think it's set by cmake, same with O3
-        #add_compile_options(-std:c++14 -O3)
-    # https://forum.juce.com/t/cmake-cannot-use-try-with-exceptions-disabled/40983
-    # /MT embeds static runtime
-    # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
-    # set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -EHsc /MT -Xclang -fexceptions -Xclang -fcxx-exceptions ")
-
-    # this lets clang-cl have exceptions as per https://lists.llvm.org/pipermail/llvm-dev/2015-September/089974.html
-    #set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -Xclang -fexceptions -Xclang -fcxx-exceptions ")#-Xclang -fnew-ms-eh ")
-    #set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} " -Xlinker /subsystem:windows ")
+    add_compile_definitions(_WIN32_WINNT=0x0601 GLEW_STATIC)
 
     list(APPEND MZGL_LIBS
         ${GLFW_LIBRARIES}
@@ -427,7 +403,6 @@ elseif(LINUX)
         # and to the linker where to look for libraries
         include_directories(${GTK_INCLUDE_DIRS})
         link_directories(${GTK_LIBRARY_DIRS})
-        message(STATUS "GTK link dir: ${GTK_LIBRARY_DIRS}")
 
         # Add other flags to the compiler
         add_definitions(${GTK_CFLAGS_OTHER})
@@ -457,28 +432,18 @@ elseif(LINUX)
         )
 endif()
 
-
-    # windows portaudio: can't seem to get the cmake build working (WASAPI doesn't work)
-    # so I built it in visual studio and am attempting to link it here (need to copy dll into bin)
-    #include_directories(lib/portaudio/build/msvc/Win32/Release/) ## this line may not be needed
-    #add_library(portaudio_x86 SHARED lib/portaudio/build/msvc/x64/Release/portaudio_x86.lib)
-    #set_target_properties(portaudio_x86 PROPERTIES LINKER_LANGUAGE C)
-#	these 2 apis don't seem to compile with clang-cl for now, can't be bothered to work it out
-#	set(PA_USE_WASAPI OFF)
-#	set(PA_USE_WDMKS OFF)
 if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
     add_subdirectory(lib/portaudio "portaudio-build")
     list(APPEND MZGL_LIBS PortAudio)
 endif()
 if(WIN32)
+    add_subdirectory(lib/portaudio "portaudio-build")
     list(APPEND MZGL_LIBS PortAudio)
 endif()
 
 if(NOT ANDROID AND NOT IOS)
     list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
-
-message("MZGL_LIBS ${MZGL_LIBS}")
 
 target_link_libraries(libmzgl ${MZGL_LIBS})
 
