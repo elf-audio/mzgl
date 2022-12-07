@@ -115,7 +115,7 @@ int qwertyToMidi(int k) {
 		case 'g': return 7;
 		case 'y': return 8;
 		case 'h': return 9;
-		case 'u': return 19;
+		case 'u': return 10;
 		case 'j': return 11;
 		case 'k': return 12;
 		case 'o': return 13;
