@@ -427,12 +427,28 @@ elseif(LINUX)
         # and to the linker where to look for libraries
         include_directories(${GTK_INCLUDE_DIRS})
         link_directories(${GTK_LIBRARY_DIRS})
+        message(STATUS "GTK link dir: ${GTK_LIBRARY_DIRS}")
 
         # Add other flags to the compiler
         add_definitions(${GTK_CFLAGS_OTHER})
 
+        #Check for Jack (any OS)
+        find_library(JACK_LIB jack)
+        find_package(PkgConfig)
+        pkg_check_modules(jack jack)
+        if(JACK_LIB OR jack_FOUND)
+            set(HAVE_JACK TRUE)
+        endif()
+        if (NOT HAVE_JACK)
+            message(FATAL_ERROR "Jack API requested but no Jack dev libraries found")
+        endif()
+        if(NOT jack_FOUND)
+            list(APPEND MZGL_LIBS ${JACK_LIB})
+        else()
+            list(APPEND MZGL_LIBS ${jack_LINK_LIBRARIES})
+        endif()
+
         list(APPEND MZGL_LIBS
-            jack
             atomic # needed for raspberry pi
             GLESv2
             EGL
@@ -452,15 +468,17 @@ endif()
 #	set(PA_USE_WDMKS OFF)
 if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
     add_subdirectory(lib/portaudio "portaudio-build")
-    list(APPEND MZGL_LIBS portaudio_static)
+    list(APPEND MZGL_LIBS PortAudio)
 endif()
 if(WIN32)
-    list(APPEND MZGL_LIBS portaudio_static)
+    list(APPEND MZGL_LIBS PortAudio)
 endif()
 
 if(NOT ANDROID AND NOT IOS)
     list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
+
+message("MZGL_LIBS ${MZGL_LIBS}")
 
 target_link_libraries(libmzgl ${MZGL_LIBS})
 
