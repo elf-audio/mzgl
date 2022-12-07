@@ -161,12 +161,12 @@ if(NOT ZLIB_FOUND)
     COMMAND ${CMAKE_COMMAND} "--build" "${ZLIB_BIN}"
     "--config" "${CMAKE_BUILD_TYPE}"
     "--target" "install"
-    "--" 
+    "--"
   )
   add_library(ZLIB INTERFACE)
   #Set Zlib libaries for Unix system
   set(ZLIB_LIBRARY ${ZLIB_INSTALL}/lib/libz.a)
-  set(ZLIB_LIBRARIES 
+  set(ZLIB_LIBRARIES
     ${ZLIB_INSTALL}/lib/libz.a
     ${ZLIB_INSTALL}/lib/libz.so
   )
@@ -226,7 +226,7 @@ endif()
 
 set(USING_INTEL)
 if (WIN32 AND CMAKE_C_COMPILER AND ${CMAKE_C_COMPILER} MATCHES ".*icl.*$")
-  message(STATUS "Detected Intel Compiler")   
+  message(STATUS "Detected Intel Compiler")
   set(USING_INTEL TRUE)
 endif ()
 
@@ -388,7 +388,7 @@ file(GLOB TEST_SOURCES
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.txt" VERSION)
 
-option(BUILD_SHARED_VERSION "Build the shared version of the library." ON)
+option(BUILD_SHARED_VERSION "Build the shared version of the library." OFF)
 if (BUILD_SHARED_VERSION)
   add_library (${ZIPPER_LIBRARY} SHARED ${ZIPPER_SOURCES} ${MINIZIP_SOURCES} )
   target_include_directories(
@@ -406,11 +406,13 @@ if (BUILD_SHARED_VERSION)
   target_link_libraries(${ZIPPER_LIBRARY} ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
 
   list(APPEND TARGET_LIST ${ZIPPER_LIBRARY})
+  message("Target list static: ${TARGET_LIST}")
 endif()
 
 option(BUILD_STATIC_VERSION "Build the static version of the library." ON)
 if (BUILD_STATIC_VERSION)
   set(STATIC_ZIPPER_LIBRARY static${ZIPPER_LIBRARY})
+  message("Zipper lib: ${STATIC_ZIPPER_LIBRARY}")
   add_library (${STATIC_ZIPPER_LIBRARY} STATIC ${ZIPPER_SOURCES} ${MINIZIP_SOURCES})
   if (NOT WIN32)
     set_target_properties(${STATIC_ZIPPER_LIBRARY} PROPERTIES OUTPUT_NAME ${ZIPPER_LIBRARY})
@@ -423,6 +425,7 @@ if (BUILD_STATIC_VERSION)
   )
   target_link_libraries(${STATIC_ZIPPER_LIBRARY} ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
   list(APPEND TARGET_LIST ${STATIC_ZIPPER_LIBRARY})
+  message("Target list static: ${TARGET_LIST}")
 
   # Deprecated code: old zipper static lib was named libZipper-static.a but this was not
   # a good unix name. Anyway keep installing it to avoid breaking programs link with it.
