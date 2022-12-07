@@ -464,6 +464,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
                 break;
 
             default:
+                return 0;
                 //LOGE("Unhandled motion type %d", flags);
                 break;
                 /*
@@ -488,15 +489,24 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
             int key = keycodeToKey(k);
             if(key!=0) {
                 eventDispatcher->keyDown(key);
+                return 1;
             }
+            // if we don't recognize the key, return 0 for 'not handled'
+            // it may be the volume controls and we want the OS to deal with that.
+            return 0;
         } else if(keyAction==AKEY_EVENT_ACTION_UP) {
             int32_t k = AKeyEvent_getKeyCode(event);
             int key = keycodeToKey(k);
             if(key!=0) {
                 eventDispatcher->keyUp(key);
+                return 1;
             }
+            // if we don't recognize the key, return 0 for 'not handled'
+            // it may be the volume controls and we want the OS to deal with that.
+            return 0;
         } else if(keyAction==AKEY_EVENT_ACTION_MULTIPLE) {
             Log::e() << "Unhandled AKEY_EVENT_ACTION_MULTIPLE";
+            return 0;
         }
         return 1;
     }
