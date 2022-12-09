@@ -309,7 +309,7 @@ set(PA_BUILD_SHARED OFF) # CACHE BOOL "build portaudio shared library")
     #set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
 
 if(NOT ANDROID)
-    add_subdirectory(lib/glfw "glfw-build")
+    add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
 
     add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
     # add_subdirectory("lib/RtMidi" "rtmidi-build")
@@ -433,11 +433,11 @@ elseif(LINUX)
 endif()
 
 if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
-    add_subdirectory(lib/portaudio "portaudio-build")
+    add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
     list(APPEND MZGL_LIBS PortAudio)
 endif()
 if(WIN32)
-    add_subdirectory(lib/portaudio "portaudio-build")
+    add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
     list(APPEND MZGL_LIBS PortAudio)
 endif()
 
