@@ -36,7 +36,7 @@
 
 // just a note for me, a CC at 123 is all notes off
 #define MIDI_CC_ALL_NOTES_OFF 123
-
+#define MIDI_CC_SUSTAIN_PEDAL 64
 
 
 struct MidiMessage {
