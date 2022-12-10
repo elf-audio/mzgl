@@ -911,6 +911,16 @@ void Graphics::drawText(const std::string &s, float x, float y) {
 	getFont().draw(*this, s, x, y);
 }
 
+void Graphics::drawTextWithBG(const std::string &s, vec4 bgColor, float x, float y) {
+	auto r = getFont().getRect(s, x, y);
+	r.inset(-4);
+	auto old = getColor();
+	setColor(bgColor);
+	draw(r);
+	setColor(old);
+	getFont().draw(*this, s, x, y);
+}
+
 void Graphics::drawText(const std::string &s, vec2 p) {
 	getFont().draw(*this, s, p.x, p.y);
 }

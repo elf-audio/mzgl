@@ -118,6 +118,7 @@ public:
 
 	void drawText(const std::string &s, float x, float y);
 	void drawText(const std::string &s, glm::vec2 p);
+	void drawTextWithBG(const std::string &s, vec4 bgColor, float x, float y);
 	void drawTextCentred(const std:: string &s, glm::vec2 c);
 	void drawTextVerticallyCentred(const std::string &text, glm::vec2 c);
 	void drawTextHorizontallyCentred(const std::string &text, glm::vec2 c);
