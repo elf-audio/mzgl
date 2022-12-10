@@ -115,6 +115,9 @@ public:
 	void append(float *buff, int length);
 	void append(const FloatBuffer &b);
 	
+	// multiplies the buffer by left and right gain if it's
+	// a stereo interleaved buffer.
+	void stereoGain(float lGain, float rGain);
 	
     // sets the input samples to the contents of this FloatBuffer
 	

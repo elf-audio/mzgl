@@ -916,6 +916,7 @@ void Graphics::drawTextWithBG(const std::string &s, vec4 bgColor, float x, float
 	r.inset(-4);
 	auto old = getColor();
 	setColor(bgColor);
+	fill();
 	draw(r);
 	setColor(old);
 	getFont().draw(*this, s, x, y);

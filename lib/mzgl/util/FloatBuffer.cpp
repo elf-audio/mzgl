@@ -485,6 +485,22 @@ FloatBuffer& FloatBuffer::operator*=(const FloatBuffer& right) {
 	return *this;
 }
 
+void FloatBuffer::stereoGain(float lGain, float rGain) {
+	
+	
+#ifdef __APPLE__
+
+	vDSP_vsmul(data(), 2, &lGain, data(), 2, size()/2);
+	vDSP_vsmul(data()+1, 2, &rGain, data()+1, 2, size()/2);
+
+#else
+	for(int i = 0; i < size(); i+=2) {
+		(*this)[i] *= lGain;
+		(*this)[i+1] *= rGain;
+	}
+#endif
+}
+
 FloatBuffer& FloatBuffer::operator/=(const FloatBuffer& right) {
 	assert(size()==right.size());
     
