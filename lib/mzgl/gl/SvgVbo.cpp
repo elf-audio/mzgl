@@ -35,14 +35,18 @@ static VboRef vboFromDocWithScale(SVGDoc &doc, float scale, bool ignoreColor) {
 
 VboRef SvgVbo::createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor) {
 	SVGDoc doc;
-	doc.load(path);
+	if(!doc.load(path)) {
+		return nullptr;
+	}
 	return vboFromDoc(doc, maxDim, ignoreColor);
 }
 
 
 VboRef SvgVbo::createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor) {
 	SVGDoc doc;
-	doc.loadFromString(svgCode);
+	if(!doc.loadFromString(svgCode)) {
+		return nullptr;
+	}
 	return vboFromDoc(doc, maxDim, ignoreColor);
 }
 
