@@ -172,12 +172,14 @@ int uikeyToMz(UIKey *key) {
 			if(key!=nil) {
 				int k = uikeyToMz(key);
 				if(k!=-1) {
+//					Log::d() << "KeyCode: " << k << " UIKey.keycode = " << key.keyCode;
 					eventDispatcher->keyDown(k);
-
 				} else {
 					Log::d() << "Don't know how to handle key";
 				}
 				handled = true;
+			} else {
+				Log::d() << "Key was null";
 			}
 		}
 		
@@ -198,11 +200,9 @@ int uikeyToMz(UIKey *key) {
 			UIKey *key = press.key;
 			
 			if(key!=nil) {
-				string keyStr = [key.charactersIgnoringModifiers UTF8String];
-				if(keyStr.size()==1) {
-					eventDispatcher->keyUp(keyStr[0]);
-				} else {
-					Log::d() << "Don't know how to handle key press with chars '" << keyStr << "'";
+				int k = uikeyToMz(key);
+				if(k!=-1) {
+					eventDispatcher->keyUp(k);
 				}
 				handled = true;
 			}
