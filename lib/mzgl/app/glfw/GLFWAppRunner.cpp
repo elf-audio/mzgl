@@ -277,6 +277,12 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
+
+#ifdef _WIN32
+    delete app;
+#endif
+
+
 //	exit(EXIT_SUCCESS);
 }
 
