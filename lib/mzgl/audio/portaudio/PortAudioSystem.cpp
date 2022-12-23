@@ -259,11 +259,6 @@ void PortAudioSystem::configureStream() {
         }
     }
 
-
-#ifdef __linux__
-    PaAlsa_EnableRealtimeScheduling(&stream, true);
-#endif
-
     auto *inParams = &inputParameters;
     auto *outParams = &outputParameters;
 
@@ -288,6 +283,10 @@ void PortAudioSystem::configureStream() {
 	} else if(verbose) {
 		Log::d() << "Success opening stream";
 	}
+
+#ifdef __linux__
+    PaAlsa_EnableRealtimeScheduling(stream, true);
+#endif
 
 }
 void PortAudioSystem::start() {
