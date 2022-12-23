@@ -52,6 +52,11 @@ public:
     virtual void audioOut(float *data, int frames, int chans) {}
 };
 
+enum class StreamConfigurationStatus {
+    OK,
+    FAILED, // TODO: more descriptive errors can be added here
+};
+
 class _AudioSystem {
 public:
 
@@ -102,11 +107,14 @@ public:
 
     //
     virtual double getTimeAtBufferBegin() { return 0; }
+
+    StreamConfigurationStatus getStreamConfigurationStatus() { return streamConfigStatus_; }
 protected:
 
     std::vector<SampleRateChangeListener*> listeners;
     uint32_t bufferSize = 256;
     float sampleRate = 0;
+    StreamConfigurationStatus streamConfigStatus_ = StreamConfigurationStatus::OK;
 };
 
 class DummyAudioSystem : public _AudioSystem {

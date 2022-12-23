@@ -232,6 +232,7 @@ void PortAudioSystem::configureStream() {
         outputParameters.device = outPort.portId;
         if (outputParameters.device == paNoDevice) {
             Log::e() << "Error: No default output device.";
+            streamConfigStatus_ = StreamConfigurationStatus::FAILED;
             return;
         }
         numOutChannels = min((int)outPort.numOutChannels, numOutChannels);
@@ -279,6 +280,7 @@ void PortAudioSystem::configureStream() {
             PortAudioSystem_callback,
             this );
     if(!checkPaError(err, "open stream")) {
+        streamConfigStatus_ = StreamConfigurationStatus::FAILED;
         return;
     } else if(verbose) {
         Log::d() << "Success opening stream";
@@ -287,7 +289,7 @@ void PortAudioSystem::configureStream() {
 #ifdef __linux__
     PaAlsa_EnableRealtimeScheduling(stream, true);
 #endif
-
+    streamConfigStatus_ = StreamConfigurationStatus::OK;
 }
 void PortAudioSystem::start() {
     auto err = Pa_StartStream(stream);
@@ -401,13 +403,19 @@ void PortAudioSystem::rescanPorts() {
     }
 }
 double PortAudioSystem::getLatency() {
-    const auto *info = Pa_GetStreamInfo( stream );
-    return info->inputLatency + info->outputLatency;
+    const auto *info = Pa_GetStreamInfo(stream);
+    if (info != nullptr) {
+        return info->inputLatency + info->outputLatency;
+    }
+    return 0.0;
 }
 
 double PortAudioSystem::getOutputLatency() {
-    const auto *info = Pa_GetStreamInfo( stream );
-    return info->outputLatency;
+    const auto *info = Pa_GetStreamInfo(stream);
+    if (info != nullptr) {
+        return info->outputLatency;
+    }
+    return 0.0;
 }
 
 double PortAudioSystem::getHostTime() {
