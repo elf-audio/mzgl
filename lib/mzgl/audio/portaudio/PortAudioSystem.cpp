@@ -25,7 +25,7 @@ bool PortAudioSystem::checkPaError(PaError err, string msg) {
 	} else if(verbose) {
 		Log::d() << "PortAudioSystem Success " << msg;
 	}
-	
+
 	return true;
 }
 
@@ -68,10 +68,10 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 {
 
     PortAudioSystem *as = (PortAudioSystem*)userData;
-	
+
     as->inputTime = timeInfo->inputBufferAdcTime;  /**< The time when the first sample of the input buffer was captured at the ADC input */
-    as->outputTime = timeInfo->outputBufferDacTime; 
-    
+    as->outputTime = timeInfo->outputBufferDacTime;
+
 	if(inputBuffer!=nullptr) {
 		as->inputCallback((float*)inputBuffer, (int)framesPerBuffer, as->numInChannels);
 	}
@@ -88,15 +88,15 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 
 //#ifdef __APPLE__
 //double getMacDefaultDeviceSampleRate() {
-//	
-//	
+//
+//
 //
 //	AudioObjectID      deviceID;
-//	
+//
 //	// load the current default device
 //	UInt32 deviceSize = sizeof(deviceID);
 //	AudioObjectPropertyAddress address = { kAudioHardwarePropertyDefaultInputDevice, kAudioObjectPropertyScopeGlobal,  kAudioObjectPropertyElementMaster};
-//	
+//
 //	auto err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, &deviceSize, &deviceID);
 //
 //
@@ -104,33 +104,33 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 //		NSLog(@"Error getting default device");
 //		return 0;
 //	}
-//	
-//	
+//
+//
 //	AudioObjectPropertyAddress addr;
-//		
+//
 //	addr.mSelector = kAudioDevicePropertyNominalSampleRate;
 //	addr.mScope = kAudioObjectPropertyScopeGlobal;
 //	addr.mElement = kAudioObjectPropertyElementMaster;
-//	
+//
 //	UInt32 dataSize = 0;
 //	err = AudioObjectGetPropertyDataSize(deviceID, &addr, 0, NULL, &dataSize);
-//	
-//	
+//
+//
 //	if(err != kAudioHardwareNoError) {
 //		NSLog(@"Error getting prop size");
 //		return 0;
 //	}
-//	
+//
 //	double val;
-//	
-//	
+//
+//
 //	err = AudioObjectGetPropertyData( deviceID,
 //								&addr,
 //								0,
 //								NULL,
 //								&dataSize,
 //								&val);
-//	
+//
 //	if(err != kAudioHardwareNoError) {
 //		NSLog(@"Error getting prop");
 //		return 0;
@@ -138,7 +138,7 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 ////	this->sampleRate = val;
 ////					this->sampleRate = outSampleRate;
 ////			NSLog(@"Want %f Hz", this->sampleRate);
-//		
+//
 //	return val;
 //}
 //#endif
@@ -190,7 +190,7 @@ void PortAudioSystem::setup(int numIns, int numOuts) {
 	this->numOutChannels = numOuts;
 	this->desiredNumInChannels = numIns;
 	this->desiredNumOutChannels = numOuts;
-	
+
 	configureStream();
 	isSetup = true;
 }
@@ -273,7 +273,7 @@ void PortAudioSystem::configureStream() {
 	if(verbose) {
 		Log::d() << "Calling Pa_OpenStream";
 	}
-	
+
     auto err = Pa_OpenStream(
             &stream,
             inParams,
@@ -333,23 +333,23 @@ void PortAudioSystem::rescanPorts() {
 		Log::d() << "PortAudioSystem::rescanPorts()";
 	}
 	ports.clear();
-	
+
 	int defaultInputDeviceId = Pa_GetDefaultInputDevice();
 	int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
-	
+
 	int numDevices = Pa_GetDeviceCount();
 	if(numDevices<0) {
 		Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
 		return;
 	}
-	
+
 	const vector<double> standardSampleRates = {
-	
+
 		//8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
-		
-		44100.0, 48000.0, 
-		
-		
+
+		44100.0, 48000.0,
+
+
 		//88200.0, 96000.0, 192000.0,
 	};
 
@@ -367,10 +367,10 @@ void PortAudioSystem::rescanPorts() {
 		if(i==defaultOutputDeviceId) {
 			port.isDefaultOutput = true;
 		}
-		
+
 		port.defaultSampleRate = dev->defaultSampleRate;
-		
-		
+
+
 /*
 		for(const auto sr : standardSampleRates) {
 			PaStreamParameters inputParameters, outputParameters;
@@ -397,7 +397,7 @@ void PortAudioSystem::rescanPorts() {
 			}
 		}
 		*/
-		
+
 		ports.emplace_back(port);
 	}
 }
