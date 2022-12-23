@@ -16,97 +16,97 @@
 
 
 struct AudioPort {
-	int portId = -1;
-	int numInChannels = 0;
-	int numOutChannels = 0;
-	double defaultSampleRate;
-	std::vector<double> supportedSampleRates;
-	std::string name;
-	bool isDefaultInput = false;
-	bool isDefaultOutput = false;
+    int portId = -1;
+    int numInChannels = 0;
+    int numOutChannels = 0;
+    double defaultSampleRate;
+    std::vector<double> supportedSampleRates;
+    std::string name;
+    bool isDefaultInput = false;
+    bool isDefaultOutput = false;
 
-	bool isValid() { return portId != -1; }
+    bool isValid() { return portId != -1; }
 
-	std::string toString() {
-		std::string s = "[id: "+std::to_string(portId)+"] " + name + " (ins: "+std::to_string(numInChannels);
-		s += " / outs: " + std::to_string(numOutChannels);
-		if(isDefaultInput) s += ",default-input";
-		if(isDefaultOutput) s += ",default-output";
-		s += ") - default sr: "+to_string(defaultSampleRate,1)+" other: ";
-		for(int i = 0; i < supportedSampleRates.size(); i++) {
-			s += to_string(supportedSampleRates[i],1) + " ";
-		}
-		
-		return s;
-	}
+    std::string toString() {
+        std::string s = "[id: "+std::to_string(portId)+"] " + name + " (ins: "+std::to_string(numInChannels);
+        s += " / outs: " + std::to_string(numOutChannels);
+        if(isDefaultInput) s += ",default-input";
+        if(isDefaultOutput) s += ",default-output";
+        s += ") - default sr: "+to_string(defaultSampleRate,1)+" other: ";
+        for(int i = 0; i < supportedSampleRates.size(); i++) {
+            s += to_string(supportedSampleRates[i],1) + " ";
+        }
+
+        return s;
+    }
 };
 
 class SampleRateChangeListener {
 public:
-	virtual void sampleRateChanged(double newSampleRate) = 0;
+    virtual void sampleRateChanged(double newSampleRate) = 0;
 };
 
 class AudioIO {
 public:
-	virtual void audioIn (float *data, int frames, int chans) {}
-	virtual void audioOut(float *data, int frames, int chans) {}
+    virtual void audioIn (float *data, int frames, int chans) {}
+    virtual void audioOut(float *data, int frames, int chans) {}
 };
 
 class _AudioSystem {
 public:
-	
-	
 
-	void bindToApp(AudioIO *app);
-	virtual ~_AudioSystem() {}
-	virtual void setup(int numInChannels, int numOutChannels) = 0;
-	virtual void start() = 0;
-	virtual void stop() = 0;
-	virtual bool isRunning() = 0;
 
-	int numInChannels = 2;
-	int numOutChannels = 2;
-	virtual void setVerbose(bool) {}
-	std::function<void(float*, int, int)> inputCallback = [](float*, int, int){};
-	std::function<void(float*, int, int)> outputCallback = [](float*, int, int){};
 
-	void printPorts();
-	virtual void rescanPorts() {}
-	
-	virtual std::vector<AudioPort> getInputs() = 0;
-	virtual std::vector<AudioPort> getOutputs() = 0;
-	
-	virtual bool setInput(const AudioPort &audioInput);
-	virtual bool setOutput(const AudioPort &audioOutput);
+    void bindToApp(AudioIO *app);
+    virtual ~_AudioSystem() {}
+    virtual void setup(int numInChannels, int numOutChannels) = 0;
+    virtual void start() = 0;
+    virtual void stop() = 0;
+    virtual bool isRunning() = 0;
 
-	bool setInputByName(const std::string &name);
-	bool setOutputByName(const std::string &name);
-	
-	virtual AudioPort getInput();
-	virtual AudioPort getOutput();
+    int numInChannels = 2;
+    int numOutChannels = 2;
+    virtual void setVerbose(bool) {}
+    std::function<void(float*, int, int)> inputCallback = [](float*, int, int){};
+    std::function<void(float*, int, int)> outputCallback = [](float*, int, int){};
 
-	virtual double getOutputLatency();
+    void printPorts();
+    virtual void rescanPorts() {}
 
-	// this should restart the system and try to set the samplerate
-	virtual void setSampleRate(float sampleRate);
-	virtual void setBufferSize(int size);
-	
+    virtual std::vector<AudioPort> getInputs() = 0;
+    virtual std::vector<AudioPort> getOutputs() = 0;
 
-	virtual float getSampleRate() const { return sampleRate; }
-	virtual int getBufferSize() const {return bufferSize; }
-	void bufferSizeChangedBySystem(int size);
-	
-	void addSampleRateChangeListener(SampleRateChangeListener *listener);
-	void removeSampleRateChangeListener(SampleRateChangeListener *listener);
-	void notifySampleRateChanged();
-	
-	// 
-	virtual double getTimeAtBufferBegin() { return 0; }
+    virtual bool setInput(const AudioPort &audioInput);
+    virtual bool setOutput(const AudioPort &audioOutput);
+
+    bool setInputByName(const std::string &name);
+    bool setOutputByName(const std::string &name);
+
+    virtual AudioPort getInput();
+    virtual AudioPort getOutput();
+
+    virtual double getOutputLatency();
+
+    // this should restart the system and try to set the samplerate
+    virtual void setSampleRate(float sampleRate);
+    virtual void setBufferSize(int size);
+
+
+    virtual float getSampleRate() const { return sampleRate; }
+    virtual int getBufferSize() const {return bufferSize; }
+    void bufferSizeChangedBySystem(int size);
+
+    void addSampleRateChangeListener(SampleRateChangeListener *listener);
+    void removeSampleRateChangeListener(SampleRateChangeListener *listener);
+    void notifySampleRateChanged();
+
+    //
+    virtual double getTimeAtBufferBegin() { return 0; }
 protected:
-	
-	std::vector<SampleRateChangeListener*> listeners;
-	uint32_t bufferSize = 256;
-	float sampleRate = 0;
+
+    std::vector<SampleRateChangeListener*> listeners;
+    uint32_t bufferSize = 256;
+    float sampleRate = 0;
 };
 
 class DummyAudioSystem : public _AudioSystem {
@@ -118,8 +118,8 @@ public:
 
     void setVerbose(bool v) override { }
 
-	std::vector<AudioPort> getInputs()  override { return {}; }
-	std::vector<AudioPort> getOutputs() override { return {}; }
+    std::vector<AudioPort> getInputs()  override { return {}; }
+    std::vector<AudioPort> getOutputs() override { return {}; }
 };
 
 #ifdef __APPLE__
