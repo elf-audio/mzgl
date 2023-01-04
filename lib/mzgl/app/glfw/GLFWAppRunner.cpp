@@ -38,6 +38,8 @@ bool rightAltDown = false;
 bool leftShiftDown = false;
 bool rightShiftDown = false;
 
+bool framebuferResized = false;
+
 EventDispatcher *getEventDispatcher(GLFWwindow *window) {
     auto *app = (GLFWAppRunner*)glfwGetWindowUserPointer(window);
     return app->eventDispatcher;
@@ -138,14 +140,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 void window_size_callback(GLFWwindow* window, int width, int height) {
 
+
     auto &g = getGraphics(window);
     glViewport(0, 0, width, height);
 
     g.width = width;
     g.height = height;
 
-    getEventDispatcher(window)->resized();
-
+    framebuferResized = true; // just mark that we need to resize
     Log::d() << "resized to " << width << height;
 }
 
@@ -179,7 +181,8 @@ void GLFWAppRunner::setCallbacks() {
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    glfwSetWindowSizeCallback(window, window_size_callback);
+    //glfwSetWindowSizeCallback(window, window_size_callback);
+    glfwSetFramebufferSizeCallback(window, window_size_callback);
     glfwSetDropCallback(window, drop_callback);
     glfwSetWindowUserPointer(window, this);
 
@@ -306,6 +309,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        // While resizing glfwPollEvents blocks until user finishes action, so we can dispatch event here
+        // This is optimization to avoid dispatching from every resize callback, which can be overkill
+        if (framebuferResized) {
+            getEventDispatcher(window)->resized();
+            framebuferResized = false;
+        }
     }
 
     eventDispatcher->exit();
