@@ -161,6 +161,7 @@ float getMainMonitorScale() {
 	if(monitor!=nullptr) {
 		float xscale, yscale;
 		glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+        Log::d() << "scale x: " << xscale << " scale y: " << yscale;
 		return xscale;
 	} else {
 		printf("Error, can't find main monitor\n");
@@ -200,15 +201,17 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	}
 
 
-	graphics.pixelScale = getMainMonitorScale();
+	//graphics.pixelScale = getMainMonitorScale();
+    graphics.pixelScale = 1.0f;
 
-    Log::d() << "Pixel scale is" << graphics.pixelScale;
-
-    app = instantiateApp(graphics);
+    Log::d() << "Pixel scale is " << graphics.pixelScale;
 
     // on linux window is really small, so lets bump it up.
     graphics.width *= graphics.pixelScale;
     graphics.height *= graphics.pixelScale;
+    	
+	//app = instantiateApp(graphics);
+
 	
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
@@ -221,13 +224,31 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 #endif
 
+	app = instantiateApp(graphics);
+	
+	Log::d() << "Request window " << (graphics.width / graphics.pixelScale) << "x"
+             << (graphics.height / graphics.pixelScale);
+	
     window = glfwCreateWindow(graphics.width/graphics.pixelScale, graphics.height/graphics.pixelScale, "mzgl", NULL, NULL);
+
+	int windowH, windowW;
+    glfwGetWindowSize(window, &windowW, &windowH);
+    Log::d() << "Window crated: " << windowW << "x" << windowH;
+    
+	glfwGetFramebufferSize(window, &windowW, &windowH);
+    Log::d() << "FB crated: " << windowW << "x" << windowH;
+
 
     if (!window) {
 		printf("Can't create GLFW window\n");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+
+	graphics.width = windowW * graphics.pixelScale;
+    graphics.height = windowH * graphics.pixelScale;
+
+	//app = instantiateApp(graphics);
 
 	app->windowHandle = window;
 
