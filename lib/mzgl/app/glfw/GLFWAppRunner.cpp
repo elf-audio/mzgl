@@ -100,8 +100,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     auto &g = getGraphics(window);
-    mouseX = xpos*g.pixelScale;
-    mouseY = ypos*g.pixelScale;
+    mouseX = xpos;
+    mouseY = ypos;
     if(!mouseIsDown) {
         getEventDispatcher(window)->touchOver(mouseX, mouseY);
 
@@ -141,8 +141,8 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
     auto &g = getGraphics(window);
     glViewport(0, 0, width, height);
 
-    g.width = width*g.pixelScale;
-    g.height = height*g.pixelScale;
+    g.width = width;
+    g.height = height;
 
     getEventDispatcher(window)->resized();
 
@@ -201,17 +201,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     }
 
 
-    //graphics.pixelScale = getMainMonitorScale();
-    graphics.pixelScale = 1.0f;
-
-    Log::d() << "Pixel scale is " << graphics.pixelScale;
-
-    // on linux window is really small, so lets bump it up.
-    graphics.width *= graphics.pixelScale;
-    graphics.height *= graphics.pixelScale;
-
-    //app = instantiateApp(graphics);
-
+    graphics.pixelScale = 1.0f; // actually we don't need any scaling, this is legacy code for compatibility
 
     glfwWindowHint(GLFW_SAMPLES, 16);
 
@@ -224,20 +214,45 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 #endif
 
+    int requestedWidth = -1;
+    int requestedHeight = -1;
+
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    if (primaryMonitor != nullptr) {
+         const GLFWvidmode* currentVideoMode = glfwGetVideoMode(primaryMonitor);
+         if (currentVideoMode != nullptr) {
+            float h = (currentVideoMode->height) * 0.8; // make it 0.9 of max height, so there is room for decorations
+            float w = h * 0.54; // set width as 0.54 of height, that looks OK
+            requestedHeight = (int)h;
+            requestedWidth = (int)w;
+            if (requestedWidth > currentVideoMode->width) {
+                requestedWidth = currentVideoMode->width; // clamp in case of pivoted monitor
+            }
+         }
+    }
+
+    // Note that graphics object is not fully functional here
+    // as we need to update width/height later on.
     app = instantiateApp(graphics);
 
-    Log::d() << "Request window " << (graphics.width / graphics.pixelScale) << "x"
-             << (graphics.height / graphics.pixelScale);
+    if (requestedWidth != -1) {
+        graphics.width = requestedWidth;
+        graphics.height = requestedHeight;
+    }
 
-    window = glfwCreateWindow(graphics.width/graphics.pixelScale, graphics.height/graphics.pixelScale, "mzgl", NULL, NULL);
+    Log::d() << "Request window " << (graphics.width) << "x"
+             << (graphics.height);
+
+    window = glfwCreateWindow(graphics.width, graphics.height, "mzgl", NULL, NULL);
 
     int windowH, windowW;
-    glfwGetWindowSize(window, &windowW, &windowH);
+    glfwGetWindowSize(window, &windowW, &windowH); // note that it can be DIFFERENT than requested
     Log::d() << "Window crated: " << windowW << "x" << windowH;
 
+    // Use Frame Buffer pixel size as graphics context size
+    // That would be compatible with GL functions using pixel coords (glViewport, glScissors, etc.)
     glfwGetFramebufferSize(window, &windowW, &windowH);
-    Log::d() << "FB crated: " << windowW << "x" << windowH;
-
+    Log::d() << "FB size: " << windowW << "x" << windowH;
 
     if (!window) {
         printf("Can't create GLFW window\n");
@@ -245,20 +260,19 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    graphics.width = windowW * graphics.pixelScale;
-    graphics.height = windowH * graphics.pixelScale;
-
-    //app = instantiateApp(graphics);
+    graphics.width = windowW;
+    graphics.height = windowH;
 
     app->windowHandle = window;
 
 #ifdef __linux__
     gtk_init(&argc, &argv);
+#endif
 
     if(argc>0) {
         glfwSetWindowTitle(window, fs::path(argv[0]).filename().string().c_str());
     }
-#endif
+
 
     setCallbacks();
 
