@@ -39,8 +39,14 @@ FloatBuffer::FloatBuffer(const float *arr, size_t size) {
 
 
 void FloatBuffer::splice(int start, int end, FloatBuffer &outBuff) const {
-	outBuff.clear();
-	outBuff.insert(outBuff.end(), begin() + start, begin() + end);
+    outBuff.clear();
+    outBuff.insert(outBuff.end(), begin() + start, begin() + end);
+}
+
+FloatBuffer FloatBuffer::splice(int start, int end) const {
+    FloatBuffer outBuff;
+    outBuff.insert(outBuff.end(), begin() + start, begin() + end);
+    return outBuff;
 }
 
 void FloatBuffer::set(const float *buff, size_t length, int start, int stride) {

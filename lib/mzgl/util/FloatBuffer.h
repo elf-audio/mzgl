@@ -69,13 +69,15 @@ public:
 	 * returns it as another floatbuffer (outBuff in parameter)
 	 * end is exclusive
 	 */
-	void splice(int start, int end, FloatBuffer &outBuff) const;
+    void splice(int start, int end, FloatBuffer &outBuff) const;
+    FloatBuffer splice(int start, int end) const;
 	
 	int16_t floatToInt16(float in) const;
 	vector<int16_t> getInt16() const;
 	
 	FloatBuffer stereoToMono();
 	
+    
 	void convertToMono(int originalNumChannels = 2);
 	
 //	void save(std::string path);
