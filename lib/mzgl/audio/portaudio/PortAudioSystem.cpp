@@ -19,41 +19,41 @@
 using namespace std;
 
 bool PortAudioSystem::checkPaError(PaError err, string msg) {
-	if(err != paNoError) {
-		Log::e() << "PortAudio error: " << msg << " - error is " << err << "("<<Pa_GetErrorText(err)<<")";
-		return false;
-	} else if(verbose) {
-		Log::d() << "PortAudioSystem Success " << msg;
-	}
-	
-	return true;
+    if(err != paNoError) {
+        Log::e() << "PortAudio error: " << msg << " - error is " << err << "("<<Pa_GetErrorText(err)<<")";
+        return false;
+    } else if(verbose) {
+        Log::d() << "PortAudioSystem Success " << msg;
+    }
+
+    return true;
 }
 
 PortAudioSystem::PortAudioSystem() {
-	if(verbose) {
-		Log::d() << "PortAudioSystem()";
-		printf("PortAudioSystem()\n");
-	}
-	auto err = Pa_Initialize();
-	if(!checkPaError(err, "Intializing port audio")) {
-		throw std::runtime_error("dang! portaudio not working");
-	}
-	rescanPorts();
+    if(verbose) {
+        Log::d() << "PortAudioSystem()";
+        printf("PortAudioSystem()\n");
+    }
+    auto err = Pa_Initialize();
+    if(!checkPaError(err, "Intializing port audio")) {
+        throw std::runtime_error("dang! portaudio not working");
+    }
+    rescanPorts();
 }
 
 PortAudioSystem::~PortAudioSystem() {
-	if(verbose) {
-		Log::e() << "Tearing down PortAudioSystem";
-	}
-	if(isRunning()) {
-		stop();
-	}
-	if(stream!=nullptr && !Pa_IsStreamStopped(stream)) {
-		auto err = Pa_StopStream(stream);
-		checkPaError(err, "stopping");
-	}
-	auto err = Pa_Terminate();
-	checkPaError(err, "terminating");
+    if(verbose) {
+        Log::e() << "Tearing down PortAudioSystem";
+    }
+    if(isRunning()) {
+        stop();
+    }
+    if(stream!=nullptr && !Pa_IsStreamStopped(stream)) {
+        auto err = Pa_StopStream(stream);
+        checkPaError(err, "stopping");
+    }
+    auto err = Pa_Terminate();
+    checkPaError(err, "terminating");
 }
 
 double PortAudioSystem::getTimeAtBufferBegin() {
@@ -61,26 +61,26 @@ double PortAudioSystem::getTimeAtBufferBegin() {
 }
 
 static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer,
-						 unsigned long framesPerBuffer,
-						 const PaStreamCallbackTimeInfo* timeInfo,
-						 PaStreamCallbackFlags statusFlags,
-						 void *userData )
+                         unsigned long framesPerBuffer,
+                         const PaStreamCallbackTimeInfo* timeInfo,
+                         PaStreamCallbackFlags statusFlags,
+                         void *userData )
 {
 
     PortAudioSystem *as = (PortAudioSystem*)userData;
-	
+
     as->inputTime = timeInfo->inputBufferAdcTime;  /**< The time when the first sample of the input buffer was captured at the ADC input */
-    as->outputTime = timeInfo->outputBufferDacTime; 
-    
-	if(inputBuffer!=nullptr) {
-		as->inputCallback((float*)inputBuffer, (int)framesPerBuffer, as->numInChannels);
-	}
+    as->outputTime = timeInfo->outputBufferDacTime;
 
-	if(outputBuffer!=nullptr) {
-		as->outputCallback((float*) outputBuffer, (int)framesPerBuffer, as->numOutChannels);
-	}
+    if(inputBuffer!=nullptr) {
+        as->inputCallback((float*)inputBuffer, (int)framesPerBuffer, as->numInChannels);
+    }
 
-	return paContinue;
+    if(outputBuffer!=nullptr) {
+        as->outputCallback((float*) outputBuffer, (int)framesPerBuffer, as->numOutChannels);
+    }
+
+    return paContinue;
 }
 
 
@@ -88,15 +88,15 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 
 //#ifdef __APPLE__
 //double getMacDefaultDeviceSampleRate() {
-//	
-//	
+//
+//
 //
 //	AudioObjectID      deviceID;
-//	
+//
 //	// load the current default device
 //	UInt32 deviceSize = sizeof(deviceID);
 //	AudioObjectPropertyAddress address = { kAudioHardwarePropertyDefaultInputDevice, kAudioObjectPropertyScopeGlobal,  kAudioObjectPropertyElementMaster};
-//	
+//
 //	auto err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, &deviceSize, &deviceID);
 //
 //
@@ -104,33 +104,33 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 //		NSLog(@"Error getting default device");
 //		return 0;
 //	}
-//	
-//	
+//
+//
 //	AudioObjectPropertyAddress addr;
-//		
+//
 //	addr.mSelector = kAudioDevicePropertyNominalSampleRate;
 //	addr.mScope = kAudioObjectPropertyScopeGlobal;
 //	addr.mElement = kAudioObjectPropertyElementMaster;
-//	
+//
 //	UInt32 dataSize = 0;
 //	err = AudioObjectGetPropertyDataSize(deviceID, &addr, 0, NULL, &dataSize);
-//	
-//	
+//
+//
 //	if(err != kAudioHardwareNoError) {
 //		NSLog(@"Error getting prop size");
 //		return 0;
 //	}
-//	
+//
 //	double val;
-//	
-//	
+//
+//
 //	err = AudioObjectGetPropertyData( deviceID,
 //								&addr,
 //								0,
 //								NULL,
 //								&dataSize,
 //								&val);
-//	
+//
 //	if(err != kAudioHardwareNoError) {
 //		NSLog(@"Error getting prop");
 //		return 0;
@@ -138,7 +138,7 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 ////	this->sampleRate = val;
 ////					this->sampleRate = outSampleRate;
 ////			NSLog(@"Want %f Hz", this->sampleRate);
-//		
+//
 //	return val;
 //}
 //#endif
@@ -146,61 +146,61 @@ static int PortAudioSystem_callback( const void *inputBuffer, void *outputBuffer
 
 
 AudioPort PortAudioSystem::getPort(int dev) {
-	if(verbose) {
-		Log::d() << "Gettting port for " << dev;
-	}
-	for(auto &p : ports) {
-		if(p.portId==dev) {
-			return p;
-		}
-	}
-	return AudioPort();
+    if(verbose) {
+        Log::d() << "Gettting port for " << dev;
+    }
+    for(auto &p : ports) {
+        if(p.portId==dev) {
+            return p;
+        }
+    }
+    return AudioPort();
 }
 
 bool PortAudioSystem::setInput(const AudioPort &audioInput) {
-	if(verbose) {
-		Log::d() << "Setting input to " << audioInput.name;
-	}
+    if(verbose) {
+        Log::d() << "Setting input to " << audioInput.name;
+    }
     bool shouldStopAndStart = isRunning();
     if(shouldStopAndStart) stop();
     inPort = audioInput;
-	if(isSetup) configureStream();
+    if(isSetup) configureStream();
     if(shouldStopAndStart) start();
 
     return true;
 }
 bool PortAudioSystem::setOutput(const AudioPort &audioOutput) {
-	if(verbose) {
-		Log::d() << "Setting output to " << audioOutput.name;
-	}
+    if(verbose) {
+        Log::d() << "Setting output to " << audioOutput.name;
+    }
     bool shouldStopAndStart = isRunning();
     if(shouldStopAndStart) stop();
     outPort = audioOutput;
     if(isSetup) configureStream();
     if(shouldStopAndStart) start();
-	return true;
+    return true;
 }
 
 
 void PortAudioSystem::setup(int numIns, int numOuts) {
-	if(verbose) {
-		Log::d() << "PortAudioSystem::setup("<<numIns << ", "<< numOuts<<")";
-	}
-	this->numInChannels = numIns;
-	this->numOutChannels = numOuts;
-	this->desiredNumInChannels = numIns;
-	this->desiredNumOutChannels = numOuts;
-	
-	configureStream();
-	isSetup = true;
+    if(verbose) {
+        Log::d() << "PortAudioSystem::setup("<<numIns << ", "<< numOuts<<")";
+    }
+    this->numInChannels = numIns;
+    this->numOutChannels = numOuts;
+    this->desiredNumInChannels = numIns;
+    this->desiredNumOutChannels = numOuts;
+
+    configureStream();
+    isSetup = true;
 }
 
 void PortAudioSystem::configureStream() {
-	if(verbose) {
-		Log::d() << "PortAudioSystem::configureStream()";
-	}
-	numInChannels = desiredNumInChannels;
-	numOutChannels = desiredNumOutChannels;
+    if(verbose) {
+        Log::d() << "PortAudioSystem::configureStream()";
+    }
+    numInChannels = desiredNumInChannels;
+    numOutChannels = desiredNumOutChannels;
     // just make sure our ports are up to date
     rescanPorts();
     PaStreamParameters inputParameters, outputParameters;
@@ -232,6 +232,7 @@ void PortAudioSystem::configureStream() {
         outputParameters.device = outPort.portId;
         if (outputParameters.device == paNoDevice) {
             Log::e() << "Error: No default output device.";
+            streamConfigStatus_ = StreamConfigurationStatus::FAILED;
             return;
         }
         numOutChannels = min((int)outPort.numOutChannels, numOutChannels);
@@ -253,16 +254,11 @@ void PortAudioSystem::configureStream() {
         Log::d() << "Using user specified sample rate of " << sampleRate;
     }
     if(verbose) {
-		Log::d() << "---------------------------------------------------------";
+        Log::d() << "---------------------------------------------------------";
         for(auto & p : ports) {
             Log::d() << "PORT: " << p.toString();
         }
     }
-
-
-#ifdef __linux__
-    PaAlsa_EnableRealtimeScheduling(&stream, true);
-#endif
 
     auto *inParams = &inputParameters;
     auto *outParams = &outputParameters;
@@ -270,10 +266,10 @@ void PortAudioSystem::configureStream() {
     if(numInChannels<1) inParams = nullptr;
     if(numOutChannels<1) outParams = nullptr;
 
-	if(verbose) {
-		Log::d() << "Calling Pa_OpenStream";
-	}
-	
+    if(verbose) {
+        Log::d() << "Calling Pa_OpenStream";
+    }
+
     auto err = Pa_OpenStream(
             &stream,
             inParams,
@@ -284,131 +280,142 @@ void PortAudioSystem::configureStream() {
             PortAudioSystem_callback,
             this );
     if(!checkPaError(err, "open stream")) {
+        streamConfigStatus_ = StreamConfigurationStatus::FAILED;
         return;
-	} else if(verbose) {
-		Log::d() << "Success opening stream";
-	}
+    } else if(verbose) {
+        Log::d() << "Success opening stream";
+    }
 
+#ifdef __linux__
+    PaAlsa_EnableRealtimeScheduling(stream, true);
+#endif
+    streamConfigStatus_ = StreamConfigurationStatus::OK;
 }
 void PortAudioSystem::start() {
-	auto err = Pa_StartStream(stream);
-	checkPaError(err, "start stream");
-	Log::d() << to_string(getOutputLatency()*1000.0, 0) << "ms output latency, buffersize: " << std::to_string(bufferSize) << " samples";
+    auto err = Pa_StartStream(stream);
+    checkPaError(err, "start stream");
+    Log::d() << to_string(getOutputLatency()*1000.0, 0) << "ms output latency, buffersize: " << std::to_string(bufferSize) << " samples";
 }
 
 void PortAudioSystem::stop() {
-	auto err = Pa_StopStream( stream );
-	checkPaError(err, "stop stream");
+    auto err = Pa_StopStream( stream );
+    checkPaError(err, "stop stream");
 }
 
 bool PortAudioSystem::isRunning() {
-	if(verbose) {
-		Log::d() << "PortAudioSystem::isRunning()" << Pa_IsStreamActive(stream);
-	}
-	return Pa_IsStreamActive(stream)==1;
+    if(verbose) {
+        Log::d() << "PortAudioSystem::isRunning()" << Pa_IsStreamActive(stream);
+    }
+    return Pa_IsStreamActive(stream)==1;
 }
 
 
 vector<AudioPort> PortAudioSystem::getOutputs() {
 //	updatePorts();
-	vector<AudioPort> ret;
-	for(const auto &p : ports) {
-		if(p.numOutChannels>0) ret.push_back(p);
-	}
-	return ret;
+    vector<AudioPort> ret;
+    for(const auto &p : ports) {
+        if(p.numOutChannels>0) ret.push_back(p);
+    }
+    return ret;
 }
 
 
 vector<AudioPort> PortAudioSystem::getInputs() {
 //	updatePorts();
-	vector<AudioPort> ret;
-	for(const auto &p : ports) {
-		if(p.numInChannels>0) ret.push_back(p);
-	}
-	return ret;
+    vector<AudioPort> ret;
+    for(const auto &p : ports) {
+        if(p.numInChannels>0) ret.push_back(p);
+    }
+    return ret;
 }
 
 void PortAudioSystem::rescanPorts() {
-	if(verbose) {
-		Log::d() << "PortAudioSystem::rescanPorts()";
-	}
-	ports.clear();
-	
-	int defaultInputDeviceId = Pa_GetDefaultInputDevice();
-	int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
-	
-	int numDevices = Pa_GetDeviceCount();
-	if(numDevices<0) {
-		Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
-		return;
-	}
-	
-	const vector<double> standardSampleRates = {
-	
-		//8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
-		
-		44100.0, 48000.0, 
-		
-		
-		//88200.0, 96000.0, 192000.0,
-	};
+    if(verbose) {
+        Log::d() << "PortAudioSystem::rescanPorts()";
+    }
+    ports.clear();
 
-	for(int i = 0; i < numDevices; i++) {
-		auto dev = Pa_GetDeviceInfo(i);
+    int defaultInputDeviceId = Pa_GetDefaultInputDevice();
+    int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
 
-		AudioPort port;
-		port.portId = i;
-		port.name = dev->name;
-		port.numInChannels = dev->maxInputChannels;
-		port.numOutChannels = dev->maxOutputChannels;
-		if(i==defaultInputDeviceId) {
-			port.isDefaultInput = true;
-		}
-		if(i==defaultOutputDeviceId) {
-			port.isDefaultOutput = true;
-		}
-		
-		port.defaultSampleRate = dev->defaultSampleRate;
-		
-		
+    int numDevices = Pa_GetDeviceCount();
+    if(numDevices<0) {
+        Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
+        return;
+    }
+
+    const vector<double> standardSampleRates = {
+
+        //8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
+
+        44100.0, 48000.0,
+
+
+        //88200.0, 96000.0, 192000.0,
+    };
+
+    for(int i = 0; i < numDevices; i++) {
+        auto dev = Pa_GetDeviceInfo(i);
+
+        AudioPort port;
+        port.portId = i;
+        port.name = dev->name;
+        port.numInChannels = dev->maxInputChannels;
+        port.numOutChannels = dev->maxOutputChannels;
+        if(i==defaultInputDeviceId) {
+            port.isDefaultInput = true;
+        }
+        if(i==defaultOutputDeviceId) {
+            port.isDefaultOutput = true;
+        }
+
+        port.defaultSampleRate = dev->defaultSampleRate;
+
+
 /*
-		for(const auto sr : standardSampleRates) {
-			PaStreamParameters inputParameters, outputParameters;
-			inputParameters.device = i;
-			inputParameters.channelCount = dev->maxInputChannels;
-			inputParameters.sampleFormat = paFloat32;
-			inputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
-			inputParameters.hostApiSpecificStreamInfo = NULL;
+        for(const auto sr : standardSampleRates) {
+            PaStreamParameters inputParameters, outputParameters;
+            inputParameters.device = i;
+            inputParameters.channelCount = dev->maxInputChannels;
+            inputParameters.sampleFormat = paFloat32;
+            inputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
+            inputParameters.hostApiSpecificStreamInfo = NULL;
 
-			outputParameters.device = i;
-			outputParameters.channelCount = dev->maxOutputChannels;
-			outputParameters.sampleFormat = paFloat32;
-			outputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
-			outputParameters.hostApiSpecificStreamInfo = NULL;
-			auto *ins = &inputParameters;
-			auto *outs = &outputParameters;
-			if(ins->channelCount==0) ins = nullptr;
-			if(outs->channelCount==0) outs = nullptr;
-			auto err = Pa_IsFormatSupported( ins, outs, sr );
-			if( err == paFormatIsSupported ) {
-				port.supportedSampleRates.push_back(sr);
-			} else {
-				Log::e() << "Got error in rescanPorts() " << Pa_GetErrorText(err);
-			}
-		}
-		*/
-		
-		ports.emplace_back(port);
-	}
+            outputParameters.device = i;
+            outputParameters.channelCount = dev->maxOutputChannels;
+            outputParameters.sampleFormat = paFloat32;
+            outputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
+            outputParameters.hostApiSpecificStreamInfo = NULL;
+            auto *ins = &inputParameters;
+            auto *outs = &outputParameters;
+            if(ins->channelCount==0) ins = nullptr;
+            if(outs->channelCount==0) outs = nullptr;
+            auto err = Pa_IsFormatSupported( ins, outs, sr );
+            if( err == paFormatIsSupported ) {
+                port.supportedSampleRates.push_back(sr);
+            } else {
+                Log::e() << "Got error in rescanPorts() " << Pa_GetErrorText(err);
+            }
+        }
+        */
+
+        ports.emplace_back(port);
+    }
 }
 double PortAudioSystem::getLatency() {
-    const auto *info = Pa_GetStreamInfo( stream );
-    return info->inputLatency + info->outputLatency;
+    const auto *info = Pa_GetStreamInfo(stream);
+    if (info != nullptr) {
+        return info->inputLatency + info->outputLatency;
+    }
+    return 0.0;
 }
 
 double PortAudioSystem::getOutputLatency() {
-    const auto *info = Pa_GetStreamInfo( stream );
-    return info->outputLatency;
+    const auto *info = Pa_GetStreamInfo(stream);
+    if (info != nullptr) {
+        return info->outputLatency;
+    }
+    return 0.0;
 }
 
 double PortAudioSystem::getHostTime() {
