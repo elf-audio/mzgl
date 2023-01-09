@@ -408,15 +408,18 @@ void FloatBuffer::fadeIn(int length, int numChans) {
 }
 
 
-void FloatBuffer::fadeOut(int length, int numChans) {
+void FloatBuffer::fadeOut(int length, int numChans, bool smooth) {
 	if(size()>=length*numChans) {
 		if(numChans==1) {
 			for(int i = 0; i < length; i++) {
-				assignValue(size() - i - 1, (*this)[size() - i - 1] * i/(float)length);
+				float fade =  i/(float)length;
+				if(smooth) fade = smoothstep(fade);
+				assignValue(size() - i - 1, (*this)[size() - i - 1] * fade);
 			}
 		} else if(numChans==2) {
 			for(int i = 0; i < length; i++) {
 				float fade = i/(float)length;
+				if(smooth) fade = smoothstep(fade);
 				int frameIndex = ((int)size() / numChans) - i - 1;
 				assignValue(frameIndex*2, (*this)[frameIndex*2] * fade);
 				assignValue(frameIndex*2+1, (*this)[frameIndex*2+1] * fade);
@@ -424,6 +427,7 @@ void FloatBuffer::fadeOut(int length, int numChans) {
 		} else {
 			for(int i = 0; i < length; i++) {
 				float fade = i/(float)length;
+				if(smooth) fade = smoothstep(fade);
 				int frameIndex = ((int)size() / numChans) - i - 1;
 				for(int ch = 0; ch < numChans; ch++) {
 					assignValue(frameIndex*numChans+ch, (*this)[frameIndex*numChans+ch] * fade);

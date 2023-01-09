@@ -62,7 +62,7 @@ public:
 	void assignValue(size_t index, float v) { (*this)[index] = v; }
 	
 	void fadeIn(int length, int numChans);
-	void fadeOut(int length, int numChans);
+	void fadeOut(int length, int numChans, bool smooth = false);
 	
 	/**
 	 * This copies a section out of this float buffer and
