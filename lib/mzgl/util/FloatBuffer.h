@@ -61,7 +61,9 @@ public:
 	
 	void assignValue(size_t index, float v) { (*this)[index] = v; }
 	
-	void fadeIn(int length, int numChans);
+	// if smooth = false, fadeout is linear, if it's true, then its smoothed
+	// using the smoothstep algorithm.
+	void fadeIn(int length, int numChans, bool smooth = false);
 	void fadeOut(int length, int numChans, bool smooth = false);
 	
 	/**

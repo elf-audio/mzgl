@@ -381,22 +381,26 @@ void FloatBuffer::print() const {
 	printf(" ]\n");
 }
 
-void FloatBuffer::fadeIn(int length, int numChans) {
+void FloatBuffer::fadeIn(int length, int numChans, bool smooth) {
 	if(size()*numChans>length) {
 		
 		if(numChans==1) {
 			for(int i = 0; i < length; i++) {
-				assignValue(i, (*this)[i] * i/(float)length);
+				float fade = i/(float)length;
+				if(smooth) fade = smoothstep(fade);
+				assignValue(i, (*this)[i] * fade);
 			}
 		} else if(numChans==2) {
 			for(int i = 0; i < length; i++) {
-				const float fade = i/(float)length;
+				float fade = i/(float)length;
+				if(smooth) fade = smoothstep(fade);
 				assignValue(i*2, (*this)[i*2]*fade);
 				assignValue(i*2+1, (*this)[i*2+1]*fade);
 			}
 		} else {
 			for(int i = 0; i < length; i++) {
-				const float fade = i/(float)length;
+				float fade = i/(float)length;
+				if(smooth) fade = smoothstep(fade);
 				for(int ch = 0; ch < numChans; ch++) {
 					assignValue(i*numChans + ch, (*this)[i*numChans + ch]*fade);
 				}
