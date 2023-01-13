@@ -85,21 +85,6 @@ std::vector<std::string> androidListAssetDir(const std::string &path) {
 ////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 std::vector<std::string> androidGetMidiDeviceNames() {
     if(getAndroidAppPtr()==nullptr) return std::vector<std::string>();
     std::vector<std::string> outDevs;
@@ -203,6 +188,65 @@ void androidLaunchUrl(const std::string &url) {
 void androidDisplayHtml(const std::string &html) {
     callJNI("displayHtml", html);
 }
+
+void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, int numChannels, int sampleRate) {
+
+    ScopedJni scp;
+    jmethodID methodID = scp.getMethodID("getAACEncoder", "()Lcom/elf/aacencoder/Encoder;");
+    JNIEnv *jni = scp.j();
+
+    jobject aacEncoder = jni->CallObjectMethod(getAndroidAppPtr()->activity->clazz, methodID);
+    if (aacEncoder != nullptr) {
+        jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
+        jmethodID initMethodID = jni->GetMethodID(aacEncoderClazz, "initialize", "(Ljava/lang/String;II)V");
+        jmethodID feedMethodID = jni->GetMethodID(aacEncoderClazz, "feed", "(Ljava/nio/ByteBuffer;I)V");
+        jmethodID doneMethodID = jni->GetMethodID(aacEncoderClazz, "done", "()V");
+
+        jstring path = jni->NewStringUTF(pathToOutput.c_str());
+
+        jni->CallVoidMethod(aacEncoder, initMethodID, path, numChannels, sampleRate);
+
+        // unfortunately android AAC encoder needs signed int 16 sample as input
+        // create reasonably large buffer
+
+#define OUT_BUFF_SIZE 32
+
+        uint32_t numberOfPCMSamples = inputBuffer.size();
+        uint32_t shortBuffSize = (numberOfPCMSamples > OUT_BUFF_SIZE * 1024) ? OUT_BUFF_SIZE * 1024 : numberOfPCMSamples;
+        uint32_t byteBuffSize = shortBuffSize * 2;
+
+        uint32_t dataLeft = numberOfPCMSamples;
+
+        auto *byteBuffer = new uint8_t[byteBuffSize];
+        jobject nativeBuffer = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
+
+        int inputBuffPos = 0;
+        while (dataLeft > 0) {
+
+            uint32_t samplesToCopy = (dataLeft > shortBuffSize) ? shortBuffSize : dataLeft;
+            uint32_t outBufPos = 0;
+            for (int i = 0; i < samplesToCopy; i++) {
+                auto signedSample = (int16_t)(inputBuffer[inputBuffPos++] * 32767.f); // mind the endian, which must be LE
+                byteBuffer[outBufPos++] = (uint8_t)signedSample;
+                byteBuffer[outBufPos++] = (uint8_t)(signedSample >> 8);
+            }
+            dataLeft -= samplesToCopy;
+
+            jni->CallVoidMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
+
+        }
+
+        jni->CallVoidMethod(aacEncoder, doneMethodID);
+
+
+        jni->DeleteLocalRef(path);
+        jni->DeleteLocalRef(nativeBuffer);
+        jni->DeleteLocalRef(aacEncoder);
+    }
+
+
+}
+
 
 void androidAlertDialog(const std::string &title, const std::string &message) {
     callJNI("alertDialog", title, message);

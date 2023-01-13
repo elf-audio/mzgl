@@ -7,6 +7,7 @@
 #include "App.h"
 #include "Midi.h"
 #include "mzAssert.h"
+#include "FloatBuffer.h"
 
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "native-activity", __VA_ARGS__))
@@ -68,6 +69,8 @@ void androidLaunchUrl(const std::string &url);
 /// @param html String containing HTML document to display.
 //------------------------------------------------------------------------------------------------------------------------------
 void androidDisplayHtml(const std::string &html);
+
+void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
 std::string getAndroidTempDir();
 std::vector<std::string> androidGetMidiDeviceNames();
