@@ -273,9 +273,7 @@ void Layer::_touchUp(float x, float y, int id) {
 	}
 	// so if we're the root, we want to clear the focussed layer for this touch
 	if(parent==NULL) {
-		if(g.focusedLayers.find(id)!=g.focusedLayers.end()) {
-			g.focusedLayers.erase(id);
-		}
+		g.focusedLayers.erase(id);
 	}
 }
 
