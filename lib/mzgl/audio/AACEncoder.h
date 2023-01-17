@@ -13,6 +13,6 @@
 
 namespace AACEncoder {
 
-    void encodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
+    bool encodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
 }

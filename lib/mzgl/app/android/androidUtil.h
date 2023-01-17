@@ -70,7 +70,7 @@ void androidLaunchUrl(const std::string &url);
 //------------------------------------------------------------------------------------------------------------------------------
 void androidDisplayHtml(const std::string &html);
 
-void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
+bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
 std::string getAndroidTempDir();
 std::vector<std::string> androidGetMidiDeviceNames();

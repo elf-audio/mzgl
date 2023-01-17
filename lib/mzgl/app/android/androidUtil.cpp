@@ -191,7 +191,7 @@ void androidDisplayHtml(const std::string &html) {
     callJNI("displayHtml", html);
 }
 
-void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, int numChannels, int sampleRate) {
+bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, int numChannels, int sampleRate) {
 
     ScopedJni scp;
     jmethodID methodID = scp.getMethodID("getAACEncoder", "()Lcom/elf/aacencoder/Encoder;");
@@ -250,7 +250,7 @@ void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
         jni->DeleteLocalRef(aacEncoder);
     }
 
-
+    return true;
 }
 
 
