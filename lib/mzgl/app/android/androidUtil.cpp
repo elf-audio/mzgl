@@ -6,6 +6,8 @@
 #include "util.h"
 #include "mainThread.h"
 
+#define PCM_OUT_BUFF_SIZE (32 * 1024)
+
 using namespace std;
 bool ScopedJniAttachmentBlocker::shouldBlock = false;
 
@@ -198,49 +200,53 @@ void androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
     jobject aacEncoder = jni->CallObjectMethod(getAndroidAppPtr()->activity->clazz, methodID);
     if (aacEncoder != nullptr) {
         jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
-        jmethodID initMethodID = jni->GetMethodID(aacEncoderClazz, "initialize", "(Ljava/lang/String;II)V");
-        jmethodID feedMethodID = jni->GetMethodID(aacEncoderClazz, "feed", "(Ljava/nio/ByteBuffer;I)V");
+        jmethodID initMethodID = jni->GetMethodID(aacEncoderClazz, "initialize", "(Ljava/lang/String;II)Z");
+        jmethodID feedMethodID = jni->GetMethodID(aacEncoderClazz, "feed", "(Ljava/nio/ByteBuffer;I)Z");
         jmethodID doneMethodID = jni->GetMethodID(aacEncoderClazz, "done", "()V");
-
+        jobject nativeBuffer = nullptr;
         jstring path = jni->NewStringUTF(pathToOutput.c_str());
 
-        jni->CallVoidMethod(aacEncoder, initMethodID, path, numChannels, sampleRate);
+        jboolean initOK = jni->CallBooleanMethod(aacEncoder, initMethodID, path, numChannels, sampleRate);
+        if (initOK == JNI_TRUE) {
 
-        // unfortunately android AAC encoder needs signed int 16 sample as input
-        // create reasonably large buffer
+            // unfortunately android AAC encoder needs signed int 16 sample as input
+            // create reasonably large buffer
 
-#define OUT_BUFF_SIZE 32
+            uint32_t numberOfPCMSamples = inputBuffer.size();
+            uint32_t shortBuffSize = (numberOfPCMSamples > PCM_OUT_BUFF_SIZE) ? PCM_OUT_BUFF_SIZE
+                                                                              : numberOfPCMSamples;
+            uint32_t byteBuffSize = shortBuffSize * 2;
 
-        uint32_t numberOfPCMSamples = inputBuffer.size();
-        uint32_t shortBuffSize = (numberOfPCMSamples > OUT_BUFF_SIZE * 1024) ? OUT_BUFF_SIZE * 1024 : numberOfPCMSamples;
-        uint32_t byteBuffSize = shortBuffSize * 2;
+            auto *byteBuffer = new uint8_t[byteBuffSize];
+            nativeBuffer = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
 
-        uint32_t dataLeft = numberOfPCMSamples;
+            uint32_t dataLeft = (nativeBuffer != nullptr) ? numberOfPCMSamples : 0;
 
-        auto *byteBuffer = new uint8_t[byteBuffSize];
-        jobject nativeBuffer = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
+            int inputBuffPos = 0;
+            while (dataLeft > 0) {
 
-        int inputBuffPos = 0;
-        while (dataLeft > 0) {
+                uint32_t samplesToCopy = (dataLeft > shortBuffSize) ? shortBuffSize : dataLeft;
+                uint32_t outBufPos = 0;
+                for (int i = 0; i < samplesToCopy; i++) {
+                    auto signedSample = (int16_t) (inputBuffer[inputBuffPos++] *
+                                                   32767.f); // mind the endian, which must be LE
+                    byteBuffer[outBufPos++] = (uint8_t) signedSample;
+                    byteBuffer[outBufPos++] = (uint8_t) (signedSample >> 8);
+                }
+                dataLeft -= samplesToCopy;
 
-            uint32_t samplesToCopy = (dataLeft > shortBuffSize) ? shortBuffSize : dataLeft;
-            uint32_t outBufPos = 0;
-            for (int i = 0; i < samplesToCopy; i++) {
-                auto signedSample = (int16_t)(inputBuffer[inputBuffPos++] * 32767.f); // mind the endian, which must be LE
-                byteBuffer[outBufPos++] = (uint8_t)signedSample;
-                byteBuffer[outBufPos++] = (uint8_t)(signedSample >> 8);
+                jboolean feedOK = jni->CallBooleanMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
+                if (feedOK != JNI_TRUE) {
+                    break;
+                }
             }
-            dataLeft -= samplesToCopy;
+            jni->CallVoidMethod(aacEncoder, doneMethodID);
 
-            jni->CallVoidMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
-
+            if (nativeBuffer != nullptr) {
+                jni->DeleteLocalRef(nativeBuffer);
+            }
         }
-
-        jni->CallVoidMethod(aacEncoder, doneMethodID);
-
-
         jni->DeleteLocalRef(path);
-        jni->DeleteLocalRef(nativeBuffer);
         jni->DeleteLocalRef(aacEncoder);
     }
 
