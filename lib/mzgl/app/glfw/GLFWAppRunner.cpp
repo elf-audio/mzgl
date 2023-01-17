@@ -42,7 +42,7 @@ bool framebuferResized = false;
 
 EventDispatcher *getEventDispatcher(GLFWwindow *window) {
     auto *app = (GLFWAppRunner*)glfwGetWindowUserPointer(window);
-    return app->eventDispatcher;
+    return app->eventDispatcher.get();
 }
 
 Graphics &getGraphics(GLFWwindow *window) {
@@ -236,7 +236,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     // Note that graphics object is not fully functional here
     // as we need to update width/height later on.
-    app = instantiateApp(graphics);
+    app = std::shared_ptr<App>(instantiateApp(graphics));
 
     if (requestedWidth != -1) {
         graphics.width = requestedWidth;
@@ -298,9 +298,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #endif
 
 
-    initMZGL(app);
+    initMZGL(app.get());
 
-    eventDispatcher = new EventDispatcher(app);
+    eventDispatcher = std::make_shared<EventDispatcher>(app.get());
     eventDispatcher->setup();
 
     while (!glfwWindowShouldClose(window)) {
@@ -323,9 +323,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     glfwDestroyWindow(window);
     glfwTerminate();
 
-#ifdef _WIN32
-    delete app;
-#endif
+//#ifdef _WIN32
+//    delete app;
+//#endif
 
 
 //	exit(EXIT_SUCCESS);

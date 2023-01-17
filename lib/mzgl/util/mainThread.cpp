@@ -77,7 +77,6 @@ void MainThreadRunner::clearMainThreadQueue() {
 	while(mainThreadQueue->try_dequeue(fn)) {}
 }
 
-
 void MainThreadRunner::pollInternal() {
 	std::function<void()> fn;
 	pollMutex.lock();
@@ -86,6 +85,7 @@ void MainThreadRunner::pollInternal() {
 	}
 	pollMutex.unlock();
 }
+
 void MainThreadRunner::pollMainThreadQueue() {
 	
 	mainThreadEverPolled = true;
