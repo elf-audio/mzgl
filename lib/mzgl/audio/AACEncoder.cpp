@@ -10,5 +10,7 @@ namespace AACEncoder {
 #if defined(__ANDROID__)
         return androidEncodeAAC(pathToOutput, buff, numChannels, sampleRate);
 #endif
+        return false;
     }
+
 }
