@@ -633,6 +633,10 @@ float FloatBuffer::interpolate(double p) const noexcept {
 			b = a;
 		}
 	}
+	if(a<0) {
+		a = 0;
+		b = 1;
+	}
 	return (*this)[a]*(1.f - m) + (*this)[b] * m;
 }
 
@@ -646,6 +650,10 @@ void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept
 		} else {
 			b = a;
 		}
+	}
+	if(a<0) {
+		a = 0;
+		b = 1;
 	}
 #ifdef DEBUG
 	if(std::isnan((*this)[a*2])) {
