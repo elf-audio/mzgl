@@ -196,6 +196,7 @@ bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
     ScopedJni scp;
     jmethodID methodID = scp.getMethodID("getAACEncoder", "()Lcom/elf/aacencoder/Encoder;");
     JNIEnv *jni = scp.j();
+    bool success = false;
 
     jobject aacEncoder = jni->CallObjectMethod(getAndroidAppPtr()->activity->clazz, methodID);
     if (aacEncoder != nullptr) {
@@ -223,6 +224,8 @@ bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
             uint32_t dataLeft = (nativeBuffer != nullptr) ? numberOfPCMSamples : 0;
 
             int inputBuffPos = 0;
+            jboolean feedOK = JNI_FALSE;
+
             while (dataLeft > 0) {
 
                 uint32_t samplesToCopy = (dataLeft > shortBuffSize) ? shortBuffSize : dataLeft;
@@ -235,7 +238,7 @@ bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
                 }
                 dataLeft -= samplesToCopy;
 
-                jboolean feedOK = jni->CallBooleanMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
+                feedOK = jni->CallBooleanMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
                 if (feedOK != JNI_TRUE) {
                     break;
                 }
@@ -245,12 +248,14 @@ bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, 
             if (nativeBuffer != nullptr) {
                 jni->DeleteLocalRef(nativeBuffer);
             }
+
+            success = (feedOK == JNI_TRUE);
         }
         jni->DeleteLocalRef(path);
         jni->DeleteLocalRef(aacEncoder);
     }
 
-    return true;
+    return success;
 }
 
 
