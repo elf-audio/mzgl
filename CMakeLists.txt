@@ -54,7 +54,6 @@ set(MZGL_SOURCES
     lib/mzgl/animation/Tween.cpp
     lib/mzgl/audio/AudioSystem.cpp
     lib/mzgl/audio/DrAudioFileReader.cpp
-    lib/mzgl/audio/AACEncoder.cpp
     lib/mzgl/geom/Rectf.cpp
     lib/mzgl/geom/RoundedRect.cpp
     lib/mzgl/geom/SVG.cpp
