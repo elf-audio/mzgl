@@ -820,17 +820,15 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	return;
 #endif
 
+#ifdef __APPLE__
 
 
-
-#if TARGET_OS_IOS
+#	if TARGET_OS_IOS
 	WKWebView *wv = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, 200, 200)];
 	NSURL *URL = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:url.c_str()]];
 	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
-
-
 
 	UIViewController *targetController = [[UIViewController alloc] init];
 
@@ -858,7 +856,9 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|" options:0 metrics:nil views:views]];
 
 	[((__bridge UIViewController*)app.viewController) presentViewController:targetController animated:YES completion:nil];
-
+#	else // mac
+	
+#	endif
 #else
 	launchUrl(url);
 #endif

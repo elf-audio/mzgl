@@ -702,6 +702,26 @@
 		EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EACF1E462863532B0086EE11 /* MacFilePickerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EACF1E442863532B0086EE11 /* MacFilePickerDelegate.h */; };
+		EAD03B9C297FD49700D0C04A /* MZWebView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD03B9A297FD49700D0C04A /* MZWebView.cpp */; };
+		EAD03B9D297FD49700D0C04A /* MZWebView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD03B9A297FD49700D0C04A /* MZWebView.cpp */; };
+		EAD03B9E297FD49700D0C04A /* MZWebView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD03B9A297FD49700D0C04A /* MZWebView.cpp */; };
+		EAD03B9F297FD49700D0C04A /* MZWebView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD03B9A297FD49700D0C04A /* MZWebView.cpp */; };
+		EAD03BA0297FD49700D0C04A /* MZWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03B9B297FD49700D0C04A /* MZWebView.h */; };
+		EAD03BA1297FD49700D0C04A /* MZWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03B9B297FD49700D0C04A /* MZWebView.h */; };
+		EAD03BA5297FD9A200D0C04A /* MacWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BA3297FD9A200D0C04A /* MacWebView.mm */; };
+		EAD03BA7297FD9A200D0C04A /* MacWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BA3297FD9A200D0C04A /* MacWebView.mm */; };
+		EAD03BA9297FD9A200D0C04A /* MacWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BA4297FD9A200D0C04A /* MacWebView.h */; };
+		EAD03BAA297FD9A200D0C04A /* MacWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BA4297FD9A200D0C04A /* MacWebView.h */; };
+		EAD03BAF297FF53300D0C04A /* iOSWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BAC297FF53300D0C04A /* iOSWebView.mm */; };
+		EAD03BB1297FF53300D0C04A /* iOSWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BAC297FF53300D0C04A /* iOSWebView.mm */; };
+		EAD03BB2297FF53300D0C04A /* iOSWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BAD297FF53300D0C04A /* iOSWebView.h */; };
+		EAD03BB3297FF53300D0C04A /* iOSWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BAD297FF53300D0C04A /* iOSWebView.h */; };
+		EAD03BB62980185000D0C04A /* AppleWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BB42980185000D0C04A /* AppleWebView.mm */; };
+		EAD03BB72980185000D0C04A /* AppleWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BB42980185000D0C04A /* AppleWebView.mm */; };
+		EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BB42980185000D0C04A /* AppleWebView.mm */; };
+		EAD03BB92980185000D0C04A /* AppleWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EAD03BB42980185000D0C04A /* AppleWebView.mm */; };
+		EAD03BBA2980185000D0C04A /* AppleWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BB52980185000D0C04A /* AppleWebView.h */; };
+		EAD03BBB2980185000D0C04A /* AppleWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EAD03BB52980185000D0C04A /* AppleWebView.h */; };
 		EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
 		EAD177A9282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
 		EAD177AA282732A900E2AAE6 /* pu_gixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */; };
@@ -1549,6 +1569,15 @@
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
 		EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MacFilePickerDelegate.mm; sourceTree = "<group>"; };
 		EACF1E442863532B0086EE11 /* MacFilePickerDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MacFilePickerDelegate.h; sourceTree = "<group>"; };
+		EAD03B9A297FD49700D0C04A /* MZWebView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MZWebView.cpp; sourceTree = "<group>"; };
+		EAD03B9B297FD49700D0C04A /* MZWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZWebView.h; sourceTree = "<group>"; };
+		EAD03BA3297FD9A200D0C04A /* MacWebView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MacWebView.mm; sourceTree = "<group>"; };
+		EAD03BA4297FD9A200D0C04A /* MacWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MacWebView.h; sourceTree = "<group>"; };
+		EAD03BAB297FDA6000D0C04A /* MZWebViewImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZWebViewImpl.h; sourceTree = "<group>"; };
+		EAD03BAC297FF53300D0C04A /* iOSWebView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = iOSWebView.mm; sourceTree = "<group>"; };
+		EAD03BAD297FF53300D0C04A /* iOSWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iOSWebView.h; sourceTree = "<group>"; };
+		EAD03BB42980185000D0C04A /* AppleWebView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppleWebView.mm; sourceTree = "<group>"; };
+		EAD03BB52980185000D0C04A /* AppleWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppleWebView.h; sourceTree = "<group>"; };
 		EAD1779B282732A900E2AAE6 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		EAD1779C282732A900E2AAE6 /* .codecov.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .codecov.yml; sourceTree = "<group>"; };
 		EAD1779D282732A900E2AAE6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -1788,6 +1817,7 @@
 		EA1835C22432C18B00A5C3E8 /* app */ = {
 			isa = PBXGroup;
 			children = (
+				EAD03BA2297FD98F00D0C04A /* web */,
 				EA64AD7126A186D7001427AD /* apple */,
 				EA1835C52432C18B00A5C3E8 /* ios */,
 				EA1835CD2432C18B00A5C3E8 /* mac */,
@@ -2230,6 +2260,8 @@
 				EA81A9502756F0AC009C911E /* AUv3 */,
 				EA64AD7226A186D7001427AD /* MZGLWebView.mm */,
 				EA64AD7326A186D7001427AD /* MZGLWebView.h */,
+				EAD03BB42980185000D0C04A /* AppleWebView.mm */,
+				EAD03BB52980185000D0C04A /* AppleWebView.h */,
 				EA6901802863954500ECD038 /* AppleFileBookmarks.h */,
 			);
 			path = apple;
@@ -2862,6 +2894,20 @@
 			path = gtx;
 			sourceTree = "<group>";
 		};
+		EAD03BA2297FD98F00D0C04A /* web */ = {
+			isa = PBXGroup;
+			children = (
+				EAD03B9A297FD49700D0C04A /* MZWebView.cpp */,
+				EAD03B9B297FD49700D0C04A /* MZWebView.h */,
+				EAD03BAC297FF53300D0C04A /* iOSWebView.mm */,
+				EAD03BAD297FF53300D0C04A /* iOSWebView.h */,
+				EAD03BA3297FD9A200D0C04A /* MacWebView.mm */,
+				EAD03BA4297FD9A200D0C04A /* MacWebView.h */,
+				EAD03BAB297FDA6000D0C04A /* MZWebViewImpl.h */,
+			);
+			path = web;
+			sourceTree = "<group>";
+		};
 		EAD1779A282732A900E2AAE6 /* pu_gixml */ = {
 			isa = PBXGroup;
 			children = (
@@ -2941,6 +2987,7 @@
 				EA1840082432C18D00A5C3E8 /* Fbo.h in Headers */,
 				EA71A74627E39E6C0081A5CB /* ioapi_buf.h in Headers */,
 				EA71A76E27E39E6C0081A5CB /* brg_types.h in Headers */,
+				EAD03BB2297FF53300D0C04A /* iOSWebView.h in Headers */,
 				EA183F942432C18D00A5C3E8 /* SimpleButton.h in Headers */,
 				EA297C7125C954E600F890AE /* pa_ringbuffer.h in Headers */,
 				EA183FFF2432C18D00A5C3E8 /* NineSlice.h in Headers */,
@@ -2951,6 +2998,7 @@
 				EA297C6925C954E600F890AE /* pa_jack.h in Headers */,
 				EAF6737D289BC441001F778D /* stringUtil.h in Headers */,
 				EA71A79027E39E6C0081A5CB /* zipper.h in Headers */,
+				EAD03BA0297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA71A78627E39E6C0081A5CB /* fileenc.h in Headers */,
 				EA183FC12432C18D00A5C3E8 /* events.h in Headers */,
 				EA71A74C27E39E6C0081A5CB /* prng.h in Headers */,
@@ -2963,6 +3011,7 @@
 				EA35518D25CB05D5003DF2FB /* EventsView.h in Headers */,
 				EA71A79827E39E6C0081A5CB /* CDirEntry.h in Headers */,
 				EA183FEA2432C18D00A5C3E8 /* AudioSystem.h in Headers */,
+				EAD03BBA2980185000D0C04A /* AppleWebView.h in Headers */,
 				EA71A73A27E39E6C0081A5CB /* unzip.h in Headers */,
 				EA18400D2432C18D00A5C3E8 /* mzOpenGL.h in Headers */,
 				EA183FB32432C18D00A5C3E8 /* LayerExplorer.h in Headers */,
@@ -3083,6 +3132,7 @@
 				EA15B280291D49E70051570A /* UndoManager.h in Headers */,
 				EA183FF92432C18D00A5C3E8 /* error.h in Headers */,
 				EAD177AE282732A900E2AAE6 /* pu_gixml.hpp in Headers */,
+				EAD03BA9297FD9A200D0C04A /* MacWebView.h in Headers */,
 				EA297C7425C954E600F890AE /* pa_memorybarrier.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3100,6 +3150,7 @@
 				EA2B827824E7093600EA12BD /* Camera.h in Headers */,
 				EA2B828024E7093600EA12BD /* MitredLine.h in Headers */,
 				EA71A74727E39E6C0081A5CB /* ioapi_buf.h in Headers */,
+				EAD03BAA297FD9A200D0C04A /* MacWebView.h in Headers */,
 				EA2B82A924E7093600EA12BD /* Vbo.h in Headers */,
 				EA2B82B324E7093600EA12BD /* Graphics.h in Headers */,
 				EAF67386289BC87E001F778D /* mainThread.h in Headers */,
@@ -3123,6 +3174,7 @@
 				EA2B842224E7093600EA12BD /* Fbo.h in Headers */,
 				EA2B843C24E7093600EA12BD /* SimpleButton.h in Headers */,
 				EA2B844D24E7093600EA12BD /* NineSlice.h in Headers */,
+				EAD03BBB2980185000D0C04A /* AppleWebView.h in Headers */,
 				EA2B845324E7093600EA12BD /* RoundedRect.h in Headers */,
 				EA2B846024E7093600EA12BD /* NVGUI.h in Headers */,
 				EA71A78727E39E6C0081A5CB /* fileenc.h in Headers */,
@@ -3194,6 +3246,7 @@
 				EA2B884A24E7093600EA12BD /* DrawingCanvas.h in Headers */,
 				EA2B887324E7093600EA12BD /* Plugin.h in Headers */,
 				EA2B887924E7093600EA12BD /* DrawingFunction.h in Headers */,
+				EAD03BA1297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA2B889524E7093600EA12BD /* LineEquation.h in Headers */,
 				EA2B88BA24E7093600EA12BD /* DateTime.h in Headers */,
 				EA71A77327E39E6C0081A5CB /* hmac.h in Headers */,
@@ -3225,6 +3278,7 @@
 				EA2B8A4824E7093600EA12BD /* BitUtils.h in Headers */,
 				EA2B8A4D24E7093600EA12BD /* SVG.h in Headers */,
 				EA2B8A5024E7093600EA12BD /* errors.h in Headers */,
+				EAD03BB3297FF53300D0C04A /* iOSWebView.h in Headers */,
 				EA2B8A5224E7093600EA12BD /* PluginEditor.h in Headers */,
 				EAD177AD282732A900E2AAE6 /* pu_giconfig.hpp in Headers */,
 				EA2B8A7024E7093600EA12BD /* AudioSystemIOS.h in Headers */,
@@ -3380,6 +3434,7 @@
 				EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA183FC82432C18D00A5C3E8 /* Dylib.cpp in Sources */,
 				EA183FAE2432C18D00A5C3E8 /* TextConsole.mm in Sources */,
+				EAD03BA5297FD9A200D0C04A /* MacWebView.mm in Sources */,
 				EA71A79427E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
 				EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EAF9A15126F8B42200698263 /* log.cpp in Sources */,
@@ -3388,6 +3443,7 @@
 				EA71A73C27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA71FEE927F33B310005C47A /* ZipReader.cpp in Sources */,
 				EAF99AC0267A4DE800157A7C /* ScrollingList.cpp in Sources */,
+				EAD03BB62980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA71A7A027E39E6C0081A5CB /* tools.cpp in Sources */,
 				EA234B0D24A609CA000F057B /* event.cpp in Sources */,
 				EA1840072432C18D00A5C3E8 /* Texture.cpp in Sources */,
@@ -3415,6 +3471,7 @@
 				EA1840042432C18D00A5C3E8 /* error.cpp in Sources */,
 				EA234AF424A609CA000F057B /* Yoga.cpp in Sources */,
 				EA297C6D25C954E600F890AE /* pa_dither.c in Sources */,
+				EAD03B9C297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA297C7025C954E600F890AE /* pa_process.c in Sources */,
 				EA71A7B027E39E6C0081A5CB /* ZipFile.cpp in Sources */,
 				EA71A78027E39E6C0081A5CB /* aestab.c in Sources */,
@@ -3485,6 +3542,7 @@
 				EAD177A9282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA1841222432C4C900A5C3E8 /* Camera.cpp in Sources */,
 				EA1840F62432C36300A5C3E8 /* iOSAppDelegate.mm in Sources */,
+				EAD03B9D297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA18411D2432C4AC00A5C3E8 /* Drawer.cpp in Sources */,
 				EA71A75F27E39E6C0081A5CB /* fileenc.c in Sources */,
 				EA234AED24A609CA000F057B /* Utils.cpp in Sources */,
@@ -3520,6 +3578,7 @@
 				EA234AF724A609CA000F057B /* YGStyle.cpp in Sources */,
 				EA99490524730DB8004D0DB7 /* nanovg.cpp in Sources */,
 				EA18411B2432C4A500A5C3E8 /* Vbo.cpp in Sources */,
+				EAD03BAF297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924362273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA1841302432C4FF00A5C3E8 /* maths.cpp in Sources */,
@@ -3542,6 +3601,7 @@
 				EA71A77D27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA924369274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA71A73327E39E6C0081A5CB /* ioapi_buf.c in Sources */,
+				EAD03BB72980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
 				EA18412B2432C4FF00A5C3E8 /* events.cpp in Sources */,
@@ -3602,11 +3662,13 @@
 				EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */,
 				EA71A72427E39E6B0081A5CB /* zip.c in Sources */,
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
+				EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A75C27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */,
+				EAD03B9E297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA2B8AE424E7093600EA12BD /* TextConsole.mm in Sources */,
 				EA2B8AE624E7093600EA12BD /* MitredLine.cpp in Sources */,
 				EA2B8AE824E7093600EA12BD /* event.cpp in Sources */,
@@ -3644,6 +3706,7 @@
 				EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */,
 				EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */,
 				EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */,
+				EAD03BA7297FD9A200D0C04A /* MacWebView.mm in Sources */,
 				EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */,
 				EA2B8B0D24E7093600EA12BD /* DropDown.cpp in Sources */,
 				EA16DAD125FFABDA001C0460 /* pa_allocation.c in Sources */,
@@ -3711,6 +3774,7 @@
 				EA68944C261C633500F76B91 /* Drawer.cpp in Sources */,
 				EA71A78B27E39E6C0081A5CB /* entropy.c in Sources */,
 				EA68944D261C633500F76B91 /* Utils.cpp in Sources */,
+				EAD03B9F297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA68944F261C633500F76B91 /* YGNodePrint.cpp in Sources */,
 				EA71A7B327E39E6C0081A5CB /* ZipFile.cpp in Sources */,
 				EA71A77927E39E6C0081A5CB /* prng.c in Sources */,
@@ -3746,6 +3810,7 @@
 				EA68946A261C633500F76B91 /* YGStyle.cpp in Sources */,
 				EA68946B261C633500F76B91 /* nanovg.cpp in Sources */,
 				EA68946C261C633500F76B91 /* Vbo.cpp in Sources */,
+				EAD03BB1297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924364273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A77F27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */,
@@ -3768,6 +3833,7 @@
 				EA92436B274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA71A76D27E39E6C0081A5CB /* sha1.c in Sources */,
 				EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
+				EAD03BB92980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */,
 				EA689483261C633500F76B91 /* events.cpp in Sources */,
 				EA689485261C633500F76B91 /* Yoga.cpp in Sources */,

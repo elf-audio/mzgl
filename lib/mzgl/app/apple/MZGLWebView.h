@@ -6,6 +6,9 @@
 //  Copyright © 2021 Marek Bereza. All rights reserved.
 //
 
+/**
+ * DON'T USE THIS USE AppleWebView - eventually delete this and rename AppleWebView as MZGLWebView
+ */
 #pragma once
 #include <TargetConditionals.h>
 

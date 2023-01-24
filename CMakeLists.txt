@@ -116,6 +116,9 @@ set(MZGL_SOURCES
         lib/mzgl/app/mac/TextConsole.mm
         lib/mzgl/app/mac/mainMac.mm
         lib/mzgl/app/apple/MZGLWebView.mm
+        lib/mzgl/app/apple/AppleWebView.mm
+        lib/mzgl/app/web/MacWebView.mm
+        lib/mzgl/app/web/MZWebView.cpp
     >
 )
 if(NOT ANDROID)
@@ -137,6 +140,7 @@ set(HEADERS
     lib/mzgl/app/mac
     lib/mzgl/app/mac/GL
     lib/mzgl/app/glfw
+    lib/mzgl/app/web
     lib/mzgl/audio
     lib/mzgl/audio/portaudio
     lib/mzgl/audio/iOS

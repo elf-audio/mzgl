@@ -28,11 +28,6 @@
 
     
     
-    
-    
-    
-    
-    
     [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"fullScreenEnabled"];
         [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"DOMPasteAllowed"];
         [config.preferences setValue: [NSNumber numberWithBool: YES] forKey: @"javaScriptCanAccessClipboard"];
@@ -73,13 +68,6 @@
 			NSLog(@"%@", url);
 			
 			[self loadFileURL:url allowingReadAccessToURL:baseURL];
-//		} else {
-//
-//			auto p = fs::path(customUrl);
-//			NSURL *baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String: p.parent_path().string().c_str()]];
-//			NSURL *url = [baseURL URLByAppendingPathComponent:[NSString stringWithUTF8String:p.filename().string().c_str()]];
-//			[self loadFileURL:url allowingReadAccessToURL:baseURL];
-//		}
 		}
 	}
 	return self;
@@ -100,20 +88,15 @@
 - (void)windowDidResize:(NSNotification *)notification {
 	Log::d() << "windowDidResize";
 	NSWindow *window = notification.object;
-	//WIDTH = window.frame.size.width;
-	//HEIGHT = window.frame.size.height;
 	
 	auto w = window.contentLayoutRect.size.width;
 	auto h = window.contentLayoutRect.size.height;
-//	auto pixelScale = [window backingScaleFactor];
+	
 	Log::d() << w << " " << h;
 	
 	NSRect f = self.frame;
 	f.size = CGSizeMake(w, h);;
 	self.frame = f;
-
-	
-	
 }
 
 - (BOOL) acceptsFirstResponder {
@@ -133,31 +116,6 @@
 //	[super shutdown];
 //	eventDispatcher->exit();
 }
-//
-//- (void*) getApp {
-//	return eventDispatcher->app.get();
-//}
-
-//
-//- (BOOL)windowShouldClose:(NSWindow *)sender {
-//	return YES;
-//}
-//
-//- (void)windowDidBecomeKey:(NSNotification *)notification {
-////	NSWindow *window = notification.object;
-////	Graphics &g = eventDispatcher->app->g;
-////	g.pixelScale = [window backingScaleFactor];
-////	Log::e() << "Pixel scale being set for first time: " << g.pixelScale;
-//}
-//
-//- (void)windowWillClose:(NSNotification *)notification {
-//	[[NSApplication sharedApplication] terminate:nil];
-//}
-//
-//- (void)windowDidResize:(NSNotification *)notification {
-//	[super windowResized: notification];
-//}
-
 
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
