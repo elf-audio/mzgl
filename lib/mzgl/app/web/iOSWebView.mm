@@ -18,7 +18,9 @@ iOSWebView::iOSWebView(App *app) : app(app) {}
 iOSWebView::~iOSWebView() {}
 
 
-void iOSWebView::show(const std::string &_path, std::function<void()> loadedCallback) {
+void iOSWebView::show(const std::string &_path,
+					  std::function<void(const std::string &data)> jsCallback,
+					  std::function<void()> loadedCallback) {
 	std::string path = _path;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		
@@ -31,15 +33,13 @@ void iOSWebView::show(const std::string &_path, std::function<void()> loadedCall
 //		AppleWebView *view = [[AppleWebView alloc] initWithFrame: rect eventDispatcher: &evts andUrl: url];
 //		[[win contentView] addSubview:view];
 		
-		auto cb = [](const std::string &s) {
-			printf("js callback: %s\n", s.c_str());
-		};
+	
 		auto closeCb = [this]() {
 			close();
 		};
 		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.bounds
 												  loadedCallback: loadedCallback
-													  jsCallback: cb
+													  jsCallback: jsCallback
 												   closeCallback: closeCb
 															 url: url];
 		webView = (__bridge void*)view;

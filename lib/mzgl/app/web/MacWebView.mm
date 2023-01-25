@@ -19,7 +19,9 @@ MacWebView::MacWebView(App *app) : app(app) {}
 MacWebView::~MacWebView() {}
 
 
-void MacWebView::show(const std::string &_path, std::function<void()> loadedCallback) {
+void MacWebView::show(const std::string &_path,
+					  std::function<void(const std::string &data)> jsCallback,
+					  std::function<void()> loadedCallback) {
 	
 	auto path = _path;
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -28,16 +30,13 @@ void MacWebView::show(const std::string &_path, std::function<void()> loadedCall
 
 		NSWindow *win = (__bridge NSWindow*)app->windowHandle;
 		
-		auto cb = [](const std::string &s) {
-			printf("js callback: %s\n", s.c_str());
-		};
 		
 		auto closeCb = [this]() {
 			close();
 		};
 		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.contentView.frame
 												  loadedCallback: loadedCallback
-													  jsCallback: cb
+													  jsCallback: jsCallback
 												   closeCallback: closeCb
 															 url: url];
 		

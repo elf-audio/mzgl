@@ -56,7 +56,8 @@
 	//		window.webkit.messageHandlers.updateHandler.postMessage({"key": key, "value": ""+value});
 	//	}
 	
-		[config.userContentController addScriptMessageHandler:self name:@"closeWindow"];
+	[config.userContentController addScriptMessageHandler:self name:@"closeWindow"];
+	[config.userContentController addScriptMessageHandler:self name:@"messages"];
 	//	if(window.webkit) {
 	//		window.webkit.messageHandlers.updateHandler.postMessage({"key": key, "value": ""+value});
 	//	}
@@ -165,8 +166,8 @@
 		if(closeCallback) closeCallback();
 		return;
 	}
-	NSDictionary *dict = message.body;
-	std::string data = [dict[@"data"] UTF8String];
+	NSString *str = message.body;
+	std::string data = [str UTF8String];
 	jsCallback(data);
 }
 
