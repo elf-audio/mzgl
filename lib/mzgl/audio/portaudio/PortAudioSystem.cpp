@@ -158,27 +158,55 @@ AudioPort PortAudioSystem::getPort(int dev) {
 }
 
 bool PortAudioSystem::setInput(const AudioPort &audioInput) {
-    if(verbose) {
-        Log::d() << "Setting input to " << audioInput.name;
-    }
-    bool shouldStopAndStart = isRunning();
-    if(shouldStopAndStart) stop();
-    inPort = audioInput;
-    if(isSetup) configureStream();
-    if(shouldStopAndStart) start();
-
-    return true;
+    return setIOPort(audioInput, false);
 }
+
 bool PortAudioSystem::setOutput(const AudioPort &audioOutput) {
+    return setIOPort(audioOutput, true);
+}
+
+bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
+
     if(verbose) {
-        Log::d() << "Setting output to " << audioOutput.name;
+        Log::d() << "Setting " << (isOutput ? "output" : "input") << " to " << audioPort.name;
     }
+
+    bool success = true;
     bool shouldStopAndStart = isRunning();
-    if(shouldStopAndStart) stop();
-    outPort = audioOutput;
-    if(isSetup) configureStream();
-    if(shouldStopAndStart) start();
-    return true;
+    if (shouldStopAndStart) {
+        stop();
+    }
+
+    if (isOutput) {
+        outPort = audioPort;
+    }
+    else {
+        inPort = audioPort;
+        isInPortDummy = (inPort.numInChannels == 0);
+    }
+
+
+    if (setupFinished) {
+        configureStream();
+
+        // fallback to no-input
+        if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+            setNoInputPort();
+            configureStream();
+            success = false; // even if configureStream() succeeded, we return false to inform that input is set to no-input
+        }
+
+        if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+            // TODO: shall never happen, really don't know what to do in such case, TBD
+            Log::e() << "PANIC: cannot configure stream with no-input!";
+        }
+    }
+
+    if (shouldStopAndStart) {
+        start();
+    }
+
+    return success;
 }
 
 
@@ -192,22 +220,34 @@ void PortAudioSystem::setup(int numIns, int numOuts) {
     this->desiredNumOutChannels = numOuts;
 
     configureStream();
-    isSetup = true;
+
+    // in case of error fallback to no-input
+    if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+        setNoInputPort();
+        configureStream();
+    }
+
+    // however configureStream might fail at that point, but number of desired channels is already set
+    // so mark that setup finished, upper layer shall check for errors and decide what to do next
+    setupFinished = true;
 }
 
 void PortAudioSystem::configureStream() {
     if(verbose) {
         Log::d() << "PortAudioSystem::configureStream()";
     }
-    numInChannels = desiredNumInChannels;
+
+    numInChannels = isInPortDummy ? 0 : desiredNumInChannels;
     numOutChannels = desiredNumOutChannels;
+
     // just make sure our ports are up to date
     rescanPorts();
     PaStreamParameters inputParameters, outputParameters;
 
-    if(this->numInChannels>0) {
+    if (this->numInChannels > 0) {
         if(!inPort.isValid()) {
             inPort = getPort(Pa_GetDefaultInputDevice());
+            isInPortDummy = false;
         }
         inputParameters.device = inPort.portId;
         if (inputParameters.device == paNoDevice) {
@@ -222,6 +262,9 @@ void PortAudioSystem::configureStream() {
             inputParameters.suggestedLatency = Pa_GetDeviceInfo(inputParameters.device)->defaultLowInputLatency;
             inputParameters.hostApiSpecificStreamInfo = nullptr;
         }
+    }
+    else if (this->numInChannels == 0) {
+        setNoInputPort();
     }
 
     if(this->numOutChannels>0) {
@@ -319,15 +362,26 @@ vector<AudioPort> PortAudioSystem::getOutputs() {
     return ret;
 }
 
+AudioPort PortAudioSystem::getDummyInputPort() {
+    AudioPort noInput;
+    noInput.name = "No Input";
+    return noInput;
+}
+
 
 vector<AudioPort> PortAudioSystem::getInputs() {
 //	updatePorts();
     vector<AudioPort> ret;
+
+    // set "No Input" first on the list
+    ret.push_back(getDummyInputPort());
+
     for(const auto &p : ports) {
         if(p.numInChannels>0) ret.push_back(p);
     }
     return ret;
 }
+
 
 void PortAudioSystem::rescanPorts() {
     if(verbose) {

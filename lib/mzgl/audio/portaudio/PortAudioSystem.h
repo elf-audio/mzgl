@@ -16,59 +16,76 @@ typedef int PaError;
 
 class PortAudioSystem : public _AudioSystem {
 public:
-	PortAudioSystem();
-	virtual ~PortAudioSystem() override;
-	void setup(int numInChannels, int numOutChannels) override;
-	void start() override;
-	void stop() override;
-	bool isRunning() override;
-	
-	void setVerbose(bool verbose) override { this->verbose = verbose; }
-	std::vector<AudioPort> getInputs() override;
-	std::vector<AudioPort> getOutputs() override;
+    PortAudioSystem();
+    virtual ~PortAudioSystem() override;
+    void setup(int numInChannels, int numOutChannels) override;
+    void start() override;
+    void stop() override;
+    bool isRunning() override;
 
-	bool setInput(const AudioPort &audioInput) override;
-	bool setOutput(const AudioPort &audioOutput) override;
-	void rescanPorts() override;
-	
-	AudioPort getInput() override { return inPort; }
-	AudioPort getOutput() override { return outPort; }
+    void setVerbose(bool verbose) override { this->verbose = verbose; }
+    std::vector<AudioPort> getInputs() override;
+    std::vector<AudioPort> getOutputs() override;
+
+    bool setInput(const AudioPort &audioInput) override;
+    bool setOutput(const AudioPort &audioOutput) override;
+    void rescanPorts() override;
+
+    AudioPort getInput() override {
+        return inPort;
+    }
+
+    AudioPort getOutput() override { return outPort; }
 
     double getLatency();
     double getOutputLatency() override;
     double getTimeAtBufferBegin() override;
     double getHostTime();
-    
-    
+
+
     // The time when the first sample of the input buffer was captured at the ADC input
     double inputTime = 0;
-    
+
     // The time when the first sample of the output buffer will output the DAC
     double outputTime = 0; // this is host time + latency I think.
-    
+
 private:
-    
+
     uint64_t hostTime = 0;
-	bool isSetup = false;
+
+    bool setupFinished = false;
+
     AudioPort inPort;
     AudioPort outPort;
 
-    void configureStream();
+    bool isInPortDummy = false;
 
-	bool verbose = false;
-	bool running = false;
-	bool checkPaError(PaError err, std::string msg);
+    void configureStream();
+    bool setIOPort(const AudioPort &audioPort, bool isOutput);
+
+    bool verbose = false;
+    bool running = false;
+    bool checkPaError(PaError err, std::string msg);
 //	void printDevices();
-	PaStream *stream = nullptr;
-	
-	std::vector<AudioPort> ports;
-	
-	// don't hold onto this port for too long
-	AudioPort getPort(int dev);
-	
+    PaStream *stream = nullptr;
+
+    std::vector<AudioPort> ports;
+
+    // don't hold onto this port for too long
+    AudioPort getPort(int dev);
+
+    // returns non-functional port labeled as "No Input"
+    AudioPort getDummyInputPort();
+
+    // sets inPort to no-input dummy port
+    void setNoInputPort() {
+        inPort = getDummyInputPort();
+        isInPortDummy = true;
+    }
+
 private:
-	int desiredNumInChannels = 2;
-	int desiredNumOutChannels = 2;
+    int desiredNumInChannels = 2;
+    int desiredNumOutChannels = 2;
 };
 
 typedef PortAudioSystem AudioSystem;
