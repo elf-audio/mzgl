@@ -18,7 +18,7 @@ iOSWebView::iOSWebView(App *app) : app(app) {}
 iOSWebView::~iOSWebView() {}
 
 
-void iOSWebView::show(const std::string &_path, std::function<void()> callbacks) {
+void iOSWebView::show(const std::string &_path, std::function<void()> loadedCallback) {
 	std::string path = _path;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		
@@ -37,8 +37,12 @@ void iOSWebView::show(const std::string &_path, std::function<void()> callbacks)
 		auto closeCb = [this]() {
 			close();
 		};
-		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.bounds callback:cb closeCallback: closeCb andUrl: url];
-		
+		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.bounds
+												  loadedCallback: loadedCallback
+													  jsCallback: cb
+												   closeCallback: closeCb
+															 url: url];
+		webView = (__bridge void*)view;
 		
 		
 		UIViewController *targetController = [[UIViewController alloc] init];
@@ -68,7 +72,12 @@ void iOSWebView::show(const std::string &_path, std::function<void()> callbacks)
 }
 
 void iOSWebView::callJS(const std::string &js) {
+	NSString *jsStr = [NSString stringWithUTF8String:js.c_str()];
 	
+	if(webView!=nullptr) {
+		AppleWebView *view = (__bridge AppleWebView *)webView;
+		[view callJS:jsStr];
+	}
 }
 
 
@@ -77,6 +86,7 @@ void iOSWebView::close() {
 		UIViewController *targetController = (__bridge UIViewController*)viewController;
 		[targetController dismissViewControllerAnimated:true completion:nil];
 		viewController = nullptr;
+		webView = nullptr;
 	}
 }
 

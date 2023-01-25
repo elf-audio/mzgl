@@ -22,8 +22,13 @@
 #include <string>
 #include <functional>
 
-@interface AppleWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate>
-- (id) initWithFrame:(CGRect)frame callback:(std::function<void(const std::string &)>) jsCb closeCallback:(std::function<void()>)closeCallback andUrl: (NSString*) url;
-- (void) callJS:(const char *) jsString;
+@interface AppleWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate, WKNavigationDelegate>
+- (id) initWithFrame: (CGRect)frame
+	  loadedCallback: (std::function<void()>) loadedCallback
+		  jsCallback: (std::function<void(const std::string &)>) jsCb
+	   closeCallback: (std::function<void()>)closeCallback
+				 url: (NSString*) url;
+
+- (void) callJS:(NSString*) jsString;
 @end
 

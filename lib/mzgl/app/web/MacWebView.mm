@@ -19,7 +19,7 @@ MacWebView::MacWebView(App *app) : app(app) {}
 MacWebView::~MacWebView() {}
 
 
-void MacWebView::show(const std::string &_path, std::function<void()> callbacks) {
+void MacWebView::show(const std::string &_path, std::function<void()> loadedCallback) {
 	
 	auto path = _path;
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -35,9 +35,14 @@ void MacWebView::show(const std::string &_path, std::function<void()> callbacks)
 		auto closeCb = [this]() {
 			close();
 		};
-		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.contentView.frame callback:cb closeCallback: closeCb andUrl: url];
+		AppleWebView *view = [[AppleWebView alloc] initWithFrame: win.contentView.frame
+												  loadedCallback: loadedCallback
+													  jsCallback: cb
+												   closeCallback: closeCb
+															 url: url];
+		
 		[[win contentView] addSubview:view];
-		viewToRemove = (__bridge void*)view;
+		this->webView = (__bridge void*)view;
 	});
 /*
 	// no runloop because no graphics, so lets make one for runOnMainThread
@@ -49,13 +54,21 @@ void MacWebView::show(const std::string &_path, std::function<void()> callbacks)
 }
 
 void MacWebView::close() {
-	if(viewToRemove!=nullptr) {
-		AppleWebView *view = (__bridge AppleWebView *)viewToRemove;
+	if(webView!=nullptr) {
+		AppleWebView *view = (__bridge AppleWebView *)webView;
 		[view removeFromSuperview];
-		viewToRemove = nullptr;
+		webView = nullptr;
 	}
 }
 
 void MacWebView::callJS(const std::string &js) {
 	
+	NSString *jsStr = [NSString stringWithUTF8String:js.c_str()];
+	
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if(webView!=nullptr) {
+			AppleWebView *view = (__bridge AppleWebView *)webView;
+			[view callJS:jsStr];
+		}
+	});
 }

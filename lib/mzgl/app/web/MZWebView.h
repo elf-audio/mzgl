@@ -26,7 +26,7 @@ public:
 	 * @param path could be a URL (e.g. starting with https://) or a local
 	 * file path, which would serve up that folder.
 	 */
-	void show(const std::string &path, std::function<void()> callbacks = []() {});
+	void show(const std::string &path, std::function<void()> loadedCallback = []() {});
 	
 	/**
 	 * Call a javascript function inside the html.

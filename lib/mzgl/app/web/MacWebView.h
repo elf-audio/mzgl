@@ -16,7 +16,7 @@ public:
 	MacWebView(App *app);
 	virtual ~MacWebView();
 
-	void show(const std::string &path, std::function<void()> callbacks = []() {}) override;
+	void show(const std::string &path, std::function<void()> loadedCallback = []() {}) override;
 	
 	/**
 	 * Call a javascript function inside the html.
@@ -24,6 +24,6 @@ public:
 	void callJS(const std::string &js) override;
 private:
 	App *app = nullptr;
-	void *viewToRemove = nullptr;
+	void *webView = nullptr;
 	void close();
 };

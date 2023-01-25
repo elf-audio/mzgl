@@ -19,16 +19,35 @@
 @implementation AppleWebView {
 	std::function<void(const std::string &)> jsCallback;
 	std::function<void()> closeCallback;
+	std::function<void()> loadedCallback;
 }
 
-- (void) callJS:(const char *) jsString {
-	[self evaluateJavaScript:[NSString stringWithUTF8String:jsString] completionHandler:nil];
+- (void) callJS:(NSString*) jsString {
+	[self evaluateJavaScript:jsString completionHandler:^(id _Nullable, NSError * _Nullable error) {
+		NSLog(@"ERRORRRRRR: %@\n\nCall was:\n%@\n", error, jsString);
+	}];
+	
+}
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+	if(loadedCallback) {
+		loadedCallback();
+		
+		// only call loadCallback once!
+		loadedCallback = nullptr;
+	}
 }
 
-- (id) initWithFrame:(CGRect)frame callback:(std::function<void(const std::string &)>) jsCb closeCallback:(std::function<void()>)clsCallback andUrl: (NSString*) url {
 
+- (id) initWithFrame: (CGRect)frame
+	  loadedCallback: (std::function<void()>) loadedCb
+		  jsCallback: (std::function<void(const std::string &)>) jsCb
+	   closeCallback: (std::function<void()>)closeCb
+				 url: (NSString*) url {
+
+//- (id) initWithFrame:(CGRect)frame callback:(std::function<void(const std::string &)>) jsCb closeCallback:(std::function<void()>)clsCallback andUrl: (NSString*) url {
+	loadedCallback = loadedCb;
 	jsCallback = jsCb;
-	closeCallback = clsCallback;
+	closeCallback = closeCb;
 	WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
 	
 	
@@ -61,7 +80,7 @@
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
 #endif
 		self.UIDelegate = self;
-		
+		self.navigationDelegate = self;
 		if(customUrl!="" && customUrl.find("http")!=-1) {
 			NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%s", customUrl.c_str()]];
 			NSURLRequest *request = [NSURLRequest requestWithURL:url];

@@ -16,7 +16,7 @@ public:
 	iOSWebView(App *app);
 	virtual ~iOSWebView();
 
-	void show(const std::string &path, std::function<void()> callbacks = []() {}) override;
+	void show(const std::string &path, std::function<void()> loadedCallback = []() {}) override;
 	
 	/**
 	 * Call a javascript function inside the html.
@@ -25,5 +25,6 @@ public:
 private:
 	App *app = nullptr;
 	void *viewController = nullptr;
+	void *webView = nullptr;
 	void close();
 };
