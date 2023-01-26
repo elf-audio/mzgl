@@ -187,10 +187,12 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 
 
     if (setupFinished) {
+        sampleRate = 0; // reset sample rate to port-default
         configureStream();
 
         // fallback to no-input
         if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+            sampleRate = 0; // reset sample rate to port-default
             setNoInputPort();
             configureStream();
             success = false; // even if configureStream() succeeded, we return false to inform that input is set to no-input
