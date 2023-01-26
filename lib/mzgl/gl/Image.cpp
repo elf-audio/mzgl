@@ -20,22 +20,27 @@
 using namespace std;
 
 Image::Image(const std::string &filePath) {
-    if(!load(filePath)) {
-        throw std::runtime_error("Can't load file at "+filePath + " cwd is: " + getCWD());
-    }
+	if (!load(filePath)) {
+		throw std::runtime_error("Can't load file at " + filePath
+								 + " cwd is: " + getCWD());
+	}
 }
-
-bool Image::loadPngFromData(const vector<uint8_t> &inData, vector<uint8_t> &outData, int &outWidth, int &outHeight, int &outNumChannels, int &outBytesPerChannel, bool &outIsFloat) {
-
-	unsigned char *image = stbi_load_from_memory   (inData.data(),
-			(int)inData.size(),
-			&outWidth,
-			&outHeight,
-			&outNumChannels,
-			STBI_default);
+bool Image::loadPngFromData(const vector<uint8_t> &inData,
+							vector<uint8_t> &outData,
+							int &outWidth,
+							int &outHeight,
+							int &outNumChannels,
+							int &outBytesPerChannel,
+							bool &outIsFloat) {
+	unsigned char *image = stbi_load_from_memory(inData.data(),
+												 (int) inData.size(),
+												 &outWidth,
+												 &outHeight,
+												 &outNumChannels,
+												 STBI_default);
 
 	outBytesPerChannel = 1;
-//    printf("%d %d %d\n", outWidth, outHeight, outNumChannels);
+	//  printf("%d %d %d\n", outWidth, outHeight, outNumChannels);
 	outData.resize(outWidth * outHeight * outNumChannels);
 	memcpy(outData.data(), image, outWidth * outHeight * outNumChannels);
 	stbi_image_free(image);
@@ -67,23 +72,23 @@ void Image::flipVertical() {
 
 
 void rgb2rgba(vector<uint8_t> &d) {
-	int sz3 = (int)d.size() / 3;
-	d.resize(sz3*4);
-	for(int i = sz3-1; i >= 0; i--) {
-		d[i*4] = d[i*3];
-		d[i*4+1] = d[i*3+1];
-		d[i*4+2] = d[i*3+2];
-		d[i*4] = 255;
+	int sz3 = (int) d.size() / 3;
+	d.resize(sz3 * 4);
+	for (int i = sz3 - 1; i >= 0; i--) {
+		d[i * 4] = d[i * 3];
+		d[i * 4 + 1] = d[i * 3 + 1];
+		d[i * 4 + 2] = d[i * 3 + 2];
+		d[i * 4] = 255;
 	}
 }
 void rgba2rgb(vector<uint8_t> &d) {
 	auto sz4 = d.size() / 4;
-	for(int i = 0; i < sz4; i++) {
-		d[i*3] = d[i*4];
-		d[i*3+1] = d[i*4+1];
-		d[i*3+2] = d[i*4+2];
+	for (int i = 0; i < sz4; i++) {
+		d[i * 3] = d[i * 4];
+		d[i * 3 + 1] = d[i * 4 + 1];
+		d[i * 3 + 2] = d[i * 4 + 2];
 	}
-	d.resize(sz4*3);
+	d.resize(sz4 * 3);
 }
 
 

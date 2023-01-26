@@ -161,15 +161,15 @@
 }
 
 
-- (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
-	if([message.name isEqual:@"closeWindow"]) {
-		if(closeCallback) closeCallback();
-		return;
-	}
-	NSString *str = message.body;
-	std::string data = [str UTF8String];
-	jsCallback(data);
+- (void)userContentController:
+			(nonnull WKUserContentController *)userContentController
+	  didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
+  if ([message.name isEqual:@"closeWindow"]) {
+	if (closeCallback) closeCallback();
+	return;
+  }
+  NSString *str = message.body;
+  std::string data = [str UTF8String];
+  jsCallback(data);
 }
-
-
 @end
