@@ -323,6 +323,18 @@ void PortAudioSystem::configureStream() {
 	PaAlsa_EnableRealtimeScheduling(stream, true);
 #endif
 	streamConfigStatus_ = StreamConfigurationStatus::OK;
+	
+	
+	// when asking for a specific sample rate, we don't
+	// always get it, so we need to update the sampleRate
+	// value to reflect that and make a warning for now
+	const auto *info = Pa_GetStreamInfo(stream);
+	if (info != nullptr) {
+		if (info->sampleRate!=sampleRate) {
+			Log::w() << "Didn't get desired samplerate of " << to_string(sampleRate/1000.f, 0) << "kHz, got " << to_string(info->sampleRate/1000.f, 0) << "kHz instead";
+			sampleRate = info->sampleRate;
+		}
+	}
 }
 void PortAudioSystem::start() {
 	auto err = Pa_StartStream(stream);
