@@ -41,6 +41,11 @@
 #include <shlobj.h>
 #include <tchar.h>
 #include <stdio.h>
+#include <ShObjIdl_core.h>
+#include <locale>
+#include <codecvt>
+
+
 
 #endif
 
@@ -72,12 +77,12 @@ using namespace std;
 #include <string>
 
 std::string convertWideToNarrow( const wchar_t *s, char dfault = '?',
-                      const std::locale& loc = std::locale() )
+					  const std::locale& loc = std::locale() )
 {
   std::ostringstream stm;
 
   while( *s != L'\0' ) {
-    stm << std::use_facet< std::ctype<wchar_t> >( loc ).narrow( *s++, dfault );
+	stm << std::use_facet< std::ctype<wchar_t> >( loc ).narrow( *s++, dfault );
   }
   return stm.str();
 }
@@ -96,14 +101,14 @@ std::string getHomeDirectory() {
 }
 #	else
 std::string getHomeDirectory() {
-    const char *homeDir = getenv("HOME");
+	const char *homeDir = getenv("HOME");
 
-    if (!homeDir) {
-        struct passwd* pwd = getpwuid(getuid());
-        if (pwd)
-           homeDir = pwd->pw_dir;
-    }
-    return homeDir;
+	if (!homeDir) {
+		struct passwd* pwd = getpwuid(getuid());
+		if (pwd)
+		   homeDir = pwd->pw_dir;
+	}
+	return homeDir;
 
 }
 #	endif
@@ -113,15 +118,15 @@ std::string getHomeDirectory() {
 
 #ifdef _WIN32
 std::string getCWD() {
-    char c[512];
-    _getcwd(c, 512);
-    return c;
+	char c[512];
+	_getcwd(c, 512);
+	return c;
 }
 #else
 std::string getCWD() {
-    char c[512];
-    getcwd(c, 512);
-    return c;
+	char c[512];
+	getcwd(c, 512);
+	return c;
 }
 #endif
 
@@ -389,10 +394,10 @@ int64_t getAvailableMemory() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	if (@available(iOS 13.0, *)) {
-	    return os_proc_available_memory();
+		return os_proc_available_memory();
 	} else {
 		return -1;
-	    
+		
 	}
 #	else
 	return -1;
@@ -401,8 +406,8 @@ int64_t getAvailableMemory() {
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
-    Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
-    return 10000000000;
+	Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
+	return 10000000000;
 }
 string docsPath(string path) {
 #ifdef UNIT_TEST
@@ -418,33 +423,39 @@ string docsPath(string path) {
 #elif defined(__ANDROID__)
 	return getAndroidExternalDataPath() + "/" + path;
 #elif defined(_WIN32)
-    CHAR my_documents[MAX_PATH];
-    HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
 
-    TCHAR szExeFileName[MAX_PATH];
-    GetModuleFileName(NULL, szExeFileName, MAX_PATH);
-    string pth = string(my_documents) + "\\" + fs::path(string(szExeFileName)).stem().string();
-    if (result != S_OK) {
-        Log::e() << "Error: " << result << "\n";
-        return "";
-    } else {
-        // create dir if not exist
-        if(!fs::exists(pth)) {
-            fs::create_directory(pth);
-        }
-        pth += "\\" + path;
+	wchar_t *documentsDir;
+	HRESULT result = SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
+	string retPath;
 
-        return pth;
-    }
+	if (result == S_OK) {
+		std::wstring ws(documentsDir);
+		std::string documentsDirUtf8 = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
+		
+		TCHAR szExeFileName[MAX_PATH];
+		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
+		retPath = documentsDirUtf8 + "\\" + fs::path(string(szExeFileName)).stem().string();
+		if (!fs::exists(retPath)) {
+			fs::create_directory(retPath);
+		}
+		retPath += "\\" + path;
+	} else {
+		Log::e() << "Error: " << result << "\n";
+		retPath = "";
+	}
+	CoTaskMemFree(documentsDir);
+
+	return retPath;
+
 #elif defined(__linux__)
 #   ifdef __arm__
 	return "/home/pi/Documents/koala/" + path;
 #   else
-    std::string docsPath = "../Documents/Koala";
-    if(!fs::exists(docsPath)) {
-        fs::create_directories(docsPath);
-    }
-    return docsPath + "/" + path;
+	std::string docsPath = "../Documents/Koala";
+	if(!fs::exists(docsPath)) {
+		fs::create_directories(docsPath);
+	}
+	return docsPath + "/" + path;
 #   endif
 #else
 	Log::e() << "docsPath not implemented";
@@ -514,7 +525,7 @@ string getPlatformName() {
 #elif defined(__RPI)
 	return "Raspberry Pi";
 #elif defined(__linux__)
-    return "Linux";
+	return "Linux";
 #else
 	return "Unknown";
 #endif
@@ -555,14 +566,14 @@ uint64_t getStorageRemainingInBytes() {
 	return androidGetStorageRemainingInBytes();
 //#elif defined(_WIN32)
 #else
-    // this might actually be pretty good for all platforms, but need to test
-    try {
-        auto si = fs::space(".");
-        return si.available;
-    } catch(fs::filesystem_error const & e) {
-        Log::e() << "Error in getStorageRemainingInBytes()";
-        return 1024 * 1024 * 1024;
-    }
+	// this might actually be pretty good for all platforms, but need to test
+	try {
+		auto si = fs::space(".");
+		return si.available;
+	} catch(fs::filesystem_error const & e) {
+		Log::e() << "Error in getStorageRemainingInBytes()";
+		return 1024 * 1024 * 1024;
+	}
 #endif
 
 }
@@ -633,11 +644,11 @@ void launchUrl(string url) {
 
 string getAppVersionString() {
 #ifdef __APPLE__
-    NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	if(str==nil) {
 		return "not available";
 	}
-    return string([str UTF8String]);
+	return string([str UTF8String]);
 #elif defined(__ANDROID__)
 	return androidGetAppVersionString();
 #else
@@ -683,11 +694,11 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 			
 			[context makeCurrentContext];
 			
-            if([[[saveDialog URL] path] compare: [[saveDialog directoryURL] path]]==NSOrderedSame) {
-                completionCallback("", false);
-                Log::e() << "No filename given, abort! abort!";
-                return;
-            }
+			if([[[saveDialog URL] path] compare: [[saveDialog directoryURL] path]]==NSOrderedSame) {
+				completionCallback("", false);
+				Log::e() << "No filename given, abort! abort!";
+				return;
+			}
 			if(buttonClicked == NSModalResponseOK){
 				filePath = string([[[saveDialog URL] path] UTF8String]);
 			}
@@ -699,27 +710,27 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 #elif defined (_WIN32)
 
 
-    wchar_t fileName[MAX_PATH] = L"";
-    char * extension;
-    OPENFILENAMEW ofn;
-    memset(&ofn, 0, sizeof(OPENFILENAME));
-    ofn.lStructSize = sizeof(OPENFILENAME);
-    HWND hwnd = WindowFromDC(wglGetCurrentDC());
-    ofn.hwndOwner = hwnd;
-    ofn.hInstance = GetModuleHandle(0);
-    ofn.nMaxFileTitle = 31;
-    ofn.lpstrFile = fileName;
-    ofn.nMaxFile = MAX_PATH;
-    ofn.lpstrFilter = L"All Files (*.*)\0*.*\0";
-    ofn.lpstrDefExt = L"";	// we could do .rxml here?
-    ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
-    ofn.lpstrTitle = L"Select Output File";
+	wchar_t fileName[MAX_PATH] = L"";
+	char * extension;
+	OPENFILENAMEW ofn;
+	memset(&ofn, 0, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	HWND hwnd = WindowFromDC(wglGetCurrentDC());
+	ofn.hwndOwner = hwnd;
+	ofn.hInstance = GetModuleHandle(0);
+	ofn.nMaxFileTitle = 31;
+	ofn.lpstrFile = fileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrFilter = L"All Files (*.*)\0*.*\0";
+	ofn.lpstrDefExt = L"";	// we could do .rxml here?
+	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+	ofn.lpstrTitle = L"Select Output File";
 
-    if (GetSaveFileNameW(&ofn)){
-        completionCallback(convertWideToNarrow(fileName), true);
-    } else {
-        completionCallback("", false);
-    }
+	if (GetSaveFileNameW(&ofn)){
+		completionCallback(convertWideToNarrow(fileName), true);
+	} else {
+		completionCallback("", false);
+	}
 #elif !defined(__ANDROID__) && defined(__linux__)
 	linuxSaveFileDialog(msg, defaultFileName, completionCallback);
 #endif
