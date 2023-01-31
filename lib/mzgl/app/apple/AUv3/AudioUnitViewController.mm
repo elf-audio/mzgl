@@ -39,24 +39,26 @@ using namespace std;
     MZGLKitViewController *vc;
     MZGLKitView *glView;
     Graphics g;
-    
+	MZGLEffectAU *audioUnit;
+	
+	
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<PluginEditor> app;
 //#else
 //    MZGLView *glView;
 //    AppHolder appHolder;
 //#endif
-    BOOL needsConnection;
+
 }
 #include <thread>
 
 - (id) init {
     self = [super init];
     if(self!=nil) {
-        needsConnection = YES;
+	
 		app = nullptr;
 		plugin = nullptr;
-		
+		audioUnit = nil;
 //#if !TARGET_OS_IOS
 //        auto &g = appHolder.g;
 //        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
@@ -115,26 +117,18 @@ using namespace std;
     }
 }
 
-- (void) viewDidLoad {
-    NSLog(@"MZGL: viewDidLoad");
-    [super viewDidLoad];
+- (void)viewWillAppear:(BOOL)animated {
+	if(app==nullptr && plugin!=nullptr) {
+		app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, plugin.get()));
+		vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
+		app->viewController = (__bridge void*)self;
 
-//    [self doBoth];
-
-    //[glView setNeedsDisplay];
+		glView = (MZGLKitView*)vc.view;
+		glView.frame = self.view.frame;
+		[self addGLView];
+	}
 }
 
-- (void) doBoth: (MZGLEffectAU*) audioUnit {
-    if(app==nullptr && audioUnit!=nil) {
-        app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, (Plugin*)[audioUnit getPlugin].get()));
-        vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
-        app->viewController = (__bridge void*)self;
-
-        glView = (MZGLKitView*)vc.view;
-        glView.frame = self.view.frame;
-        [self addGLView];
-    }
-}
 
 -(void) viewDidAppear:(BOOL)animated {
     NSLog(@"MZGL: viewDidAppear");
@@ -146,34 +140,26 @@ using namespace std;
     NSLog(@"MZGL: Size change whaaa");
 }
 
+ 
 - (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
     
+	audioUnit = [[MZGLEffectAU alloc] initWithComponentDescription:desc error:error];
+	plugin = [audioUnit getPlugin];
+	
     NSLog(@"MZGL: createAudioUnitWithComponentDescription");
-    MZGLEffectAU *audioUnit = [[MZGLEffectAU alloc] initWithComponentDescription:desc error:error];
-    plugin = [audioUnit getPlugin];
-    if([NSThread isMainThread]) {
-        NSLog(@"main thread");
-        [self doBoth: audioUnit];
-    } else {
-        NSLog(@"dispatch");
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSLog(@"now on main thread");
-            [self doBoth: audioUnit];
-        });
-        
-    }
-    NSLog(@"ready to return");
+	
+//    if([NSThread isMainThread]) {
+//        NSLog(@"main thread");
+//        [self doBoth: audioUnit];
+//    } else {
+//        NSLog(@"dispatch");
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            NSLog(@"now on main thread");
+//            [self doBoth: audioUnit];
+//        });
+//    }
     
     return audioUnit;
 }
 
-//- (void) dealloc {
-//    // don't delete the app, the view will delete it
-//    // when it falls out of scope (shared ptr)
-////    if(app!=nullptr) delete app;
-//    glView = nil;
-////    if(app!=nullptr) delete app;
-////    if(plugin!=nullptr) delete plugin;
-//    printf("Finished\n");
-//}
 @end
