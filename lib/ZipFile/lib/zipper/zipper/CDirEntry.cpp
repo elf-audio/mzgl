@@ -18,7 +18,7 @@
 #include "CDirEntry.h"
 #include <algorithm>
 #include <sys/types.h>
-#include <fstream>
+#include "filesystem.h"
 
 using namespace zipper;
 
@@ -288,8 +288,8 @@ bool CDirEntry::move(const std::string& from, const std::string& to)
     if (!success)
     {
         {
-            std::ifstream in(from.c_str());
-            std::ofstream out(To.c_str());
+            fs::ifstream in(fs::u8path(from));
+            fs::ofstream out(fs::u8path(To));
 
             out << in.rdbuf();
 

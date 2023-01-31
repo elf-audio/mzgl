@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fstream>
+#include "filesystem.h"
 #include <vector>
 #include <memory>
 
@@ -10,11 +10,11 @@ class ZipReader {
 public:
 
 	ZipReader(const std::string &path);
- 
+
 	std::shared_ptr<ZipReaderFile> open(std::string pathInZip);
-	
+
 	std::vector<std::string> list(bool print = false);
-	
+
 	struct Entry {
 		std::string path;
 		int offset;
@@ -38,7 +38,7 @@ private:
 class ZipReaderFile {
 public:
     ZipReaderFile(const std::string &zipPath, const ZipReader::Entry &entry);
-    
+
     int fileStart;
     int fileSize;
 
@@ -46,9 +46,9 @@ public:
         Start,
         Current,
     };
-    
+
     bool seek(int offset, SeekOrigin origin = SeekOrigin::Start);
-    
+
     size_t read(int8_t *d, uint32_t sz);
 	std::vector<int8_t> read();
 	void extract(const std::string &path);

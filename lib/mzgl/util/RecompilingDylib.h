@@ -5,19 +5,19 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 /*
- 
- 
+
+
  for this to work, you need to put this in your Other C++ flags
  -DSRCROOT=\"${SRCROOT}\"
- 
- 
+
+
  found some good nuggets here
  https://glandium.org/blog/?p=2764
  about how to do precompiled headers.
- 
+
  What this does is precompile headers when the app starts if we're doing a LiveCodeApp.
  It shouldn't really be in here, this should be for a general RecompilingDylib
- 
+
  */
 
 #pragma once
@@ -28,7 +28,6 @@
 
 #include <sys/stat.h>
 #include "util.h"
-#include <fstream>
 #ifndef SRCROOT
 #define SRCROOT "BUMBO"
 #pragma warning Must set SRCROOT if you want to do livecoding
@@ -40,45 +39,45 @@
 #endif
 class RecompilingDylib {
 public:
-	
+
 	Dylib dylib;
-	
+
 	//mutex mut;
 	FileWatcher watcher;
 	std::string path;
-	
+
 	std::function<void(void*)> recompiled;
 	std::function<void()> willCloseDylib;
-	
+
 	std::function<void()> successCallback;
 	std::function<void(std::string)> failureCallback;
-	
+
 	void setup(std::string path) {
 		this->path = findFile(path);
-		
+
 		precompileHeaders();
-		
+
 		watcher.watch(this->path);
 		watcher.touched = [this]() {
 			recompile();
 		};
 	}
-	
+
 	// if you want to recompile this class when other files change
 	// (they might be dependents for this class) you can add them
 	// here manually.
 	void addFileToWatch(std::string path) {
 		watcher.watch(path);
 	}
-	
+
 	void update() {
 		watcher.tick();
 	}
-	
-	
+
+
 	void precompileHeaders() {
 		auto libroot = /*std::string(SRCROOT) + "/../" +*/ MZGL_LIBROOT;
-		
+
 		printf("pwd: %s\n", execute("pwd").c_str());
 		auto cmd = "g++ -std=c++14 -DDEBUG -stdlib=libc++ "
 			+ getAllIncludes(libroot, macExcludes)
@@ -86,17 +85,17 @@ public:
 		printf("Precompiling headers: %s\n", cmd.c_str());
 		execute(cmd);
 	}
-	
-	
+
+
 	void lock() {
 		mut.lock();
 	}
-	
+
 	void unlock() {
 		mut.unlock();
 	}
-	
-	
+
+
 	void recompile() {
 		printf("Need to recompile %s\n", path.c_str());
 		float t = getSeconds();
@@ -115,14 +114,14 @@ public:
 			}
 		}
 	}
-	
-	
+
+
 private:
 	std::vector<std::string> macExcludes = {"glfw", "MetalANGLE"};
 	std::string lastErrorStr;
-	
-	
-	
+
+
+
 	std::string cc() {
 		// call our makefile
 		auto objectName = getObjectName(path);
@@ -138,20 +137,20 @@ private:
 		+ " -include " + libroot + "/mzgl/App.h"
 		+ getAllIncludes(libroot, macExcludes) + "/mzgl/ "
 //		+ getAllIncludes(libroot+"/../opt/imgui/")
-		
-		
+
+
 //		+ getAllIncludes(libroot+"/../opt/dsp/")
         ;
 		//+ " -I"+string(SRCROOT)+"/sf2cute/include";
-		
-			
-		
+
+
+
 		auto cmd = "g++ -std=c++14 -g -Wno-deprecated-declarations -stdlib=libc++ -c " + cppFile + " -o " + objFile + " "
 					+ includes;
-		
+
 		int exitCode = 0;
 		auto res =  execute(cmd, &exitCode);
-		
+
 		//printf("Exit code : %d\n", exitCode);
 		if(exitCode==0) {
 			cmd = "g++ -dynamiclib -g -undefined dynamic_lookup -o "+dylibPath + " " + objFile;
@@ -162,7 +161,7 @@ private:
 			return "";
 		}
 	}
-	
+
 	void recursivelyFindAllDirs(fs::path curr, std::vector<fs::path> &dirs) {
 		dirs.push_back(curr);
 		for(const auto &entry : fs::directory_iterator(curr)) {
@@ -174,7 +173,7 @@ private:
 			}
 		}
 	}
-	
+
 	std::string getAllIncludes(std::string basePath, const std::vector<std::string> &excludes = {}) {
 		std::string includes = "";
 		std::vector<fs::path> dirs;
@@ -201,15 +200,15 @@ private:
 		}
 		return includes;
 	}
-	
-	
+
+
 	std::string getObjectName(std::string p) {
 		// split on last '/'
 		int indexOfLastSlash = p.rfind('/');
 		if(indexOfLastSlash!=-1) {
 			p = p.substr(indexOfLastSlash + 1);
 		}
-		
+
 		// split on last '.'
 		int indexOfLastDot = p.rfind('.');
 		if(indexOfLastDot!=-1) {
@@ -217,22 +216,22 @@ private:
 		}
 		return p;
 	}
-	
-	
-	
+
+
+
 	virtual void makeCppFile(std::string path, std::string objName) {
-		std::ofstream outFile(path.c_str());
-		
+		fs::ofstream outFile(fs::u8path(path));
+
 		outFile << "#include \""+objName+".h\"\n\n";
 		outFile << "extern \"C\" {\n\n";
 		outFile << "\n\nvoid *getPluginPtr() {return new "+objName+"(); };\n\n";
 		outFile << "}\n\n";
-		
+
 		outFile.close();
-		
+
 	}
-	
-	
+
+
 	virtual void loadDylib(std::string dylibPath) {
 		lock();
 		if(dylib.isOpen()) {
@@ -249,13 +248,13 @@ private:
 		}
 		unlock();
 	}
-	
-	
-	
+
+
+
 	std::mutex mut;
-	
+
 	/////////////////////////////////////////////////////////
-	
+
 
 	std::string findFile(std::string file) {
 		auto f = file;
@@ -270,7 +269,7 @@ private:
 		printf("Livecoding not gonna work, you may not have set your Other C++ flags to \"-DSRCROOT=\\\"${SRCROOT}\\\"\n");
 		return f;
 	}
-	
+
 	bool fileExists(std::string path) {
 		struct stat fileStat;
 		return !(stat(path.c_str(), &fileStat) < 0);

@@ -6,19 +6,19 @@ class RecompilingAppDylib: public RecompilingDylib {
 public:
 	Graphics &g;
 	RecompilingAppDylib(Graphics &g) : RecompilingDylib(), g(g) {
-		
+
 	}
-	
+
 	virtual void makeCppFile(std::string path, std::string objName) override {
-		std::ofstream outFile(path.c_str());
-		
+		fs::ofstream outFile(fs::u8path(path));
+
 		outFile << "#include \""+objName+".h\"\n\n";
 		outFile << "extern \"C\" {\n\n";
 		outFile << "\n\nApp *getPluginPtr(Graphics &g) {return new "+objName+"(g); };\n\n";
 		outFile << "}\n\n";
-		
+
 		outFile.close();
-		
+
 	}
 
 
@@ -29,7 +29,7 @@ public:
 			dylib.close();
 		}
 		if(dylib.open(dylibPath)) {
-		
+
 
 			void *funcPtr = dylib.getFunctionPointer("getPluginPtr");
 			if(funcPtr!=nullptr) {

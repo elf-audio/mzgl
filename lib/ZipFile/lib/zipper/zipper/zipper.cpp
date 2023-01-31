@@ -6,7 +6,7 @@
 #include "CDirEntry.h"
 #include "Timestamp.h"
 
-#include <fstream>
+#include "filesystem.h"
 #include <stdexcept>
 
 namespace zipper {
@@ -340,7 +340,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
         for (; it != files.end(); ++it)
         {
             Timestamp time(*it);
-            std::ifstream input(it->c_str(), std::ios::binary);
+            fs::ifstream input(fs::u8path(it->c_str()), std::ios::binary);
             std::string nameInZip = it->substr(it->rfind(folderName + CDirEntry::Separator), it->size());
             add(input, time.timestamp, nameInZip, flags);
             input.close();
@@ -349,7 +349,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
     else
     {
         Timestamp time(fileOrFolderPath);
-        std::ifstream input(fileOrFolderPath.c_str(), std::ios::binary);
+        fs::ifstream input(fs::u8path(fileOrFolderPath.c_str()), std::ios::binary);
         std::string fullFileName;
 
         if (flags & Zipper::SaveHierarchy)
