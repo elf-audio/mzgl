@@ -1,8 +1,8 @@
 /* stb_image - v2.10 - public domain image loader - http://nothings.org/stb_image.h
-                                     no warranty implied; use at your own risk
+									 no warranty implied; use at your own risk
 
    Do this:
-      #define STB_IMAGE_IMPLEMENTATION
+	  #define STB_IMAGE_IMPLEMENTATION
    before you include this file in *one* C or C++ file to create the implementation.
 
    // i.e. it should look like this:
@@ -17,160 +17,160 @@
 
 
    QUICK NOTES:
-      Primarily of interest to game developers and other people who can
-          avoid problematic images and only need the trivial interface
+	  Primarily of interest to game developers and other people who can
+		  avoid problematic images and only need the trivial interface
 
-      JPEG baseline & progressive (12 bpc/arithmetic not supported, same as stock IJG lib)
-      PNG 1/2/4/8-bit-per-channel (16 bpc not supported)
+	  JPEG baseline & progressive (12 bpc/arithmetic not supported, same as stock IJG lib)
+	  PNG 1/2/4/8-bit-per-channel (16 bpc not supported)
 
-      TGA (not sure what subset, if a subset)
-      BMP non-1bpp, non-RLE
-      PSD (composited view only, no extra channels, 8/16 bit-per-channel)
+	  TGA (not sure what subset, if a subset)
+	  BMP non-1bpp, non-RLE
+	  PSD (composited view only, no extra channels, 8/16 bit-per-channel)
 
-      GIF (*comp always reports as 4-channel)
-      HDR (radiance rgbE format)
-      PIC (Softimage PIC)
-      PNM (PPM and PGM binary only)
+	  GIF (*comp always reports as 4-channel)
+	  HDR (radiance rgbE format)
+	  PIC (Softimage PIC)
+	  PNM (PPM and PGM binary only)
 
-      Animated GIF still needs a proper API, but here's one way to do it:
-          http://gist.github.com/urraka/685d9a6340b26b830d49
+	  Animated GIF still needs a proper API, but here's one way to do it:
+		  http://gist.github.com/urraka/685d9a6340b26b830d49
 
-      - decode from memory or through FILE (define STBI_NO_STDIO to remove code)
-      - decode from arbitrary I/O callbacks
-      - SIMD acceleration on x86/x64 (SSE2) and ARM (NEON)
+	  - decode from memory or through FILE (define STBI_NO_STDIO to remove code)
+	  - decode from arbitrary I/O callbacks
+	  - SIMD acceleration on x86/x64 (SSE2) and ARM (NEON)
 
    Full documentation under "DOCUMENTATION" below.
 
 
    Revision 2.00 release notes:
 
-      - Progressive JPEG is now supported.
+	  - Progressive JPEG is now supported.
 
-      - PPM and PGM binary formats are now supported, thanks to Ken Miller.
+	  - PPM and PGM binary formats are now supported, thanks to Ken Miller.
 
-      - x86 platforms now make use of SSE2 SIMD instructions for
-        JPEG decoding, and ARM platforms can use NEON SIMD if requested.
-        This work was done by Fabian "ryg" Giesen. SSE2 is used by
-        default, but NEON must be enabled explicitly; see docs.
+	  - x86 platforms now make use of SSE2 SIMD instructions for
+		JPEG decoding, and ARM platforms can use NEON SIMD if requested.
+		This work was done by Fabian "ryg" Giesen. SSE2 is used by
+		default, but NEON must be enabled explicitly; see docs.
 
-        With other JPEG optimizations included in this version, we see
-        2x speedup on a JPEG on an x86 machine, and a 1.5x speedup
-        on a JPEG on an ARM machine, relative to previous versions of this
-        library. The same results will not obtain for all JPGs and for all
-        x86/ARM machines. (Note that progressive JPEGs are significantly
-        slower to decode than regular JPEGs.) This doesn't mean that this
-        is the fastest JPEG decoder in the land; rather, it brings it
-        closer to parity with standard libraries. If you want the fastest
-        decode, look elsewhere. (See "Philosophy" section of docs below.)
+		With other JPEG optimizations included in this version, we see
+		2x speedup on a JPEG on an x86 machine, and a 1.5x speedup
+		on a JPEG on an ARM machine, relative to previous versions of this
+		library. The same results will not obtain for all JPGs and for all
+		x86/ARM machines. (Note that progressive JPEGs are significantly
+		slower to decode than regular JPEGs.) This doesn't mean that this
+		is the fastest JPEG decoder in the land; rather, it brings it
+		closer to parity with standard libraries. If you want the fastest
+		decode, look elsewhere. (See "Philosophy" section of docs below.)
 
-        See final bullet items below for more info on SIMD.
+		See final bullet items below for more info on SIMD.
 
-      - Added STBI_MALLOC, STBI_REALLOC, and STBI_FREE macros for replacing
-        the memory allocator. Unlike other STBI libraries, these macros don't
-        support a context parameter, so if you need to pass a context in to
-        the allocator, you'll have to store it in a global or a thread-local
-        variable.
+	  - Added STBI_MALLOC, STBI_REALLOC, and STBI_FREE macros for replacing
+		the memory allocator. Unlike other STBI libraries, these macros don't
+		support a context parameter, so if you need to pass a context in to
+		the allocator, you'll have to store it in a global or a thread-local
+		variable.
 
-      - Split existing STBI_NO_HDR flag into two flags, STBI_NO_HDR and
-        STBI_NO_LINEAR.
-            STBI_NO_HDR:     suppress implementation of .hdr reader format
-            STBI_NO_LINEAR:  suppress high-dynamic-range light-linear float API
+	  - Split existing STBI_NO_HDR flag into two flags, STBI_NO_HDR and
+		STBI_NO_LINEAR.
+			STBI_NO_HDR:     suppress implementation of .hdr reader format
+			STBI_NO_LINEAR:  suppress high-dynamic-range light-linear float API
 
-      - You can suppress implementation of any of the decoders to reduce
-        your code footprint by #defining one or more of the following
-        symbols before creating the implementation.
+	  - You can suppress implementation of any of the decoders to reduce
+		your code footprint by #defining one or more of the following
+		symbols before creating the implementation.
 
-            STBI_NO_JPEG
-            STBI_NO_PNG
-            STBI_NO_BMP
-            STBI_NO_PSD
-            STBI_NO_TGA
-            STBI_NO_GIF
-            STBI_NO_HDR
-            STBI_NO_PIC
-            STBI_NO_PNM   (.ppm and .pgm)
+			STBI_NO_JPEG
+			STBI_NO_PNG
+			STBI_NO_BMP
+			STBI_NO_PSD
+			STBI_NO_TGA
+			STBI_NO_GIF
+			STBI_NO_HDR
+			STBI_NO_PIC
+			STBI_NO_PNM   (.ppm and .pgm)
 
-      - You can request *only* certain decoders and suppress all other ones
-        (this will be more forward-compatible, as addition of new decoders
-        doesn't require you to disable them explicitly):
+	  - You can request *only* certain decoders and suppress all other ones
+		(this will be more forward-compatible, as addition of new decoders
+		doesn't require you to disable them explicitly):
 
-            STBI_ONLY_JPEG
-            STBI_ONLY_PNG
-            STBI_ONLY_BMP
-            STBI_ONLY_PSD
-            STBI_ONLY_TGA
-            STBI_ONLY_GIF
-            STBI_ONLY_HDR
-            STBI_ONLY_PIC
-            STBI_ONLY_PNM   (.ppm and .pgm)
+			STBI_ONLY_JPEG
+			STBI_ONLY_PNG
+			STBI_ONLY_BMP
+			STBI_ONLY_PSD
+			STBI_ONLY_TGA
+			STBI_ONLY_GIF
+			STBI_ONLY_HDR
+			STBI_ONLY_PIC
+			STBI_ONLY_PNM   (.ppm and .pgm)
 
-         Note that you can define multiples of these, and you will get all
-         of them ("only x" and "only y" is interpreted to mean "only x&y").
+		 Note that you can define multiples of these, and you will get all
+		 of them ("only x" and "only y" is interpreted to mean "only x&y").
 
-       - If you use STBI_NO_PNG (or _ONLY_ without PNG), and you still
-         want the zlib decoder to be available, #define STBI_SUPPORT_ZLIB
+	   - If you use STBI_NO_PNG (or _ONLY_ without PNG), and you still
+		 want the zlib decoder to be available, #define STBI_SUPPORT_ZLIB
 
-      - Compilation of all SIMD code can be suppressed with
-            #define STBI_NO_SIMD
-        It should not be necessary to disable SIMD unless you have issues
-        compiling (e.g. using an x86 compiler which doesn't support SSE
-        intrinsics or that doesn't support the method used to detect
-        SSE2 support at run-time), and even those can be reported as
-        bugs so I can refine the built-in compile-time checking to be
-        smarter.
+	  - Compilation of all SIMD code can be suppressed with
+			#define STBI_NO_SIMD
+		It should not be necessary to disable SIMD unless you have issues
+		compiling (e.g. using an x86 compiler which doesn't support SSE
+		intrinsics or that doesn't support the method used to detect
+		SSE2 support at run-time), and even those can be reported as
+		bugs so I can refine the built-in compile-time checking to be
+		smarter.
 
-      - The old STBI_SIMD system which allowed installing a user-defined
-        IDCT etc. has been removed. If you need this, don't upgrade. My
-        assumption is that almost nobody was doing this, and those who
-        were will find the built-in SIMD more satisfactory anyway.
+	  - The old STBI_SIMD system which allowed installing a user-defined
+		IDCT etc. has been removed. If you need this, don't upgrade. My
+		assumption is that almost nobody was doing this, and those who
+		were will find the built-in SIMD more satisfactory anyway.
 
-      - RGB values computed for JPEG images are slightly different from
-        previous versions of stb_image. (This is due to using less
-        integer precision in SIMD.) The C code has been adjusted so
-        that the same RGB values will be computed regardless of whether
-        SIMD support is available, so your app should always produce
-        consistent results. But these results are slightly different from
-        previous versions. (Specifically, about 3% of available YCbCr values
-        will compute different RGB results from pre-1.49 versions by +-1;
-        most of the deviating values are one smaller in the G channel.)
+	  - RGB values computed for JPEG images are slightly different from
+		previous versions of stb_image. (This is due to using less
+		integer precision in SIMD.) The C code has been adjusted so
+		that the same RGB values will be computed regardless of whether
+		SIMD support is available, so your app should always produce
+		consistent results. But these results are slightly different from
+		previous versions. (Specifically, about 3% of available YCbCr values
+		will compute different RGB results from pre-1.49 versions by +-1;
+		most of the deviating values are one smaller in the G channel.)
 
-      - If you must produce consistent results with previous versions of
-        stb_image, #define STBI_JPEG_OLD and you will get the same results
-        you used to; however, you will not get the SIMD speedups for
-        the YCbCr-to-RGB conversion step (although you should still see
-        significant JPEG speedup from the other changes).
+	  - If you must produce consistent results with previous versions of
+		stb_image, #define STBI_JPEG_OLD and you will get the same results
+		you used to; however, you will not get the SIMD speedups for
+		the YCbCr-to-RGB conversion step (although you should still see
+		significant JPEG speedup from the other changes).
 
-        Please note that STBI_JPEG_OLD is a temporary feature; it will be
-        removed in future versions of the library. It is only intended for
-        near-term back-compatibility use.
+		Please note that STBI_JPEG_OLD is a temporary feature; it will be
+		removed in future versions of the library. It is only intended for
+		near-term back-compatibility use.
 
 
    Latest revision history:
-      2.10  (2016-01-22) avoid warning introduced in 2.09
-      2.09  (2016-01-16) 16-bit TGA; comments in PNM files; STBI_REALLOC_SIZED
-      2.08  (2015-09-13) fix to 2.07 cleanup, reading RGB PSD as RGBA
-      2.07  (2015-09-13) partial animated GIF support
-                         limited 16-bit PSD support
-                         minor bugs, code cleanup, and compiler warnings
-      2.06  (2015-04-19) fix bug where PSD returns wrong '*comp' value
-      2.05  (2015-04-19) fix bug in progressive JPEG handling, fix warning
-      2.04  (2015-04-15) try to re-enable SIMD on MinGW 64-bit
-      2.03  (2015-04-12) additional corruption checking
-                         stbi_set_flip_vertically_on_load
-                         fix NEON support; fix mingw support
-      2.02  (2015-01-19) fix incorrect assert, fix warning
-      2.01  (2015-01-17) fix various warnings
-      2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
-      2.00  (2014-12-25) optimize JPEG, including x86 SSE2 & ARM NEON SIMD
-                         progressive JPEG
-                         PGM/PPM support
-                         STBI_MALLOC,STBI_REALLOC,STBI_FREE
-                         STBI_NO_*, STBI_ONLY_*
-                         GIF bugfix
-      1.48  (2014-12-14) fix incorrectly-named assert()
-      1.47  (2014-12-14) 1/2/4-bit PNG support (both grayscale and paletted)
-                         optimize PNG
-                         fix bug in interlaced PNG with user-specified channel count
+	  2.10  (2016-01-22) avoid warning introduced in 2.09
+	  2.09  (2016-01-16) 16-bit TGA; comments in PNM files; STBI_REALLOC_SIZED
+	  2.08  (2015-09-13) fix to 2.07 cleanup, reading RGB PSD as RGBA
+	  2.07  (2015-09-13) partial animated GIF support
+						 limited 16-bit PSD support
+						 minor bugs, code cleanup, and compiler warnings
+	  2.06  (2015-04-19) fix bug where PSD returns wrong '*comp' value
+	  2.05  (2015-04-19) fix bug in progressive JPEG handling, fix warning
+	  2.04  (2015-04-15) try to re-enable SIMD on MinGW 64-bit
+	  2.03  (2015-04-12) additional corruption checking
+						 stbi_set_flip_vertically_on_load
+						 fix NEON support; fix mingw support
+	  2.02  (2015-01-19) fix incorrect assert, fix warning
+	  2.01  (2015-01-17) fix various warnings
+	  2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
+	  2.00  (2014-12-25) optimize JPEG, including x86 SSE2 & ARM NEON SIMD
+						 progressive JPEG
+						 PGM/PPM support
+						 STBI_MALLOC,STBI_REALLOC,STBI_FREE
+						 STBI_NO_*, STBI_ONLY_*
+						 GIF bugfix
+	  1.48  (2014-12-14) fix incorrectly-named assert()
+	  1.47  (2014-12-14) 1/2/4-bit PNG support (both grayscale and paletted)
+						 optimize PNG
+						 fix bug in interlaced PNG with user-specified channel count
 
    See end of file for full revision history.
 
@@ -178,33 +178,33 @@
  ============================    Contributors    =========================
 
  Image formats                          Extensions, features
-    Sean Barrett (jpeg, png, bmp)          Jetro Lauha (stbi_info)
-    Nicolas Schulz (hdr, psd)              Martin "SpartanJ" Golini (stbi_info)
-    Jonathan Dummer (tga)                  James "moose2000" Brown (iPhone PNG)
-    Jean-Marc Lienher (gif)                Ben "Disch" Wenger (io callbacks)
-    Tom Seddon (pic)                       Omar Cornut (1/2/4-bit PNG)
-    Thatcher Ulrich (psd)                  Nicolas Guillemot (vertical flip)
-    Ken Miller (pgm, ppm)                  Richard Mitton (16-bit PSD)
-    urraka@github (animated gif)           Junggon Kim (PNM comments)
-                                           Daniel Gibson (16-bit TGA)
+	Sean Barrett (jpeg, png, bmp)          Jetro Lauha (stbi_info)
+	Nicolas Schulz (hdr, psd)              Martin "SpartanJ" Golini (stbi_info)
+	Jonathan Dummer (tga)                  James "moose2000" Brown (iPhone PNG)
+	Jean-Marc Lienher (gif)                Ben "Disch" Wenger (io callbacks)
+	Tom Seddon (pic)                       Omar Cornut (1/2/4-bit PNG)
+	Thatcher Ulrich (psd)                  Nicolas Guillemot (vertical flip)
+	Ken Miller (pgm, ppm)                  Richard Mitton (16-bit PSD)
+	urraka@github (animated gif)           Junggon Kim (PNM comments)
+										   Daniel Gibson (16-bit TGA)
 
  Optimizations & bugfixes
-    Fabian "ryg" Giesen
-    Arseny Kapoulkine
+	Fabian "ryg" Giesen
+	Arseny Kapoulkine
 
  Bug & warning fixes
-    Marc LeBlanc            David Woo          Guillaume George   Martins Mozeiko
-    Christpher Lloyd        Martin Golini      Jerry Jansson      Joseph Thomson
-    Dave Moore              Roy Eltham         Hayaki Saito       Phil Jordan
-    Won Chun                Luke Graham        Johan Duparc       Nathan Reed
-    the Horde3D community   Thomas Ruf         Ronny Chevalier    Nick Verigakis
-    Janez Zemva             John Bartholomew   Michal Cichon      svdijk@github
-    Jonathan Blow           Ken Hamada         Tero Hanninen      Baldur Karlsson
-    Laurent Gomila          Cort Stratton      Sergio Gonzalez    romigrou@github
-    Aruelien Pocheville     Thibault Reuille   Cass Everitt
-    Ryamond Barbiero        Paul Du Bois       Engin Manap
-    Blazej Dariusz Roszkowski
-    Michaelangel007@github
+	Marc LeBlanc            David Woo          Guillaume George   Martins Mozeiko
+	Christpher Lloyd        Martin Golini      Jerry Jansson      Joseph Thomson
+	Dave Moore              Roy Eltham         Hayaki Saito       Phil Jordan
+	Won Chun                Luke Graham        Johan Duparc       Nathan Reed
+	the Horde3D community   Thomas Ruf         Ronny Chevalier    Nick Verigakis
+	Janez Zemva             John Bartholomew   Michal Cichon      svdijk@github
+	Jonathan Blow           Ken Hamada         Tero Hanninen      Baldur Karlsson
+	Laurent Gomila          Cort Stratton      Sergio Gonzalez    romigrou@github
+	Aruelien Pocheville     Thibault Reuille   Cass Everitt
+	Ryamond Barbiero        Paul Du Bois       Engin Manap
+	Blazej Dariusz Roszkowski
+	Michaelangel007@github
 
 
 LICENSE
@@ -677,9 +677,9 @@ static int stbi__cpuid3(void) {
 static int stbi__cpuid3(void) {
 	int res;
 	__asm {
-      mov  eax,1
-      cpuid
-      mov  res,edx
+	  mov  eax,1
+	  cpuid
+	  mov  res,edx
 	}
 	return res;
 }
@@ -988,6 +988,11 @@ static void stbi__float_postprocess(float *result, int *x, int *y, int *comp, in
 #	endif
 
 #	ifndef STBI_NO_STDIO
+
+#		if defined(_MSC_VER) && _MSC_VER >= 1400
+extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int cp, unsigned long flags, const char* str, int cbmb, wchar_t* widestr, int cchwide);
+extern "C" __declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int cp, unsigned long flags, const wchar_t* widestr, int cchwide, char* str, int cbmb, const char* defchar, int* used_default);
+#		endif
 
 static FILE *stbi__fopen(char const *filename, char const *mode) {
 	FILE *f;
@@ -6428,156 +6433,156 @@ STBIDEF int stbi_info_from_callbacks(stbi_io_callbacks const *c, void *user, int
 
 /*
    revision history:
-      2.10  (2016-01-22) avoid warning introduced in 2.09 by STBI_REALLOC_SIZED
-      2.09  (2016-01-16) allow comments in PNM files
-                         16-bit-per-pixel TGA (not bit-per-component)
-                         info() for TGA could break due to .hdr handling
-                         info() for BMP to shares code instead of sloppy parse
-                         can use STBI_REALLOC_SIZED if allocator doesn't support realloc
-                         code cleanup
-      2.08  (2015-09-13) fix to 2.07 cleanup, reading RGB PSD as RGBA
-      2.07  (2015-09-13) fix compiler warnings
-                         partial animated GIF support
-                         limited 16-bpc PSD support
-                         #ifdef unused functions
-                         bug with < 92 byte PIC,PNM,HDR,TGA
-      2.06  (2015-04-19) fix bug where PSD returns wrong '*comp' value
-      2.05  (2015-04-19) fix bug in progressive JPEG handling, fix warning
-      2.04  (2015-04-15) try to re-enable SIMD on MinGW 64-bit
-      2.03  (2015-04-12) extra corruption checking (mmozeiko)
-                         stbi_set_flip_vertically_on_load (nguillemot)
-                         fix NEON support; fix mingw support
-      2.02  (2015-01-19) fix incorrect assert, fix warning
-      2.01  (2015-01-17) fix various warnings; suppress SIMD on gcc 32-bit without -msse2
-      2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
-      2.00  (2014-12-25) optimize JPG, including x86 SSE2 & NEON SIMD (ryg)
-                         progressive JPEG (stb)
-                         PGM/PPM support (Ken Miller)
-                         STBI_MALLOC,STBI_REALLOC,STBI_FREE
-                         GIF bugfix -- seemingly never worked
-                         STBI_NO_*, STBI_ONLY_*
-      1.48  (2014-12-14) fix incorrectly-named assert()
-      1.47  (2014-12-14) 1/2/4-bit PNG support, both direct and paletted (Omar Cornut & stb)
-                         optimize PNG (ryg)
-                         fix bug in interlaced PNG with user-specified channel count (stb)
-      1.46  (2014-08-26)
-              fix broken tRNS chunk (colorkey-style transparency) in non-paletted PNG
-      1.45  (2014-08-16)
-              fix MSVC-ARM internal compiler error by wrapping malloc
-      1.44  (2014-08-07)
-              various warning fixes from Ronny Chevalier
-      1.43  (2014-07-15)
-              fix MSVC-only compiler problem in code changed in 1.42
-      1.42  (2014-07-09)
-              don't define _CRT_SECURE_NO_WARNINGS (affects user code)
-              fixes to stbi__cleanup_jpeg path
-              added STBI_ASSERT to avoid requiring assert.h
-      1.41  (2014-06-25)
-              fix search&replace from 1.36 that messed up comments/error messages
-      1.40  (2014-06-22)
-              fix gcc struct-initialization warning
-      1.39  (2014-06-15)
-              fix to TGA optimization when req_comp != number of components in TGA;
-              fix to GIF loading because BMP wasn't rewinding (whoops, no GIFs in my test suite)
-              add support for BMP version 5 (more ignored fields)
-      1.38  (2014-06-06)
-              suppress MSVC warnings on integer casts truncating values
-              fix accidental rename of 'skip' field of I/O
-      1.37  (2014-06-04)
-              remove duplicate typedef
-      1.36  (2014-06-03)
-              convert to header file single-file library
-              if de-iphone isn't set, load iphone images color-swapped instead of returning NULL
-      1.35  (2014-05-27)
-              various warnings
-              fix broken STBI_SIMD path
-              fix bug where stbi_load_from_file no longer left file pointer in correct place
-              fix broken non-easy path for 32-bit BMP (possibly never used)
-              TGA optimization by Arseny Kapoulkine
-      1.34  (unknown)
-              use STBI_NOTUSED in stbi__resample_row_generic(), fix one more leak in tga failure case
-      1.33  (2011-07-14)
-              make stbi_is_hdr work in STBI_NO_HDR (as specified), minor compiler-friendly improvements
-      1.32  (2011-07-13)
-              support for "info" function for all supported filetypes (SpartanJ)
-      1.31  (2011-06-20)
-              a few more leak fixes, bug in PNG handling (SpartanJ)
-      1.30  (2011-06-11)
-              added ability to load files via callbacks to accomidate custom input streams (Ben Wenger)
-              removed deprecated format-specific test/load functions
-              removed support for installable file formats (stbi_loader) -- would have been broken for IO callbacks anyway
-              error cases in bmp and tga give messages and don't leak (Raymond Barbiero, grisha)
-              fix inefficiency in decoding 32-bit BMP (David Woo)
-      1.29  (2010-08-16)
-              various warning fixes from Aurelien Pocheville
-      1.28  (2010-08-01)
-              fix bug in GIF palette transparency (SpartanJ)
-      1.27  (2010-08-01)
-              cast-to-stbi_uc to fix warnings
-      1.26  (2010-07-24)
-              fix bug in file buffering for PNG reported by SpartanJ
-      1.25  (2010-07-17)
-              refix trans_data warning (Won Chun)
-      1.24  (2010-07-12)
-              perf improvements reading from files on platforms with lock-heavy fgetc()
-              minor perf improvements for jpeg
-              deprecated type-specific functions so we'll get feedback if they're needed
-              attempt to fix trans_data warning (Won Chun)
-      1.23    fixed bug in iPhone support
-      1.22  (2010-07-10)
-              removed image *writing* support
-              stbi_info support from Jetro Lauha
-              GIF support from Jean-Marc Lienher
-              iPhone PNG-extensions from James Brown
-              warning-fixes from Nicolas Schulz and Janez Zemva (i.stbi__err. Janez (U+017D)emva)
-      1.21    fix use of 'stbi_uc' in header (reported by jon blow)
-      1.20    added support for Softimage PIC, by Tom Seddon
-      1.19    bug in interlaced PNG corruption check (found by ryg)
-      1.18  (2008-08-02)
-              fix a threading bug (local mutable static)
-      1.17    support interlaced PNG
-      1.16    major bugfix - stbi__convert_format converted one too many pixels
-      1.15    initialize some fields for thread safety
-      1.14    fix threadsafe conversion bug
-              header-file-only version (#define STBI_HEADER_FILE_ONLY before including)
-      1.13    threadsafe
-      1.12    const qualifiers in the API
-      1.11    Support installable IDCT, colorspace conversion routines
-      1.10    Fixes for 64-bit (don't use "unsigned long")
-              optimized upsampling by Fabian "ryg" Giesen
-      1.09    Fix format-conversion for PSD code (bad global variables!)
-      1.08    Thatcher Ulrich's PSD code integrated by Nicolas Schulz
-      1.07    attempt to fix C++ warning/errors again
-      1.06    attempt to fix C++ warning/errors again
-      1.05    fix TGA loading to return correct *comp and use good luminance calc
-      1.04    default float alpha is 1, not 255; use 'void *' for stbi_image_free
-      1.03    bugfixes to STBI_NO_STDIO, STBI_NO_HDR
-      1.02    support for (subset of) HDR files, float interface for preferred access to them
-      1.01    fix bug: possible bug in handling right-side up bmps... not sure
-              fix bug: the stbi__bmp_load() and stbi__tga_load() functions didn't work at all
-      1.00    interface to zlib that skips zlib header
-      0.99    correct handling of alpha in palette
-      0.98    TGA loader by lonesock; dynamically add loaders (untested)
-      0.97    jpeg errors on too large a file; also catch another malloc failure
-      0.96    fix detection of invalid v value - particleman@mollyrocket forum
-      0.95    during header scan, seek to markers in case of padding
-      0.94    STBI_NO_STDIO to disable stdio usage; rename all #defines the same
-      0.93    handle jpegtran output; verbose errors
-      0.92    read 4,8,16,24,32-bit BMP files of several formats
-      0.91    output 24-bit Windows 3.0 BMP files
-      0.90    fix a few more warnings; bump version number to approach 1.0
-      0.61    bugfixes due to Marc LeBlanc, Christopher Lloyd
-      0.60    fix compiling as c++
-      0.59    fix warnings: merge Dave Moore's -Wall fixes
-      0.58    fix bug: zlib uncompressed mode len/nlen was wrong endian
-      0.57    fix bug: jpg last huffman symbol before marker was >9 bits but less than 16 available
-      0.56    fix bug: zlib uncompressed mode len vs. nlen
-      0.55    fix bug: restart_interval not initialized to 0
-      0.54    allow NULL for 'int *comp'
-      0.53    fix bug in png 3->4; speedup png decoding
-      0.52    png handles req_comp=3,4 directly; minor cleanup; jpeg comments
-      0.51    obey req_comp requests, 1-component jpegs return as 1-component,
-              on 'test' only check type, not whether we support this variant
-      0.50  (2006-11-19)
-              first released version
+	  2.10  (2016-01-22) avoid warning introduced in 2.09 by STBI_REALLOC_SIZED
+	  2.09  (2016-01-16) allow comments in PNM files
+						 16-bit-per-pixel TGA (not bit-per-component)
+						 info() for TGA could break due to .hdr handling
+						 info() for BMP to shares code instead of sloppy parse
+						 can use STBI_REALLOC_SIZED if allocator doesn't support realloc
+						 code cleanup
+	  2.08  (2015-09-13) fix to 2.07 cleanup, reading RGB PSD as RGBA
+	  2.07  (2015-09-13) fix compiler warnings
+						 partial animated GIF support
+						 limited 16-bpc PSD support
+						 #ifdef unused functions
+						 bug with < 92 byte PIC,PNM,HDR,TGA
+	  2.06  (2015-04-19) fix bug where PSD returns wrong '*comp' value
+	  2.05  (2015-04-19) fix bug in progressive JPEG handling, fix warning
+	  2.04  (2015-04-15) try to re-enable SIMD on MinGW 64-bit
+	  2.03  (2015-04-12) extra corruption checking (mmozeiko)
+						 stbi_set_flip_vertically_on_load (nguillemot)
+						 fix NEON support; fix mingw support
+	  2.02  (2015-01-19) fix incorrect assert, fix warning
+	  2.01  (2015-01-17) fix various warnings; suppress SIMD on gcc 32-bit without -msse2
+	  2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
+	  2.00  (2014-12-25) optimize JPG, including x86 SSE2 & NEON SIMD (ryg)
+						 progressive JPEG (stb)
+						 PGM/PPM support (Ken Miller)
+						 STBI_MALLOC,STBI_REALLOC,STBI_FREE
+						 GIF bugfix -- seemingly never worked
+						 STBI_NO_*, STBI_ONLY_*
+	  1.48  (2014-12-14) fix incorrectly-named assert()
+	  1.47  (2014-12-14) 1/2/4-bit PNG support, both direct and paletted (Omar Cornut & stb)
+						 optimize PNG (ryg)
+						 fix bug in interlaced PNG with user-specified channel count (stb)
+	  1.46  (2014-08-26)
+			  fix broken tRNS chunk (colorkey-style transparency) in non-paletted PNG
+	  1.45  (2014-08-16)
+			  fix MSVC-ARM internal compiler error by wrapping malloc
+	  1.44  (2014-08-07)
+			  various warning fixes from Ronny Chevalier
+	  1.43  (2014-07-15)
+			  fix MSVC-only compiler problem in code changed in 1.42
+	  1.42  (2014-07-09)
+			  don't define _CRT_SECURE_NO_WARNINGS (affects user code)
+			  fixes to stbi__cleanup_jpeg path
+			  added STBI_ASSERT to avoid requiring assert.h
+	  1.41  (2014-06-25)
+			  fix search&replace from 1.36 that messed up comments/error messages
+	  1.40  (2014-06-22)
+			  fix gcc struct-initialization warning
+	  1.39  (2014-06-15)
+			  fix to TGA optimization when req_comp != number of components in TGA;
+			  fix to GIF loading because BMP wasn't rewinding (whoops, no GIFs in my test suite)
+			  add support for BMP version 5 (more ignored fields)
+	  1.38  (2014-06-06)
+			  suppress MSVC warnings on integer casts truncating values
+			  fix accidental rename of 'skip' field of I/O
+	  1.37  (2014-06-04)
+			  remove duplicate typedef
+	  1.36  (2014-06-03)
+			  convert to header file single-file library
+			  if de-iphone isn't set, load iphone images color-swapped instead of returning NULL
+	  1.35  (2014-05-27)
+			  various warnings
+			  fix broken STBI_SIMD path
+			  fix bug where stbi_load_from_file no longer left file pointer in correct place
+			  fix broken non-easy path for 32-bit BMP (possibly never used)
+			  TGA optimization by Arseny Kapoulkine
+	  1.34  (unknown)
+			  use STBI_NOTUSED in stbi__resample_row_generic(), fix one more leak in tga failure case
+	  1.33  (2011-07-14)
+			  make stbi_is_hdr work in STBI_NO_HDR (as specified), minor compiler-friendly improvements
+	  1.32  (2011-07-13)
+			  support for "info" function for all supported filetypes (SpartanJ)
+	  1.31  (2011-06-20)
+			  a few more leak fixes, bug in PNG handling (SpartanJ)
+	  1.30  (2011-06-11)
+			  added ability to load files via callbacks to accomidate custom input streams (Ben Wenger)
+			  removed deprecated format-specific test/load functions
+			  removed support for installable file formats (stbi_loader) -- would have been broken for IO callbacks anyway
+			  error cases in bmp and tga give messages and don't leak (Raymond Barbiero, grisha)
+			  fix inefficiency in decoding 32-bit BMP (David Woo)
+	  1.29  (2010-08-16)
+			  various warning fixes from Aurelien Pocheville
+	  1.28  (2010-08-01)
+			  fix bug in GIF palette transparency (SpartanJ)
+	  1.27  (2010-08-01)
+			  cast-to-stbi_uc to fix warnings
+	  1.26  (2010-07-24)
+			  fix bug in file buffering for PNG reported by SpartanJ
+	  1.25  (2010-07-17)
+			  refix trans_data warning (Won Chun)
+	  1.24  (2010-07-12)
+			  perf improvements reading from files on platforms with lock-heavy fgetc()
+			  minor perf improvements for jpeg
+			  deprecated type-specific functions so we'll get feedback if they're needed
+			  attempt to fix trans_data warning (Won Chun)
+	  1.23    fixed bug in iPhone support
+	  1.22  (2010-07-10)
+			  removed image *writing* support
+			  stbi_info support from Jetro Lauha
+			  GIF support from Jean-Marc Lienher
+			  iPhone PNG-extensions from James Brown
+			  warning-fixes from Nicolas Schulz and Janez Zemva (i.stbi__err. Janez (U+017D)emva)
+	  1.21    fix use of 'stbi_uc' in header (reported by jon blow)
+	  1.20    added support for Softimage PIC, by Tom Seddon
+	  1.19    bug in interlaced PNG corruption check (found by ryg)
+	  1.18  (2008-08-02)
+			  fix a threading bug (local mutable static)
+	  1.17    support interlaced PNG
+	  1.16    major bugfix - stbi__convert_format converted one too many pixels
+	  1.15    initialize some fields for thread safety
+	  1.14    fix threadsafe conversion bug
+			  header-file-only version (#define STBI_HEADER_FILE_ONLY before including)
+	  1.13    threadsafe
+	  1.12    const qualifiers in the API
+	  1.11    Support installable IDCT, colorspace conversion routines
+	  1.10    Fixes for 64-bit (don't use "unsigned long")
+			  optimized upsampling by Fabian "ryg" Giesen
+	  1.09    Fix format-conversion for PSD code (bad global variables!)
+	  1.08    Thatcher Ulrich's PSD code integrated by Nicolas Schulz
+	  1.07    attempt to fix C++ warning/errors again
+	  1.06    attempt to fix C++ warning/errors again
+	  1.05    fix TGA loading to return correct *comp and use good luminance calc
+	  1.04    default float alpha is 1, not 255; use 'void *' for stbi_image_free
+	  1.03    bugfixes to STBI_NO_STDIO, STBI_NO_HDR
+	  1.02    support for (subset of) HDR files, float interface for preferred access to them
+	  1.01    fix bug: possible bug in handling right-side up bmps... not sure
+			  fix bug: the stbi__bmp_load() and stbi__tga_load() functions didn't work at all
+	  1.00    interface to zlib that skips zlib header
+	  0.99    correct handling of alpha in palette
+	  0.98    TGA loader by lonesock; dynamically add loaders (untested)
+	  0.97    jpeg errors on too large a file; also catch another malloc failure
+	  0.96    fix detection of invalid v value - particleman@mollyrocket forum
+	  0.95    during header scan, seek to markers in case of padding
+	  0.94    STBI_NO_STDIO to disable stdio usage; rename all #defines the same
+	  0.93    handle jpegtran output; verbose errors
+	  0.92    read 4,8,16,24,32-bit BMP files of several formats
+	  0.91    output 24-bit Windows 3.0 BMP files
+	  0.90    fix a few more warnings; bump version number to approach 1.0
+	  0.61    bugfixes due to Marc LeBlanc, Christopher Lloyd
+	  0.60    fix compiling as c++
+	  0.59    fix warnings: merge Dave Moore's -Wall fixes
+	  0.58    fix bug: zlib uncompressed mode len/nlen was wrong endian
+	  0.57    fix bug: jpg last huffman symbol before marker was >9 bits but less than 16 available
+	  0.56    fix bug: zlib uncompressed mode len vs. nlen
+	  0.55    fix bug: restart_interval not initialized to 0
+	  0.54    allow NULL for 'int *comp'
+	  0.53    fix bug in png 3->4; speedup png decoding
+	  0.52    png handles req_comp=3,4 directly; minor cleanup; jpeg comments
+	  0.51    obey req_comp requests, 1-component jpegs return as 1-component,
+			  on 'test' only check type, not whether we support this variant
+	  0.50  (2006-11-19)
+			  first released version
 */
