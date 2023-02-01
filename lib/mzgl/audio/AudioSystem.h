@@ -119,6 +119,7 @@ protected:
 
 class DummyAudioSystem : public _AudioSystem {
 public:
+	DummyAudioSystem() : _AudioSystem() {sampleRate = 48000.f;}
     void setup(int numInChannels, int numOutChannels) override {}
     void start() override {}
     void stop() override {}
