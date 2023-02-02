@@ -3338,7 +3338,10 @@ static drmp3_result drmp3_fopen(FILE** ppFile, const char* pFilePath, const char
     }
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
-    err = fopen_s(ppFile, pFilePath, pOpenMode);
+    err = _wfopen_s(ppFile,
+        (const wchar_t*)(utf8::utf8to16(std::string(pFilePath)).c_str()),
+        (const wchar_t*)(utf8::utf8to16(std::string(pOpenMode)).c_str()));
+
     if (err != 0) {
         return drmp3_result_from_errno(err);
     }
@@ -3519,7 +3522,7 @@ DRMP3_API void drmp3_uninit(drmp3* pMP3)
     if (pMP3 == NULL) {
         return;
     }
-    
+
 #ifndef DR_MP3_NO_STDIO
     if (pMP3->onRead == drmp3__on_read_stdio) {
         FILE* pFile = (FILE*)pMP3->pUserData;
@@ -3907,7 +3910,7 @@ DRMP3_API drmp3_bool32 drmp3_get_mp3_and_pcm_frame_count(drmp3* pMP3, drmp3_uint
 
     /* We'll need to seek back to where we were, so grab the PCM frame we're currently sitting on so we can restore later. */
     currentPCMFrame = pMP3->currentPCMFrame;
-    
+
     if (!drmp3_seek_to_start_of_stream(pMP3)) {
         return DRMP3_FALSE;
     }
@@ -4005,7 +4008,7 @@ DRMP3_API drmp3_bool32 drmp3_calculate_seek_points(drmp3* pMP3, drmp3_uint32* pS
 
     /* We'll need to seek back to the current sample after calculating the seekpoints so we need to go ahead and grab the current location at the top. */
     currentPCMFrame = pMP3->currentPCMFrame;
-    
+
     /* We never do more than the total number of MP3 frames and we limit it to 32-bits. */
     if (!drmp3_get_mp3_and_pcm_frame_count(pMP3, &totalMP3FrameCount, &totalPCMFrameCount)) {
         return DRMP3_FALSE;
