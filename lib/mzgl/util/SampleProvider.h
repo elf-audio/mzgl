@@ -66,9 +66,7 @@ public:
 		min = _min;
 		max = _max;
 	}
-	
-	
-	
+
 	bool isFloat() const override {
 		return true;
 	}
@@ -99,8 +97,6 @@ public:
 			const auto v = data[j];
 			if(v>maxVal) maxVal = v;
 			if(v<minVal) minVal = v;
-//			maxVal = std::max(v, maxVal);
-//			minVal = std::min(v, minVal);
 		}
 		_min = minVal * mult;
 		_max = maxVal * mult;
