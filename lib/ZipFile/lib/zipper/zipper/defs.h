@@ -22,6 +22,7 @@ extern "C" {
 #if defined(USE_WINDOWS)
 #    include <direct.h>
 #    include <io.h>
+#    include <mbctype.h>
 typedef struct _stat STAT;
 #    define stat _stat
 #    define S_IFREG _S_IFREG
