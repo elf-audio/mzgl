@@ -40,10 +40,14 @@ typedef struct stat STAT;
 #define WRITEBUFFERSIZE (8192)
 #define MAXFILENAME (256)
 
+//#if defined(USE_WINDOWS)
+//#undef USE_WINDOWS
+//#endif
+
 #if defined(USE_WINDOWS)
-#    define USEWIN32IOAPI
-#    include "ioapi.h"
-#    include "iowin32.h"
+//#    define USEWIN32IOAPI
+//#    include "ioapi.h"
+//#    include "iowin32.h"
 #endif
 }
 

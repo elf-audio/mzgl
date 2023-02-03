@@ -70,14 +70,6 @@ using namespace std;
 #	include <sstream>
 #	include <string>
 
-std::string convertWideToNarrow(const wchar_t *s, char dfault = '?', const std::locale &loc = std::locale()) {
-	std::ostringstream stm;
-
-	while (*s != L'\0') {
-		stm << std::use_facet<std::ctype<wchar_t>>(loc).narrow(*s++, dfault);
-	}
-	return stm.str();
-}
 #endif
 
 #include <stdlib.h>
@@ -675,7 +667,9 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	ofn.lpstrTitle = L"Select Output File";
 
 	if (GetSaveFileNameW(&ofn)) {
-		completionCallback(convertWideToNarrow(fileName), true);
+		std::wstring ws(fileName);
+		std::string fileNameUtf8 = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
+		completionCallback(fileNameUtf8, true);
 	} else {
 		completionCallback("", false);
 	}

@@ -10,6 +10,7 @@ include_directories(
     lib/zipper/zipper
     lib/zipper/minizip
     lib/zipper/
+    lib/zipper/utf8helper/
 #    lib/zipper/zlib
     ..
 )
@@ -32,7 +33,7 @@ add_library(ZipFile STATIC
     lib/zipper/minizip/ioapi.c
     lib/zipper/minizip/ioapi_buf.c
     lib/zipper/minizip/ioapi_mem.c
-    lib/zipper/minizip/iowin32.c
+    # lib/zipper/minizip/iowin32.c
     # lib/zipper/zipper/tps/dirent.c
 
     lib/zipper/zlib/adler32.c
@@ -50,6 +51,8 @@ add_library(ZipFile STATIC
     lib/zipper/zlib/trees.c
     lib/zipper/zlib/uncompr.c
     lib/zipper/zlib/zutil.c
+
+    lib/zipper/utf8helper/win32io_utf8.cpp
 )
 else()
 add_library(ZipFile STATIC

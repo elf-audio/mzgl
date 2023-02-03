@@ -60,7 +60,7 @@
 #include "zip.h"
 
 #ifdef _WIN32
-#  define USEWIN32IOAPI
+//#  define USEWIN32IOAPI
 #  include "iowin32.h"
 #endif
 

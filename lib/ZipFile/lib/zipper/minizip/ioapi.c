@@ -18,7 +18,9 @@
 
 #if defined(_WIN32)
 #  define snprintf _snprintf
-#define FOPEN_FUNC(filename, mode) fopen(filename, mode)
+
+#include "win32io_utf8.h"
+#define FOPEN_FUNC(filename, mode) (FILE *)(win32io_utf8_fopen(filename, mode))
 #define FTELLO_FUNC(stream) _ftelli64(stream)
 #define FSEEKO_FUNC(stream, offset, origin) _fseeki64(stream, offset, origin)
 
