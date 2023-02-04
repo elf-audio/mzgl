@@ -14,10 +14,10 @@
 
    This program is distributed under the terms of the same license as zlib.
    See the accompanying LICENSE file for the full text of the license.
-   
-   Mar 8th, 2016 - Lucio Cosmo 
+
+   Mar 8th, 2016 - Lucio Cosmo
    Fixed support for 64bit builds for archives with "PKWARE" password.
-   Changed long, unsigned long, unsigned to unsigned int in 
+   Changed long, unsigned long, unsigned to unsigned int in
    access functions to crctables and pkeys
 */
 
@@ -194,8 +194,8 @@ local void unz64local_DosDateToTmuDate (ZPOS64_T ulDosDate, tm_unz* ptm)
 }
 
 /* Read a byte from a gz_stream; Return EOF for end of file. */
-local int unz64local_getByte OF((const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, int *pi));
-local int unz64local_getByte(const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, int *pi)
+local int unz64local_getByte OF((const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, uLong *pi));
+local int unz64local_getByte(const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, uLong *pi)
 {
     unsigned char c;
     int err = (int)ZREAD64(*pzlib_filefunc_def, filestream, &c, 1);
@@ -214,7 +214,7 @@ local int unz64local_getShort OF((const zlib_filefunc64_32_def* pzlib_filefunc_d
 local int unz64local_getShort (const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, uLong *pX)
 {
     uLong x;
-    int i = 0;
+    uLong i = 0;
     int err;
 
     err = unz64local_getByte(pzlib_filefunc_def, filestream, &i);
@@ -234,7 +234,7 @@ local int unz64local_getLong OF((const zlib_filefunc64_32_def* pzlib_filefunc_de
 local int unz64local_getLong (const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, uLong *pX)
 {
     uLong x;
-    int i = 0;
+    uLong i = 0;
     int err;
 
     err = unz64local_getByte(pzlib_filefunc_def, filestream, &i);
@@ -260,7 +260,7 @@ local int unz64local_getLong64 OF((const zlib_filefunc64_32_def* pzlib_filefunc_
 local int unz64local_getLong64 (const zlib_filefunc64_32_def* pzlib_filefunc_def, voidpf filestream, ZPOS64_T *pX)
 {
     ZPOS64_T x;
-    int i = 0;
+    uLong i = 0;
     int err;
 
     err = unz64local_getByte(pzlib_filefunc_def, filestream, &i);
@@ -1460,19 +1460,19 @@ extern int ZEXPORT unzReadCurrentFile(unzFile file, voidp buf, unsigned len)
             s->pfile_in_zip_read->bstream.avail_in       = s->pfile_in_zip_read->stream.avail_in;
             s->pfile_in_zip_read->bstream.total_in_lo32  = (uInt)s->pfile_in_zip_read->stream.total_in;
             s->pfile_in_zip_read->bstream.total_in_hi32  = s->pfile_in_zip_read->stream.total_in >> 32;
-            
+
             s->pfile_in_zip_read->bstream.next_out       = (char*)s->pfile_in_zip_read->stream.next_out;
             s->pfile_in_zip_read->bstream.avail_out      = s->pfile_in_zip_read->stream.avail_out;
             s->pfile_in_zip_read->bstream.total_out_lo32 = (uInt)s->pfile_in_zip_read->stream.total_out;
             s->pfile_in_zip_read->bstream.total_out_hi32 = s->pfile_in_zip_read->stream.total_out >> 32;
 
-            total_out_before = s->pfile_in_zip_read->bstream.total_out_lo32 + 
+            total_out_before = s->pfile_in_zip_read->bstream.total_out_lo32 +
                 (((uLong)s->pfile_in_zip_read->bstream.total_out_hi32) << 32);
             buf_before = (const Bytef *)s->pfile_in_zip_read->bstream.next_out;
 
             err = BZ2_bzDecompress(&s->pfile_in_zip_read->bstream);
 
-            total_out_after = s->pfile_in_zip_read->bstream.total_out_lo32 + 
+            total_out_after = s->pfile_in_zip_read->bstream.total_out_lo32 +
                 (((uLong)s->pfile_in_zip_read->bstream.total_out_hi32) << 32);
 
             out_bytes = total_out_after-total_out_before;
