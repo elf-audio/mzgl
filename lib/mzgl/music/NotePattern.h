@@ -6,11 +6,11 @@
 //
 //
 
-#pragma once 
+#pragma once
 #include "Note.h"
 //#include "ofxMidi.h"
 #include "json.hpp"
-#include <fstream>
+#include "filesystem.h"
 //#ifdef _WIN32
 //#include "mingw.mutex.h"
 //#define MUTEX mingw_stdthread::mutex
@@ -40,28 +40,28 @@ class NoteCommand {
 public:
 
 	int status; // midi note on or off
-	
+
 	int delay; // in samples from the frame
-	
+
 	int pitch;
-	
+
 	int velocity;
-	
+
 	NoteCommand(int status = MIDI_NOTE_ON, int delay = 0, int pitch = 0, int velocity = 0) {
 		this->status = status;
 		this->delay = delay;
 		this->pitch = pitch;
 		this->velocity = velocity;
 	}
-    
-    
+
+
     string statusString() {
         switch(status) {
             case MIDI_NOTE_ON: return "midi note on";
             case MIDI_NOTE_OFF: return "midi note off";
             case METRO_TICK_MAJOR: return "metro tick major";
             case METRO_TICK_MINOR: return "metro tick minor";
-                
+
             default: return "unknown";
         }
     }
@@ -79,54 +79,54 @@ public:
 	int ppqn;
 	bool metroOn;
 	multimap<TimeOffset,Note> notes;
-	
+
 	static mutex patternMutex;
-	
-	
-	
+
+
+
 	bool operator==(const NotePattern &other) const;
-    
+
     // checks that all the notes in this pattern are also in the
     // other note pattern (there may be extra notes in the other pattern)
     // so to check for equality you have to test both ways
 	bool containsAllTheSameNotes(const NotePattern &other) const;
-	
-    
+
+
 	bool contains(const TimeOffset &t, Note &n) const;
-    
+
     bool operator!=(const NotePattern &other) const {
         return !((*this)==other);
     }
-    
+
 	void save(string path);
-	
+
 	nlohmann::json createNoteJson(TimeOffset to, const Note &n);
-	
+
 	void clear() {
 		lock();
 		notes.clear();
 		unlock();
 	}
 
-	
+
 	void quantize();
-	
+
 	void load(string path);
-   
+
 
 	NotePattern();
 
-    
+
 	void lock() {
 		patternMutex.lock();
 	}
-	
+
 	void unlock() {
 		patternMutex.unlock();
 	}
-	
+
 	const PatternNote &insertNote(Note note, TimeOffset pos);
-	
+
 	TimeOffset generatePosition(int barNo, int beatNo, int ppqnOffset = 0) {
 		return (barNo * beatsPerBar + beatNo) * ppqn + ppqnOffset;
 	}
@@ -135,50 +135,50 @@ public:
 		beginIt = notes.begin();
 		return beginIt;
 	}
-	
+
 	PatternNote endIt;
 	const PatternNote &end() {
 		endIt = notes.end();
 		return endIt;
 	}
-	
-	
+
+
 	PatternNote findIt;
 	const PatternNote &find(int pitch, TimeOffset t);
-	
-	
+
+
 	void erase(const PatternNote &note) {
 		notes.erase(note);
 	}
 
     int getTimeOfBeatInSamples();
-	
+
 	int getPatternLengthInSamples() {
 		return getTimeOfBeatInSamples() * beatsPerBar * numBars;
 	}
-	
+
 	int getPatternLength() {
 		return beatsPerBar * numBars * ppqn;
 	}
-	
+
 	void doubleUp();
-	
+
 	int timeOffsetToSamples(TimeOffset t) {
 		return getPatternLengthInSamples() * (float)(t / (float)(numBars * beatsPerBar * ppqn));
 	}
-	
+
 	TimeOffset samplesToTimeOffset(int s) {
 		//return (numBars * beatsPerBar * ppqn * s) / (float)getPatternLengthInSamples();
 		return (ppqn * s) / (float)(getTimeOfBeatInSamples());
 	}
 
-	
+
 	void doMetro(int start, int finish, vector<NoteCommand> &noteCommands);
-	
+
 	// must take care of wrapping the finish value
 	// TODO: I think the missing notes are due to rounding errors in time offset to samples
 	void getAllNoteCommands(int start, int finish, vector<NoteCommand> &noteCommands);
-	
+
 	TimeOffset quantizeTiming(TimeOffset t, int division);
 };
 

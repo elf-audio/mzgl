@@ -77,7 +77,7 @@ ZipReaderFile::ZipReaderFile(const std::string &zipPath, const ZipReader::Entry 
         printf("Can't read file");
         throw std::runtime_error("Can't read zip file '"+zipPath+"'");
     }
-    
+
     zip.seekg(entry.offset + 26);
     int16_t fnExtraLength[2];
     zip.read((char*)fnExtraLength, 4);
@@ -133,7 +133,7 @@ size_t ZipReaderFile::readSome(std::vector<int8_t> &d) {
 
 void ZipReaderFile::extract(const std::string &path) {
 	seek(0);
-	std::ofstream f(path, std::ios_base::binary);
+	fs::ofstream f(fs::u8path(path), std::ios_base::binary);
 	std::vector<int8_t> buff(4096);
 	while(1) {
 		auto amountRead = readSome(buff);
@@ -204,7 +204,7 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 		memcpy(fn, fileNamePtr, ent->fileNameLength);
 //		printf("Compression used: %d\n", ent->compression);
 		entries.emplace_back(std::string(fn), ent->localHeaderOffset, ent->uncompressedSize);
-		
+
 		offset += ent->getTotalLength();
 	}
 
@@ -231,7 +231,7 @@ std::shared_ptr<ZipReaderFile> ZipReader::open(std::string pathInZip) {
 	if(!currEntry.valid) return nullptr;
 //	seekToEntry(currEntry);
 	return std::make_shared<ZipReaderFile>(zipPath, currEntry);
-	
+
 }
 
 
@@ -263,7 +263,7 @@ std::vector<std::string> ZipReader::list(bool print) {
 //	std::vector<int8_t> d(e.size);
 //	read(d);
 //
-//	for(auto c : d) {			
+//	for(auto c : d) {
 //		printf("%c", c);
 //	}
 //	printf("\n");

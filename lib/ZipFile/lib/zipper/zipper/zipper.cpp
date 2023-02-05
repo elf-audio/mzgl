@@ -6,7 +6,7 @@
 #include "CDirEntry.h"
 #include "Timestamp.h"
 
-#include <fstream>
+#include "filesystem.h"
 #include <stdexcept>
 
 namespace zipper {
@@ -335,13 +335,13 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
     if (isDirectory(fileOrFolderPath))
     {
         std::string folderName = fileNameFromPath(fileOrFolderPath);
-        std::vector<std::string> files = filesFromDirectory(fileOrFolderPath);
-        std::vector<std::string>::iterator it = files.begin();
-        for (; it != files.end(); ++it)
+        std::vector<fs::path> files = filesFromDirectory(fileOrFolderPath);
+        for (auto it = files.begin(); it != files.end(); ++it)
         {
-            Timestamp time(*it);
-            std::ifstream input(it->c_str(), std::ios::binary);
-            std::string nameInZip = it->substr(it->rfind(folderName + CDirEntry::Separator), it->size());
+            fs::path path = *it;
+            Timestamp time(path);
+            fs::ifstream input(path, std::ios::binary);
+            std::string nameInZip = path.string().substr(path.string().rfind(folderName + CDirEntry::Separator), path.string().size());
             add(input, time.timestamp, nameInZip, flags);
             input.close();
         }
@@ -349,7 +349,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
     else
     {
         Timestamp time(fileOrFolderPath);
-        std::ifstream input(fileOrFolderPath.c_str(), std::ios::binary);
+        fs::ifstream input(fs::u8path(fileOrFolderPath.c_str()), std::ios::binary);
         std::string fullFileName;
 
         if (flags & Zipper::SaveHierarchy)

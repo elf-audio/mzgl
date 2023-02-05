@@ -53,15 +53,15 @@ bool NotePattern::contains(const TimeOffset &t, Note &n) const {
 
 
 void NotePattern::save(string path) {
-	
-	
+
+
 	json j;
 	json noteObj;
 	for(auto it = begin(); it != end(); it++) {
 		noteObj.push_back(createNoteJson((*it).first, (*it).second));
 	}
 	j["pattern"] = {{"numBars", numBars}, {"beatsPerBar", beatsPerBar}, {"ppqn", ppqn}, {"notes", noteObj}};
-	std::ofstream o(path.c_str());
+	fs::ofstream o(fs::u8path(path));
 	o << std::setw(4) << j << std::endl;
 }
 
@@ -71,19 +71,19 @@ nlohmann::json NotePattern::createNoteJson(TimeOffset to, const Note &n) {
 	j["pitch"] = n.pitch;
 	j["vel"] = n.vel;
 	j["length"] = n.length;
-	
+
 	return j;
 }
 
 TimeOffset NotePattern::quantizeTiming(TimeOffset t, int division) {
-	
+
 	// this is the quantize factor for TimeOffset
 	int ppDiv = (ppqn * 4) / division;
 	double tt = round(t / (double)ppDiv);
 	return (TimeOffset) round(tt * ppDiv);
 }
 void NotePattern::quantize() {
-	
+
 	multimap<TimeOffset,Note> quantized;
 
 	for(auto &note: notes) {
@@ -94,27 +94,27 @@ void NotePattern::quantize() {
 }
 
 void NotePattern::load(string path) {
-	
+
 	notes.clear();
-	
-	std::ifstream i(path);
+
+	fs::ifstream i(fs::u8path(path));
 	json j;
 	i >> j;
-	
+
 	j = j["pattern"];
-	
+
 	numBars		= j["numBars"];
 	beatsPerBar = j["beatsPerBar"];
-	
+
 	j = j["notes"];
-	
+
 	for(auto &note : j) {
 		Note n;
 		TimeOffset t	= note["timeOffset"];
 		n.pitch			= note["pitch"];
 		n.vel			= note["vel"];
 		n.length		= note["length"];
-		
+
 		insertNote(n, t);
 	}
 }
@@ -146,15 +146,15 @@ const PatternNote &NotePattern::insertNote(Note note, TimeOffset pos) {
 
 
 const PatternNote &NotePattern::find(int pitch, TimeOffset t) {
-	
+
 	int patternLength = getPatternLength();
-	
+
 	for(findIt = begin(); findIt != end(); findIt++) {
 		Note &n = (*findIt).second;
 		TimeOffset start = (*findIt).first;
 		if(n.pitch==pitch) {
-			
-			
+
+
 			if(t>=start && t < start + n.length) { // normal notes
 				return findIt;
 			} else if(start + n.length > patternLength // if length goes over the end and wraps
@@ -162,12 +162,12 @@ const PatternNote &NotePattern::find(int pitch, TimeOffset t) {
 					  (t >= start
 					  ||
 					   t < start + n.length - patternLength
-					   
+
 					   )
-					  
+
 					  ) { // wrapping notes
 				return findIt;
-				
+
 			}
 		}
 	}
@@ -180,14 +180,14 @@ const PatternNote &NotePattern::find(int pitch, TimeOffset t) {
 void NotePattern::doubleUp() {
 	int oldNumBars = numBars;
 	numBars *= 2;
-	
+
 	vector<pair<TimeOffset, Note> > newNotes;
 	for(auto it = begin(); it != end(); it++) {
 		newNotes.push_back(make_pair((*it).first, (*it).second));
 	}
-	
+
 	for(int i = 0; i < newNotes.size(); i++) {
-		
+
 		// offset the note by the length of the old measure
 		newNotes[i].first += oldNumBars * beatsPerBar * ppqn;
 		insertNote(newNotes[i].second, newNotes[i].first);
@@ -201,15 +201,15 @@ void NotePattern::doubleUp() {
 void NotePattern::doMetro(int start, int finish, vector<NoteCommand> &noteCommands) {
 	TimeOffset a = samplesToTimeOffset(start);
 	TimeOffset b = samplesToTimeOffset(finish);
-	
+
 	if(a>b) { // fix wrapping
 		a -= numBars * beatsPerBar * ppqn;
 		//printf("%d -> %d\n", a, b);
-		
+
 	}
-	
+
 	for(TimeOffset i = a; i < b; i++) {
-		
+
 		if(i%(beatsPerBar*ppqn)==0) { // bar beep
 			int d = (timeOffsetToSamples(i) - start);
 			if(d<0) d += getPatternLengthInSamples();
@@ -225,25 +225,25 @@ void NotePattern::doMetro(int start, int finish, vector<NoteCommand> &noteComman
 void NotePattern::getAllNoteCommands(int start, int finish, vector<NoteCommand> &noteCommands) {
 	// work out if there are any metros
 	// bar boundary, beatBoundary numBars beatsPerBar ppqn
-	
-	
+
+
 	if(metroOn) doMetro(start, finish, noteCommands);
-	
-	
-	
+
+
+
 	for(auto it = begin(); it != end(); it++) {
-		
+
 		// if the end of a note is in the bracket, do a note off
 		int noteStart = timeOffsetToSamples((*it).first);
 		int noteEnd = noteStart + timeOffsetToSamples((*it).second.length);
-		
+
 		// have to check for wrap around stuff
-		
+
 		if(finish>start) {
 			if(noteStart >= start && noteStart < finish) {
 				noteCommands.push_back(NoteCommand(MIDI_NOTE_ON, noteStart - start, (*it).second.pitch, (*it).second.vel));
 			}
-			
+
 			if(noteEnd >= start && noteEnd < finish) {
 				noteCommands.push_back(NoteCommand(MIDI_NOTE_OFF, noteEnd - start, (*it).second.pitch));
 			}
@@ -254,8 +254,8 @@ void NotePattern::getAllNoteCommands(int start, int finish, vector<NoteCommand> 
 			} else if(noteStart < finish) {
 				noteCommands.push_back(NoteCommand(MIDI_NOTE_ON,  noteStart - (start - getPatternLengthInSamples()), (*it).second.pitch, (*it).second.vel));
 			}
-			
-			
+
+
 			if(noteEnd >= start) {
 				noteCommands.push_back(NoteCommand(MIDI_NOTE_OFF, noteEnd - start, (*it).second.pitch, (*it).second.vel));
 			} else if(noteEnd < finish) {

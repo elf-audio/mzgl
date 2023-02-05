@@ -2098,7 +2098,7 @@ inline std::string decode_url(const std::string &s,
 }
 
 inline void read_file(const std::string &path, std::string &out) {
-  std::ifstream fs(path, std::ios_base::binary);
+  fs::ifstream fs(fs::u8path(path), std::ios_base::binary);
   fs.seekg(0, std::ios_base::end);
   auto size = fs.tellg();
   fs.seekg(0);
@@ -5266,7 +5266,7 @@ Server::create_server_socket(const char *host, int port, int socket_flags,
         if (err) {
             std::cout << "Or, in German, " << std::strerror(errno) << '\n';
 //            fprintf(stderr, "%s\n", explain_errno_bind(errNo,
-                                                                                                  
+
 //                    sock, ai.ai_addr, static_cast<socklen_t>(ai.ai_addrlen)));
             return false;
         }

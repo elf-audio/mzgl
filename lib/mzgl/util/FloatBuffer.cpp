@@ -50,7 +50,7 @@ FloatBuffer FloatBuffer::splice(int start, int end) const {
 }
 
 void FloatBuffer::set(const float *buff, size_t length, int start, int stride) {
-	
+
 	if(start==0 && stride==1) {
 		assign(buff, buff + length);
 	} else {
@@ -114,7 +114,7 @@ FloatBuffer FloatBuffer::stereoToMono() {
 //void FloatBuffer::load(string path) {
 //	string line;
 //	string f;
-//	ifstream myfile (path.c_str());
+//	fs::ifstream myfile (fs::u8path(path.c_str()));
 //	if (myfile.is_open())
 //	{
 //		while ( getline (myfile,line) )
@@ -159,13 +159,13 @@ float FloatBuffer::maxValue() const {
 	vDSP_maxvi(data(), 1, &maxVal,  &pos, size());
 	return maxVal;
 #else
-	  
+
 	return (*this)[findMaxPos()];
 #endif
 }
 
 float FloatBuffer::minValue() const {
-	
+
 #ifdef __APPLE__
 	float minVal = INFINITY;
 	vDSP_Length pos;
@@ -207,7 +207,7 @@ int FloatBuffer::findMaxPos() const {
 }
 
 int FloatBuffer::findMinPos() const {
-	
+
 	float minVal = std::numeric_limits<float>::max();
 #ifdef __APPLE__
 	vDSP_Length pos;
@@ -229,7 +229,7 @@ void FloatBuffer::getMinMax(float &min, float &max) const {
 	if(size()==0) return;
 	min = std::numeric_limits<float>::max();
 	max = std::numeric_limits<float>::min();
-	
+
 	for(int i = 0; i < size(); i++) {
 		if((*this)[i]<min) {
 			min = (*this)[i];
@@ -243,10 +243,10 @@ void FloatBuffer::getMinMax(float &min, float &max) const {
 void FloatBuffer::normalize(float min, float max) {
 	float inMin, inMax;
 	getMinMax(inMin, inMax);
-	
+
 	float norm = 1.f / (inMax - inMin);
 	float scale = max - min;
-	
+
 	for(int i = 0; i < size(); i++) {
 		(*this)[i] = min + scale * ((*this)[i] - inMin) * norm;
 	}
@@ -254,10 +254,10 @@ void FloatBuffer::normalize(float min, float max) {
 
 
 void FloatBuffer::normalizeAudio() {
-	
+
 	float inMin, inMax;
 	getMinMax(inMin, inMax);
-	
+
 	float loudest = std::max(abs(inMin), abs(inMax));
 	if(loudest<0.000001) {
 		loudest = 0.00001;
@@ -284,7 +284,7 @@ void FloatBuffer::setFromRightChannel(float *buff, int length) {
 
 // mix incoming sample into this one
 void FloatBuffer::mix(const FloatBuffer &other) {
-	
+
 	// make this sample is at least as long as the other
 	if(size()<other.size()) {
 		resize(other.size(), 0.f);
@@ -312,9 +312,9 @@ void FloatBuffer::mix(const FloatBuffer &other) {
 //	for(std::size_t i = vec_size; i < sz; ++i) {
 //		(*this)[i] += other[i];
 //	}
-	
-	
-	
+
+
+
 	for(int i = 0; i < other.size(); i++) {
 		(*this)[i] += other[i];
 	}
@@ -323,13 +323,13 @@ void FloatBuffer::mix(const FloatBuffer &other) {
 
 // mix incoming sample into this one
 void FloatBuffer::mixNaive(const FloatBuffer &other) {
-	
+
 	// make sure both samples are
 	// as long as the longest one
 	if(size()<other.size()) {
 		resize(other.size(), 0.f);
 	}
-	
+
 	for(int i = 0; i < other.size(); i++) {
 		(*this)[i] += other[i];
 	}
@@ -383,7 +383,7 @@ void FloatBuffer::print() const {
 
 void FloatBuffer::fadeIn(int length, int numChans, bool smooth) {
 	if(size()*numChans>length) {
-		
+
 		if(numChans==1) {
 			for(int i = 0; i < length; i++) {
 				float fade = i/(float)length;
@@ -449,11 +449,11 @@ void FloatBuffer::fadeOut(int length, int numChans, bool smooth) {
 //        // self-assignment guard
 //        if (this == &buff)
 //            return *this;
-//		
+//
 //        // do the copy
 //        assert(size()==buff.size());
 //        copy(buff.begin(), buff.end(), this->begin());
-//		
+//
 //        // return the existing object so we can chain this operator
 //        return *this;
 //    }
@@ -483,7 +483,7 @@ FloatBuffer& FloatBuffer::operator*=(const FloatBuffer& right) {
 		printf("Wrong size - %ld != %ld\n", size(),  right.size());
 		assert(size()==right.size());
 	}
-	
+
 #ifdef __APPLE__
 	vDSP_vmul(this->data(), 1,
 			  right.data(), 1,
@@ -494,14 +494,14 @@ FloatBuffer& FloatBuffer::operator*=(const FloatBuffer& right) {
 		(*this)[i] *= right[i];
 	}
 #endif
-	
-	
+
+
 	return *this;
 }
 
 void FloatBuffer::stereoGain(float lGain, float rGain) {
-	
-	
+
+
 #ifdef __APPLE__
 
 	vDSP_vsmul(data(), 2, &lGain, data(), 2, size()/2);
@@ -517,7 +517,7 @@ void FloatBuffer::stereoGain(float lGain, float rGain) {
 
 FloatBuffer& FloatBuffer::operator/=(const FloatBuffer& right) {
 	assert(size()==right.size());
-    
+
 #ifdef __APPLE__
     vDSP_vdiv(this->data(), 1,
               right.data(), 1,
@@ -559,7 +559,7 @@ FloatBuffer& FloatBuffer::operator-=(const float& right) {
 }
 
 FloatBuffer& FloatBuffer::operator*=(const float& right) {
-    
+
 #ifdef __APPLE__
     vDSP_vsmul(data(), 1, &right, data(), 1, size());
 
@@ -587,7 +587,7 @@ FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r) {
 	FloatBuffer sum = l;
 	sum += r;
 	return sum;
-	
+
 }
 
 FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r) {
@@ -595,7 +595,7 @@ FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r) {
 	FloatBuffer sum = l;
 	sum -= r;
 	return sum;
-	
+
 }
 
 

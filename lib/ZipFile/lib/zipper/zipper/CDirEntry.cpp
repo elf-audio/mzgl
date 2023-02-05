@@ -18,18 +18,39 @@
 #include "CDirEntry.h"
 #include <algorithm>
 #include <sys/types.h>
-#include <fstream>
+#include "filesystem.h"
 
 using namespace zipper;
 
 const std::string CDirEntry::Separator(DIRECTORY_SEPARATOR);
+
+static int stat_internal(const std::string& path, STAT* st) {
+
+#if defined(USE_WINDOWS)
+    std::wstring unicodePath = fs::path(path).wstring();
+    return _wstat(unicodePath.c_str(), st);
+#else
+    return stat(path.c_str(), st);
+#endif
+}
+
+static int access_internal(const std::string& path, int mode) {
+
+#if defined(USE_WINDOWS)
+    std::wstring unicodePath = fs::path(path).wstring();
+    return _waccess_s(unicodePath.c_str(), mode);
+#else
+    return access(path.c_str(), mode);
+#endif
+}
+
 
 // -----------------------------------------------------------------------------
 bool CDirEntry::isFile(const std::string& path)
 {
     STAT st;
 
-    if (stat(path.c_str(), &st) == -1)
+    if (stat_internal(path, &st) == -1)
         return false;
 
 #if defined(USE_WINDOWS)
@@ -44,9 +65,9 @@ bool CDirEntry::isDir(const std::string& path)
 {
     STAT st;
 
-    if (stat(path.c_str(), &st) == -1)
+    if (stat_internal(path, &st) == -1)
         return false;
-
+        
 #if defined(USE_WINDOWS)
     return ((st.st_mode & S_IFDIR) == S_IFDIR);
 #else
@@ -59,7 +80,7 @@ bool CDirEntry::exist(const std::string& path)
 {
     STAT st;
 
-    if (stat(path.c_str(), &st) == -1)
+    if (stat_internal(path, &st) == -1)
         return false;
 
 #if defined(USE_WINDOWS)
@@ -72,13 +93,13 @@ bool CDirEntry::exist(const std::string& path)
 // -----------------------------------------------------------------------------
 bool CDirEntry::isReadable(const std::string& path)
 {
-    return (access(path.c_str(), 0x4) == 0);
+    return (access_internal(path, 0x4) == 0);
 }
 
 // -----------------------------------------------------------------------------
 bool CDirEntry::isWritable(const std::string& path)
 {
-    return (access(path.c_str(), 0x2) == 0);
+    return (access_internal(path, 0x2) == 0);
 }
 
 // -----------------------------------------------------------------------------
@@ -223,7 +244,11 @@ bool CDirEntry::createDir(const std::string& dir, const std::string& parent)
     }
 
 #if defined(USE_WINDOWS) || defined(__MINGW32__)
-    return (mkdir(Dir.c_str()) == 0);
+
+    int ret;
+    std::wstring unicodePath = fs::path(Dir).wstring();
+    ret = _wmkdir(unicodePath.c_str());
+    return (ret == 0);
 #else
     return (mkdir(Dir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) == 0);
 #endif
@@ -288,8 +313,8 @@ bool CDirEntry::move(const std::string& from, const std::string& to)
     if (!success)
     {
         {
-            std::ifstream in(from.c_str());
-            std::ofstream out(To.c_str());
+            fs::ifstream in(fs::u8path(from));
+            fs::ofstream out(fs::u8path(To));
 
             out << in.rdbuf();
 
@@ -305,15 +330,25 @@ bool CDirEntry::move(const std::string& from, const std::string& to)
 // -----------------------------------------------------------------------------
 bool CDirEntry::remove(const std::string& path)
 {
-    if (isDir(path))
-        return (rmdir(path.c_str()) == 0);
-    else if (isFile(path))
 #if defined(USE_WINDOWS)
-        return (::remove(path.c_str()) == 0);
-#else
-        return (::remove(path.c_str()) == 0);
-#endif
 
+    std::wstring unicodePath = fs::path(path).wstring();
+    int ret = -1;
+    if (isDir(path)) {
+        ret = _wrmdir(unicodePath.c_str());
+    }
+    else if (isFile(path)) {
+        ret = _wremove(unicodePath.c_str());
+    }
+    return (ret == 0);
+#else
+    if (isDir(path)) {
+        return (rmdir(path.c_str()) == 0);
+    }
+    else if (isFile(path)) {
+        return (::remove(path.c_str()) == 0);
+    }
+#endif
     return false;
 }
 

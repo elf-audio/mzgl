@@ -8,7 +8,7 @@
 
 #include <functional>
 #include <exception>
-#include <fstream>
+#include "filesystem.h"
 #include <stdexcept>
 
 namespace zipper {
@@ -253,7 +253,7 @@ public:
         makedir(parentDirectory(filename));
 
         /* Create the file on disk so we can unzip to it */
-        std::ofstream output_file(filename.c_str(), std::ofstream::binary);
+        fs::ofstream output_file(fs::u8path(filename), std::ofstream::binary);
 
         if (output_file.good())
         {

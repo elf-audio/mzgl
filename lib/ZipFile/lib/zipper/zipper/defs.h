@@ -22,6 +22,7 @@ extern "C" {
 #if defined(USE_WINDOWS)
 #    include <direct.h>
 #    include <io.h>
+#    include <mbctype.h>
 typedef struct _stat STAT;
 #    define stat _stat
 #    define S_IFREG _S_IFREG
@@ -40,10 +41,14 @@ typedef struct stat STAT;
 #define WRITEBUFFERSIZE (8192)
 #define MAXFILENAME (256)
 
+//#if defined(USE_WINDOWS)
+//#undef USE_WINDOWS
+//#endif
+
 #if defined(USE_WINDOWS)
-#    define USEWIN32IOAPI
-#    include "ioapi.h"
-#    include "iowin32.h"
+//#    define USEWIN32IOAPI
+//#    include "ioapi.h"
+//#    include "iowin32.h"
 #endif
 }
 

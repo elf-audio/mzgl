@@ -70,27 +70,27 @@ bool makedir(const std::string& newdir)
 }
 
 // -----------------------------------------------------------------------------
-void removeFolder(const std::string& foldername)
+void removeFolder(const fs::path& foldername)
 {
-    if (!CDirEntry::remove(foldername))
+    if (!CDirEntry::remove(foldername.string()))
     {
-        std::vector<std::string> files = filesFromDirectory(foldername);
-        std::vector<std::string>::iterator it = files.begin();
+        std::vector<fs::path> files = filesFromDirectory(foldername.string());
+        std::vector<fs::path>::iterator it = files.begin();
         for (; it != files.end(); ++it)
         {
             if (isDirectory(*it) && *it != foldername)
                 removeFolder(*it);
             else
-                std::remove(it->c_str());
+                fs::remove(*it);
         }
-        CDirEntry::remove(foldername);
+        CDirEntry::remove(foldername.string());
     }
 }
 
 // -----------------------------------------------------------------------------
-bool isDirectory(const std::string& path)
+bool isDirectory(const fs::path& path)
 {
-    return CDirEntry::isDir(path);
+    return CDirEntry::isDir(path.string());
 }
 
 // -----------------------------------------------------------------------------
@@ -107,39 +107,17 @@ std::string currentPath()
 }
 
 // -----------------------------------------------------------------------------
-std::vector<std::string> filesFromDirectory(const std::string& path)
+std::vector<fs::path> filesFromDirectory(const std::string& path)
 {
-    std::vector<std::string> files;
-    DIR* dir;
-    struct dirent* entry;
+    std::vector<fs::path> dir_ls;
 
-    dir = opendir(path.c_str());
-
-    if (dir == NULL)
-        return files;
-
-    for (entry = readdir(dir); entry != NULL; entry = readdir(dir))
+    for (auto& dir_entry : fs::recursive_directory_iterator(fs::u8path(path)))
     {
-        std::string filename(entry->d_name);
-
-        if (filename == "." || filename == "..") continue;
-
-        if (CDirEntry::isDir(path + CDirEntry::Separator + filename))
-        {
-            std::vector<std::string> moreFiles = filesFromDirectory(path + CDirEntry::Separator + filename);
-            std::copy(moreFiles.begin(), moreFiles.end(), std::back_inserter(files));
-            continue;
-        }
-
-
-        files.push_back(path + CDirEntry::Separator + filename);
+        dir_ls.push_back(dir_entry.path());
     }
-
-    closedir(dir);
-
-
-    return files;
+    return dir_ls;
 }
+
 
 // -----------------------------------------------------------------------------
 std::string fileNameFromPath(const std::string& fullPath)
