@@ -107,46 +107,12 @@ std::string currentPath()
 }
 
 // -----------------------------------------------------------------------------
-std::vector<std::string> filesFromDirectoryx(const std::string& path)
-{
-    std::vector<std::string> files;
-    DIR* dir;
-    struct dirent* entry;
-
-    dir = opendir(path.c_str());
-
-    if (dir == NULL)
-        return files;
-
-    for (entry = readdir(dir); entry != NULL; entry = readdir(dir))
-    {
-        std::string filename(entry->d_name);
-
-        if (filename == "." || filename == "..") continue;
-
-        if (CDirEntry::isDir(path + CDirEntry::Separator + filename))
-        {
-            std::vector<std::string> moreFiles = filesFromDirectoryx(path + CDirEntry::Separator + filename);
-            std::copy(moreFiles.begin(), moreFiles.end(), std::back_inserter(files));
-            continue;
-        }
-
-
-        files.push_back(path + CDirEntry::Separator + filename);
-    }
-
-    closedir(dir);
-
-
-    return files;
-}
-
-// -----------------------------------------------------------------------------
 std::vector<fs::path> filesFromDirectory(const std::string& path)
 {
     std::vector<fs::path> dir_ls;
 
-    for (auto& dir_entry : fs::recursive_directory_iterator(fs::u8path(path))) {
+    for (auto& dir_entry : fs::recursive_directory_iterator(fs::u8path(path)))
+    {
         dir_ls.push_back(dir_entry.path());
     }
     return dir_ls;
