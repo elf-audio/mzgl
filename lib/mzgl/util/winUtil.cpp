@@ -374,32 +374,33 @@ void windowsThreeOptionCancelDialog(std::string title, std::string msg,
 
 #include<ShObjIdl_core.h>
 
-void windowsChooseFolderDialog(std::string msg, std::function<void(std::string, bool)> completionCallback) {
-	IFileDialog *pfd;
-	bool success = false;
-	WCHAR *dirName;
-	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd)))) {
-		DWORD dwOptions;		
-		if (SUCCEEDED(pfd->GetOptions(&dwOptions))) {
-			pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
-		}
-		if (SUCCEEDED(pfd->Show(NULL))) {
-			IShellItem *psi;
-			if (SUCCEEDED(pfd->GetResult(&psi))) {
-				if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &dirName))) {
-					success = true;
-				}
-				psi->Release();
-			}
-		}
-		pfd->Release();
-	}
-	
-	std::string filename;
+
+void windowsChooseEntryDialog(bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback) {
+    IFileDialog* pfd;
+    bool success = false;
+    WCHAR* entryName;
+    if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd)))) {
+        DWORD dwOptions;
+        if (SUCCEEDED(pfd->GetOptions(&dwOptions))) {
+            pfd->SetOptions(dwOptions | (isFile ? (FOS_FORCEFILESYSTEM | FOS_FILEMUSTEXIST) : FOS_PICKFOLDERS));
+        }
+        if (SUCCEEDED(pfd->Show(NULL))) {
+            IShellItem* psi;
+            if (SUCCEEDED(pfd->GetResult(&psi))) {
+                if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &entryName))) {
+                    success = true;
+                }
+                psi->Release();
+            }
+        }
+        pfd->Release();
+    }
+
+    std::string filename;
     if (success) {
-		std::wstring ws(dirName);
-		filename = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
-		CoTaskMemFree(dirName);
-	}
-	completionCallback(success ? filename : "", success);
+        std::wstring ws(entryName);
+        filename = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
+        CoTaskMemFree(entryName);
+    }
+    completionCallback(success ? filename : "", success);
 }

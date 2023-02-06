@@ -16,4 +16,6 @@ void windowsThreeOptionCancelDialog(std::string title, std::string msg,
                              std::string buttonThreeText, std::function<void()> buttonThreePressed,
                              std::function<void()> cancelPressed);
 
-void windowsChooseFolderDialog(std::string msg, std::function<void(std::string, bool)> completionCallback);
+// isFile - true choose file
+//          false choose dir
+void windowsChooseEntryDialog(bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback);

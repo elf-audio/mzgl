@@ -1012,29 +1012,7 @@ void Dialogs::loadFile(std::string msg,
 #endif
 
 #ifdef _WIN32
-
-	OPENFILENAME ofn;
-
-	ZeroMemory(&ofn, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	HWND hwnd = WindowFromDC(wglGetCurrentDC());
-	ofn.hwndOwner = hwnd;
-
-	//  wchar_t szFileName[MAX_PATH] = L"";
-	char szFileName[MAX_PATH] = "";
-	ofn.lpstrFilter = "All\0";
-	ofn.lpstrFile = szFileName;
-
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrDefExt = 0;
-
-	if (GetOpenFileName(&ofn)) {
-		completionCallback(szFileName, true);
-		//completionCallback(convertWideToNarrow(szFileName), true);
-	} else {
-		completionCallback("", false);
-	}
+	windowsChooseEntryDialog(true, msg, completionCallback);
 
 #elif defined(__APPLE__)
 
@@ -1164,6 +1142,6 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 	linuxChooseFolderDialog(msg, completionCallback);
 
 #elif (WIN32)
-	windowsChooseFolderDialog(msg, completionCallback);
+	windowsChooseEntryDialog(false, msg, completionCallback);
 #endif
 }
