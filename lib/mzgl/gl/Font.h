@@ -13,11 +13,20 @@
 #include "Texture.h"
 struct FONScontext;
 
-enum class TextAlign {
+enum class HTextAlign {
 	Left,
 	Center,
 	Right
 };
+enum class VTextAlign {
+	Top,
+	Center,
+	Bottom
+};
+
+
+
+
 
 class Font {
 public:
@@ -27,7 +36,7 @@ public:
 	void draw(Graphics &g, const std::string &text, float x, float y);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c);
 	void drawCentred(Graphics &g, const std::string &text, glm::vec2 c);
-	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, TextAlign align = TextAlign::Left);
+	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign align = HTextAlign::Left);
 	void drawHorizontallyCentred(Graphics &g, const std::string &text, glm::vec2 c);
 	
 	// draws the string making c the bottom left corner

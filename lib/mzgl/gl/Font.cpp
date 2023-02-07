@@ -259,15 +259,15 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	g.popMatrix();
 }
 
-void Font::drawVerticallyCentred(Graphics &g, const string &text, glm::vec2 c, TextAlign align) {
-	if(align==TextAlign::Center) {
+void Font::drawVerticallyCentred(Graphics &g, const string &text, glm::vec2 c, HTextAlign align) {
+	if(align==HTextAlign::Center) {
 		drawCentred(g, text, c);
 	} else {
 
 		auto a = getRect(text, 0, 0);
 		auto by = c.y - a.centre().y;
 				
-		if(align==TextAlign::Left) {
+		if(align==HTextAlign::Left) {
 			draw(g, text, c.x, by);
 		} else { // TextAlign::Right
 			draw(g, text, c.x - a.width, by);
