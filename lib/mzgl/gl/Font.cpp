@@ -259,8 +259,33 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	g.popMatrix();
 }
 
+
+
+void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign) {
+	
+	auto a = getRect(text, 0, 0);
+
+	float x = c.x; // default left align
+	float y = c.y - a.y; // default top align
+	
+	if(halign==HTextAlign::Centre) {
+		x = c.x - a.width/2.f;
+	} else if(halign==HTextAlign::Right) {
+		x = c.x - a.width;
+	}
+	
+	if(valign==VTextAlign::Centre) {
+		y = c.y - a.centre().y;
+	} else if(valign==VTextAlign::Bottom) {
+		y = c.y - a.bottom();
+	}
+	
+	draw(g, text, x, y);
+}
+
+
 void Font::drawVerticallyCentred(Graphics &g, const string &text, glm::vec2 c, HTextAlign align) {
-	if(align==HTextAlign::Center) {
+	if(align==HTextAlign::Centre) {
 		drawCentred(g, text, c);
 	} else {
 

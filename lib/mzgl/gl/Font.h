@@ -15,12 +15,12 @@ struct FONScontext;
 
 enum class HTextAlign {
 	Left,
-	Center,
+	Centre,
 	Right
 };
 enum class VTextAlign {
 	Top,
-	Center,
+	Centre,
 	Bottom
 };
 
@@ -35,11 +35,13 @@ public:
 	
 	void draw(Graphics &g, const std::string &text, float x, float y);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c);
+	void draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign);
+	
 	void drawCentred(Graphics &g, const std::string &text, glm::vec2 c);
 	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign align = HTextAlign::Left);
 	void drawHorizontallyCentred(Graphics &g, const std::string &text, glm::vec2 c);
 	
-	// draws the string making c the bottom left corner
+	// draws the string making c the bottom left corner - get rid of this in favour of draw(..., halign, valign)
 	void drawBottomLeftAligned(Graphics &g, const std::string &text, glm::vec2 c);
 	
 	std::string ellipsize(const std::string &t, int w) const;
