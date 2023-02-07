@@ -148,3 +148,6 @@ public:
 
 FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r);
 FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r);
+
+
+using FloatBufferRef = std::shared_ptr<FloatBuffer>;
