@@ -373,6 +373,7 @@ elseif(APPLE)
 elseif(WIN32)
 
     add_compile_definitions(_WIN32_WINNT=0x0601 GLEW_STATIC)
+    add_compile_definitions(__WINDOWS_MM__)
 
     list(APPEND MZGL_LIBS
         ${GLFW_LIBRARIES}
