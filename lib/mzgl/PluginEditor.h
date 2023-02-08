@@ -17,7 +17,15 @@ public:
 	PluginEditor(Graphics &g, ::Plugin &effect) : App(g), effect(effect) {}
 	virtual ~PluginEditor() {}
 
+	// right now just for auv3
+	// so koala knows when to cut off the otherMain
+	// - the plugin can be started without the view,
+	// or it can temporarily stop the view from rendering
+	// in which case we don't get a main loop
+	virtual void pluginViewAppeared() {}
+	virtual void pluginViewDisappeared() {}
 
+	
 	std::function<void(unsigned int, float)> uiParameterChanged;
 };
 

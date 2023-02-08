@@ -56,7 +56,9 @@ void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
 		
 		std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 		duration += sleepTime;
-		if(duration>1'000'000 && pollCount==originalPollCount) {
+		
+		// this may never have polled
+		if(duration>1'000'000 && pollCount==0) {
 			Log::e() << "Main thread may be not active";
 			pollMainThreadQueue();
 		}

@@ -198,7 +198,6 @@ public:
 	};
 	
 	
-	
 	// midi events will come in on audio thread
 	virtual void midiReceivedAtTime(const MidiMessage &m, uint32_t delay) {}
 	

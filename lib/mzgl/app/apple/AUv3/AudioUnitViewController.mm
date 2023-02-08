@@ -117,6 +117,10 @@ using namespace std;
     }
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+	if(app) app->pluginViewDisappeared();
+}
+
 - (void)viewWillAppear:(BOOL)animated {
 	if(app==nullptr && plugin!=nullptr) {
 		app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, plugin.get()));
@@ -134,6 +138,7 @@ using namespace std;
     NSLog(@"MZGL: viewDidAppear");
     [self addGLView];
     [self tryToResize];
+	if(app) app->pluginViewAppeared();
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id)coordinator {
