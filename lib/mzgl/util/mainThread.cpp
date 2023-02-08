@@ -48,13 +48,15 @@ void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
 		fn();
 		done.store(true);
 	});
+	int originalPollCount = pollCount;
+	
 	const uint64_t sleepTime = 100;
 	uint64_t duration = 0;
 	while(!done.load()) {
 		
 		std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 		duration += sleepTime;
-		if(duration>1'000'000 && !mainThreadEverPolled) {
+		if(duration>1'000'000 && pollCount==originalPollCount) {
 			Log::e() << "Main thread may be not active";
 			pollMainThreadQueue();
 		}
@@ -88,7 +90,8 @@ void MainThreadRunner::pollInternal() {
 
 void MainThreadRunner::pollMainThreadQueue() {
 	
-	mainThreadEverPolled = true;
+//	mainThreadEverPolled = true;
+	pollCount++;
 	pollInternal();
 }
 

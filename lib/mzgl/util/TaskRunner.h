@@ -24,6 +24,9 @@
 class TaskRunner {
 public:
     
+#ifdef DEBUG
+	std::atomic<int> jobCount {0};
+#endif
     /**
      * For testing you can set the task runner to be synchronous - which will
      * just run functions passed to it rather than spinning up another thread
@@ -48,6 +51,9 @@ public:
                 }
                 
                 while(taskQueue.try_dequeue(taskFn)) {
+#ifdef DEBUG
+	jobCount--;
+#endif
                     tasks.emplace_back(std::make_shared<Task>(taskFn));
                 }
                 
@@ -66,6 +72,10 @@ public:
             Log::e() << "TaskRunner '"<<name<<"' is finished!";
             return;
         }
+#ifdef DEBUG
+	jobCount++;
+#endif
+		
         taskQueue.enqueue(taskFn);
         
 	}
@@ -77,7 +87,6 @@ public:
         fut.wait();
 		waitTilAllTasksAreDone();
 	}
-
     
    
 private:
@@ -87,13 +96,9 @@ private:
 
         std::future<void> taskFuture;
         std::atomic<bool> isDone { false };
-//#if UNIT_TEST
-//        std::function<void()> tf;
-//#endif
+		
         Task(std::function<void()> taskFn) {
-//#if UNIT_TEST
-//            tf = taskFn;
-//#endif
+
             taskFuture = std::async(std::launch::async, [this, taskFn](){
  #if defined(__APPLE__) && (DEBUG || UNIT_TEST)
                 // sets a thread name that is readable in xcode when debugging
@@ -106,20 +111,14 @@ private:
                     Log::e() << "exception in runTask: " << ex;
                 }
                 isDone.store(true);
-                // printf("finish task\n");
             });
-            
         }
         
         bool done() {
-//            return !taskFuture.valid();
             return isDone.load();
         }
     };
     
-    
-   
-
     
     moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
 	std::list<std::shared_ptr<Task>> tasks;
