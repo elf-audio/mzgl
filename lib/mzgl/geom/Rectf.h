@@ -40,6 +40,8 @@ public:
 	void setFromCentre(float cx, float cy, float w, float h);
 	void setFromCentre(glm::vec2 c, float w, float h) { setFromCentre(c.x, c.y, w, h); }
 	
+	static Rectf fromCentre(float cx, float cy, float w, float h) { Rectf r; r.setFromCentre(cx,cy,w,h); return r;}
+	static Rectf fromCentre(glm::vec2 c, float w, float h) { Rectf r; r.setFromCentre(c,w,h); return r;}
 	glm::vec2 tl() const { return glm::vec2(x, y); }
 	glm::vec2 tr() const { return glm::vec2(x + width, y); }
 	glm::vec2 bl() const { return glm::vec2(x, y + height); }
