@@ -32,6 +32,7 @@ public:
 	
 	static VboRef createVboFromStringWithScale(const std::string &svgCode, float scale, bool ignoreColor);
 	static VboRef createVboFromStringWithHeight(const std::string &svgCode, float height, bool ignoreColor);
+	static VboRef createVboFromStringWithWidth(const std::string &svgCode, float width, bool ignoreColor);
 
 	static SvgVboRef create(std::string path, float scale, bool ignoreColor) {
 		return SvgVboRef(new SvgVbo(path, scale, ignoreColor));
