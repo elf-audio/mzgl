@@ -10,7 +10,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "mzOpenGL.h"
 #include "Image.h"
 
 #include "Rectf.h"
@@ -30,8 +29,16 @@ public:
         Linear
     };
     
+	enum class PixelFormat {
+		RGBA,
+		RGB,
+		LUMINANCE,
+	};
+	
     void setSamplingMethod(SamplingMethod sampling);
-	static TextureRef create(GLuint textureID = 0, int width = 0, int height = 0) {
+	
+	
+	static TextureRef create(uint32_t textureID = 0, int width = 0, int height = 0) {
 		return TextureRef(new Texture(textureID, width, height));
 	}
 
@@ -56,14 +63,14 @@ public:
 	
 	void enableWrap(bool wrapX = true, bool wrapY = true);
 	
-	void allocate(const unsigned char *data, int w, int h, int type = GL_RGBA);
-	void allocate(int w, int h, int type = GL_RGBA);
+	void allocate(const unsigned char *data, int w, int h, PixelFormat type = PixelFormat::RGBA);
+	void allocate(int w, int h, PixelFormat type = PixelFormat::RGBA);
 	void deallocate();
 	bool load(const std::string &imgFilePath);
 
 	int width  = 0;
 	int height = 0;
-	GLuint getId() { return textureID; }
+	uint32_t getId() { return textureID; }
 	// TODO: this owns thing is a bit messy, surely we want shared_ptr
 	// here. It's a case when you put a texID in the constructor from
 	// somewhere else to draw it temporarily, we don't want the tex
@@ -97,7 +104,7 @@ private:
     // WARNING - outData gets modified inplace if it's an incompatible number of channels
     bool loadFromPixels(std::vector<uint8_t> &outData, int w, int h, int numChans, int bytesPerChan, bool isFloat);
 
-    Texture(GLuint textureID, int width, int height) : Texture() {
+    Texture(uint32_t textureID, int width, int height) : Texture() {
 		this->textureID = textureID;
 		this->width = width;
 		this->height = height;
@@ -110,6 +117,6 @@ private:
 
 
 	Texture();
-	GLuint textureID = 0;
+	uint32_t textureID = 0;
 
 };

@@ -6,6 +6,11 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+
+
+#include "mzOpenGL.h"
+
+
 #include "Vbo.h"
 #include "Shader.h"
 #include "error.h"
@@ -93,7 +98,7 @@ void Vbo::deallocateResources() {
 	numTcs = 0;
 	numNorms = 0;
 	
-	mode = 0xDEADBEEF;
+	mode = PrimitiveType::None;
 }
 
 void Vbo::clear() {
@@ -252,7 +257,22 @@ void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
 }
 
 
-void Vbo::draw(Graphics &g, int mode, size_t instances) {
+static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
+	switch(mode) {
+		case Vbo::PrimitiveType::Triangles:		return GL_TRIANGLES;
+		case Vbo::PrimitiveType::TriangleStrip:	return GL_TRIANGLE_STRIP;
+		case Vbo::PrimitiveType::TriangleFan: 	return GL_TRIANGLE_FAN;
+		case Vbo::PrimitiveType::LineLoop:		return GL_LINE_LOOP;
+		case Vbo::PrimitiveType::LineStrip:		return GL_LINE_STRIP;
+		case Vbo::PrimitiveType::Lines:			return GL_LINES;
+			
+		default: {
+			Log::e() << "ERROR!! invalid primitive type " << (int)mode;
+			return GL_TRIANGLES;
+		}
+	}
+}
+void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	if(numVerts==0) {
 //	    Log::d() << "This is so hard to find";
 //		Log::i() << "Trying to draw Vbo with no vertices";
@@ -270,11 +290,11 @@ void Vbo::draw(Graphics &g, int mode, size_t instances) {
 	_numDrawnVerts += numVerts;
 	_numDrawCalls++;
 #endif
-	if(mode==-1) {
-		if(this->mode!=0xDEADBEEF) {
+	if(mode==PrimitiveType::None) {
+		if(this->mode!=PrimitiveType::None) {
 			mode = this->mode;
 		} else {
-			mode = GL_TRIANGLES;
+			mode = PrimitiveType::Triangles;
 		}
 	}
 
@@ -395,16 +415,17 @@ void Vbo::draw(Graphics &g, int mode, size_t instances) {
 		GetError();
 	}
 	
+	auto glMode = primitiveTypeToGLMode(mode);
 	if(instances>1) {
 		if(indexBuffer) {
 #ifdef MZGL_GL2
 			// simulate instancing in gl2
 			for(int i = 0; i < instances; i++) {
 				g.currShader->setInstanceUniforms(i);
-				glDrawElements(mode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0);
+				glDrawElements(glMode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0);
 			}
 #else
-			glDrawElementsInstanced(mode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0, instances);
+			glDrawElementsInstanced(glMode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0, instances);
 #endif
 		} else {
 			
@@ -412,17 +433,17 @@ void Vbo::draw(Graphics &g, int mode, size_t instances) {
 			// simulate instancing in gl2
 			for(int i = 0; i < instances; i++) {
 				g.currShader->setInstanceUniforms(i);
-				glDrawArrays(mode, 0, (GLsizei)numVerts);
+				glDrawArrays(glMode, 0, (GLsizei)numVerts);
 			}
 #else
-			glDrawArraysInstanced(mode, 0, (GLsizei)numVerts, instances);
+			glDrawArraysInstanced(glMode, 0, (GLsizei)numVerts, instances);
 #endif
 		}
 	} else {
 		if(indexBuffer) {
-			glDrawElements(mode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0);
+			glDrawElements(glMode, (GLsizei)numIndices, GL_UNSIGNED_INT, (void*)0);
 		} else {
-			glDrawArrays(mode, 0, (GLsizei)numVerts);
+			glDrawArrays(glMode, 0, (GLsizei)numVerts);
 		}
 	}
 	
@@ -452,7 +473,7 @@ void Vbo::draw(Graphics &g, int mode, size_t instances) {
 	GetError();
 }
 
-Vbo &Vbo::setMode(GLuint mode) {
+Vbo &Vbo::setMode(PrimitiveType mode) {
 	this->mode = mode;
 	return *this;
 }

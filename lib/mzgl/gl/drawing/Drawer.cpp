@@ -393,7 +393,7 @@ void Drawer::commit(VboRef vbo, bool ignoreColor, bool addNormalizedTexCoords) {
 			geom.calculateNormalizedTexCoords();
 			vbo->setTexCoords(geom.texCoords);
 		}
-		vbo->setMode(GL_TRIANGLES);
+		vbo->setMode(Vbo::PrimitiveType::Triangles);
 	}
 	geom.clear();
 }

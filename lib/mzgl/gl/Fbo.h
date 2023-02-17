@@ -19,7 +19,7 @@ public:
 	int height = 0;
 	TextureRef tex;
 	
-	void setup(int w, int h, GLenum type = GL_RGBA, bool hasDepth = false, int numSamples = 0);
+	void setup(int w, int h, Texture::PixelFormat format = Texture::PixelFormat::RGBA, bool hasDepth = false, int numSamples = 0);
 	
 	void begin(Graphics &g);
 	void end(Graphics &g);
@@ -35,14 +35,15 @@ public:
 private:
 	int numSamples = 0;
 
-	GLuint fboId = 0;
-	GLuint rboDepthId = 0;
+	// GLuints
+	uint32_t fboId = 0;
+	uint32_t rboDepthId = 0;
 	
 	// when msaa engaged, this is where the multisampled texture is stored.
-	GLuint rboMsaaColorId = 0;
+	uint32_t rboMsaaColorId = 0;
 	// when msaa, this is the normal sized buffer, backed by our texture, that gets blitted into
-	GLuint downsampleFboId = 0;
-	GLuint downsampleDepthRboId = 0;
+	uint32_t downsampleFboId = 0;
+	uint32_t downsampleDepthRboId = 0;
 	void deallocate();
 	
 };

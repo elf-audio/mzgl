@@ -70,6 +70,8 @@ set(MZGL_SOURCES
     lib/mzgl/gl/SvgVbo.cpp
     lib/mzgl/gl/Texture.cpp
     lib/mzgl/gl/Vbo.cpp
+    lib/mzgl/gl/ScopedMask.cpp
+    lib/mzgl/gl/glUtil.cpp
     lib/mzgl/gl/drawing/Drawer.cpp
     lib/mzgl/gl/drawing/MitredLine.cpp
     lib/mzgl/midi/Midi.cpp

@@ -53,7 +53,13 @@ public:
 
     std::function<void(bool)> setAntialiasing = [](bool){};
 
+	enum class BlendMode {
+		Alpha, // the classic alpha blending mode
+		Additive,
+	};
+	
     void setBlending(bool shouldBlend);
+	void setBlendMode(BlendMode blendMode);
     bool isBlending();
     glm::vec4 getColor();
 
@@ -73,7 +79,7 @@ public:
 
     void loadDefaultShaders();
 
-
+	
 
     void noFill();
     void fill();
@@ -112,9 +118,9 @@ public:
 
     void drawShape(const std::vector<vec2> &shape);
     void drawTriangle(vec2 a, vec2 b, vec2 c);
-    void drawVerts(const std::vector<glm::vec2> &verts, int type = GL_TRIANGLES);
+    void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
     void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices);
-    void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<glm::vec4> &cols, int type = GL_TRIANGLES);
+    void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<glm::vec4> &cols, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
 
     void drawText(const std::string &s, float x, float y);
     void drawText(const std::string &s, glm::vec2 p);
@@ -149,6 +155,14 @@ public:
     void setViewMatrix(glm::mat4 viewMat);
     glm::mat4 getMVP();
     const glm::mat4 &getModelMatrix();
+	
+	
+	
+	void maskOn(const Rectf &r);
+	void maskOff();
+	bool isMaskOn();
+	Rectf getMaskRect();
+	
     /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
     // PRIVATE
@@ -158,7 +172,7 @@ public:
     unsigned int getFrameNum() { return frameNum; }
     // when you want to unbind a frame buffer (fbo) you need to bind to this
     // as on iOS, the default framebuffer is not always 0
-    GLint getDefaultFrameBufferId();
+    
     Font &getFont();
     void unloadFont();
     Font *font = nullptr;
@@ -177,10 +191,13 @@ public:
     std::map<int,Layer*> focusedLayers;
 
     friend class App;
-
+	
+	// for FBO
+	int32_t getDefaultFrameBufferId();
+	
 private:
     float strokeWeight = 1;
-    GLint defaultFBO;
+    
     bool blendingEnabled = false;
     bool filling = true;
     glm::vec4 color;
@@ -193,10 +210,12 @@ private:
     friend class ScopedAlphaBlend;
     friend class ScopedTranslate;
 
-    GLuint immediateVertexArray = 0;
-    GLuint immediateVertexBuffer = 0;
-    GLuint immediateColorBuffer = 0;
-    GLuint immediateIndexBuffer = 0;
+	
+	int32_t defaultFBO;
+    uint32_t immediateVertexArray = 0;
+	uint32_t immediateVertexBuffer = 0;
+	uint32_t immediateColorBuffer = 0;
+	uint32_t immediateIndexBuffer = 0;
 
 
     // was in Globals
@@ -234,47 +253,5 @@ struct ScopedShaderEnable {
     virtual ~ScopedShaderEnable() { sh->end(); }
 };
 
-struct ScopedMask {
-    bool scissorWasEnabled = false;
-    float vals[4];
-    bool masking = false;
+#include "ScopedMask.h"
 
-    // you can initialize with empty constructor
-    // so there's no mask actually happening
-    // this is handy when you want conditinal masks
-    ScopedMask() {
-        masking = false;
-    }
-    ScopedMask(Graphics &g, const Rectf &r) {
-        startMask(g, r);
-    }
-
-    void startMask(Graphics &g, const Rectf &r) {
-        masking = true;
-        if(glIsEnabled(GL_SCISSOR_TEST)) {
-            scissorWasEnabled = true;
-            glGetFloatv(GL_SCISSOR_BOX, vals);
-        }
-        glEnable(GL_SCISSOR_TEST);
-
-        // glScissor works with pixel coordinates
-        // so make sure that parameters are not
-        // in different coord-space. If thats the case,
-        // some kind of translation must take place here
-        // see: wrapMaskForScissors
-        glScissor(r.x, g.height-(r.bottom()), r.width, r.height);
-    }
-
-    void stopMask() {
-        if(!masking) return;
-        if(scissorWasEnabled) {
-            glScissor(vals[0], vals[1], vals[2], vals[3]);
-        } else {
-            glDisable(GL_SCISSOR_TEST);
-        }
-    }
-
-    virtual ~ScopedMask() {
-        stopMask();
-    }
-};

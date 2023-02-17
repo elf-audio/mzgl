@@ -13,6 +13,7 @@
 #include <iostream>
 #include "error.h"
 #include "log.h"
+#include "mzOpenGL.h"
 
 using namespace std;
 
@@ -72,13 +73,13 @@ bool checkFramebufferStatus(GLuint fbo)
 
 
 
-void Fbo::setup(int w, int h, GLenum type, bool hasDepth, int numSamples) {
+void Fbo::setup(int w, int h, Texture::PixelFormat fmt, bool hasDepth, int numSamples) {
 	deallocate();
 	this->width = w;
 	this->height = h;
 	this->numSamples = numSamples;
 	tex = Texture::create();
-	tex->allocate(w,h, type);
+	tex->allocate(w,h, fmt);
 	
 	
 	glGenFramebuffers(1, &fboId);
@@ -111,9 +112,9 @@ void Fbo::setup(int w, int h, GLenum type, bool hasDepth, int numSamples) {
 		glBindRenderbuffer(GL_RENDERBUFFER, rboMsaaColorId);
 		GetError();
 		GLuint internalFormat = GL_RGBA8;
-		if(type==GL_RGB) {
+		if(fmt==Texture::PixelFormat::RGB) {
 			internalFormat = GL_RGB8;
-		} else if(type==GL_RGBA) {
+		} else if(fmt==Texture::PixelFormat::RGBA) {
 			internalFormat = GL_RGBA8;
 		} else {
 			assert(0);

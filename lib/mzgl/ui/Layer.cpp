@@ -36,24 +36,27 @@ string Layer::toString() const {
 
 
 void Layer::maskOn() {
-	glEnable(GL_SCISSOR_TEST);
-	auto r = getAbsoluteRect();
-	r.y = g.height - (r.y+r.height);
 	
-	// my suspicion is the way mac and ios set up pixel scaling
-	// means that this works for them but not others. I should make others work
-	// with this.
-#if defined(__APPLE__) || defined(__ANDROID__)
-	glScissor(r.x, r.y, r.width, r.height);
-#else
-    glScissor(r.x/g.pixelScale, r.y/g.pixelScale, r.width/g.pixelScale, r.height/g.pixelScale);
-#endif
-//	glScissor(r.x*fctr, g.height*fctr-(r.y*fctr+r.height*fctr), r.width*fctr, r.height*fctr);
-	//g.clear({0, 1, 0, 1});
+	auto r = getAbsoluteRect();
+	//r.y = g.height - (r.y+r.height);
+	
+	
+//	glEnable(GL_SCISSOR_TEST);
+//	// my suspicion is the way mac and ios set up pixel scaling
+//	// means that this works for them but not others. I should make others work
+//	// with this.
+//#if defined(__APPLE__) || defined(__ANDROID__)
+//	glScissor(r.x, r.y, r.width, r.height);
+//#else
+//    glScissor(r.x/g.pixelScale, r.y/g.pixelScale, r.width/g.pixelScale, r.height/g.pixelScale);
+//#endif
+
+	g.maskOn(r);//*this);
 }
 
 void Layer::maskOff() {
-	glDisable(GL_SCISSOR_TEST);
+//	glDisable(GL_SCISSOR_TEST);
+	g.maskOff();
 	
 }
 

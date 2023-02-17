@@ -14,6 +14,7 @@
 #include "error.h"
 #include "log.h"
 #include "mzAssert.h"
+#include "mzOpenGL.h"
 
 using namespace std;
 
@@ -101,6 +102,54 @@ bool Texture::load(const string &imgFilePath) {
 
 }
 
+//static PixelFormat glToPixelFormat(GLuint fmt) {
+//	int glType = GL_RGBA;
+//	if(numChans==4) {
+//		glType = GL_RGBA;
+//	} else if(numChans==3) {
+//		glType = GL_RGB;
+//	} else if(numChans==1) {
+//#ifdef GL_LUMINANCE
+//		glType = GL_LUMINANCE;
+//#else
+//		glType = GL_ALPHA;
+//#endif
+//
+//	}
+//}
+
+static GLenum pixelFormatToGLType(Texture::PixelFormat fmt) {
+	switch(fmt) {
+		case Texture::PixelFormat::RGBA:
+			return GL_RGBA;
+		case Texture::PixelFormat::RGB:
+			return GL_RGB;
+		case Texture::PixelFormat::LUMINANCE:
+#ifdef GL_LUMINANCE
+			return GL_LUMINANCE;
+#else
+			return GL_ALPHA;
+#endif
+		default:
+			return GL_RGBA;
+	}
+}
+
+static Texture::PixelFormat numChansToPixelFormat(int numChans) {
+	int glType = GL_RGBA;
+	if(numChans==4) {
+		return Texture::PixelFormat::RGBA;
+	} else if(numChans==3) {
+		return Texture::PixelFormat::RGB;
+	} else if(numChans==1) {
+		return Texture::PixelFormat::LUMINANCE;
+	}
+	Log::e() << "ERROR: got number of channels don't know how to deal with: " << numChans;
+	return Texture::PixelFormat::RGBA;
+}
+
+
+
 bool Texture::loadFromPixels(vector<uint8_t> &outData, int w, int h, int numChans, int bytesPerChan, bool isFloat) {
 
 	if(w==0 || h==0) {
@@ -131,33 +180,35 @@ bool Texture::loadFromPixels(vector<uint8_t> &outData, int w, int h, int numChan
 
     mzAssert(numChans==3 || numChans==4);
 
-    int glType = GL_RGBA;
-    if(numChans==4) {
-        glType = GL_RGBA;
-    } else if(numChans==3) {
-        glType = GL_RGB;
-    } else if(numChans==1) {
-#ifdef GL_LUMINANCE
-        glType = GL_LUMINANCE;
-#else
-        glType = GL_ALPHA;
-#endif
+	
+//    int glType = GL_RGBA;
+//    if(numChans==4) {
+//        glType = GL_RGBA;
+//    } else if(numChans==3) {
+//        glType = GL_RGB;
+//    } else if(numChans==1) {
+//#ifdef GL_LUMINANCE
+//        glType = GL_LUMINANCE;
+//#else
+//        glType = GL_ALPHA;
+//#endif
+//
+//    }
 
-    }
-
-    allocate(outData.data(), w, h, glType);
+    allocate(outData.data(), w, h, numChansToPixelFormat(numChans));
     return true;
 }
 
 
 
-void Texture::allocate(int w, int h, int type) {
+void Texture::allocate(int w, int h, PixelFormat type) {
 	allocate(nullptr, w, h);
 }
 
-void Texture::allocate(const unsigned char *data, int w, int h, int type) {
+void Texture::allocate(const unsigned char *data, int w, int h, PixelFormat fmt) {
 	owns = true;
 
+	auto type = pixelFormatToGLType(fmt);
 	GetError();
 	glGenTextures(1, &textureID);
 	

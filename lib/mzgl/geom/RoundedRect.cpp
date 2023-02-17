@@ -33,7 +33,7 @@ void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid, floa
 	
 	if(solid) {
 		m->setVertices(verts);
-		m->setMode(GL_TRIANGLE_FAN);
+		m->setMode(Vbo::PrimitiveType::TriangleFan);
 	} else {
 		MitredLine lineDrawer;
 
@@ -48,7 +48,7 @@ void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid, floa
 		m->setVertices(vs);
 		m->setIndices(indices);
 
-		m->setMode(GL_TRIANGLE_STRIP);
+		m->setMode(Vbo::PrimitiveType::TriangleStrip);
 	}
 }
 

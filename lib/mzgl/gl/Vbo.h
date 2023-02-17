@@ -10,9 +10,6 @@
 
 
 
-
-#include "mzOpenGL.h"
-
 #define DO_DRAW_STATS
 
 
@@ -31,18 +28,30 @@ using vec4 = glm::vec4;
 
 
 class Vbo;
-typedef std::shared_ptr<Vbo> VboRef;
+using VboRef = std::shared_ptr<Vbo>;
 class Graphics;
 class Geometry;
 
 class Vbo {
 public:
-	GLuint vertexArrayObject = 0;
-	GLuint vertexBuffer = 0;
-	GLuint colorbuffer = 0;
-	GLuint texCoordBuffer = 0;
-	GLuint normalBuffer = 0;
-	GLuint indexBuffer = 0;
+	
+	enum class PrimitiveType {
+		Triangles,
+		TriangleStrip,
+		TriangleFan,
+		LineLoop,
+		LineStrip,
+		Lines,
+		None,
+	};
+	
+	// these were GLuints
+	uint32_t vertexArrayObject = 0;
+	uint32_t vertexBuffer = 0;
+	uint32_t colorbuffer = 0;
+	uint32_t texCoordBuffer = 0;
+	uint32_t normalBuffer = 0;
+	uint32_t indexBuffer = 0;
 	
 	static VboRef create() {
 		return VboRef(new Vbo());
@@ -73,10 +82,12 @@ public:
 	
 	
 	// GL_TRIANGLES etc optional
-	Vbo &setMode(GLuint mode);
+	Vbo &setMode(PrimitiveType mode);
 	
-	void draw(Graphics &g, int mode = -1, size_t instances = 1);
-	void drawInstanced(Graphics &g, size_t instances) { draw(g, -1, instances);};
+	
+	// if primitive type is none, it will use whatever PrimitiveType stored in the vbo
+	void draw(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1);
+	void drawInstanced(Graphics &g, size_t instances) { draw(g, PrimitiveType::None, instances);};
 	size_t getNumVerts() { return numVerts; }
 	
 #ifdef DO_DRAW_STATS
@@ -90,7 +101,7 @@ private:
 	static int _numDrawCalls;
 #endif
 	
-	GLuint mode = 0xDEADBEEF;
+	PrimitiveType mode = PrimitiveType::None;
 	
 	size_t numVerts = 0;
 	size_t numIndices = 0;

@@ -694,6 +694,18 @@
 		EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
 		EA9C32E8299F9EFE000C1DD2 /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA9C32E9299F9EFF000C1DD2 /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
+		EA9C32F0299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
+		EA9C32F1299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
+		EA9C32F2299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
+		EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
+		EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
+		EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
+		EA9C32F8299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
+		EA9C32F9299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
+		EA9C32FA299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
+		EA9C32FB299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
+		EA9C32FC299FCF4C000C1DD2 /* glUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32F7299FCF4C000C1DD2 /* glUtil.h */; };
+		EA9C32FD299FCF4C000C1DD2 /* glUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32F7299FCF4C000C1DD2 /* glUtil.h */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -1139,6 +1151,10 @@
 		EA924367274000E300311C98 /* AllMidiDevices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllMidiDevices.cpp; sourceTree = "<group>"; };
 		EA92436C27400D8800311C98 /* AllMidiDevicesImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesImpl.h; sourceTree = "<group>"; };
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
+		EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedMask.cpp; sourceTree = "<group>"; };
+		EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedMask.h; sourceTree = "<group>"; };
+		EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = glUtil.cpp; sourceTree = "<group>"; };
+		EA9C32F7299FCF4C000C1DD2 /* glUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glUtil.h; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAAA590C2755436F00021ACA /* vec4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vec4.hpp; sourceTree = "<group>"; };
@@ -2013,11 +2029,15 @@
 				EA1836322432C18B00A5C3E8 /* Shader.h */,
 				EA18363A2432C18B00A5C3E8 /* Shader.cpp */,
 				EA1836332432C18B00A5C3E8 /* SvgVbo.h */,
+				EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */,
+				EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */,
 				EA18363B2432C18B00A5C3E8 /* SvgVbo.cpp */,
 				EA18363F2432C18B00A5C3E8 /* Font.h */,
 				EA1836362432C18B00A5C3E8 /* Font.cpp */,
 				EA1732BB245AD802009E7B55 /* DefaultFont.inc.h */,
 				EA1836372432C18B00A5C3E8 /* Vbo.h */,
+				EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */,
+				EA9C32F7299FCF4C000C1DD2 /* glUtil.h */,
 				EA18363D2432C18B00A5C3E8 /* Vbo.cpp */,
 				EA18363E2432C18B00A5C3E8 /* mzOpenGL.h */,
 				EA1836402432C18B00A5C3E8 /* Texture.h */,
@@ -3009,6 +3029,7 @@
 				EA18400E2432C18D00A5C3E8 /* Font.h in Headers */,
 				EA71A79227E39E6C0081A5CB /* defs.h in Headers */,
 				EA183F992432C18D00A5C3E8 /* Draggable.h in Headers */,
+				EA9C32FC299FCF4C000C1DD2 /* glUtil.h in Headers */,
 				EA924365273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h in Headers */,
 				EA71A75627E39E6C0081A5CB /* aestab.h in Headers */,
 				EA71A78427E39E6C0081A5CB /* sha1.h in Headers */,
@@ -3017,6 +3038,7 @@
 				EA183FEA2432C18D00A5C3E8 /* AudioSystem.h in Headers */,
 				EAD03BBA2980185000D0C04A /* AppleWebView.h in Headers */,
 				EA71A73A27E39E6C0081A5CB /* unzip.h in Headers */,
+				EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */,
 				EA18400D2432C18D00A5C3E8 /* mzOpenGL.h in Headers */,
 				EA183FB32432C18D00A5C3E8 /* LayerExplorer.h in Headers */,
 				EA71A70627E39E6B0081A5CB /* ZipStreamer.h in Headers */,
@@ -3155,6 +3177,7 @@
 				EA2B828024E7093600EA12BD /* MitredLine.h in Headers */,
 				EA71A74727E39E6C0081A5CB /* ioapi_buf.h in Headers */,
 				EAD03BAA297FD9A200D0C04A /* MacWebView.h in Headers */,
+				EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */,
 				EA2B82A924E7093600EA12BD /* Vbo.h in Headers */,
 				EA2B82B324E7093600EA12BD /* Graphics.h in Headers */,
 				EAF67386289BC87E001F778D /* mainThread.h in Headers */,
@@ -3250,6 +3273,7 @@
 				EA2B884A24E7093600EA12BD /* DrawingCanvas.h in Headers */,
 				EA2B887324E7093600EA12BD /* Plugin.h in Headers */,
 				EA2B887924E7093600EA12BD /* DrawingFunction.h in Headers */,
+				EA9C32FD299FCF4C000C1DD2 /* glUtil.h in Headers */,
 				EAD03BA1297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA2B889524E7093600EA12BD /* LineEquation.h in Headers */,
 				EA2B88BA24E7093600EA12BD /* DateTime.h in Headers */,
@@ -3462,6 +3486,7 @@
 				EA183FE62432C18D00A5C3E8 /* AudioFileApple.cpp in Sources */,
 				EA234AF924A609CA000F057B /* experiments.cpp in Sources */,
 				EA183FB62432C18D00A5C3E8 /* MacMenuBar.mm in Sources */,
+				EA9C32F0299FC45D000C1DD2 /* ScopedMask.cpp in Sources */,
 				EA183FAF2432C18D00A5C3E8 /* LayerExplorer.mm in Sources */,
 				EA71A75E27E39E6C0081A5CB /* fileenc.c in Sources */,
 				EA71A76A27E39E6C0081A5CB /* sha1.c in Sources */,
@@ -3494,6 +3519,7 @@
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA183F8F2432C18D00A5C3E8 /* Layer.cpp in Sources */,
+				EA9C32F8299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */,
 				EA924361273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA183FEF2432C18D00A5C3E8 /* SVG.cpp in Sources */,
@@ -3587,6 +3613,7 @@
 				EAD03BAF297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924362273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */,
+				EA9C32F9299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA1841302432C4FF00A5C3E8 /* maths.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
 				EA71A71F27E39E6B0081A5CB /* unzip.c in Sources */,
@@ -3629,6 +3656,7 @@
 				EA71A78127E39E6C0081A5CB /* aestab.c in Sources */,
 				EA71A77727E39E6C0081A5CB /* prng.c in Sources */,
 				EA1840F72432C38500A5C3E8 /* AudioShareSDK.m in Sources */,
+				EA9C32F1299FC45D000C1DD2 /* ScopedMask.cpp in Sources */,
 				EA1840FB2432C3DB00A5C3E8 /* AVFoundationVideoGrabber.mm in Sources */,
 				EA18411F2432C4C500A5C3E8 /* Rectf.cpp in Sources */,
 				EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */,
@@ -3659,6 +3687,7 @@
 				EA2B8AD824E7093600EA12BD /* Slider.cpp in Sources */,
 				EA71A75027E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA2B8ADB24E7093600EA12BD /* MacAppDelegate.mm in Sources */,
+				EA9C32F2299FC45D000C1DD2 /* ScopedMask.cpp in Sources */,
 				EA71A7B627E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA2B8ADC24E7093600EA12BD /* YGLayout.cpp in Sources */,
 				EA71A75427E39E6C0081A5CB /* hmac.c in Sources */,
@@ -3743,6 +3772,7 @@
 				EA71A72027E39E6B0081A5CB /* unzip.c in Sources */,
 				EA71A79627E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
 				EA16DACF25FFABDA001C0460 /* pa_converters.c in Sources */,
+				EA9C32FA299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA2B8B1F24E7093600EA12BD /* YGStyle.cpp in Sources */,
 				EA924363273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A76027E39E6C0081A5CB /* fileenc.c in Sources */,
@@ -3821,6 +3851,7 @@
 				EAD03BB1297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924364273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A77F27E39E6C0081A5CB /* pwd2key.c in Sources */,
+				EA9C32FB299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA68946D261C633500F76B91 /* maths.cpp in Sources */,
 				EA68946E261C633500F76B91 /* Dylib.cpp in Sources */,
@@ -3863,6 +3894,7 @@
 				EA689494261C633500F76B91 /* RoundedRect.cpp in Sources */,
 				EA689496261C633500F76B91 /* AudioShareSDK.m in Sources */,
 				EA71A72527E39E6B0081A5CB /* zip.c in Sources */,
+				EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */,
 				EA71A7A727E39E6C0081A5CB /* unzipper.cpp in Sources */,
 				EA689497261C633500F76B91 /* AVFoundationVideoGrabber.mm in Sources */,
 				EA68949A261C633500F76B91 /* Rectf.cpp in Sources */,

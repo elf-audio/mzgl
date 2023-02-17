@@ -1,5 +1,5 @@
 //
-//  Renderer.cpp
+//  Graphics.cpp
 //  MZGL
 //
 //  Created by Marek Bereza on 15/01/2018.
@@ -15,10 +15,12 @@
 #include "RoundedRect.h"
 #include "Image.h"
 #include "error.h"
-
+#include "mzOpenGL.h"
 #include "log.h"
 #include "MitredLine.h"
 #include "Drawer.h"
+#include "glUtil.h"
+
 using namespace std;
 
 glm::vec4 hexColor(int hex, float a) {
@@ -603,7 +605,7 @@ void Graphics::drawRect(const Rectf &r) {
     if(isFilling()) {
         drawVerts({r.tl(), r.tr(), r.br(), r.br(), r.bl(), r.tl()});
     } else {
-        drawVerts({r.tl(), r.tr(), r.br(), r.bl()}, GL_LINE_LOOP);
+        drawVerts({r.tl(), r.tr(), r.br(), r.bl()}, Vbo::PrimitiveType::LineLoop);
     }
 }
 
@@ -629,9 +631,9 @@ void Graphics::drawCircle(float x, float y, float r) {
     }
 
     if(isFilling()) {
-        drawVerts(verts, GL_TRIANGLE_FAN);
+		drawVerts(verts,  Vbo::PrimitiveType::TriangleFan);
     } else {
-        drawVerts(verts, GL_LINE_LOOP);
+        drawVerts(verts, Vbo::PrimitiveType::LineLoop);
     }
 }
 
@@ -654,7 +656,7 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
     }
 
     if(isFilling()) {
-        drawVerts(verts, GL_TRIANGLE_FAN);
+        drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
     } else {
         Log::e() << "Warning! non-filled arcs not implemented in drawArc";
     }
@@ -666,12 +668,7 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 
 
 
-void Graphics::drawVerts(const vector<glm::vec2> &verts, int type) {
-//	VboRef vbo = Vbo::create();
-//	vbo->setVertices(verts);
-//	vbo->draw(*this, type);
-
-
+void Graphics::drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type) {
 
     nothingShader->begin();
 
@@ -693,8 +690,10 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, int type) {
     glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
     glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
+	
+	auto glType = primitiveTypeToGLMode(type);
 
-    glDrawArrays(type, 0, (GLsizei)verts.size());
+    glDrawArrays(glType, 0, (GLsizei)verts.size());
 
     glDisableVertexAttribArray(currShader->positionAttribute);
 
@@ -706,7 +705,7 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, int type) {
 }
 
 
-void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, int type) {
+void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, Vbo::PrimitiveType type) {
 
 
     colorShader->begin();
@@ -733,7 +732,8 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4>
     glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
     glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    glDrawArrays(type, 0, (GLsizei)verts.size());
+	
+    glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei)verts.size());
 
     glDisableVertexAttribArray(currShader->positionAttribute);
     glDisableVertexAttribArray(currShader->colorAttribute);
@@ -744,7 +744,13 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4>
 
 }
 
-
+void Graphics::setBlendMode(BlendMode blendMode) {
+	if(blendMode==BlendMode::Additive) {
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	} else {
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+}
 
 
 
@@ -793,17 +799,29 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> 
 
 
 
+void Graphics::maskOn(const Rectf &r) {
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(r.x, height-(r.bottom()), r.width, r.height);
+}
 
+void Graphics::maskOff() {
+	glDisable(GL_SCISSOR_TEST);
+}
 
+bool Graphics::isMaskOn() {
+	return glIsEnabled(GL_SCISSOR_TEST);
+}
 
-
-
-
-
-
+Rectf Graphics::getMaskRect() {
+	Rectf r;
+	glGetFloatv(GL_SCISSOR_BOX, (float*)&r);
+	
+	r.y = height - r.y - r.height;
+	return r;
+}
 
 void Graphics::drawLine(glm::vec2 a, glm::vec2 b) {
-    drawVerts({a, b}, GL_LINES);
+    drawVerts({a, b}, Vbo::PrimitiveType::Lines);
 }
 
 void Graphics::drawLine(float x1, float y1, float x2, float y2) {
@@ -811,7 +829,7 @@ void Graphics::drawLine(float x1, float y1, float x2, float y2) {
 }
 
 void Graphics::drawLineStrip(const vector<vec2> &pts) {
-    drawVerts(pts, GL_LINE_STRIP);
+    drawVerts(pts, Vbo::PrimitiveType::LineStrip);
 }
 
 
@@ -892,9 +910,9 @@ void Graphics::drawShape(const std::vector<vec2> &shape) {
         VboRef vbo = Vbo::create();
         vbo->setVertices(outs);
         vbo->setIndices(indices);
-        vbo->draw(*this, GL_TRIANGLES);
+        vbo->draw(*this, Vbo::PrimitiveType::Triangles);
     } else {
-        drawVerts(shape, GL_LINE_LOOP);
+        drawVerts(shape, Vbo::PrimitiveType::LineLoop);
     }
 }
 void Graphics::drawText(const std::string &s, float x, float y) {

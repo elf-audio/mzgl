@@ -9,8 +9,6 @@
 #pragma once
 
 
-#include "mzOpenGL.h"
-
 
 
 
@@ -41,25 +39,17 @@ public:
 		return std::shared_ptr<Shader>(new Shader(g));
 	}
 	
+	int32_t positionAttribute = -1;
+	int32_t colorAttribute = -1;
+	int32_t texCoordAttribute = -1;
+	int32_t normAttribute = -1;
 	
+	uint32_t shaderProgram = 0;
 	
-	
-	
-	GLint positionAttribute = -1;
-	GLint colorAttribute = -1;
-	GLint texCoordAttribute = -1;
-	GLint normAttribute = -1;
-	
-	GLuint shaderProgram = 0;
 	bool isDefaultShader = false;
 	
 	// should be private in some way but vbo needs it because it manages shaders
 	bool needsColorUniform = false;
-	
-//	static GLint getPositionAttribute() { return currShader->positionAttribute; }
-//	static GLint getColorAttribute() { return currShader->colorAttribute; }
-//	static GLint getTexCoordAttribute() { return currShader->texCoordAttribute; }
-//	static GLint getNormalAttribute() { return currShader->normAttribute; }
 	
 	virtual ~Shader();
 	
@@ -89,7 +79,6 @@ public:
 	void uniform(std::string name, const glm::vec3 *p, size_t length);
 	void uniform(std::string name, const glm::vec4 *p, size_t length);
 
-	
 	void loadFromString(std::string vertCode, std::string fragCode);
 	
 	void load(std::string vertex_file_path, std::string fragment_file_path);
@@ -104,15 +93,15 @@ public:
 #endif
 	void deallocate();
 private:
-	void createProgram(GLuint vertexShader, GLuint fragmentShader);
+	void createProgram(uint32_t vertexShader, uint32_t fragmentShader);
 	
 	std::string readFile2(const std::string &fileName);
-	GLuint compileShader(GLenum type, std::string src);
+	uint32_t compileShader(uint32_t type, std::string src);
 	
-	void linkProgram(GLuint program);
+	void linkProgram(uint32_t program);
 	
 	
-	void validateProgram(GLuint program);
+	void validateProgram(uint32_t program);
 	
 	
 	

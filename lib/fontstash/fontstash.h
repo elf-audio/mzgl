@@ -64,24 +64,7 @@ extern "C" {
 //#include <GL/gl.h>
 //#endif
 
-
 #include "mzOpenGL.h" // this is an experiment so we don't have to have crazy gl includes all the time
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 enum FONSflags {

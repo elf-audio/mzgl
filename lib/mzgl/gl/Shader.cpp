@@ -14,6 +14,7 @@
 #include "log.h"
 #include "stringUtil.h"
 #include "Graphics.h"
+#include "mzOpenGL.h"
 
 using namespace std;
 

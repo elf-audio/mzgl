@@ -51,7 +51,7 @@ using namespace std;
 	return app;
 }
 - (EventDispatcher*) getEventDispatcher {
-	return eventDispatcher;
+	return eventDispatcher.get();
 }
 #endif
 
