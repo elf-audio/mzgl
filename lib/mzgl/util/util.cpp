@@ -590,18 +590,34 @@ void launchUrl(string url) {
 }
 
 string getAppVersionString() {
+
+	std::string version = "";
 #ifdef __APPLE__
 	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	if (str == nil) {
 		return "not available";
 	}
-	return string([str UTF8String]);
+	std::string v = string([str UTF8String]);
+	
+	NSString *ver = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+	if (ver != nil) {
+		
+		v += " (" + string([ver UTF8String]) + ")";
+	}
+
+	
+	version = v;
 #elif defined(__ANDROID__)
-	return androidGetAppVersionString();
+	version = androidGetAppVersionString();
 #else
-	return "No version available";
+	version = "No version available";
 
 #endif
+	
+#ifdef DEBUG
+	version += " DEBUG";
+#endif
+	return version;
 }
 
 #if defined(__APPLE__) && !TARGET_OS_IOS

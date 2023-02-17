@@ -29,6 +29,7 @@ using namespace std;
 	return self;
 }
 
+
 - (BOOL) acceptsFirstResponder {
 	return YES;
 }

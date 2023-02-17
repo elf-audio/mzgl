@@ -7,8 +7,13 @@
 //
 
 #import <CoreAudioKit/CoreAudioKit.h>
-#import "MZGLKitView.h"
 
+#include <TargetConditionals.h>
+#if TARGET_OS_IOS
+#	import "MZGLKitView.h"
+#endif
 @interface AudioUnitViewController : AUViewController <AUAudioUnitFactory>
+#if TARGET_OS_IOS
 -(MZGLKitView*) getView;
+#endif
 @end

@@ -26,7 +26,7 @@ using namespace std;
 	id view;
 
 	App *app;
-	EventDispatcher *eventDispatcher;
+	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
 	
 #ifdef USE_METALANGLE
@@ -57,7 +57,7 @@ using namespace std;
 
 - (void) makeWebView: (NSString*) url {
     NSRect windowRect = [self setupWindow];
-    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher andUrl: url];
+    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher.get() andUrl: url];
     [[window contentView] addSubview:view];
     [window makeKeyAndOrderFront:nil];
     [window makeMainWindow];
@@ -88,12 +88,6 @@ using namespace std;
 	
 	
 	}
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -145,7 +139,7 @@ using namespace std;
 	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 	view = controller.view;
 #else
-	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
+	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher.get()];
 #endif
 	
 	
@@ -202,7 +196,6 @@ using namespace std;
 	
 #else
 	
-	
 	id menubar = [NSMenu new];
 	id appMenuItem = [NSMenuItem new];
 	[menubar addItem:appMenuItem];
@@ -232,7 +225,7 @@ using namespace std;
 	Log::d() << "applicationDidFinishLaunching";
 	// Insert code here to initialize your application
 	
-	eventDispatcher = new EventDispatcher(app);
+	eventDispatcher = std::make_shared<EventDispatcher>(app);
 	
 	if(!app->isHeadless()) {
 		[self makeMenus];

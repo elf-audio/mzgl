@@ -690,6 +690,10 @@
 		EA99490524730DB8004D0DB7 /* nanovg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA99490324730DB7004D0DB7 /* nanovg.cpp */; };
 		EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
 		EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
+		EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
+		EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
+		EA9C32E8299F9EFE000C1DD2 /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
+		EA9C32E9299F9EFF000C1DD2 /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -3488,6 +3492,7 @@
 				EA297C7825C954E600F890AE /* pa_trace.c in Sources */,
 				EA71A73227E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
+				EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA183F8F2432C18D00A5C3E8 /* Layer.cpp in Sources */,
 				EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */,
 				EA924361273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
@@ -3518,6 +3523,7 @@
 				EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */,
 				EA183FCF2432C18D00A5C3E8 /* DateTime.cpp in Sources */,
+				EA9C32E8299F9EFE000C1DD2 /* MZGLEffectAU.mm in Sources */,
 				EA64AD7426A186D7001427AD /* MZGLWebView.mm in Sources */,
 				EA183F9E2432C18D00A5C3E8 /* PadGrid.cpp in Sources */,
 				EA2B8B3224E7095D00EA12BD /* mainMac.mm in Sources */,
@@ -3663,6 +3669,7 @@
 				EA71A72427E39E6B0081A5CB /* zip.c in Sources */,
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
 				EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */,
+				EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
@@ -3751,6 +3758,7 @@
 				EA2B8B2B24E7093600EA12BD /* DateTime.cpp in Sources */,
 				EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA2B8B2C24E7093600EA12BD /* PadGrid.cpp in Sources */,
+				EA9C32E9299F9EFF000C1DD2 /* MZGLEffectAU.mm in Sources */,
 				EAF67373289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */,
 			);

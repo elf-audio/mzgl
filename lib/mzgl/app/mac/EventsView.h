@@ -23,6 +23,5 @@
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
 - (void) shutdown;
 - (void*) getApp;
-
 @end
 

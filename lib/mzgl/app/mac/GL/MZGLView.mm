@@ -73,6 +73,10 @@
 	
 }
 
+- (EventDispatcher*) getEventDispatcher {
+	return eventDispatcher;
+}
+
 -(void) dealloc {
 	if(displayLink!=NULL) {
 		CVDisplayLinkStop(displayLink);

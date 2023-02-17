@@ -9,10 +9,10 @@
 #import "AudioUnitViewController.h"
 #import "MZGLEffectAU.h"
 #if TARGET_OS_IPHONE
-#import "MZGLKitViewController.h"
-#import "MZGLKitView.h"
+#	import "MZGLKitViewController.h"
+#	import "MZGLKitView.h"
 #else
-#import "MZGLView.h"
+#	import "MZGLView.h"
 #endif
 #include "Plugin.h"
 #include "PluginEditor.h"
@@ -23,33 +23,22 @@
 @end
 
 using namespace std;
-//
-//class AppHolder {
-//public:
-//    Graphics g;
-//    PluginEditor *app;
-//    shared_ptr<EventDispatcher> eventDispatcher;
-//};
-
 
 @implementation AudioUnitViewController {
-    //__weak - WARNING DOES THIS CRASH iOS?
-//    __unsafe_unretained MZGLEffectAU *audioUnit;
-//#if TARGET_OS_IPHONE
-    MZGLKitViewController *vc;
-    MZGLKitView *glView;
+
+#if TARGET_OS_IPHONE
+	MZGLKitViewController *vc;
+	MZGLKitView *glView;
+#else
+	MZGLView *glView;
+#endif
     Graphics g;
 	MZGLEffectAU *audioUnit;
-	
-	
+		
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<PluginEditor> app;
-//#else
-//    MZGLView *glView;
-//    AppHolder appHolder;
-//#endif
-
 }
+
 #include <thread>
 
 - (id) init {
@@ -77,9 +66,15 @@ using namespace std;
     return self;
 }
 
+#if TARGET_OS_IOS
 -(MZGLKitView*) getView {
-    return glView;
+	return glView;
 }
+#else
+-(MZGLView*) getView {
+	return glView;
+}
+#endif
 
 - (void)didReceiveMemoryWarning {
     EventDispatcher *ed = [glView getEventDispatcher];
@@ -105,7 +100,7 @@ using namespace std;
 -(void) tryToResize {
     if(self.view.window!=nil && glView!=nil) {
         glView.frame = self.view.frame;
-    #if TARGET_OS_IPHONE
+    #if TARGET_OS_IOS
         EventDispatcher *ed = [glView getEventDispatcher];
         if(ed != nullptr && ed->hasSetup()) {
             [vc viewWillTransitionToSize: self.view.window.frame.size withTransitionCoordinator:nil];
@@ -124,10 +119,14 @@ using namespace std;
 - (void)viewWillAppear:(BOOL)animated {
 	if(app==nullptr && plugin!=nullptr) {
 		app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, plugin.get()));
+#if TARGET_OS_IOS
 		vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
 		app->viewController = (__bridge void*)self;
 
 		glView = (MZGLKitView*)vc.view;
+#else
+		// ???
+#endif
 		glView.frame = self.view.frame;
 		[self addGLView];
 	}

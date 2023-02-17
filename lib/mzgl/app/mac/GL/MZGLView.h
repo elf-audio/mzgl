@@ -29,6 +29,7 @@ class EventDispatcher;
 - (void) lock;
 - (void) unlock;
 - (void) shutdown;
+- (EventDispatcher*) getEventDispatcher;
 @property (nonatomic, readwrite, retain) IBOutlet MZGLView *view;
 
 @end

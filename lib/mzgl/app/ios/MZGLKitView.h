@@ -15,8 +15,8 @@ class EventDispatcher;
 @interface MZGLKitView : GLKView
 -(void*) getApp;
 - (id) initWithApp:(App*)_app;
--(EventDispatcher*) getEventDispatcher;
--(void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
+- (EventDispatcher*) getEventDispatcher;
+- (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
 - (BOOL) handleNormalOpen: (NSURL*) url;
 @end
 
