@@ -83,17 +83,9 @@ using namespace std;
 														 backing:NSBackingStoreBuffered
 														   defer:YES
 														  screen:nil];
-		
-
-	
-	
 	}
 	
-	
-	
-	
 	NSScreen *mainScreen = [NSScreen mainScreen];
-	
 	
 	float w = app->g.width/app->g.pixelScale;
 	float h = app->g.height/app->g.pixelScale;
@@ -131,9 +123,7 @@ using namespace std;
 
 - (void) makeWindow {
 	
-	
-   NSRect windowRect = [self setupWindow];
-
+	NSRect windowRect = [self setupWindow];
 	
 #ifdef USE_METALANGLE
 	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];

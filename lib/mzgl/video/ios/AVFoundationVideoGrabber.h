@@ -41,8 +41,8 @@ class AVFoundationVideoGrabber{
 		float getHeight(){
 			return height;
 		}
-	
-		GLint internalGlDataType;
+		// GLint
+		int32_t internalGlDataType;
 		unsigned char * pixels;
 		bool newFrame;
 		bool bLock;
@@ -58,8 +58,8 @@ class AVFoundationVideoGrabber{
 		
 		int fps;
 		TextureRef tex;
-		
-		GLubyte *pixelsTmp;
+		// GLubyte
+		uint8_t *pixelsTmp;
 };
 
 
