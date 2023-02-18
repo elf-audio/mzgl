@@ -31,6 +31,7 @@ void MainThreadRunner::setMainThreadId() {
 
 
 void MainThreadRunner::runOnMainThread(std::function<void()> fn) {
+	Log::d() << mainThreadId << " " << std::this_thread::get_id();
 	mzAssert(!isMainThread());
 	mainThreadQueue->enqueue(fn);
 }
@@ -91,8 +92,11 @@ void MainThreadRunner::pollInternal() {
 }
 
 void MainThreadRunner::pollMainThreadQueue() {
-	
-//	mainThreadEverPolled = true;
+	if(!hasSetMainThreadId) {
+		hasSetMainThreadId = true;
+		setMainThreadId();
+	}
+
 	pollCount++;
 	pollInternal();
 }

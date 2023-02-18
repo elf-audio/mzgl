@@ -62,6 +62,7 @@ private:
 	std::thread::id		mainThreadId;
 	std::shared_ptr<LambdaQueue> mainThreadQueue;
 //	bool mainThreadEverPolled = false;
+	bool hasSetMainThreadId = false;
 	std::atomic<int> pollCount {0};
 	std::mutex pollMutex;
 	void pollInternal();

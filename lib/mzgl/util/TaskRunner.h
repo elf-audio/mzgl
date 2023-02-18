@@ -91,6 +91,8 @@ public:
    
 private:
     
+	std::thread::id		thisThreadId;
+	
     class Task {
     public:
 
