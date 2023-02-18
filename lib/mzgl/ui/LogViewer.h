@@ -11,6 +11,7 @@
 #include "Scroller.h"
 #include "log.h"
 
+
 class LogViewer : public Layer {
 public:
 	class CloseButton : public Layer {
@@ -53,38 +54,39 @@ public:
 		}
 	};
 	
-	class LogWindow: public Layer, public LogListener {
+	class LogWindow: public Layer {
 	public:
 		
 		
-		LogWindow(Graphics &g) : Layer(g) {
+		LogCapturer &logCapturer;
+		LogWindow(Graphics &g, LogCapturer &logCapturer) : Layer(g), logCapturer(logCapturer) {
 			height = 2000;
 			width = 100;
-			Log::Logger::addListener(this);
+//			Log::Logger::addListener(this);
 		}
 		
 		virtual ~LogWindow() {
-			Log::Logger::removeListener(this);
+//			Log::Logger::removeListener(this);
 		}
 		std::function<void()> contentUpdated;
-		std::vector<std::string> lines;
+//		std::vector<std::string> lines;
 		float lineHeight = 20;
-		void stringLogged(const std::string & m) override {
-			lines.push_back(m);
-			
-		}
+		
 
 		void draw() override {
 			lineHeight = g.getFont().getHeight("Ig");
-			int newHeight = lines.size() * lineHeight;
+			int newHeight = logCapturer.lines.size() * lineHeight;
 			if(height!=newHeight) {
 				height = newHeight;
 				contentUpdated();
 			}
 			
 			g.setColor(1);
-			for(int i = 0; i < lines.size(); i++) {
-				g.drawText(lines[i], {20, (i+1)*lineHeight});
+//			for(int i = 0; i < logCapturer.lines.size(); i++) {
+			int i = 0;
+			for(auto &l : logCapturer.lines) {
+				g.drawText(l, {20, (i+1)*lineHeight});
+				i++;
 			}
 		}
 	};
@@ -95,9 +97,9 @@ public:
 	Scroller *scroller;
 	LogWindow *logWindow;
 	
-	LogViewer(Graphics &g) : Layer(g) {
+	LogViewer(Graphics &g, LogCapturer &logCapturer) : Layer(g) {
 		
-		logWindow = new LogWindow(g);
+		logWindow = new LogWindow(g, logCapturer);
 		scroller = new Scroller(g);
 		scroller->addContent(logWindow);
 		scroller->drawingScrollbar = true;
@@ -115,7 +117,7 @@ public:
 		
 		clearButton = new ClearButton(g);
 		clearButton->pressed = [this]() {
-			logWindow->lines.clear();
+			logWindow->logCapturer.lines.clear();
 		};
 		
 		addChild(closeButton);

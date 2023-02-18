@@ -23,6 +23,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <list>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -31,6 +32,7 @@ class LogListener {
 public:
 	virtual void stringLogged(const std::string & m) = 0;
 };
+
 
 namespace Log {
 	
@@ -114,3 +116,19 @@ namespace Log {
 // the only way to do logging in that setup. On other platforms
 // it just logs to Log::d()
 void iosLog(std::string msg);
+
+// handy class for something that you can tap into for logs
+class LogCapturer : public LogListener {
+public:
+	LogCapturer() {
+		Log::Logger::addListener(this);
+	}
+	~LogCapturer() {
+		Log::Logger::removeListener(this);
+	}
+	virtual void stringLogged(const std::string & m) {
+		lines.push_back(m);
+	}
+	
+	std::list<std::string> lines;
+};
