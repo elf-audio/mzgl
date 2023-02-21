@@ -37,9 +37,9 @@ bool Log::Logger::isSavingToFile() {
 
 
 void Log::Logger::addListener(LogListener *listener) {
-#ifdef DEBUG
+//#ifdef DEBUG
 	listeners.push_back(listener);
-#endif
+//#endif
 }
 void Log::Logger::removeListener(LogListener *listener) {
 	for(int i =0 ; i < listeners.size(); i++) {
@@ -75,12 +75,14 @@ Log::Logger::~Logger() {
 			logStream << std::string("[") << levelName << "] " << msg.str();
 		}
 		
-#ifdef DEBUG
-		std::string m = "[" + levelName + "] " + msg.str();
-		for(auto *l : listeners) {
-			l->stringLogged(m);
+//#ifdef DEBUG // should probs put this back
+		if(listeners.size()>0) {
+			std::string m = "[" + levelName + "] " + msg.str();
+			for(auto *l : listeners) {
+				l->stringLogged(m);
+			}
 		}
-#endif
+//#endif
 	}
 }
 
