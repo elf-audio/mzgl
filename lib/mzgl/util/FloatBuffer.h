@@ -1,38 +1,39 @@
-/**     ___           ___           ___                         ___           ___     
- *     /__/\         /  /\         /  /\         _____         /  /\         /__/|    
- *    |  |::\       /  /::\       /  /::|       /  /::\       /  /::\       |  |:|    
- *    |  |:|:\     /  /:/\:\     /  /:/:|      /  /:/\:\     /  /:/\:\      |  |:|    
- *  __|__|:|\:\   /  /:/~/::\   /  /:/|:|__   /  /:/~/::\   /  /:/  \:\   __|__|:|    
+/**     ___           ___           ___                         ___           ___
+ *     /__/\         /  /\         /  /\         _____         /  /\         /__/|
+ *    |  |::\       /  /::\       /  /::|       /  /::\       /  /::\       |  |:|
+ *    |  |:|:\     /  /:/\:\     /  /:/:|      /  /:/\:\     /  /:/\:\      |  |:|
+ *  __|__|:|\:\   /  /:/~/::\   /  /:/|:|__   /  /:/~/::\   /  /:/  \:\   __|__|:|
  * /__/::::| \:\ /__/:/ /:/\:\ /__/:/ |:| /\ /__/:/ /:/\:| /__/:/ \__\:\ /__/::::\____
  * \  \:\~~\__\/ \  \:\/:/__\/ \__\/  |:|/:/ \  \:\/:/~/:/ \  \:\ /  /:/    ~\~~\::::/
- *  \  \:\        \  \::/          |  |:/:/   \  \::/ /:/   \  \:\  /:/      |~~|:|~~ 
- *   \  \:\        \  \:\          |  |::/     \  \:\/:/     \  \:\/:/       |  |:|   
- *    \  \:\        \  \:\         |  |:/       \  \::/       \  \::/        |  |:|   
- *     \__\/         \__\/         |__|/         \__\/         \__\/         |__|/   
+ *  \  \:\        \  \::/          |  |:/:/   \  \::/ /:/   \  \:\  /:/      |~~|:|~~
+ *   \  \:\        \  \:\          |  |::/     \  \:\/:/     \  \:\/:/       |  |:|
+ *    \  \:\        \  \:\         |  |:/       \  \::/       \  \::/        |  |:|
+ *     \__\/         \__\/         |__|/         \__\/         \__\/         |__|/
  *
- *  Description: 
+ *  Description:
  *
- *	sustainPedal2	
- *		 
+ *	sustainPedal2
+ *
  *  FloatBuffer.h, created by Marek Bereza on 01/08/2017.
- *  
+ *
  */
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
 //#include "xsimd/xsimd.hpp"
 
 //class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
 class FloatBuffer : public std::vector<float> {
 public:
-	
-	
+
+
 	FloatBuffer(size_t sz);
-	
+
 	FloatBuffer();
-	
+
 	virtual ~FloatBuffer();
-	
+
 	FloatBuffer(const float *arr, size_t size);
 
 	// xsimd disabled for MSVC build, it does not give performance boost for Android anyway - to be investigated
@@ -58,14 +59,14 @@ public:
 	void setStereoFromMono(float *data, int length);
 	void setFromLeftChannel(float *buff, int length);
 	void setFromRightChannel(float *buff, int length);
-	
+
 	void assignValue(size_t index, float v) { (*this)[index] = v; }
-	
+
 	// if smooth = false, fadeout is linear, if it's true, then its smoothed
 	// using the smoothstep algorithm.
 	void fadeIn(int length, int numChans, bool smooth = false);
 	void fadeOut(int length, int numChans, bool smooth = false);
-	
+
 	/**
 	 * This copies a section out of this float buffer and
 	 * returns it as another floatbuffer (outBuff in parameter)
@@ -73,66 +74,66 @@ public:
 	 */
     void splice(int start, int end, FloatBuffer &outBuff) const;
     FloatBuffer splice(int start, int end) const;
-	
+
 	int16_t floatToInt16(float in) const;
 	vector<int16_t> getInt16() const;
-	
+
 	FloatBuffer stereoToMono();
-	
-    
+
+
 	void convertToMono(int originalNumChannels = 2);
-	
+
 //	void save(std::string path);
 //	void load(std::string path);
-	
+
 	float sum() const;
 	float mean() const;
-	
+
 	// square each value
 	void square();
-	
+
 	float absMax() const;
 	float maxValue() const;
 	float minValue() const;
-	
+
 	int findAbsMaxPos() const;
 	int findMaxPos() const;
 	int findMinPos() const;
-	
+
 	void getMinMax(float &min, float &max) const;
-	
-	
+
+
 	void zeros(size_t N = 0);
 	void random(float min = -1, float max = 1);
 	void linspace(float a, float b, int N);
-	
+
 	void mix(const FloatBuffer &other);
 	void mixNaive(const FloatBuffer &other); // no optimization for neon testing
-	
+
 	void normalize(float min = -1, float max = 1);
-    
+
 	// this is like normalize but it doesn't cause a DC offset
 	void normalizeAudio();
-    
+
     void clamp(float min = -1, float max = 1);
-    
+
 	void append(float *buff, int length);
 	void append(const FloatBuffer &b);
-	
+
 	// multiplies the buffer by left and right gain if it's
 	// a stereo interleaved buffer.
 	void stereoGain(float lGain, float rGain);
-	
+
     // sets the input samples to the contents of this FloatBuffer
-	
+
 	void get(float *buff) const;
     void get(float *buff, int len) const;
 	void getMonoAsStereo(float *buff, int length) const;
-    
+
 	// linear interpolation
 	float interpolate(double index) const noexcept;
 	void interpolateStereo(double index, float &L, float &R) const noexcept;
-	
+
 	void print() const;
 
 	FloatBuffer& operator+=(const FloatBuffer& right);
@@ -143,7 +144,7 @@ public:
 	FloatBuffer& operator-=(const float& right);
 	FloatBuffer& operator*=(const float& right);
 	FloatBuffer& operator/=(const float& right);
-	
+
 };
 
 FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r);
