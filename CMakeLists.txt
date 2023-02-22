@@ -370,7 +370,7 @@ elseif(APPLE)
     # MZGL_GL2
     #MZGL_MAC_GLFW
     add_compile_definitions(GL_SILENCE_DEPRECATION   __MACOSX_CORE__ MZGL_GL2)
-    target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit")
+    target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit")
 
 elseif(WIN32)
 
