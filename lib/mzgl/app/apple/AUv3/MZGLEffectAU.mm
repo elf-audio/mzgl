@@ -28,6 +28,9 @@ static int instanceNumber = 0;
 @property (nonatomic, readwrite) AUParameterTree *parameterTree;
 @property AUAudioUnitBusArray *inputBusArray;
 @property AUAudioUnitBusArray *outputBusArray;
+//#if !TARGET_OS_IOS
+//@property(readonly, copy, nonatomic) NSArray<NSNumber *> *channelCapabilities;
+//#endif
 @end
 
 #define AULog(fmt,...) NSLog(@"[MZGLEffectAU %d] %@", inst, [NSString stringWithFormat:(fmt), ##__VA_ARGS__]);
@@ -69,11 +72,22 @@ struct Blocks {
 	bool isInstrument;
 
 }
-
+//#if !TARGET_OS_IOS
+//@synthesize channelCapabilities = _channelCapabilities;
+//#endif
 -(std::shared_ptr<Plugin>) getPlugin {
 	return plugin;
 }
 
+
+//
+#if !TARGET_OS_IOS
+
+- (NSArray <NSNumber *> *)channelCapabilities{
+	NSArray *carray = @[@2,@2];
+	return carray;
+}
+#endif
 // TODO: Ensure lifecycle of Effect is same as AudioUnit
 // TODO: Mono + Stereo support at least
 // TODO: Check multiple instances
@@ -109,9 +123,10 @@ struct Blocks {
 	
 	plugin = std::shared_ptr<Plugin>(instantiatePlugin());
 	
-	
-	
-	
+//#if !TARGET_OS_IOS
+//	// This will support any set of channels where the input number equals the output number
+//	_channelCapabilities = @[@-1, @-1];
+//#endif
 //
 //	TESTING COMMENTING THIS OUT, TO SEE IF IT FIXES SOMETHING!
 //
