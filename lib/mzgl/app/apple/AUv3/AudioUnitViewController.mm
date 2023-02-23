@@ -31,6 +31,7 @@ using namespace std;
 	MZGLKitView *glView;
 #else
 	MZGLView *glView;
+	std::shared_ptr<EventDispatcher> eventDispatcher;
 #endif
     Graphics g;
 	MZGLEffectAU *audioUnit;
@@ -44,10 +45,17 @@ using namespace std;
 - (id) init {
     self = [super init];
     if(self!=nil) {
+		[self setup];
+    }
+    return self;
+}
+
+
+- (void)setup {
 	
-		app = nullptr;
-		plugin = nullptr;
-		audioUnit = nil;
+	app = nullptr;
+	plugin = nullptr;
+	audioUnit = nil;
 //#if !TARGET_OS_IOS
 //        auto &g = appHolder.g;
 //        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
@@ -60,11 +68,20 @@ using namespace std;
 ////        [self addGLView];
 ////        [self connectViewToAU];
 //#else
-        [self setPreferredContentSize: CGSizeMake(500, 800)];
+	[self setPreferredContentSize: CGSizeMake(500, 800)];
 //#endif
-    }
-    return self;
 }
+#if !TARGET_OS_IOS
+
+- (instancetype) initWithNibName:(NSNibName)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+	self = [super initWithNibName:nibNameOrNil bundle:[NSBundle bundleForClass:self.class]];
+	if(self!=nil) {
+		[self setup];
+	}
+	return self;
+}
+#endif
 
 #if TARGET_OS_IOS
 -(MZGLKitView*) getView {
@@ -116,6 +133,12 @@ using namespace std;
 	if(app) app->pluginViewDisappeared();
 }
 
+// this is the mac version
+// calls the iOS version of viewWillAppear
+- (void) viewWillAppear { [self viewWillAppear:NO]; }
+- (void)viewWillDisappear { [self viewWillDisappear:NO]; }
+- (void)viewDidAppear { [self viewDidAppear:NO]; }
+
 - (void)viewWillAppear:(BOOL)animated {
 	if(app==nullptr && plugin!=nullptr) {
 		app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, plugin.get()));
@@ -125,9 +148,15 @@ using namespace std;
 
 		glView = (MZGLKitView*)vc.view;
 #else
-		// ???
+		eventDispatcher = std::make_shared<EventDispatcher>(app.get());
+		glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: eventDispatcher.get()];
 #endif
 		glView.frame = self.view.frame;
+#if !TARGET_OS_IOS
+		g.width = self.view.frame.size.width*2;
+		g.height = self.view.frame.size.height*2;
+		eventDispatcher->resized();
+#endif
 		[self addGLView];
 	}
 }
