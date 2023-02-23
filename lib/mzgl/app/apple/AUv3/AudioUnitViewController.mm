@@ -12,7 +12,7 @@
 #	import "MZGLKitViewController.h"
 #	import "MZGLKitView.h"
 #else
-#	import "MZGLView.h"
+#	import "EventsView.h"
 #endif
 #include "Plugin.h"
 #include "PluginEditor.h"
@@ -149,7 +149,7 @@ using namespace std;
 		glView = (MZGLKitView*)vc.view;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app.get());
-		glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: eventDispatcher.get()];
+		glView = [[EventsView alloc] initWithFrame: self.view.frame eventDispatcher: eventDispatcher.get()];
 #endif
 		glView.frame = self.view.frame;
 #if !TARGET_OS_IOS
