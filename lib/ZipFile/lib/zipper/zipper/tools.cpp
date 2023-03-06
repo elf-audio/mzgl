@@ -113,7 +113,9 @@ std::vector<fs::path> filesFromDirectory(const std::string& path)
 
     for (auto& dir_entry : fs::recursive_directory_iterator(fs::u8path(path)))
     {
-        dir_ls.push_back(dir_entry.path());
+		if(!CDirEntry::isDir(dir_entry.path())) {
+			dir_ls.push_back(dir_entry.path());
+		}
     }
     return dir_ls;
 }
