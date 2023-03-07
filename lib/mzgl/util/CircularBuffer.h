@@ -13,8 +13,8 @@
 template <typename T>
 class CircularBuffer {
 public:
-    CircularBuffer() = default;
-    CircularBuffer(size_t sz) {
+
+    CircularBuffer(size_t sz = 3) {
         reserve(sz);
     }
     
@@ -60,7 +60,7 @@ public:
 		return buff[readPos];
 	}
 
-	size_t size() {
+	size_t size() const {
 		if(writePos<readPos) {
 			return buff.size() - readPos + writePos;
 		} else {

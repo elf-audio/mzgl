@@ -42,7 +42,7 @@ std::string byteSizeToString(uint64_t bytes) {
 		size /= 1024;
 		i++;
 	}
-	sprintf(buf, "%.*f %s", i, size, units[i]);
+	snprintf(buf, 999, "%.*f %s", i, size, units[i]);
 	return buf;
 }
 

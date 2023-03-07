@@ -1608,6 +1608,7 @@
 		EAD177A5282732A900E2AAE6 /* pu_gixml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pu_gixml.cpp; sourceTree = "<group>"; };
 		EAD177A6282732A900E2AAE6 /* pu_giconfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_giconfig.hpp; sourceTree = "<group>"; };
 		EAD177A7282732A900E2AAE6 /* pu_gixml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pu_gixml.hpp; sourceTree = "<group>"; };
+		EAD27F7A29B6778200225521 /* RingBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RingBuffer.h; sourceTree = "<group>"; };
 		EAD47FB125892D4100D2172A /* ThreadPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
 		EAD82EC7269CA18000861BE3 /* Dialogs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Dialogs.h; sourceTree = "<group>"; };
 		EAD82EC8269CA19400861BE3 /* Dialogs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp.preprocessed; fileEncoding = 4; path = Dialogs.cpp; sourceTree = "<group>"; };
@@ -1900,6 +1901,7 @@
 				EAA44CD2267A2BCB0014C203 /* Haptics.h */,
 				EAF67378289BC441001F778D /* stringUtil.h */,
 				EAF67377289BC441001F778D /* stringUtil.cpp */,
+				EAD27F7A29B6778200225521 /* RingBuffer.h */,
 				EA1835EC2432C18B00A5C3E8 /* util.h */,
 				EA1835E32432C18B00A5C3E8 /* util.cpp */,
 				EA15B27A291D49E70051570A /* UndoManager.cpp */,

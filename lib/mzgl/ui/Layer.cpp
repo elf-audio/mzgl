@@ -7,6 +7,7 @@
 #include "Layer.h"
 #include "Graphics.h"
 #include "util.h"
+#include "stringUtil.h"
 #include <iostream>
 
 using namespace std;
@@ -29,9 +30,10 @@ void Layer::draw() {
 }
 
 string Layer::toString() const {
-	char c[512];
-	sprintf(c, "name: %s  (xy: %.0f,%.0f   %.0f x %.0f)", name.c_str(), x, y, width, height);
-	return string(c);
+	return "name: " + name + " (xy: "+to_string(x, 0)+","+to_string(y, 0)+" "+to_string(width, 0)+"  x "+to_string(height, 0)+")";
+	// char c[512];
+	// sprintf(c, "name: %s  (xy: %.0f,%.0f   %.0f x %.0f)", name.c_str(), x, y, width, height);
+	// return string(c);
 }
 
 
