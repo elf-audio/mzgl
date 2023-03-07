@@ -189,6 +189,11 @@ void GLFWAppRunner::setCallbacks() {
 }
 
 
+#ifdef METAL_BACKEND
+// lifting from here: https://gist.github.com/gcatlin/987be74e2d58da96093a7598f3fbfb27
+#	import <Metal/Metal.h>
+#	import <QuartzCore/CAMetalLayer.h>
+#endif
 
 void GLFWAppRunner::run(int argc, char *argv[]) {
 
@@ -208,13 +213,26 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     glfwWindowHint(GLFW_SAMPLES, 16);
 
-#ifdef UNIT_TEST
+	
+#ifdef METAL_BACKEND
+	
+	const id<MTLDevice> gpu = MTLCreateSystemDefaultDevice();
+	const id<MTLCommandQueue> queue = [gpu newCommandQueue];
+	CAMetalLayer *swapchain = [CAMetalLayer layer];
+	swapchain.device = gpu;
+	swapchain.opaque = YES;
+	
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	
+#else
+#	ifdef UNIT_TEST
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-#else
+#	else
     // this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+#	endif
 #endif
 
     int requestedWidth = -1;
@@ -247,7 +265,14 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
              << (graphics.height);
 
     window = glfwCreateWindow(graphics.width, graphics.height, "mzgl", NULL, NULL);
-
+	
+#ifdef METAL_BACKEND
+	NSWindow *nswindow = glfwGetCocoaWindow(window);
+	nswindow.contentView.layer = swapchain;
+	nswindow.contentView.wantsLayer = YES;
+	MTLClearColor color = MTLClearColorMake(0, 0, 0, 1);
+#endif
+	
     int windowH, windowW;
     glfwGetWindowSize(window, &windowW, &windowH); // note that it can be DIFFERENT than requested
     Log::d() << "Window crated: " << windowW << "x" << windowH;
@@ -305,6 +330,25 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     while (!glfwWindowShouldClose(window)) {
 
+#ifdef METAL_BACKEND
+		@autoreleasepool {
+				   color.red = (color.red > 1.0) ? 0 : color.red + 0.01;
+
+				   id<CAMetalDrawable> surface = [swapchain nextDrawable];
+
+				   MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+				   pass.colorAttachments[0].clearColor = color;
+				   pass.colorAttachments[0].loadAction  = MTLLoadActionClear;
+				   pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+				   pass.colorAttachments[0].texture = surface.texture;
+
+				   id<MTLCommandBuffer> buffer = [queue commandBuffer];
+				   id<MTLRenderCommandEncoder> encoder = [buffer renderCommandEncoderWithDescriptor:pass];
+				   [encoder endEncoding];
+				   [buffer presentDrawable:surface];
+				   [buffer commit];
+			   }
+#else
         eventDispatcher->runFrame();
 
         glfwSwapBuffers(window);
@@ -316,6 +360,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
             getEventDispatcher(window)->resized();
             framebuferResized = false;
         }
+#endif
     }
 
     eventDispatcher->exit();
