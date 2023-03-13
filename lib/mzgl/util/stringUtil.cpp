@@ -33,7 +33,7 @@ std::string to_string(const T a_value, const int n)
 
 
 std::string byteSizeToString(uint64_t bytes) {
-	
+
 	char buf[256];
 	double size = bytes;
 	int i = 0;
@@ -42,17 +42,17 @@ std::string byteSizeToString(uint64_t bytes) {
 		size /= 1024;
 		i++;
 	}
-	snprintf(buf, 999, "%.*f %s", i, size, units[i]);
+	snprintf(buf, sizeof(buf), "%.*f %s", i, size, units[i]);
 	return buf;
 }
 
 
 void replaceAll(std::string & d, std::string toSearch, std::string replaceStr) {
-	
-	
+
+
 	// Get the first occurrence
 	size_t pos = d.find(toSearch);
-	
+
 	// Repeat till end is reached
 	while( pos != std::string::npos) {
 		// Replace this occurrence of Sub String
@@ -66,10 +66,10 @@ void replaceAll(std::string & d, std::string toSearch, std::string replaceStr) {
 
 std::string urlencode(const std::string& value) {
 	static auto hex_digt = "0123456789ABCDEF";
-	
+
 	std::string result;
 	result.reserve(value.size() << 1);
-	
+
 	for (auto ch : value) {
 		if ((ch >= '0' && ch <= '9')
 			|| (ch >= 'A' && ch <= 'Z')
@@ -84,17 +84,17 @@ std::string urlencode(const std::string& value) {
 					  +  hex_digt[static_cast<unsigned char>(ch) & 15];
 		}
 	}
-	
+
 	return result;
 }
 
 std::string urldecode(const std::string& value) {
 	std::string result;
 	result.reserve(value.size());
-	
+
 	for (std::size_t i = 0; i < value.size(); ++i) {
 		auto ch = value[i];
-		
+
 		if (ch == '%' && (i + 2) < value.size()) {
 			auto hex = value.substr(i + 1, 2);
 			auto dec = static_cast<char>(std::strtol(hex.c_str(), nullptr, 16));
@@ -106,7 +106,7 @@ std::string urldecode(const std::string& value) {
 			result.push_back(ch);
 		}
 	}
-	
+
 	return result;
 }
 
