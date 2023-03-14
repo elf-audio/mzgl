@@ -304,9 +304,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     setCallbacks();
 
-    glfwSwapInterval(1);
     // NOTE: OpenGL error checks have been omitted for brevity
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
     // GL_MULTISAMPLE does not seem to exist on certain linux environment.
     // e.g. https://stackoverflow.com/questions/4207506/where-is-gl-multisample-defined
