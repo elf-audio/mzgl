@@ -141,7 +141,7 @@ using namespace std;
 
 - (void)viewWillAppear:(BOOL)animated {
 	if(app==nullptr && plugin!=nullptr) {
-		app = std::shared_ptr<PluginEditor>(instantiatePluginEditor(g, plugin.get()));
+		app = instantiatePluginEditor(g, plugin);
 #if TARGET_OS_IOS
 		vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
 		app->viewController = (__bridge void*)self;

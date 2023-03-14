@@ -115,4 +115,4 @@ public:
 	}
 };
 
-App *instantiateApp(Graphics &g);
+std::shared_ptr<App> instantiateApp(Graphics &g);

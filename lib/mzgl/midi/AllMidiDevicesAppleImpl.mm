@@ -404,6 +404,8 @@ AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
         OSStatus s = MIDIClientDispose(client);
         NSLogError(s, "Dispose MIDI client");
     }
+	running = false;
+	portScannerThread.join();
 }
 
 void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {

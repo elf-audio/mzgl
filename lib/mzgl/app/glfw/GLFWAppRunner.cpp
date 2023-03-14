@@ -254,7 +254,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     // Note that graphics object is not fully functional here
     // as we need to update width/height later on.
-    app = std::shared_ptr<App>(instantiateApp(graphics));
+    app = instantiateApp(graphics);
 
     if (requestedWidth != -1) {
         graphics.width = requestedWidth;

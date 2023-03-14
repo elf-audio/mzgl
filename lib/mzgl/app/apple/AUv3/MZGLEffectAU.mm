@@ -121,7 +121,7 @@ struct Blocks {
 	asbd = *defaultFormat.streamDescription;
 
 	
-	plugin = std::shared_ptr<Plugin>(instantiatePlugin());
+	plugin = instantiatePlugin();
 	
 //#if !TARGET_OS_IOS
 //	// This will support any set of channels where the input number equals the output number

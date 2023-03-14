@@ -304,6 +304,6 @@ private:
 	double sampleRate = 0.f;
 };
 
-::Plugin *instantiatePlugin();
+std::shared_ptr<Plugin> instantiatePlugin();
 
 

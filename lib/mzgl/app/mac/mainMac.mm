@@ -20,10 +20,10 @@ int main(int argc, const char * argv[]) {
 
 	loadCommandLineArgs(argc, argv);
 
-	App *app = instantiateApp(g);
+	auto app = instantiateApp(g);
 	if(!app->isHeadless()) {
 		[NSApp activateIgnoringOtherApps:YES];
-		id appDelegate = [[MacAppDelegate alloc] initWithApp: app];
+		id appDelegate = [[MacAppDelegate alloc] initWithApp: app.get()];
 		[NSApp setDelegate:appDelegate];
 		[NSApp run];
 	}
