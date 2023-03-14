@@ -675,9 +675,8 @@ void android_main(struct android_app* state) {
     state->onInputEvent = engine_handle_input;
     engine.app = state;
 
-    App *appPtr = instantiateApp(graphics);
-    initMZGL(appPtr);
-    app = shared_ptr<App>(appPtr);
+    app = instantiateApp(graphics);
+    initMZGL(app.get());
 
     // loop waiting for stuff to do.
     while (1) {
