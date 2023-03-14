@@ -290,7 +290,7 @@ protected:
 	}
 	
 	// indexed
-	void addIndexedParameter(std::string name, float defaultValue, const std::vector<std::string> &options) {
+	void addIndexedParameter(std::string name, int defaultValue, const std::vector<std::string> &options) {
 		params.push_back(std::make_shared<PluginParameter>(name, defaultValue, options));
 	}
 	
