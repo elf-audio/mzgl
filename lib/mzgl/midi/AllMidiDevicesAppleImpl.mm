@@ -91,17 +91,43 @@ void AllMidiDevicesAppleImpl::autoPoll() {
 #if defined(__APPLE__) && DEBUG
 				pthread_setname_np("AllMidiIns::portScanner");
 #endif
+		std::atomic<bool> doneScanning = true;
+		auto *ptr = &doneScanning;
         while(running) {
-            
-			dispatch_async(dispatch_get_main_queue(), ^{
-				scanForDevices();  
-            });
+			[[NSOperationQueue mainQueue] addOperationWithBlock:^{
+				if(running) scanForDevices();
+			}];
+//			dispatch_async(dispatch_get_main_queue(), ^{
+//				if(running) scanForDevices();
+//            });
+			
             for(int i = 0; i < 100; i++) {
                 sleepMillis(10);
                 if(!running) break;
             }
         }
     });
+}
+
+
+AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
+	if (outputPort) {
+		OSStatus s = MIDIPortDispose(outputPort);
+		NSLogError(s, "Dispose MIDI port");
+	}
+
+	if (inputPort) {
+		OSStatus s = MIDIPortDispose(inputPort);
+		NSLogError(s, "Dispose MIDI port");
+	}
+
+	if (client) {
+		OSStatus s = MIDIClientDispose(client);
+		NSLogError(s, "Dispose MIDI client");
+	}
+	running = false;
+	[[NSOperationQueue mainQueue] cancelAllOperations];
+	portScannerThread.join();
 }
 
 
@@ -222,7 +248,6 @@ void AllMidiDevicesAppleImpl::midiReceived(const MidiMessage &msg, uint64_t time
 void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetList) {
     // if this message is from coremidi, and audiobus is enabled, ignore it.
     // if this message is from audiobus and it is diabled, ignore it (probs never happens that way round)
-    
     
     const MIDIPacket *packet = &packetList->packet[0];
     for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
@@ -389,24 +414,6 @@ void AllMidiDevicesAppleImpl::sendSysex(const UInt8 *data, UInt32 size) {
 
 }
 
-AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
-    if (outputPort) {
-        OSStatus s = MIDIPortDispose(outputPort);
-        NSLogError(s, "Dispose MIDI port");
-    }
-
-    if (inputPort) {
-        OSStatus s = MIDIPortDispose(inputPort);
-        NSLogError(s, "Dispose MIDI port");
-    }
-
-    if (client) {
-        OSStatus s = MIDIClientDispose(client);
-        NSLogError(s, "Dispose MIDI client");
-    }
-	running = false;
-	portScannerThread.join();
-}
 
 void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {
 	const auto b = m.getBytes();
