@@ -18,7 +18,7 @@
 #include "DateTime.h"
 
 @interface iOSAppDelegate () {
-	App *app;
+	std::shared_ptr<App> app;
 	Graphics g;
 	MZGLKitViewController *mzViewController;
 }
@@ -105,7 +105,7 @@ public:
 
 		}
 		
-		mzViewController = [[MZGLKitViewController alloc] initWithApp: app];
+		mzViewController = [[MZGLKitViewController alloc] initWithApp: app.get()];
 		window.rootViewController = mzViewController;
 		app->viewController = (__bridge void*)mzViewController;
         app->windowHandle = (__bridge void*)window;
@@ -114,11 +114,11 @@ public:
 	} catch(std::exception &e) {
 		writeStringToFile("instantiateAppError.txt", e.what());
 		
-		app = new ErrorApp(g, e.what());
+		app = std::make_shared<ErrorApp>(g, e.what());
 		
 	}
 	
-	mzViewController = [[MZGLKitViewController alloc] initWithApp: app];
+	mzViewController = [[MZGLKitViewController alloc] initWithApp: app.get()];
 	window.rootViewController = mzViewController;
 	app->viewController = (__bridge void*)mzViewController;
 
@@ -157,10 +157,8 @@ public:
 	// Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 	EventDispatcher *eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->exit();
-	NSLog(@"And deleted view ??");
-	delete app;
-	
 }
+
 -(void) dealloc {
 	NSLog(@"dealloc iOSAppDelegate");
 }

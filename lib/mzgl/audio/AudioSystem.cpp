@@ -29,7 +29,7 @@ void _AudioSystem::removeSampleRateChangeListener(SampleRateChangeListener *list
 			return;
 		}
 	}
-	Log::e() << "Error - couldn't find sample rate listener to erase";
+//	Log::e() << "Error - couldn't find sample rate listener to erase";
 }
 
 bool _AudioSystem::setInput(const AudioPort &audioInput) {
