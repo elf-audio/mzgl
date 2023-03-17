@@ -102,6 +102,20 @@ std::string getCWD() {
 	_getcwd(c, 512);
 	return c;
 }
+std::string UTF16ToUTF8(const wchar_t *utf16Str) {
+	std::string out;
+	int requiredSize = WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, NULL, 0, NULL, NULL);
+	if (requiredSize > 0) {
+		out.resize(requiredSize - 1);
+		WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, out.data(), requiredSize, NULL, NULL);
+	}
+	return out;
+}
+std::string GetKnownFolder(int identifier, int flags = 0) {
+	wchar_t wideBuffer[1024];
+	SHGetFolderPathW(NULL, identifier, NULL, flags, wideBuffer);
+	return UTF16ToUTF8(wideBuffer);
+}
 #else
 std::string getCWD() {
 	char c[512];
@@ -335,7 +349,11 @@ string dataPath(string path, string appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
+#if defined(MZGL_PLUGIN)
+	return GetKnownFolder(CSIDL_COMMON_APPDATA) + "\\Koala\\data\\" + path;
+#else
 	return "../data/" + path;
+#endif
 #else
 	return "../data/" + path;
 #endif
