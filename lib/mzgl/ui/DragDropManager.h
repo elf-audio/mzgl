@@ -133,8 +133,6 @@ public:
 		dropTargets.push_back(target);
 	}
 	
-	
-
 	// add draggers as items are dragged
 	void addDragger(std::shared_ptr<T> dragger) {
 		dragger->sourceLayer->transferFocus(this, dragger->touchId);
@@ -264,7 +262,11 @@ public:
 			// got to fire the touchUp event in order for the
 			// original object to know we released it
 			if(draggers[id]->sourceLayer!=nullptr) {
-				draggers[id]->sourceLayer->touchUp(x, y, id);
+				
+				// this was doing the incorrect coords as of 19.03.23,
+				// fixed it to do local coords - it may have an impact elsewhere
+				auto localCoords = draggers[id]->sourceLayer->getLocalPosition({x, y});
+				draggers[id]->sourceLayer->touchUp(localCoords.x, localCoords.y, id);
 			}
 			
 			draggers.erase(id);
