@@ -26,10 +26,10 @@ public:
 		if(visible) {
 			Rectf r = layer->getAbsoluteRect();
 			g.fill();
-			g.setColor(0.5, 0, 0, 0.2);
+			g.setColor(0.5f, 0.0f, 0.0f, 0.2f);
 			g.drawRect(r);
 			g.noFill();
-			g.setColor(1, 1, 1, 0.5);
+			g.setColor(1.0f, 1.0f, 1.0f, 0.5f);
 			g.drawRect(r);
 		}
 	}

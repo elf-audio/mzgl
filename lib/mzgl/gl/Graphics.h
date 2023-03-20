@@ -32,8 +32,8 @@ glm::vec4 hexColor(int hex, float a = 1);
 glm::vec4 hexColor(std::string s);
 
 class ScopedAlphaBlend;
-class ScopedTranslate;
-class ScopedTransform;
+struct ScopedTranslate;
+struct ScopedTransform;
 
 class Graphics {
 public:
@@ -208,7 +208,7 @@ private:
     // this is cached version of the above multiplied
     glm::mat4 viewProjectionMatrix;
     friend class ScopedAlphaBlend;
-    friend class ScopedTranslate;
+    friend struct ScopedTranslate;
 
 	
 	int32_t defaultFBO;

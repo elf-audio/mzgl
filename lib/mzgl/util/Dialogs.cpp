@@ -18,10 +18,11 @@
 #	include "linuxUtil.h"
 #endif
 #include "mzAssert.h"
-using namespace std;
 
 #include "filesystem.h"
 #include "mainThread.h"
+
+using namespace std;
 
 #ifdef UNIT_TEST
 namespace unit_test {
