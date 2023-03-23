@@ -269,7 +269,7 @@ static void engine_draw_frame(struct engine* engine) {
         graphics.height = engine->height;
         glViewport(0, 0, graphics.width, graphics.height);
 
-        eventDispatcher = make_shared<EventDispatcher>(app.get());
+        eventDispatcher = make_shared<EventDispatcher>(app);
         // just draw *something* whilst loading... - doesn't seem to work
         eventDispatcher->androidDrawLoading();
         eglSwapBuffers(engine->display, engine->surface);
@@ -676,7 +676,7 @@ void android_main(struct android_app* state) {
     engine.app = state;
 
     app = instantiateApp(graphics);
-    initMZGL(app.get());
+    initMZGL(app);
 
     // loop waiting for stuff to do.
     while (1) {

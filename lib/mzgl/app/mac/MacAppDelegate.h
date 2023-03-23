@@ -19,7 +19,7 @@ class App;
 
 #ifdef UNIT_TEST
 - (std::shared_ptr<App>) getApp;
-- (EventDispatcher*) getEventDispatcher;
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
 #endif
 @end
 
