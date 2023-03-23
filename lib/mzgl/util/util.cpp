@@ -561,7 +561,7 @@ string execute(string cmd, int *outExitCode) {
 	return "Error - can't do this";
 #endif
 }
-void initMZGL(App *app) {
+void initMZGL(std::shared_ptr<App> app) {
 	if (!app->isHeadless()) {
 		app->g.initGraphics();
 	}

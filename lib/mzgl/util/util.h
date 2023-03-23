@@ -138,7 +138,7 @@ void hideMouse();
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// internal! Should definitely go elsewhere
-void initMZGL(App *app);
+void initMZGL(std::shared_ptr<App> app);
 
 #ifdef UNIT_TEST
 

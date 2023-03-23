@@ -24,8 +24,8 @@ using namespace std;
 
 @interface MacAppDelegate() {
 	id view;
-
-	App *app;
+    
+	std::shared_ptr<App> app;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
 	
@@ -38,20 +38,20 @@ using namespace std;
 
 @implementation MacAppDelegate
 
--(id) initWithApp: (void*)_app {
+-(id) initWithApp: (std::shared_ptr<App>)_app {
 	self = [super init];
 	if(self!=nil) {
-		app = (App*)_app;
+		app = _app;
 	}
 	return self;
 }
 
 #ifdef UNIT_TEST
-- (App*) getApp {
+- (std::shared_ptr<App>) getApp {
 	return app;
 }
-- (EventDispatcher*) getEventDispatcher {
-	return eventDispatcher.get();
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher {
+    return eventDispatcher;
 }
 #endif
 
@@ -221,7 +221,7 @@ using namespace std;
 		[self makeMenus];
         if(app->isWebView()) {
 			
-			auto *webViewApp = (WebViewApp*)app;
+			auto webViewApp = dynamic_pointer_cast<WebViewApp>(app);
 			NSString *url = [NSString stringWithUTF8String:webViewApp->customUrl.c_str()];
             [self makeWebView: url];
             eventDispatcher->setup();

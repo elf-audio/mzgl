@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
 	auto app = instantiateApp(g);
 	if(!app->isHeadless()) {
 		[NSApp activateIgnoringOtherApps:YES];
-		id appDelegate = [[MacAppDelegate alloc] initWithApp: app.get()];
+		id appDelegate = [[MacAppDelegate alloc] initWithApp: app];
 		[NSApp setDelegate:appDelegate];
 		[NSApp run];
 	}

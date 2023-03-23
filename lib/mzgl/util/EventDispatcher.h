@@ -13,7 +13,7 @@
 class EventDispatcher {
 
 public:
-	EventDispatcher(App *app) {
+	EventDispatcher(std::shared_ptr<App> app) {
 		this->app = app;
 	}
 	
@@ -148,8 +148,8 @@ public:
 		app->androidOnResume();
 	}
 	
-//	bool isReady() {return app!=nullptr;}
-	App *app = nullptr;
+
+	std::shared_ptr<App> app;
 	glm::vec2 mouse;
 	std::map<int, bool> downTouches;
     bool hasCalledSetup = false;
@@ -174,6 +174,6 @@ public:
 	}
     
     virtual void receivedJSMessage(const std::string &key, const std::string &value) {
-        ((WebViewApp*)app)->receivedJSMessage(key, value);
+        std::dynamic_pointer_cast<WebViewApp>(app)->receivedJSMessage(key, value);
     }
 };

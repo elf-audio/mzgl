@@ -183,7 +183,7 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void*) getApp {
-	return eventDispatcher->app;
+	return eventDispatcher->app.get();
 }
 
 - (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender {
