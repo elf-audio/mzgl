@@ -787,16 +787,31 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 }
 bool readStringFromFile(const std::string &path, std::string &outStr) {
 	fs::ifstream t(fs::u8path(path));
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to open stream to " << path;
+		return false;
+	}
 
 	t.seekg(0, std::ios::end);
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to seek to end in " << path;
+		return false;
+	}
 	outStr.reserve(t.tellg());
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to determine tellg " << path;
+		return false;
+	}
 	t.seekg(0, std::ios::beg);
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to seek to beginning " << path;
+		return false;
+	}
 	outStr.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to read from " << path;
+		return false;
+	}
 	return true;
 }
 #ifdef __APPLE__
