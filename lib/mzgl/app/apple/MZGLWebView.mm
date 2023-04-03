@@ -18,7 +18,7 @@
 - (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr andUrl: (NSString*) url {
     eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
     
-    ((WebViewApp*)eventDispatcher->app)->callJS = [self](const std::string &s) {
+    dynamic_pointer_cast<WebViewApp>(eventDispatcher->app)->callJS = [self](const std::string &s) {
         printf("callJS(%s)\n", s.c_str());
         [self evaluateJavaScript:[NSString stringWithUTF8String:s.c_str()] completionHandler:nil];
     };

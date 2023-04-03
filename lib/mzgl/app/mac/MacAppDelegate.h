@@ -7,17 +7,19 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#ifdef UNIT_TEST
-class App;
+#include <memory>
+
+
 class EventDispatcher;
-#endif
+class App;
+
 @interface MacAppDelegate : NSObject <NSApplicationDelegate> {}
 
--(id) initWithApp: (void*)_app;
+-(id) initWithApp: (std::shared_ptr<App>)_app;
 
 #ifdef UNIT_TEST
-- (App*) getApp;
-- (EventDispatcher*) getEventDispatcher;
+- (std::shared_ptr<App>) getApp;
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
 #endif
 @end
 

@@ -323,9 +323,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #endif
 
 
-    initMZGL(app.get());
+    initMZGL(app);
 
-    eventDispatcher = std::make_shared<EventDispatcher>(app.get());
+    eventDispatcher = std::make_shared<EventDispatcher>(app);
     eventDispatcher->setup();
 
     while (!glfwWindowShouldClose(window)) {
