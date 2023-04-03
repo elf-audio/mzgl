@@ -16,11 +16,14 @@ namespace Log {
 	bool isLoggingToFile = false;
 };
 
-void Log::Logger::startSavingToFile(std::string path) {
+void Log::Logger::startSavingToFile(std::string path, bool append) {
 	
 	logFile = path;
-	
-	logStream.open(logFile.c_str());
+	if (append) {
+		logStream.open(logFile.c_str(), std::ios_base::app);
+	} else {
+		logStream.open(logFile.c_str());
+	}
 	isLoggingToFile = true;
 }
 

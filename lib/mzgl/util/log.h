@@ -52,7 +52,7 @@ namespace Log {
 		
 		// you can tell the logger to log to a file as well as
 		// stdout, to a specific path
-		static void startSavingToFile(std::string path);
+		static void startSavingToFile(std::string path, bool append = false);
 		
 		// if you want to get that file and stop the saving, call this
 		static std::string stopSavingToFile();
