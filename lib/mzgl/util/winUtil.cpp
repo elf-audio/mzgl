@@ -37,18 +37,6 @@ struct WindowsDialogBoxSetup {
 	float y;
 };
 
-std::string w2n(const std::wstring &w) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::string narrow = converter.to_bytes(w);
-	return narrow;
-}
-
-std::wstring n2w(const std::string &n) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring wide = converter.from_bytes(n);
-	return wide;
-}
-
 struct WM {
 	HWND hwnd;
 	UINT msg;
@@ -515,8 +503,7 @@ public:
 		: bsCallback_{std::move(spec.onProgress)}
 		, spec_{std::move(spec)}
 	{
-		const auto dst{n2w(spec_.destinationFilePath)};
-		thread_ = std::thread([url = spec_.url, dst, &bsCallback = bsCallback_, onComplete = spec_.onComplete] {
+		thread_ = std::thread([url = spec_.url, dst = spec_.destinationFilePath, &bsCallback = bsCallback_, onComplete = spec_.onComplete] {
 			ensureThatFileDirectoryExists(dst);
 			URLDownloadToFile(NULL, url.c_str(), dst.c_str(), 0, &bsCallback);
 			onComplete();
@@ -549,5 +536,17 @@ std::wstring windowsGetPathForTemporaryFile(std::wstring fileName) {
 		tempDir += buffer[i];
 	}
 	return tempDir + L"\\" + fileName;
+}
+
+std::string w2n(const std::wstring &w) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::string narrow = converter.to_bytes(w);
+	return narrow;
+}
+
+std::wstring n2w(const std::string &n) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring wide = converter.from_bytes(n);
+	return wide;
 }
 

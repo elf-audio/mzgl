@@ -819,6 +819,17 @@ bool readStringFromFile(const std::string &path, std::string &outStr) {
 }
 bool moveFile(const std::string& from, const std::string& to)
 {
+	try {
+		if (!fs::copy_file(from, to)) {
+			return false;
+		}
+		fs::remove(from);
+		return true;
+	}
+	catch(const fs::filesystem_error& err) {
+		Log::e() << "Exception thrown while attempting to move file";
+		return false;
+	}
 }
 #ifdef __APPLE__
 os_log_t logObject = nullptr;

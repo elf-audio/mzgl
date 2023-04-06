@@ -36,8 +36,7 @@ struct IWindowsFileDownloadTask {
     virtual ~IWindowsFileDownloadTask() {}
 };
 
-extern
-std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFileDownloadSpec spec);
-
-extern
-std::wstring windowsGetPathForTemporaryFile(std::wstring fileName);
+extern std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFileDownloadSpec spec);
+extern std::wstring windowsGetPathForTemporaryFile(std::wstring fileName);
+extern std::string w2n(const std::wstring &w);
+extern std::wstring n2w(const std::string &n);
