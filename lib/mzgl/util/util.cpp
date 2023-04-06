@@ -817,6 +817,9 @@ bool readStringFromFile(const std::string &path, std::string &outStr) {
 	if (t.fail()) return false;
 	return true;
 }
+bool moveFile(const std::string& from, const std::string& to)
+{
+}
 #ifdef __APPLE__
 os_log_t logObject = nullptr;
 void oslog(string s) {

@@ -2,9 +2,15 @@
 #include <codecvt>
 #include <locale>
 #include <optional>
+#include <thread>
+#include <mutex>
 #include <vector>
+#include <Urlmon.h>
+#include <wininet.h>
+#include "filesystem.h"
 #include "Rectf.h"
 #include "log.h"
+#include "util.h"
 
 namespace { ///////////////////////////////////////////////////////////////////////
 
@@ -243,7 +249,7 @@ private:
 		}
 
 		int textLength_WithNUL {GetWindowTextLength(textEditorHwnd_) + 1};
-		std::vector<TCHAR> text(textLength_WithNUL);
+		std::vector<wchar_t> text(textLength_WithNUL);
 		GetWindowText(textEditorHwnd_, text.data(), textLength_WithNUL);
 		char output[512];
 		sprintf(output, "%ws", text.data());
@@ -325,7 +331,15 @@ auto windowsDialogBox(WindowsDialogBoxSetup setup) -> void {
 				 data);
 }
 
-} // namespace
+void ensureThatFileDirectoryExists(std::wstring filePath) {
+	fs::path path{filePath};
+	const auto parentPath{path.parent_path()};
+	if (!fs::exists(parentPath)) {
+		fs::create_directories(parentPath);
+	}
+}
+
+} //////////////////////////////////////////////////////////////////////////////////////////
 
 void windowsConfirmDialog(HWND parent, std::string title, std::string msg, std::function<void()> okPressed, std::function<void()> cancelPressed) {
 	auto response = MessageBoxW(NULL, n2w(msg).c_str(), n2w(title).c_str(), MB_OKCANCEL);
@@ -452,3 +466,88 @@ void windowsChooseEntryDialog(HWND parent, bool isFile, std::string msg, std::fu
 	}
 	completionCallback(success ? filename : "", success);
 }
+
+struct DownloadBSCallback : public IBindStatusCallback
+{
+	DownloadBSCallback(std::function<void(float)> onProgress)
+		: onProgress_{onProgress}
+	{
+	}
+
+	auto abort() {
+		std::unique_lock lock{mutex_};
+		abort_ = true;
+	}
+
+private:
+
+	STDMETHODIMP OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
+		if (ulProgressMax == 0) {
+			return S_OK;
+		}
+		onProgress_(float(ulProgress) / ulProgressMax);
+		std::unique_lock lock{mutex_};
+		if (abort_) {
+			return E_ABORT;
+		}
+		return S_OK;
+	}
+
+	STDMETHODIMP QueryInterface(REFIID riid, void** ppv) override { return E_NOTIMPL; }
+	STDMETHODIMP_(ULONG) AddRef() override { return 1; }
+	STDMETHODIMP_(ULONG) Release() override { return 1; }
+	STDMETHODIMP OnStartBinding(DWORD dwReserved, IBinding *pib) override { return E_NOTIMPL; }
+	STDMETHODIMP GetPriority(LONG *pnPriority) override { return E_NOTIMPL; }
+	STDMETHODIMP OnLowResource(DWORD reserved) override { return E_NOTIMPL; }
+	STDMETHODIMP GetBindInfo(DWORD *grfBINDF, BINDINFO *pbindinfo) { return E_NOTIMPL; }
+	STDMETHODIMP OnDataAvailable(DWORD grfBSCF, DWORD dwSize, FORMATETC *pformatetc, STGMEDIUM *pstgmed) { return E_NOTIMPL; }
+	STDMETHODIMP OnStopBinding(HRESULT hresult, LPCWSTR szError) { return E_NOTIMPL; }
+	STDMETHODIMP OnObjectAvailable(REFIID riid, IUnknown *punk) { return E_NOTIMPL; }
+
+	std::function<void(float)> onProgress_;
+	std::mutex mutex_;
+	bool abort_{false};
+};
+
+struct WindowsFileDownloadTask : public IWindowsFileDownloadTask {
+public:
+	WindowsFileDownloadTask(WindowsFileDownloadSpec spec) 
+		: bsCallback_{std::move(spec.onProgress)}
+		, spec_{std::move(spec)}
+	{
+		const auto dst{n2w(spec_.destinationFilePath)};
+		thread_ = std::thread([url = spec_.url, dst, &bsCallback = bsCallback_, onComplete = spec_.onComplete] {
+			ensureThatFileDirectoryExists(dst);
+			URLDownloadToFile(NULL, url.c_str(), dst.c_str(), 0, &bsCallback);
+			onComplete();
+		});
+	}
+
+	~WindowsFileDownloadTask() {
+		if (thread_.joinable()) {
+			bsCallback_.abort();
+			thread_.join();
+		}
+	}
+
+private:
+	std::thread thread_;
+	DownloadBSCallback bsCallback_;
+	WindowsFileDownloadSpec spec_;
+};
+
+std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFileDownloadSpec spec) {
+	return std::make_unique<WindowsFileDownloadTask>(std::move(spec));
+}
+
+std::wstring windowsGetPathForTemporaryFile(std::wstring fileName) {
+	wchar_t buffer[MAX_PATH];
+	const auto len{GetTempPath(MAX_PATH, buffer)};
+	assert (len != 0);
+	std::wstring tempDir;
+	for (int i = 0; i < len; i++) {
+		tempDir += buffer[i];
+	}
+	return tempDir + L"\\" + fileName;
+}
+

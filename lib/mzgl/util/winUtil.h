@@ -1,5 +1,6 @@
 #include <string>
 #include <functional>
+#include <memory>
 #define UNICODE
 #define _UNICODE
 #include <Windows.h>
@@ -23,3 +24,20 @@ void windowsThreeOptionCancelDialog(HWND parent, std::string title, std::string 
 // isFile - true choose file
 //          false choose dir
 void windowsChooseEntryDialog(HWND parent, bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback);
+
+struct WindowsFileDownloadSpec {
+    std::wstring url;
+    std::wstring destinationFilePath;
+    std::function<void(float)> onProgress;
+    std::function<void()> onComplete;
+};
+
+struct IWindowsFileDownloadTask {
+    virtual ~IWindowsFileDownloadTask() {}
+};
+
+extern
+std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFileDownloadSpec spec);
+
+extern
+std::wstring windowsGetPathForTemporaryFile(std::wstring fileName);
