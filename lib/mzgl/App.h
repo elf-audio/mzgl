@@ -107,6 +107,7 @@ public:
 	// only available on iOS
 	void *viewController = nullptr;
     void *windowHandle = nullptr;
+    void *nativeWindowHandle = nullptr;
 	MainThreadRunner main;
 	
 	void updateInternal() {

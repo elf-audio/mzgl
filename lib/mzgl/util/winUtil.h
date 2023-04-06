@@ -1,16 +1,20 @@
 #include <string>
 #include <functional>
-void windowsTextboxDialog(std::string title, std::string msg, std::string text, std::function<void(std::string, bool)> completionCallback);
-void windowsConfirmDialog(std::string title, std::string msg,
+#define UNICODE
+#define _UNICODE
+#include <Windows.h>
+
+void windowsTextboxDialog(HWND parent, std::string title, std::string msg, std::string text, std::function<void(std::string, bool)> completionCallback);
+void windowsConfirmDialog(HWND parent, std::string title, std::string msg,
                    std::function<void()> okPressed,
                    std::function<void()> cancelPressed);
 
-void windowsTwoOptionCancelDialog(std::string title, std::string msg,
+void windowsTwoOptionCancelDialog(HWND parent, std::string title, std::string msg,
                            std::string buttonOneText, std::function<void()> buttonOnePressed,
                            std::string buttonTwoText, std::function<void()> buttonTwoPressed,
                            std::function<void()> cancelPressed);
 
-void windowsThreeOptionCancelDialog(std::string title, std::string msg,
+void windowsThreeOptionCancelDialog(HWND parent, std::string title, std::string msg,
                              std::string buttonOneText, std::function<void()> buttonOnePressed,
                              std::string buttonTwoText, std::function<void()> buttonTwoPressed,
                              std::string buttonThreeText, std::function<void()> buttonThreePressed,
@@ -18,4 +22,4 @@ void windowsThreeOptionCancelDialog(std::string title, std::string msg,
 
 // isFile - true choose file
 //          false choose dir
-void windowsChooseEntryDialog(bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback);
+void windowsChooseEntryDialog(HWND parent, bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback);

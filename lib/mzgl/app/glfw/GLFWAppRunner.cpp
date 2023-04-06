@@ -20,6 +20,11 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 #include "GLFWAppRunner.h"
 #include "glfw3.h"
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_NATIVE_INCLUDE_NONE
+#include <glfw/glfw3native.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include "filesystem.h"
@@ -298,6 +303,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     graphics.height = windowH;
 
     app->windowHandle = window;
+
+#ifdef _WIN32
+    app->nativeWindowHandle = glfwGetWin32Window(window);
+#endif
 
 #ifdef __linux__
     gtk_init(&argc, &argv);

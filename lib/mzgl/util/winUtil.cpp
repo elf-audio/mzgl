@@ -1,13 +1,10 @@
 #include "winUtil.h"
-
-#define UNICODE
-#define _UNICODE
-#include <Windows.h>
 #include <codecvt>
 #include <locale>
 #include <optional>
 #include <vector>
 #include "Rectf.h"
+#include "log.h"
 
 namespace { ///////////////////////////////////////////////////////////////////////
 
@@ -19,11 +16,13 @@ struct WindowsDialogBoxSetup {
 	struct Button {
 		std::string text;
 		std::function<void(WindowsDialogBoxResult)> onClicked;
+		bool isDefaultPushButton{false};
 	};
 	struct TextEditor {
 		std::string defaultText;
 	};
 
+	HWND parent;
 	std::string title;
 	std::string text;
 	std::optional<TextEditor> textEditor;
@@ -89,6 +88,7 @@ struct DialogBoxData {
 			button.onClicked = buttonSetup.onClicked;
 			button.text = buttonSetup.text;
 			button.rect = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
+			button.isDefaultPushButton = buttonSetup.isDefaultPushButton;
 			buttons_.push_back(std::move(button));
 			x += BUTTON_WIDTH + PADDING;
 		}
@@ -122,14 +122,20 @@ struct DialogBoxData {
 
 	auto on_wm_create(WM wm) -> LRESULT {
 		SetWindowLongPtr(wm.hwnd, GWLP_USERDATA, reinterpret_cast<LPARAM>(this));
+		HWND textHandle {0};
+		HWND textEditorHandle {0};
+		std::vector<HWND> buttonHandles {};
 		if (text_) {
-			createTextWindow(*text_, wm.hwnd);
+			textHandle = createTextWindow(*text_, wm.hwnd);
 		}
 		if (textEditor_) {
-			createTextEditorWindow(*textEditor_, wm.hwnd);
+			textEditorHandle = createTextEditorWindow(*textEditor_, wm.hwnd);
 		}
 		for (const auto button: buttons_) {
-			createButtonWindow(button, wm.hwnd);
+			buttonHandles.push_back(createButtonWindow(button, wm.hwnd));
+		}
+		if (textEditorHandle) {
+			SetFocus(textEditorHandle);
 		}
 		return 0;
 	}
@@ -152,7 +158,6 @@ struct DialogBoxData {
 	auto getRect() const { return rect_; }
 
 private:
-
 	struct Text {
 		WORD id;
 		std::string text;
@@ -170,6 +175,7 @@ private:
 		std::string text;
 		std::function<void(WindowsDialogBoxResult)> onClicked;
 		Rectf rect;
+		bool isDefaultPushButton;
 	};
 
 	static auto createFont() -> HFONT {
@@ -179,10 +185,14 @@ private:
 		return CreateFontIndirect(&metrics.lfMessageFont);
 	}
 
-	auto createButtonWindow(Button button, HWND hwnd) -> void {
+	auto createButtonWindow(Button button, HWND hwnd) -> HWND {
+		DWORD style{WS_VISIBLE | WS_CHILD | WS_TABSTOP};
+		if (button.isDefaultPushButton) {
+			style |= BS_DEFPUSHBUTTON;
+		}
 		const auto buttonHwnd = CreateWindow(TEXT("Button"),
 											 n2w(button.text).c_str(),
-											 WS_VISIBLE | WS_CHILD,
+											 style,
 											 button.rect.x,
 											 button.rect.y,
 											 button.rect.width,
@@ -192,36 +202,39 @@ private:
 											 NULL,
 											 NULL);
 		SendMessage(buttonHwnd, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
+		return buttonHwnd;
 	}
 
-	auto createTextEditorWindow(TextEditor textEditor, HWND hwnd) -> void {
+	auto createTextEditorWindow(TextEditor textEditor, HWND hwnd) -> HWND {
 		textEditorHwnd_ = CreateWindow(TEXT("Edit"),
-												 n2w(textEditor.defaultText).c_str(),
-												 WS_CHILD | WS_VISIBLE | WS_BORDER,
-												 textEditor.rect.x,
-												 textEditor.rect.y,
-												 textEditor.rect.width,
-												 textEditor.rect.height,
-												 hwnd,
-												 (HMENU) textEditor.id,
-												 NULL,
-												 NULL);
-		SendMessage(textEditorHwnd_, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
-	}
-
-	auto createTextWindow(Text text, HWND hwnd) -> void {
-		const auto textHwnd = CreateWindow(TEXT("Static"),
-									   n2w(text.text).c_str(),
-									   SS_CENTER | WS_CHILD | WS_VISIBLE,
-									   text.rect.x,
-									   text.rect.y,
-									   text.rect.width,
-									   text.rect.height,
+									   n2w(textEditor.defaultText).c_str(),
+									   WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP,
+									   textEditor.rect.x,
+									   textEditor.rect.y,
+									   textEditor.rect.width,
+									   textEditor.rect.height,
 									   hwnd,
-									   (HMENU) (text.id),
+									   (HMENU) textEditor.id,
 									   NULL,
 									   NULL);
+		SendMessage(textEditorHwnd_, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
+		return textEditorHwnd_;
+	}
+
+	auto createTextWindow(Text text, HWND hwnd) -> HWND {
+		const auto textHwnd = CreateWindow(TEXT("Static"),
+										   n2w(text.text).c_str(),
+										   SS_CENTER | WS_CHILD | WS_VISIBLE,
+										   text.rect.x,
+										   text.rect.y,
+										   text.rect.width,
+										   text.rect.height,
+										   hwnd,
+										   (HMENU) (text.id),
+										   NULL,
+										   NULL);
 		SendMessage(textHwnd, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
+		return textHwnd;
 	}
 
 	auto getEditorText() const -> std::string {
@@ -270,6 +283,10 @@ LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 	}
 
+	Log::d().startSavingToFile("z:/tmp/test.log", true);
+	Log::d() << "here";
+	Log::d().stopSavingToFile();
+
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
@@ -302,15 +319,15 @@ auto windowsDialogBox(WindowsDialogBoxSetup setup) -> void {
 				 requiredRect.top,
 				 requiredRect.right - requiredRect.left,
 				 requiredRect.bottom - requiredRect.top,
-				 NULL,
+				 setup.parent,
 				 0,
 				 hInstance,
 				 data);
 }
 
-} /////////////////////////////////////////////////////////////////////////////////
+} // namespace
 
-void windowsConfirmDialog(std::string title, std::string msg, std::function<void()> okPressed, std::function<void()> cancelPressed) {
+void windowsConfirmDialog(HWND parent, std::string title, std::string msg, std::function<void()> okPressed, std::function<void()> cancelPressed) {
 	auto response = MessageBoxW(NULL, n2w(msg).c_str(), n2w(title).c_str(), MB_OKCANCEL);
 	if (response == IDOK) {
 		okPressed();
@@ -319,7 +336,8 @@ void windowsConfirmDialog(std::string title, std::string msg, std::function<void
 	}
 }
 
-void windowsTextboxDialog(std::string title, std::string msg, std::string text, std::function<void(std::string, bool)> completionCallback) {
+void windowsTextboxDialog(
+	HWND parent, std::string title, std::string msg, std::string text, std::function<void(std::string, bool)> completionCallback) {
 	auto onOk = [completionCallback](WindowsDialogBoxResult result) {
 		completionCallback(result.text, true);
 	};
@@ -327,39 +345,49 @@ void windowsTextboxDialog(std::string title, std::string msg, std::string text, 
 		completionCallback(result.text, false);
 	};
 	WindowsDialogBoxSetup setup;
+	setup.parent = parent;
 	setup.title = title;
 	setup.text = msg;
-	setup.textEditor = WindowsDialogBoxSetup::TextEditor{};
+	setup.textEditor = WindowsDialogBoxSetup::TextEditor {};
 	setup.textEditor->defaultText = text;
 	setup.x = 150.0f;
 	setup.y = 150.0f;
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"OK", onOk});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"OK", onOk, true});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
 	windowsDialogBox(std::move(setup));
 }
 
-void windowsTwoOptionCancelDialog(std::string title,
+void windowsTwoOptionCancelDialog(HWND parent,
+								  std::string title,
 								  std::string msg,
 								  std::string buttonOneText,
 								  std::function<void()> buttonOnePressed,
 								  std::string buttonTwoText,
 								  std::function<void()> buttonTwoPressed,
 								  std::function<void()> cancelPressed) {
-	const auto onButtonOne = [buttonOnePressed](auto&&...) { buttonOnePressed(); };
-	const auto onButtonTwo = [buttonTwoPressed](auto&&...) { buttonTwoPressed(); };
-	const auto onCancel = [cancelPressed](auto&&...) { cancelPressed(); };
+	const auto onButtonOne = [buttonOnePressed](auto &&...) {
+		buttonOnePressed();
+	};
+	const auto onButtonTwo = [buttonTwoPressed](auto &&...) {
+		buttonTwoPressed();
+	};
+	const auto onCancel = [cancelPressed](auto &&...) {
+		cancelPressed();
+	};
 	WindowsDialogBoxSetup setup;
+	setup.parent = parent;
 	setup.title = title;
 	setup.text = msg;
 	setup.x = 150.0f;
 	setup.y = 150.0f;
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne, true});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonTwoText, onButtonTwo});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
 	windowsDialogBox(std::move(setup));
 }
 
-void windowsThreeOptionCancelDialog(std::string title,
+void windowsThreeOptionCancelDialog(HWND parent,
+									std::string title,
 									std::string msg,
 									std::string buttonOneText,
 									std::function<void()> buttonOnePressed,
@@ -367,18 +395,26 @@ void windowsThreeOptionCancelDialog(std::string title,
 									std::function<void()> buttonTwoPressed,
 									std::string buttonThreeText,
 									std::function<void()> buttonThreePressed,
-									std::function<void()> cancelPressed)
-{
-	const auto onButtonOne = [buttonOnePressed](auto&&...) { buttonOnePressed(); };
-	const auto onButtonTwo = [buttonTwoPressed](auto&&...) { buttonTwoPressed(); };
-	const auto onButtonThree = [buttonThreePressed](auto&&...) { buttonThreePressed(); };
-	const auto onCancel = [cancelPressed](auto&&...) { cancelPressed(); };
+									std::function<void()> cancelPressed) {
+	const auto onButtonOne = [buttonOnePressed](auto &&...) {
+		buttonOnePressed();
+	};
+	const auto onButtonTwo = [buttonTwoPressed](auto &&...) {
+		buttonTwoPressed();
+	};
+	const auto onButtonThree = [buttonThreePressed](auto &&...) {
+		buttonThreePressed();
+	};
+	const auto onCancel = [cancelPressed](auto &&...) {
+		cancelPressed();
+	};
 	WindowsDialogBoxSetup setup;
+	setup.parent = parent;
 	setup.title = title;
 	setup.text = msg;
 	setup.x = 150.0f;
 	setup.y = 150.0f;
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne, true});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonTwoText, onButtonTwo});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonThreeText, onButtonThree});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
@@ -387,7 +423,7 @@ void windowsThreeOptionCancelDialog(std::string title,
 
 #include <ShObjIdl_core.h>
 
-void windowsChooseEntryDialog(bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback) {
+void windowsChooseEntryDialog(HWND parent, bool isFile, std::string msg, std::function<void(std::string, bool)> completionCallback) {
 	IFileDialog *pfd;
 	bool success = false;
 	WCHAR *entryName;
