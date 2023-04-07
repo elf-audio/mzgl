@@ -13,7 +13,7 @@
 #include "log.h"
 #import "MZGLKitView.h"
 
-#ifdef MZGL_AU
+#ifdef MZGL_PLUGIN
 #include "MZGLEffectAU.h"
 #endif
 @implementation MZGLKitViewController {

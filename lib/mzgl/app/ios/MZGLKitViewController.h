@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
-#ifdef MZGL_AU
+#ifdef MZGL_PLUGIN
 #import <CoreAudioKit/CoreAudioKit.h>
 #endif
 #import "MZGLKitView.h"
@@ -16,7 +16,7 @@ class App;
 
 class EventDispatcher;
 @interface MZGLKitViewController : GLKViewController
-#ifdef MZGL_AU
+#ifdef MZGL_PLUGIN
 // NOT SURE IF WE NEED THESE, AS THERES A DIFFERENT CLASS DOING IT I THINK
 <AUAudioUnitFactory,NSExtensionRequestHandling,GLKViewControllerDelegate>
 #else
