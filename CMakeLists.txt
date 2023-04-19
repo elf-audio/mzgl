@@ -445,7 +445,10 @@ if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
 endif()
 if(WIN32)
     add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
-    list(APPEND MZGL_LIBS PortAudio)
+    list(APPEND MZGL_LIBS
+		PortAudio
+		$<$<PLATFORM_ID:Windows>:Urlmon Wininet>
+    )
 endif()
 
 if(NOT ANDROID AND NOT IOS)

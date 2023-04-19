@@ -185,7 +185,7 @@ public:
 	
 	// process audio here, no allocating
     // the buffers are arrays of interleaved (for stereo) bus buffers
-	virtual void process(FloatBuffer *ins, FloatBuffer *outs, int channels) {}
+	virtual void process(FloatBuffer *ins, FloatBuffer *outs, int channelsPerBus) {}
 	
     virtual int getNumOutputBusses() { return 1; }
     

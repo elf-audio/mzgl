@@ -10,6 +10,7 @@
 
 #include <string>
 #include <functional>
+#include <memory>
 #include <vector>
 
 class App;
@@ -101,6 +102,7 @@ std::vector<unsigned char> readFile(std::string filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
 bool writeStringToFile(const std::string &path, const std::string &data);
 bool readStringFromFile(const std::string &path, std::string &outStr);
+bool moveFile(const std::string& from, const std::string& to);
 
 
 ////////////////////////////////////////////////////////////////////////////////
