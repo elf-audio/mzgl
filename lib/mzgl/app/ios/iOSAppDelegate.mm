@@ -32,7 +32,7 @@
 	//NSString* urlPath = url.path;
 	NSLog(@"openURL: %@", url);
 	
-	EventDispatcher *eventDispatcher = [mzViewController getEventDispatcher];
+	auto eventDispatcher = [mzViewController getEventDispatcher];
 	std::string urlStr = [[url absoluteString] UTF8String];
 	bool isLocalFilePath = urlStr.size()>0 && urlStr[0]=='/';
 	
@@ -105,7 +105,7 @@ public:
 
 		}
 		
-		mzViewController = [[MZGLKitViewController alloc] initWithApp: app.get()];
+		mzViewController = [[MZGLKitViewController alloc] initWithApp: app];
 		window.rootViewController = mzViewController;
 		app->viewController = (__bridge void*)mzViewController;
         app->windowHandle = (__bridge void*)window;
@@ -118,7 +118,7 @@ public:
 		
 	}
 	
-	mzViewController = [[MZGLKitViewController alloc] initWithApp: app.get()];
+	mzViewController = [[MZGLKitViewController alloc] initWithApp: app];
 	window.rootViewController = mzViewController;
 	app->viewController = (__bridge void*)mzViewController;
 
@@ -137,14 +137,14 @@ public:
 - (void)applicationDidEnterBackground:(UIApplication *)application {
 	// Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
 	// If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-	EventDispatcher *eventDispatcher = [mzViewController getEventDispatcher];
+	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->didEnterBackground();
 }
 
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
 	// Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-	EventDispatcher *eventDispatcher = [mzViewController getEventDispatcher];
+	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->willEnterForeground();
 }
 
@@ -155,7 +155,7 @@ public:
 
 - (void)applicationWillTerminate:(UIApplication *)application {
 	// Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-	EventDispatcher *eventDispatcher = [mzViewController getEventDispatcher];
+	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->exit();
 }
 

@@ -29,7 +29,7 @@
 //     apparently. Bit of a hack but it works.
 
 EAGLContext *context = nil;
-- (id) initWithApp:(App*) _app {
+- (id) initWithApp:(std::shared_ptr<App>) _app {
 	self = [super init];
 	if(self!=nil) {
 		currentlyPaused = YES;
@@ -83,12 +83,12 @@ EAGLContext *context = nil;
 //	NSLog(@"Orientation changed %.0f %.0f", size.width, size.height);
 	if(mzView!=nil) {
 		
-		App *app = (App*)[mzView getApp];
+		auto app = [mzView getApp];
 		if(app!=nullptr) {
 			app->g.width = size.width * app->g.pixelScale;
 			app->g.height = size.height * app->g.pixelScale;
 			
-			EventDispatcher *eventDispatcher = [mzView getEventDispatcher];
+			auto eventDispatcher = [mzView getEventDispatcher];
 			if(eventDispatcher && eventDispatcher->hasSetup()) {
 				eventDispatcher->resized();
 			}
@@ -97,7 +97,7 @@ EAGLContext *context = nil;
 }
 
 
-- (EventDispatcher*) getEventDispatcher {
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher {
 	return [mzView getEventDispatcher];
 }
 

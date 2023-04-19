@@ -23,8 +23,8 @@ class EventDispatcher;
 <GLKViewControllerDelegate>
 #endif
 
-- (id) initWithApp: (App*) app;
-- (EventDispatcher*) getEventDispatcher;
+- (id) initWithApp: (std::shared_ptr<App>) app;
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
 - (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
 - (MZGLKitView*) getView;
 @end
