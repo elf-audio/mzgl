@@ -14,16 +14,16 @@
 // this is what your dragger should inherit from
 class Dragger {
 public:
-	
+
 	virtual ~Dragger() {}
-	
-	
+
+
 	Rectf sourceLayerRect;
 	Graphics &g;
 	// the area on the screen that the drag has been dragged
 	Rectf dragRect;
 	int touchId;
-	
+
 	/**
 	 * @param sourceLayer the layer that received the touch (because we tranfer the touch away)
 	 * @param startTouch  must be in absolute coordinates
@@ -33,59 +33,60 @@ public:
 	g(g), startTouch(startTouch), sourceLayer(sourceLayer), sourceLayerRect(sourceLayer->getAbsoluteRect()), touchId(touchId) {
 		touchOffset = startTouch - sourceLayer->getAbsolutePosition();
 		dragRect.set(startTouch.x, startTouch.y, 0, 0);
+		touchDelta = {0.f, 0.f};
 	}
-	
+
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
-	
+
 	// distance from finger to top-left of dragging object
 	vec2 touchOffset;
-	
-	
+
+
 	// denotes if the user has moved their finger far enough
 	// to initiate the drag due to hysteresisDistance
 	bool isActive() { return active; }
-	
+
 	void activate() {
 		active = true;
 	}
-	
+
 	// call this if you don't want the
 	// sourceLayer to receive a touch up
 	// when you drop the drag.
 	void cancelTouchUpOnSourceLayer() {
 		sourceLayer = nullptr;
 	}
-	
+
 	virtual void draw() {}
-	
+
 	// reposition the drag origin
 	void setCentre(vec2 c) {
 		startTouch = c;
 		touchDelta = {0.f, 0.f};
 		touchOffset = {0.f, 0.f};
 	}
-	
+
 	vec2 touchPos() const {
 		return startTouch + touchDelta;
 	}
-	
+
 	void touchMoved(float x, float y) {
 		auto touch = glm::vec2(x, y);
 		dragRect.growToInclude(touch);
 		touchDelta = touch - startTouch;
-		
+
 		if(!active) {
 			if(glm::length(touchDelta)>hysteresisDistance) {//} * g.width / 750.f) {
 				active = true;
 			}
 		}
 	}
-	
+
 	void setHysteresisDistance(float f) {
 		hysteresisDistance = f;
 	}
-	
+
 
 	// may be null, so always check
 	Layer *sourceLayer = nullptr;
@@ -99,19 +100,19 @@ template <class T>
 class DropTarget : public Layer {
 public:
 	DropTarget(Graphics &g) : Layer(g) {}
-	
+
 	// called when a T is dragged into this drop target
 	virtual void draggedIn(std::shared_ptr<T> dragger) {}
 	// called when a T is dragged out of this drop target
 	virtual void draggedOut(std::shared_ptr<T> dragger) {}
-	
+
 	// called when a T is dropped onto this drop target
 	virtual void dropped(std::shared_ptr<T> dragger) {}
-	
+
 	// gets called when any drag is started when there were
 	// no drags before
 	virtual void dragsStarted() {}
-	
+
 	// gets called when all drags are finished
 	virtual void dragsEnded() {}
 
@@ -121,24 +122,24 @@ public:
 template <class T>
 class DragDropManager : public Layer {
 public:
-	
+
 	/**
 	 * The drag root is the root layer that all dragging happens from -
 	 * things can be nested but we need to know which is the bottom layer.
 	 */
 	DragDropManager(Layer *dragRoot) : Layer(dragRoot->getGraphics()), dragRoot(dragRoot) {}
-	
+
 	// add all your targets ahead of time
 	void addTarget(DropTarget<T> *target) {
 		dropTargets.push_back(target);
 	}
-	
+
 	// add draggers as items are dragged
 	void addDragger(std::shared_ptr<T> dragger) {
 		dragger->sourceLayer->transferFocus(this, dragger->touchId);
 		draggers[dragger->touchId] = dragger;
 	}
-	
+
 	void cancelAll() {
 		callDragsEnded();
 		for(auto &d : draggers) {
@@ -150,11 +151,11 @@ public:
 				auto c = dragger->sourceLayer->centre();
 				dragger->sourceLayer->touchUp(c.x, c.y, id);
 			}
-			
+
 		}
 		draggers.clear();
 	}
-	
+
 	/**
 	 * DragDropManager assumes that all sourceLayers (e.g. the layer that originated
 	 * the drag) will still be alive when drag is finished - if they are deleted
@@ -169,22 +170,22 @@ public:
 			d.second->sourceLayer = nullptr;
 		}
 	}
-	
+
 
 public:
-	
-	
+
+
 	bool isActive() {
 		return draggers.size()>0;
 	}
-	
+
 	DrawingFunction *createDraggerDrawingFunction() {
 		return new DrawingFunction(g, [this](Graphics &g) {
 			drawDraggers();
 		});
 	}
-	
-	
+
+
 	// call this explicitly - could make DragDropManager a layer
 	// so it can just be added
 	void drawDraggers() {
@@ -204,33 +205,33 @@ public:
 	bool hasTouch(int touchId) {
 		return draggers.find(touchId)!=draggers.end();
 	}
-	
+
 	void touchMoved(float x, float y, int id) override {
 		touchMoved__(x, y, id);
 	}
-	
+
 	void touchUp(float x, float y, int id) override {
 		touchUp__(x, y, id);
 	}
-	
+
 	bool touchMoved__(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
-			
+
 			auto d = draggers[id];
 			auto prevPos = d->touchPos();
-			
+
 			d->touchMoved(x, y);
-			
+
 			if(d->isActive()) {
-				
+
 				auto currPos = d->touchPos();
-				
+
 				for(auto *target : dropTargets) {
-					
+
 					Rectf r;
-					
+
 					if(target->getRectRelativeTo(dragRoot, r)) {
-						
+
 						bool wasInside = r.inside(prevPos);
 						bool isInside = r.inside(currPos);
 
@@ -243,10 +244,10 @@ public:
 		}
 		return false;
 	}
-	
+
 	bool touchUp__(float x, float y, int id) {
 		if(draggers.find(id)!=draggers.end()) {
-			
+
 			// make sure we've reached the drag threshold
 			if(draggers[id]->isActive()) {
 				auto touch = draggers[id]->touchPos();
@@ -262,13 +263,13 @@ public:
 			// got to fire the touchUp event in order for the
 			// original object to know we released it
 			if(draggers[id]->sourceLayer!=nullptr) {
-				
+
 				// this was doing the incorrect coords as of 19.03.23,
 				// fixed it to do local coords - it may have an impact elsewhere
 				auto localCoords = draggers[id]->sourceLayer->getLocalPosition({x, y});
 				draggers[id]->sourceLayer->touchUp(localCoords.x, localCoords.y, id);
 			}
-			
+
 			draggers.erase(id);
 			if(draggers.empty()) {
 				callDragsEnded();
@@ -280,7 +281,7 @@ public:
 
 
 	std::map<int,std::shared_ptr<T>> draggers;
-	
+
 private:
 	bool dragsStartedCalled = false;
 
@@ -290,14 +291,14 @@ private:
 			d->dragsStarted();
 		}
 	}
-	
+
 	void callDragsEnded() {
 		dragsStartedCalled = false;
 		for(auto *d : dropTargets) {
 			d->dragsEnded();
 		}
 	}
-	
+
 	Layer *dragRoot = nullptr;
 	std::vector<DropTarget<T>*> dropTargets;
 };
