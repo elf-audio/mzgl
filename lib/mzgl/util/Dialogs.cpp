@@ -83,7 +83,7 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 											}]];
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-	  textField.placeholder = [NSString stringWithUTF8String:text.c_str()];
+	  textField.text = [NSString stringWithUTF8String:text.c_str()];
 	}];
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
