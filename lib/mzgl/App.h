@@ -28,7 +28,11 @@
 #define MZ_KEY_DELETE   	127 // this is actually ascii, but non-printable
 #define MZ_KEY_TAB			9
 #define MZ_KEY_SHIFT_TAB 	25
-
+#define MZ_KEY_SHIFT		1001
+#define MZ_KEY_FN			1002
+#define MZ_KEY_CTRL			1002
+#define MZ_KEY_ALT			1003
+#define MZ_KEY_CMD			1004
 
 
 class App : public AudioIO {
