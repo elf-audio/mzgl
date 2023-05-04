@@ -49,8 +49,12 @@ public:
 
 	void activate() {
 		active = true;
+		activated();
 	}
 
+	// gets called when dragger appears (has moved past hysteresis distance)
+	std::function<void()> activated = []() {};
+	
 	// call this if you don't want the
 	// sourceLayer to receive a touch up
 	// when you drop the drag.
@@ -78,7 +82,7 @@ public:
 
 		if(!active) {
 			if(glm::length(touchDelta)>hysteresisDistance) {//} * g.width / 750.f) {
-				active = true;
+				activate();
 			}
 		}
 	}
