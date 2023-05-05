@@ -24,12 +24,13 @@ public:
 		storage.reserve(sz);
 	}
 	
-	void insert(T s) {
+	bool insert(T s) {
 		// only insert if not already inside
 		for(auto spd : storage) {
-			if(spd==s) return;
+			if(spd==s) return false;
 		}
 		storage.push_back(s);
+		return true;
 	}
 	
 	bool contains(const T &s) const {
@@ -39,20 +40,24 @@ public:
 		return false;
 	}
 	
-	void erase(T p) {
+	bool erase(T p) {
 		for(size_t i = 0; i < storage.size(); i++) {
 			if(storage[i]==p) {
 				storage.erase(storage.begin() + i);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 	
-	bool empty()  { return storage.empty(); }
-	void clear()  { 	   storage.clear(); }
-	size_t size() { return storage.size(); }
-	
-	std::vector<T> &getVector() { return storage; }
+	bool empty() const  { return storage.empty(); }
+	void clear()        {  storage.clear(); }
+	size_t size() const { return storage.size(); }
+	const T &operator[](int i) const {
+		return storage[i];
+	}
+
+	const std::vector<T> &getVector() const { return storage; }
 private:
 	std::vector<T> storage;
 };
