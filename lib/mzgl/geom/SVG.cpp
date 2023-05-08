@@ -239,6 +239,17 @@ public:
 			0,0,1});
 		strokeWeight *= s;
 	}
+	
+	
+	void scale(float w, float h) override {
+		applyTransformToPoints({
+			w,0,0,
+			0,h,0,
+			0,0,1});
+		strokeWeight *= std::max(w, h);
+	}
+	
+	
 	void translate(float x, float y) override {
 		applyTransformToPoints({
 			1,0,0,
@@ -460,6 +471,11 @@ public:
 			c->scale(s);
 		}
 	}
+	void scale(float w, float h) override {
+		for(auto c: children) {
+			c->scale(w, h);
+		}
+	}
 
 	void mirrorX() override {
 		for(auto c: children) {
@@ -623,6 +639,11 @@ void SVGDoc::scale(float s) {
 	rootGroup->scale(s);
 	width *= s;
 	height *= s;
+}
+void SVGDoc::scale(float w, float h) {
+	rootGroup->scale(w, h);
+	width *= w;
+	height *= h;
 }
 void SVGDoc::mirrorX() {
 	rootGroup->mirrorX();
