@@ -37,6 +37,8 @@ public:
 	void draw(Graphics &g, const std::string &text, glm::vec2 c);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign);
 	
+	
+	
 	void drawCentred(Graphics &g, const std::string &text, glm::vec2 c);
 	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign align = HTextAlign::Left);
 	void drawHorizontallyCentred(Graphics &g, const std::string &text, glm::vec2 c);
@@ -58,7 +60,12 @@ public:
 	bool isLoaded() const;
 	
 	void clear();
-
+	
+	// you can draw a font smaller than the texture atlas is set to
+	// if you want... use with care, and remember to put it back to
+	// 1 when you're not using it.
+	void setScale(float scale);
+	
 	// should be private
 	void fontstashError(int error, int val);
 
@@ -69,5 +76,6 @@ private:
 	FONScontext* fs = nullptr;
 	int fontNormal = -1;
 	float size = 0;
+	float scale = 1;
 };
 

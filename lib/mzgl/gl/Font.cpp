@@ -78,7 +78,9 @@ void Font::fontstashError(int error, int val) {
 		}
 	}
 }
-
+void Font::setScale(float scale) {
+	this->scale = scale;
+}
 bool Font::isLoaded() const {
 	return fs != nullptr;
 }
@@ -240,6 +242,9 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	g.pushMatrix();
 	g.translate(x, y);
 	
+	if(scale!=1) {
+		g.scale(scale);
+	}
 	g.fontShader->begin();
 	g.fontShader->uniform("mvp", g.getMVP());
 
