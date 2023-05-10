@@ -4,7 +4,7 @@
 #include "RoundedRect.h"
 #include "maths.h"
 #include "mzAssert.h"
-
+#include "log.h"
 using namespace std;
 
 void Drawer::setColor(const glm::vec4 &c) {
