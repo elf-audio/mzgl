@@ -15,7 +15,9 @@
 std::string to_string(float value, int precision);
 std::string to_string(double value, int precision);
 
-std::string tolower(std::string s);
+std::string toLowerCase(std::string s);
+std::string toUpperCase(std::string s);
+
 void replaceAll(std::string & data, std::string toSearch, std::string replaceStr);
 std::string byteSizeToString(uint64_t bytes);
 

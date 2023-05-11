@@ -747,10 +747,7 @@ void hideMouse() {
 #endif
 }
 
-string tolower(std::string s) {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-	return s;
-}
+
 
 bool readFile(string filename, std::vector<unsigned char> &outData) {
 	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);

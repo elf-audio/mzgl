@@ -32,6 +32,17 @@ std::string to_string(const T a_value, const int n)
 }
 
 
+std::string toLowerCase(std::string s) {
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+	return s;
+}
+
+std::string toUpperCase(std::string s) {
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::toupper(c); });
+	return s;
+}
+
+
 std::string byteSizeToString(uint64_t bytes) {
 
 	char buf[256];
