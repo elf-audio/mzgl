@@ -296,7 +296,7 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 
 bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
 #ifdef __ANDROID__
-    string ext = tolower(fs::path(path).extension().string());
+    string ext = toLowerCase(fs::path(path).extension().string());
 	// this is an issue because people are loading .mp3 extensions that are actually m4a's from youtube.
 	// check to see if Dr Lib fails on AAC and if it does, send it to NDK decoder and see if that works.
 	// (e.g. do a test with an AAC renamed to MP3
