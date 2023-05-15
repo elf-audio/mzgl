@@ -56,15 +56,26 @@ public:
 	}
 	
 	void findMinMax(int from, int to, float &min, float &max) const override {
-		float _min = 1;
-		float _max = -1;
-		for(int j = from; j < to; j++) {
-			float v = data[j];
-			if(_max<v) _max = v;
-			if(_min>v) _min = v;
-		}
-		min = _min;
-		max = _max;
+
+
+		// find min and max in float vector data between from and to
+		// and set min and max to those values
+
+		// intial benchmark shows that the std::minmax_element is much slower than
+		// the algo below it
+//		auto minmax = std::minmax_element(data.begin() + from, data.begin() + to);
+//		min = *minmax.first;
+//		max = *minmax.second;
+
+		 float _min = 1;
+		 float _max = -1;
+		 for(int j = from; j < to; j++) {
+		 	float v = data[j];
+		 	if(_max<v) _max = v;
+		 	if(_min>v) _min = v;
+		 }
+		 min = _min;
+		 max = _max;
 	}
 
 	bool isFloat() const override {
