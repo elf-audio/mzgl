@@ -9,6 +9,7 @@
 #include "util.h"
 #include "stringUtil.h"
 #include <iostream>
+#include "log.h"
 
 using namespace std;
 
@@ -428,6 +429,10 @@ int Layer::getNumChildren() const {
 
 
 Layer *Layer::getChild(int index) {
+	if(index<0||index>=children.size()) {
+		Log::e() << "Couldn't find child of "<<name<<" at index " <<index;
+		return nullptr;
+	}
 	return children[index];
 }
 

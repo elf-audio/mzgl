@@ -296,7 +296,9 @@ void ScrollingList::unselect() {
 	bool mustCallback = selectedIndex!=-1;
 	if(selectedIndex!=-1) {
 		auto *t = (ScrollingListItemView*)content->getChild(selectedIndex);
-		t->selected = false;
+		if(t!=nullptr) {
+			t->selected = false;
+		}
 	}
 	selecting = false;
 	selectedIndex = -1;
