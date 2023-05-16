@@ -152,6 +152,7 @@ set(HEADERS
     lib/mzgl/gl/drawing
     lib/mzgl/midi
     lib/mzgl/music
+    lib/mzgl/net
     lib/mzgl/ui
     lib/mzgl/ui/widgets
     lib/mzgl/util
