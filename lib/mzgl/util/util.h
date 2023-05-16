@@ -77,6 +77,8 @@ std::string execute(std::string cmd, int *outExitCode = nullptr);
 
 
 void sleepMillis(long ms);
+void sleepMicros(long us);
+
 // this makes sure a file path is unique by appending
 // a number to the end of the filename (before the
 // file extension) 
