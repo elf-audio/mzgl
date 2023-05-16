@@ -549,7 +549,7 @@ uint64_t getStorageRemainingInBytes() {
 #endif
 }
 
-// on iOS this'll give the launched url
+// on iOS/mac this'll give the launched url
 string getLaunchUrl() {
 	return Globals::launchUrl;
 }

@@ -750,6 +750,12 @@
 		EAD82ECA269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAD82ECB269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
 		EAD82ECC269CA19400861BE3 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
+		EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
+		EADA5B2A2A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
+		EADA5B2B2A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
+		EADA5B2C2A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
+		EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
+		EADA5B2E2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
@@ -1612,6 +1618,8 @@
 		EAD47FB125892D4100D2172A /* ThreadPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
 		EAD82EC7269CA18000861BE3 /* Dialogs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Dialogs.h; sourceTree = "<group>"; };
 		EAD82EC8269CA19400861BE3 /* Dialogs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp.preprocessed; fileEncoding = 4; path = Dialogs.cpp; sourceTree = "<group>"; };
+		EADA5B272A138E36000DCE7B /* netUtil.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = netUtil.cpp; sourceTree = "<group>"; };
+		EADA5B282A138E36000DCE7B /* netUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = netUtil.h; sourceTree = "<group>"; };
 		EADBBCDB24925ACB001E0047 /* Knob.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Knob.h; sourceTree = "<group>"; };
 		EADDACC024BC8FF800C5F885 /* ChromaticKeyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChromaticKeyboard.h; sourceTree = "<group>"; };
 		EAE3C63326D39E8F0000613E /* SampleProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleProvider.h; sourceTree = "<group>"; };
@@ -1731,6 +1739,7 @@
 		EA18359A2432C18B00A5C3E8 /* mzgl */ = {
 			isa = PBXGroup;
 			children = (
+				EADA5B262A138E02000DCE7B /* net */,
 				EA1836022432C18B00A5C3E8 /* animation */,
 				EA1835C22432C18B00A5C3E8 /* app */,
 				EA18360C2432C18B00A5C3E8 /* audio */,
@@ -2975,6 +2984,15 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		EADA5B262A138E02000DCE7B /* net */ = {
+			isa = PBXGroup;
+			children = (
+				EADA5B272A138E36000DCE7B /* netUtil.cpp */,
+				EADA5B282A138E36000DCE7B /* netUtil.h */,
+			);
+			path = net;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -3132,6 +3150,7 @@
 				EA183FC92432C18D00A5C3E8 /* util.h in Headers */,
 				EA234AFF24A609CA000F057B /* YGStyle.h in Headers */,
 				EA183FA02432C18D00A5C3E8 /* iOSStyleWidgets.h in Headers */,
+				EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */,
 				EA183FB52432C18D00A5C3E8 /* TextConsole.h in Headers */,
 				EA71FEE727F33B310005C47A /* ZipReader.h in Headers */,
 				EA71A77027E39E6C0081A5CB /* entropy.h in Headers */,
@@ -3255,6 +3274,7 @@
 				EA71A78527E39E6C0081A5CB /* sha1.h in Headers */,
 				EA2B874C24E7093600EA12BD /* Tween.h in Headers */,
 				EA2B875224E7093600EA12BD /* SvgVbo.h in Headers */,
+				EADA5B2E2A138E36000DCE7B /* netUtil.h in Headers */,
 				EA2B875A24E7093600EA12BD /* maths.h in Headers */,
 				EA71A75927E39E6C0081A5CB /* pwd2key.h in Headers */,
 				EA2B879324E7093600EA12BD /* nanovg_gl.h in Headers */,
@@ -3436,6 +3456,7 @@
 				EA35518E25CB05D5003DF2FB /* EventsView.mm in Sources */,
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
+				EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
 				EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */,
@@ -3579,6 +3600,7 @@
 				EAD03B9D297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA18411D2432C4AC00A5C3E8 /* Drawer.cpp in Sources */,
 				EA71A75F27E39E6C0081A5CB /* fileenc.c in Sources */,
+				EADA5B2A2A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AED24A609CA000F057B /* Utils.cpp in Sources */,
 				EA71A72327E39E6B0081A5CB /* zip.c in Sources */,
 				EA81AA632757CBBB009C911E /* AudioUnitViewController.mm in Sources */,
@@ -3673,6 +3695,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */,
+				EADA5B2B2A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA2B8ACE24E7093600EA12BD /* Image.mm in Sources */,
 				EA2B8ACF24E7093600EA12BD /* YGNodePrint.cpp in Sources */,
 				EA2B8AD024E7093600EA12BD /* Drawer.cpp in Sources */,
@@ -3817,6 +3840,7 @@
 				EAD03B9F297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA68944F261C633500F76B91 /* YGNodePrint.cpp in Sources */,
 				EA71A7B327E39E6C0081A5CB /* ZipFile.cpp in Sources */,
+				EADA5B2C2A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA71A77927E39E6C0081A5CB /* prng.c in Sources */,
 				EA689451261C633500F76B91 /* YGValue.cpp in Sources */,
 				EA71A75527E39E6C0081A5CB /* hmac.c in Sources */,

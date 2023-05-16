@@ -77,6 +77,7 @@ set(MZGL_SOURCES
     lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/music/scales.cpp
+	lib/mzgl/net/netUtil.cpp
     lib/mzgl/ui/widgets/ReorderableGrid.cpp
     lib/mzgl/ui/DropDown.cpp
     lib/mzgl/ui/Layer.cpp
@@ -226,6 +227,7 @@ if(APPLE)
         lib/mzgl/util/util.cpp
         lib/mzgl/audio/AudioFileApple.cpp
         lib/mzgl/util/log.cpp
+		lib/mzgl/net/netUtil.cpp
         PROPERTIES COMPILE_FLAGS "-x objective-c++"
     )
 else()

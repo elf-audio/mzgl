@@ -86,11 +86,7 @@ public:
 	}
 };
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-	NSURL *launchedUrl = [launchOptions objectForKey: UIApplicationLaunchOptionsURLKey];
-	if(launchedUrl!=nil) {
-		setLaunchUrl(std::string([[launchedUrl absoluteString] UTF8String]));
-	}
+	
 	
 	// Override point for customization after application launch.
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -124,6 +120,14 @@ public:
 
 	
 	[window makeKeyAndVisible];
+	
+	
+	auto eventDispatcher = [mzViewController getEventDispatcher];
+	NSURL *launchedUrl = [launchOptions objectForKey: UIApplicationLaunchOptionsURLKey];
+	if(launchedUrl!=nil) {
+		eventDispatcher->openUrl([[launchedUrl absoluteString] UTF8String]);
+	}
+	
 	
 	return YES;
 }

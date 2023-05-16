@@ -62,14 +62,16 @@ void setWindowTitle(std::string title);
 
 extern std::vector<std::string> commandLineArgs;
 
-// on iOS this'll give the launched url
+// on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
-
-std::string tempDir();
 // this is only for internal, it's so
 // the app delegate can set this variable
 // when loading the app
 void setLaunchUrl(std::string url);
+
+
+std::string tempDir();
+
 
 std::string execute(std::string cmd, int *outExitCode = nullptr);
 
