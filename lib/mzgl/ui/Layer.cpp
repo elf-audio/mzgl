@@ -32,35 +32,15 @@ void Layer::draw() {
 
 string Layer::toString() const {
 	return "name: " + name + " (xy: "+to_string(x, 0)+","+to_string(y, 0)+" "+to_string(width, 0)+"  x "+to_string(height, 0)+")";
-	// char c[512];
-	// sprintf(c, "name: %s  (xy: %.0f,%.0f   %.0f x %.0f)", name.c_str(), x, y, width, height);
-	// return string(c);
 }
 
 
 void Layer::maskOn() {
-	
-	auto r = getAbsoluteRect();
-	//r.y = g.height - (r.y+r.height);
-	
-	
-//	glEnable(GL_SCISSOR_TEST);
-//	// my suspicion is the way mac and ios set up pixel scaling
-//	// means that this works for them but not others. I should make others work
-//	// with this.
-//#if defined(__APPLE__) || defined(__ANDROID__)
-//	glScissor(r.x, r.y, r.width, r.height);
-//#else
-//    glScissor(r.x/g.pixelScale, r.y/g.pixelScale, r.width/g.pixelScale, r.height/g.pixelScale);
-//#endif
-
-	g.maskOn(r);//*this);
+	g.maskOn(getAbsoluteRect());
 }
 
 void Layer::maskOff() {
-//	glDisable(GL_SCISSOR_TEST);
 	g.maskOff();
-	
 }
 
 void Layer::pushMask() {
@@ -101,30 +81,6 @@ void Layer::layoutSelfAndChildren() {
 		c->layoutSelfAndChildren();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
@@ -521,16 +477,15 @@ void Layer::transferFocus(Layer *otherLayer, int touchId) {
 }
 
 void Layer::clear() {
-	for(int i = 0; i < children.size(); i++) {
+	for(auto *ch : children) {
 		for(auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
-			if((*it).second==children[i]) {
+			if((*it).second==ch) {
 				g.focusedLayers.erase(it++);
 			} else {
 				it++;
 			}
 		}
 	}
-	
 	
 	
 	for(auto *c : children) {
@@ -540,7 +495,6 @@ void Layer::clear() {
 	children.clear();
 	
 }
-
 
 
 void Layer::positionAbove(Layer *l, float padding) {
@@ -568,8 +522,7 @@ void Layer::layoutChildrenAsGrid(int cols, int rows, float padding) {
 	float wSpace = w + padding;
 	float hSpace = h + padding;
 	int pos = 0;
-	for(int i  = 0; i < getNumChildren(); i++) {
-		Layer *l = getChild(i);
+	for(auto *l : children) {
 		if(l->visible) {
 			l->width = w;
 			l->height = h;
@@ -582,8 +535,14 @@ void Layer::layoutChildrenAsGrid(int cols, int rows, float padding) {
 }
 
 void Layer::alignChildrenToPixels() {
-	for(int i  = 0; i < getNumChildren(); i++) {
-		getChild(i)->alignToPixels();
+	for(auto *ch : children) {
+		ch->alignToPixels();
 	}
 }
 
+Layer *Layer::getChild(const std::string &name) {
+	for(auto *ch : children) {
+		if(ch->name==name) return ch;
+	}
+	return nullptr;
+}

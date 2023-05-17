@@ -73,6 +73,9 @@ public:
 	Layer *getFirstChild();
 	Layer *getLastChild();
 	
+	// get a child by its name, returns null if it
+	// doesn't find one
+	Layer *getChild(const std::string &name);
 	
 	// called by api, do not use
 	virtual void _draw();
