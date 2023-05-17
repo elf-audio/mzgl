@@ -43,7 +43,7 @@ std::string downloadUrl(std::string url) {
 }
 
 std::string postToUrl(const std::string url, const std::vector<std::pair<std::string,std::string>> &params) {
-	
+#ifdef __APPLE__
 	NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
 
 	std::string paramStr = "";
@@ -103,6 +103,11 @@ std::string postToUrl(const std::string url, const std::vector<std::pair<std::st
 		throw DownloadError(url, responseValue);
 	}
 	return responseValue;
+#else
+	// not implemented yet
+	Log::e() << "ERROR: no implementation of postToUrl() on this platform";
+	return "";
+#endif
 }
 
 
