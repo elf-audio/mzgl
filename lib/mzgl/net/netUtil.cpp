@@ -9,7 +9,7 @@
 #include "netUtil.h"
 #include "stringUtil.h"
 #include "util.h"
-
+#include "log.h"
 #ifdef __APPLE__
 #	include <Foundation/Foundation.h>
 #endif
