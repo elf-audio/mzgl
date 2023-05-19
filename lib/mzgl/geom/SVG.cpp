@@ -6,6 +6,8 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+#define NOMINMAX // Avoids name conflicts on Windows
+
 #include "SVG.h"
 #include "stringUtil.h"
 #include "Triangulator.h"
@@ -18,7 +20,6 @@
 #include "pu_gixml.hpp"
 #include "filesystem.h"
 #include "choc/platform/choc_ReenableAllWarnings.h"
-
 
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
