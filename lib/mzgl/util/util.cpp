@@ -353,7 +353,7 @@ string dataPath(string path, string appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
-#if defined(MZGL_PLUGIN)
+#if defined(MZGL_PLUGIN_VST)
 	return GetKnownFolder(CSIDL_COMMON_APPDATA) + "\\Koala\\data\\" + path;
 #else
 	return "../data/" + path;
