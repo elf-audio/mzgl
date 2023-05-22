@@ -1,4 +1,5 @@
 #include <string>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #define UNICODE
@@ -40,3 +41,4 @@ extern std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFile
 extern std::wstring windowsGetPathForTemporaryFile(std::wstring fileName);
 extern std::string w2n(const std::wstring &w);
 extern std::wstring n2w(const std::string &n);
+extern auto getCurrentDllPath() -> std::filesystem::path;

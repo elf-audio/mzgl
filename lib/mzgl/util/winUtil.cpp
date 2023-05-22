@@ -550,3 +550,16 @@ std::wstring n2w(const std::string &n) {
 	return wide;
 }
 
+auto getCurrentDllPath() -> std::filesystem::path {
+	TCHAR path[MAX_PATH];
+	HMODULE hm {NULL};
+	const auto flags {GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT};
+	if (GetModuleHandleEx(flags, (LPTSTR) &getCurrentDllPath, &hm) == 0) {
+		return {};
+	}
+	if (GetModuleFileName(hm, path, sizeof(path)) == 0) {
+		return {};
+	}
+	return std::filesystem::path {path};
+}
+
