@@ -148,25 +148,28 @@ public:
 
 
 	void getTriangles(vector<glm::vec2> &outVerts, vector<glm::vec4> &outCols, vector<unsigned int> &indices) override {
-
 		if(filled) {
-            for(int i = 0; i < verts.size(); i++) {
-                if(verts[i].size()<3) {
-                    Log::e() << "ERROR: shape '"<< id<<"', " << to_string(i) << " with less than 3 points";
-                }
-            }
-
-//				else {
-				Triangulator tri;
-				int numVerts = tri.triangulate(verts, outVerts, indices);
-				outCols.insert(outCols.end(), numVerts, fillColor);
-//			}
+			for(int i = 0; i < verts.size(); i++) {
+				if(verts[i].size()<3) {
+					Log::e() << "ERROR: shape '"<< id<<"', " << to_string(i) << " with less than 3 points";
+					return;
+				}
+			}
+			Triangulator tri;
+			int numVerts = tri.triangulate(verts, outVerts, indices);
+			outCols.insert(outCols.end(), numVerts, fillColor);
 		}
 		if(stroked) {
+			// HACK: For Marek to look at
+			// This check is added to prevent a crash in MitredLine::getVerts()
+			for(int i = 0; i < verts.size(); i++) {
+				if(verts[i].size()<2) {
+					return;
+				}
+			}
 			MitredLine ml;
 			ml.thickness = strokeWeight;
 			for(auto &v : verts) {
-//				auto &v = verts[0];
 				int numVerts = ml.getVerts(v, outVerts, indices, closed);
 				outCols.insert(outCols.end(), numVerts, strokeColor);
 			}
