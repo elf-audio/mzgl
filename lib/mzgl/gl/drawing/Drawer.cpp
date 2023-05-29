@@ -423,7 +423,7 @@ void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 	rrv.pop_back();
 	lineDrawer.outside = true;
 	lineDrawer.thickness = shadow;
-	Geometry geom;
+	
 	int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 	
