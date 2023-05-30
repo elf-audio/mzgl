@@ -106,7 +106,6 @@ public:
 	// return true if you can open, false if you can't
 	virtual bool canOpenFiles(const std::vector<std::string> &paths) {return false;}
 	
-	virtual std::pair<int, int> getPreferredDimensions() const = 0;
 
 	Dialogs dialogs;
 	
