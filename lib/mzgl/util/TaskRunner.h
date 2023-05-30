@@ -23,6 +23,14 @@
  */
 class TaskRunner {
 public:
+
+    using task_t = std::function<void()>;
+    using done_cb_t = std::function<void()>;
+
+    struct TaskSpec {
+        task_t task;
+        done_cb_t onDone;
+	};
     
 #ifdef DEBUG
 	std::atomic<int> jobCount {0};
@@ -40,7 +48,7 @@ public:
 #ifdef __APPLE__
             pthread_setname_np(this->name.c_str());
 #endif
-            std::function<void()> taskFn;
+            TaskSpec spec;
             
             int ppp = 0;
             while(!shouldStop) {
@@ -50,11 +58,11 @@ public:
                     clearAnyDoneTasks();
                 }
                 
-                while(taskQueue.try_dequeue(taskFn)) {
+                while(taskQueue.try_dequeue(spec)) {
 #ifdef DEBUG
 	jobCount--;
 #endif
-                    tasks.emplace_back(std::make_shared<Task>(taskFn));
+                    tasks.emplace_back(std::make_shared<Task>(std::move(spec)));
                 }
                 
                 std::this_thread::sleep_for(std::chrono::microseconds(100));
@@ -63,9 +71,12 @@ public:
     }
     
 	// runs taskFn asynchronously, run on any thread
-	void run(std::function<void()> taskFn) {
+	void run(TaskSpec spec) {
         if(synchronous) {
-            taskFn();
+            spec.task();
+			if (spec.onDone) {
+				spec.onDone();
+			}
             return;
         }
         if(!fut.valid()) {
@@ -76,8 +87,7 @@ public:
 	jobCount++;
 #endif
 		
-        taskQueue.enqueue(taskFn);
-        
+        taskQueue.enqueue(spec);
 	}
 
 	// need to guarantee that ALL tasks are done before this dies.
@@ -99,20 +109,23 @@ private:
         std::future<void> taskFuture;
         std::atomic<bool> isDone { false };
 		
-        Task(std::function<void()> taskFn) {
+        Task(TaskSpec spec) {
 
-            taskFuture = std::async(std::launch::async, [this, taskFn](){
+            taskFuture = std::async(std::launch::async, [this, spec = std::move(spec)](){
  #if defined(__APPLE__) && (DEBUG || UNIT_TEST)
                 // sets a thread name that is readable in xcode when debugging
                 pthread_setname_np("runTask()");
  #endif
                 try {
-                    taskFn();
+                    spec.task();
                 } catch(const std::exception& err) {
                     std::string ex = err.what();
                     Log::e() << "exception in runTask: " << ex;
                 }
                 isDone.store(true);
+                if (spec.onDone) {
+					spec.onDone();
+				}
             });
         }
         
@@ -122,7 +135,7 @@ private:
     };
     
     
-    moodycamel::ConcurrentQueue<std::function<void()>> taskQueue;
+    moodycamel::ConcurrentQueue<TaskSpec> taskQueue;
 	std::list<std::shared_ptr<Task>> tasks;
 
 #ifdef UNIT_TEST

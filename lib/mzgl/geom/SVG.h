@@ -57,6 +57,7 @@ public:
 	
 	virtual void applyState(SVGState state = SVGState()) = 0;
 	virtual void scale(float s) = 0;
+	virtual void scale(float w, float h) = 0;
 	virtual void mirrorX() = 0;
 	virtual void mirrorY() = 0;
 	virtual void rotate(float theta) = 0;
@@ -69,6 +70,7 @@ public:
 	bool loadFromString(const std::string &svgData);
 	bool load(std::string path);
 	void scale(float s);
+	void scale(float w, float h);
 	void mirrorX();
 	void mirrorY();
 	void rotate(float theta);

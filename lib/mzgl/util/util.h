@@ -10,6 +10,7 @@
 
 #include <string>
 #include <functional>
+#include <memory>
 #include <vector>
 
 class App;
@@ -61,19 +62,23 @@ void setWindowTitle(std::string title);
 
 extern std::vector<std::string> commandLineArgs;
 
-// on iOS this'll give the launched url
+// on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
-
-std::string tempDir();
 // this is only for internal, it's so
 // the app delegate can set this variable
 // when loading the app
 void setLaunchUrl(std::string url);
 
+
+std::string tempDir();
+
+
 std::string execute(std::string cmd, int *outExitCode = nullptr);
 
 
 void sleepMillis(long ms);
+void sleepMicros(long us);
+
 // this makes sure a file path is unique by appending
 // a number to the end of the filename (before the
 // file extension) 
@@ -101,6 +106,7 @@ std::vector<unsigned char> readFile(std::string filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
 bool writeStringToFile(const std::string &path, const std::string &data);
 bool readStringFromFile(const std::string &path, std::string &outStr);
+bool moveFile(const std::string& from, const std::string& to);
 
 
 ////////////////////////////////////////////////////////////////////////////////

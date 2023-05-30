@@ -24,6 +24,7 @@ void FileWatcher::watch(const std::string &path) {
 
 
 void FileWatcher::tick() {
+	if(watchedFiles.empty()) return;
 	waitCount++;
 	if(waitCount<30) {
 		return;

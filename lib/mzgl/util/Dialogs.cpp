@@ -83,7 +83,7 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 											}]];
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-	  textField.placeholder = [NSString stringWithUTF8String:text.c_str()];
+	  textField.text = [NSString stringWithUTF8String:text.c_str()];
 	}];
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -133,7 +133,7 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 #elif defined(__ANDROID__)
 	androidTextboxDialog(title, msg, text, completionCallback);
 #elif defined(_WIN32)
-	windowsTextboxDialog(title, msg, text, completionCallback);
+	windowsTextboxDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, text, completionCallback);
 #elif defined(__linux__)
 	linuxTextboxDialog(title, msg, text, completionCallback);
 #endif
@@ -207,7 +207,7 @@ void Dialogs::confirm(std::string title, std::string msg, std::function<void()> 
 	androidConfirmDialog(title, msg, okPressed, cancelPressed);
 #elif defined(_WIN32)
 	Log::d() << "Calling here";
-	windowsConfirmDialog(title, msg, okPressed, cancelPressed);
+	windowsConfirmDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, okPressed, cancelPressed);
 #elif defined(__linux__)
 	linuxConfirmDialog(title, msg, okPressed, cancelPressed);
 #endif
@@ -364,7 +364,7 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 #elif defined(__ANDROID__)
 	androidTwoOptionCancelDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
 #elif defined(_WIN32)
-	windowsTwoOptionCancelDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
+	windowsTwoOptionCancelDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
 #elif defined(__linux__)
 	linuxTwoOptionCancelDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
 #endif
@@ -563,7 +563,7 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
 #elif defined(_WIN32)
 	windowsThreeOptionCancelDialog(
-		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
+		static_cast<HWND>(app.nativeWindowHandle), title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
 #elif defined(__linux__)
 	linuxThreeOptionCancelDialog(
 		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
@@ -1013,7 +1013,7 @@ void Dialogs::loadFile(std::string msg,
 #endif
 
 #ifdef _WIN32
-	windowsChooseEntryDialog(true, msg, completionCallback);
+	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), true, msg, completionCallback);
 
 #elif defined(__APPLE__)
 
@@ -1143,6 +1143,6 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 	linuxChooseFolderDialog(msg, completionCallback);
 
 #elif (WIN32)
-	windowsChooseEntryDialog(false, msg, completionCallback);
+	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), false, msg, completionCallback);
 #endif
 }

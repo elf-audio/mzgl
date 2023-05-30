@@ -28,7 +28,11 @@
 #define MZ_KEY_DELETE   	127 // this is actually ascii, but non-printable
 #define MZ_KEY_TAB			9
 #define MZ_KEY_SHIFT_TAB 	25
-
+#define MZ_KEY_SHIFT		1001
+#define MZ_KEY_FN			1002
+#define MZ_KEY_CTRL			1002
+#define MZ_KEY_ALT			1003
+#define MZ_KEY_CMD			1004
 
 
 class App : public AudioIO {
@@ -93,7 +97,7 @@ public:
 	virtual void filesDropped(const std::vector<std::string> &paths, int touchId, std::function<void()> completionHandler) {}
 	
 	virtual void fileDragCancelled(int touchId) {}
-	
+	virtual void fileDragExited(float x, float y, int id) {}
     
     virtual void androidDrawLoading() {}
     
@@ -102,11 +106,14 @@ public:
 	// return true if you can open, false if you can't
 	virtual bool canOpenFiles(const std::vector<std::string> &paths) {return false;}
 	
+	virtual std::pair<int, int> getPreferredDimensions() const = 0;
+
 	Dialogs dialogs;
 	
 	// only available on iOS
 	void *viewController = nullptr;
     void *windowHandle = nullptr;
+    void *nativeWindowHandle = nullptr;
 	MainThreadRunner main;
 	
 	void updateInternal() {

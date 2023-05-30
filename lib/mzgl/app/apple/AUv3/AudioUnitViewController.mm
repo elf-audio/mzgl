@@ -94,7 +94,7 @@ using namespace std;
 #endif
 
 - (void)didReceiveMemoryWarning {
-    EventDispatcher *ed = [glView getEventDispatcher];
+    auto ed = [glView getEventDispatcher];
     if(ed != nullptr && ed->hasSetup()) {
         ed->memoryWarning();
     }
@@ -118,7 +118,7 @@ using namespace std;
     if(self.view.window!=nil && glView!=nil) {
         glView.frame = self.view.frame;
     #if TARGET_OS_IOS
-        EventDispatcher *ed = [glView getEventDispatcher];
+        auto ed = [glView getEventDispatcher];
         if(ed != nullptr && ed->hasSetup()) {
             [vc viewWillTransitionToSize: self.view.window.frame.size withTransitionCoordinator:nil];
         }
@@ -143,7 +143,7 @@ using namespace std;
 	if(app==nullptr && plugin!=nullptr) {
 		app = instantiatePluginEditor(g, plugin);
 #if TARGET_OS_IOS
-		vc = [[MZGLKitViewController alloc] initWithApp: app.get()];
+		vc = [[MZGLKitViewController alloc] initWithApp: app];
 		app->viewController = (__bridge void*)self;
 
 		glView = (MZGLKitView*)vc.view;

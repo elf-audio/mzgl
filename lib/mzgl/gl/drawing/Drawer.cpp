@@ -4,7 +4,7 @@
 #include "RoundedRect.h"
 #include "maths.h"
 #include "mzAssert.h"
-
+#include "log.h"
 using namespace std;
 
 void Drawer::setColor(const glm::vec4 &c) {
@@ -118,6 +118,34 @@ void Drawer::drawQuad(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d) {
 
 
 
+void Drawer::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
+	vector<glm::vec2> verts;
+
+	if(startAngle>endAngle) {
+		Log::e() << "drawArc doesn't wrap angles for now! Feel like implementing it?";
+	}
+	verts.reserve((endAngle - startAngle)/0.1f + 2.f);
+
+	if(filled) {
+		verts.emplace_back(c);
+	}
+
+	// resolution is about 60
+	for(float f = startAngle; f < endAngle; f+=0.1) {
+		verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+	}
+
+	if(filled) {
+		drawTriangleFan(verts);
+	} else {
+		drawLineStrip(verts);
+//		Log::e() << "Warning! non-filled arcs not implemented in drawArc";
+	}
+}
+
+
+
+
 void Drawer::drawLine(glm::vec2 a, glm::vec2 b) {
 	lineDrawer.thickness = strokeWeight;
 	int numVerts = lineDrawer.getVerts({a,b}, geom.verts, geom.indices);
@@ -174,6 +202,7 @@ void Drawer::drawTriangleStrip(const vector<vec2> &strip) {
 	
 //	geom.verts.reserve(geom.verts.size() + strip.size());
 	geom.verts.insert(geom.verts.end(), strip.begin(), strip.end());
+	geom.cols.insert(geom.cols.end(), strip.size(), color);
 
 	auto numParts = strip.size()/2;
 	for(uint32_t i = 1; i < numParts; i++) {
@@ -190,8 +219,32 @@ void Drawer::drawTriangleStrip(const vector<vec2> &strip) {
 		};
 		geom.indices.insert(geom.indices.end(), indices.begin(), indices.end());
 	}
-	geom.cols.insert(geom.cols.end(), strip.size(), color);
 
+}
+
+
+
+void Drawer::drawTriangleFan(const vector<vec2> &fan) {
+
+	mzAssert(fan.size()>=3);
+	// new way
+	uint32_t startPos = static_cast<uint32_t>(geom.verts.size());
+	
+	geom.verts.insert(geom.verts.end(), fan.begin(), fan.end());
+	geom.cols.insert(geom.cols.end(), fan.size(), color);
+	
+	auto numTris = fan.size()-2;
+	geom.indices.reserve(geom.indices.size() + numTris * 3);
+	
+	for(uint32_t i = 0; i < numTris; i++) {
+		
+		vector<uint32_t> indices = {
+			startPos,
+			startPos + i + 1,
+			startPos + i + 2,
+		};
+		geom.indices.insert(geom.indices.end(), indices.begin(), indices.end());
+	}
 }
 
 

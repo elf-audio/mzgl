@@ -7,6 +7,12 @@
 //
 
 #ifdef _WIN32
+
+// This enables visual styles
+#pragma comment(linker, "\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 #include <glew.h>
 #endif
 #ifdef __linux__
@@ -14,6 +20,11 @@
 #endif
 #include "GLFWAppRunner.h"
 #include "glfw3.h"
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_NATIVE_INCLUDE_NONE
+#include <glfw/glfw3native.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include "filesystem.h"
@@ -292,6 +303,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     graphics.height = windowH;
 
     app->windowHandle = window;
+
+#ifdef _WIN32
+    app->nativeWindowHandle = glfwGetWin32Window(window);
+#endif
 
 #ifdef __linux__
     gtk_init(&argc, &argv);

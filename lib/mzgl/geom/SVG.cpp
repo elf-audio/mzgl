@@ -6,6 +6,8 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+#define NOMINMAX // Avoids name conflicts on Windows
+
 #include "SVG.h"
 #include "stringUtil.h"
 #include "Triangulator.h"
@@ -18,7 +20,6 @@
 #include "pu_gixml.hpp"
 #include "filesystem.h"
 #include "choc/platform/choc_ReenableAllWarnings.h"
-
 
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
@@ -147,25 +148,28 @@ public:
 
 
 	void getTriangles(vector<glm::vec2> &outVerts, vector<glm::vec4> &outCols, vector<unsigned int> &indices) override {
-
 		if(filled) {
-            for(int i = 0; i < verts.size(); i++) {
-                if(verts[i].size()<3) {
-                    Log::e() << "ERROR: shape '"<< id<<"', " << to_string(i) << " with less than 3 points";
-                }
-            }
-
-//				else {
-				Triangulator tri;
-				int numVerts = tri.triangulate(verts, outVerts, indices);
-				outCols.insert(outCols.end(), numVerts, fillColor);
-//			}
+			for(int i = 0; i < verts.size(); i++) {
+				if(verts[i].size()<3) {
+					Log::e() << "ERROR: shape '"<< id<<"', " << to_string(i) << " with less than 3 points";
+					return;
+				}
+			}
+			Triangulator tri;
+			int numVerts = tri.triangulate(verts, outVerts, indices);
+			outCols.insert(outCols.end(), numVerts, fillColor);
 		}
 		if(stroked) {
+			// HACK: For Marek to look at
+			// This check is added to prevent a crash in MitredLine::getVerts()
+			for(int i = 0; i < verts.size(); i++) {
+				if(verts[i].size()<2) {
+					return;
+				}
+			}
 			MitredLine ml;
 			ml.thickness = strokeWeight;
 			for(auto &v : verts) {
-//				auto &v = verts[0];
 				int numVerts = ml.getVerts(v, outVerts, indices, closed);
 				outCols.insert(outCols.end(), numVerts, strokeColor);
 			}
@@ -239,6 +243,17 @@ public:
 			0,0,1});
 		strokeWeight *= s;
 	}
+	
+	
+	void scale(float w, float h) override {
+		applyTransformToPoints({
+			w,0,0,
+			0,h,0,
+			0,0,1});
+		strokeWeight *= std::max(w, h);
+	}
+	
+	
 	void translate(float x, float y) override {
 		applyTransformToPoints({
 			1,0,0,
@@ -460,6 +475,11 @@ public:
 			c->scale(s);
 		}
 	}
+	void scale(float w, float h) override {
+		for(auto c: children) {
+			c->scale(w, h);
+		}
+	}
 
 	void mirrorX() override {
 		for(auto c: children) {
@@ -623,6 +643,11 @@ void SVGDoc::scale(float s) {
 	rootGroup->scale(s);
 	width *= s;
 	height *= s;
+}
+void SVGDoc::scale(float w, float h) {
+	rootGroup->scale(w, h);
+	width *= w;
+	height *= h;
 }
 void SVGDoc::mirrorX() {
 	rootGroup->mirrorX();

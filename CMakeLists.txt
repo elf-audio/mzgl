@@ -77,6 +77,7 @@ set(MZGL_SOURCES
     lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/music/scales.cpp
+	lib/mzgl/net/netUtil.cpp
     lib/mzgl/ui/widgets/ReorderableGrid.cpp
     lib/mzgl/ui/DropDown.cpp
     lib/mzgl/ui/Layer.cpp
@@ -118,6 +119,8 @@ set(MZGL_SOURCES
         lib/mzgl/app/mac/mainMac.mm
         lib/mzgl/app/apple/MZGLWebView.mm
         lib/mzgl/app/apple/AppleWebView.mm
+        lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
+        lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
         lib/mzgl/app/web/MacWebView.mm
         lib/mzgl/app/web/MZWebView.cpp
     >
@@ -138,6 +141,7 @@ set(HEADERS
     lib/mzgl/animation
     lib/mzgl/app/android
     lib/mzgl/app/apple
+    lib/mzgl/app/apple/AUv3
     lib/mzgl/app/mac
     lib/mzgl/app/mac/GL
     lib/mzgl/app/glfw
@@ -151,6 +155,7 @@ set(HEADERS
     lib/mzgl/gl/drawing
     lib/mzgl/midi
     lib/mzgl/music
+    lib/mzgl/net
     lib/mzgl/ui
     lib/mzgl/ui/widgets
     lib/mzgl/util
@@ -226,6 +231,7 @@ if(APPLE)
         lib/mzgl/util/util.cpp
         lib/mzgl/audio/AudioFileApple.cpp
         lib/mzgl/util/log.cpp
+		lib/mzgl/net/netUtil.cpp
         PROPERTIES COMPILE_FLAGS "-x objective-c++"
     )
 else()
@@ -370,7 +376,7 @@ elseif(APPLE)
     # MZGL_GL2
     #MZGL_MAC_GLFW
     add_compile_definitions(GL_SILENCE_DEPRECATION   __MACOSX_CORE__ MZGL_GL2)
-    target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit")
+    target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit")
 
 elseif(WIN32)
 
@@ -445,7 +451,10 @@ if(NOT ANDROID AND NOT WIN32 AND NOT IOS)
 endif()
 if(WIN32)
     add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
-    list(APPEND MZGL_LIBS PortAudio)
+    list(APPEND MZGL_LIBS
+		PortAudio
+		$<$<PLATFORM_ID:Windows>:Urlmon Wininet>
+    )
 endif()
 
 if(NOT ANDROID AND NOT IOS)

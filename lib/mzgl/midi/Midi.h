@@ -55,10 +55,10 @@ public:
 	static int findPortByName(std::string portSearchName, bool isOutput) {
 		auto ports = MidiPort::getPortNames(isOutput, false);
 		std::string portSearchNameOriginal = portSearchName;
-		portSearchName = tolower(portSearchName);
+		portSearchName = toLowerCase(portSearchName);
 		
 		for(int i = 0; i < ports.size(); i++) {
-			ports[i] = tolower(ports[i]);
+			ports[i] = toLowerCase(ports[i]);
 			if(ports[i].find(portSearchName)!=-1) {
 				Log::v() << "Connecting to port '" << portSearchNameOriginal << "' ('"+ports[i]+"')";
 				return i;

@@ -233,6 +233,11 @@ using namespace std;
         }
 	}
 }
+- (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls {
+	if ([urls count]>0) {
+		eventDispatcher->openUrl([[urls[0] absoluteString] UTF8String]);
+	}
+}
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
 	// Insert code here to tear down your application

@@ -51,6 +51,9 @@ public:
 	void filesDropped(const std::vector<std::string> &paths, int touchId, std::function<void()> completionHandler) {
 		app->filesDropped(paths,touchId, completionHandler);
 	}
+	void fileDragExited(float x, float y, int id) {
+		app->fileDragExited(x, y, id);
+	}
 	
 	void fileDragCancelled(int touchId) {
 		return app->fileDragCancelled(touchId);

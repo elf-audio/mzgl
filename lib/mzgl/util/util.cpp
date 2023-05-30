@@ -102,6 +102,20 @@ std::string getCWD() {
 	_getcwd(c, 512);
 	return c;
 }
+std::string UTF16ToUTF8(const wchar_t *utf16Str) {
+	std::string out;
+	int requiredSize = WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, NULL, 0, NULL, NULL);
+	if (requiredSize > 0) {
+		out.resize(requiredSize - 1);
+		WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, out.data(), requiredSize, NULL, NULL);
+	}
+	return out;
+}
+std::string GetKnownFolder(int identifier, int flags = 0) {
+	wchar_t wideBuffer[1024];
+	SHGetFolderPathW(NULL, identifier, NULL, flags, wideBuffer);
+	return UTF16ToUTF8(wideBuffer);
+}
 #else
 std::string getCWD() {
 	char c[512];
@@ -159,6 +173,10 @@ bool copyDir(const std::string &source, const std::string &destination, string &
 
 void sleepMillis(long ms) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+void sleepMicros(long ms) {
+	std::this_thread::sleep_for(std::chrono::microseconds(ms));
 }
 
 bool is_number(const std::string &s) {
@@ -335,7 +353,11 @@ string dataPath(string path, string appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
+#if defined(MZGL_PLUGIN_VST)
+	return GetKnownFolder(CSIDL_COMMON_APPDATA) + "\\Koala\\data\\" + path;
+#else
 	return "../data/" + path;
+#endif
 #else
 	return "../data/" + path;
 #endif
@@ -397,7 +419,7 @@ string docsPath(string path) {
 
 		TCHAR szExeFileName[MAX_PATH];
 		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
-		retPath = documentsDirUtf8 + "\\" + fs::path(string(szExeFileName)).stem().string();
+		retPath = documentsDirUtf8 + "\\" + fs::path(wstring(szExeFileName)).stem().string();
 		if (!fs::exists(retPath)) {
 			fs::create_directory(retPath);
 		}
@@ -531,7 +553,7 @@ uint64_t getStorageRemainingInBytes() {
 #endif
 }
 
-// on iOS this'll give the launched url
+// on iOS/mac this'll give the launched url
 string getLaunchUrl() {
 	return Globals::launchUrl;
 }
@@ -729,10 +751,7 @@ void hideMouse() {
 #endif
 }
 
-string tolower(std::string s) {
-	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-	return s;
-}
+
 
 bool readFile(string filename, std::vector<unsigned char> &outData) {
 	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);
@@ -787,17 +806,46 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 }
 bool readStringFromFile(const std::string &path, std::string &outStr) {
 	fs::ifstream t(fs::u8path(path));
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to open stream to " << path;
+		return false;
+	}
 
 	t.seekg(0, std::ios::end);
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to seek to end in " << path;
+		return false;
+	}
 	outStr.reserve(t.tellg());
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to determine tellg " << path;
+		return false;
+	}
 	t.seekg(0, std::ios::beg);
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to seek to beginning " << path;
+		return false;
+	}
 	outStr.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-	if (t.fail()) return false;
+	if (t.fail()) {
+		Log::e() << "failed to read from " << path;
+		return false;
+	}
 	return true;
+}
+bool moveFile(const std::string& from, const std::string& to)
+{
+	try {
+		if (!fs::copy_file(from, to)) {
+			return false;
+		}
+		fs::remove(from);
+		return true;
+	}
+	catch(const fs::filesystem_error& err) {
+		Log::e() << "Exception thrown while attempting to move file";
+		return false;
+	}
 }
 #ifdef __APPLE__
 os_log_t logObject = nullptr;

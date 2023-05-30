@@ -32,6 +32,17 @@ std::string to_string(const T a_value, const int n)
 }
 
 
+std::string toLowerCase(std::string s) {
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+	return s;
+}
+
+std::string toUpperCase(std::string s) {
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::toupper(c); });
+	return s;
+}
+
+
 std::string byteSizeToString(uint64_t bytes) {
 
 	char buf[256];
@@ -63,52 +74,6 @@ void replaceAll(std::string & d, std::string toSearch, std::string replaceStr) {
 }
 
 
-
-std::string urlencode(const std::string& value) {
-	static auto hex_digt = "0123456789ABCDEF";
-
-	std::string result;
-	result.reserve(value.size() << 1);
-
-	for (auto ch : value) {
-		if ((ch >= '0' && ch <= '9')
-			|| (ch >= 'A' && ch <= 'Z')
-			|| (ch >= 'a' && ch <= 'z')
-			|| ch == '-' || ch == '_' || ch == '!'
-			|| ch == '\'' || ch == '(' || ch == ')'
-			|| ch == '*' || ch == '~' || ch == '.')  /*  !'()*-._~   */{
-			result.push_back(ch);
-		} else {
-			result += std::string("%") +
-					  hex_digt[static_cast<unsigned char>(ch) >> 4]
-					  +  hex_digt[static_cast<unsigned char>(ch) & 15];
-		}
-	}
-
-	return result;
-}
-
-std::string urldecode(const std::string& value) {
-	std::string result;
-	result.reserve(value.size());
-
-	for (std::size_t i = 0; i < value.size(); ++i) {
-		auto ch = value[i];
-
-		if (ch == '%' && (i + 2) < value.size()) {
-			auto hex = value.substr(i + 1, 2);
-			auto dec = static_cast<char>(std::strtol(hex.c_str(), nullptr, 16));
-			result.push_back(dec);
-			i += 2;
-		} else if (ch == '+') {
-			result.push_back(' ');
-		} else {
-			result.push_back(ch);
-		}
-	}
-
-	return result;
-}
 
 
 

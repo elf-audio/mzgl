@@ -537,8 +537,13 @@ struct Blocks {
 		blocks.transportState = nil;
 	}
 	
-	if (@available(iOS 11.0, *) && self.MIDIOutputEventBlock) {
-		blocks.midiOut = self.MIDIOutputEventBlock;
+	
+
+	
+	if (@available(macOS 10.13, iOS 11.0, *)) {
+		if(self.MIDIOutputEventBlock) {
+			blocks.midiOut = self.MIDIOutputEventBlock;
+		}
 	}
 
 	

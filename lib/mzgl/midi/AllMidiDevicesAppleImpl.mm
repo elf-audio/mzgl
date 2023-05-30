@@ -127,7 +127,13 @@ AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
 	}
 	running = false;
 	[[NSOperationQueue mainQueue] cancelAllOperations];
-	portScannerThread.join();
+	try {
+		if(portScannerThread.joinable()) {
+			portScannerThread.join();
+		}
+	} catch(std::system_error &e) {
+		Log::d() << "Got error trying to join portScannerThread - maybe it's not running? - error: " << e.what();
+	}
 }
 
 
