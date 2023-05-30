@@ -84,9 +84,7 @@ public:
 		g.setColor(1);
 		g.drawTextCentred(msg, vec2(g.width/2.f, g.height/2.f));
 	}
-	virtual std::pair<int, int> getPreferredDimensions() const override {
-		return { 1024, 256 };
-	}
+
 };
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {

@@ -25,7 +25,8 @@ public:
 	virtual void pluginViewAppeared() {}
 	virtual void pluginViewDisappeared() {}
 
-	
+	virtual std::pair<int, int> getPreferredDimensions() const = 0;
+
 	std::function<void(unsigned int, float)> uiParameterChanged;
 };
 
