@@ -107,21 +107,51 @@ struct Blocks {
 
 
 
-- (instancetype)initWithComponentDescription:(AudioComponentDescription)componentDescription options:(AudioComponentInstantiationOptions)options error:(NSError **)outError {
+- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
+	   andComponentDescription:(AudioComponentDescription)componentDescription
+					   options:(AudioComponentInstantiationOptions)options
+						 error:(NSError **)outError {
+	
 	self = [super initWithComponentDescription:componentDescription options:options error:outError];
 	
+
 	if (self == nil) {
 		return nil;
 	}
-	inst = instanceNumber++;
-	isInstrument = !(componentDescription.componentType=='aufx' || componentDescription.componentType=='aumf');
+	
+	[self setupWithPlugin: _plugin andComponentDescription:componentDescription];
+	return self;
+}
 
+- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
+	   andComponentDescription:(AudioComponentDescription)componentDescription
+						 error:(NSError **)outError {
+	
+	self = [super initWithComponentDescription:componentDescription error:outError];
+	
+
+	if (self == nil) {
+		return nil;
+	}
+	
+	[self setupWithPlugin: _plugin andComponentDescription:componentDescription];
+	return self;
+}
+
+
+- (void) setupWithPlugin: (std::shared_ptr<Plugin>) _plugin
+ andComponentDescription: (AudioComponentDescription) componentDescription {
+	
+	inst = instanceNumber++;
+	plugin = _plugin;// instantiatePlugin();
+	isInstrument = !(componentDescription.componentType=='aufx' || componentDescription.componentType=='aumf');
+	
 	// @invalidname: Initialize a default format for the busses.
 	AVAudioFormat *defaultFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:2];
 	asbd = *defaultFormat.streamDescription;
 
 	
-	plugin = instantiatePlugin();
+	
 	
 //#if !TARGET_OS_IOS
 //	// This will support any set of channels where the input number equals the output number
@@ -320,9 +350,6 @@ struct Blocks {
 	self.maximumFramesToRender = 1024;
 	
 	self.currentPreset = _factoryPresets.firstObject;
-	
-	
-	return self;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {

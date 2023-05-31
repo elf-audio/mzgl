@@ -140,7 +140,8 @@ using namespace std;
 - (void)viewDidAppear { [self viewDidAppear:NO]; }
 
 - (void)viewWillAppear:(BOOL)animated {
-	if(app==nullptr && plugin!=nullptr) {
+	if(app==nullptr) {
+		plugin = [self getPlugin];
 		app = instantiatePluginEditor(g, plugin);
 #if TARGET_OS_IOS
 		vc = [[MZGLKitViewController alloc] initWithApp: app];
@@ -173,12 +174,24 @@ using namespace std;
     NSLog(@"MZGL: Size change whaaa");
 }
 
- 
+- (std::shared_ptr<Plugin>) getPlugin {
+	
+	if(plugin == nullptr) {
+		plugin = instantiatePlugin();
+	}
+	return plugin;
+}
 - (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
     
-	audioUnit = [[MZGLEffectAU alloc] initWithComponentDescription:desc error:error];
-	plugin = [audioUnit getPlugin];
-	
+	plugin = [self getPlugin];
+//	audioUnit = [[MZGLEffectAU alloc] initWithPlugin: plugin andComponentDescription:desc error:error];
+//
+//	- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
+//		   andComponentDescription:(AudioComponentDescription)componentDescription
+//						   options:(AudioComponentInstantiationOptions)options error:(NSError **)outError;
+	audioUnit = [[MZGLEffectAU alloc] initWithPlugin: plugin
+							 andComponentDescription: desc
+											   error: error];
     NSLog(@"MZGL: createAudioUnitWithComponentDescription");
 	
 //    if([NSThread isMainThread]) {
