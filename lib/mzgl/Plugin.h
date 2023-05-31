@@ -301,7 +301,7 @@ protected:
 	std::vector<std::shared_ptr<PluginParameter>> params;
 	std::function<void(unsigned int, float)> paramChanged;
 private:
-	double sampleRate = 0.f;
+	double sampleRate = 48000.0;
 };
 
 std::shared_ptr<Plugin> instantiatePlugin();

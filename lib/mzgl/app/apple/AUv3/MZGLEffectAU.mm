@@ -246,8 +246,20 @@ struct Blocks {
 		AUParameter *param = [[weakSelf.parameterTree allParameters] objectAtIndex:i];
 //		Log::d() << "Sending " << f << " to host";// at " << getSeconds()*1000.f;
 		[param setValue: f];
+		// TODO: atHostTime:0 ?
+		//		AUParameterAutomationEventTypeTouch // down
+		//		AUParameterAutomationEventTypeValue // moved
+		//		AUParameterAutomationEventTypeRelease // up
+		//		[param setValue:f originator: nil atHostTime:0 eventType:(AUParameterAutomationEventType)eventType]);
+
+		
 	};
 //
+	
+
+	
+	
+	
 //
 	// implementorValueObserver is called when a parameter changes value in the host
 	
