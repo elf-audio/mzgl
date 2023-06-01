@@ -223,6 +223,17 @@ add_subdirectory(lib/ZipFile EXCLUDE_FROM_ALL)
 # Apple platforms have a special audio file reader
 if(APPLE)
 
+    # force ARC - we were doing this but it breaks GLFW at the moment
+    # because it isn't ARC compatible yet, so we're just selectively compiling
+    # with arc for MZGLEffectAU below instead.
+    # add_compile_options(-fobjc-arc)
+
+    # these are the files that have objective-c in them
+    set_source_files_properties(
+        lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
+        PROPERTIES COMPILE_FLAGS "-fobjc-arc"
+    )
+
 
     # these are the files that have objective-c in them
     set_source_files_properties(
