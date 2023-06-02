@@ -60,6 +60,9 @@ public:
 		return buff[readPos];
 	}
 
+	T peek() {
+		return buff[(readPos+1) % buff.size()];
+	}
 	size_t size() const {
 		if(writePos<readPos) {
 			return buff.size() - readPos + writePos;
