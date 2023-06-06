@@ -56,10 +56,18 @@ public:
 	void set(const float *buff, size_t length, int start = 0, int stride = 1);
 	void setMonoFromStereo(const float *buff, size_t numFrames);
 	void setMonoFromStereo(const FloatBuffer &b) { setMonoFromStereo(b.data(), b.size()/2); }
-	void setStereoFromMono(float *data, int length);
+	void setStereoFromMono(const float *data, int length);
+	void setStereoFromMono(const FloatBuffer &b) { setStereoFromMono(b.data(), b.size()); }
 	void setFromLeftChannel(float *buff, int length);
 	void setFromRightChannel(float *buff, int length);
 
+	
+	// splits this stereo float buffer into 2 mono float buffers passed in param
+	void splitStereo(FloatBuffer &l, FloatBuffer &r);
+	
+	// combines the 2 params as mono signals into left and right channels of this stereo buffer
+	void combineStereo(const FloatBuffer &l, const FloatBuffer &r);
+	
 	void assignValue(size_t index, float v) { (*this)[index] = v; }
 
 	// if smooth = false, fadeout is linear, if it's true, then its smoothed
@@ -79,7 +87,6 @@ public:
 	vector<int16_t> getInt16() const;
 
 	FloatBuffer stereoToMono();
-
 
 	void convertToMono(int originalNumChannels = 2);
 

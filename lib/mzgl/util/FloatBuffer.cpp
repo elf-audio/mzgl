@@ -68,7 +68,7 @@ void FloatBuffer::setMonoFromStereo(const float *buff, size_t numFrames) {
 		(*this)[i] = (buff[i*2] + buff[i*2+1])*0.5f;
 	}
 }
-void FloatBuffer::setStereoFromMono(float *data, int length) {
+void FloatBuffer::setStereoFromMono(const float *data, int length) {
 	resize(length*2);
 	for(int i = 0; i < length; i++) {
 		(*this)[i*2] = data[i];
@@ -96,6 +96,7 @@ FloatBuffer FloatBuffer::stereoToMono() {
 	}
 	return ret;
 }
+
 
 //void FloatBuffer::save(string path) {
 //	ofstream myfile;
@@ -668,4 +669,29 @@ void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept
 #endif
 	L = (*this)[a*2]*(1.f - m) + (*this)[b*2] * m;
 	R = (*this)[a*2+1]*(1.f - m) + (*this)[b*2+1] * m;
+}
+
+
+// splits this stereo float buffer into 2 mono float buffers passed in param
+void FloatBuffer::splitStereo(FloatBuffer &l, FloatBuffer &r) {
+	const auto len = size()/2;
+	
+	l.resize(len);
+	r.resize(len);
+	
+	for(int i = 0; i < len; i++) {
+		l[i] = (*this)[i*2];
+		r[i] = (*this)[i*2+1];
+	}
+}
+
+// combines the 2 params as mono signals into left and right channels of this stereo buffer
+void FloatBuffer::combineStereo(const FloatBuffer &l, const FloatBuffer &r) {
+	resize(l.size()*2);
+	//mzAssert(l.size()==r.size());
+
+	for(int i = 0; i < l.size(); i++) {
+		(*this)[i*2] = l[i];
+		(*this)[i*2+1] = r[i];
+	}
 }
