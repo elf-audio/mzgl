@@ -1051,6 +1051,7 @@
 		EA3551BC25CB2028003DF2FB /* MZMGLKViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZMGLKViewController.h; sourceTree = "<group>"; };
 		EA3551BD25CB2028003DF2FB /* MZMGLKView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKView.mm; sourceTree = "<group>"; };
 		EA3551BE25CB2028003DF2FB /* MZMGLKViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKViewController.mm; sourceTree = "<group>"; };
+		EA3FC4FD2A31DD0B00422568 /* GainMeter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GainMeter.h; sourceTree = "<group>"; };
 		EA64AD6F26A182B3001427AD /* WebViewApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebViewApp.h; sourceTree = "<group>"; };
 		EA64AD7226A186D7001427AD /* MZGLWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLWebView.mm; sourceTree = "<group>"; };
 		EA64AD7326A186D7001427AD /* MZGLWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLWebView.h; sourceTree = "<group>"; };
@@ -1821,6 +1822,7 @@
 				EA234ABD24A37022000F057B /* ReorderableGrid.h */,
 				EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */,
 				EA1835B72432C18B00A5C3E8 /* PadGrid.h */,
+				EA3FC4FD2A31DD0B00422568 /* GainMeter.h */,
 				EA1835B82432C18B00A5C3E8 /* PadGrid.cpp */,
 				EA1835BA2432C18B00A5C3E8 /* iOSStyleWidgets.h */,
 				EADDACC024BC8FF800C5F885 /* ChromaticKeyboard.h */,
