@@ -7,6 +7,7 @@ xcuserdata/
 *.xccheckout
 
 build/
+out/
 *.gch
 projects/*
 !projects/dev/empty/*
