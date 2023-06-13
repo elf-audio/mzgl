@@ -169,6 +169,7 @@ public:
 		callUpdateListeners();
 		
 		auto s = getSeconds();
+	//	app->g.frameDelta = clampf(s - app->g.currFrameTime, 1/100.f, 1.f/15.f);
 		app->g.frameDelta = s - app->g.currFrameTime;
 		app->g.currFrameTime = s;
 		
