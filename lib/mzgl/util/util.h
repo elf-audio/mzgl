@@ -15,7 +15,7 @@
 
 class App;
 
-std::string dataPath(std::string path, std::string bundleId = "");//com.elf-audio.vst3.koala");
+std::string dataPath(std::string path, std::string bundleId = ""); //com.elf-audio.vst3.koala");
 std::string docsPath(std::string path = "");
 std::string appSupportPath(std::string path);
 std::string getHomeDirectory();
@@ -34,7 +34,7 @@ std::vector<std::string> getCommandLineArgs();
  * taken from here: https://www.cppstories.com/2021/filter-cpp-containers/
  */
 template <typename T, typename Pred>
-auto filterVector(const std::vector<T>& vec, Pred p) {
+auto filterVector(const std::vector<T> &vec, Pred p) {
 	std::vector<T> out;
 	std::copy_if(begin(vec), end(vec), std::back_inserter(out), p);
 	return out;
@@ -42,7 +42,7 @@ auto filterVector(const std::vector<T>& vec, Pred p) {
 // from https://stackoverflow.com/questions/3424962/where-is-erase-if
 // for std::vector
 template <class T, class A, class Predicate>
-void eraseIf(std::vector<T, A>& c, Predicate pred) {
+void eraseIf(std::vector<T, A> &c, Predicate pred) {
 	c.erase(std::remove_if(c.begin(), c.end(), pred), c.end());
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,8 @@ float getSeconds();
 
 bool copyDir(const std::string &source, const std::string &destination, std::string &errMsg);
 
+// deletes a file, or moves it to the trash if implemented (it is on iOS and mac)
+void deleteOrTrash(const std::string &path);
 
 void setWindowSize(int w, int h);
 void setWindowTitle(std::string title);
@@ -69,25 +71,20 @@ std::string getLaunchUrl();
 // when loading the app
 void setLaunchUrl(std::string url);
 
-
 std::string tempDir();
 
-
 std::string execute(std::string cmd, int *outExitCode = nullptr);
-
 
 void sleepMillis(long ms);
 void sleepMicros(long us);
 
 // this makes sure a file path is unique by appending
 // a number to the end of the filename (before the
-// file extension) 
+// file extension)
 std::string uniquerizePath(std::string path);
-
 
 // only works on mac, this one.
 void saveFileDialog(std::string msg, std::string defaultFileName, std::function<void(std::string, bool)> completionCallback);
-
 
 // generates a UUID - not tied to the machine
 // but can be considered globally unique
@@ -95,8 +92,6 @@ std::string generateUUID();
 
 // only works on iOS. this one
 void launchUrl(std::string url);
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Easy file writing
@@ -106,8 +101,7 @@ std::vector<unsigned char> readFile(std::string filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
 bool writeStringToFile(const std::string &path, const std::string &data);
 bool readStringFromFile(const std::string &path, std::string &outStr);
-bool moveFile(const std::string& from, const std::string& to);
-
+bool moveFile(const std::string &from, const std::string &to);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// System info

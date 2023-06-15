@@ -124,6 +124,16 @@ std::string getCWD() {
 }
 #endif
 
+void deleteOrTrash(const std::string &path) {
+#ifdef __APPLE__
+	[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+								  resultingItemURL:nil
+											 error:nil];
+#else
+	fs::remove_all(path);
+#endif
+}
+
 bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg) {
 	try {
 		// Check whether the function call is valid
@@ -353,11 +363,11 @@ string dataPath(string path, string appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
-#if defined(MZGL_PLUGIN_VST)
+#	if defined(MZGL_PLUGIN_VST)
 	return GetKnownFolder(CSIDL_COMMON_APPDATA) + "\\Koala\\data\\" + path;
-#else
+#	else
 	return "../data/" + path;
-#endif
+#	endif
 #else
 	return "../data/" + path;
 #endif
@@ -612,7 +622,6 @@ void launchUrl(string url) {
 }
 
 string getAppVersionString() {
-
 	std::string version = "";
 #ifdef __APPLE__
 	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
@@ -620,14 +629,12 @@ string getAppVersionString() {
 		return "not available";
 	}
 	std::string v = string([str UTF8String]);
-	
+
 	NSString *ver = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
 	if (ver != nil) {
-		
 		v += " (" + string([ver UTF8String]) + ")";
 	}
 
-	
 	version = v;
 #elif defined(__ANDROID__)
 	version = androidGetAppVersionString();
@@ -635,7 +642,7 @@ string getAppVersionString() {
 	version = "No version available";
 
 #endif
-	
+
 #ifdef DEBUG
 	version += " DEBUG";
 #endif
@@ -751,8 +758,6 @@ void hideMouse() {
 #endif
 }
 
-
-
 bool readFile(string filename, std::vector<unsigned char> &outData) {
 	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);
 	if (!strm) {
@@ -833,16 +838,14 @@ bool readStringFromFile(const std::string &path, std::string &outStr) {
 	}
 	return true;
 }
-bool moveFile(const std::string& from, const std::string& to)
-{
+bool moveFile(const std::string &from, const std::string &to) {
 	try {
 		if (!fs::copy_file(from, to)) {
 			return false;
 		}
 		fs::remove(from);
 		return true;
-	}
-	catch(const fs::filesystem_error& err) {
+	} catch (const fs::filesystem_error &err) {
 		Log::e() << "Exception thrown while attempting to move file";
 		return false;
 	}
