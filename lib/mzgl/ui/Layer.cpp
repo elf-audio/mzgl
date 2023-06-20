@@ -33,8 +33,13 @@ Layer::~Layer() {
 }
 
 void Layer::draw() {
-	if (width == 0 || height == 0) return;
-	if (color.a > 0) {
+	if (width == 0 || height == 0 || color.a == 0) return;
+	
+	if (color.a == 1) {
+		g.setColor(color);
+		g.drawRect(*this);
+	} else {
+		ScopedAlphaBlend bl(g, true);
 		g.setColor(color);
 		g.drawRect(*this);
 	}
