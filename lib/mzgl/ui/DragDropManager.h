@@ -29,13 +29,19 @@ public:
 	 * @param startTouch  must be in absolute coordinates
 	 * @param touchId the touch id of the touch dragging
 	 */
-	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId) :
-	g(g), startTouch(startTouch), sourceLayer(sourceLayer), sourceLayerRect(sourceLayer->getAbsoluteRect()), touchId(touchId) {
+	Dragger(Graphics &g, Layer *sourceLayer, glm::vec2 startTouch, int touchId)
+	: g(g)
+	, startTouch(startTouch)
+	, sourceLayer(sourceLayer)
+	, sourceLayerRect(sourceLayer->getAbsoluteRect())
+	, touchId(touchId)
+	, creationTime(g.currFrameTime) {
 		touchOffset = startTouch - sourceLayer->getAbsolutePosition();
 		dragRect.set(startTouch.x, startTouch.y, 0, 0);
 		touchDelta = {0.f, 0.f};
 	}
 
+	const double creationTime;
 	glm::vec2 touchDelta;
 	glm::vec2 startTouch;
 
@@ -158,6 +164,28 @@ public:
 
 		}
 		draggers.clear();
+	}
+	
+	void cancel(std::shared_ptr<T> dragger, bool passTouchBackToSourceLayer) {
+		for(auto it = draggers.begin() ; it != draggers.end(); it++) {
+			if((*it).second==dragger) {
+				if(passTouchBackToSourceLayer) {
+					transferFocus(dragger->sourceLayer, dragger->touchId);
+				} else {
+					if(dragger->sourceLayer!=nullptr) {
+						auto c = dragger->sourceLayer->centre();
+						dragger->sourceLayer->touchUp(c.x, c.y, dragger->touchId);
+					}
+				
+				}
+				draggers.erase(it);
+				break;
+			}
+		}
+		
+		if(draggers.size()==0) {
+			callDragsEnded();
+		}
 	}
 
 	/**
