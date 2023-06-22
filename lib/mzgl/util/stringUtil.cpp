@@ -18,6 +18,14 @@ std::string to_string(float value, int precision){
 	return out.str();
 }
 
+
+std::string toSigFigs(float value, int sigFigs){
+	std::ostringstream out;
+	out << std::setprecision(sigFigs) << value;
+	return out.str();
+}
+
+
 std::string to_string(double value, int precision){
 	return to_string((float)value, precision);
 }

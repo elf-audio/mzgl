@@ -12,8 +12,13 @@
 #include <vector>
 
 
+// to 'precision' decimal places
 std::string to_string(float value, int precision);
 std::string to_string(double value, int precision);
+
+// to 'sigFigs' significant figures
+std::string toSigFigs(float value, int sigFigs);
+
 
 std::string toLowerCase(std::string s);
 std::string toUpperCase(std::string s);
