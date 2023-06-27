@@ -10,6 +10,14 @@
 
 #include <string.h>
 
+/**
+ * This class is missing a lot of things
+ * but works for what koala needs it for.
+ * It doesn't check if you try to consume
+ * too many items, or insert too many.
+ *
+ * Also, it's not to be used for concurrency.
+ */
 template <typename T>
 class CircularBuffer {
 public:
@@ -42,6 +50,10 @@ public:
 			d[i] = consume();
 		}
 	}
+	
+	float &operator[](int i) {
+		return buff[(readPos + i+1) % buff.size()];
+	}
 
 	void consumeMonoToStereo(float *d, int numFrames) {
 		for(int i =0 ; i < numFrames; i++) {
@@ -49,7 +61,7 @@ public:
 		}
 	}
 
-
+	
 	void insert(T a) {
 		writePos = (writePos+1) % buff.size();
 		buff[writePos] = a;
@@ -63,6 +75,7 @@ public:
 	T peek() {
 		return buff[(readPos+1) % buff.size()];
 	}
+	
 	size_t size() const {
 		if(writePos<readPos) {
 			return buff.size() - readPos + writePos;
