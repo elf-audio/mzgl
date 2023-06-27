@@ -29,6 +29,9 @@ public:
 	void reserve(size_t sz) {
 		buff.resize(sz+1);
 	}
+	size_t capacity() {
+		return buff.size()-1;
+	}
 
 	// REWRITE THESE 2 METHODS:
 	void insert(const T *d, size_t len) {
@@ -51,7 +54,7 @@ public:
 		}
 	}
 	
-	float &operator[](int i) {
+	T &operator[](int i) {
 		return buff[(readPos + i+1) % buff.size()];
 	}
 
