@@ -413,7 +413,12 @@ string docsPath(string path) {
 #ifdef __APPLE__
 	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 	string _path = [[url path] UTF8String];
-
+	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
+	if (_path == "/Users/marek/Documents") {
+		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
+		printf(
+			"Hack to get this working on marek's computer with vscode because vscode running the app in a way that prevents NSFileManager from working properly\n\n");
+	}
 	return _path + "/" + path;
 #elif defined(__ANDROID__)
 	return getAndroidExternalDataPath() + "/" + path;
