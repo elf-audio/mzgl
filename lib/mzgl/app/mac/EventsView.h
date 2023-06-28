@@ -20,8 +20,7 @@
 
 
 @interface EventsView : GL_VIEW_CLASS<NSWindowDelegate>
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
 - (void) shutdown;
-- (void*) getApp;
 @end
 

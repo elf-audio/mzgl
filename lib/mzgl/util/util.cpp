@@ -254,7 +254,7 @@ float getSeconds() {
 #		include "EventsView.h"
 #	endif
 #endif
-
+#include "EventDispatcher.h"
 void setWindowSize(int w, int h) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
@@ -277,7 +277,12 @@ void setWindowSize(int w, int h) {
 	dispatch_async(dispatch_get_main_queue(), ^(void) {
 	  [win setFrame:frame display:YES animate:NO];
 	  //		// get window delegate which is events view
-	  //		EventsView *delegate = (EventsView*)win.delegate;
+	  EventsView *delegate = (EventsView *) win.delegate;
+	  if (delegate == nullptr) return;
+	  auto evts = [delegate getEventDispatcher];
+	  evts->app->g.width = w;
+	  evts->app->g.height = h;
+	  evts->resized();
 	  //		// then call windowDidEndLiveResize:(NSNotification *)notification
 	  //		NSNotification *notif = [[NSNotification alloc] initWithName:@"" object:win userInfo:nil];
 	  //		[delegate windowDidEndLiveResize:notif];

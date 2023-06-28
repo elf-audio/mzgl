@@ -25,8 +25,8 @@ using namespace std;
 	bool lastOptionState;
 	bool lastCommandState;
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr {
-	self = [super initWithFrame:frame eventDispatcher:evtDispatcherPtr];
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+	self = [super initWithFrame:frame eventDispatcher:evtDispatcher];
 	if(self!=nil) {
 		dropped = false;
 		lastShiftState = false;
@@ -259,8 +259,11 @@ int nsEventToKey(NSEvent *evt) {
 	
 }
 
-- (void*) getApp {
-	return eventDispatcher->app.get();
+- (std::shared_ptr<App>) getApp {
+	return eventDispatcher->app;
+}
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher {
+	return eventDispatcher;
 }
 
 - (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender {

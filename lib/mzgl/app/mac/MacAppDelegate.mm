@@ -57,7 +57,7 @@ using namespace std;
 
 - (void) makeWebView: (NSString*) url {
     NSRect windowRect = [self setupWindow];
-    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher.get() andUrl: url];
+    view = [[MZGLWebView alloc] initWithFrame: windowRect eventDispatcher: eventDispatcher andUrl: url];
     [[window contentView] addSubview:view];
     [window makeKeyAndOrderFront:nil];
     [window makeMainWindow];
@@ -129,7 +129,7 @@ using namespace std;
 	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 	view = controller.view;
 #else
-	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher.get()];
+	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 #endif
 	
 	

@@ -150,7 +150,7 @@ using namespace std;
 		glView = (MZGLKitView*)vc.view;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		glView = [[EventsView alloc] initWithFrame: self.view.frame eventDispatcher: eventDispatcher.get()];
+		glView = [[EventsView alloc] initWithFrame: self.view.frame eventDispatcher: eventDispatcher];
 #endif
 		glView.frame = self.view.frame;
 #if !TARGET_OS_IOS

@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
+#include <memory>
 
 //#include "App.h"
 class EffectPlugin;
@@ -17,19 +18,22 @@ class EffectPlugin;
 #else
 
 #endif
+class App;
 class EventDispatcher;
 @interface MZGLView : NSOpenGLView {
-	EventDispatcher *eventDispatcher;
+	std::shared_ptr<EventDispatcher> eventDispatcher;
 }
 
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
 - (void)windowResized:(NSNotification *)notification;
 - (void) disableDrawing;
 - (void) enableDrawing;
 - (void) lock;
 - (void) unlock;
 - (void) shutdown;
-- (EventDispatcher*) getEventDispatcher;
+- (std::shared_ptr<App>) getApp;
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
+
 @property (nonatomic, readwrite, retain) IBOutlet MZGLView *view;
 
 @end

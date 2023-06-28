@@ -143,13 +143,13 @@ void printLayer(Layer *l, int indent = 0) {
 	} else if([tableColumn.identifier isEqualToString: @"Name"]) {
 		[v.textField setStringValue: [NSString stringWithFormat:@"%s", layer->name.c_str()]];
 	} else if([tableColumn.identifier isEqualToString: @"x"]) {
-		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->x]];
+		[v.textField setStringValue: [NSString stringWithFormat:@"%g", layer->x]];
 	} else if([tableColumn.identifier isEqualToString: @"y"]) {
-		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->y]];
+		[v.textField setStringValue: [NSString stringWithFormat:@"%g", layer->y]];
 	} else if([tableColumn.identifier isEqualToString: @"width"]) {
-		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->width]];
+		[v.textField setStringValue: [NSString stringWithFormat:@"%g", layer->width]];
 	} else if([tableColumn.identifier isEqualToString: @"height"]) {
-		[v.textField setStringValue: [NSString stringWithFormat:@"%.0f", layer->height]];
+		[v.textField setStringValue: [NSString stringWithFormat:@"%g", layer->height]];
 	}
 	if(!layer->visible) {
 		v.textField.textColor = [NSColor systemGrayColor];

@@ -28,8 +28,8 @@
 
 @synthesize view;
 
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*) evtDispatcherPtr {
-	eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>) evtDispatcher {
+	eventDispatcher = evtDispatcher;
 	
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] = {
 
@@ -71,7 +71,10 @@
 	[self unlock];
 }
 
-- (EventDispatcher*) getEventDispatcher {
+- (std::shared_ptr<App>) getApp {
+	return eventDispatcher->app;
+}
+- (std::shared_ptr<EventDispatcher>) getEventDispatcher {
 	return eventDispatcher;
 }
 
@@ -166,7 +169,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *inNow,
 	g.width *= g.pixelScale;
 	g.height *= g.pixelScale;
 
-	auto *evtDispatcher = eventDispatcher;
+	auto evtDispatcher = eventDispatcher;
 	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher, &g]() {
 		
 		evtDispatcher->resized();

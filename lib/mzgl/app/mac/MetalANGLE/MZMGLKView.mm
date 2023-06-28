@@ -30,8 +30,8 @@
 - (void)windowResized:(NSNotification *)notification {
 	
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr {
-	eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+	eventDispatcher = evtDispatcher;
 	self = [super initWithFrame: frame];
 	if(self!=nil) {
 		// do stuff

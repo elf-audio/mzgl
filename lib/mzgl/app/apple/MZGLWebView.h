@@ -11,7 +11,8 @@
  */
 #pragma once
 #include <TargetConditionals.h>
-
+#include <memory>
+class EventDispatcher;
 #if !TARGET_OS_IOS
 #import <Cocoa/Cocoa.h>
 #endif
@@ -20,7 +21,7 @@
 #import <WebKit/WebKit.h>
 
 @interface MZGLWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate, NSWindowDelegate>
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr andUrl: (NSString*) url;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher andUrl: (NSString*) url;
 - (void) shutdown;
 // - (void*) getApp;
 

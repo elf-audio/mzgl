@@ -13,10 +13,10 @@
 #include "log.h"
 #include "filesystem.h"
 @implementation MZGLWebView {
-    EventDispatcher *eventDispatcher;
+    std::shared_ptr<EventDispatcher> eventDispatcher;
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr andUrl: (NSString*) url {
-    eventDispatcher = (EventDispatcher*)evtDispatcherPtr;
+- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher andUrl: (NSString*) url {
+    eventDispatcher = evtDispatcher;
     
     dynamic_pointer_cast<WebViewApp>(eventDispatcher->app)->callJS = [self](const std::string &s) {
         printf("callJS(%s)\n", s.c_str());
