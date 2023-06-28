@@ -667,7 +667,7 @@ string getAppVersionString() {
 // http://www.yakyak.org/viewtopic.php?p=1475838&sid=1e9dcb5c9fd652a6695ac00c5e957822#p1475838
 
 #	include <Cocoa/Cocoa.h>
-
+#	include <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #endif
 
 void saveFileDialog(string msg, string defaultFileName, function<void(string, bool)> completionCallback) {
@@ -686,7 +686,20 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
-
+		  
+		  
+		  if (defaultFileName!="") if (@available(macOS 11.0, *)) {
+			  
+			  auto ext = fs::path(defaultFileName).extension().string();
+			  if(ext!="" && ext[0]=='.') {
+				  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
+				  
+				  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
+					  [saveDialog setAllowedContentTypes:@[ type ]];
+				  }
+			  }
+		  }
+		  
 		  buttonClicked = [saveDialog runModal];
 
 		  [context makeCurrentContext];
