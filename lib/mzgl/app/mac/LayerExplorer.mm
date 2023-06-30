@@ -249,6 +249,7 @@ NSTableColumn *addColumn(NSString *name, int colWidth = 200) {
 
 NSWindow *window;
 void LayerExplorer::hide() {
+	isShowing = false;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[window close];
 	});

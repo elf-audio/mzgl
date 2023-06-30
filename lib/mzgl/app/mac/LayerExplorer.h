@@ -12,9 +12,10 @@
 class Layer;
 class LayerExplorer {
 public:
-	void setup(Layer *root); 
+	void setup(Layer *root);
 	void show();
 	void hide();
+	bool showing() { return isShowing; }
 	void setText(std::string text);
 	void setBgColor(glm::vec3 c);
 
