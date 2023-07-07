@@ -169,7 +169,7 @@ public:
 
 	Rectf getIntersection(const Rectf &other) const;
 	void alignToPixels();
-
+	glm::vec2 normToPos(float x, float y) const { return {this->x + x * width, this->y + y * height}; }
 	glm::vec2 normToPos(glm::vec2 a) const { return {x + a.x * width, y + a.y * height}; }
 	bool operator==(const Rectf &o) const { return x == o.x && y == o.y && width == o.width && height == o.height; }
 
