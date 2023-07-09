@@ -3,7 +3,6 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <glfw/glfw3.h>
 
 class EventDispatcher;
 

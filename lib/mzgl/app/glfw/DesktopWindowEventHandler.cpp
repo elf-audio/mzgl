@@ -1,5 +1,6 @@
 #include "DesktopWindowEventHandler.h"
 #include "EventDispatcher.h"
+#include <glfw/glfw3.h>
 
 #ifdef _WIN32
 static constexpr auto SCROLL_SPEED{5};

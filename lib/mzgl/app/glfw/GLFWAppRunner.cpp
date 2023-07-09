@@ -25,10 +25,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define GLFW_NATIVE_INCLUDE_NONE
 #include <glfw/glfw3native.h>
 #endif
+#include <optional>
 #include <stdlib.h>
 #include <stdio.h>
 #include "filesystem.h"
 #include "DesktopWindowEventHandler.h"
+#include "DesktopWindowFileDragHandler.h"
 #include "util.h"
 #include "log.h"
 
@@ -116,9 +118,15 @@ void GLFWAppRunner::setCallbacks() {
     glfwSetScrollCallback(window, scroll_callback);
     //glfwSetWindowSizeCallback(window, window_size_callback);
     glfwSetFramebufferSizeCallback(window, window_size_callback);
-    glfwSetDropCallback(window, drop_callback);
     glfwSetWindowUserPointer(window, this);
-
+    // File drops should be handled by DesktopWindowFileDragHandler but this
+    // is only implemented for Windows at the moment.
+    // Using this GLFW callback instead lets the user drag files into the
+    // window but there will be no animations while dragging and samples will
+    // always be dropped onto the first available pads.
+#ifndef _WIN32
+    glfwSetDropCallback(window, drop_callback);
+#endif
 }
 
 
@@ -223,9 +231,11 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     graphics.height = windowH;
 
     app->windowHandle = window;
+    eventDispatcher = std::make_shared<EventDispatcher>(app);
 
 #ifdef _WIN32
     app->nativeWindowHandle = glfwGetWin32Window(window);
+	DesktopWindowFileDragHandler windowFileDragHandler{app->nativeWindowHandle, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
 #endif
 
 #ifdef __linux__
@@ -260,8 +270,8 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     initMZGL(app);
 
-    eventDispatcher = std::make_shared<EventDispatcher>(app);
     eventDispatcher->setup();
+
 
     while (!glfwWindowShouldClose(window)) {
 

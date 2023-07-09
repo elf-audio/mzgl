@@ -127,8 +127,13 @@ set(MZGL_SOURCES
 )
 if(NOT ANDROID)
     list(APPEND MZGL_SOURCES
-		lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
 		lib/mzgl/app/glfw/GLFWAppRunner.cpp
+		lib/mzgl/app/glfw/DesktopWindowEventHandler.h
+		lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
+		lib/mzgl/app/glfw/DesktopWindowFileDragHandler.h
+		$<$<PLATFORM_ID:Windows>:
+			lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
+		>
 	)
 endif()
 
