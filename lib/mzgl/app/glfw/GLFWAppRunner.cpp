@@ -28,27 +28,13 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <stdlib.h>
 #include <stdio.h>
 #include "filesystem.h"
-
+#include "DesktopWindowEventHandler.h"
 #include "util.h"
 #include "log.h"
 
-
 using namespace std;
 
-float mouseX = 0;
-float mouseY = 0;
-
-#define NUM_MOUSE_BUTTONS 8
-
-std::vector<bool> buttons;
-bool mouseIsDown = false;
-
-bool leftAltDown = false;
-bool rightAltDown = false;
-
-bool leftShiftDown = false;
-bool rightShiftDown = false;
-
+DesktopWindowEventHandler windowEventHandler;
 bool framebuferResized = false;
 
 EventDispatcher *getEventDispatcher(GLFWwindow *window) {
@@ -61,97 +47,36 @@ Graphics &getGraphics(GLFWwindow *window) {
     return app->graphics;
 }
 
+static auto makePathsVector(int count, const char** paths) {
+	std::vector<std::string> out;
+	out.reserve(count);
+	for (int i = 0; i < count; i++) {
+		out.push_back(paths[i]);
+	}
+	return out;
+}
 
 static void error_callback(int error, const char* description) {
     fprintf(stderr, "Error: %s\n", description);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    //    glfwSetWindowShouldClose(window, GLFW_TRUE);
-    if(action==GLFW_PRESS || action==GLFW_REPEAT) {
-        if(key==GLFW_KEY_LEFT_ALT) {
-            leftAltDown = true;
-        } else if(key==GLFW_KEY_RIGHT_ALT) {
-            rightAltDown = true;
-        } else if(key==GLFW_KEY_LEFT_SHIFT) {
-            leftShiftDown = true;
-        } else if(key==GLFW_KEY_RIGHT_SHIFT) {
-            rightShiftDown = true;
-        }
-        getEventDispatcher(window)->keyDown(key);
-
-    } else if(action==GLFW_RELEASE) {
-        if(key==GLFW_KEY_LEFT_ALT) {
-            leftAltDown = false;
-        } else if(key==GLFW_KEY_RIGHT_ALT) {
-            rightAltDown = false;
-        } else if(key==GLFW_KEY_LEFT_SHIFT) {
-            leftShiftDown = false;
-        } else if(key==GLFW_KEY_RIGHT_SHIFT) {
-            rightShiftDown = false;
-        }
-        getEventDispatcher(window)->keyUp(key);
-    }
+	windowEventHandler.key(getEventDispatcher(window), key, action);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-
-    if(action==GLFW_PRESS) {
-        mouseIsDown = true;
-        buttons[button] = true;
-        getEventDispatcher(window)->touchDown(mouseX, mouseY, button);
-    } else {
-        getEventDispatcher(window)->touchUp(mouseX, mouseY, button);
-        buttons[button] = false;
-        for(const auto &b : buttons) {
-            if(b) return;
-        }
-        mouseIsDown = false;
-    }
+    windowEventHandler.mouseButton(getEventDispatcher(window), button, action);
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-    auto &g = getGraphics(window);
-    mouseX = xpos;
-    mouseY = ypos;
-    if(!mouseIsDown) {
-        getEventDispatcher(window)->touchOver(mouseX, mouseY);
-
-    } else {
-        for(int i = 0; i < buttons.size(); i++) {
-            if(buttons[i]) {
-
-                getEventDispatcher(window)->touchMoved(mouseX, mouseY, i);
-
-            }
-        }
-    }
+    windowEventHandler.cursorPos(getEventDispatcher(window), static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    if (leftAltDown || rightAltDown) {
-        printf("yoffset: %.2f\n", yoffset);
-        getEventDispatcher(window)->mouseZoomed(mouseX, mouseY, yoffset*-0.03);
-    } else {
-#ifdef WIN32
-        // speed up windows scrolling.
-        // should really have acceleration here...
-        xoffset *= 3;
-        yoffset *= 3;
-#endif
-        if(leftShiftDown || rightShiftDown) {
-            std::swap(xoffset, yoffset);
-        }
-        getEventDispatcher(window)->mouseScrolled(mouseX, mouseY, xoffset, yoffset);
-    }
+    windowEventHandler.scroll(getEventDispatcher(window), xoffset, yoffset);
 }
 
-
-
 void window_size_callback(GLFWwindow* window, int width, int height) {
-
-
     auto &g = getGraphics(window);
     glViewport(0, 0, width, height);
 
@@ -163,11 +88,8 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void drop_callback(GLFWwindow* window, int count, const char** paths) {
-    for (int i = 0; i < count; i++) {
-        getEventDispatcher(window)->openUrl(paths[i]);
-    }
+    windowEventHandler.filesDropped(getEventDispatcher(window), makePathsVector(count, paths));
 }
-
 
 float getMainMonitorScale() {
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -210,8 +132,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 
     loadCommandLineArgs(argc, (const char **)argv);
-
-    for(int i =0; i < NUM_MOUSE_BUTTONS; i++) buttons.push_back(false);
 
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) {
