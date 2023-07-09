@@ -1,13 +1,19 @@
 #include "DesktopWindowEventHandler.h"
 #include "EventDispatcher.h"
 
+#ifdef _WIN32
+static constexpr auto SCROLL_SPEED{5};
+#else
+static constexpr auto SCROLL_SPEED{1};
+#endif
+
 auto DesktopWindowEventHandler::isAnyMouseButtonDown() const -> bool {
-    for (const auto b : buttons_) {
-        if (b) {
-            return true;
+	for (const auto b : buttons_) {
+		if (b) {
+			return true;
 		}
 	}
-    return false;
+	return false;
 }
 
 auto DesktopWindowEventHandler::isDown(Modifier modifier) const -> bool {
@@ -18,9 +24,9 @@ auto DesktopWindowEventHandler::isDown(Modifier modifier) const -> bool {
 }
 
 auto DesktopWindowEventHandler::cursorPos(EventDispatcher* eventDispatcher, float x, float y) -> void {
-    mouseX_ = x;
-    mouseY_ = y;
-    if (!isAnyMouseButtonDown()) {
+	mouseX_ = x;
+	mouseY_ = y;
+	if (!isAnyMouseButtonDown()) {
 		eventDispatcher->touchOver(mouseX_, mouseY_);
 		return;
 	}
@@ -48,14 +54,14 @@ auto DesktopWindowEventHandler::getModifier(int key) const -> Modifier {
 }
 
 auto DesktopWindowEventHandler::key(EventDispatcher* eventDispatcher, int key, int action) -> void {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
 		keyDown(eventDispatcher, key);
 		return;
-    }
-    if (action == GLFW_RELEASE) {
+	}
+	if (action == GLFW_RELEASE) {
 		keyUp(eventDispatcher, key);
 		return;
-    }
+	}
 }
 
 auto DesktopWindowEventHandler::keyDown(EventDispatcher* eventDispatcher, int key) -> void {
@@ -75,10 +81,10 @@ auto DesktopWindowEventHandler::keyUp(EventDispatcher* eventDispatcher, int key)
 }
 
 auto DesktopWindowEventHandler::mouseButton(EventDispatcher* eventDispatcher, int button, int action) -> void {
-    if (action == GLFW_PRESS) {
-        buttons_[button] = true;
-        eventDispatcher->touchDown(mouseX_, mouseY_, button);
-        return;
+	if (action == GLFW_PRESS) {
+		buttons_[button] = true;
+		eventDispatcher->touchDown(mouseX_, mouseY_, button);
+		return;
 	}
 	// Check if we are aware of any mouse button being down at this point.
 	// Otherwise touchUp() can crash if there was no corresponding
@@ -95,15 +101,11 @@ auto DesktopWindowEventHandler::mouseButton(EventDispatcher* eventDispatcher, in
 
 auto DesktopWindowEventHandler::scroll(EventDispatcher* eventDispatcher, float x, float y) -> void {
 	if (isDown(Modifier::left_alt) || isDown(Modifier::right_alt)) {
-        eventDispatcher->mouseZoomed(mouseX_, mouseY_, y * -0.03);
+		eventDispatcher->mouseZoomed(mouseX_, mouseY_, y * -0.03);
 		return;
-    }
-#ifdef WIN32
-	// speed up windows scrolling.
-	// should really have acceleration here...
-	x *= 3;
-	y *= 3;
-#endif
+	}
+	x *= SCROLL_SPEED;
+	y *= SCROLL_SPEED;
 	if (isDown(Modifier::left_shift) || isDown(Modifier::right_shift)) {
 		std::swap(x, y);
 	}
