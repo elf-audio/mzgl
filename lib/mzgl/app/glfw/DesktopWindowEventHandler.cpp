@@ -80,7 +80,16 @@ auto DesktopWindowEventHandler::mouseButton(EventDispatcher* eventDispatcher, in
         eventDispatcher->touchDown(mouseX_, mouseY_, button);
         return;
 	}
-	eventDispatcher->touchUp(mouseX_, mouseY_, button);
+	// Check if we are aware of any mouse button being down at this point.
+	// Otherwise touchUp() can crash if there was no corresponding
+	// touchDown() event.
+	// This can occur if the window is a child window (e.g. in the VST
+	// version, and the mouse button was pressed while the cursor was
+	// outside the bounds of the child window, but then released while
+	// the cursor is inside the child window.
+	if (isAnyMouseButtonDown()) {
+		eventDispatcher->touchUp(mouseX_, mouseY_, button);
+	}
 	buttons_[button] = false;
 }
 
