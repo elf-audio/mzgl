@@ -5,6 +5,8 @@
 #include <vector>
 #include "EventDispatcher.h"
 
+struct GLFWwindow;
+
 namespace file_drag_handler {
 
 struct Listener {
@@ -20,7 +22,7 @@ struct Handler;
 struct Deleter { auto operator()(Handler* ptr) const -> void; };
 using Ptr = std::unique_ptr<Handler, Deleter>;
 
-auto init(void* nativeWindowHandle, Listener::Ptr listener) -> Ptr;
+auto init(GLFWwindow* window, Listener::Ptr listener) -> Ptr;
 
 inline auto makeFileDragListener(EventDispatcher* eventDispatcher) {
 	struct Listener : file_drag_handler::Listener {
@@ -52,8 +54,8 @@ inline auto makeFileDragListener(EventDispatcher* eventDispatcher) {
 
 struct DesktopWindowFileDragHandler {
 	using Listener = file_drag_handler::Listener;
-	DesktopWindowFileDragHandler(void* nativeWindowHandle, Listener::Ptr listener)
-		: impl_{file_drag_handler::init(nativeWindowHandle, std::move(listener))}
+	DesktopWindowFileDragHandler(GLFWwindow* window, Listener::Ptr listener)
+		: impl_{file_drag_handler::init(window, std::move(listener))}
 	{
 	}
 private:

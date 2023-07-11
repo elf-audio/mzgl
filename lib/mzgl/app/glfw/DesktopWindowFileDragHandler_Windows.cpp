@@ -1,6 +1,10 @@
 #include "DesktopWindowFileDragHandler.h"
 #include <Windows.h>
 #include <ShlObj.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_NATIVE_INCLUDE_NONE
+#include <glfw/glfw3.h>
+#include <glfw/glfw3native.h>
 
 namespace file_drag_handler {
 
@@ -20,6 +24,7 @@ struct DropTarget : public IDropTarget {
 	virtual ~DropTarget() {
 		OleUninitialize();
 	} 
+	// COM boilerplate //////////////////////////////////////////////////////////////
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppv) {
 		if (IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_IDropTarget)) {
 			*ppv = static_cast<IDropTarget*>(this);
@@ -39,6 +44,7 @@ struct DropTarget : public IDropTarget {
 		}
 		return lRefCount;
 	} 
+	// end of COM boilerplate ///////////////////////////////////////////////////////
 	STDMETHODIMP DragEnter(IDataObject *pDataObj, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect) {
 		if (!areFilesBeingDragged(pDataObj)) {
 			// No files are being dragged
@@ -131,9 +137,9 @@ auto Deleter::operator()(Handler* ptr) const -> void {
 	delete ptr;
 }
 
-auto init(void* nativeWindowHandle, Listener::Ptr listener) -> Ptr {
-	auto out{std::unique_ptr<Handler, Deleter>(new Handler{}, Deleter{})};
-	out->hwnd = reinterpret_cast<HWND>(nativeWindowHandle);
+auto init(GLFWwindow* window, Listener::Ptr listener) -> Ptr {
+	auto out{Ptr(new Handler{}, Deleter{})};
+	out->hwnd = reinterpret_cast<HWND>(glfwGetWin32Window(window));
 	out->dropTarget = DropTarget::Ptr(new DropTarget{out->hwnd, std::move(listener)}, DropTarget::Deleter{});
 	RegisterDragDrop(out->hwnd, out->dropTarget.get());
 	return out;

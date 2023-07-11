@@ -131,8 +131,14 @@ if(NOT ANDROID)
 		lib/mzgl/app/glfw/DesktopWindowEventHandler.h
 		lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
 		lib/mzgl/app/glfw/DesktopWindowFileDragHandler.h
+		lib/mzgl/app/glfw/GLFWOS.h
+		$<$<PLATFORM_ID:Linux>:
+			lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Linux.cpp
+			lib/mzgl/app/glfw/GLFWOS_Linux.cpp
+		>
 		$<$<PLATFORM_ID:Windows>:
 			lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
+			lib/mzgl/app/glfw/GLFWOS_Windows.cpp
 		>
 	)
 endif()

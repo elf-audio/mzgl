@@ -332,6 +332,15 @@ void setDataPath(string path) {
 }
 #endif
 
+static auto getVSTBundlePath() -> fs::path {
+#ifdef _WIN32
+	return std::filesystem::canonical(getCurrentDllPath() / ".." / ".." / "..");
+#else
+	// FIXME: This needs to be implemented for other platforms
+	return "";
+#endif
+}
+
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
 string dataPath(string path, string appBundleId) {
 	// it's an absolute path, don't do anything to it
@@ -339,6 +348,12 @@ string dataPath(string path, string appBundleId) {
 
 #ifdef UNIT_TEST
 	if (isOverridingDataPath) return dataPathOverride + "/" + path;
+#endif
+
+#if defined(MZGL_PLUGIN_VST)
+	const auto bundlePath{getVSTBundlePath()};
+	const auto dataPath{bundlePath / "Contents" / "Resources" / "data"};
+	return (dataPath / path).string();
 #endif
 
 #if defined(__APPLE__) && defined(MZGL_MAC_GLFW)
@@ -368,11 +383,7 @@ string dataPath(string path, string appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
-#	if defined(MZGL_PLUGIN_VST)
-	return GetKnownFolder(CSIDL_COMMON_APPDATA) + "\\Koala\\data\\" + path;
-#	else
 	return "../data/" + path;
-#	endif
 #else
 	return "../data/" + path;
 #endif
@@ -439,7 +450,7 @@ string docsPath(string path) {
 
 		TCHAR szExeFileName[MAX_PATH];
 		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
-		retPath = documentsDirUtf8 + "\\" + fs::path(wstring(szExeFileName)).stem().string();
+		retPath = documentsDirUtf8 + "\\Koala";
 		if (!fs::exists(retPath)) {
 			fs::create_directory(retPath);
 		}

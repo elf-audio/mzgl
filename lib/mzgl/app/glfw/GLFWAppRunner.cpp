@@ -6,25 +6,22 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#ifdef _WIN32
+#ifdef _WIN32 ////////////////////////////////////////////////
 
-// This enables visual styles
+// This enables visual styles on Windows
 #pragma comment(linker, "\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <glew.h>
-#endif
-#ifdef __linux__
+#endif // _WIN32 /////////////////////////////////////////////
+
+#ifdef __linux__ /////////////////////////////////////////////
 #include <gtk/gtk.h>
-#endif
+#endif // __linux__ //////////////////////////////////////////
+
 #include "GLFWAppRunner.h"
 #include "glfw3.h"
-#ifdef _WIN32
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_NATIVE_INCLUDE_NONE
-#include <glfw/glfw3native.h>
-#endif
 #include <optional>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,6 +30,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "DesktopWindowFileDragHandler.h"
 #include "util.h"
 #include "log.h"
+#include "GLFWOS.h"
 
 using namespace std;
 
@@ -47,15 +45,6 @@ EventDispatcher *getEventDispatcher(GLFWwindow *window) {
 Graphics &getGraphics(GLFWwindow *window) {
     auto *app = (GLFWAppRunner*)glfwGetWindowUserPointer(window);
     return app->graphics;
-}
-
-static auto makePathsVector(int count, const char** paths) {
-	std::vector<std::string> out;
-	out.reserve(count);
-	for (int i = 0; i < count; i++) {
-		out.push_back(paths[i]);
-	}
-	return out;
 }
 
 static void error_callback(int error, const char* description) {
@@ -89,10 +78,6 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
     Log::d() << "resized to " << width << height;
 }
 
-void drop_callback(GLFWwindow* window, int count, const char** paths) {
-    windowEventHandler.filesDropped(getEventDispatcher(window), makePathsVector(count, paths));
-}
-
 float getMainMonitorScale() {
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     if(monitor!=nullptr) {
@@ -119,14 +104,6 @@ void GLFWAppRunner::setCallbacks() {
     //glfwSetWindowSizeCallback(window, window_size_callback);
     glfwSetFramebufferSizeCallback(window, window_size_callback);
     glfwSetWindowUserPointer(window, this);
-    // File drops should be handled by DesktopWindowFileDragHandler but this
-    // is only implemented for Windows at the moment.
-    // Using this GLFW callback instead lets the user drag files into the
-    // window but there will be no animations while dragging and samples will
-    // always be dropped onto the first available pads.
-#ifndef _WIN32
-    glfwSetDropCallback(window, drop_callback);
-#endif
 }
 
 
@@ -231,12 +208,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     graphics.height = windowH;
 
     app->windowHandle = window;
+    app->nativeWindowHandle = os::getNativeWindowHandle(window);
+
+    // Create the event dispatcher
     eventDispatcher = std::make_shared<EventDispatcher>(app);
 
-#ifdef _WIN32
-    app->nativeWindowHandle = glfwGetWin32Window(window);
-	DesktopWindowFileDragHandler windowFileDragHandler{app->nativeWindowHandle, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
-#endif
+    // Platform-specific file drag/drop handler.
+	DesktopWindowFileDragHandler windowFileDragHandler{window, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
 
 #ifdef __linux__
     gtk_init(&argc, &argv);
@@ -253,20 +231,8 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    // GL_MULTISAMPLE does not seem to exist on certain linux environment.
-    // e.g. https://stackoverflow.com/questions/4207506/where-is-gl-multisample-defined
-#ifdef GL_MULTISAMPLE
-    glEnable(GL_MULTISAMPLE);
-#endif
-
-#ifdef _WIN32
-    GLenum err = glewInit();
-    if(err!=GLEW_OK) {
-        printf("Problem with glew\n");
-        return;
-    }
-#endif
-
+    // Platform-specific GL setup
+    os::initializeGLContext();
 
     initMZGL(app);
 
@@ -312,13 +278,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
     glfwDestroyWindow(window);
     glfwTerminate();
-
-//#ifdef _WIN32
-//    delete app;
-//#endif
-
-
-//	exit(EXIT_SUCCESS);
 }
 
 void GLFWAppRunner::stop() {
