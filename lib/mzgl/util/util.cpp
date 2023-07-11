@@ -439,7 +439,7 @@ string docsPath(string path) {
 
 		TCHAR szExeFileName[MAX_PATH];
 		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
-		retPath = documentsDirUtf8 + "\\" + fs::path(wstring(szExeFileName)).stem().string();
+		retPath = documentsDirUtf8 + "\\Koala";
 		if (!fs::exists(retPath)) {
 			fs::create_directory(retPath);
 		}
