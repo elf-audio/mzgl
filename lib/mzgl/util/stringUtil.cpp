@@ -111,8 +111,8 @@ std::string toSigFigs(float value, int sigFig) {
 
 	// Create buffer and perform formatting
 	char buffer[50];
-	std::sprintf(buffer, format.c_str(), value);
-	printf("%f(%d):  %s\n", value, sigFig, buffer);
+	std::snprintf(buffer, sizeof(buffer), format.c_str(), value);
+//	printf("%f(%d):  %s\n", value, sigFig, buffer);
 	return std::string(buffer);
 }
 
