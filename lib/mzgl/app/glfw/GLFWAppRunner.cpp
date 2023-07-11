@@ -30,7 +30,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "DesktopWindowFileDragHandler.h"
 #include "util.h"
 #include "log.h"
-#include "OS.h"
+#include "GLFWOS.h"
 
 using namespace std;
 

@@ -1,4 +1,4 @@
-#include "OS.h"
+#include "GLFWOS.h"
 #include <glew.h>
 #include "glfw3.h"
 #include <glfw/glfw3native.h>
