@@ -11,7 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-
+#include <cmath>
 std::string to_string(float value, int precision) {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(precision) << value;
