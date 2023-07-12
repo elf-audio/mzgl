@@ -731,11 +731,11 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 
 	
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring wide = converter.from_bytes(defaultFilename);
+	std::wstring wide = converter.from_bytes(defaultFileName);
 	
 	
-	size_t extPos = defaultFilename.rfind('.');
-	std::string extension = (extPos != std::string::npos) ? defaultFilename.substr(extPos + 1) : "";
+	size_t extPos = defaultFileName.rfind('.');
+	std::string extension = (extPos != std::string::npos) ? defaultFileName.substr(extPos + 1) : "";
 
 	
 	
@@ -744,7 +744,6 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	fileName[MAX_PATH-1] = 0;  // null terminate, in case of long string
 
 	
-	char *extension;
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
@@ -756,8 +755,9 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	ofn.nMaxFile = MAX_PATH;
 	
 	std::wstring filter = L"All Files (*.*)\0*.*\0";
+	std::wstring wideExtension = L"";
 	if (!extension.empty()) {
-		std::wstring wideExtension = converter.from_bytes(extension);
+		wideExtension = converter.from_bytes(extension);
 		filter = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
 	}
 
