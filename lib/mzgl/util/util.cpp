@@ -729,7 +729,21 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 #	endif
 #elif defined(_WIN32)
 
+	
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring wide = converter.from_bytes(defaultFilename);
+	
+	
+	size_t extPos = defaultFilename.rfind('.');
+	std::string extension = (extPos != std::string::npos) ? defaultFilename.substr(extPos + 1) : "";
+
+	
+	
 	wchar_t fileName[MAX_PATH] = L"";
+	wcsncpy(fileName, wide.c_str(), MAX_PATH-1);
+	fileName[MAX_PATH-1] = 0;  // null terminate, in case of long string
+
+	
 	char *extension;
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
@@ -740,8 +754,15 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	ofn.nMaxFileTitle = 31;
 	ofn.lpstrFile = fileName;
 	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrFilter = L"All Files (*.*)\0*.*\0";
-	ofn.lpstrDefExt = L""; // we could do .rxml here?
+	
+	std::wstring filter = L"All Files (*.*)\0*.*\0";
+	if (!extension.empty()) {
+		std::wstring wideExtension = converter.from_bytes(extension);
+		filter = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
+	}
+
+	ofn.lpstrFilter = filter.c_str();// L"All Files (*.*)\0*.*\0";
+	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
 	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
 	ofn.lpstrTitle = L"Select Output File";
 
