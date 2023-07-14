@@ -1,12 +1,15 @@
+#define GLFW_EXPOSE_NATIVE_GLX
+#define GLFW_NATIVE_INCLUDE_NONE
+
 #include "GLFWOS.h"
 #include <glew.h>
 #include "glfw3.h"
-#include <glfw/glfw3native.h>
+#include <GLFW/glfw3native.h>
 
 namespace os {
 
 auto getNativeWindowHandle(GLFWwindow* window) -> void* {
-	return glfwGetGLXWindow(window);
+	return (void*)(glfwGetGLXWindow(window)); // FIXME: don't like that cast, it smells
 }
 
 auto initializeGLContext() -> void {
