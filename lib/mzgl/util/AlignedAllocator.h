@@ -2,7 +2,7 @@
 
 
 // taken from https://stackoverflow.com/questions/12942548/making-stdvector-allocate-aligned-memory
-
+/*
 enum class Alignment : size_t
 {
     Normal = sizeof(void*),
@@ -174,3 +174,41 @@ inline
 bool
 operator!= (const AlignedAllocator<T,TAlign>&, const AlignedAllocator<U, UAlign>&) noexcept
 { return TAlign != UAlign; }
+*/
+
+#include <vector>
+#include <cstdlib>
+
+#if _WIN32
+#include <malloc.h>
+#endif
+
+template <class T>
+struct AlignedAllocator
+{
+    typedef T value_type;
+    std::size_t alignment = 32;  // Adjust this value according to your requirements
+
+    T* allocate(std::size_t num)
+    {
+        void* ptr = nullptr;
+#if _WIN32
+        ptr = _aligned_malloc(num * sizeof(T), alignment);
+#else
+        if(posix_memalign(&ptr, alignment, num * sizeof(T)) != 0)
+            ptr = nullptr;
+#endif
+        if (!ptr)
+            throw std::bad_alloc();
+        return reinterpret_cast<T*>(ptr);
+    }
+
+    void deallocate(T* p, std::size_t num)
+    {
+#if _WIN32
+        _aligned_free(p);
+#else
+        free(p);
+#endif
+    }
+};

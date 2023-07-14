@@ -23,11 +23,12 @@
 #include <memory>
 //#include "xsimd/xsimd.hpp"
 
+
+
 //class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
+// class FloatBuffer : public std::vector<float, AlignedAllocator<float>> {
 class FloatBuffer : public std::vector<float> {
 public:
-
-
 	FloatBuffer(size_t sz);
 
 	FloatBuffer();
@@ -39,7 +40,8 @@ public:
 	// xsimd disabled for MSVC build, it does not give performance boost for Android anyway - to be investigated
 	//FloatBuffer(size_t size, float fillValue) : std::vector<float, xsimd::aligned_allocator<float>>(size, fillValue) {}
 
-	FloatBuffer(size_t size, float fillValue) : std::vector<float>(size, fillValue) {}
+	FloatBuffer(size_t size, float fillValue)
+		: std::vector<float>(size, fillValue) {}
 
 	/**
      * You can copy an array of floats into the buffer
@@ -55,19 +57,18 @@ public:
      */
 	void set(const float *buff, size_t length, int start = 0, int stride = 1);
 	void setMonoFromStereo(const float *buff, size_t numFrames);
-	void setMonoFromStereo(const FloatBuffer &b) { setMonoFromStereo(b.data(), b.size()/2); }
+	void setMonoFromStereo(const FloatBuffer &b) { setMonoFromStereo(b.data(), b.size() / 2); }
 	void setStereoFromMono(const float *data, int length);
 	void setStereoFromMono(const FloatBuffer &b) { setStereoFromMono(b.data(), b.size()); }
 	void setFromLeftChannel(float *buff, int length);
 	void setFromRightChannel(float *buff, int length);
 
-	
 	// splits this stereo float buffer into 2 mono float buffers passed in param
 	void splitStereo(FloatBuffer &l, FloatBuffer &r);
-	
+
 	// combines the 2 params as mono signals into left and right channels of this stereo buffer
 	void combineStereo(const FloatBuffer &l, const FloatBuffer &r);
-	
+
 	void assignValue(size_t index, float v) { (*this)[index] = v; }
 
 	// if smooth = false, fadeout is linear, if it's true, then its smoothed
@@ -80,8 +81,8 @@ public:
 	 * returns it as another floatbuffer (outBuff in parameter)
 	 * end is exclusive
 	 */
-    void splice(int start, int end, FloatBuffer &outBuff) const;
-    FloatBuffer splice(int start, int end) const;
+	void splice(int start, int end, FloatBuffer &outBuff) const;
+	FloatBuffer splice(int start, int end) const;
 
 	int16_t floatToInt16(float in) const;
 	vector<int16_t> getInt16() const;
@@ -90,8 +91,8 @@ public:
 
 	void convertToMono(int originalNumChannels = 2);
 
-//	void save(std::string path);
-//	void load(std::string path);
+	//	void save(std::string path);
+	//	void load(std::string path);
 
 	float sum() const;
 	float mean() const;
@@ -109,7 +110,6 @@ public:
 
 	void getMinMax(float &min, float &max) const;
 
-
 	void zeros(size_t N = 0);
 	void random(float min = -1, float max = 1);
 	void linspace(float a, float b, int N);
@@ -122,7 +122,7 @@ public:
 	// this is like normalize but it doesn't cause a DC offset
 	void normalizeAudio();
 
-    void clamp(float min = -1, float max = 1);
+	void clamp(float min = -1, float max = 1);
 
 	void append(float *buff, int length);
 	void append(const FloatBuffer &b);
@@ -131,10 +131,10 @@ public:
 	// a stereo interleaved buffer.
 	void stereoGain(float lGain, float rGain);
 
-    // sets the input samples to the contents of this FloatBuffer
+	// sets the input samples to the contents of this FloatBuffer
 
 	void get(float *buff) const;
-    void get(float *buff, int len) const;
+	void get(float *buff, int len) const;
 	void getMonoAsStereo(float *buff, int length) const;
 
 	// linear interpolation
@@ -143,19 +143,17 @@ public:
 
 	void print() const;
 
-	FloatBuffer& operator+=(const FloatBuffer& right);
-	FloatBuffer& operator-=(const FloatBuffer& right);
-	FloatBuffer& operator*=(const FloatBuffer& right);
-	FloatBuffer& operator/=(const FloatBuffer& right);
-	FloatBuffer& operator+=(const float& right);
-	FloatBuffer& operator-=(const float& right);
-	FloatBuffer& operator*=(const float& right);
-	FloatBuffer& operator/=(const float& right);
-
+	FloatBuffer &operator+=(const FloatBuffer &right);
+	FloatBuffer &operator-=(const FloatBuffer &right);
+	FloatBuffer &operator*=(const FloatBuffer &right);
+	FloatBuffer &operator/=(const FloatBuffer &right);
+	FloatBuffer &operator+=(const float &right);
+	FloatBuffer &operator-=(const float &right);
+	FloatBuffer &operator*=(const float &right);
+	FloatBuffer &operator/=(const float &right);
 };
 
 FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r);
 FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r);
-
 
 using FloatBufferRef = std::shared_ptr<FloatBuffer>;
