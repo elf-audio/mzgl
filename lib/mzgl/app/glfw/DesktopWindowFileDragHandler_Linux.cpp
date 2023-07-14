@@ -1,12 +1,12 @@
 #include "DesktopWindowFileDragHandler.h"
 #include "EventDispatcher.h"
 #include "GLFWAppRunner.h"
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace file_drag_handler {
 
 static auto getEventDispatcher(GLFWwindow* window) -> EventDispatcher* {
-	const auto app{reinterpret_cast<GLFWAppRunner*>(glfwGetWindowUserPointer(window)};
+	const auto app{reinterpret_cast<GLFWAppRunner*>(glfwGetWindowUserPointer(window))};
     return app->eventDispatcher.get();
 }
 
@@ -24,7 +24,7 @@ static auto makePathsVector(int count, const char** paths) {
 //
 // There won't be visual feedback when the user is dragging files over the window
 // with the button still pressed.
-// 
+//
 // To fix that we would need to do something platform-specific here and call these
 // Listener functions at the appropriate times:
 //	- Listener::onDragBegin
@@ -34,7 +34,7 @@ static auto makePathsVector(int count, const char** paths) {
 //
 // See the Windows implementation for an example of this.
 
-static callback(GLFWwindow* window, int count, const char** paths) -> void {
+static auto callback(GLFWwindow* window, int count, const char** paths) -> void {
 	getEventDispatcher(window)->filesDropped(makePathsVector(count, paths), 0, []{});
 }
 
