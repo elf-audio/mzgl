@@ -59,7 +59,7 @@ public:
 	void setMonoFromStereo(const float *buff, size_t numFrames);
 	void setMonoFromStereo(const FloatBuffer &b) { setMonoFromStereo(b.data(), b.size() / 2); }
 	void setStereoFromMono(const float *data, int length);
-	void setStereoFromMono(const FloatBuffer &b) { setStereoFromMono(b.data(), b.size()); }
+	void setStereoFromMono(const FloatBuffer &b) { setStereoFromMono(b.data(), static_cast<int>(b.size())); }
 	void setFromLeftChannel(float *buff, int length);
 	void setFromRightChannel(float *buff, int length);
 

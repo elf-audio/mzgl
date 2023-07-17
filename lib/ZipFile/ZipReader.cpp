@@ -194,14 +194,15 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 		ZipCDEntry *ent = (ZipCDEntry*)(cd.data() + offset);
 		signed char *fileNamePtr = cd.data() + offset + 46;
 
+		int fnLength = ent->fileNameLength;
 #ifdef _WIN32
 		char fn[260] = {}; // MAX_PATH
 #else
-		char fn[ent->fileNameLength+1];
+		char fn[fnLength+1];
 #endif
 
-		fn[ent->fileNameLength] = 0;
-		memcpy(fn, fileNamePtr, ent->fileNameLength);
+		fn[fnLength] = 0;
+		memcpy(fn, fileNamePtr, fnLength);
 //		printf("Compression used: %d\n", ent->compression);
 		entries.emplace_back(std::string(fn), ent->localHeaderOffset, ent->uncompressedSize);
 
