@@ -102,6 +102,9 @@ public:
 
 	void setCentreX(float cx) { x = cx - width * 0.5f; }
 	void setCentreY(float cy) { x = cy - height * 0.5f; }
+	void setBottomCentre(float x, float y) { set(x - this->width / 2, y - this->height, this->width, this->height); }
+
+	void setTopCentre(float x, float y) { set(x - this->width / 2, y, this->width, this->height); }
 
 	void scale(float amt) {
 		auto c = centre();
