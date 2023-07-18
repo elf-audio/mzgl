@@ -140,6 +140,10 @@ if(NOT ANDROID)
 			lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
 			lib/mzgl/app/glfw/GLFWOS_Windows.cpp
 		>
+        $<$<PLATFORM_ID:Darwin>:
+			lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Mac.cpp
+			lib/mzgl/app/glfw/GLFWOS_Mac.cpp
+		>
 	)
 endif()
 
