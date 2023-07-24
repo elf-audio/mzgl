@@ -9,31 +9,6 @@
 #include "maths.h"
 #include <stdlib.h>
 #include <math.h>
-float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp) {
-	float norm = (inp - inMin) / (inMax - inMin);
-	float f = outMin + (outMax - outMin) * norm;
-	if(clamp) {
-		if(outMax > outMin) {
-			return clampf(f, outMin, outMax);
-		} else {
-			return clampf(f, outMax, outMin);
-		}
-	}
-	return f;
-
-}
-double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp) {
-	double norm = (inp - inMin) / (inMax - inMin);
-	double f = outMin + (outMax - outMin) * norm;
-	if(clamp) {
-		if(outMax > outMin) {
-			return clampd(f, outMin, outMax);
-		} else {
-			return clampd(f, outMax, outMin);
-		}
-	}
-	return f;
-}
 
 
 int clampi(int inp, int from, int to) {
@@ -54,10 +29,17 @@ double clampd(double inp, double from, double to) {
 	return inp;
 }
 
-float clampf(float inp, float from, float to) {
-	if(inp < from) return from;
-	if(inp>to) return to;
-	return inp;
+double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp)  {
+	double norm = (inp - inMin) / (inMax - inMin);
+	double f = outMin + (outMax - outMin) * norm;
+	if(clamp) {
+		if(outMax > outMin) {
+			return clampd(f, outMin, outMax);
+		} else {
+			return clampd(f, outMax, outMin);
+		}
+	}
+	return f;
 }
 
 float randuf() {
