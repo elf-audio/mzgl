@@ -12,6 +12,10 @@
 
 #include <cstring>
 
+#ifdef __ARM_NEON
+#include <arm_neon.h>
+#endif
+
 class SampleProvider {
 public:
 	virtual ~SampleProvider() {}
@@ -63,19 +67,48 @@ public:
 
 		// intial benchmark shows that the std::minmax_element is much slower than
 		// the algo below it
-//		auto minmax = std::minmax_element(data.begin() + from, data.begin() + to);
-//		min = *minmax.first;
-//		max = *minmax.second;
+//#if 0
+#ifdef __ARM_NEON
+		int numIterations = (to - from) / 4; // Each iteration processes 4 values
 
-		 float _min = 1;
-		 float _max = -1;
-		 for(int j = from; j < to; j++) {
-		 	float v = data[j];
-		 	if(_max<v) _max = v;
-		 	if(_min>v) _min = v;
-		 }
-		 min = _min;
-		 max = _max;
+		float32x4_t minVec = vdupq_n_f32(1.0f);
+		float32x4_t maxVec = vdupq_n_f32(-1.0f);
+
+		for (int i = 0; i < numIterations; i++) {
+			float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);
+			minVec = vminq_f32(minVec, values);
+			maxVec = vmaxq_f32(maxVec, values);
+		}
+
+		float resultsMin[4], resultsMax[4];
+		vst1q_f32(resultsMin, minVec);
+		vst1q_f32(resultsMax, maxVec);
+
+		float _min = std::min({resultsMin[0], resultsMin[1], resultsMin[2], resultsMin[3]});
+		float _max = std::max({resultsMax[0], resultsMax[1], resultsMax[2], resultsMax[3]});
+
+		// Handle any remaining values that aren't a multiple of 4
+		for (int j = from + numIterations * 4; j < to; j++) {
+			float v = this->data[j];
+			if (_max < v) _max = v;
+			if (_min > v) _min = v;
+		}
+		min = _min;
+		max = _max;
+
+#else
+		// Fallback for platforms without NEON support
+		float _min = 1;
+		float _max = -1;
+		for(int j = from; j < to; j++) {
+			float v = this->data[j];
+			if(_max < v) _max = v;
+			if(_min > v) _min = v;
+		}
+		min = _min;
+		max = _max;
+#endif
+		
 	}
 
 	bool isFloat() const override {
