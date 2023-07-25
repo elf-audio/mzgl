@@ -503,7 +503,32 @@ FloatBuffer& FloatBuffer::operator*=(const FloatBuffer& right) {
 void FloatBuffer::stereoGain(float lGain, float rGain) {
 
 
-#ifdef __APPLE__
+#ifdef __ARM_NEON
+		size_t numIterations = size() / 4; // Each iteration processes 4 stereo pairs
+
+		float32x4_t lGainVec = vdupq_n_f32(lGain);
+		float32x4_t rGainVec = vdupq_n_f32(rGain);
+
+		for (size_t i = 0; i < numIterations; i++) {
+			// Load 4 stereo pairs
+			float32x4x2_t stereoPairs = vld2q_f32(data() + i * 8);
+			
+			// Multiply left channel values by lGain
+			stereoPairs.val[0] = vmulq_f32(stereoPairs.val[0], lGainVec);
+			
+			// Multiply right channel values by rGain
+			stereoPairs.val[1] = vmulq_f32(stereoPairs.val[1], rGainVec);
+			
+			// Store results back
+			vst2q_f32(data() + i * 8, stereoPairs);
+		}
+
+		// Handle any remaining stereo pairs (if size is not a multiple of 4)
+		for (size_t i = numIterations * 4; i < size() / 2; i++) {
+			(*this)[i * 2] *= lGain;
+			(*this)[i * 2 + 1] *= rGain;
+		}
+#elif defined(__APPLE__)
 
 	vDSP_vsmul(data(), 2, &lGain, data(), 2, size()/2);
 	vDSP_vsmul(data()+1, 2, &rGain, data()+1, 2, size()/2);
