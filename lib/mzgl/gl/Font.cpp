@@ -7,27 +7,27 @@
 //
 
 #include "Font.h"
-#include <stdio.h>					// malloc, free, fopen, fclose, ftell, fseek, fread
-#include <string.h>					// memset
+#include <stdio.h> // malloc, free, fopen, fclose, ftell, fseek, fread
+#include <string.h> // memset
 #include "Shader.h"
 #include "Graphics.h"
-#define FONTSTASH_IMPLEMENTATION	// Expands implementation
+#define FONTSTASH_IMPLEMENTATION // Expands implementation
 
 #include "mzOpenGL.h"
 #include "fontstash.h"
 #include "util.h"
 #ifdef __APPLE__ // I don't think this block is needed
-#include <TargetConditionals.h>
+#	include <TargetConditionals.h>
 
 #endif
 #include "log.h"
-#define GLFONTSTASH_IMPLEMENTATION	// Expands implementation
+#define GLFONTSTASH_IMPLEMENTATION // Expands implementation
 
 #include "filesystem.h"
 using namespace std;
 
 #ifdef __ANDROID__
-vector<Font*> Font::fonts;
+vector<Font *> Font::fonts;
 #endif
 
 /*
@@ -58,9 +58,8 @@ vector<Font*> Font::fonts;
 using namespace std;
 
 void fontstashErrorCallback(void *font, int error, int val) {
-	
-	Log::e() << "Got fontstash error " << error << " " <<  val;
-	auto f = (Font*)font;
+	Log::e() << "Got fontstash error " << error << " " << val;
+	auto f = (Font *) font;
 	f->fontstashError(error, val);
 }
 
@@ -68,11 +67,11 @@ void Font::fontstashError(int error, int val) {
 	// if there's no more space for
 	// glyphs in the font atlas, make
 	// it bigger
-	if(error==FONS_ATLAS_FULL) {
+	if (error == FONS_ATLAS_FULL) {
 		int width, height;
 		fonsGetAtlasSize(fs, &width, &height);
-		if(width<height) {
-			fonsExpandAtlas(fs, width*2, height);
+		if (width < height) {
+			fonsExpandAtlas(fs, width * 2, height);
 		} else {
 			fonsExpandAtlas(fs, width, height * 2);
 		}
@@ -86,16 +85,15 @@ bool Font::isLoaded() const {
 }
 
 bool Font::load(const vector<unsigned char> &data, float size) {
-
 	// todo - this is just a copy of the next method
 	clear();
 
 	GetError();
-	this->size = size/2.f;
+	this->size = size / 2.f;
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
-    fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
+	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
 
-    //fs = glfonsCreate(1024, 1024, FONS_ZERO_TOPLEFT);
+	//fs = glfonsCreate(1024, 1024, FONS_ZERO_TOPLEFT);
 	GetError();
 	if (fs == NULL) {
 		Log::e() << "Could not create stash.";
@@ -110,25 +108,23 @@ bool Font::load(const vector<unsigned char> &data, float size) {
 		return false;
 	}
 	// need tos et the font and size in order to make getRect work
-	fonsSetSize(fs, (int)this->size);
+	fonsSetSize(fs, (int) this->size);
 	fonsSetFont(fs, fontNormal);
 
-    return true;
+	return true;
 }
-
 
 bool Font::load(string path, float size) {
 	clear();
 
 	GetError();
-	this->size = size/2.f;
+	this->size = size / 2.f;
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 	GetError();
 	if (fs == NULL) {
 		Log::e() << "Could not create stash.";
 		return false;
 	}
-
 
 	fontNormal = fonsAddFont(fs, "sans", path.c_str());
 	if (fontNormal == FONS_INVALID) {
@@ -145,7 +141,7 @@ bool Font::load(string path, float size) {
 }
 
 TextureRef Font::getAtlasTexture() {
-	GLFONScontext* gl = (GLFONScontext*)(fs->params.userPtr);
+	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 	return Texture::create(gl->tex, gl->width, gl->height);
 }
 
@@ -169,40 +165,36 @@ TextureRef Font::getAtlasTexture() {
 //
 //
 
-
 std::string Font::ellipsize(const std::string &str, int w) const {
-	
-	if(str.size()<4 || getWidth(str)<=w) return str;
-	
+	if (str.size() < 4 || getWidth(str) <= w) return str;
+
 	auto s = str;
 
-	auto centreIndex = s.size()/2;
-	auto front = s.substr(0, centreIndex-2);
-	auto back = s.substr(centreIndex+1);
+	auto centreIndex = s.size() / 2;
+	auto front = s.substr(0, centreIndex - 2);
+	auto back = s.substr(centreIndex + 1);
 
 	bool flipFlop = false;
-	while(front.size()>1 && back.size()>1) {
-
+	while (front.size() > 1 && back.size() > 1) {
 		s = front + "..." + back;
-		if(getWidth(s)<=w) return s;
-		if(flipFlop) back.erase(0,1);
-		else front.pop_back();
+		if (getWidth(s) <= w) return s;
+		if (flipFlop) back.erase(0, 1);
+		else
+			front.pop_back();
 		flipFlop = !flipFlop;
 	}
 	return s;
 }
 
-
-
 Rectf Font::getRect(const string &text, float x, float y) const {
-	if(fs==nullptr) {
+	if (fs == nullptr) {
 		Log::e() << "Calling getRect on null Font";
 		return Rectf();
 	}
 	float b[4];
 	fonsTextBounds(fs, x, y, text.c_str(), NULL, b);
 	auto r = Rectf(b[0], b[1], b[2] - b[0], b[3] - b[1]);
-	return r; 
+	return r;
 }
 
 vec2 Font::getDims(const string &text) const {
@@ -227,25 +219,26 @@ void Font::draw(Graphics &g, const string &text, glm::vec2 c) {
 }
 
 void Font::draw(Graphics &g, const string &text, float x, float y) {
-	
-	if(fs==nullptr) {
+	if (fs == nullptr) {
 		Log::e() << "Calling getRect on null Font";
 		return;
 	}
-	
-	GLFONScontext* gl = (GLFONScontext*)(fs->params.userPtr);
-	if(gl->VERTEX_ATTRIB==0) {
+
+	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
+	if (gl->VERTEX_ATTRIB == 0) {
 		gl->VERTEX_ATTRIB = g.fontShader->positionAttribute;
 		gl->TCOORD_ATTRIB = g.fontShader->texCoordAttribute;
 	}
-	
-	g.pushMatrix();
-	g.translate(x, y);
-	
-	if(scale!=1) {
+	g.fontShader->begin();
+	// ScopedTransform t(g);
+	// g.translate(x, y);
+
+	if (scale != 1) {
+		g.pushMatrix();
+		g.translate(x, y);
 		g.scale(scale);
 	}
-	g.fontShader->begin();
+
 	g.fontShader->uniform("mvp", g.getMVP());
 
 #ifdef __ANDROID__
@@ -253,51 +246,50 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	// for some reason, they blow up and set the whole texture alpha to 1, so
 	// this code just turns it shy of 1
 	auto c = g.getColor();
-	if(c.a==1) c.a = 0.999;
+	if (c.a == 1) c.a = 0.999;
 	g.fontShader->uniform("color", c);
 #else
 	g.fontShader->uniform("color", g.getColor());
 #endif
 	ScopedAlphaBlend b(g, true);
-	fonsDrawText(fs, 0,0, text.c_str(), NULL);
-	
-	g.popMatrix();
+
+	if (scale != 1) {
+		fonsDrawText(fs, 0, 0, text.c_str(), NULL);
+		g.popMatrix();
+	} else {
+		fonsDrawText(fs, x, y, text.c_str(), NULL);
+	}
 }
 
-
-
 void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign) {
-	
 	auto a = getRect(text, 0, 0);
 
 	float x = c.x; // default left align
 	float y = c.y - a.y; // default top align
-	
-	if(halign==HTextAlign::Centre) {
-		x = c.x - a.width/2.f;
-	} else if(halign==HTextAlign::Right) {
+
+	if (halign == HTextAlign::Centre) {
+		x = c.x - a.width / 2.f;
+	} else if (halign == HTextAlign::Right) {
 		x = c.x - a.width;
 	}
-	
-	if(valign==VTextAlign::Centre) {
+
+	if (valign == VTextAlign::Centre) {
 		y = c.y - a.centre().y;
-	} else if(valign==VTextAlign::Bottom) {
+	} else if (valign == VTextAlign::Bottom) {
 		y = c.y - a.bottom();
 	}
-	
+
 	draw(g, text, x, y);
 }
 
-
 void Font::drawVerticallyCentred(Graphics &g, const string &text, glm::vec2 c, HTextAlign align) {
-	if(align==HTextAlign::Centre) {
+	if (align == HTextAlign::Centre) {
 		drawCentred(g, text, c);
 	} else {
-
 		auto a = getRect(text, 0, 0);
 		auto by = c.y - a.centre().y;
-				
-		if(align==HTextAlign::Left) {
+
+		if (align == HTextAlign::Left) {
 			draw(g, text, c.x, by);
 		} else { // TextAlign::Right
 			draw(g, text, c.x - a.width, by);
@@ -317,7 +309,6 @@ void Font::drawCentred(Graphics &g, const string &text, glm::vec2 c) {
 	draw(g, text, b.x, b.y);
 }
 
-
 // draws the string making c the bottom left corner
 void Font::drawBottomLeftAligned(Graphics &g, const std::string &text, glm::vec2 c) {
 	auto a = getRect(text, 0, 0);
@@ -325,11 +316,10 @@ void Font::drawBottomLeftAligned(Graphics &g, const std::string &text, glm::vec2
 	draw(g, text, b.x, b.y);
 }
 
-
 Font::~Font() {
 #ifdef __ANDROID__
-	for(int i = 0; i < fonts.size(); i++) {
-		if(fonts[i]==this) {
+	for (int i = 0; i < fonts.size(); i++) {
+		if (fonts[i] == this) {
 			fonts.erase(fonts.begin() + i);
 			break;
 		}
@@ -339,14 +329,13 @@ Font::~Font() {
 }
 
 void Font::clear() {
+	if (fs) {
+		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 
-	if(fs) {
-        GLFONScontext* gl = (GLFONScontext*)(fs->params.userPtr);
+		gl->TCOORD_ATTRIB = 0;
+		gl->VERTEX_ATTRIB = 0;
 
-        gl->TCOORD_ATTRIB = 0;
-        gl->VERTEX_ATTRIB = 0;
-
-	    glfonsDelete(fs);
+		glfonsDelete(fs);
 		fs = nullptr;
 	}
 }
