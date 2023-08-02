@@ -134,17 +134,71 @@ public:
 		return data[index] * mult;
 	}
 	
+	
+	
 	void findMinMax(int from, int to, float &_min, float &_max) const override {
-		int16_t minVal = 32767;
-		int16_t maxVal = -32768;
-		for(int j = (int)from; j < to; j++) {
+	#ifdef __ARM_NEON
+		int numIterations = (to - from) / 8; // Each iteration processes 8 values
+
+		int16x8_t minVec = vdupq_n_s16(32767);
+		int16x8_t maxVec = vdupq_n_s16(-32768);
+
+		for (int i = 0; i < numIterations; i++) {
+			int16x8_t values = vld1q_s16(&data[from + i * 8]);
+			minVec = vminq_s16(minVec, values);
+			maxVec = vmaxq_s16(maxVec, values);
+		}
+
+		int16_t resultsMin[8], resultsMax[8];
+		vst1q_s16(resultsMin, minVec);
+		vst1q_s16(resultsMax, maxVec);
+
+		int16_t minVal = *std::min_element(resultsMin, resultsMin + 8);
+		int16_t maxVal = *std::max_element(resultsMax, resultsMax + 8);
+
+		// Handle any remaining values that aren't a multiple of 8
+		for (int j = from + numIterations * 8; j < to; j++) {
 			const auto v = data[j];
-			if(v>maxVal) maxVal = v;
-			if(v<minVal) minVal = v;
+			if (v > maxVal) maxVal = v;
+			if (v < minVal) minVal = v;
 		}
 		_min = minVal * mult;
 		_max = maxVal * mult;
+
+	#else
+		// Fallback for platforms without NEON support
+		int16_t minVal = 32767;
+		int16_t maxVal = -32768;
+		for (int j = from; j < to; j++) {
+			const auto v = data[j];
+			if (v > maxVal) maxVal = v;
+			if (v < minVal) minVal = v;
+		}
+		_min = minVal * mult;
+		_max = maxVal * mult;
+	#endif
 	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	void getSamples(int startPos, FloatBuffer &buffToFill) const override {
 		for(int i = 0; i < buffToFill.size(); i++) {
