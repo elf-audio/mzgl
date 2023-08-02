@@ -8,7 +8,9 @@
 #include <cmath>		// std::isnan()
 #include <string.h>     // memset()
 #ifdef __APPLE__
-#include <Accelerate/Accelerate.h>
+#	include <Accelerate/Accelerate.h>
+#elif defined(__ARM_NEON)
+#	include <arm_neon.h>
 #endif
 
 // xsimd disabled for MSVC build, it does not give performance boost for Android anyway - to be investigated
