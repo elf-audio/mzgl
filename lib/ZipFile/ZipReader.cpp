@@ -1,7 +1,7 @@
 #include "ZipReader.h"
 #include <string.h>
 
-#pragma pack(2)
+
 struct ZipEndOfCD {
 	int32_t signature; // 0x50, 0x4b, 0x05, 0x06
 	int16_t diskNo;
@@ -15,31 +15,27 @@ struct ZipEndOfCD {
 	void print() {
 		printf("disk no: %d\ndisk cd start: %d\nnum CDs: %d\nnum entries: %d\ncd size in bytes: %d\ncd file offset: %d\ncomment length: %d\n",diskNo,diskCDStart,numCDs,numEntries,cdSizeBytes,cdFileOffset,commentLength);
 	}
-};
-#pragma pack()
+	
+	void readFromStream(std::istream& stream) {
+		// Helper lambda to read data from the stream
+		auto readField = [&stream](auto* destination, size_t size) {
+			stream.read(reinterpret_cast<char*>(destination), size);
+		};
 
-#pragma pack(2)
-struct ZipLocalFileHeader {
-	int32_t signature; // 0x50, 0x4b, 0x03, 0x04
-	int16_t version;
-	int16_t versionNeeded;
-	int16_t flags;
-	int16_t compression;
-	int16_t modTime;
-	int16_t modDate;
-	int32_t crc32;
-	int32_t compressedSize;
-	int32_t uncompressedSize;
-	int16_t fileNameLength;
-	int16_t extraFieldLength;
+		readField(&signature, sizeof(signature));
+		readField(&diskNo, sizeof(diskNo));
+		readField(&diskCDStart, sizeof(diskCDStart));
+		readField(&numCDs, sizeof(numCDs));
+		readField(&numEntries, sizeof(numEntries));
+		readField(&cdSizeBytes, sizeof(cdSizeBytes));
+		readField(&cdFileOffset, sizeof(cdFileOffset));
+		readField(&commentLength, sizeof(commentLength));
 
-	void print() {
-		printf("HEADER: \nversion: %d\nversion needed: %d\nflags: %d\ncompression: %d\nmodTime: %d\nmodDate: %d\ncrc32: %d\ncompressedSize: %d\nuncompressedSize: %d\nfileNameLength: %d\nextraFieldLength: %d\n",version,versionNeeded,flags,compression,modTime,modDate,crc32,compressedSize,uncompressedSize,fileNameLength,extraFieldLength);
+		// At this point, if you wanted to read the comment itself (given its length), you could do so, though it's not part of the struct you provided.
 	}
 };
-#pragma pack()
 
-#pragma pack(2)
+
 struct ZipCDEntry {
 	int8_t signature[4]; // 0x50, 0x4b, 0x05, 0x06
 	int16_t version;
@@ -58,6 +54,45 @@ struct ZipCDEntry {
 	int16_t internalAttrs;
 	int32_t externalAttrs;
 	int32_t localHeaderOffset;
+	std::string filename;
+
+	void readFromVector(const std::vector<int8_t> &buffer, size_t offset) {
+		// Helper lambda to read data from the buffer
+		auto readField = [&buffer, &offset](auto* destination, size_t size) {
+			std::memcpy(destination, buffer.data() + offset, size);
+			offset += size;
+		};
+
+		readField(signature, sizeof(signature));
+		readField(&version, sizeof(version));
+		readField(&versionNeeded, sizeof(versionNeeded));
+		readField(&flags, sizeof(flags));
+		readField(&compression, sizeof(compression));
+		readField(&modTime, sizeof(modTime));
+		readField(&modDate, sizeof(modDate));
+		readField(&crc32, sizeof(crc32));
+		readField(&compressedSize, sizeof(compressedSize));
+		readField(&uncompressedSize, sizeof(uncompressedSize));
+		readField(&fileNameLength, sizeof(fileNameLength));
+		readField(&extraFieldLength, sizeof(extraFieldLength));
+		readField(&fileCommentLength, sizeof(fileCommentLength));
+		readField(&diskNoStart, sizeof(diskNoStart));
+		readField(&internalAttrs, sizeof(internalAttrs));
+		readField(&externalAttrs, sizeof(externalAttrs));
+		readField(&localHeaderOffset, sizeof(localHeaderOffset));
+
+		// Read the filename
+		if (fileNameLength > 0) {
+			filename.assign(reinterpret_cast<const char*>(buffer.data() + offset), fileNameLength);
+			offset += fileNameLength;
+		} else {
+			filename.clear();
+		}
+
+		// If you plan to read extraField and comment, add similar code here.
+	}
+
+	// ... other member functions ...
 
 	void print() {
 		printf("\n--------\nENTRY\nsignature: 0x%x 0x%x 0x%x 0x%x\nversion: %d\nversionNeeded: %d\nflags: %d\ncompression: %d\nmodTime: %d\nmodDate: %d\ncrc32: %d\ncompressedSize: %d\nuncompressedSize: %d\nfileNameLength: %d\nextraFieldLength: %d\nfileCommentLength: %d\ndiskNoStart: %d\ninternalAttrs: %d\nexternalAttrs: %d\nlocalHeaderOffset: %d\n",signature[0],signature[1],signature[2],signature[3], version, versionNeeded, flags, compression, modTime, modDate, crc32, compressedSize, uncompressedSize, fileNameLength, extraFieldLength, fileCommentLength, diskNoStart, internalAttrs, externalAttrs, localHeaderOffset);
@@ -67,7 +102,6 @@ struct ZipCDEntry {
 		return 46 + fileNameLength + extraFieldLength + fileCommentLength;
 	}
 };
-#pragma pack()
 
 
 
@@ -158,7 +192,8 @@ ZipEndOfCD readEndOfCD(std::ifstream &zip) {
 			if(sig[1]==0x4b && sig[2]==0x05 && sig[3]==0x06) {
 				// printf("Found header\n");
 				zip.seekg(pos);
-				zip.read((char*)&endOfCd, sizeof(ZipEndOfCD));
+				endOfCd.readFromStream(zip);
+//				zip.read((char*)&endOfCd, sizeof(ZipEndOfCD));
 				zip.clear(); // clear eof
 				break;
 			}
@@ -172,8 +207,8 @@ ZipEndOfCD readEndOfCD(std::ifstream &zip) {
 	return endOfCd;
 }
 
-
-
+/////////////////////
+///
 std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOfCd) {
 	std::vector<ZipReader::Entry> entries;
 	std::vector<int8_t> cd(endOfCd.cdSizeBytes);
@@ -191,28 +226,28 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 
 	int offset = 0;
 	while(offset<cd.size()) {
-		ZipCDEntry *ent = (ZipCDEntry*)(cd.data() + offset);
-		signed char *fileNamePtr = cd.data() + offset + 46;
+		ZipCDEntry ent;
+		ent.readFromVector(cd, offset);
+//		signed char *fileNamePtr = cd.data() + offset + 46;
 
-		int fnLength = ent->fileNameLength;
-#ifdef _WIN32
-		char fn[260] = {}; // MAX_PATH
-#else
-		char fn[fnLength+1];
-#endif
-
-		fn[fnLength] = 0;
-		memcpy(fn, fileNamePtr, fnLength);
+//		int fnLength = ent->fileNameLength;
+//#ifdef _WIN32
+//		char fn[260] = {}; // MAX_PATH
+//#else
+//		char fn[fnLength+1];
+//#endif
+//
+//		fn[fnLength] = 0;
+//		memcpy(fn, fileNamePtr, fnLength);
 //		printf("Compression used: %d\n", ent->compression);
-		entries.emplace_back(std::string(fn), ent->localHeaderOffset, ent->uncompressedSize);
+		entries.emplace_back(ent.filename, ent.localHeaderOffset, ent.uncompressedSize);
 
-		offset += ent->getTotalLength();
+		offset += ent.getTotalLength();
 	}
 
 	return entries;
 }
-
-
+////////////////////////////
 
 ZipReader::ZipReader(const std::string &path) {
     this->zipPath = path;
@@ -226,25 +261,14 @@ ZipReader::ZipReader(const std::string &path) {
 	entries = readCD(zip, endOfCd);
 }
 
-
 std::shared_ptr<ZipReaderFile> ZipReader::open(std::string pathInZip) {
 	auto currEntry = findEntry(pathInZip);
 	if(!currEntry.valid) return nullptr;
 //	seekToEntry(currEntry);
 	return std::make_shared<ZipReaderFile>(zipPath, currEntry);
-
 }
 
 
-
-
-//
-//bool ZipReader::printTextFile(const std::string &path) {
-//	auto entry = findEntry(path);
-//	if(!entry.valid) return false;
-//	printTextFile(entry);
-//	return true;
-//}
 
 std::vector<std::string> ZipReader::list(bool print) {
 	std::vector<std::string> ret;
@@ -256,32 +280,6 @@ std::vector<std::string> ZipReader::list(bool print) {
 	}
 	return ret;
 }
-
-//
-//void ZipReader::printTextFile(const Entry &e) {
-//
-//	seekToEntry(e);
-//	std::vector<int8_t> d(e.size);
-//	read(d);
-//
-//	for(auto c : d) {
-//		printf("%c", c);
-//	}
-//	printf("\n");
-//}
-
-
-//void ZipReader::seekToEntry(const Entry &e) {
-//	zip.seekg(e.offset + 26);
-//	int16_t fnExtraLength[2];
-//	zip.read((char*)fnExtraLength, 4);
-//
-//	int fileStartOffset = e.offset + 30 + fnExtraLength[0] + fnExtraLength[1];
-//
-//	currEntryStart = fileStartOffset;
-//	currEntryLength = e.size;
-//	zip.seekg(fileStartOffset);
-//}
 
 
 ZipReader::Entry ZipReader::findEntry(const std::string &path) {

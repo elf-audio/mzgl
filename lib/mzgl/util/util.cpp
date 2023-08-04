@@ -551,7 +551,16 @@ uint64_t getStorageRemainingInBytes() {
 	NSError *error = nil;
 
 	if (@available(macOS 10.13, iOS 11, *)) {
-		NSDictionary *results = [fileURL resourceValuesForKeys:@[ NSURLVolumeAvailableCapacityForImportantUsageKey ] error:&error];
+		
+		// on mac, the NSURLVolumeAvailableCapacityForImportantUsageKey is more accurate
+		// but it spits out loads of garbage to the console, so for now just using
+		// the less accurate version so I can read logs.
+#if TARGET_OS_IOS
+		auto flag = NSURLVolumeAvailableCapacityForImportantUsageKey;
+#else
+		auto flag = NSURLVolumeAvailableCapacityKey;
+#endif
+		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
 		if (!results) {
 			NSLog(@"Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
@@ -560,7 +569,7 @@ uint64_t getStorageRemainingInBytes() {
 			//		abort();
 		}
 
-		NSNumber *n = results[NSURLVolumeAvailableCapacityForImportantUsageKey];
+		NSNumber *n = results[flag];
 
 		return n.longLongValue;
 	} else {
