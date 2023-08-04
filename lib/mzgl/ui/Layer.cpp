@@ -34,7 +34,7 @@ Layer::~Layer() {
 
 void Layer::draw() {
 	if (width == 0 || height == 0 || color.a == 0) return;
-	
+
 	if (color.a == 1) {
 		g.setColor(color);
 		g.drawRect(*this);
@@ -392,6 +392,12 @@ glm::vec2 Layer::getAbsolutePosition() {
 	return getAbsolutePosition(position());
 }
 
+void Layer::setAbsolutePosition(glm::vec2 p) {
+	auto whereAmINow = getAbsolutePosition(tl());
+	auto delta = p - whereAmINow;
+	x += delta.x;
+	y += delta.y;
+}
 glm::vec2 Layer::getAbsolutePosition(glm::vec2 pos) {
 	localToAbsoluteCoords(pos.x, pos.y);
 	return pos;

@@ -90,7 +90,7 @@ public:
 
 	glm::vec2 getAbsolutePosition(glm::vec2 p);
 	Rectf getAbsoluteRect(const Rectf &r);
-
+	void setAbsolutePosition(glm::vec2 p);
 	glm::vec2 getLocalPosition(glm::vec2 pp);
 
 	// rather than absolute coords, this tries to give you the rect
