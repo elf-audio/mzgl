@@ -505,8 +505,9 @@ FloatBuffer& FloatBuffer::operator*=(const FloatBuffer& right) {
 void FloatBuffer::stereoGain(float lGain, float rGain) {
 
 
+//#if 0
 #ifdef __ARM_NEON
-		size_t numIterations = size() / 4; // Each iteration processes 4 stereo pairs
+		size_t numIterations = size() / 8; // Each iteration processes 4 stereo pairs
 
 		float32x4_t lGainVec = vdupq_n_f32(lGain);
 		float32x4_t rGainVec = vdupq_n_f32(rGain);
@@ -526,7 +527,7 @@ void FloatBuffer::stereoGain(float lGain, float rGain) {
 		}
 
 		// Handle any remaining stereo pairs (if size is not a multiple of 4)
-		for (size_t i = numIterations * 4; i < size() / 2; i++) {
+		for (size_t i = numIterations * 8; i < size(); i++) {
 			(*this)[i * 2] *= lGain;
 			(*this)[i * 2 + 1] *= rGain;
 		}
