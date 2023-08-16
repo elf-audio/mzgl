@@ -71,8 +71,8 @@ public:
 #ifdef __ARM_NEON
 		int numIterations = (to - from) / 4; // Each iteration processes 4 values
 
-		float32x4_t minVec = vdupq_n_f32(1.0f);
-		float32x4_t maxVec = vdupq_n_f32(-1.0f);
+		float32x4_t minVec = vdupq_n_f32(1);
+		float32x4_t maxVec = vdupq_n_f32(-1);
 
 		for (int i = 0; i < numIterations; i++) {
 			float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);

@@ -23,8 +23,6 @@
 #include <memory>
 //#include "xsimd/xsimd.hpp"
 
-
-
 //class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
 // class FloatBuffer : public std::vector<float, AlignedAllocator<float>> {
 class FloatBuffer : public std::vector<float> {
@@ -139,7 +137,11 @@ public:
 
 	// linear interpolation
 	float interpolate(double index) const noexcept;
+
 	void interpolateStereo(double index, float &L, float &R) const noexcept;
+
+	// for delay lines
+	float interpolateWrapping(double index) const noexcept;
 
 	void print() const;
 
