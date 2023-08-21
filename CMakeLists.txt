@@ -127,6 +127,7 @@ set(MZGL_SOURCES
 )
 if(NOT ANDROID)
     list(APPEND MZGL_SOURCES
+        lib/glew/src/glew.c
 		lib/mzgl/app/glfw/GLFWAppRunner.cpp
 		lib/mzgl/app/glfw/DesktopWindowEventHandler.h
 		lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
@@ -297,7 +298,6 @@ endif()
 if(WIN32)
 
     list(APPEND MZGL_SOURCES
-            lib/glew/src/glew.c
             #lib/mzgl/app/win64/mainWin.cpp
             lib/mzgl/util/winUtil.cpp
             lib/mzgl/util/AlignedAllocator.cpp
