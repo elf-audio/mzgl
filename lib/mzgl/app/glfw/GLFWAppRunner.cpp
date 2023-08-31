@@ -147,7 +147,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #	else
 	// this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #	endif
 #endif
 
@@ -180,7 +180,11 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	Log::d() << "Request window " << (graphics.width) << "x" << (graphics.height);
 
 	window = glfwCreateWindow(graphics.width, graphics.height, "mzgl", NULL, NULL);
-
+	if (!window) {
+		printf("Can't create GLFW window\n");
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
 #ifdef METAL_BACKEND
 	NSWindow *nswindow = glfwGetCocoaWindow(window);
 	nswindow.contentView.layer = swapchain;
@@ -196,12 +200,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	// That would be compatible with GL functions using pixel coords (glViewport, glScissors, etc.)
 	glfwGetFramebufferSize(window, &windowW, &windowH);
 	Log::d() << "FB size: " << windowW << "x" << windowH;
-
-	if (!window) {
-		printf("Can't create GLFW window\n");
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
 
 	graphics.width = windowW;
 	graphics.height = windowH;

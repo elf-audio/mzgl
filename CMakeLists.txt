@@ -495,3 +495,7 @@ target_link_libraries(libmzgl ${MZGL_LIBS})
 if(NOT ANDROID)
     target_link_libraries(libmzgl_unit_test  ${MZGL_LIBS})
 endif()
+
+if(NOT WIN32)
+add_compile_options(-fdiagnostics-color=always)
+endif()
