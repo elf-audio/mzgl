@@ -34,6 +34,8 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInterac
 
 -(void) dealloc {
 	NSLog(@"Tearing down MZGLKitView");
+	
+
 }
 
 - (id) initWithApp: (std::shared_ptr<App>) _app {
