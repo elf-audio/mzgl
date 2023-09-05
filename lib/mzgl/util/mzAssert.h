@@ -9,7 +9,7 @@
 #pragma once
 
 #include <assert.h>
-#if DEBUG==1
+#if DEBUG==1 && !defined(AUTO_TEST)
 #include "log.h"
 
 #define mzAssert(A) if(mzAssertEnabled()) { bool a = (A); if(!a) { Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line "<< __LINE__;} assert(a);}
