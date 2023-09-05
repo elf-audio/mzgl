@@ -136,12 +136,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 #else
 
-	const unsigned char *openglVersion = glGetString(GL_VERSION);
-	if (openglVersion != nullptr) {
-		Log::d() << "GLFWAppRunner - OpenGL Version: " << openglVersion;
-	} else {
-		Log::d() << "OpenGL Version: unknown";
-	}
+	
 #	ifdef UNIT_TEST
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -151,7 +146,14 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #	endif
 #endif
-
+	
+	// this is crashing on mac for some reason
+//	const unsigned char *openglVersion = glGetString(GL_VERSION);
+//	if (openglVersion != nullptr) {
+//		Log::d() << "GLFWAppRunner - OpenGL Version: " << openglVersion;
+//	} else {
+//		Log::d() << "OpenGL Version: unknown";
+//	}
 	int requestedWidth = -1;
 	int requestedHeight = -1;
 

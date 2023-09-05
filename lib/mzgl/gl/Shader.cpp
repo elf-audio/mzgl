@@ -400,21 +400,24 @@ GLuint Shader::compileShader(GLenum type, string src) {
 		return 0;
 		//throw 0;
 	}
-
 	shader = glCreateShader(type);
 	GetError();
 	glShaderSource(shader, 1, &source, nullptr);
 	GetError();
 	glCompileShader(shader);
 	GetError();
-
 //#if defined(DEBUG)
 	GLint logLength;
 
 	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 	GetError();
+    if(logLength>1024*1024) {
+        Log::e() << "Shader log length is huge, may be a nokia phone going crazy";
+        logLength = 0;
+    }
 	if (logLength > 0) {
-		GLchar *log = (GLchar*)malloc((size_t)logLength);
+
+        GLchar *log = (GLchar*)malloc((size_t)logLength);
 		glGetShaderInfoLog(shader, logLength, &logLength, log);
 		GetError();
 		std::string lm = log;

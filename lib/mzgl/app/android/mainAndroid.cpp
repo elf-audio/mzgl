@@ -675,7 +675,9 @@ void android_main(struct android_app* state) {
     state->onInputEvent = engine_handle_input;
     engine.app = state;
 
+
     app = instantiateApp(graphics);
+
     initMZGL(app);
 
     // loop waiting for stuff to do.
@@ -700,5 +702,6 @@ void android_main(struct android_app* state) {
         }
 
         engine_draw_frame(&engine);
+
     }
 }

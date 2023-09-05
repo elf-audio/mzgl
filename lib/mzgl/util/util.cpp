@@ -624,8 +624,11 @@ string execute(string cmd, int *outExitCode) {
 #endif
 }
 void initMZGL(std::shared_ptr<App> app) {
+//	Log::d() << "initMZGL()";
 	if (!app->isHeadless()) {
+//		Log::d() << "Initing graphics";
 		app->g.initGraphics();
+//		Log::d() << "inited graphics";
 	}
 	Globals::startTime = std::chrono::system_clock::now();
 }
@@ -876,7 +879,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 bool readStringFromFile(const std::string &path, std::string &outStr) {
 	fs::ifstream t(fs::u8path(path));
 	if (t.fail()) {
-		Log::e() << "failed to open stream to " << path;
+		Log::e() << "failed to open file at " << path;
 		return false;
 	}
 
