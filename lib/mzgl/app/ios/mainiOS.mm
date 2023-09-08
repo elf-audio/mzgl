@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "iOSAppDelegate.h"
-//#include "log.h"
+#include "log.h"
 int main(int argc, char * argv[]) {
 	NSString * appDelegateClassName;
 
@@ -16,10 +16,10 @@ int main(int argc, char * argv[]) {
 	    // Setup code that might create autoreleased objects goes here.
 	    appDelegateClassName = NSStringFromClass([iOSAppDelegate class]);
 	}
-//	try {
+	try {
 		return UIApplicationMain(argc, argv, nil, appDelegateClassName);
-//	} catch(const std::exception &e) {
-//		Log::e() << "main exception: " << e.what();
-//		return 1;
-//	}
+	} catch(const std::exception &e) {
+		Log::e() << "main exception: " << e.what();
+		return 1;
+	}
 }

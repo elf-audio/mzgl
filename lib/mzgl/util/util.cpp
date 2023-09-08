@@ -351,8 +351,8 @@ string dataPath(string path, string appBundleId) {
 #endif
 
 #if defined(MZGL_PLUGIN_VST)
-	const auto bundlePath{getVSTBundlePath()};
-	const auto dataPath{bundlePath / "Contents" / "Resources" / "data"};
+	const auto bundlePath {getVSTBundlePath()};
+	const auto dataPath {bundlePath / "Contents" / "Resources" / "data"};
 	return (dataPath / path).string();
 #endif
 
@@ -401,24 +401,43 @@ void setDocsPath(string path) {
 
 #ifdef __APPLE__
 #	include <os/proc.h>
+#	include <mach/mach.h>
+#	include <mach/mach_host.h>
 #endif
 int64_t getAvailableMemory() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	if (@available(iOS 13.0, *)) {
 		return os_proc_available_memory();
-	} else {
-		return -1;
 	}
-#	else
-	return -1;
 #	endif
+	// //else {
+
+	//    vm_size_t pagesize;
+
+	// 	mach_port_t host_port = mach_host_self();
+	// 	mach_msg_type_number_t host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
+	//    host_page_size(host_port, &pagesize);
+
+	//    vm_statistics_data_t vm_stat;
+
+	//    if (host_statistics(host_port, HOST_VM_INFO, (host_info_t)&vm_stat, &host_size) != KERN_SUCCESS) {
+	// 	   NSLog(@"Failed to fetch VM statistics");
+	// 	   return -1;
+	//    }
+
+	//    return vm_stat.free_count * pagesize;
+
+	// //}
+//#	else
+//	return -1;
+//#	endif
 #endif
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
 	Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
-	return 10000000000;
+	return -1;
 }
 string docsPath(string path) {
 #ifdef UNIT_TEST
@@ -551,15 +570,14 @@ uint64_t getStorageRemainingInBytes() {
 	NSError *error = nil;
 
 	if (@available(macOS 10.13, iOS 11, *)) {
-		
 		// on mac, the NSURLVolumeAvailableCapacityForImportantUsageKey is more accurate
 		// but it spits out loads of garbage to the console, so for now just using
 		// the less accurate version so I can read logs.
-#if TARGET_OS_IOS
+#	if TARGET_OS_IOS
 		auto flag = NSURLVolumeAvailableCapacityForImportantUsageKey;
-#else
+#	else
 		auto flag = NSURLVolumeAvailableCapacityKey;
-#endif
+#	endif
 		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
 		if (!results) {
@@ -624,11 +642,11 @@ string execute(string cmd, int *outExitCode) {
 #endif
 }
 void initMZGL(std::shared_ptr<App> app) {
-//	Log::d() << "initMZGL()";
+	//	Log::d() << "initMZGL()";
 	if (!app->isHeadless()) {
-//		Log::d() << "Initing graphics";
+		//		Log::d() << "Initing graphics";
 		app->g.initGraphics();
-//		Log::d() << "inited graphics";
+		//		Log::d() << "inited graphics";
 	}
 	Globals::startTime = std::chrono::system_clock::now();
 }
@@ -709,20 +727,19 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
-		  
-		  
-		  if (defaultFileName!="") if (@available(macOS 11.0, *)) {
-			  
-			  auto ext = fs::path(defaultFileName).extension().string();
-			  if(ext!="" && ext[0]=='.') {
-				  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
-				  
-				  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
-					  [saveDialog setAllowedContentTypes:@[ type ]];
+
+		  if (defaultFileName != "")
+			  if (@available(macOS 11.0, *)) {
+				  auto ext = fs::path(defaultFileName).extension().string();
+				  if (ext != "" && ext[0] == '.') {
+					  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
+
+					  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
+						  [saveDialog setAllowedContentTypes:@[ type ]];
+					  }
 				  }
 			  }
-		  }
-		  
+
 		  buttonClicked = [saveDialog runModal];
 
 		  [context makeCurrentContext];
@@ -741,21 +758,16 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 #	endif
 #elif defined(_WIN32)
 
-	
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring wide = converter.from_bytes(defaultFileName);
-	
-	
+
 	size_t extPos = defaultFileName.rfind('.');
 	std::string extension = (extPos != std::string::npos) ? defaultFileName.substr(extPos + 1) : "";
 
-	
-	
 	wchar_t fileName[MAX_PATH] = L"";
-	wcsncpy(fileName, wide.c_str(), MAX_PATH-1);
-	fileName[MAX_PATH-1] = 0;  // null terminate, in case of long string
+	wcsncpy(fileName, wide.c_str(), MAX_PATH - 1);
+	fileName[MAX_PATH - 1] = 0; // null terminate, in case of long string
 
-	
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
@@ -765,7 +777,7 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	ofn.nMaxFileTitle = 31;
 	ofn.lpstrFile = fileName;
 	ofn.nMaxFile = MAX_PATH;
-	
+
 	std::wstring filter = L"All Files (*.*)\0*.*\0";
 	std::wstring wideExtension = L"";
 	if (!extension.empty()) {
@@ -773,7 +785,7 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 		filter = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
 	}
 
-	ofn.lpstrFilter = filter.c_str();// L"All Files (*.*)\0*.*\0";
+	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";
 	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
 	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
 	ofn.lpstrTitle = L"Select Output File";

@@ -11,8 +11,8 @@
 #include "FloatBuffer.h"
 
 namespace AudioFile {
+    // these probably throw std::bad_alloc if running out of RAM
     bool load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate = nullptr);
-
     bool loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels);
 }
 
