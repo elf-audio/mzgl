@@ -260,6 +260,41 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 		fonsDrawText(fs, x, y, text.c_str(), NULL);
 	}
 }
+void Font::addVerts(Graphics &g,
+					const std::string &text,
+					glm::vec2 c,
+					std::vector<glm::vec2> &verts,
+					std::vector<glm::vec2> &uvs,
+					HTextAlign halign,
+					VTextAlign valign) {
+	auto a = getRect(text, 0, 0);
+
+	float x = c.x; // default left align
+	float y = c.y - a.y; // default top align
+
+	if (halign == HTextAlign::Centre) {
+		x = c.x - a.width / 2.f;
+	} else if (halign == HTextAlign::Right) {
+		x = c.x - a.width;
+	}
+
+	if (valign == VTextAlign::Centre) {
+		y = c.y - a.centre().y;
+	} else if (valign == VTextAlign::Bottom) {
+		y = c.y - a.bottom();
+	}
+
+	addVerts(g, text, vec2(x, y), verts, uvs);
+}
+
+void Font::addVerts(Graphics &g, const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs) {
+	if (fs == nullptr) {
+		Log::e() << "Calling getRect on null Font";
+		return;
+	}
+
+	fonsAddVerts(fs, c.x, c.y, text.c_str(), NULL, verts, uvs);
+}
 
 void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign) {
 	auto a = getRect(text, 0, 0);
