@@ -314,23 +314,28 @@ private:
 				} else if (instr == 'M') {
 					verts.push_back(vector<glm::vec2>());
 					auto xy = split(s[i], ",");
+					// if (xy.size() < 2) xy = split(s[i], " ");
 					verts.back().push_back(glm::vec2(stof(xy[0]), stof(xy[1])));
 
 				} else if (instr == 'C') {
 					auto xy = split(s[i], ",");
+					// if (xy.size() < 2) xy = split(s[i], " ");
 					auto p1 = glm::vec2(stof(xy[0]), stof(xy[1]));
 					i++;
 
 					xy = split(s[i], ",");
+					// if (xy.size() < 2) xy = split(s[i], " ");
 					auto p2 = glm::vec2(stof(xy[0]), stof(xy[1]));
 					i++;
 					xy = split(s[i], ",");
+					// if (xy.size() < 2) xy = split(s[i], " ");
 					auto p3 = glm::vec2(stof(xy[0]), stof(xy[1]));
 
 					doBezierCubic(verts.back().back(), p1, p2, p3, verts.back());
 
 				} else if (instr == 'L') {
 					auto xy = split(s[i], ",");
+					// if (xy.size() < 2) xy = split(s[i], " ");
 					verts.back().push_back(glm::vec2(stof(xy[0]), stof(xy[1])));
 				}
 			}
