@@ -198,9 +198,7 @@ void Graphics::loadDefaultShaders() {
 
 									in lowp vec4 colorV; out vec4 fragColor;
 
-									void main(void) {
-										fragColor = colorV;
-									}
+									void main(void) { fragColor = colorV; }
 
 									)
 
@@ -295,9 +293,7 @@ void Graphics::loadDefaultShaders() {
 
 								  in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
 
-								  void main(void) {
-									  fragColor = texture(myTextureSampler, texCoordV) * colorV;
-								  }
+								  void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
 
 								  )
 
@@ -567,6 +563,9 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 	// resolution is about 60
 	for (float f = startAngle; f < endAngle; f += 0.1) {
 		verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+	}
+	if (startAngle != endAngle) {
+		verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
 	}
 
 	if (isFilling()) {
