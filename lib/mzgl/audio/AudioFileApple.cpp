@@ -157,8 +157,8 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 }
 
 
-bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
-
+template <class Buffer>
+bool AudioFile_loadResampled(std::string path, Buffer &buff, int newSampleRate, int *outNumChannels) {
 	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
 	
 	
@@ -226,9 +226,9 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 		
 		err = ExtAudioFileRead(xafref, &frameCount, &convertedData);
 		
-		
 		float *b = (float*)convertedData.mBuffers[0].mData;
-		buff.insert(buff.end(), &b[0],&b[frameCount**outNumChannels]);
+		buff.append(b, frameCount * *outNumChannels);
+//		buff.insert(buff.end(), &b[0],&b[frameCount**outNumChannels]);
 		
 		
 		if(err!=noErr) {
@@ -243,4 +243,13 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	}
 	free(outputBuffer);
 	return true;
+}
+
+
+bool AudioFile::loadResampled(std::string path, Int16Buffer &buff, int newSampleRate, int *outNumChannels) {
+	return AudioFile_loadResampled<Int16Buffer>(path, buff, newSampleRate, outNumChannels);
+}
+
+bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
+	return AudioFile_loadResampled<FloatBuffer>(path, buff, newSampleRate, outNumChannels);
 }

@@ -141,3 +141,20 @@ void Int16Buffer::mix(const Int16Buffer &other) {
 		assignValue(i, (*this)[i] + other[i]);
 	}
 }
+
+
+void Int16Buffer::append(const FloatBuffer &fd) {
+	auto originalSize = d.size();
+	d.resize(d.size() + fd.size());
+	for (int i = 0; i < fd.size(); i++) {
+		d[i + originalSize] = clamp16bit(fd[i]);
+	}
+}
+
+void Int16Buffer::append(const float *data, int length) {
+	auto originalSize = d.size();
+	d.resize(d.size() + length);
+	for (int i = 0; i < length; i++) {
+		d[i + originalSize] = clamp16bit(data[i]);
+	}
+}
