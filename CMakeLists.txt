@@ -97,6 +97,7 @@ set(MZGL_SOURCES
     lib/mzgl/util/FileWatcher.cpp
     lib/mzgl/util/FloatBuffer.cpp
     lib/mzgl/util/Haptics.cpp
+    lib/mzgl/util/Int16Buffer.cpp
     lib/mzgl/util/log.cpp
     lib/mzgl/util/maths.cpp
     lib/mzgl/util/util.cpp

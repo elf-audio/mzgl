@@ -756,6 +756,7 @@
 		EADA5B2C2A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
 		EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
 		EADA5B2E2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
+		EAE8428A2AE16F06008DB683 /* Int16Buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE842892AE16F06008DB683 /* Int16Buffer.h */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
@@ -776,6 +777,10 @@
 		EAF67384289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
 		EAF67385289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
 		EAF67386289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
+		EAF91F752AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
+		EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
+		EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
+		EAF91F782AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
 		EAF99AB5267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB6267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
 		EAF99AB7267A415200157A7C /* ScrollingListItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */; };
@@ -1624,6 +1629,7 @@
 		EADBBCDB24925ACB001E0047 /* Knob.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Knob.h; sourceTree = "<group>"; };
 		EADDACC024BC8FF800C5F885 /* ChromaticKeyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChromaticKeyboard.h; sourceTree = "<group>"; };
 		EAE3C63326D39E8F0000613E /* SampleProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleProvider.h; sourceTree = "<group>"; };
+		EAE842892AE16F06008DB683 /* Int16Buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Int16Buffer.h; sourceTree = "<group>"; };
 		EAE94825274C0BF300718B53 /* UIBlockButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIBlockButton.h; sourceTree = "<group>"; };
 		EAE94826274C0BF300718B53 /* UIBlockButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIBlockButton.m; sourceTree = "<group>"; };
 		EAF18F8E273BE69A00E1589E /* MidiMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MidiMessage.h; sourceTree = "<group>"; };
@@ -1633,6 +1639,7 @@
 		EAF67378289BC441001F778D /* stringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stringUtil.h; sourceTree = "<group>"; };
 		EAF6737F289BC87E001F778D /* mainThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mainThread.cpp; sourceTree = "<group>"; };
 		EAF67380289BC87E001F778D /* mainThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainThread.h; sourceTree = "<group>"; };
+		EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Int16Buffer.cpp; sourceTree = "<group>"; };
 		EAF99AB3267A40D200157A7C /* ScrollingListItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListItem.h; sourceTree = "<group>"; };
 		EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListItem.cpp; sourceTree = "<group>"; };
 		EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListDeletable.h; sourceTree = "<group>"; };
@@ -1901,6 +1908,8 @@
 				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
+				EAE842892AE16F06008DB683 /* Int16Buffer.h */,
+				EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */,
 				EAF6736F289BC3DB001F778D /* mzAssert.cpp */,
 				EAF67370289BC3DC001F778D /* mzAssert.h */,
 				EAF6737F289BC87E001F778D /* mainThread.cpp */,
@@ -3099,6 +3108,7 @@
 				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA183F852432C18D00A5C3E8 /* scales.h in Headers */,
 				EA297C7D25C954E600F890AE /* pa_util.h in Headers */,
+				EAE8428A2AE16F06008DB683 /* Int16Buffer.h in Headers */,
 				EA234AE724A609CA000F057B /* CompactValue.h in Headers */,
 				EA7855672472DBF40072FD05 /* nanovg.h in Headers */,
 				EA183FC72432C18D00A5C3E8 /* log.h in Headers */,
@@ -3463,6 +3473,7 @@
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
 				EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */,
 				EA234AEC24A609CA000F057B /* Utils.cpp in Sources */,
+				EAF91F752AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA297BE625C954CD00F890AE /* PortAudioSystem.cpp in Sources */,
 				EA18400B2432C18D00A5C3E8 /* Graphics.cpp in Sources */,
 				EA234B0724A609CA000F057B /* YGConfig.cpp in Sources */,
@@ -3641,6 +3652,7 @@
 				EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA9C32F9299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA1841302432C4FF00A5C3E8 /* maths.cpp in Sources */,
+				EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
 				EA71A71F27E39E6B0081A5CB /* unzip.c in Sources */,
 				EA71A79B27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -3728,6 +3740,7 @@
 				EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
+				EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A75C27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */,
@@ -3881,6 +3894,7 @@
 				EA71A77F27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA9C32FB299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */,
+				EAF91F782AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA68946D261C633500F76B91 /* maths.cpp in Sources */,
 				EA68946E261C633500F76B91 /* Dylib.cpp in Sources */,
 				EA71A79D27E39E6C0081A5CB /* zipper.cpp in Sources */,
