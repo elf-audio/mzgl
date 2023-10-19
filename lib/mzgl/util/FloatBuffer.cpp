@@ -30,9 +30,6 @@ FloatBuffer::FloatBuffer(size_t sz) {
 	zeros(sz);
 }
 
-FloatBuffer::FloatBuffer() {
-}
-
 FloatBuffer::~FloatBuffer() {
 }
 

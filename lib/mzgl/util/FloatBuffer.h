@@ -29,7 +29,20 @@ class FloatBuffer : public std::vector<float> {
 public:
 	FloatBuffer(size_t sz);
 
-	FloatBuffer();
+	FloatBuffer() = default;
+
+	// Copy constructor
+	FloatBuffer(const FloatBuffer &other)
+		: std::vector<float>(other) {}
+
+	// Copy assignment operator
+	FloatBuffer &operator=(const FloatBuffer &other) {
+		std::vector<float>::operator=(other);
+		return *this;
+	}
+
+	FloatBuffer(FloatBuffer &&other) noexcept
+		: std::vector<float>(std::move(other)) {}
 
 	virtual ~FloatBuffer();
 
