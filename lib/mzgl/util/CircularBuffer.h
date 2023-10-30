@@ -21,92 +21,76 @@
 template <typename T>
 class CircularBuffer {
 public:
+	CircularBuffer(size_t sz = 3) { reserve(sz); }
 
-    CircularBuffer(size_t sz = 3) {
-        reserve(sz);
-    }
-    
-	void reserve(size_t sz) {
-		buff.resize(sz+1);
-	}
-	size_t capacity() {
-		return buff.size()-1;
-	}
+	void reserve(size_t sz) { buff.resize(sz + 1); }
+	size_t capacity() { return buff.size() - 1; }
 
 	// REWRITE THESE 2 METHODS:
-	void insert(const T *d, size_t len) {
-		if(writePos + len < buff.size()) {
+	// was insert
+	void write(const T *d, size_t len) {
+		if (writePos + len < buff.size()) {
 			// no wrap
-			memcpy(buff.data()+writePos+1,d, len*sizeof(T));
+			memcpy(buff.data() + writePos + 1, d, len * sizeof(T));
 			writePos = (writePos + len) % buff.size();
 		} else {
 			// wrap
 			size_t toEnd = (buff.size() - writePos - 1);
-			memcpy(buff.data() + writePos + 1, d, toEnd*sizeof(T));
+			memcpy(buff.data() + writePos + 1, d, toEnd * sizeof(T));
 			memcpy(buff.data(), d + toEnd, (len - toEnd) * sizeof(T));
 			writePos = len - toEnd - 1;
 		}
 	}
 
-	void consume(T *d, size_t len) {
-		for(int i = 0; i < len; i++) {
-			d[i] = consume();
-		}
-	}
-	
-	T &operator[](int i) {
-		return buff[(readPos + i+1) % buff.size()];
-	}
-
-	void consumeMonoToStereo(float *d, int numFrames) {
-		for(int i =0 ; i < numFrames; i++) {
-			d[i*2] = d[i*2+1] = consume();
+	// was consume
+	void read(T *d, size_t len) {
+		for (int i = 0; i < len; i++) {
+			d[i] = read();
 		}
 	}
 
-	
-	void insert(T a) {
-		writePos = (writePos+1) % buff.size();
+	T &operator[](int i) { return buff[(readPos + i + 1) % buff.size()]; }
+
+	void readMonoToStereo(float *d, int numFrames) {
+		for (int i = 0; i < numFrames; i++) {
+			d[i * 2] = d[i * 2 + 1] = read();
+		}
+	}
+
+	// was insert
+	void write(T a) {
+		writePos = (writePos + 1) % buff.size();
 		buff[writePos] = a;
 	}
-
-	T consume() {
-		readPos = (readPos+1) % buff.size();
+	// was consume
+	T read() {
+		readPos = (readPos + 1) % buff.size();
 		return buff[readPos];
 	}
 
-	T peek() {
-		return buff[(readPos+1) % buff.size()];
-	}
-	
+	T peek() { return buff[(readPos + 1) % buff.size()]; }
+
 	size_t size() const {
-		if(writePos<readPos) {
+		if (writePos < readPos) {
 			return buff.size() - readPos + writePos;
 		} else {
 			return writePos - readPos;
 		}
 	}
 
-	void clear() {
-		readPos = writePos;
-	}
+	void clear() { readPos = writePos; }
 
-	void insert(const std::vector<T> &items) {
-		insert(items.data(), (int)items.size());
-	}
+	// was insert
+	void write(const std::vector<T> &items) { write(items.data(), (int) items.size()); }
 
-	void consume(std::vector<T> &out) {
-		consume(out.data(), (int)out.size());
-	}
-	void consumeMonoToStereo(std::vector<T> &out) {
-		consumeMonoToStereo(out.data(), out.size()/2);
-	}
-    
+	// was consume
+	void read(std::vector<T> &out) { read(out.data(), (int) out.size()); }
+	// was consume
+	void readMonoToStereo(std::vector<T> &out) { readMonoToStereo(out.data(), out.size() / 2); }
+
 private:
-    std::vector<T> buff;
-    
-    size_t writePos = 0;
-    size_t readPos = 0;
+	std::vector<T> buff;
+
+	size_t writePos = 0;
+	size_t readPos = 0;
 };
-
-
