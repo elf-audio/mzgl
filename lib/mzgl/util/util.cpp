@@ -439,6 +439,7 @@ int64_t getAvailableMemory() {
 	Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
 	return -1;
 }
+bool hasPrintedTheError = false;
 string docsPath(string path) {
 #ifdef UNIT_TEST
 	if (isOverridingDocsPath) {
@@ -451,8 +452,13 @@ string docsPath(string path) {
 	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
 	if (_path == "/Users/marek/Documents") {
 		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
-		printf(
-			"Hack to get this working on marek's computer with vscode because vscode running the app in a way that prevents NSFileManager from working properly\n\n");
+		if (!hasPrintedTheError) {
+			printf("=======================================================================\n\n"
+				   "Hack to get this working on marek's computer with vscode because vscode "
+				   "running the app in a way that prevents NSFileManager from working properly\n\n"
+				   "=======================================================================\n\n");
+			hasPrintedTheError = true;
+		}
 	}
 	return _path + "/" + path;
 #elif defined(__ANDROID__)
