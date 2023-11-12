@@ -300,7 +300,7 @@ void Texture::draw(Graphics &g, float x, float y, float width, float height) {
 	GetError();
 	bind();
 	GetError();
-
+	g.texShader->begin();
 	vbo->draw(g);
 	GetError();
 

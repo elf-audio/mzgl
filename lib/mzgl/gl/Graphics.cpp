@@ -241,15 +241,12 @@ void Graphics::loadDefaultShaders() {
 
 								   in vec4 Position;
 								   in vec2 TexCoord;
-								   // in lowp vec4 Color;
 
 								   uniform lowp vec4 color;
 
-								   //							  out lowp vec4 colorV;
 								   out vec2 texCoordV;
 
-								   void main(void) {
-									   //								  colorV = Color*0.0039215;
+								   void main() {
 									   texCoordV = TexCoord;
 									   gl_Position = mvp * Position;
 								   }
@@ -258,12 +255,10 @@ void Graphics::loadDefaultShaders() {
 							   STRINGIFY(
 
 								   uniform lowp vec4 color;
-								   //							  in lowp vec4 colorV;
-								   in vec2 texCoordV;
-								   out vec4 fragColor;
-								   uniform sampler2D myTextureSampler;
+										 in vec2 texCoordV;
+										 out vec4 fragColor; uniform sampler2D myTextureSampler;
 
-								   void main(void) {
+								   void main() {
 									   fragColor = color;
 									   fragColor.a *= texture(myTextureSampler, texCoordV).a;
 								   }

@@ -294,7 +294,11 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 		if (numCols == 0 && numTcs == 0) {
 			g.nothingShader->begin();
 		} else if (numTcs > 0 && numCols == 0) {
-			g.texShader->begin();
+			if(g.currShader==g.fontShader.get()) {
+				g.fontShader->begin();
+			} else {
+				g.texShader->begin();
+			}
 		} else if (numTcs == 0 && numCols > 0) {
 			g.colorShader->begin();
 		} else {
