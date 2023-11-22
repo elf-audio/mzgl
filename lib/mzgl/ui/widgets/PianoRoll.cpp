@@ -198,7 +198,7 @@ void PianoRoll::touchMoved(float x, float y, int button) {
 				if (duration < 0) {
 					duration += pattern->getPatternLength();
 				}
-				(*mousedNote)->second.length = fmaxf(MIN_NOTE_LENGTH, duration + 2);
+				(*mousedNote)->second.length = std::max(MIN_NOTE_LENGTH, duration + 2);
 
 			} else {
 				int mouseDelta = x - mouseDownCoord.x;

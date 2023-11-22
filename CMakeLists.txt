@@ -190,6 +190,7 @@ set(HEADERS
     lib/pu_gixml/src
     lib/misc
     lib/yoga
+    lib/farbot/include
     # lib/ghc-filesystem/include
 )
 

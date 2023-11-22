@@ -27,7 +27,7 @@ void Scroller::contentUpdated() {
 void Scroller::addContent(Layer *layer) {
 	content->addChild(layer);
 	if (!contentHeightExplicitlySet) {
-		content->height = fmaxf(content->height, layer->bottom());
+		content->height = std::max(content->height, layer->bottom());
 	}
 }
 void Scroller::clear() {
