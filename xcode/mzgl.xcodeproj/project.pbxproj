@@ -1063,6 +1063,16 @@
 		EA67199B285CB961001800AA /* DragDropManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragDropManager.h; sourceTree = "<group>"; };
 		EA6894A1261C633500F76B91 /* libmzgl iOS AUTO_TEST.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl iOS AUTO_TEST.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA6901802863954500ECD038 /* AppleFileBookmarks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppleFileBookmarks.h; sourceTree = "<group>"; };
+		EA6A6BE52B0FA0EA007026A7 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		EA6A6BE62B0FA0EA007026A7 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		EA6A6BE82B0FA0EA007026A7 /* test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test.cpp; sourceTree = "<group>"; };
+		EA6A6BEB2B0FA0EB007026A7 /* AsyncCaller.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AsyncCaller.hpp; sourceTree = "<group>"; };
+		EA6A6BEC2B0FA0EB007026A7 /* RealtimeTraits.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RealtimeTraits.hpp; sourceTree = "<group>"; };
+		EA6A6BEE2B0FA0EB007026A7 /* RealtimeObject.tcc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RealtimeObject.tcc; sourceTree = "<group>"; };
+		EA6A6BEF2B0FA0EB007026A7 /* fifo.tcc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fifo.tcc; sourceTree = "<group>"; };
+		EA6A6BF02B0FA0EB007026A7 /* fifo.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fifo.hpp; sourceTree = "<group>"; };
+		EA6A6BF12B0FA0EB007026A7 /* RealtimeObject.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RealtimeObject.hpp; sourceTree = "<group>"; };
+		EA6A6BF22B0FA0EB007026A7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		EA6ACC642475DE7000BC0012 /* NVGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NVGUI.h; sourceTree = "<group>"; };
 		EA71A6A827E39E6B0081A5CB /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		EA71A6A927E39E6B0081A5CB /* ZipStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipStreamer.h; sourceTree = "<group>"; };
@@ -1705,6 +1715,7 @@
 		EA182D402432C18800A5C3E8 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				EA6A6BE42B0FA0EA007026A7 /* farbot */,
 				EAAA54B02755436D00021ACA /* glm */,
 				EA297BEB25C954E600F890AE /* portaudio */,
 				EA18359A2432C18B00A5C3E8 /* mzgl */,
@@ -2311,6 +2322,55 @@
 				EA6901802863954500ECD038 /* AppleFileBookmarks.h */,
 			);
 			path = apple;
+			sourceTree = "<group>";
+		};
+		EA6A6BE42B0FA0EA007026A7 /* farbot */ = {
+			isa = PBXGroup;
+			children = (
+				EA6A6BE52B0FA0EA007026A7 /* CMakeLists.txt */,
+				EA6A6BE62B0FA0EA007026A7 /* LICENSE */,
+				EA6A6BE72B0FA0EA007026A7 /* test */,
+				EA6A6BE92B0FA0EA007026A7 /* include */,
+				EA6A6BF22B0FA0EB007026A7 /* README.md */,
+			);
+			path = farbot;
+			sourceTree = "<group>";
+		};
+		EA6A6BE72B0FA0EA007026A7 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				EA6A6BE82B0FA0EA007026A7 /* test.cpp */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
+		EA6A6BE92B0FA0EA007026A7 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				EA6A6BEA2B0FA0EB007026A7 /* farbot */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		EA6A6BEA2B0FA0EB007026A7 /* farbot */ = {
+			isa = PBXGroup;
+			children = (
+				EA6A6BEB2B0FA0EB007026A7 /* AsyncCaller.hpp */,
+				EA6A6BEC2B0FA0EB007026A7 /* RealtimeTraits.hpp */,
+				EA6A6BED2B0FA0EB007026A7 /* detail */,
+				EA6A6BF02B0FA0EB007026A7 /* fifo.hpp */,
+				EA6A6BF12B0FA0EB007026A7 /* RealtimeObject.hpp */,
+			);
+			path = farbot;
+			sourceTree = "<group>";
+		};
+		EA6A6BED2B0FA0EB007026A7 /* detail */ = {
+			isa = PBXGroup;
+			children = (
+				EA6A6BEE2B0FA0EB007026A7 /* RealtimeObject.tcc */,
+				EA6A6BEF2B0FA0EB007026A7 /* fifo.tcc */,
+			);
+			path = detail;
 			sourceTree = "<group>";
 		};
 		EA71A6A727E39E6B0081A5CB /* ZipFile */ = {
