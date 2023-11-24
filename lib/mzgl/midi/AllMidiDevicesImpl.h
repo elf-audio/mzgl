@@ -13,10 +13,9 @@ class MidiMessage;
 
 class AllMidiDevicesImpl {
 public:
-	
-    virtual void setup() {}
-    virtual void addListener(MidiListener *l) = 0;
-	
+	virtual void setup() {}
+	virtual void addListener(MidiListener *l) = 0;
+
 	// send message to all connected midi devices that have an input
 	virtual void sendMessage(const MidiMessage &m) = 0;
 };
