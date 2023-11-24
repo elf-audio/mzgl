@@ -39,18 +39,19 @@ glm::vec4 parseColor(const string &hex) {
 		}
 	}
 	string s = hex.substr(1);
-	int c = (int) strtol(s.c_str(), NULL, 16);
+	int c	 = (int) strtol(s.c_str(), NULL, 16);
 	return hexColor(c);
 }
 
 // TODO: replace with glm version
-void doBezierCubic(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, vector<glm::vec2> &outVerts) {
-	float dist = distance(p0, p3);
-	float numSteps = dist / SVG_CUBIC_RESOLUTION;
+void doBezierCubic(
+	glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, vector<glm::vec2> &outVerts) {
+	float dist		= distance(p0, p3);
+	float numSteps	= dist / SVG_CUBIC_RESOLUTION;
 	float increment = 1.f / numSteps;
 	//printf("cubic numSteps: %.0f\n", numSteps);
 	for (float t = increment; t < 1; t += increment) {
-		float u = 1.f - t;
+		float u	 = 1.f - t;
 		float t2 = t * t;
 		float u2 = u * u;
 		float u3 = u2 * u;
@@ -63,11 +64,11 @@ void doBezierCubic(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, vecto
 
 glm::mat3 parseTransform(string tr) {
 	glm::mat3 transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-	auto t = split(tr, ")");
+	auto t				= split(tr, ")");
 	for (auto &a: t) {
 		if (a.find("translate") != -1) {
 			auto parts = split(a, "(");
-			auto vals = split(parts[1], ",");
+			auto vals  = split(parts[1], ",");
 			glm::vec2 translation(stof(vals[0]), stof(vals[1]));
 
 			glm::mat3 m = {1, 0, 0, 0, 1, 0, translation.x, translation.y, 1};
@@ -75,9 +76,9 @@ glm::mat3 parseTransform(string tr) {
 			transform *= m;
 
 		} else if (a.find("rotate") != -1) {
-			auto parts = split(a, "(");
+			auto parts	   = split(a, "(");
 			float rotation = stof(parts[1]);
-			float theta = rotation * M_PI / 180.f;
+			float theta	   = rotation * M_PI / 180.f;
 
 			glm::mat3 m = {
 
@@ -109,11 +110,11 @@ public:
 	glm::vec4 fillColor;
 	glm::mat3 transform;
 
-	float strokeWeight = 1;
+	float strokeWeight	 = 1;
 	bool strokeWeightSet = false;
-	bool filled = true;
-	bool stroked = false;
-	bool closed = false;
+	bool filled			 = true;
+	bool stroked		 = false;
+	bool closed			 = false;
 
 	void getOutlines(vector<glm::vec2> &outlines) override {
 		if (verts.size() == 0) {
@@ -128,11 +129,14 @@ public:
 		}
 	}
 
-	void getTriangles(vector<glm::vec2> &outVerts, vector<glm::vec4> &outCols, vector<unsigned int> &indices) override {
+	void getTriangles(vector<glm::vec2> &outVerts,
+					  vector<glm::vec4> &outCols,
+					  vector<unsigned int> &indices) override {
 		if (filled) {
 			for (int i = 0; i < verts.size(); i++) {
 				if (verts[i].size() < 3) {
-					Log::e() << "ERROR: shape '" << id << "', " << to_string(i) << " with less than 3 points";
+					Log::e() << "ERROR: shape '" << id << "', " << to_string(i)
+							 << " with less than 3 points";
 					return;
 				}
 			}
@@ -165,15 +169,21 @@ public:
 		applyTransformToPoints(state.transform);
 		if (!filled) {
 			if (state.filling) {
-				filled = true;
-				fillColor = glm::vec4(state.fillColor.r, state.fillColor.g, state.fillColor.b, state.fillOpacity * state.opacity);
+				filled	  = true;
+				fillColor = glm::vec4(state.fillColor.r,
+									  state.fillColor.g,
+									  state.fillColor.b,
+									  state.fillOpacity * state.opacity);
 			}
 		}
 
 		if (!stroked) {
 			if (state.stroking) {
-				stroked = true;
-				strokeColor = glm::vec4(state.strokeColor.r, state.strokeColor.g, state.strokeColor.b, state.strokeOpacity * state.opacity);
+				stroked		= true;
+				strokeColor = glm::vec4(state.strokeColor.r,
+										state.strokeColor.g,
+										state.strokeColor.b,
+										state.strokeOpacity * state.opacity);
 			}
 		}
 		if (stroked && !strokeWeightSet) {
@@ -188,7 +198,9 @@ public:
 		}
 	}
 
-	void rotate(float theta) override { applyTransformToPoints({cos(theta), -sin(theta), 0, sin(theta), cos(theta), 0, 0, 0, 1}); }
+	void rotate(float theta) override {
+		applyTransformToPoints({cos(theta), -sin(theta), 0, sin(theta), cos(theta), 0, 0, 0, 1});
+	}
 	void mirrorY() override {
 		applyTransformToPoints({1, 0, 0, 0, -1, 0, 0, 0, 1});
 		for (auto &v: verts) {
@@ -206,15 +218,17 @@ public:
 		strokeWeight *= std::max(w, h);
 	}
 
-	void translate(float x, float y) override { applyTransformToPoints({1, 0, 0, 0, 1, 0, x, y, 1}); }
+	void translate(float x, float y) override {
+		applyTransformToPoints({1, 0, 0, 0, 1, 0, x, y, 1});
+	}
 
 	void setUseInfo(pu_gi::xml_node &n) {
 		if (n.attribute("stroke-width")) {
 			strokeWeightSet = true;
-			strokeWeight = n.attribute("stroke-width").as_float();
+			strokeWeight	= n.attribute("stroke-width").as_float();
 		}
 		if (n.attribute("fill")) {
-			filled = true;
+			filled	  = true;
 			fillColor = parseColor(n.attribute("fill").value());
 			if (n.attribute("fill-opacity")) {
 				fillColor.a = n.attribute("fill-opacity").as_float();
@@ -251,7 +265,10 @@ private:
 	}
 
 	void parseRect(pu_gi::xml_node &n) {
-		Rectf r(n.attribute("x").as_float(), n.attribute("y").as_float(), n.attribute("width").as_float(), n.attribute("height").as_float());
+		Rectf r(n.attribute("x").as_float(),
+				n.attribute("y").as_float(),
+				n.attribute("width").as_float(),
+				n.attribute("height").as_float());
 		float radius = 0;
 		if (n.attribute("rx")) {
 			radius = n.attribute("rx").as_float();
@@ -282,7 +299,7 @@ private:
 	void doEllipse(glm::vec2 c, float rx, float ry) {
 		verts.push_back(vector<glm::vec2>());
 		float pixelsPerStep = SVG_CIRCLE_RESOLUTION;
-		float step = asin(pixelsPerStep / 2.f / ((rx + ry) * 0.5)) / 2.f;
+		float step			= asin(pixelsPerStep / 2.f / ((rx + ry) * 0.5)) / 2.f;
 		for (float f = 0; f < M_PI * 2.f; f += step) {
 			verts.back().push_back(glm::vec2(c.x + rx * cos(f), c.y + ry * sin(f)));
 		}
@@ -302,44 +319,89 @@ private:
 			closed = false;
 		}
 	}
+	char toLower(char c) {
+		if (c >= 'A' && c <= 'Z') return c - 'A' + 'a';
+		return c;
+	}
+
+	std::vector<std::string> splitSVGPath(const std::string &path) {
+		std::vector<std::string> commands;
+		std::string currentCommand;
+
+		for (char ch: path) {
+			if (isalpha(ch) && ch != 'e') { // e is for scientific notation
+				if (!currentCommand.empty()) {
+					commands.push_back(currentCommand);
+					currentCommand.clear();
+				}
+			}
+			if (ch == ',') {
+				ch = ' ';
+			}
+			currentCommand += ch;
+		}
+
+		if (!currentCommand.empty()) {
+			commands.push_back(currentCommand);
+		}
+
+		return commands;
+	}
 
 	void parsePath(pu_gi::xml_node &n) {
 		string d = n.attribute("d").value();
-		auto s = split(d, " ");
-		for (int i = 0; i < s.size(); i++) {
-			if (!isNumeric(s[i][0])) {
-				char instr = s[i][0];
-				s[i] = s[i].substr(1);
-				if (instr == 'Z') {
-				} else if (instr == 'M') {
+
+		auto commands = splitSVGPath(d);
+
+		for (int i = 0; i < commands.size(); i++) {
+			char instr = toLower(commands[i][0]);
+			auto s	   = commands[i].substr(1);
+
+			auto args = split(s, " ");
+			if (args.size() > 0 && args.back() == "") args.pop_back();
+
+			switch (instr) {
+				case 'z': break; // path end
+				case 'm': { // moveto
 					verts.push_back(vector<glm::vec2>());
-					auto xy = split(s[i], ",");
-					// if (xy.size() < 2) xy = split(s[i], " ");
+					auto xy = split(s, " ");
 					verts.back().push_back(glm::vec2(stof(xy[0]), stof(xy[1])));
+					break;
+				}
 
-				} else if (instr == 'C') {
-					auto xy = split(s[i], ",");
-					// if (xy.size() < 2) xy = split(s[i], " ");
-					auto p1 = glm::vec2(stof(xy[0]), stof(xy[1]));
-					i++;
+				case 'q': Log::e() << "Can't parse quadratic bezier curves yet"; break;
+				case 't': Log::e() << "Can't parse smooth quadratic bezier curves yet"; break;
 
-					xy = split(s[i], ",");
-					// if (xy.size() < 2) xy = split(s[i], " ");
-					auto p2 = glm::vec2(stof(xy[0]), stof(xy[1]));
-					i++;
-					xy = split(s[i], ",");
-					// if (xy.size() < 2) xy = split(s[i], " ");
-					auto p3 = glm::vec2(stof(xy[0]), stof(xy[1]));
+				case 'a': Log::e() << "Can't parse elliptical arcs yet"; break;
+				case 's': Log::e() << "Can't parse smooth cubic bezier yet"; break;
+
+				case 'c': { // cubic bezier
+
+					assert(args.size() == 6);
+
+					glm::vec2 p1(stof(args[0]), stof(args[1]));
+					glm::vec2 p2(stof(args[2]), stof(args[3]));
+					glm::vec2 p3(stof(args[4]), stof(args[5]));
 
 					doBezierCubic(verts.back().back(), p1, p2, p3, verts.back());
-
-				} else if (instr == 'L') {
-					auto xy = split(s[i], ",");
-					// if (xy.size() < 2) xy = split(s[i], " ");
-					verts.back().push_back(glm::vec2(stof(xy[0]), stof(xy[1])));
+					break;
 				}
+
+				case 'v': // vertical lineto
+					verts.back().push_back({verts.back().back().x, stof(s)});
+					break;
+
+				case 'h': // horizontal lineto
+					verts.back().push_back({stof(s), verts.back().back().y});
+					break;
+
+				case 'l': // lineto
+
+					verts.back().push_back({stof(args[0]), stof(args[1])});
+					break;
 			}
 		}
+
 		if (verts[0][0] == verts[0].back()) {
 			verts[0].pop_back();
 			closed = true;
@@ -349,9 +411,9 @@ private:
 	// groups can have opacity
 	// but shapes have fill-opacity and stroke-opacity
 	SVGShape(pu_gi::xml_node &n) {
-		transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+		transform	= {1, 0, 0, 0, 1, 0, 0, 0, 1};
 		string name = n.name();
-		id = n.attribute("id").value();
+		id			= n.attribute("id").value();
 
 		setUseInfo(n);
 
@@ -375,11 +437,11 @@ class SVGGroup : public SVGNode {
 public:
 	glm::mat3 transform;
 
-	float opacity = 1;
-	bool fillSet = false;
-	bool strokeSet = false;
-	bool strokeWeightSet = false;
-	bool fillOpacitySet = false;
+	float opacity		  = 1;
+	bool fillSet		  = false;
+	bool strokeSet		  = false;
+	bool strokeWeightSet  = false;
+	bool fillOpacitySet	  = false;
 	bool strokeOpacitySet = false;
 
 	bool filling = false;
@@ -394,7 +456,9 @@ public:
 
 	float strokeOpacity = 1;
 
-	static SVGGroupRef create(pu_gi::xml_node &n, map<string, SVGShapeRef> &defs) { return SVGGroupRef(new SVGGroup(n, defs)); }
+	static SVGGroupRef create(pu_gi::xml_node &n, map<string, SVGShapeRef> &defs) {
+		return SVGGroupRef(new SVGGroup(n, defs));
+	}
 
 	void getOutlines(vector<glm::vec2> &outlines) override {
 		for (auto c: children) {
@@ -402,7 +466,9 @@ public:
 		}
 	}
 
-	void getTriangles(vector<glm::vec2> &verts, vector<glm::vec4> &cols, vector<unsigned int> &indices) override {
+	void getTriangles(vector<glm::vec2> &verts,
+					  vector<glm::vec4> &cols,
+					  vector<unsigned int> &indices) override {
 		for (auto c: children) {
 			c->getTriangles(verts, cols, indices);
 		}
@@ -448,7 +514,7 @@ public:
 		state.transform *= transform;
 
 		if (fillSet) {
-			state.filling = filling;
+			state.filling	= filling;
 			state.fillColor = fillColor;
 		}
 		if (fillOpacitySet) {
@@ -456,7 +522,7 @@ public:
 		}
 
 		if (strokeSet) {
-			state.stroking = stroking;
+			state.stroking	  = stroking;
 			state.strokeColor = strokeColor;
 		}
 
@@ -491,13 +557,13 @@ private:
 				filling = fillStr != "none";
 				if (filling) {
 					glm::vec4 c = parseColor(fillStr);
-					fillColor = glm::vec3(c.r, c.g, c.b);
+					fillColor	= glm::vec3(c.r, c.g, c.b);
 				}
 			}
 		}
 
 		if (n.attribute("fill-opacity")) {
-			fillOpacity = n.attribute("fill-opacity").as_float();
+			fillOpacity	   = n.attribute("fill-opacity").as_float();
 			fillOpacitySet = true;
 		}
 
@@ -505,7 +571,7 @@ private:
 			string strokeStr = n.attribute("stroke").value();
 			if (strokeStr != "" && strokeStr[0] == '#') {
 				strokeSet = true;
-				stroking = strokeStr != "none";
+				stroking  = strokeStr != "none";
 				if (stroking) {
 					glm::vec4 c = parseColor(strokeStr);
 					strokeColor = glm::vec3(c.r, c.g, c.b);
@@ -514,12 +580,12 @@ private:
 		}
 
 		if (n.attribute("stroke-opacity")) {
-			strokeOpacity = n.attribute("stroke-opacity").as_float();
+			strokeOpacity	 = n.attribute("stroke-opacity").as_float();
 			strokeOpacitySet = true;
 		}
 
 		if (n.attribute("stroke-width")) {
-			strokeWeight = n.attribute("stroke-width").as_float();
+			strokeWeight	= n.attribute("stroke-width").as_float();
 			strokeWeightSet = true;
 		}
 
@@ -531,8 +597,8 @@ private:
 				children.push_back(SVGGroup::create(c, defs));
 			} else if (tag == "use") {
 				if (c.attribute("xlink:href")) {
-					string id = c.attribute("xlink:href").value();
-					id = id.substr(1); // remove #
+					string id		= c.attribute("xlink:href").value();
+					id				= id.substr(1); // remove #
 					SVGShapeRef use = SVGShapeRef(new SVGShape(*defs.at(id)));
 					children.push_back(use);
 					use->setUseInfo(c);
@@ -547,10 +613,10 @@ private:
 };
 
 void SVGDoc::parseViewBox(string s) {
-	auto p = split(s, " ");
-	viewBox.x = stoi(p[0]);
-	viewBox.y = stoi(p[1]);
-	viewBox.width = stoi(p[2]);
+	auto p		   = split(s, " ");
+	viewBox.x	   = stoi(p[0]);
+	viewBox.y	   = stoi(p[1]);
+	viewBox.width  = stoi(p[2]);
 	viewBox.height = stoi(p[3]);
 	// printf("%f %f %f %f\n", viewBox.x, viewBox.y, viewBox.width, viewBox.height);
 }
@@ -605,15 +671,15 @@ bool SVGDoc::loadFromString(const string &svgData) {
 	pu_gi::xml_document doc;
 	auto status = doc.load_string(svgData.c_str());
 	if (status.status != pu_gi::status_ok) {
-		Log::e() << "ERROR: couldn't load SVG from string - must be a parse error - msg is " << status.description() << " - at character "
-				 << status.offset;
+		Log::e() << "ERROR: couldn't load SVG from string - must be a parse error - msg is "
+				 << status.description() << " - at character " << status.offset;
 		Log::e() << svgData;
 		return false;
 	}
 	pu_gi::xml_node root = doc.document_element();
 
 	parseViewBox(root.attribute("viewBox").value());
-	width = viewBox.width;
+	width  = viewBox.width;
 	height = viewBox.height;
 	parseDefs(root);
 
@@ -633,8 +699,9 @@ bool SVGDoc::load(string path) {
 	auto status = doc.load_buffer(data.data(), data.size());
 
 	if (status.status != pu_gi::status_ok) {
-		Log::e() << "Error: Couldn't load svg from buffer - got " << data.size() << "bytes - message from pu_gi is " << status.description()
-				 << " - at character " << status.offset;
+		Log::e() << "Error: Couldn't load svg from buffer - got " << data.size()
+				 << "bytes - message from pu_gi is " << status.description() << " - at character "
+				 << status.offset;
 		return false;
 	}
 #else
@@ -642,10 +709,11 @@ bool SVGDoc::load(string path) {
 	// pu_gixml has no interface for utf8 paths
 	// so first convert utf8 to wchar version
 	wstring unicodePath = fs::path(path).wstring();
-	auto status = doc.load_file((wchar_t *) (unicodePath.c_str()));
+	auto status			= doc.load_file((wchar_t *) (unicodePath.c_str()));
 
 	if (status.status != pu_gi::status_ok) {
-		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description() << " - at character " << status.offset;
+		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description()
+				 << " - at character " << status.offset;
 		return false;
 	}
 #endif
@@ -653,7 +721,7 @@ bool SVGDoc::load(string path) {
 	pu_gi::xml_node root = doc.document_element();
 
 	parseViewBox(root.attribute("viewBox").value());
-	width = viewBox.width;
+	width  = viewBox.width;
 	height = viewBox.height;
 	parseDefs(root);
 
@@ -663,7 +731,9 @@ bool SVGDoc::load(string path) {
 	return true;
 }
 
-void SVGDoc::getTriangles(vector<glm::vec2> &verts, vector<glm::vec4> &cols, vector<unsigned int> &indices) {
+void SVGDoc::getTriangles(vector<glm::vec2> &verts,
+						  vector<glm::vec4> &cols,
+						  vector<unsigned int> &indices) {
 	rootGroup->getTriangles(verts, cols, indices);
 }
 
