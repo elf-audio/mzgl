@@ -17,13 +17,18 @@
 class Layer : public Rectf {
 public:
 	std::string name;
-	glm::vec4 color {1.f, 1.f, 1.f, 1.f};
+
+	// [[deprecated(
+	// "this shouldn't be part of the Layer API, if you need a color, put it in your subclass")]] glm::
+	vec4 color {1.f, 1.f, 1.f, 1.f};
 
 	bool interactive = false;
-	bool visible = true;
+	bool visible	 = true;
 
 	Layer(Graphics &g, std::string name = "");
+	// [[deprecated("see color above")]]
 	Layer(Graphics &g, std::string name, glm::vec4 c);
+
 	virtual ~Layer();
 	Layer(Graphics &g, std::string name, float x, float y, float w, float h);
 
@@ -103,7 +108,9 @@ public:
 	// same functionality as getAbsolutePosition()
 	void localToAbsoluteCoords(float &xx, float &yy);
 
-	void setBottomCenter(float x, float y) { set(x - this->width / 2, y - this->height, this->width, this->height); }
+	void setBottomCenter(float x, float y) {
+		set(x - this->width / 2, y - this->height, this->width, this->height);
+	}
 
 	// attempt to pass focus from this layer to another
 

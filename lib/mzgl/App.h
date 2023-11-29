@@ -37,7 +37,7 @@
 class App : public AudioIO {
 public:
 	RootLayer *root = nullptr;
-	Graphics  &g;
+	Graphics &g;
 	// maybe only implemented on mac
 	virtual bool isHeadless() const { return false; }
 	virtual bool isWebView() const { return false; }
@@ -94,8 +94,8 @@ public:
 
 	// return true to accept, false to reject
 	virtual void filesDropped(const std::vector<std::string> &paths,
-							  int							  touchId,
-							  std::function<void()>			  completionHandler) {}
+							  int touchId,
+							  std::function<void()> completionHandler) {}
 
 	virtual void fileDragCancelled(int touchId) {}
 	virtual void fileDragExited(float x, float y, int id) {}
@@ -110,9 +110,9 @@ public:
 	Dialogs dialogs;
 
 	// only available on iOS
-	void			*viewController		= nullptr;
-	void			*windowHandle		= nullptr;
-	void			*nativeWindowHandle = nullptr;
+	void *viewController	 = nullptr;
+	void *windowHandle		 = nullptr;
+	void *nativeWindowHandle = nullptr;
 	MainThreadRunner main;
 
 	void updateInternal() {
