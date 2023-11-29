@@ -6,11 +6,11 @@ It works on mac, windows, iOS, android, linux etc.
 
 There is a template project for using the library here: https://github.com/elf-audio/mzgl-starter
 
-lib/ - contains all the core libraries
+`lib/` - contains all the core libraries
 
-lib/mzgl - the application framework
+`lib/mzgl` - the application framework
 
-App is the main class (in src/App.h) but if you're making a plugin there is a subclass called PluginEditor which has more of a plugin API.
+App is the main class (in [src/App.h](src/App.h)) but if you're making a plugin there is a subclass called PluginEditor which has more of a plugin API.
 
 The graphics are all drawn with OpenGL, the backend residing in src/app and src/graphics. There should be no need to call actual OpenGL API in your app. You may need to write some GLSL shaders if you want to do things other than flat shapes though.
 
