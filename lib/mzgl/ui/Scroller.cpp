@@ -3,12 +3,11 @@
 
 Scroller::Scroller(Graphics &g)
 	: Layer(g) {
-	interactive = true;
-	content = new Layer(g, "content");
+	interactive				   = true;
+	content					   = new Layer(g, "content");
 	contentHeightExplicitlySet = false;
 	addChild(content);
 	clipToBounds = true;
-	color.a = 0.f;
 }
 void Scroller::contentUpdated() {
 	if (!contentHeightExplicitlySet) {
@@ -60,10 +59,9 @@ void Scroller::update() {
 }
 
 void Scroller::draw() {
-	if (color.a > 0) {
-		g.setColor(color);
-		g.drawRect(*this);
-	}
+	if (color.a == 0) return;
+	g.setColor(color);
+	g.drawRect(*this);
 }
 
 void Scroller::_draw() {
@@ -88,20 +86,20 @@ void Scroller::drawScrollbar() {
 		float squash = 1;
 		if (a > 1) {
 			squash = 2 - a;
-			a = 1;
+			a	   = 1;
 		} else if (a < 0) {
 			squash = 1 + a;
-			a = 0;
+			a	   = 0;
 		}
 
 		if (squash < 1) {
 			squash = 1 + tanh(squash - 1) * 0.5f;
 		}
 
-		float w = 10;
+		float w		  = 10;
 		float padding = w;
 
-		float h = (height - padding * 2) * (height / content->height) * squash;
+		float h	 = (height - padding * 2) * (height / content->height) * squash;
 		float yy = y + padding + (height - (padding * 2) - h) * a;
 		g.drawRoundedRect(Rectf(x + width - padding * 2, yy, w, h), w / 2);
 	}
@@ -145,7 +143,7 @@ bool Scroller::touchDown(float x, float y, int id) {
 }
 
 void Scroller::setContentHeight(float contentHeight) {
-	this->content->height = contentHeight;
+	this->content->height	   = contentHeight;
 	contentHeightExplicitlySet = true;
 }
 void Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {

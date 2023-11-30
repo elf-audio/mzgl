@@ -17,11 +17,7 @@ Layer::Layer(Graphics &g, string name)
 	: g(g)
 	, name(name) {
 }
-Layer::Layer(Graphics &g, string name, glm::vec4 c)
-	: g(g)
-	, name(name)
-	, color(c) {
-}
+
 Layer::Layer(Graphics &g, string name, float x, float y, float w, float h)
 	: Rectf(x, y, w, h)
 	, g(g)
@@ -32,21 +28,9 @@ Layer::~Layer() {
 	clear();
 }
 
-void Layer::draw() {
-	if (width == 0 || height == 0 || color.a == 0) return;
-
-	if (color.a == 1) {
-		g.setColor(color);
-		g.drawRect(*this);
-	} else {
-		ScopedAlphaBlend bl(g, true);
-		g.setColor(color);
-		g.drawRect(*this);
-	}
-}
-
 string Layer::toString() const {
-	return "name: " + name + " (xy: " + to_string(x, 0) + "," + to_string(y, 0) + " " + to_string(width, 0) + "  x " + to_string(height, 0) + ")";
+	return "name: " + name + " (xy: " + to_string(x, 0) + "," + to_string(y, 0) + " "
+		   + to_string(width, 0) + "  x " + to_string(height, 0) + ")";
 }
 
 void Layer::maskOn() {
@@ -110,7 +94,7 @@ bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
 	//	printf("=================================\n");
 	//	printf("Not direct parent\n");
 	Layer *curr = parent;
-	Rectf out = *this;
+	Rectf out	= *this;
 
 	//	int i = 1;
 	while (1) {
@@ -141,7 +125,7 @@ Layer *Layer::addChild(Layer *layer) {
 bool Layer::removeFromParent() {
 	if (getParent() != nullptr) {
 		bool res = getParent()->removeChild(this);
-		parent = nullptr;
+		parent	 = nullptr;
 		return res;
 	}
 	return false;
@@ -394,7 +378,7 @@ glm::vec2 Layer::getAbsolutePosition() {
 
 void Layer::setAbsolutePosition(glm::vec2 p) {
 	auto whereAmINow = getAbsolutePosition(tl());
-	auto delta = p - whereAmINow;
+	auto delta		 = p - whereAmINow;
 	x += delta.x;
 	y += delta.y;
 }
@@ -411,10 +395,10 @@ glm::vec2 Layer::getLocalPosition(glm::vec2 pos) {
 Rectf Layer::getAbsoluteRect(const Rectf &rr) {
 	Rectf r;
 	glm::vec2 tl = getAbsolutePosition(rr.tl());
-	r.x = tl.x;
-	r.y = tl.y;
-	r.width = rr.width;
-	r.height = rr.height;
+	r.x			 = tl.x;
+	r.y			 = tl.y;
+	r.width		 = rr.width;
+	r.height	 = rr.height;
 	return r;
 }
 
@@ -457,7 +441,8 @@ void Layer::removeFocus() {
  * distinguish between the 2 fingers - so now you need to pass in a touchId
  */
 void Layer::transferFocus(Layer *otherLayer, int touchId) {
-	if (g.focusedLayers.find(touchId) != g.focusedLayers.end() && g.focusedLayers[touchId] == this) {
+	if (g.focusedLayers.find(touchId) != g.focusedLayers.end()
+		&& g.focusedLayers[touchId] == this) {
 		g.focusedLayers[touchId] = otherLayer;
 	} else {
 		cout << "Couldn't find the other layer to focus on" << endl;
@@ -505,13 +490,13 @@ void Layer::layoutChildrenAsGrid(int cols, int rows, float padding) {
 
 	float wSpace = w + padding;
 	float hSpace = h + padding;
-	int pos = 0;
+	int pos		 = 0;
 	for (auto *l: children) {
 		if (l->visible) {
-			l->width = w;
+			l->width  = w;
 			l->height = h;
-			l->x = (pos % cols) * wSpace;
-			l->y = (pos / cols) * hSpace;
+			l->x	  = (pos % cols) * wSpace;
+			l->y	  = (pos / cols) * hSpace;
 			pos++;
 		}
 	}

@@ -33,7 +33,6 @@ public:
 	virtual void stringLogged(const std::string & m) = 0;
 };
 
-
 namespace Log {
 	
 	class Logger {

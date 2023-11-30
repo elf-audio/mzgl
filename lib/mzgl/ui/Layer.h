@@ -18,21 +18,15 @@ class Layer : public Rectf {
 public:
 	std::string name;
 
-	// [[deprecated(
-	// "this shouldn't be part of the Layer API, if you need a color, put it in your subclass")]] glm::
-	vec4 color {1.f, 1.f, 1.f, 1.f};
-
 	bool interactive = false;
 	bool visible	 = true;
 
 	Layer(Graphics &g, std::string name = "");
-	// [[deprecated("see color above")]]
-	Layer(Graphics &g, std::string name, glm::vec4 c);
-
 	virtual ~Layer();
+
 	Layer(Graphics &g, std::string name, float x, float y, float w, float h);
 
-	virtual void draw();
+	virtual void draw() {}
 
 	Layer *addChild(Layer *layer);
 	bool removeChild(Layer *layer);
@@ -152,4 +146,21 @@ private:
 
 	//static void transformFocusedMouse(float &x, float &y);
 	//static glm::vec2 focusedMouseTransform;
+};
+
+class ColouredRectLayer : public Layer {
+public:
+	ColouredRectLayer(Graphics &g)
+		: Layer(g) {}
+	vec4 color;
+	void draw() override {
+		if (color.a == 0) return;
+		g.setColor(color);
+		if (color.a < 1) {
+			ScopedAlphaBlend scp(g, true);
+			g.drawRect(*this);
+		} else {
+			g.drawRect(*this);
+		}
+	}
 };

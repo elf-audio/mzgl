@@ -8,13 +8,13 @@
 using namespace std;
 
 void Drawer::setColor(const glm::vec4 &c) {
-	this->color = c;
+	this->color		= c;
 	isDoingGradient = false;
 }
 
 void Drawer::setColor(const glm::vec4 &c, float alpha) {
-	this->color = c;
-	color.a = alpha;
+	this->color		= c;
+	color.a			= alpha;
 	isDoingGradient = false;
 }
 
@@ -36,12 +36,12 @@ void Drawer::setColor(float grey) {
 
 void Drawer::setGradient(vec4 c1, vec2 pos1, vec4 c2, vec2 pos2) {
 	gradientStartColor = c1;
-	gradientStopColor = c2;
+	gradientStopColor  = c2;
 	gradientStartPoint = pos1;
-	gradientStopPoint = pos2;
-	isDoingGradient = true;
-	v2 = gradientStopPoint - gradientStartPoint;
-	v2_ls = v2.x * v2.x + v2.y * v2.y;
+	gradientStopPoint  = pos2;
+	isDoingGradient	   = true;
+	v2				   = gradientStopPoint - gradientStartPoint;
+	v2_ls			   = v2.x * v2.x + v2.y * v2.y;
 }
 
 //
@@ -68,7 +68,7 @@ void Drawer::setGradient(vec4 c1, vec2 pos1, vec4 c2, vec2 pos2) {
 //
 
 vec4 Drawer::lookupGradient(vec2 pos) {
-	vec2 v1 = pos - gradientStartPoint;
+	vec2 v1	  = pos - gradientStartPoint;
 	vec2 proj = gradientStartPoint + v2 * (dot(v2, v1) / v2_ls);
 
 	if (gradientStartPoint.x == gradientStopPoint.x) { // vertical
@@ -149,7 +149,7 @@ void Drawer::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 
 void Drawer::drawLine(glm::vec2 a, glm::vec2 b) {
 	lineDrawer.thickness = strokeWeight;
-	int numVerts = lineDrawer.getVerts({a, b}, geom.verts, geom.indices);
+	int numVerts		 = lineDrawer.getVerts({a, b}, geom.verts, geom.indices);
 	geom.cols.insert(geom.cols.end(), numVerts, color);
 }
 void Drawer::drawLine(float ax, float ay, float bx, float by) {
@@ -158,13 +158,13 @@ void Drawer::drawLine(float ax, float ay, float bx, float by) {
 
 void Drawer::drawLineStrip(const vector<vec2> &strip) {
 	lineDrawer.thickness = strokeWeight;
-	int numVerts = lineDrawer.getVerts(strip, geom.verts, geom.indices);
+	int numVerts		 = lineDrawer.getVerts(strip, geom.verts, geom.indices);
 	geom.cols.insert(geom.cols.end(), numVerts, color);
 }
 
 void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) {
 	lineDrawer.thickness = strokeWeight;
-	int numVerts = lineDrawer.getVerts(strip, geom.verts, geom.indices);
+	int numVerts		 = lineDrawer.getVerts(strip, geom.verts, geom.indices);
 	for (const auto &a: cols) {
 		geom.cols.push_back(a);
 		geom.cols.push_back(a);
@@ -175,7 +175,7 @@ void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) 
 void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip) {
 	if (strip.size() == 0) return;
 	lineDrawer.thickness = strokeWeight;
-	int numVerts = lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices);
+	int numVerts		 = lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices);
 	geom.cols.insert(geom.cols.end(), numVerts, color);
 }
 
@@ -205,7 +205,7 @@ void Drawer::drawTriangleStrip(const vector<vec2> &strip) {
 
 	auto numParts = strip.size() / 2;
 	for (uint32_t i = 1; i < numParts; i++) {
-		auto ind = i * 2 + (uint32_t) startPos;
+		auto ind				 = i * 2 + (uint32_t) startPos;
 		vector<uint32_t> indices = {ind - 2,
 									ind,
 									ind - 1,
@@ -241,7 +241,7 @@ void Drawer::drawTriangleFan(const vector<vec2> &fan) {
 void Drawer::drawRect(const Rectf &r) {
 	vector<glm::vec2> v = {r.tl(), r.tr(), r.br(), r.bl()};
 	if (filled) {
-		uint32_t n = (uint32_t) geom.verts.size();
+		uint32_t n			   = (uint32_t) geom.verts.size();
 		vector<unsigned int> i = {n, n + 1, n + 2, n + 2, n + 3, n};
 		geom.verts.insert(geom.verts.end(), v.begin(), v.end());
 		geom.indices.insert(geom.indices.end(), i.begin(), i.end());
@@ -254,7 +254,7 @@ void Drawer::drawRect(const Rectf &r) {
 		}
 	} else {
 		lineDrawer.thickness = strokeWeight;
-		int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+		int numVerts		 = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
 }
@@ -269,8 +269,8 @@ void Drawer::drawPlus(vec2 c, int diameter, int thickness) {
 
 void Drawer::drawCross(vec2 c, int diameter, int thickness) {
 	float s2 = 0.707106781186548;
-	float p = diameter * s2 * 0.5f;
-	float t = thickness * s2 * 0.5f;
+	float p	 = diameter * s2 * 0.5f;
+	float t	 = thickness * s2 * 0.5f;
 
 	drawQuad(c + vec2(p - t, -p - t), c + vec2(p + t, -p + t), c + vec2(-p + t, p + t), c + vec2(-p - t, p - t));
 	drawQuad(c + vec2(-p - t, -p + t), c + vec2(-p + t, -p - t), c + vec2(p + t, p - t), c + vec2(p - t, p + t));
@@ -278,8 +278,8 @@ void Drawer::drawCross(vec2 c, int diameter, int thickness) {
 
 void Drawer::drawChevronRight(vec2 c, int radius, int thickness) {
 	float s2 = 0.707106781186548;
-	float p = radius * s2;
-	float t = thickness * s2;
+	float p	 = radius * s2;
+	float t	 = thickness * s2;
 
 	drawQuad(c, c + vec2(-t, t), c + vec2(-p - t, t - p), c + vec2(-p, -p));
 	drawQuad(c, c + vec2(-p, p), c + vec2(-p - t, p - t), c + vec2(-t, -t));
@@ -287,8 +287,8 @@ void Drawer::drawChevronRight(vec2 c, int radius, int thickness) {
 
 void Drawer::drawChevronLeft(vec2 c, int radius, int thickness) {
 	float s2 = 0.707106781186548;
-	float p = radius * s2;
-	float t = thickness * s2;
+	float p	 = radius * s2;
+	float t	 = thickness * s2;
 
 	drawQuad(c, c + vec2(t, t), c + vec2(p + t, t - p), c + vec2(p, -p));
 	drawQuad(c, c + vec2(p, p), c + vec2(p + t, p - t), c + vec2(t, -t));
@@ -296,16 +296,16 @@ void Drawer::drawChevronLeft(vec2 c, int radius, int thickness) {
 
 void Drawer::drawChevronDown(vec2 c, int radius, int thickness) {
 	float s2 = 0.707106781186548;
-	float p = radius * s2;
-	float t = thickness * s2;
+	float p	 = radius * s2;
+	float t	 = thickness * s2;
 
 	drawQuad(c, c + vec2(-p, -p), c + vec2(-p + t, -t - p), c + vec2(t, -t));
 	drawQuad(c, c + vec2(-t, -t), c + vec2(p - t, -p - t), c + vec2(p, -p));
 }
 void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
 	float s2 = 0.707106781186548;
-	float p = radius * s2;
-	float t = thickness * s2;
+	float p	 = radius * s2;
+	float t	 = thickness * s2;
 
 	drawQuad(c, c + vec2(-p, p), c + vec2(-p + t, t + p), c + vec2(t, t));
 	drawQuad(c, c + vec2(-t, t), c + vec2(p - t, p + t), c + vec2(p, p));
@@ -326,7 +326,7 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 			geom.indices.push_back((uint32_t) startIndex + i + 2);
 		}
 	} else {
-		float sw = strokeWeight * 0.5;
+		float sw	= strokeWeight * 0.5;
 		float inner = r - sw;
 		float outer = r + sw;
 		for (float th = 0; th < M_PI * 2; th += M_PI * 0.02) {
@@ -380,7 +380,7 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 	} else {
 		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
+		int numVerts		 = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
@@ -392,14 +392,14 @@ void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 	::getPerfectRoundedRectVerts(r, radius, rrv);
 
 	rrv.pop_back();
-	lineDrawer.outside = true;
+	lineDrawer.outside	 = true;
 	lineDrawer.thickness = shadow;
 
 	int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 
 	auto c = color;
-	c.a = 0.f;
+	c.a	   = 0.f;
 	for (int i = 0; i < numVerts; i += 2) {
 		geom.cols.push_back(color);
 		geom.cols.push_back(c);
@@ -445,10 +445,11 @@ void Drawer::addGeometry(Geometry &_geom) {
 	}
 }
 
-void Drawer::getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl) {
+void Drawer::getPerfectRoundedRectVerts(
+	const Rectf &r, float radius, vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl) {
 	vector<glm::vec2> cache;
 	float pixelsPerStep = 2;
-	float ang = pixelsPerStep / 2.f / radius;
+	float ang			= pixelsPerStep / 2.f / radius;
 	if (ang > 1) {
 		outVerts.push_back(r.tl());
 		outVerts.push_back(r.tr());
@@ -456,7 +457,7 @@ void Drawer::getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm
 		outVerts.push_back(r.bl());
 		return;
 	}
-	float step = asin(pixelsPerStep / 2.f / radius) / 2.f;
+	float step	   = asin(pixelsPerStep / 2.f / radius) / 2.f;
 	float numSteps = M_PI * 2.f / step;
 
 	createRoundedRectCache(cache, numSteps);
@@ -487,13 +488,20 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, boo
 	} else {
 		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
+		int numVerts		 = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
 
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
 }
 
-void Drawer::roundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &outVerts, vector<glm::vec2> &cache, bool tl, bool tr, bool br, bool bl
+void Drawer::roundedRectVerts(const Rectf &r,
+							  float radius,
+							  vector<glm::vec2> &outVerts,
+							  vector<glm::vec2> &cache,
+							  bool tl,
+							  bool tr,
+							  bool br,
+							  bool bl
 
 ) {
 	// top left
@@ -544,6 +552,6 @@ void Drawer::createRoundedRectCache(vector<glm::vec2> &cache, int numSteps) {
 	cache.resize(numSteps); //20
 	for (int i = 0; i < cache.size(); i++) {
 		float phi = mapf(i, 0, cache.size(), M_PI, M_PI + M_PI / 2.0);
-		cache[i] = glm::vec2(1.f + (float) cos(phi), 1.f + (float) sin(phi));
+		cache[i]  = glm::vec2(1.f + (float) cos(phi), 1.f + (float) sin(phi));
 	}
 }
