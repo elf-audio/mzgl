@@ -100,6 +100,7 @@ set(MZGL_SOURCES
     lib/mzgl/util/Int16Buffer.cpp
     lib/mzgl/util/log.cpp
     lib/mzgl/util/maths.cpp
+    lib/mzgl/util/ScopedUrl.cpp
     lib/mzgl/util/util.cpp
     lib/mzgl/util/mainThread.cpp
     lib/mzgl/util/mzAssert.cpp

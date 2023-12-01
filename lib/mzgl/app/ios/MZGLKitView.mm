@@ -239,15 +239,7 @@ int uikeyToMz(UIKey *key) {
 		// is ready (i.e. after setup())
 		if(urlToOpen!=nil) {
 			string url = [urlToOpen UTF8String];
-			eventDispatcher->openUrl(url, [url]() {
-				try {
-					if(fs::exists(url) && fs::is_regular_file(url)) {
-						fs::remove(url);
-					}
-				} catch(const fs::filesystem_error &e) {
-					Log::e() << "Error deleting file: " << e.what();
-				}
-			});
+			eventDispatcher->openUrl(ScopedUrl::createWithDeleter(url));
 		}
 		firstFrame = false;
 	}
@@ -297,21 +289,12 @@ int uikeyToMz(UIKey *key) {
 		NSLog(@"temp file copy error %@", destination);
 		return false;
 	}
-//	EventDispatcher *eventDispatcher = [self getEventDispatcher];
-	if(appIsSetup) {//eventDispatcher!=nullptr) {
-		bool a = eventDispatcher->openUrl([destination UTF8String], [destination]() {
-			fs::path p([destination UTF8String]);
-			try {
-				if(fs::exists(p) && fs::is_regular_file(p)) {
-					fs::remove(p);
-				}
-			} catch(const fs::filesystem_error &e) {
-				Log::e() << "Error deleting file: " << e.what();
-			}
-		});
-//		removeFileAtPathIfNotDir(destination);
+
+	if(appIsSetup) {
 		
-		return a;
+		std::string url = [destination UTF8String];
+		return eventDispatcher->openUrl(ScopedUrl::createWithDeleter(url));
+
 	} else {
 		[self openURLWhenLoadedAndDeleteFile: destination];
 		Log::e() << "Event dispatcher not ready";

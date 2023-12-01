@@ -16,13 +16,15 @@
 #include "log.h"
 #include "PluginEditor.h"
 #include "DateTime.h"
-
+#include "ScopedUrl.h"
 @interface iOSAppDelegate () {
 	std::shared_ptr<App> app;
 	Graphics g;
 	MZGLKitViewController *mzViewController;
 }
 @end
+
+
 
 @implementation iOSAppDelegate
 @synthesize window;
@@ -49,18 +51,11 @@
 
 						   try {
 							   fs::rename(source, destination);
-							   eventDispatcher->openUrl(destination.string(), [destination]() {
-								   try {
-									   fs::remove(destination);
-								   } catch (fs::filesystem_error &e) {
-									   Log::e() << "Couldn't remove file: " << e.what();
-								   }
-							   });
-
 						   } catch (fs::filesystem_error &e) {
 							   Log::e() << "Couldn't copy file: " << e.what();
 							   return;
 						   }
+						   eventDispatcher->openUrl(ScopedUrl::createWithDeleter(destination));
 						 }]) {
 			return YES;
 		} else {
@@ -72,7 +67,7 @@
 	} else if ([url.scheme containsString:@"file"] || isLocalFilePath) {
 		return [[mzViewController getView] handleNormalOpen:url];
 	} else {
-		eventDispatcher->openUrl(urlStr, [](){});
+		eventDispatcher->openUrl(ScopedUrl::create(urlStr));
 	}
 	return NO;
 }
@@ -121,7 +116,10 @@ public:
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	NSURL *launchedUrl	 = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
 	if (launchedUrl != nil) {
-		eventDispatcher->openUrl([[launchedUrl absoluteString] UTF8String], []() {/*THIS REALLY SHOULDNT BE EMPTY!*/});
+		
+		std::string url = [[launchedUrl absoluteString] UTF8String];
+		// this should maybe have a deleter
+		eventDispatcher->openUrl(ScopedUrl::create(url));
 	}
 
 	return YES;

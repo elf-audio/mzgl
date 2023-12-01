@@ -21,6 +21,8 @@
 #include "RootLayer.h"
 #include "Dialogs.h"
 #include "mainThread.h"
+#include "ScopedUrl.h"
+
 #define MZ_KEY_LEFT		 256
 #define MZ_KEY_RIGHT	 257
 #define MZ_KEY_DOWN		 258
@@ -86,19 +88,17 @@ public:
 	// this is for if you have a custom url scheme,
 	// return true if you handle the url, false if you
 	// don't need it. Implemented for AudioShare initially.
-	// If the url is actually a local file, you better call
-	// completionCallback to let the API know you're done with
-	// the file!
-	virtual bool openUrl(std::string url, std::function<void()> completionCallback) { return false; }
+	// Keep a reference to the ScopedUrlRef for as long as you
+	// need to access the resource, because it may be deleted
+	// once url destructs.
+	virtual bool openUrl(ScopedUrlRef url) { return false; }
 
 	// FILE DROP
 	//	virtual void fileDragBegin(float x, float y, int touchId, int numFiles){}
 	virtual void fileDragUpdate(float x, float y, int touchId, int numFiles) {}
 
 	// return true to accept, false to reject
-	virtual void filesDropped(const std::vector<std::string> &paths,
-							  int touchId,
-							  std::function<void()> completionHandler) {}
+	virtual void filesDropped(const std::vector<ScopedUrlRef> &paths, int touchId) {}
 
 	virtual void fileDragCancelled(int touchId) {}
 	virtual void fileDragExited(float x, float y, int id) {}

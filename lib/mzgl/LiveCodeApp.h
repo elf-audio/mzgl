@@ -27,9 +27,7 @@ public:
 
 	void addFileToWatch(std::string path) { compiler.addFileToWatch(path); }
 
-	LiveCodeApp(Graphics					 &g,
-				std::string					  headerFile,
-				std::shared_ptr<_AudioSystem> audioSystem = nullptr)
+	LiveCodeApp(Graphics &g, std::string headerFile, std::shared_ptr<_AudioSystem> audioSystem = nullptr)
 		: App(g)
 		, compiler(g) {
 		this->audioSystem = audioSystem;
@@ -154,10 +152,8 @@ public:
 	}
 
 	// return true to accept, false to reject
-	virtual void filesDropped(const std::vector<std::string> &paths,
-							  int							  touchId,
-							  std::function<void()>			  completionHandler) override {
-		if (d) d->filesDropped(paths, touchId, completionHandler);
+	virtual void filesDropped(const std::vector<ScopedUrlRef> &paths, int touchId) override {
+		if (d) d->filesDropped(paths, touchId);
 	}
 
 	// return true if you can open, false if you can't

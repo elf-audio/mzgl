@@ -668,6 +668,10 @@
 		EA7855682472DBF40072FD05 /* nanovg_gl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */; };
 		EA78556E2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
 		EA78556F2472E3320072FD05 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
+		EA7B45A72B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
+		EA7B45A82B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
+		EA7B45A92B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
+		EA7B45AA2B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
 		EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
@@ -1158,6 +1162,8 @@
 		EA78556B2472DFC00072FD05 /* fontstash-nvg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fontstash-nvg.h"; sourceTree = "<group>"; };
 		EA78556C2472E31C0072FD05 /* NVG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NVG.h; sourceTree = "<group>"; };
 		EA78556D2472E3320072FD05 /* NVG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NVG.cpp; sourceTree = "<group>"; };
+		EA7B45A52B19F9F600F19B8D /* ScopedUrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedUrl.h; sourceTree = "<group>"; };
+		EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedUrl.cpp; sourceTree = "<group>"; };
 		EA8086CA29119DF60072148D /* filesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = filesystem.h; sourceTree = "<group>"; };
 		EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLEffectAU.mm; sourceTree = "<group>"; };
 		EA81A9532756F0AC009C911E /* MZGLEffectAU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLEffectAU.h; sourceTree = "<group>"; };
@@ -1956,6 +1962,8 @@
 				EA1835F22432C18B00A5C3E8 /* DateTime.cpp */,
 				EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */,
 				EAE3C63326D39E8F0000613E /* SampleProvider.h */,
+				EA7B45A52B19F9F600F19B8D /* ScopedUrl.h */,
+				EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -3641,6 +3649,7 @@
 				EA183F902432C18D00A5C3E8 /* Layout.cpp in Sources */,
 				EA297C7A25C954E600F890AE /* pa_debugprint.c in Sources */,
 				EA18400A2432C18D00A5C3E8 /* SvgVbo.cpp in Sources */,
+				EA7B45A72B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA234B0324A609CA000F057B /* YGValue.cpp in Sources */,
 				EAD177A8282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */,
@@ -3747,6 +3756,7 @@
 				EA1841322432C51E00A5C3E8 /* Layer.cpp in Sources */,
 				EA1841232432C4CF00A5C3E8 /* AudioFileApple.cpp in Sources */,
 				EA234B0A24A609CA000F057B /* YGNode.cpp in Sources */,
+				EA7B45A82B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA71A74F27E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA1841152432C4A500A5C3E8 /* error.cpp in Sources */,
 				EA1841312432C51E00A5C3E8 /* Scroller.cpp in Sources */,
@@ -3883,6 +3893,7 @@
 				EA2B8B2624E7093600EA12BD /* Layout.cpp in Sources */,
 				EA2B8B2824E7093600EA12BD /* SvgVbo.cpp in Sources */,
 				EA2B8B2924E7093600EA12BD /* YGValue.cpp in Sources */,
+				EA7B45A92B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA71A73E27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA2B8B2A24E7093600EA12BD /* Image.cpp in Sources */,
 				EA2B8B2B24E7093600EA12BD /* DateTime.cpp in Sources */,
@@ -3989,6 +4000,7 @@
 				EA68948F261C633500F76B91 /* Layer.cpp in Sources */,
 				EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */,
 				EA71A72127E39E6B0081A5CB /* unzip.c in Sources */,
+				EA7B45AA2B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA689490261C633500F76B91 /* AudioFileApple.cpp in Sources */,
 				EA689491261C633500F76B91 /* YGNode.cpp in Sources */,
 				EA689492261C633500F76B91 /* error.cpp in Sources */,
