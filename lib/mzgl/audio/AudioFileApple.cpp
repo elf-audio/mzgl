@@ -69,7 +69,7 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 
 	OSStatus err = noErr;
 	err			 = ExtAudioFileOpenURL(audioFileURL, &xafref);
-
+	Log::d() << "Does " << path << " exist? " << fs::exists(path);
 	if (err != noErr) {
 		printf("Couldn't load file\n");
 		return false;
@@ -152,6 +152,8 @@ bool AudioFile_loadResampled(std::string path,
 							 int newSampleRate,
 							 int *outNumChannels) {
 	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
+
+	Log::d() << "Does " << path << " exist? " << fs::exists(path);
 
 	CFURLRef audioFileURL =
 		(__bridge CFURLRef) [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];

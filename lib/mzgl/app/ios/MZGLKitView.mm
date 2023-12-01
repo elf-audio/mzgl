@@ -239,15 +239,15 @@ int uikeyToMz(UIKey *key) {
 		// is ready (i.e. after setup())
 		if(urlToOpen!=nil) {
 			string url = [urlToOpen UTF8String];
-			eventDispatcher->openUrl(url);
-			try {
-				if(fs::exists(url) && fs::is_regular_file(url)) {
-					fs::remove(url);
+			eventDispatcher->openUrl(url, [url]() {
+				try {
+					if(fs::exists(url) && fs::is_regular_file(url)) {
+						fs::remove(url);
+					}
+				} catch(const fs::filesystem_error &e) {
+					Log::e() << "Error deleting file: " << e.what();
 				}
-			} catch(const fs::filesystem_error &e) {
-				Log::e() << "Error deleting file: " << e.what();
-			}
-//			[self removeFileAtPathIfNotDir:urlToOpen];
+			});
 		}
 		firstFrame = false;
 	}
@@ -299,16 +299,18 @@ int uikeyToMz(UIKey *key) {
 	}
 //	EventDispatcher *eventDispatcher = [self getEventDispatcher];
 	if(appIsSetup) {//eventDispatcher!=nullptr) {
-		bool a = eventDispatcher->openUrl([destination UTF8String]);
-//		removeFileAtPathIfNotDir(destination);
-		fs::path p([destination UTF8String]);
-		try {
-			if(fs::exists(p) && fs::is_regular_file(p)) {
-				fs::remove(p);
+		bool a = eventDispatcher->openUrl([destination UTF8String], [destination]() {
+			fs::path p([destination UTF8String]);
+			try {
+				if(fs::exists(p) && fs::is_regular_file(p)) {
+					fs::remove(p);
+				}
+			} catch(const fs::filesystem_error &e) {
+				Log::e() << "Error deleting file: " << e.what();
 			}
-		} catch(const fs::filesystem_error &e) {
-			Log::e() << "Error deleting file: " << e.what();
-		}
+		});
+//		removeFileAtPathIfNotDir(destination);
+		
 		return a;
 	} else {
 		[self openURLWhenLoadedAndDeleteFile: destination];

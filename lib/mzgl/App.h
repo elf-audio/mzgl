@@ -85,8 +85,11 @@ public:
 
 	// this is for if you have a custom url scheme,
 	// return true if you handle the url, false if you
-	// don't need it. Implemented for AudioShare initially
-	virtual bool openUrl(std::string url) { return false; }
+	// don't need it. Implemented for AudioShare initially.
+	// If the url is actually a local file, you better call
+	// completionCallback to let the API know you're done with
+	// the file!
+	virtual bool openUrl(std::string url, std::function<void()> completionCallback) { return false; }
 
 	// FILE DROP
 	//	virtual void fileDragBegin(float x, float y, int touchId, int numFiles){}

@@ -59,8 +59,8 @@ public:
 		return app->fileDragCancelled(touchId);
 	}
 	
-	bool openUrl(std::string url) {
-		return app->openUrl(url);
+	bool openUrl(std::string url, std::function<void()> completionCallback) {
+		return app->openUrl(url, completionCallback);
 	}
 	
 	// TOUCHES
