@@ -65,7 +65,8 @@ void ScrollingList::update() {
 		emptyMessageLayer->visible = empty();
 	}
 
-	if (touchingId != -1 && touchRect.getMaxDimension() < 10 && !touchHeldCalled && g.currFrameTime - touchDownTime > 0.5) {
+	if (touchingId != -1 && touchRect.getMaxDimension() < 10 && !touchHeldCalled
+		&& g.currFrameTime - touchDownTime > 0.5) {
 		touchHeld();
 		touchHeldCalled = true;
 	}
@@ -128,7 +129,7 @@ void ScrollingList::updateItems() {
 	Scroller::clear();
 
 	for (auto &item: items) {
-		auto *a = getNewListItem(item);
+		auto *a	 = getNewListItem(item);
 		a->width = this->width;
 		if (a->hasCustomHeight()) {
 			a->height = a->getCustomHeight();
@@ -142,7 +143,7 @@ void ScrollingList::updateItems() {
 			for (int i = 0; i < content->getNumChildren(); i++) {
 				auto *t = (ScrollingListItemView *) content->getChild(i);
 				if (t == a) {
-					t->selected = true;
+					t->selected	  = true;
 					selectedIndex = i;
 				} else {
 					t->selected = false;
@@ -153,9 +154,7 @@ void ScrollingList::updateItems() {
 			}
 		};
 
-		a->deleteSelf = [this, a]() {
-			collapseAndDeleteCell(a);
-		};
+		a->deleteSelf = [this, a]() { collapseAndDeleteCell(a); };
 
 		if (content->getNumChildren() > 0) {
 			a->y = content->getLastChild()->bottom();
@@ -181,7 +180,7 @@ void ScrollingList::_draw() {
 	// now draw the scroller stuff
 
 	int from = 0;
-	int to = content->getNumChildren();
+	int to	 = content->getNumChildren();
 	for (int i = 0; i < content->getNumChildren(); i++) {
 		auto *item = content->getChild(i);
 
@@ -237,20 +236,20 @@ bool ScrollingList::touchDown(float x, float y, int id) {
 	if (!canSelect) return true;
 	// its a new touch, we only want one touch here
 	if (touchingId != -1) return true;
-	touchingId = id;
+	touchingId		= id;
 	touchHeldCalled = false;
 	Scroller::touchDown(x, y, id);
-	selecting = true;
+	selecting	  = true;
 	touchDownTime = g.currFrameTime;
-	startTouch = glm::vec2(x, y);
+	startTouch	  = glm::vec2(x, y);
 	touchRect.setFromCentre(startTouch, 0, 0);
-	selectedIndex = -1;
+	selectedIndex  = -1;
 	auto testTouch = startTouch - glm::vec2(this->x + content->x, this->y + content->y); //content->x, content->y);
 
 	for (int i = 0; i < content->getNumChildren(); i++) {
 		auto *t = (ScrollingListItemView *) content->getChild(i);
 		if (t->inside(testTouch)) {
-			t->selected = true;
+			t->selected	  = true;
 			selectedIndex = i;
 		} else {
 			t->selected = false;
@@ -269,14 +268,29 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 	if (touchRect.getMaxDimension() > 10) {
 		selecting = false;
 		if (selectedIndex != -1) {
-			auto *t = (ScrollingListItemView *) content->getChild(selectedIndex);
-			t->selected = false;
+			auto *t		  = (ScrollingListItemView *) content->getChild(selectedIndex);
+			t->selected	  = false;
 			selectedIndex = -1;
 			if (itemSelected) itemSelected(-1);
 		}
 	}
 }
 
+void ScrollingList::select(int itemIndex) {
+	for (int i = 0; i < content->getNumChildren(); i++) {
+		auto *t = (ScrollingListItemView *) content->getChild(i);
+
+		if (itemIndex == i) {
+			t->selected	  = true;
+			selectedIndex = i;
+		} else {
+			t->selected = false;
+		}
+	}
+	if (itemSelected) {
+		itemSelected(selectedIndex);
+	}
+}
 void ScrollingList::cancelTouches() {
 	touchingId = -1;
 }
@@ -301,7 +315,7 @@ void ScrollingList::unselect() {
 			t->selected = false;
 		}
 	}
-	selecting = false;
+	selecting	  = false;
 	selectedIndex = -1;
 	if (mustCallback)
 		if (itemSelected) itemSelected(-1);

@@ -29,8 +29,8 @@ Layer::~Layer() {
 }
 
 string Layer::toString() const {
-	return "name: " + name + " (xy: " + to_string(x, 0) + "," + to_string(y, 0) + " "
-		   + to_string(width, 0) + "  x " + to_string(height, 0) + ")";
+	return "name: " + name + " (xy: " + to_string(x, 0) + "," + to_string(y, 0) + " " + to_string(width, 0)
+		   + "  x " + to_string(height, 0) + ")";
 }
 
 void Layer::maskOn() {
@@ -441,8 +441,7 @@ void Layer::removeFocus() {
  * distinguish between the 2 fingers - so now you need to pass in a touchId
  */
 void Layer::transferFocus(Layer *otherLayer, int touchId) {
-	if (g.focusedLayers.find(touchId) != g.focusedLayers.end()
-		&& g.focusedLayers[touchId] == this) {
+	if (g.focusedLayers.find(touchId) != g.focusedLayers.end() && g.focusedLayers[touchId] == this) {
 		g.focusedLayers[touchId] = otherLayer;
 	} else {
 		cout << "Couldn't find the other layer to focus on" << endl;

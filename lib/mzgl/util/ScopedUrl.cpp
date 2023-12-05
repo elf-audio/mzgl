@@ -11,8 +11,15 @@
 #include "log.h"
 
 ScopedUrl::~ScopedUrl() {
+	destructEarly();
+}
+
+
+void ScopedUrl::destructEarly() {
 	if(callback) callback();
+	callback = nullptr;
 	if(shouldTryToDelete) {
+		shouldTryToDelete = false;
 		try {
 			if(fs::exists(url) && fs::is_regular_file(url)) {
 				fs::remove(url);
@@ -22,4 +29,3 @@ ScopedUrl::~ScopedUrl() {
 		}
 	}
 }
-

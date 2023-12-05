@@ -37,6 +37,13 @@ public:
 	static ScopedUrlRef createWithCallback(const std::string &url, std::function<void()> callback) {
 		return std::shared_ptr<ScopedUrl>(new ScopedUrl(url, callback));
 	}
+	void deleteFileOnDestruction() {
+		shouldTryToDelete = true;
+	}
+	// if you want to force things
+	// to happen before destructor
+	// is called.
+	void destructEarly();
 	~ScopedUrl();
 
 private:

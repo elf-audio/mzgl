@@ -43,8 +43,9 @@ public:
 
 	void doLayout() override;
 
-	int selectedIndex = -1;
-
+	void select(int itemIndex);
+	int getNumItems() const { return items.size(); }
+	int getSelectedIndex() const { return selectedIndex; }
 	float getContentHeight() { return content->height; }
 	//	void draw() override;
 	virtual void _draw() override;
@@ -53,6 +54,7 @@ public:
 
 protected:
 	void touchHeld();
+	int selectedIndex = -1;
 
 	int touchingId = -1;
 
@@ -61,7 +63,7 @@ protected:
 	bool selecting = false;
 	vec2 startTouch;
 	Rectf touchRect;
-	float touchDownTime = -1;
+	float touchDownTime	 = -1;
 	bool touchHeldCalled = false;
 	VboRef vbo;
 	void collapseAndDeleteCell(ScrollingListItemView *collapsingCell);

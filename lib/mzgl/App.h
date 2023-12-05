@@ -23,19 +23,6 @@
 #include "mainThread.h"
 #include "ScopedUrl.h"
 
-#define MZ_KEY_LEFT		 256
-#define MZ_KEY_RIGHT	 257
-#define MZ_KEY_DOWN		 258
-#define MZ_KEY_UP		 259
-#define MZ_KEY_DELETE	 127 // this is actually ascii, but non-printable
-#define MZ_KEY_TAB		 9
-#define MZ_KEY_SHIFT_TAB 25
-#define MZ_KEY_SHIFT	 1001
-#define MZ_KEY_FN		 1002
-#define MZ_KEY_CTRL		 1002
-#define MZ_KEY_ALT		 1003
-#define MZ_KEY_CMD		 1004
-
 class App : public AudioIO {
 public:
 	RootLayer *root = nullptr;
