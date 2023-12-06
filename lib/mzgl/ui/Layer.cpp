@@ -542,13 +542,11 @@ bool Layer::_keyDown(int key) {
 		}
 	}
 
-	if (interactive) {
-		bool usedKey = keyDown(key);
-		if (usedKey) {
-			g.keyboardFocusedLayer = this;
-			return true;
-		}
+	if (visible && keyDown(key)) {
+		g.keyboardFocusedLayer = this;
+		return true;
 	}
+
 	return false;
 }
 bool Layer::_keyUp(int key) {
