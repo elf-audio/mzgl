@@ -329,7 +329,18 @@ bool ScrollingList::keyDown(int key) {
 			focus(getNumItems() - 1);
 		}
 		return true;
+		// } else if(key == MZ_KEY_RETURN) {
+		//     if (getFocusedIndex() != -1) {
+		//         select(getFocusedIndex());
+		//     }
+		//     return true;
+	} else if (key == MZ_KEY_RIGHT || key == MZ_KEY_ENTER || key == MZ_KEY_RETURN) {
+		if (getFocusedIndex() != -1) {
+			select(getFocusedIndex());
+		}
+		return true;
 	}
+	printf("Key: %d\n", key);
 	return false;
 }
 

@@ -26,18 +26,11 @@ public:
 	};
 
 	std::list<ScrollInfo> scrollOffsets;
-	std::function<void()> forwardPressed = []() {};
-	std::function<void()> backPressed	 = []() {};
+	std::function<void()> backPressed = []() {};
 
 	virtual bool keyDown(int key) override {
 		if (key == MZ_KEY_LEFT) {
 			backPressed();
-			return true;
-		} else if (key == MZ_KEY_RIGHT) {
-			if (getFocusedIndex() != -1) {
-				select(getFocusedIndex());
-			}
-			forwardPressed();
 			return true;
 		}
 		return ScrollingList::keyDown(key);
