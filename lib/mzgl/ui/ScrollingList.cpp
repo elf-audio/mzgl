@@ -149,9 +149,8 @@ void ScrollingList::updateItems() {
 					t->selected = false;
 				}
 			}
-			if (itemSelected) {
-				itemSelected(selectedIndex);
-			}
+
+			itemSelected(selectedIndex);
 		};
 
 		a->deleteSelf = [this, a]() { collapseAndDeleteCell(a); };
@@ -271,7 +270,7 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 			auto *t		  = (ScrollingListItemView *) content->getChild(selectedIndex);
 			t->selected	  = false;
 			selectedIndex = -1;
-			if (itemSelected) itemSelected(-1);
+			itemSelected(-1);
 		}
 	}
 }
@@ -287,9 +286,7 @@ void ScrollingList::select(int itemIndex) {
 			t->selected = false;
 		}
 	}
-	if (itemSelected) {
-		itemSelected(selectedIndex);
-	}
+	itemSelected(selectedIndex);
 }
 void ScrollingList::cancelTouches() {
 	touchingId = -1;
@@ -301,9 +298,7 @@ void ScrollingList::touchUp(float x, float y, int id) {
 	if (!canSelect) return;
 	Scroller::touchUp(x, y, id);
 	if (selecting) {
-		if (itemSelected) {
-			itemSelected(selectedIndex);
-		}
+		itemSelected(selectedIndex);
 	}
 }
 
@@ -317,6 +312,43 @@ void ScrollingList::unselect() {
 	}
 	selecting	  = false;
 	selectedIndex = -1;
-	if (mustCallback)
-		if (itemSelected) itemSelected(-1);
+	if (mustCallback) itemSelected(-1);
+}
+
+bool ScrollingList::keyDown(int key) {
+	if (key == MZ_KEY_DOWN) {
+		if (getNumItems() == 0) {
+			// do nothing
+			return true;
+		}
+
+		if (getFocusedIndex() < getNumItems() - 1) {
+			focus(getFocusedIndex() + 1);
+		}
+		return true;
+	} else if (key == MZ_KEY_UP) {
+		if (getFocusedIndex() > 0) {
+			focus(getFocusedIndex() - 1);
+		}
+		return true;
+	}
+	return false;
+}
+int ScrollingList::getFocusedIndex() const {
+	return focusedIndex;
+}
+void ScrollingList::focus(int index) {
+	selectedIndex = -1;
+	for (int i = 0; i < content->getNumChildren(); i++) {
+		auto *t = (ScrollingListItemView *) content->getChild(i);
+		if (i == index) {
+			t->focused	 = true;
+			focusedIndex = i;
+
+		} else {
+			t->focused = false;
+		}
+		t->selected = false;
+	}
+	itemFocused(index);
 }

@@ -56,6 +56,9 @@ public:
 	virtual void mouseScrolled(float x, float y, float scrollX, float scrollY) {}
 	virtual void mouseZoomed(float x, float y, float zoom) {}
 
+	virtual bool keyDown(int key) { return false; }
+	virtual void keyUp(int key) {}
+
 	// override to have something to do before the draw
 	virtual void update() {}
 
@@ -78,7 +81,8 @@ public:
 	bool _touchDown(float x, float y, int id);
 	void _mouseScrolled(float x, float y, float scrollX, float scrollY);
 	void _mouseZoomed(float x, float y, float zoom);
-
+	bool _keyDown(int key);
+	bool _keyUp(int key);
 	void _update();
 
 	Layer *getParent();

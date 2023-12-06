@@ -19,7 +19,9 @@ public:
 	};
 
 	ScrollingList(Graphics &g, float itemHeight = 60);
-	std::function<void(int)> itemSelected;
+
+	std::function<void(int)> itemSelected = [](int) {};
+	std::function<void(int)> itemFocused  = [](int) {};
 
 	// only for row types that are deletable
 	std::function<void(std::shared_ptr<ScrollingListItem>)> itemDeleted;
@@ -52,8 +54,13 @@ public:
 	void update() override;
 	bool empty() const { return items.empty(); }
 
+	virtual bool keyDown(int key) override;
+
 protected:
+	int getFocusedIndex() const;
+	void focus(int index);
 	void touchHeld();
+	int focusedIndex  = -1;
 	int selectedIndex = -1;
 
 	int touchingId = -1;

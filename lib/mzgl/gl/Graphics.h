@@ -191,6 +191,8 @@ public:
 	// needs to be here so it's not static
 	std::map<int, Layer *> focusedLayers;
 
+	Layer *keyboardFocusedLayer = nullptr;
+
 	friend class App;
 
 	// for FBO

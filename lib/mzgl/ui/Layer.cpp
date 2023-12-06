@@ -513,3 +513,30 @@ Layer *Layer::getChild(const std::string &name) {
 	}
 	return nullptr;
 }
+
+bool Layer::_keyDown(int key) {
+	if (!visible) return false;
+
+	for (auto it = children.rbegin(); it != children.rend(); it++) {
+		if ((*it)->_keyDown(key)) {
+			return true;
+		}
+	}
+
+	if (interactive) {
+		bool usedKey = keyDown(key);
+		if (usedKey) {
+			g.keyboardFocusedLayer = this;
+			return true;
+		}
+	}
+	return false;
+}
+bool Layer::_keyUp(int key) {
+	if (g.keyboardFocusedLayer) {
+		g.keyboardFocusedLayer->keyUp(key);
+		g.keyboardFocusedLayer = nullptr;
+		return true;
+	}
+	return false;
+}

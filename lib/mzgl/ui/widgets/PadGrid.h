@@ -20,4 +20,5 @@ private:
 	int rows;
 	int cols;
 	int indexToPadNo(int i);
+	vec4 color;
 };

@@ -11,6 +11,7 @@
 using namespace std;
 class PadButton: public Layer {
 public:
+	vec4 color;
 	PadButton(Graphics &g, int pos, glm::vec4 upColor = {0.5, 0.5, 0.5, 1.0}, glm::vec4 downColor = {0.8, 0.8, 0.8, 1.0}) : Layer(g, ""), downColor(downColor) {
 		interactive = true;
 		down = false;

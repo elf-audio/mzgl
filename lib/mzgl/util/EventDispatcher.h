@@ -19,9 +19,19 @@ public:
 	void androidDrawLoading() { app->androidDrawLoading(); }
 
 	// KEYS
-	void keyDown(int key) { app->keyDown(key); }
+	void keyDown(int key) {
+		if (app->root->_keyDown(key)) {
+			return;
+		}
+		app->keyDown(key);
+	}
 
-	void keyUp(int key) { app->keyUp(key); }
+	void keyUp(int key) {
+		if (app->root->_keyUp(key)) {
+			return;
+		}
+		app->keyUp(key);
+	}
 
 	void iosViewWillPause(bool pausing) { app->iosViewWillPause(pausing); }
 
