@@ -7,7 +7,7 @@ class Drawer;
 class ScrollingListItem {
 public:
 	std::string name;
-
+	bool selected = false;
 	ScrollingListItem(std::string name)
 		: name(name) {}
 };
@@ -25,7 +25,6 @@ public:
 	// your subclass should respond to selected when drawing
 	// TODO: make this happen on a function call rather than variable
 	// so we can trigger animations.
-	bool selected = false;
 
 	std::shared_ptr<ScrollingListItem> item;
 	ScrollingListItemView(Graphics &g, std::shared_ptr<ScrollingListItem> item)

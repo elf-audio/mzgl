@@ -14,9 +14,8 @@ void ScrollingList::doLayout() {
 }
 
 ScrollingList::ScrollingList(Graphics &g, float itemHeight)
-	: Scroller(g) {
-	this->itemHeight = itemHeight; // * g.pixelScale;
-	updateItems();
+	: Scroller(g)
+	, itemHeight(itemHeight) {
 }
 std::shared_ptr<ScrollingListItem> ScrollingList::getItem(int index) {
 	if (index < 0 || index >= items.size()) return nullptr;
@@ -144,10 +143,10 @@ void ScrollingList::updateItems() {
 			for (int i = 0; i < content->getNumChildren(); i++) {
 				auto *t = (ScrollingListItemView *) content->getChild(i);
 				if (t == a) {
-					t->selected	  = true;
-					selectedIndex = i;
+					t->item->selected = true;
+					selectedIndex	  = i;
 				} else {
-					t->selected = false;
+					t->item->selected = false;
 				}
 			}
 
@@ -220,7 +219,12 @@ void ScrollingList::_draw() {
 
 void ScrollingList::setItemHeight(float itemHeight) {
 	this->itemHeight = itemHeight;
-	updateItems();
+	for (int i = 0; i < content->getNumChildren(); i++) {
+		auto *item	 = content->getChild(i);
+		item->height = itemHeight;
+		if (i > 0) item->positionUnder(content->getChild(i - 1));
+	}
+	// updateItems();
 }
 
 ///////////////////////////////////////////////////////
@@ -244,10 +248,10 @@ bool ScrollingList::touchDown(float x, float y, int id) {
 	for (int i = 0; i < content->getNumChildren(); i++) {
 		auto *t = (ScrollingListItemView *) content->getChild(i);
 		if (t->inside(testTouch)) {
-			t->selected	  = true;
-			selectedIndex = i;
+			t->item->selected = true;
+			selectedIndex	  = i;
 		} else {
-			t->selected = false;
+			t->item->selected = false;
 		}
 	}
 
@@ -263,9 +267,9 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 	if (touchRect.getMaxDimension() > 10) {
 		selecting = false;
 		if (selectedIndex != -1) {
-			auto *t		  = (ScrollingListItemView *) content->getChild(selectedIndex);
-			t->selected	  = false;
-			selectedIndex = -1;
+			auto *t			  = (ScrollingListItemView *) content->getChild(selectedIndex);
+			t->item->selected = false;
+			selectedIndex	  = -1;
 			itemSelected(-1);
 		}
 	}
@@ -290,10 +294,10 @@ void ScrollingList::select(int itemIndex) {
 		auto *t = (ScrollingListItemView *) content->getChild(i);
 
 		if (itemIndex == i) {
-			t->selected	  = true;
-			selectedIndex = i;
+			t->item->selected = true;
+			selectedIndex	  = i;
 		} else {
-			t->selected = false;
+			t->item->selected = false;
 		}
 	}
 	itemSelected(selectedIndex);
@@ -304,7 +308,7 @@ void ScrollingList::unselect() {
 	if (selectedIndex != -1) {
 		auto *t = (ScrollingListItemView *) content->getChild(selectedIndex);
 		if (t != nullptr) {
-			t->selected = false;
+			t->item->selected = false;
 		}
 	}
 	selecting	  = false;
@@ -333,6 +337,8 @@ bool ScrollingList::keyDown(int key) {
 	} else if (key == MZ_KEY_RIGHT || key == MZ_KEY_ENTER || key == MZ_KEY_RETURN) {
 		if (getSelectedIndex() != -1) {
 			select(getSelectedIndex());
+		} else if (getNumItems() > 0) {
+			select(0);
 		}
 		return true;
 	}
@@ -344,7 +350,7 @@ void ScrollingList::focus(int index) {
 	for (int i = 0; i < content->getNumChildren(); i++) {
 		auto *t = (ScrollingListItemView *) content->getChild(i);
 		if (i == index) {
-			t->selected = true;
+			t->item->selected = true;
 			// check scroll
 			if (t->bottom() + content->y > height) {
 				content->y = height - t->bottom();
@@ -352,7 +358,7 @@ void ScrollingList::focus(int index) {
 				content->y = -t->y;
 			}
 		} else {
-			t->selected = false;
+			t->item->selected = false;
 		}
 	}
 	itemFocused(index);
