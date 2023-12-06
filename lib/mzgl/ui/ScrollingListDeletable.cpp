@@ -19,13 +19,15 @@ void ScrollingListDeletableView::draw() {
 		return;
 	}
 	g.setColor(settings.buttonTextColor);
-	float notDeletePos = x + width + std::max(-settings.deleteButtonWidth / 2.f, horizontalScroll + settings.deleteButtonWidth / 2.f);
+	float notDeletePos =
+		x + width
+		+ std::max(-settings.deleteButtonWidth / 2.f, horizontalScroll + settings.deleteButtonWidth / 2.f);
 	float deletePos = x + width + std::max(horizontalScroll, -width) + settings.deleteButtonWidth / 2.f;
 
 	float pos = notDeletePos;
 	if (deleting) {
 		deleteDecidey = std::clamp(deleteDecidey + (shouldDelete ? 0.05f : -0.05f), 0.f, 1.f);
-		pos = mapf(easeInOutCubic(deleteDecidey), 0, 1, notDeletePos, deletePos);
+		pos			  = mapf(easeInOutCubic(deleteDecidey), 0, 1, notDeletePos, deletePos);
 	}
 
 	if (horizontalScroll < 0) {
@@ -51,7 +53,10 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 	//	if(down && length(totalMovement)<10) {
 	//		selected = true;
 	//	}
-	if (down && length(totalMovement) < 10 && downCount >= 3) {
+	// this focused vs selected logic could be wrong
+	if (focused) {
+		d.setColor(selectedColor);
+	} else if (down && length(totalMovement) < 10 && downCount >= 3) {
 		float amt = mapf(downCount, 3, 12, 0.25, 1, true);
 		d.setColor(unselectedColor * (1.f - amt) + selectedColor * amt);
 	} else {
@@ -61,8 +66,8 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 	if (down) {
 		downCount++;
 	}
-	Rectf r = *this;
-	r.y = (int) r.y + 2;
+	Rectf r	 = *this;
+	r.y		 = (int) r.y + 2;
 	r.height = (int) r.height - 1;
 	d.drawRect(r);
 
@@ -97,22 +102,22 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 
 bool ScrollingListDeletableView::touchDown(float x, float y, int id) {
 	downCount = 0;
-	start = {x, y};
-	down = true;
+	start	  = {x, y};
+	down	  = true;
 	prevTouch = start;
 	//	totalYMovement = 0.f;
 	horizontallyScrolling = false;
-	deleting = false;
-	deleteDecidey = 0.f;
-	totalMovement = {0.f, 0.f};
-	initialScrollTarget = horizontalScrollTarget;
-	haptics = std::make_shared<Haptics>();
+	deleting			  = false;
+	deleteDecidey		  = 0.f;
+	totalMovement		  = {0.f, 0.f};
+	initialScrollTarget	  = horizontalScrollTarget;
+	haptics				  = std::make_shared<Haptics>();
 	return true;
 }
 
 void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 	vec2 currTouch = vec2(x, y);
-	vec2 delta = currTouch - start;
+	vec2 delta	   = currTouch - start;
 
 	if (horizontallyScrolling) {
 		// if the scroll is more than halfway left, do a full delete swipe
@@ -129,10 +134,10 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 		} else if (delta.x < -width * 0.5) {
 			haptics->lightTap();
 			horizontalScrollTarget = -width;
-			deleting = true;
-			shouldDelete = true;
-			start.x = width + x;
-			decidePoint = x + width * 0.05;
+			deleting			   = true;
+			shouldDelete		   = true;
+			start.x				   = width + x;
+			decidePoint			   = x + width * 0.05;
 			//		} else if(horizontalScrollTarget>deleteButtonWidth) {
 			//			horizontalScrollTarget = deleteButtonWidth;
 		} else {
@@ -152,7 +157,7 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 			localToAbsoluteCoords(x, y);
 
 			Layer *scrollingList = getParent()->getParent();
-			haptics = nullptr;
+			haptics				 = nullptr;
 			transferFocus(scrollingList, id);
 			scrollingList->absoluteToLocalCoords(x, y);
 			scrollingList->touchDown(x, y, id);
@@ -168,7 +173,7 @@ void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 		if (deleting) {
 			if (shouldDelete) {
 				horizontalScrollTarget = -width;
-				collapsing = true;
+				collapsing			   = true;
 				deleteSelf();
 			} else {
 				horizontalScrollTarget = 0.f;
@@ -211,6 +216,6 @@ void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 			}
 		}
 	}
-	down = false;
+	down	= false;
 	haptics = nullptr;
 }

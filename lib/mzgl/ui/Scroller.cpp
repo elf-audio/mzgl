@@ -3,9 +3,8 @@
 
 Scroller::Scroller(Graphics &g)
 	: Layer(g) {
-	interactive				   = true;
-	content					   = new Layer(g, "content");
-	contentHeightExplicitlySet = false;
+	interactive = true;
+	content		= new Layer(g, "content");
 	addChild(content);
 	clipToBounds = true;
 }
@@ -29,10 +28,12 @@ void Scroller::addContent(Layer *layer) {
 		content->height = std::max(content->height, layer->bottom());
 	}
 }
+
 void Scroller::clear() {
 	content->clear();
 	content->height = 0;
 }
+
 void Scroller::update() {
 	if (!scrolling) {
 		float lerpSpeed = 0.86;

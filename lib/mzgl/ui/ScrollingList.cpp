@@ -18,12 +18,13 @@ ScrollingList::ScrollingList(Graphics &g, float itemHeight)
 	this->itemHeight = itemHeight; // * g.pixelScale;
 	updateItems();
 }
+std::shared_ptr<ScrollingListItem> ScrollingList::getItem(int index) {
+	if (index < 0 || index >= items.size()) return nullptr;
+	return items[index];
+}
 
 shared_ptr<ScrollingListItem> ScrollingList::getSelectedItem() {
-	if (selectedIndex != -1) {
-		return items[selectedIndex];
-	}
-	return nullptr;
+	return getItem(selectedIndex);
 }
 
 void ScrollingList::setItems(const vector<shared_ptr<ScrollingListItem>> &items) {
@@ -165,18 +166,13 @@ void ScrollingList::updateItems() {
 void ScrollingList::_draw() {
 	maskOn();
 
-	Drawer d;
-
 	// draw the bg in the coord space of content
 	// because of the translate later
 	d.setColor(bgColor);
 	Rectf r = *this;
-	//r.x = -content->x;// content->x;
-	r.y = -content->y; //content->y;
-	d.drawRect(r);
 
-	//	draw();
-	// now draw the scroller stuff
+	r.y = -content->y;
+	d.drawRect(r);
 
 	int from = 0;
 	int to	 = content->getNumChildren();
@@ -184,7 +180,7 @@ void ScrollingList::_draw() {
 		auto *item = content->getChild(i);
 
 		// don't draw offscreen
-		if (item->y + item->height + content->y < 0) {
+		if (item->bottom() + content->y < 0) {
 			from = i + 1;
 			continue;
 		}
@@ -329,14 +325,18 @@ bool ScrollingList::keyDown(int key) {
 	} else if (key == MZ_KEY_UP) {
 		if (getFocusedIndex() > 0) {
 			focus(getFocusedIndex() - 1);
+		} else if (getFocusedIndex() == -1) {
+			focus(getNumItems() - 1);
 		}
 		return true;
 	}
 	return false;
 }
+
 int ScrollingList::getFocusedIndex() const {
 	return focusedIndex;
 }
+
 void ScrollingList::focus(int index) {
 	selectedIndex = -1;
 	for (int i = 0; i < content->getNumChildren(); i++) {
@@ -344,7 +344,16 @@ void ScrollingList::focus(int index) {
 		if (i == index) {
 			t->focused	 = true;
 			focusedIndex = i;
-
+			// check scroll
+			if (t->bottom() + content->y > height) {
+				// content->y -= t->bottom() - height;
+				// printf("dn %.0f %.0f %.0f\n", t->bottom(), content->y, height);
+				content->y = height - t->bottom();
+			} else if (t->y + content->y < 0) {
+				// printf("up %.0f %.0f %.0f\n", t->y, content->y, height);
+				// content->y -= t->y;
+				content->y = -t->y;
+			}
 		} else {
 			t->focused = false;
 		}

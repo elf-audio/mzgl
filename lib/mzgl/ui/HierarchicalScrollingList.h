@@ -18,7 +18,14 @@ public:
 		: ScrollingList(g, defaultHeight) {}
 
 	std::vector<Layer *> layersToRemove;
-	std::list<float> scrollOffsets;
+
+	class ScrollInfo {
+	public:
+		float scrollOffset = 0;
+		int focusedIndex   = -1;
+	};
+
+	std::list<ScrollInfo> scrollOffsets;
 	std::function<void()> forwardPressed = []() {};
 	std::function<void()> backPressed	 = []() {};
 
@@ -53,8 +60,10 @@ public:
 			addChild(l);
 		}
 
-		scrollOffsets.push_back(content->y);
-		content->y = 0;
+		scrollOffsets.push_back({content->y, getFocusedIndex()});
+		selectedIndex = -1;
+		focusedIndex  = -1;
+		content->y	  = 0;
 
 		setItems(items);
 		isPushing	 = true;
@@ -69,7 +78,6 @@ public:
 			Log::e() << "Error: can't call pop whilst animating";
 			mzAssert(false);
 		}
-
 		//
 		// TODO!! Clever
 		// a. only save the items that are on screen at the moment
@@ -91,7 +99,9 @@ public:
 		}
 
 		if (!scrollOffsets.empty()) {
-			content->y = scrollOffsets.back();
+			content->y = scrollOffsets.back().scrollOffset;
+			focus(scrollOffsets.back().focusedIndex);
+
 			scrollOffsets.pop_back();
 		} else {
 			Log::e() << "Something went wrong, maybe popped more than pushed?";

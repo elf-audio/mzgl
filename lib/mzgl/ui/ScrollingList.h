@@ -28,6 +28,7 @@ public:
 	void setItems(const std::vector<std::shared_ptr<ScrollingListItem>> &items);
 	void unselect();
 	std::shared_ptr<ScrollingListItem> getSelectedItem();
+	std::shared_ptr<ScrollingListItem> getItem(int index);
 	void setItemHeight(float itemHeight);
 
 	//////////////////////////////////////////////////////////
@@ -79,4 +80,5 @@ protected:
 private:
 	std::vector<std::shared_ptr<ScrollingListItem>> items;
 	Layer *emptyMessageLayer = nullptr;
+	Drawer d;
 };
