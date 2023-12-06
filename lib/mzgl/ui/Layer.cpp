@@ -501,6 +501,25 @@ void Layer::layoutChildrenAsGrid(int cols, int rows, float padding) {
 	}
 }
 
+void Layer::stackChildrenVertically(float padding) {
+	int firstVisibleChild = -1;
+
+	for (int i = 0; i < getNumChildren(); i++) {
+		if (getChild(i)->visible) {
+			firstVisibleChild = i;
+			break;
+		}
+	}
+
+	if (firstVisibleChild == -1) return;
+
+	for (int i = 1; i < getNumChildren(); i++) {
+		if (getChild(i)->visible) {
+			getChild(i)->y = getChild(i - 1)->bottom() + padding;
+		}
+	}
+}
+
 void Layer::alignChildrenToPixels() {
 	for (auto *ch: children) {
 		ch->alignToPixels();

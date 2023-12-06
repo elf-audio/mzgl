@@ -121,6 +121,7 @@ public:
 	void positionLeftOf(Layer *l, float padding = 0);
 	void positionRightOf(Layer *l, float padding = 0);
 	void layoutChildrenAsGrid(int cols, int rows, float padding = 0);
+	void stackChildrenVertically(float padding = 0);
 	void alignChildrenToPixels();
 
 	// used for hacky things, don't use

@@ -58,11 +58,10 @@ public:
 	virtual bool keyDown(int key) override;
 
 protected:
-	int getFocusedIndex() const;
+	int selectedIndex = -1;
 	void focus(int index);
 	void touchHeld();
-	int focusedIndex  = -1;
-	int selectedIndex = -1;
+	bool selectionIsFocus = false;
 
 	int touchingId = -1;
 

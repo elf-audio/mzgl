@@ -27,8 +27,6 @@ public:
 	// so we can trigger animations.
 	bool selected = false;
 
-	bool focused = false;
-
 	std::shared_ptr<ScrollingListItem> item;
 	ScrollingListItemView(Graphics &g, std::shared_ptr<ScrollingListItem> item)
 		: Layer(g)

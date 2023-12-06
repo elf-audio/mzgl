@@ -47,6 +47,7 @@ void ScrollingList::setEmptyMessage(Layer *eml) {
 		emptyMessageLayer->doLayout();
 	}
 }
+
 void ScrollingList::touchHeld() {
 	// work out which view the touch is on and send the touch.
 
@@ -60,6 +61,7 @@ void ScrollingList::touchHeld() {
 		}
 	}
 }
+
 void ScrollingList::update() {
 	Scroller::update();
 	if (emptyMessageLayer != nullptr) {
@@ -108,9 +110,7 @@ void ScrollingList::update() {
 		}
 
 		// readjust positions
-		for (int i = 1; i < content->getNumChildren(); i++) {
-			content->getChild(i)->y = content->getChild(i - 1)->bottom();
-		}
+		content->stackChildrenVertically();
 
 		// I think you need this to make sure
 		// the content is the right height after reomval
@@ -271,19 +271,6 @@ void ScrollingList::touchMoved(float x, float y, int id) {
 	}
 }
 
-void ScrollingList::select(int itemIndex) {
-	for (int i = 0; i < content->getNumChildren(); i++) {
-		auto *t = (ScrollingListItemView *) content->getChild(i);
-
-		if (itemIndex == i) {
-			t->selected	  = true;
-			selectedIndex = i;
-		} else {
-			t->selected = false;
-		}
-	}
-	itemSelected(selectedIndex);
-}
 void ScrollingList::cancelTouches() {
 	touchingId = -1;
 }
@@ -296,6 +283,20 @@ void ScrollingList::touchUp(float x, float y, int id) {
 	if (selecting) {
 		itemSelected(selectedIndex);
 	}
+}
+
+void ScrollingList::select(int itemIndex) {
+	for (int i = 0; i < content->getNumChildren(); i++) {
+		auto *t = (ScrollingListItemView *) content->getChild(i);
+
+		if (itemIndex == i) {
+			t->selected	  = true;
+			selectedIndex = i;
+		} else {
+			t->selected = false;
+		}
+	}
+	itemSelected(selectedIndex);
 }
 
 void ScrollingList::unselect() {
@@ -318,57 +319,41 @@ bool ScrollingList::keyDown(int key) {
 			return true;
 		}
 
-		if (getFocusedIndex() < getNumItems() - 1) {
-			focus(getFocusedIndex() + 1);
+		if (getSelectedIndex() < getNumItems() - 1) {
+			focus(getSelectedIndex() + 1);
 		}
 		return true;
 	} else if (key == MZ_KEY_UP) {
-		if (getFocusedIndex() > 0) {
-			focus(getFocusedIndex() - 1);
-		} else if (getFocusedIndex() == -1) {
+		if (getSelectedIndex() > 0) {
+			focus(getSelectedIndex() - 1);
+		} else if (getSelectedIndex() == -1) {
 			focus(getNumItems() - 1);
 		}
 		return true;
-		// } else if(key == MZ_KEY_RETURN) {
-		//     if (getFocusedIndex() != -1) {
-		//         select(getFocusedIndex());
-		//     }
-		//     return true;
 	} else if (key == MZ_KEY_RIGHT || key == MZ_KEY_ENTER || key == MZ_KEY_RETURN) {
-		if (getFocusedIndex() != -1) {
-			select(getFocusedIndex());
+		if (getSelectedIndex() != -1) {
+			select(getSelectedIndex());
 		}
 		return true;
 	}
-	printf("Key: %d\n", key);
 	return false;
 }
 
-int ScrollingList::getFocusedIndex() const {
-	return focusedIndex;
-}
-
 void ScrollingList::focus(int index) {
-	selectedIndex = -1;
+	selectedIndex = index;
 	for (int i = 0; i < content->getNumChildren(); i++) {
 		auto *t = (ScrollingListItemView *) content->getChild(i);
 		if (i == index) {
-			t->focused	 = true;
-			focusedIndex = i;
+			t->selected = true;
 			// check scroll
 			if (t->bottom() + content->y > height) {
-				// content->y -= t->bottom() - height;
-				// printf("dn %.0f %.0f %.0f\n", t->bottom(), content->y, height);
 				content->y = height - t->bottom();
 			} else if (t->y + content->y < 0) {
-				// printf("up %.0f %.0f %.0f\n", t->y, content->y, height);
-				// content->y -= t->y;
 				content->y = -t->y;
 			}
 		} else {
-			t->focused = false;
+			t->selected = false;
 		}
-		t->selected = false;
 	}
 	itemFocused(index);
 }

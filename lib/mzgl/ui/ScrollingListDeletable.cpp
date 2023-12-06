@@ -53,10 +53,7 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 	//	if(down && length(totalMovement)<10) {
 	//		selected = true;
 	//	}
-	// this focused vs selected logic could be wrong
-	if (focused) {
-		d.setColor(selectedColor);
-	} else if (down && length(totalMovement) < 10 && downCount >= 3) {
+	if (down && length(totalMovement) < 10 && downCount >= 3) {
 		float amt = mapf(downCount, 3, 12, 0.25, 1, true);
 		d.setColor(unselectedColor * (1.f - amt) + selectedColor * amt);
 	} else {

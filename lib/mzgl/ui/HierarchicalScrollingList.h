@@ -22,7 +22,7 @@ public:
 	class ScrollInfo {
 	public:
 		float scrollOffset = 0;
-		int focusedIndex   = -1;
+		int selectedIndex  = -1;
 	};
 
 	std::list<ScrollInfo> scrollOffsets;
@@ -53,9 +53,8 @@ public:
 			addChild(l);
 		}
 
-		scrollOffsets.push_back({content->y, getFocusedIndex()});
+		scrollOffsets.push_back({content->y, getSelectedIndex()});
 		selectedIndex = -1;
-		focusedIndex  = -1;
 		content->y	  = 0;
 
 		setItems(items);
@@ -71,14 +70,6 @@ public:
 			Log::e() << "Error: can't call pop whilst animating";
 			mzAssert(false);
 		}
-		//
-		// TODO!! Clever
-		// a. only save the items that are on screen at the moment
-		// b. squirrel this into a reusable function so both push and pop use it
-		// c. remove the if(true) below somewhere
-		// d. disable all pushing and popping while animating
-		//
-		//
 
 		// remove items from content temporarily and put them directly into this layer
 		for (int i = 0; i < content->getNumChildren(); i++) {
@@ -91,20 +82,20 @@ public:
 			addChild(l);
 		}
 
-		if (!scrollOffsets.empty()) {
-			content->y = scrollOffsets.back().scrollOffset;
-			focus(scrollOffsets.back().focusedIndex);
-
-			scrollOffsets.pop_back();
-		} else {
-			Log::e() << "Something went wrong, maybe popped more than pushed?";
-		}
-
 		content->x	 = width * 0.25;
 		animationAmt = 0;
 		isPopping	 = true;
 
 		setItems(items);
+
+		if (!scrollOffsets.empty()) {
+			content->y = scrollOffsets.back().scrollOffset;
+			focus(scrollOffsets.back().selectedIndex);
+
+			scrollOffsets.pop_back();
+		} else {
+			Log::e() << "Something went wrong, maybe popped more than pushed?";
+		}
 	}
 
 	bool isAnimating() { return isPushing || isPopping; }
