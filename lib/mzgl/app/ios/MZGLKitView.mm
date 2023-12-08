@@ -24,8 +24,6 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInterac
 	
 	NSMutableDictionary	* activeTouches;
 	bool firstFrame;
-	NSString *urlToOpen;
-	bool appIsSetup;
 }
 
 - (std::shared_ptr<App>) getApp {
@@ -42,11 +40,9 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInterac
 	self = [super init];
 	if(self!=nil) {
 		app = _app;
-		appIsSetup = false;
+		
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		 
-		urlToOpen = nil;
-
 		activeTouches = [[NSMutableDictionary alloc] init];
 		self.multipleTouchEnabled = YES;
 		self.userInteractionEnabled = YES;
@@ -232,15 +228,7 @@ int uikeyToMz(UIKey *key) {
 		}
 		
 		eventDispatcher->setup();
-		appIsSetup = true;
-		// if the app was opened by a url,
-		// we need to defer sending that to
-		// the event dispatcher until the app
-		// is ready (i.e. after setup())
-		if(urlToOpen!=nil) {
-			string url = [urlToOpen UTF8String];
-			eventDispatcher->openUrl(ScopedUrl::createWithDeleter(url));
-		}
+		
 		firstFrame = false;
 	}
 	eventDispatcher->runFrame();
@@ -251,54 +239,24 @@ int uikeyToMz(UIKey *key) {
 	return eventDispatcher;
 }
 
--(void) openURLWhenLoadedAndDeleteFile: (NSString*) url {
-	urlToOpen = url;
-}
 
 - (BOOL) handleNormalOpen: (NSURL*) url {
 	NSLog(@"Standard open");
-	bool mustStopAccessing = false;
+	
 	NSString *path = url.path;
+	
+	std::function<void()> deleter = []() {};
+	// see if we need a scoped security url
 	if(![[NSFileManager defaultManager] isReadableFileAtPath:path]) {
-		NSLog(@"Warning: can't open this file");
+		NSLog(@"Using security scoped url\n");
 		[url startAccessingSecurityScopedResource];
-		mustStopAccessing = true;
-	}
-	
-	fs::path src([path UTF8String]);
-	fs::path dst = docsPath() / src.filename();
-	try {
-		fs::copy_file(src, dst, fs::copy_options::overwrite_existing);
-	} catch(const fs::filesystem_error &err) {
-		Log::e() << "Got exception trying to copy the file " << err.what();
-	}
-	
-	NSString *destination = [NSString stringWithUTF8String: dst.c_str()];
-	
-//	NSString *destination = moveFileToDocsDir(path, /* copying: */ true);
-	if(![[NSFileManager defaultManager] fileExistsAtPath:destination]) {
-		NSLog(@"File does not exist at path");
-	}
-	
-	
-	if(mustStopAccessing) {
-		[url stopAccessingSecurityScopedResource];
-	}
-
-	if(destination==nil) {
-		NSLog(@"temp file copy error %@", destination);
-		return false;
-	}
-
-	if(appIsSetup) {
 		
-		std::string url = [destination UTF8String];
-		return eventDispatcher->openUrl(ScopedUrl::createWithDeleter(url));
-
-	} else {
-		[self openURLWhenLoadedAndDeleteFile: destination];
-		Log::e() << "Event dispatcher not ready";
-		return true;
+		deleter = [url]() {
+			NSLog(@"Releasing security scoped url\n");
+			[url stopAccessingSecurityScopedResource];
+		};
 	}
+		
+	return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
 }
 @end

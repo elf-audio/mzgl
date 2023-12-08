@@ -25,7 +25,7 @@ class EventDispatcher;
 
 - (id) initWithApp: (std::shared_ptr<App>) app;
 - (std::shared_ptr<EventDispatcher>) getEventDispatcher;
-- (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
+//- (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
 - (MZGLKitView*) getView;
 @end
 
