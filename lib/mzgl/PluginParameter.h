@@ -11,9 +11,9 @@
 class PluginParameter {
 public:
 	std::string name;
-	float		defaultValue;
-	float		from;
-	float		to;
+	float defaultValue;
+	float from;
+	float to;
 	std::string unit;
 	// set this to true while your UI is interacting
 	// with a parameter to ignore incoming parameter
@@ -30,11 +30,7 @@ public:
 
 	Type type;
 
-	PluginParameter(std::string name,
-					float		defaultValue,
-					float		from = 0.f,
-					float		to	 = 1.f,
-					std::string unit = "")
+	PluginParameter(std::string name, float defaultValue, float from = 0.f, float to = 1.f, std::string unit = "")
 		: name(name)
 		, defaultValue(defaultValue)
 		, from(from)
@@ -45,8 +41,7 @@ public:
 		set(defaultValue);
 	}
 
-	PluginParameter(
-		std::string name, int defaultValue, int from = 0, int to = 1, std::string unit = "")
+	PluginParameter(std::string name, int defaultValue, int from = 0, int to = 1, std::string unit = "")
 		: name(name)
 		, defaultValue(defaultValue)
 		, from(from)
@@ -71,7 +66,7 @@ public:
 	}
 
 	float get() const noexcept { return value; }
-		  operator float() const noexcept { return value; }
+	operator float() const noexcept { return value; }
 
 	void set(float v) noexcept { value.store(v); }
 

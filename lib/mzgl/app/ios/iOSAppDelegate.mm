@@ -24,8 +24,6 @@
 }
 @end
 
-
-
 @implementation iOSAppDelegate
 @synthesize window;
 
@@ -115,11 +113,11 @@ public:
 
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	NSURL *launchedUrl	 = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
-	
+
 	if (launchedUrl != nil) {
 		[[mzViewController getView] handleNormalOpen:launchedUrl];
 		std::string url = [[launchedUrl absoluteString] UTF8String];
-		
+
 		// this should maybe have a deleter
 		eventDispatcher->openUrl(ScopedUrl::create(url));
 	}

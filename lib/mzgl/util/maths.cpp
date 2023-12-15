@@ -12,7 +12,7 @@
 
 double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp) {
 	double norm = (inp - inMin) / (inMax - inMin);
-	double f = outMin + (outMax - outMin) * norm;
+	double f	= outMin + (outMax - outMin) * norm;
 	if (clamp) {
 		if (outMax > outMin) {
 			return std::clamp(f, outMin, outMax);
@@ -65,8 +65,8 @@ float smootherstep(float x) {
 float nearestPow2(float v) {
 	float lo = floor(log2(v));
 	float hi = ceil(log2(v));
-	lo = pow(2.0, lo);
-	hi = pow(2.0, hi);
+	lo		 = pow(2.0, lo);
+	hi		 = pow(2.0, hi);
 
 	if (abs((int) (v - lo)) < abs((int) (v - hi))) {
 		return lo;

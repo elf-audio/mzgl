@@ -15,7 +15,7 @@
 class Drawer {
 public:
 	float strokeWeight = 1; // this should be private
-	bool filled = true;
+	bool filled		   = true;
 	glm::vec4 color;
 
 	void setStrokeWeight(float strokeWeight) { this->strokeWeight = strokeWeight; }
@@ -72,9 +72,16 @@ public:
 	bool isEmpty();
 
 private:
-	void getPerfectRoundedRectVerts(const Rectf &r, float radius, std::vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl);
-	void roundedRectVerts(
-		const Rectf &r, float radius, std::vector<glm::vec2> &outVerts, std::vector<glm::vec2> &cache, bool tl, bool tr, bool br, bool bl);
+	void getPerfectRoundedRectVerts(
+		const Rectf &r, float radius, std::vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl);
+	void roundedRectVerts(const Rectf &r,
+						  float radius,
+						  std::vector<glm::vec2> &outVerts,
+						  std::vector<glm::vec2> &cache,
+						  bool tl,
+						  bool tr,
+						  bool br,
+						  bool bl);
 
 	void createRoundedRectCache(std::vector<glm::vec2> &cache, int numSteps);
 	bool isDoingGradient = false;

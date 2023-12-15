@@ -11,7 +11,6 @@
 #include "mzAssert.h"
 #include "concurrentqueue.h"
 
-
 class MainThreadRunner::LambdaQueue : public moodycamel::ConcurrentQueue<std::function<void()>> {};
 // from cinder
 MainThreadRunner::MainThreadRunner() {
@@ -29,46 +28,42 @@ void MainThreadRunner::setMainThreadId() {
 	mainThreadId = std::this_thread::get_id();
 }
 
-
 void MainThreadRunner::runOnMainThread(std::function<void()> fn) {
-//	Log::d() << mainThreadId << " " << std::this_thread::get_id();
+	//	Log::d() << mainThreadId << " " << std::this_thread::get_id();
 	mzAssert(!isMainThread());
 	mainThreadQueue->enqueue(fn);
 }
 
-
 void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
-	if(isMainThread()) {
+	if (isMainThread()) {
 		Log::e() << "runOnMainThreadAndWait() called from main thread";
 		fn();
 		return;
 	}
 	mzAssert(!isMainThread());
 	std::atomic<bool> done {false};
-	mainThreadQueue->enqueue([fn,&done]() {
+	mainThreadQueue->enqueue([fn, &done]() {
 		fn();
 		done.store(true);
 	});
 	int originalPollCount = pollCount;
-	
+
 	const uint64_t sleepTime = 100;
-	uint64_t duration = 0;
-	while(!done.load()) {
-		
+	uint64_t duration		 = 0;
+	while (!done.load()) {
 		std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 		duration += sleepTime;
-		
+
 		// this may never have polled
-		if(duration>1'000'000 && pollCount==0) {
+		if (duration > 1'000'000 && pollCount == 0) {
 			Log::e() << "Main thread may be not active";
 			pollMainThreadQueue();
 		}
 	}
 }
 
-
 void MainThreadRunner::runOnMainThread(bool checkIfOnMainThread, std::function<void()> fn) {
-	if(checkIfOnMainThread && isMainThread()) {
+	if (checkIfOnMainThread && isMainThread()) {
 		fn();
 	} else {
 		runOnMainThread(fn);
@@ -79,20 +74,20 @@ void MainThreadRunner::runOnMainThread(bool checkIfOnMainThread, std::function<v
 void MainThreadRunner::clearMainThreadQueue() {
 	//mzAssert(isMainThread());
 	std::function<void()> fn;
-	while(mainThreadQueue->try_dequeue(fn)) {}
+	while (mainThreadQueue->try_dequeue(fn)) {}
 }
 
 void MainThreadRunner::pollInternal() {
 	std::function<void()> fn;
 	pollMutex.lock();
-	while(mainThreadQueue->try_dequeue(fn)) {
+	while (mainThreadQueue->try_dequeue(fn)) {
 		fn();
 	}
 	pollMutex.unlock();
 }
 
 void MainThreadRunner::pollMainThreadQueue() {
-	if(!hasSetMainThreadId) {
+	if (!hasSetMainThreadId) {
 		hasSetMainThreadId = true;
 		setMainThreadId();
 	}
@@ -100,4 +95,3 @@ void MainThreadRunner::pollMainThreadQueue() {
 	pollCount++;
 	pollInternal();
 }
-

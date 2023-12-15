@@ -14,7 +14,7 @@
 //#include "App.h"
 class EffectPlugin;
 #ifdef USE_METALANGLE
-#import <MetalANGLE/MGLKView.h>
+#	import <MetalANGLE/MGLKView.h>
 #else
 
 #endif
@@ -24,16 +24,16 @@ class EventDispatcher;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 }
 
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
 - (void)windowResized:(NSNotification *)notification;
-- (void) disableDrawing;
-- (void) enableDrawing;
-- (void) lock;
-- (void) unlock;
-- (void) shutdown;
-- (std::shared_ptr<App>) getApp;
-- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
+- (void)disableDrawing;
+- (void)enableDrawing;
+- (void)lock;
+- (void)unlock;
+- (void)shutdown;
+- (std::shared_ptr<App>)getApp;
+- (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 
-@property (nonatomic, readwrite, retain) IBOutlet MZGLView *view;
+@property(nonatomic, readwrite, retain) IBOutlet MZGLView *view;
 
 @end

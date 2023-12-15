@@ -12,7 +12,7 @@
 #include "Vbo.h"
 #include "Graphics.h"
 
-void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid = true,  float strokeWeight = 1);
+void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid = true, float strokeWeight = 1);
 
 void getRoundedRectVerts(const Rectf &r, float radius, std::vector<glm::vec2> &outVerts);
 
@@ -25,14 +25,15 @@ void getPerfectRoundedRectVerts(const Rectf &r, float radius, std::vector<glm::v
 class RoundedRect {
 public:
 	VboRef mesh;
-	
+
 	void draw(Graphics &g, const Rectf &r, float radius);
 
 	// resets cache and forces redraw
 	void touch();
+
 private:
 	float oldStrokeWeight = 1;
 	Rectf oldRect;
-	bool oldSolid = false;
+	bool oldSolid	= false;
 	float oldRadius = -1;
 };

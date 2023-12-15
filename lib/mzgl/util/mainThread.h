@@ -60,9 +60,9 @@ private:
 private:
 	// helps for complex fwd declaration
 	class LambdaQueue;
-	std::thread::id		mainThreadId;
+	std::thread::id mainThreadId;
 	std::shared_ptr<LambdaQueue> mainThreadQueue;
-//	bool mainThreadEverPolled = false;
+	//	bool mainThreadEverPolled = false;
 	bool hasSetMainThreadId = false;
 	std::atomic<int> pollCount {0};
 	std::mutex pollMutex;

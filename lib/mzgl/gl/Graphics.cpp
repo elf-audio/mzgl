@@ -146,11 +146,11 @@ void Graphics::initGraphics() {
 void Graphics::loadDefaultShaders() {
 	// zero out all shaders before loading any, for android mostly,
 	// as the context may have reset itself
-	nothingShader = nullptr;
-	colorShader = nullptr;
+	nothingShader	   = nullptr;
+	colorShader		   = nullptr;
 	colorTextureShader = nullptr;
-	fontShader = nullptr;
-	texShader = nullptr;
+	fontShader		   = nullptr;
+	texShader		   = nullptr;
 
 	nothingShader = Shader::create(*this);
 
@@ -161,7 +161,7 @@ void Graphics::loadDefaultShaders() {
 											out lowp vec4 colorV;
 
 											void main(void) {
-												colorV = color;
+												colorV		= color;
 												gl_Position = mvp * Position;
 											}
 
@@ -188,7 +188,7 @@ void Graphics::loadDefaultShaders() {
 									out lowp vec4 colorV;
 
 									void main(void) {
-										colorV = Color * color;
+										colorV		= Color * color;
 										gl_Position = mvp * Position;
 									}
 
@@ -205,100 +205,101 @@ void Graphics::loadDefaultShaders() {
 	);
 
 	colorTextureShader = Shader::create(*this);
-	colorTextureShader->loadFromString(STRINGIFY(
+	colorTextureShader->loadFromString(
+		STRINGIFY(
 
-										   uniform mat4 mvp;
+			uniform mat4 mvp;
 
-										   in vec4 Position;
-										   in lowp vec2 TexCoord;
-										   in lowp vec4 Color;
+			in vec4 Position;
+			in lowp vec2 TexCoord;
+			in lowp vec4 Color;
 
-										   out lowp vec4 colorV;
-										   out lowp vec2 texCoordV;
-										   void main(void) {
-											   colorV = Color;
-											   texCoordV = TexCoord;
-											   gl_Position = mvp * Position;
-										   }
+			out lowp vec4 colorV;
+			out lowp vec2 texCoordV;
+			void main(void) {
+				colorV		= Color;
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-										   ),
-									   STRINGIFY(
+			),
+		STRINGIFY(
 
-										   in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
+			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
 
-										   void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
+			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
 
-										   )
+			)
 
 	);
 
 	// this is temporary - it is just like colorTextureShader, but divides the color by 255
 	// TODO: need to write my own gl backend for fontstash
 	fontShader = Shader::create(*this);
-	fontShader->loadFromString(STRINGIFY(
+	fontShader->loadFromString(
+		STRINGIFY(
 
-								   uniform mat4 mvp;
+			uniform mat4 mvp;
 
-								   in vec4 Position;
-								   in vec2 TexCoord;
+			in vec4 Position;
+			in vec2 TexCoord;
 
-								   uniform lowp vec4 color;
+			uniform lowp vec4 color;
 
-								   out vec2 texCoordV;
+			out vec2 texCoordV;
 
-								   void main() {
-									   texCoordV = TexCoord;
-									   gl_Position = mvp * Position;
-								   }
+			void main() {
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-								   ),
-							   STRINGIFY(
+			),
+		STRINGIFY(
 
-								   uniform lowp vec4 color;
-										 in vec2 texCoordV;
-										 out vec4 fragColor; uniform sampler2D myTextureSampler;
+			uniform lowp vec4 color; in vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
 
-								   void main() {
-									   fragColor = color;
-									   fragColor.a *= texture(myTextureSampler, texCoordV).a;
-								   }
+			void main() {
+				fragColor = color;
+				fragColor.a *= texture(myTextureSampler, texCoordV).a;
+			}
 
-								   )
+			)
 
 	);
 	texShader = Shader::create(*this);
-	texShader->loadFromString(STRINGIFY(
+	texShader->loadFromString(
+		STRINGIFY(
 
-								  uniform mat4 mvp;
+			uniform mat4 mvp;
 
-								  in vec4 Position;
-								  in lowp vec2 TexCoord;
-								  uniform lowp vec4 color;
+			in vec4 Position;
+			in lowp vec2 TexCoord;
+			uniform lowp vec4 color;
 
-								  out lowp vec4 colorV;
-								  out lowp vec2 texCoordV;
-								  void main(void) {
-									  colorV = color;
-									  texCoordV = TexCoord;
-									  gl_Position = mvp * Position;
-								  }
+			out lowp vec4 colorV;
+			out lowp vec2 texCoordV;
+			void main(void) {
+				colorV		= color;
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-								  ),
-							  STRINGIFY(
+			),
+		STRINGIFY(
 
-								  in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
+			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
 
-								  void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
+			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
 
-								  )
+			)
 
 	);
 
-	nothingShader->isDefaultShader = true;
-	colorShader->isDefaultShader = true;
+	nothingShader->isDefaultShader		= true;
+	colorShader->isDefaultShader		= true;
 	colorTextureShader->isDefaultShader = true;
-	texShader->isDefaultShader = true;
-	fontShader->isDefaultShader = true;
+	texShader->isDefaultShader			= true;
+	fontShader->isDefaultShader			= true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -352,12 +353,12 @@ void Graphics::rotateZ(float angle) {
 }
 
 void Graphics::setProjectionMatrix(glm::mat4 projMat) {
-	projectionMatrix = projMat;
+	projectionMatrix	 = projMat;
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
 void Graphics::setViewMatrix(glm::mat4 viewMat) {
-	viewMatrix = viewMat;
+	viewMatrix			 = viewMat;
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
@@ -370,8 +371,8 @@ void Graphics::setupViewOrtho(float w, float h) {
 		height = h = 100;
 	}
 
-	projectionMatrix = glm::ortho(0.f, w, h, 0.f, -1000.f, 1000.f);
-	viewMatrix = glm::mat4(1.f);
+	projectionMatrix	 = glm::ortho(0.f, w, h, 0.f, -1000.f, 1000.f);
+	viewMatrix			 = glm::mat4(1.f);
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
@@ -387,20 +388,21 @@ void Graphics::setupView(bool flipped, int w, int h) {
 	float fov = 45.0f;
 
 	// Camera matrix
-	float eyeX = w / 2.f;
-	float eyeY = h / 2.f;
+	float eyeX	  = w / 2.f;
+	float eyeY	  = h / 2.f;
 	float halfFov = M_PI * fov / 360;
-	float theTan = tanf(halfFov);
-	float dist = eyeY / theTan;
+	float theTan  = tanf(halfFov);
+	float dist	  = eyeY / theTan;
 
 	float nearDist = dist / 10.0f;
-	float farDist = dist * 10.0f;
+	float farDist  = dist * 10.0f;
 
 	projectionMatrix = glm::perspective(glm::radians(fov), w / (float) h, nearDist, farDist);
-	viewMatrix = glm::lookAt(glm::vec3(eyeX, eyeY, dist * (flipped ? -1 : 1)), // Camera is at (4,3,-3), in World Space
-							 glm::vec3(eyeX, eyeY, 0), // and looks at the origin
-							 glm::vec3(0, (flipped ? -1 : 1), 0) // Head is up (set to 0,-1,0 to look upside-down)
-	);
+	viewMatrix =
+		glm::lookAt(glm::vec3(eyeX, eyeY, dist * (flipped ? -1 : 1)), // Camera is at (4,3,-3), in World Space
+					glm::vec3(eyeX, eyeY, 0), // and looks at the origin
+					glm::vec3(0, (flipped ? -1 : 1), 0) // Head is up (set to 0,-1,0 to look upside-down)
+		);
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
 
 	//	projectionMatrix = glm::ortho(-w, w, -h, h, -1000, 1000);
@@ -432,7 +434,7 @@ void Graphics::setStrokeWeight(float f) {
 
 void Graphics::setHexColor(int hex, float a) {
 	auto c = hexColor(hex);
-	c.a = a;
+	c.a	   = a;
 	setColor(c);
 }
 void Graphics::setColor(float bri) {
@@ -452,7 +454,7 @@ void Graphics::setColor(glm::vec4 c) {
 }
 
 void Graphics::setColor(glm::vec4 c, float alpha) {
-	color = c;
+	color	= c;
 	color.a = alpha;
 }
 
@@ -738,14 +740,14 @@ void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
 
 	v.pop_back();
 	MitredLine lineDrawer;
-	lineDrawer.outside = true;
+	lineDrawer.outside	 = true;
 	lineDrawer.thickness = shadow;
 	Geometry geom;
 	int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 
 	auto c = color;
-	c.a = 0.f;
+	c.a	   = 0.f;
 	for (int i = 0; i < numVerts; i += 2) {
 		geom.cols.push_back(color);
 		geom.cols.push_back(c);

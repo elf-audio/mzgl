@@ -139,8 +139,7 @@ bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg
 	try {
 		// Check whether the function call is valid
 		if (!fs::exists(source) || !fs::is_directory(source)) {
-			errMsg =
-				"Source directory " + source.string() + " does not exist or is not a directory.";
+			errMsg = "Source directory " + source.string() + " does not exist or is not a directory.";
 			return false;
 		}
 
@@ -192,8 +191,7 @@ void sleepMicros(long ms) {
 }
 
 bool is_number(const std::string &s) {
-	return !s.empty()
-		   && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+	return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
 
 string uniquerizePath(string path) {
@@ -214,8 +212,7 @@ string uniquerizePath(string path) {
 
 		for (int i = startingIndex; i < 10000; i++) {
 			auto filename = p.stem();
-			auto pp =
-				p.parent_path() / (filenameBase + "-" + to_string(i) + p.extension().string());
+			auto pp		  = p.parent_path() / (filenameBase + "-" + to_string(i) + p.extension().string());
 
 			if (!fs::exists(pp)) {
 				outPath = pp.string();
@@ -374,9 +371,8 @@ string dataPath(string path, string appBundleId) {
 		return s;
 	} else {
 		Log::e() << "Going for bundle" << appBundleId;
-		NSBundle *pBundle =
-			[NSBundle bundleWithIdentifier:[NSString stringWithCString:appBundleId.c_str()
-															  encoding:NSUTF8StringEncoding]];
+		NSBundle *pBundle = [NSBundle
+			bundleWithIdentifier:[NSString stringWithCString:appBundleId.c_str() encoding:NSUTF8StringEncoding]];
 		if (pBundle == nil) {
 			return path;
 		} else {
@@ -453,8 +449,8 @@ string docsPath(string path) {
 	}
 #endif
 #ifdef __APPLE__
-	NSURL *url	 = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
-														   inDomains:NSUserDomainMask] lastObject];
+	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask]
+		lastObject];
 	string _path = [[url path] UTF8String];
 	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
 	if (_path == "/Users/marek/Documents") {
@@ -473,14 +469,13 @@ string docsPath(string path) {
 #elif defined(_WIN32)
 
 	wchar_t *documentsDir;
-	HRESULT result = SHGetKnownFolderPath(
-		FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
+	HRESULT result =
+		SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
 	string retPath;
 
 	if (result == S_OK) {
 		std::wstring ws(documentsDir);
-		std::string documentsDirUtf8 =
-			std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
+		std::string documentsDirUtf8 = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
 
 		TCHAR szExeFileName[MAX_PATH];
 		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
@@ -581,9 +576,8 @@ string getPlatformName() {
 uint64_t getStorageRemainingInBytes() {
 #ifdef __APPLE__
 
-	NSURL *fileURL =
-		[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
-												inDomains:NSUserDomainMask] lastObject];
+	NSURL *fileURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
+															 inDomains:NSUserDomainMask] lastObject];
 
 	NSError *error = nil;
 
@@ -599,9 +593,7 @@ uint64_t getStorageRemainingInBytes() {
 		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
 		if (!results) {
-			NSLog(@"Error retrieving resource keys: %@\n%@",
-				  [error localizedDescription],
-				  [error userInfo]);
+			NSLog(@"Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
 
 			return 1000000000;
 			//		abort();
@@ -695,8 +687,7 @@ void launchUrl(string url) {
 string getAppVersionString() {
 	std::string version = "";
 #ifdef __APPLE__
-	NSString *str =
-		[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	if (str == nil) {
 		return "not available";
 	}
@@ -735,9 +726,7 @@ string getAppVersionString() {
 #	include <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #endif
 
-void saveFileDialog(string msg,
-					string defaultFileName,
-					function<void(string, bool)> completionCallback) {
+void saveFileDialog(string msg, string defaultFileName, function<void(string, bool)> completionCallback) {
 #ifdef AUTO_TEST
 	completionCallback(defaultFileName, randi(2) == 0);
 	return;
@@ -752,8 +741,7 @@ void saveFileDialog(string msg,
 		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
-		  [saveDialog
-			  setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
+		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
 
 		  if (defaultFileName != "")
 			  if (@available(macOS 11.0, *)) {
@@ -809,8 +797,7 @@ void saveFileDialog(string msg,
 	std::wstring wideExtension = L"";
 	if (!extension.empty()) {
 		wideExtension = converter.from_bytes(extension);
-		filter = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0"
-				 + filter;
+		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
 	}
 
 	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";

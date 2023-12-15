@@ -21,6 +21,6 @@ public:
 
 private:
 	Layer *rootLayer = nullptr;
-	void *browser_ = nullptr;
-	bool isShowing = false;
+	void *browser_	 = nullptr;
+	bool isShowing	 = false;
 };

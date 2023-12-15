@@ -23,14 +23,14 @@
 using namespace std;
 
 int Vbo::_numDrawnVerts = 0;
-int Vbo::_numDrawCalls = 0;
-int Vbo::numDrawnVerts = 0;
-int Vbo::numDrawCalls = 0;
+int Vbo::_numDrawCalls	= 0;
+int Vbo::numDrawnVerts	= 0;
+int Vbo::numDrawCalls	= 0;
 void Vbo::resetDrawStats() {
-	numDrawnVerts = _numDrawnVerts;
-	numDrawCalls = _numDrawCalls;
+	numDrawnVerts  = _numDrawnVerts;
+	numDrawCalls   = _numDrawCalls;
 	_numDrawnVerts = 0;
-	_numDrawCalls = 0;
+	_numDrawCalls  = 0;
 }
 // TODO BUG: this is all stupid, deleteing and generating vertex arrays etc.
 #ifdef __ANDROID__
@@ -39,8 +39,9 @@ void Vbo::printVbos() {
 	Log::e() << "BEGIN -----------------------------------------";
 	for (int i = 0; i < vbos.size(); i++) {
 		//Log::e() << "Vbo ("<<i<<") id: " << vbos[i]->vertexArrayObject;
-		Log::d() << vbos[i]->vertexArrayObject << ", " << vbos[i]->vertexBuffer << ", " << vbos[i]->colorbuffer << ", " << vbos[i]->texCoordBuffer
-				 << ", " << vbos[i]->normalBuffer << ", " << vbos[i]->indexBuffer;
+		Log::d() << vbos[i]->vertexArrayObject << ", " << vbos[i]->vertexBuffer << ", " << vbos[i]->colorbuffer
+				 << ", " << vbos[i]->texCoordBuffer << ", " << vbos[i]->normalBuffer << ", "
+				 << vbos[i]->indexBuffer;
 	}
 	Log::e() << "END -----------------------------------------";
 }
@@ -80,19 +81,19 @@ void Vbo::deallocateResources() {
 	if (vertexArrayObject != 0) glDeleteVertexArrays(1, &vertexArrayObject);
 #endif
 
-	vertexBuffer = 0;
-	colorbuffer = 0;
+	vertexBuffer   = 0;
+	colorbuffer	   = 0;
 	texCoordBuffer = 0;
-	normalBuffer = 0;
-	indexBuffer = 0;
+	normalBuffer   = 0;
+	indexBuffer	   = 0;
 #ifndef MZGL_GL2
 	vertexArrayObject = 0;
 #endif
-	numVerts = 0;
-	numCols = 0;
+	numVerts   = 0;
+	numCols	   = 0;
 	numIndices = 0;
-	numTcs = 0;
-	numNorms = 0;
+	numTcs	   = 0;
+	numNorms   = 0;
 
 	mode = PrimitiveType::None;
 }
@@ -113,8 +114,7 @@ Vbo &Vbo::setVertices(const vector<vec4> &verts) {
 	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 4) updating = true;
 
 	if (updating) updateVertBuffer(&verts[0].x);
-	else
-		generateVertBuffer(&verts[0].x, verts.size(), 4);
+	else generateVertBuffer(&verts[0].x, verts.size(), 4);
 	return *this;
 }
 
@@ -127,8 +127,7 @@ Vbo &Vbo::setVertices(const vector<vec3> &verts) {
 	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 3) updating = true;
 
 	if (updating) updateVertBuffer(&verts[0].x);
-	else
-		generateVertBuffer(&verts[0].x, verts.size(), 3);
+	else generateVertBuffer(&verts[0].x, verts.size(), 3);
 	return *this;
 }
 
@@ -141,8 +140,7 @@ Vbo &Vbo::setVertices(const vector<vec2> &verts) {
 	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 2) updating = true;
 
 	if (updating) updateVertBuffer(&verts[0].x);
-	else
-		generateVertBuffer(&verts[0].x, verts.size(), 2);
+	else generateVertBuffer(&verts[0].x, verts.size(), 2);
 	return *this;
 }
 
@@ -153,7 +151,7 @@ void Vbo::generateVertBuffer(const float *data, size_t numVerts, int numDims) {
 		vertexBuffer = 0;
 	}
 	this->vertDimensions = numDims;
-	this->numVerts = numVerts;
+	this->numVerts		 = numVerts;
 #ifndef MZGL_GL2
 	glBindVertexArray(vertexArrayObject);
 #endif
@@ -243,7 +241,7 @@ void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
 
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	this->numCols = numCols;
+	this->numCols		= numCols;
 	this->colDimensions = numDims;
 	glBufferData(GL_ARRAY_BUFFER, numCols * sizeof(float) * colDimensions, data, GL_STATIC_DRAW);
 }
@@ -294,7 +292,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 		if (numCols == 0 && numTcs == 0) {
 			g.nothingShader->begin();
 		} else if (numTcs > 0 && numCols == 0) {
-			if(g.currShader==g.fontShader.get()) {
+			if (g.currShader == g.fontShader.get()) {
 				g.fontShader->begin();
 			} else {
 				g.texShader->begin();
@@ -333,7 +331,8 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 
 	if (colorbuffer != 0) {
 		if (g.currShader->colorAttribute == -1) {
-			Log::e() << "There is no Color attribute in this shader - are you using Drawer and not setting ignoreColor = true?";
+			Log::e()
+				<< "There is no Color attribute in this shader - are you using Drawer and not setting ignoreColor = true?";
 		} else {
 			// 2nd attribute buffer : colors
 			glEnableVertexAttribArray(g.currShader->colorAttribute);

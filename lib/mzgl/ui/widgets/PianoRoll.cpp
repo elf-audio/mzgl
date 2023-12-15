@@ -5,12 +5,12 @@
 #include "maths.h"
 PianoRoll::PianoRoll(Graphics &g)
 	: Layer(g, "piano roll") {
-	bank = 0;
-	mousedNote = NULL;
-	playhead = 0;
+	bank		 = 0;
+	mousedNote	 = NULL;
+	playhead	 = 0;
 	quantizePPQN = 4096 / 4;
-	extending = false;
-	interactive = true;
+	extending	 = false;
+	interactive	 = true;
 }
 
 void PianoRoll::drawGrid(Rectf &r, int majorX, int minorX, int ys) {
@@ -52,18 +52,18 @@ void PianoRoll::draw() {
 	g.translate(this->x + offset, 0, 0);
 	g.scale(zoom, 1, 1);
 	Rectf r = *this;
-	r.x = 0;
+	r.x		= 0;
 	drawGrid(r, pattern->numBars * pattern->beatsPerBar, 4, BANK_SIZE);
 	pattern->lock();
 	auto it = pattern->begin();
 	for (; it != pattern->end(); it++) {
 		TimeOffset t = (*it).first;
-		Note &n = (*it).second;
-		int pitch = n.pitch;
+		Note &n		 = (*it).second;
+		int pitch	 = n.pitch;
 		pitch -= START_NOTE + bank * BANK_SIZE;
 		if (pitch < 0 || pitch >= BANK_SIZE) continue;
 
-		float xOffset = /*this->x + */ beatFraction(t) * beatWidth;
+		float xOffset  = /*this->x + */ beatFraction(t) * beatWidth;
 		float duration = beatFraction(n.length) * beatWidth;
 		drawNote(xOffset, (this->bottom()) - (1 + pitch) * noteHeight, duration, noteHeight);
 	}
@@ -128,9 +128,9 @@ bool PianoRoll::touchDown(float x, float y, int button) {
 		const PatternNote &selectedNote = pattern->find(n, t);
 		if (selectedNote != pattern->end()) {
 			TimeOffset endOfNote = (*selectedNote).first + (*selectedNote).second.length;
-			float endCoord = coordForTime(endOfNote);
+			float endCoord		 = coordForTime(endOfNote);
 
-			mousedNote = (PatternNote *) &selectedNote;
+			mousedNote		= (PatternNote *) &selectedNote;
 			mousedNoteStart = (*selectedNote).first;
 			if (x > endCoord - grabEndDistance) { // extending
 				extending = true;
@@ -144,7 +144,7 @@ bool PianoRoll::touchDown(float x, float y, int button) {
 			Note note(n, 110, pattern->ppqn / 4);
 			// try to insert note
 			mousedNote = (PatternNote *) &pattern->insertNote(note, quantize(t));
-			extending = true;
+			extending  = true;
 		}
 		pattern->unlock();
 	}
@@ -169,14 +169,14 @@ void PianoRoll::touchMoved(float x, float y, int button) {
 		// now need to set zoom given its offset
 
 		// easy to work out zoom, it's just the screen distance / pattern distance
-		float pattDist = b.patternX - a.patternX;
+		float pattDist	 = b.patternX - a.patternX;
 		float screenDist = b.pos.x - a.pos.x;
 
 		zoom = screenDist / pattDist;
 
-		float xx = (a.pos.x + b.pos.x) / 2.f;
+		float xx  = (a.pos.x + b.pos.x) / 2.f;
 		float xxx = (a.patternX + b.patternX) / 2.f;
-		offset = xx - this->x - zoom * (xxx - this->x);
+		offset	  = xx - this->x - zoom * (xxx - this->x);
 
 		if (offset > 0) offset = 0;
 		if (zoom * width + offset < width) {
@@ -208,7 +208,7 @@ void PianoRoll::touchMoved(float x, float y, int button) {
 				Note n = (*mousedNote)->second;
 				pattern->erase((const PatternNote &) *mousedNote);
 				TimeOffset newNoteTime = timeForCoord(coordForTime(mousedNoteStart) + mouseDelta);
-				mousedNote = (PatternNote *) &pattern->insertNote(n, newNoteTime);
+				mousedNote			   = (PatternNote *) &pattern->insertNote(n, newNoteTime);
 			}
 		}
 		pattern->unlock();
@@ -238,14 +238,14 @@ void PianoRoll::touchUp(float x, float y, int button) {
 }
 
 float PianoRoll::touchXToPatternCoords(float x) {
-	float left = this->x + offset;
+	float left	= this->x + offset;
 	float right = this->x + offset + zoom * width;
 	return mapf(x, left, right, this->x, this->x + this->width);
 }
 
 void PianoRoll::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	float mousePatternX = touchXToPatternCoords(x);
-	zoom = std::clamp((float) zoom * pow(2.f, -scrollY * 0.1), 1.f, 100.f);
+	zoom				= std::clamp((float) zoom * pow(2.f, -scrollY * 0.1), 1.f, 100.f);
 
 	offset = x - this->x - zoom * (-scrollX + mousePatternX - this->x);
 	if (offset > 0) offset = 0;

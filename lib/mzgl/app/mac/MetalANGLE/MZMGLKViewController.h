@@ -9,7 +9,7 @@
 
 #import <MetalANGLE/MGLKViewController.h>
 
-@interface MZMGLKViewController : MGLKViewController<MGLKViewDelegate>
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
+@interface MZMGLKViewController : MGLKViewController <MGLKViewDelegate>
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(void *)evtDispatcherPtr;
 
 @end

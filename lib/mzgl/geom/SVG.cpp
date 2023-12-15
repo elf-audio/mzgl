@@ -44,8 +44,7 @@ glm::vec4 parseColor(const string &hex) {
 }
 
 // TODO: replace with glm version
-void doBezierCubic(
-	glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, vector<glm::vec2> &outVerts) {
+void doBezierCubic(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, vector<glm::vec2> &outVerts) {
 	float dist		= distance(p0, p3);
 	float numSteps	= dist / SVG_CUBIC_RESOLUTION;
 	float increment = 1.f / numSteps;
@@ -135,8 +134,7 @@ public:
 		if (filled) {
 			for (int i = 0; i < verts.size(); i++) {
 				if (verts[i].size() < 3) {
-					Log::e() << "ERROR: shape '" << id << "', " << to_string(i)
-							 << " with less than 3 points";
+					Log::e() << "ERROR: shape '" << id << "', " << to_string(i) << " with less than 3 points";
 					return;
 				}
 			}
@@ -170,10 +168,8 @@ public:
 		if (!filled) {
 			if (state.filling) {
 				filled	  = true;
-				fillColor = glm::vec4(state.fillColor.r,
-									  state.fillColor.g,
-									  state.fillColor.b,
-									  state.fillOpacity * state.opacity);
+				fillColor = glm::vec4(
+					state.fillColor.r, state.fillColor.g, state.fillColor.b, state.fillOpacity * state.opacity);
 			}
 		}
 
@@ -218,9 +214,7 @@ public:
 		strokeWeight *= std::max(w, h);
 	}
 
-	void translate(float x, float y) override {
-		applyTransformToPoints({1, 0, 0, 0, 1, 0, x, y, 1});
-	}
+	void translate(float x, float y) override { applyTransformToPoints({1, 0, 0, 0, 1, 0, x, y, 1}); }
 
 	void setUseInfo(pu_gi::xml_node &n) {
 		if (n.attribute("stroke-width")) {
@@ -466,9 +460,7 @@ public:
 		}
 	}
 
-	void getTriangles(vector<glm::vec2> &verts,
-					  vector<glm::vec4> &cols,
-					  vector<unsigned int> &indices) override {
+	void getTriangles(vector<glm::vec2> &verts, vector<glm::vec4> &cols, vector<unsigned int> &indices) override {
 		for (auto c: children) {
 			c->getTriangles(verts, cols, indices);
 		}
@@ -712,8 +704,8 @@ bool SVGDoc::load(string path) {
 	auto status			= doc.load_file((wchar_t *) (unicodePath.c_str()));
 
 	if (status.status != pu_gi::status_ok) {
-		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description()
-				 << " - at character " << status.offset;
+		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description() << " - at character "
+				 << status.offset;
 		return false;
 	}
 #endif
@@ -731,9 +723,7 @@ bool SVGDoc::load(string path) {
 	return true;
 }
 
-void SVGDoc::getTriangles(vector<glm::vec2> &verts,
-						  vector<glm::vec4> &cols,
-						  vector<unsigned int> &indices) {
+void SVGDoc::getTriangles(vector<glm::vec2> &verts, vector<glm::vec4> &cols, vector<unsigned int> &indices) {
 	rootGroup->getTriangles(verts, cols, indices);
 }
 

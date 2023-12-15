@@ -28,4 +28,3 @@ bool pointIsInsideTriangle(vec2 pt, vec2 v1, vec2 v2, vec2 v3);
  * different side of the line.
  */
 float whichSideOfLineIsPoint(const vec2 &a, const vec2 &b, const vec2 &p);
-

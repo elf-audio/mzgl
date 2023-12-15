@@ -14,42 +14,40 @@
 	BOOL allowFoldersOnly;
 }
 
--(id) init {
+- (id)init {
 	self = [super init];
-	
-	if(self != nil) {
-		allowAll = YES;
+
+	if (self != nil) {
+		allowAll		 = YES;
 		allowFoldersOnly = YES;
-		allowedExts = @[@"png", @"tiff", @"jpg", @"gif", @"jpeg"];
+		allowedExts		 = @[ @"png", @"tiff", @"jpg", @"gif", @"jpeg" ];
 	}
 	return self;
 }
 
--(void) enableFoldersOnly: (BOOL) _allowFoldersOnly {
+- (void)enableFoldersOnly:(BOOL)_allowFoldersOnly {
 	allowFoldersOnly = _allowFoldersOnly;
 }
 
--(void) setAllowedExtensions: (NSArray *)exts {
+- (void)setAllowedExtensions:(NSArray *)exts {
 	allowedExts = exts;
-	allowAll = NO;
+	allowAll	= NO;
 }
 
-
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url {
-	if(allowAll || allowFoldersOnly) return YES;
+	if (allowAll || allowFoldersOnly) return YES;
 
-	NSString* ext = [url pathExtension];
-	if ([ext isEqualToString: @""] || [ext isEqualToString: @"/"] || ext == nil || ext == nil || [ext length] < 1) {
+	NSString *ext = [url pathExtension];
+	if ([ext isEqualToString:@""] || [ext isEqualToString:@"/"] || ext == nil || ext == nil || [ext length] < 1) {
 		return YES;
 	}
 
-	for(NSString *e in allowedExts) {
+	for (NSString *e in allowedExts) {
 		if ([ext caseInsensitiveCompare:e] == NSOrderedSame) {
 			return YES;
 		}
 	}
 	return NO;
 }
-
 
 @end

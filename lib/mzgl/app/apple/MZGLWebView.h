@@ -14,16 +14,16 @@
 #include <memory>
 class EventDispatcher;
 #if !TARGET_OS_IOS
-#import <Cocoa/Cocoa.h>
+#	import <Cocoa/Cocoa.h>
 #endif
-
 
 #import <WebKit/WebKit.h>
 
-@interface MZGLWebView : WKWebView<WKScriptMessageHandler, WKUIDelegate, NSWindowDelegate>
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher andUrl: (NSString*) url;
-- (void) shutdown;
+@interface MZGLWebView : WKWebView <WKScriptMessageHandler, WKUIDelegate, NSWindowDelegate>
+- (id)initWithFrame:(NSRect)frame
+	eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher
+			 andUrl:(NSString *)url;
+- (void)shutdown;
 // - (void*) getApp;
 
 @end
-

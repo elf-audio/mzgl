@@ -16,7 +16,7 @@ using ScopedUrlRef = std::shared_ptr<ScopedUrl>;
 
 /**
  * This creates a shared_ptr of a url - when it falls out of scope
- * the destructor is called which can delete the file pointed to if needed
+ * the destructor is called which may delete the file pointed to if needed
  * for things like async loading of a temporary file when you don't want
  * to pass around callbacks.
  */
@@ -33,13 +33,11 @@ public:
 	static ScopedUrlRef createWithDeleter(const std::string &url) {
 		return std::shared_ptr<ScopedUrl>(new ScopedUrl(url, true));
 	}
-	
+
 	static ScopedUrlRef createWithCallback(const std::string &url, std::function<void()> callback) {
 		return std::shared_ptr<ScopedUrl>(new ScopedUrl(url, callback));
 	}
-	void deleteFileOnDestruction() {
-		shouldTryToDelete = true;
-	}
+	void deleteFileOnDestruction() { shouldTryToDelete = true; }
 	// if you want to force things
 	// to happen before destructor
 	// is called.
@@ -47,16 +45,15 @@ public:
 	~ScopedUrl();
 
 private:
-	bool shouldTryToDelete = false;
+	bool shouldTryToDelete		   = false;
 	std::function<void()> callback = nullptr;
-	
+
 	ScopedUrl(const std::string &url, bool shouldTryToDelete)
 		: url(url)
 		, shouldTryToDelete(shouldTryToDelete) {}
-	
+
 	ScopedUrl(const std::string &url, std::function<void()> callback)
 		: url(url)
 		, shouldTryToDelete(false)
 		, callback(callback) {}
-	
 };

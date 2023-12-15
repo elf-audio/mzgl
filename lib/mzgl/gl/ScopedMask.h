@@ -11,25 +11,18 @@
 #include "Graphics.h"
 
 struct ScopedMask {
-	
-
 	// you can initialize with empty constructor
 	// so there's no mask actually happening
 	// this is handy when you want conditinal masks
-	ScopedMask() {
-		masking = false;
-	}
-	ScopedMask(Graphics &g, const Rectf &r) {
-		startMask(g, r);
-	}
+	ScopedMask() { masking = false; }
+	ScopedMask(Graphics &g, const Rectf &r) { startMask(g, r); }
 
 	void startMask(Graphics &g, const Rectf &r);
 
 	void stopMask();
 
-	virtual ~ScopedMask() {
-		stopMask();
-	}
+	virtual ~ScopedMask() { stopMask(); }
+
 private:
 	bool scissorWasEnabled = false;
 	Rectf rect;

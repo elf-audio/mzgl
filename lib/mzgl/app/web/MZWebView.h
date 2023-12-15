@@ -19,7 +19,7 @@ class App;
 class MZWebView {
 public:
 	MZWebView(App *app);
-	
+
 	/**
 	 * Displays a fullscreen web view pointing to the url in the parameter.
 	 *
@@ -42,16 +42,15 @@ public:
 	 * @param loadedCallback - gets called when WebView is fully loaded and
 	 *                         ready to receive javascript calls if needed.
 	 */
-	void show(const std::string &path,
-			  std::function<void(const std::string &data)> jsCallback,
-			  std::function<void()> loadedCallback = []() {});
-	
+	void show(
+		const std::string &path,
+		std::function<void(const std::string &data)> jsCallback,
+		std::function<void()> loadedCallback = []() {});
+
 	/**
 	 * Call a javascript function inside the html.
 	 */
 	void callJS(const std::string &js);
-	
-	
-	
+
 	std::shared_ptr<MZWebViewImpl> impl;
 };

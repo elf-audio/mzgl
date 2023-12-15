@@ -14,12 +14,15 @@
 using namespace std;
 
 // first member of verts is the shape, next ones are the holes
-int Triangulator::triangulate(vector<vector<glm::vec2>> &verts, vector<glm::vec2> &outVerts, vector<unsigned int> &indices) {
+int Triangulator::triangulate(vector<vector<glm::vec2>> &verts,
+							  vector<glm::vec2> &outVerts,
+							  vector<unsigned int> &indices) {
 	// check for adjacent duplicates
 	for (int k = 0; k < verts.size(); k++) {
 		for (int i = 0; i < verts[k].size(); i++) {
 			for (int j = i + 1; j < verts[k].size(); j++) {
-				if (distance(verts[k][i], verts[k][j]) < 0.0001) { // this should be FLT_EPSILON MAYBE? or at least match the triangulator
+				if (distance(verts[k][i], verts[k][j])
+					< 0.0001) { // this should be FLT_EPSILON MAYBE? or at least match the triangulator
 					//Log::e() << "found duplicate";
 					verts[k].erase(verts[k].begin() + j);
 					j--;
@@ -63,10 +66,10 @@ int Triangulator::triangulate(vector<vector<glm::vec2>> &verts, vector<glm::vec2
 		int i = 0;
 		for (auto v: verts[0]) {
 			MPEPolyPoint *Point = MPE_PolyPushPoint(&PolyContext);
-			Point->X = v.x;
-			Point->Y = v.y;
-			Point->index = i;
-			Point->array = 0;
+			Point->X			= v.x;
+			Point->Y			= v.y;
+			Point->index		= i;
+			Point->array		= 0;
 			i++;
 		}
 	}
@@ -81,10 +84,10 @@ int Triangulator::triangulate(vector<vector<glm::vec2>> &verts, vector<glm::vec2
 		}
 		for (int j = 0; j < verts[i].size(); j++) {
 			MPEPolyPoint *Hole = MPE_PolyPushPoint(&PolyContext);
-			Hole->X = verts[i][j].x;
-			Hole->Y = verts[i][j].y;
-			Hole->index = j;
-			Hole->array = i;
+			Hole->X			   = verts[i][j].x;
+			Hole->Y			   = verts[i][j].y;
+			Hole->index		   = j;
+			Hole->array		   = i;
 		}
 
 		MPE_PolyAddEdge(&PolyContext);
@@ -97,16 +100,15 @@ int Triangulator::triangulate(vector<vector<glm::vec2>> &verts, vector<glm::vec2
 	for (int i = 0; i < verts.size(); i++) {
 		outVerts.insert(outVerts.end(), verts[i].begin(), verts[i].end());
 		if (i == 0) offsets.push_back(0);
-		else
-			offsets.push_back(offsets[i - 1] + (unsigned int) verts[i - 1].size());
+		else offsets.push_back(offsets[i - 1] + (unsigned int) verts[i - 1].size());
 	}
 
 	// The resulting triangles can be used like so
 	for (uxx i = 0; i < PolyContext.TriangleCount; ++i) {
 		MPEPolyTriangle *Triangle = PolyContext.Triangles[i];
-		MPEPolyPoint *PointA = Triangle->Points[0];
-		MPEPolyPoint *PointB = Triangle->Points[1];
-		MPEPolyPoint *PointC = Triangle->Points[2];
+		MPEPolyPoint *PointA	  = Triangle->Points[0];
+		MPEPolyPoint *PointB	  = Triangle->Points[1];
+		MPEPolyPoint *PointC	  = Triangle->Points[2];
 		indices.push_back((int) startIndex + PointA->index + offsets[PointA->array]);
 		indices.push_back((int) startIndex + PointB->index + offsets[PointB->array]);
 		indices.push_back((int) startIndex + PointC->index + offsets[PointC->array]);

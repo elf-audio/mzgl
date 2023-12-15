@@ -18,15 +18,13 @@ public:
 	void start() override;
 	void stop() override;
 	bool isRunning() override;
-	
-	
+
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
-	
+
 private:
 	bool running = false;
 	std::shared_ptr<RtAudio> audio;
-
 };
 
 #ifdef __APPLE__

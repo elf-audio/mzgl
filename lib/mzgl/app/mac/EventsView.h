@@ -10,17 +10,15 @@
 
 #import <Cocoa/Cocoa.h>
 #ifdef USE_METALANGLE
-#include "MZMGLKView.h"
-#define GL_VIEW_CLASS MZMGLKView
+#	include "MZMGLKView.h"
+#	define GL_VIEW_CLASS MZMGLKView
 
 #else
-#include "MZGLView.h"
-#define GL_VIEW_CLASS MZGLView
+#	include "MZGLView.h"
+#	define GL_VIEW_CLASS MZGLView
 #endif
 
-
-@interface EventsView : GL_VIEW_CLASS<NSWindowDelegate>
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
-- (void) shutdown;
+@interface EventsView : GL_VIEW_CLASS <NSWindowDelegate>
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
+- (void)shutdown;
 @end
-

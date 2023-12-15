@@ -43,7 +43,8 @@ struct Geometry {
 		}
 		texCoords.resize(verts.size());
 		for (int i = 0; i < verts.size(); i++) {
-			texCoords[i] = vec2((verts[i].x - minV.x) / (maxV.x - minV.x), (verts[i].y - minV.y) / (maxV.y - minV.y));
+			texCoords[i] =
+				vec2((verts[i].x - minV.x) / (maxV.x - minV.x), (verts[i].y - minV.y) / (maxV.y - minV.y));
 		}
 	}
 	bool empty() const { return verts.empty(); }

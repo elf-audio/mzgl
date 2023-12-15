@@ -14,6 +14,6 @@
 #endif
 @interface AudioUnitViewController : AUViewController <AUAudioUnitFactory>
 #if TARGET_OS_IOS
--(MZGLKitView*) getView;
+- (MZGLKitView *)getView;
 #endif
 @end

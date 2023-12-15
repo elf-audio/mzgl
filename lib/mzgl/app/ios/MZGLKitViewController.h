@@ -9,25 +9,23 @@
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
 #ifdef MZGL_PLUGIN
-#import <CoreAudioKit/CoreAudioKit.h>
+#	import <CoreAudioKit/CoreAudioKit.h>
 #endif
 #import "MZGLKitView.h"
 class App;
 
 class EventDispatcher;
-@interface MZGLKitViewController : GLKViewController
+@interface MZGLKitViewController
+	: GLKViewController
 #ifdef MZGL_PLUGIN
-// NOT SURE IF WE NEED THESE, AS THERES A DIFFERENT CLASS DOING IT I THINK
-<AUAudioUnitFactory,NSExtensionRequestHandling,GLKViewControllerDelegate>
+	  // NOT SURE IF WE NEED THESE, AS THERES A DIFFERENT CLASS DOING IT I THINK
+	  <AUAudioUnitFactory, NSExtensionRequestHandling, GLKViewControllerDelegate>
 #else
-<GLKViewControllerDelegate>
+	  <GLKViewControllerDelegate>
 #endif
 
-- (id) initWithApp: (std::shared_ptr<App>) app;
-- (std::shared_ptr<EventDispatcher>) getEventDispatcher;
+- (id)initWithApp:(std::shared_ptr<App>)app;
+- (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 //- (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
-- (MZGLKitView*) getView;
+- (MZGLKitView *)getView;
 @end
-
-
-

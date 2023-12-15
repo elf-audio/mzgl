@@ -24,7 +24,7 @@ struct Stopwatch {
      */
 	std::uint64_t getTimeDeltaMs() {
 		auto duration = std::chrono::steady_clock::now() - startTime;
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+		auto ms		  = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 		return ms.count();
 	}
 

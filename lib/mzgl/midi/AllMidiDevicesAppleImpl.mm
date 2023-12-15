@@ -22,7 +22,7 @@ void NSLogError(OSStatus c, const std::string &str) {
 
 static std::string nameOfEndpoint(MIDIEndpointRef ref) {
 	CFStringRef string = nil;
-	OSStatus s = MIDIObjectGetStringProperty(ref, kMIDIPropertyDisplayName, (CFStringRef *) &string);
+	OSStatus s		   = MIDIObjectGetStringProperty(ref, kMIDIPropertyDisplayName, (CFStringRef *) &string);
 	if (s != noErr) {
 		return "Unknown name";
 	}
@@ -75,13 +75,13 @@ void AllMidiDevicesAppleImpl::setup() {
 void AllMidiDevicesAppleImpl::autoPoll() {
 	if (running) return;
 	// keep checking for new ports
-	running = true;
+	running			  = true;
 	portScannerThread = std::thread([this]() {
 #if defined(__APPLE__) && DEBUG
 		pthread_setname_np("AllMidiIns::portScanner");
 #endif
 		std::atomic<bool> doneScanning = true;
-		auto *ptr = &doneScanning;
+		auto *ptr					   = &doneScanning;
 		while (running) {
 			[[NSOperationQueue mainQueue] addOperationWithBlock:^{
 			  if (running) scanForDevices();
@@ -126,9 +126,9 @@ AllMidiDevicesAppleImpl::~AllMidiDevicesAppleImpl() {
 
 void AllMidiDevicesAppleImpl::scanForDevices() {
 	const ItemCount numberOfDestinations = MIDIGetNumberOfDestinations();
-	const ItemCount numberOfSources = MIDIGetNumberOfSources();
+	const ItemCount numberOfSources		 = MIDIGetNumberOfSources();
 
-	auto removedSources = sources;
+	auto removedSources		 = sources;
 	auto removedDestinations = destinations;
 
 	for (ItemCount index = 0; index < numberOfDestinations; ++index) {
@@ -266,7 +266,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetLis
 					// now check to see if the message is finished
 					// by seeing which status we have and looking it
 					// up in known statuses/lengths
-					int status = pendingMsg[0] & 0xF0;
+					int status		= pendingMsg[0] & 0xF0;
 					bool shouldEmit = false;
 					switch (status) {
 						case MIDI_NOTE_OFF:
@@ -299,7 +299,8 @@ void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetLis
 void AllMidiDevicesAppleImpl::midiNotifyAdd(const MIDIObjectAddRemoveNotification *notification) {
 	if (notification->child == virtualDestinationEndpoint || notification->child == virtualSourceEndpoint) return;
 
-	if (notification->childType == kMIDIObjectType_Destination) connectDestination((MIDIEndpointRef) notification->child);
+	if (notification->childType == kMIDIObjectType_Destination)
+		connectDestination((MIDIEndpointRef) notification->child);
 	else if (notification->childType == kMIDIObjectType_Source)
 		connectSource((MIDIEndpointRef) notification->child);
 }
@@ -307,7 +308,8 @@ void AllMidiDevicesAppleImpl::midiNotifyAdd(const MIDIObjectAddRemoveNotificatio
 void AllMidiDevicesAppleImpl::midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification) {
 	if (notification->child == virtualDestinationEndpoint || notification->child == virtualSourceEndpoint) return;
 
-	if (notification->childType == kMIDIObjectType_Destination) disconnectDestination((MIDIEndpointRef) notification->child);
+	if (notification->childType == kMIDIObjectType_Destination)
+		disconnectDestination((MIDIEndpointRef) notification->child);
 	else if (notification->childType == kMIDIObjectType_Source)
 		disconnectSource((MIDIEndpointRef) notification->child);
 }
@@ -315,7 +317,9 @@ void AllMidiDevicesAppleImpl::midiNotifyRemove(const MIDIObjectAddRemoveNotifica
 void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 	switch (notification->messageID) {
 		case kMIDIMsgObjectAdded: midiNotifyAdd((const MIDIObjectAddRemoveNotification *) notification); break;
-		case kMIDIMsgObjectRemoved: midiNotifyRemove((const MIDIObjectAddRemoveNotification *) notification); break;
+		case kMIDIMsgObjectRemoved:
+			midiNotifyRemove((const MIDIObjectAddRemoveNotification *) notification);
+			break;
 		case kMIDIMsgSetupChanged:
 		case kMIDIMsgPropertyChanged:
 		case kMIDIMsgThruConnectionsChanged:
@@ -340,7 +344,7 @@ void AllMidiDevicesAppleImpl::sendBytes(const UInt8 *data, UInt32 size) {
 	assert(size < 65536);
 	Byte packetBuffer[size + 100];
 	MIDIPacketList *packetList = (MIDIPacketList *) packetBuffer;
-	MIDIPacket *packet = MIDIPacketListInit(packetList);
+	MIDIPacket *packet		   = MIDIPacketListInit(packetList);
 
 	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, size, data);
 
@@ -375,12 +379,12 @@ void AllMidiDevicesAppleImpl::sendSysex(const UInt8 *data, UInt32 size) {
 
 		request->data = new Byte[size];
 		memcpy((void *) request->data, (void *) data, size);
-		request->bytesToSend = size;
-		request->completionProc = &cleanupSysex;
+		request->bytesToSend	  = size;
+		request->completionProc	  = &cleanupSysex;
 		request->completionRefCon = request;
-		request->complete = false;
-		request->destination = MIDIGetDestination(index);
-		OSStatus res = MIDISendSysex(request);
+		request->complete		  = false;
+		request->destination	  = MIDIGetDestination(index);
+		OSStatus res			  = MIDISendSysex(request);
 		if (res != noErr) {
 			printf("error sending sysex\n");
 		}

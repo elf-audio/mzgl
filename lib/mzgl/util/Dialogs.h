@@ -87,13 +87,14 @@ public:
 	/**
 	 * launch a dialog with a message and 2 buttons and a cancel button
 	 */
-	void twoOptionCancelDialog(std::string title,
-							   std::string msg,
-							   std::string buttonOneText,
-							   std::function<void()> buttonOnePressed,
-							   std::string buttonTwoText,
-							   std::function<void()> buttonTwoPressed,
-							   std::function<void()> cancelPressed = [](){}) const;
+	void twoOptionCancelDialog(
+		std::string title,
+		std::string msg,
+		std::string buttonOneText,
+		std::function<void()> buttonOnePressed,
+		std::string buttonTwoText,
+		std::function<void()> buttonTwoPressed,
+		std::function<void()> cancelPressed = []() {}) const;
 
 	/**
 	 * launch a dialog with a message and 3 buttons
@@ -110,28 +111,26 @@ public:
 	/**
 	 * launch a dialog with a message and 3 buttons and a cancel button
 	 */
-	void threeOptionCancelDialog(std::string title,
-								 std::string msg,
-								 std::string buttonOneText,
-								 std::function<void()> buttonOnePressed,
-								 std::string buttonTwoText,
-								 std::function<void()> buttonTwoPressed,
-								 std::string buttonThreeText,
-								 std::function<void()> buttonThreePressed,
-								 std::function<void()> cancelPressed = [](){}) const;
+	void threeOptionCancelDialog(
+		std::string title,
+		std::string msg,
+		std::string buttonOneText,
+		std::function<void()> buttonOnePressed,
+		std::string buttonTwoText,
+		std::function<void()> buttonTwoPressed,
+		std::string buttonThreeText,
+		std::function<void()> buttonThreePressed,
+		std::function<void()> cancelPressed = []() {}) const;
 
 	/**
 	 * launch a dialog with a message and 3 buttons and a cancel button
 	 */
-	void chooseImage(
-		std::function<void(bool success, std::string imgPath)> completionCallback) const;
+	void chooseImage(std::function<void(bool success, std::string imgPath)> completionCallback) const;
 
 	/**
 	 * If the OS has a standard sharing dialog, this method launches one of those.
 	 */
-	void share(std::string message,
-			   std::string path,
-			   std::function<void(bool)> completionCallback) const;
+	void share(std::string message, std::string path, std::function<void(bool)> completionCallback) const;
 
 	/**
 	 * Launch file opening dialog
@@ -149,16 +148,15 @@ public:
 	 * launches a web view pointing to a web url - only really needed on iOS (for ableton lite download)
 	 */
 	void launchUrlInWebView(
-		std::string url, std::function<void()> completionCallback = [](){}) const;
+		std::string url, std::function<void()> completionCallback = []() {}) const;
 
 	/**
 	 * launch a webview that displays the html contained in the string. Optionally calls completionCallback if webview is dismissed
 	 */
-	void displayHtmlInWebView(const std::string &html,
-							  std::function<void()> completionCallback = [](){}) const;
+	void displayHtmlInWebView(
+		const std::string &html, std::function<void()> completionCallback = []() {}) const;
 
-	void chooseFolder(std::string msg,
-					  std::function<void(std::string, bool)> completionCallback) const;
+	void chooseFolder(std::string msg, std::function<void(std::string, bool)> completionCallback) const;
 };
 
 #ifdef UNIT_TEST

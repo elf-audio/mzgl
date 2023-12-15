@@ -23,13 +23,21 @@ public:
 	void draw(Graphics &g, const std::string &text, float x, float y);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign);
-	void addVerts(
-		const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs, HTextAlign halign, VTextAlign valign);
+	void addVerts(const std::string &text,
+				  glm::vec2 c,
+				  std::vector<glm::vec2> &verts,
+				  std::vector<glm::vec2> &uvs,
+				  HTextAlign halign,
+				  VTextAlign valign);
 
-	void addVerts(const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs);
+	void
+		addVerts(const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs);
 
 	void drawCentred(Graphics &g, const std::string &text, glm::vec2 c);
-	void drawVerticallyCentred(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign align = HTextAlign::Left);
+	void drawVerticallyCentred(Graphics &g,
+							   const std::string &text,
+							   glm::vec2 c,
+							   HTextAlign align = HTextAlign::Left);
 	void drawHorizontallyCentred(Graphics &g, const std::string &text, glm::vec2 c);
 
 	// draws the string making c the bottom left corner - get rid of this in favour of draw(..., halign, valign)
@@ -63,7 +71,7 @@ public:
 #endif
 private:
 	FONScontext *fs = nullptr;
-	int fontNormal = -1;
-	float size = 0;
-	float scale = 1;
+	int fontNormal	= -1;
+	float size		= 0;
+	float scale		= 1;
 };

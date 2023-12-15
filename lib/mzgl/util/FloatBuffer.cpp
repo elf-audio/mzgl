@@ -69,7 +69,7 @@ void FloatBuffer::setMonoFromStereo(const float *buff, size_t numFrames) {
 void FloatBuffer::setStereoFromMono(const float *data, int length) {
 	resize(length * 2);
 	for (int i = 0; i < length; i++) {
-		(*this)[i * 2] = data[i];
+		(*this)[i * 2]	   = data[i];
 		(*this)[i * 2 + 1] = data[i];
 	}
 }
@@ -174,7 +174,7 @@ float FloatBuffer::minValue() const {
 
 int FloatBuffer::findAbsMaxPos() const {
 	float max = 0;
-	int pos = 0;
+	int pos	  = 0;
 	for (int i = 0; i < size(); i++) {
 		if (abs((*this)[i]) > max) {
 			max = abs((*this)[i]);
@@ -194,7 +194,7 @@ int FloatBuffer::findMaxPos() const {
 	for (int i = 0; i < size(); i++) {
 		if ((*this)[i] > maxVal) {
 			maxVal = (*this)[i];
-			pos = i;
+			pos	   = i;
 		}
 	}
 #endif
@@ -212,7 +212,7 @@ int FloatBuffer::findMinPos() const {
 	for (int i = 0; i < size(); i++) {
 		if ((*this)[i] < minVal) {
 			minVal = (*this)[i];
-			pos = i;
+			pos	   = i;
 		}
 	}
 #endif
@@ -238,7 +238,7 @@ void FloatBuffer::normalize(float min, float max) {
 	float inMin, inMax;
 	getMinMax(inMin, inMax);
 
-	float norm = 1.f / (inMax - inMin);
+	float norm	= 1.f / (inMax - inMin);
 	float scale = max - min;
 
 	for (int i = 0; i < size(); i++) {
@@ -340,8 +340,8 @@ void FloatBuffer::get(float *buff, int len) const {
 
 void FloatBuffer::getMonoAsStereo(float *buff, int length) const {
 	for (int i = 0; i < length; i++) {
-		float s = (*this)[i];
-		buff[i * 2] = s;
+		float s			= (*this)[i];
+		buff[i * 2]		= s;
 		buff[i * 2 + 1] = s;
 	}
 }
@@ -392,7 +392,11 @@ void FloatBuffer::fadeIn(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf("ERROR: FloatBuffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n", length, numChans, size());
+		printf(
+			"ERROR: FloatBuffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n",
+			length,
+			numChans,
+			size());
 	}
 }
 
@@ -423,7 +427,11 @@ void FloatBuffer::fadeOut(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf("ERROR: FloatBuffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n", length, numChans, size());
+		printf(
+			"ERROR: FloatBuffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n",
+			length,
+			numChans,
+			size());
 	}
 }
 
@@ -597,8 +605,7 @@ void FloatBuffer::clamp(float min, float max) {
 #else
 	for (int i = 0; i < size(); i++) {
 		if ((*this)[i] < min) (*this)[i] = min;
-		else if ((*this)[i] > max)
-			(*this)[i] = max;
+		else if ((*this)[i] > max) (*this)[i] = max;
 	}
 #endif
 }
@@ -616,8 +623,8 @@ void FloatBuffer::convertToMono(int originalNumChannels) {
 }
 // linear interpolation
 float FloatBuffer::interpolate(double p) const noexcept {
-	int a = p;
-	int b = a + 1;
+	int a	= p;
+	int b	= a + 1;
 	float m = p - a;
 	if (b >= size()) {
 		if (a >= size()) {
@@ -648,8 +655,8 @@ float FloatBuffer::interpolateWrapping(double index) const noexcept {
 }
 
 void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept {
-	int a = p;
-	int b = a + 1;
+	int a	= p;
+	int b	= a + 1;
 	float m = p - a;
 	if (b * 2 + 1 >= size()) {
 		if (a * 2 + 1 >= size()) {
@@ -696,7 +703,7 @@ void FloatBuffer::combineStereo(const FloatBuffer &l, const FloatBuffer &r) {
 	//mzAssert(l.size()==r.size());
 
 	for (int i = 0; i < l.size(); i++) {
-		(*this)[i * 2] = l[i];
+		(*this)[i * 2]	   = l[i];
 		(*this)[i * 2 + 1] = r[i];
 	}
 }

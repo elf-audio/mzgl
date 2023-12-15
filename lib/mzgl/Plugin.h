@@ -23,9 +23,9 @@ struct MidiMessage;
 
 class Serializable {
 public:
-	virtual std::string getIdentifier()							 = 0; // { return "koalafx"; }
-	virtual void		serialize(std::vector<uint8_t> &outData) = 0;
-	virtual void		deserialize(const std::vector<uint8_t> &outData) = 0;
+	virtual std::string getIdentifier()							  = 0; // { return "koalafx"; }
+	virtual void serialize(std::vector<uint8_t> &outData)		  = 0;
+	virtual void deserialize(const std::vector<uint8_t> &outData) = 0;
 
 	// this is for if you need to serialize a lot of data
 	virtual void serializeByNSDictionary(const void *nsdict) {}
@@ -44,7 +44,7 @@ public:
  */
 class EffectPreset {
 public:
-	std::string			 name;
+	std::string name;
 	std::vector<uint8_t> data;
 	EffectPreset(std::string name)
 		: name(name) {}
@@ -129,30 +129,30 @@ public:
 	}
 
 	void deleteUserPreset(int which) {
-		std::string presetToDelete =
-			getUserPresetDir() + "/" + getUserPresetNames()[which] + getExt();
+		std::string presetToDelete = getUserPresetDir() + "/" + getUserPresetNames()[which] + getExt();
 		fs::remove(presetToDelete);
 	}
 
 	void saveUserPreset(const std::string &name) {
 		createUserPresetDirIfNotExist();
-		std::string			 path = getUserPresetDir() + "/" + name + getExt();
+		std::string path = getUserPresetDir() + "/" + name + getExt();
 		std::vector<uint8_t> data;
 		plugin->serialize(data);
 		Log::d() << "Writing preset to " << path;
 		writeFile(path, data);
 	}
 
-	std::function<std::vector<std::string>()> getUserPresetNamesCallback =
-		[]() -> std::vector<std::string> { return std::vector<std::string>(); };
+	std::function<std::vector<std::string>()> getUserPresetNamesCallback = []() -> std::vector<std::string> {
+		return std::vector<std::string>();
+	};
 
 	virtual std::string getCurrentPresetName() { return currPresetName; }
 };
 
 struct PluginMidiOutMessage {
 	MidiMessage msg;
-	int			delay; // in samples
-	int			outputNo;
+	int delay; // in samples
+	int outputNo;
 	PluginMidiOutMessage(int outputNo, const MidiMessage &m, int delay)
 		: outputNo(outputNo)
 		, msg(m)
@@ -177,7 +177,7 @@ public:
 
 	virtual int getNumOutputBusses() { return 1; }
 
-	virtual int			getNumMidiOuts() { return 0; }
+	virtual int getNumMidiOuts() { return 0; }
 	virtual std::string getMidiOutName(int index) { return ""; }
 
 	// MUST HAPPEN ON AUDIO THREAD! (i.e. within process call
@@ -190,7 +190,7 @@ public:
 
 	size_t getNumParams() { return params.size(); }
 
-	size_t							 getNumPresets() { return getPresetManager()->getNumPresets(); }
+	size_t getNumPresets() { return getPresetManager()->getNumPresets(); }
 	std::shared_ptr<PluginParameter> getParam(unsigned int i) { return params[i]; }
 
 	bool isInstrument() { return pluginIsInstrument; }
@@ -213,7 +213,7 @@ public:
 		}
 	}
 
-	std::function<bool()>		   isRunning = []() { return true; };
+	std::function<bool()> isRunning = []() { return true; };
 	std::shared_ptr<PresetManager> getPresetManager() {
 		if (presetManager == nullptr) {
 			presetManager = std::make_shared<PresetManager>(this);
@@ -235,7 +235,7 @@ public:
 	double beatPosition = 0.0;
 
 	virtual void hostIsPlayingChanged() {}
-	void		 setHostIsPlaying(bool b) {
+	void setHostIsPlaying(bool b) {
 		if (b != hostIsPlaying) {
 			hostIsPlaying = b;
 			hostIsPlayingChanged();
@@ -253,7 +253,7 @@ public:
 	std::vector<PluginMidiOutMessage> midiOutMessages;
 
 protected:
-	bool						   hostIsPlaying = false;
+	bool hostIsPlaying = false;
 	std::shared_ptr<PresetManager> presetManager;
 
 	// generic float slider
@@ -262,22 +262,19 @@ protected:
 		params.push_back(std::make_shared<PluginParameter>(name, defaultValue, from, to, unit));
 	}
 
-	void addIntParameter(
-		std::string name, int defaultValue, int from = 0, int to = 1, std::string unit = "") {
+	void addIntParameter(std::string name, int defaultValue, int from = 0, int to = 1, std::string unit = "") {
 		params.push_back(std::make_shared<PluginParameter>(name, defaultValue, from, to, unit));
 	}
 
 	// indexed
-	void addIndexedParameter(std::string					 name,
-							 int							 defaultValue,
-							 const std::vector<std::string> &options) {
+	void addIndexedParameter(std::string name, int defaultValue, const std::vector<std::string> &options) {
 		params.push_back(std::make_shared<PluginParameter>(name, defaultValue, options));
 	}
 
 	std::string getParameterName(int i) { return params[i]->name; }
 
 	std::vector<std::shared_ptr<PluginParameter>> params;
-	std::function<void(unsigned int, float)>	  paramChanged;
+	std::function<void(unsigned int, float)> paramChanged;
 
 private:
 	double sampleRate = 48000.0;

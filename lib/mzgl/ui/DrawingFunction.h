@@ -9,12 +9,12 @@
 
 #include "Layer.h"
 
-class DrawingFunction: public Layer {
+class DrawingFunction : public Layer {
 public:
 	std::function<void(Graphics &g)> func;
-	DrawingFunction(Graphics &g, std::function<void(Graphics &g)> func): Layer(g), func(func) {}
-	
-	void draw() override {
-		func(g);
-	}
+	DrawingFunction(Graphics &g, std::function<void(Graphics &g)> func)
+		: Layer(g)
+		, func(func) {}
+
+	void draw() override { func(g); }
 };

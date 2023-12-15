@@ -90,7 +90,7 @@ bool Font::load(const vector<unsigned char> &data, float size) {
 
 	GetError();
 	this->size = size / 2.f;
-	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+	fs		   = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
 
 	//fs = glfonsCreate(1024, 1024, FONS_ZERO_TOPLEFT);
@@ -119,7 +119,7 @@ bool Font::load(string path, float size) {
 
 	GetError();
 	this->size = size / 2.f;
-	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+	fs		   = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 	GetError();
 	if (fs == NULL) {
 		Log::e() << "Could not create stash.";
@@ -151,16 +151,15 @@ std::string Font::ellipsize(const std::string &str, int w) const {
 	auto s = str;
 
 	auto centreIndex = s.size() / 2;
-	auto front = s.substr(0, centreIndex - 2);
-	auto back = s.substr(centreIndex + 1);
+	auto front		 = s.substr(0, centreIndex - 2);
+	auto back		 = s.substr(centreIndex + 1);
 
 	bool flipFlop = false;
 	while (front.size() > 1 && back.size() > 1) {
 		s = front + "..." + back;
 		if (getWidth(s) <= w) return s;
 		if (flipFlop) back.erase(0, 1);
-		else
-			front.pop_back();
+		else front.pop_back();
 		flipFlop = !flipFlop;
 	}
 	return s;
@@ -240,8 +239,12 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 		fonsDrawText(fs, x, y, text.c_str(), NULL);
 	}
 }
-void Font::addVerts(
-	const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs, HTextAlign halign, VTextAlign valign) {
+void Font::addVerts(const std::string &text,
+					glm::vec2 c,
+					std::vector<glm::vec2> &verts,
+					std::vector<glm::vec2> &uvs,
+					HTextAlign halign,
+					VTextAlign valign) {
 	auto a = getRect(text, 0, 0);
 
 	float x = c.x; // default left align
@@ -262,7 +265,10 @@ void Font::addVerts(
 	addVerts(text, vec2(x, y), verts, uvs);
 }
 
-void Font::addVerts(const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs) {
+void Font::addVerts(const std::string &text,
+					glm::vec2 c,
+					std::vector<glm::vec2> &verts,
+					std::vector<glm::vec2> &uvs) {
 	if (fs == nullptr) {
 		Log::e() << "Calling getRect on null Font";
 		return;
@@ -296,7 +302,7 @@ void Font::drawVerticallyCentred(Graphics &g, const string &text, glm::vec2 c, H
 	if (align == HTextAlign::Centre) {
 		drawCentred(g, text, c);
 	} else {
-		auto a = getRect(text, 0, 0);
+		auto a	= getRect(text, 0, 0);
 		auto by = c.y - a.centre().y;
 
 		if (align == HTextAlign::Left) {

@@ -38,11 +38,11 @@ public:
 
 	// these were GLuints
 	uint32_t vertexArrayObject = 0;
-	uint32_t vertexBuffer = 0;
-	uint32_t colorbuffer = 0;
-	uint32_t texCoordBuffer = 0;
-	uint32_t normalBuffer = 0;
-	uint32_t indexBuffer = 0;
+	uint32_t vertexBuffer	   = 0;
+	uint32_t colorbuffer	   = 0;
+	uint32_t texCoordBuffer	   = 0;
+	uint32_t normalBuffer	   = 0;
+	uint32_t indexBuffer	   = 0;
 
 	static VboRef create() { return VboRef(new Vbo()); }
 
@@ -90,15 +90,15 @@ private:
 
 	PrimitiveType mode = PrimitiveType::None;
 
-	size_t numVerts = 0;
+	size_t numVerts	  = 0;
 	size_t numIndices = 0;
-	size_t numCols = 0;
+	size_t numCols	  = 0;
 
-	size_t numTcs = 0;
+	size_t numTcs	= 0;
 	size_t numNorms = 0;
 
 	int vertDimensions = 0;
-	int colDimensions = 0;
+	int colDimensions  = 0;
 
 	void generateVertBuffer(const float *data, size_t numVerts, int numDims);
 	void updateVertBuffer(const float *data);

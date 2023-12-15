@@ -9,7 +9,8 @@
 #include "MitredLine.h"
 using namespace std;
 
-void MitredLine::getStripCoord(const glm::vec2 &before, const glm::vec2 &curr, const glm::vec2 &after, glm::vec2 &a, glm::vec2 &b) {
+void MitredLine::getStripCoord(
+	const glm::vec2 &before, const glm::vec2 &curr, const glm::vec2 &after, glm::vec2 &a, glm::vec2 &b) {
 	glm::vec2 n1 = getNormal(curr - before);
 	glm::vec2 n2 = getNormal(after - curr);
 
@@ -42,7 +43,11 @@ void MitredLine::getStripCoord(const glm::vec2 &before, const glm::vec2 &curr, c
 	//	return true;
 }
 
-int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts, vector<unsigned int> &indices, bool close, bool bevelled) {
+int MitredLine::getVerts(const vector<glm::vec2> &p,
+						 vector<glm::vec2> &outVerts,
+						 vector<unsigned int> &indices,
+						 bool close,
+						 bool bevelled) {
 	int originalVertCount = (int) outVerts.size();
 
 	if (p.size() < 2) return 0;
@@ -83,12 +88,12 @@ int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts
 			if (mitreLimit) {
 				if (glm::distance(p[i], a) > thickness * 0.5) {
 					auto da = glm::normalize(a - p[i]) * thickness * 0.5f;
-					a = p[i] + da;
+					a		= p[i] + da;
 				}
 
 				if (glm::distance(p[i], b) > thickness * 0.5) {
 					auto db = glm::normalize(b - p[i]) * thickness * 0.5f;
-					b = p[i] + db;
+					b		= p[i] + db;
 				}
 			}
 			strip.emplace_back(a);
@@ -134,6 +139,9 @@ int MitredLine::getVerts(const vector<glm::vec2> &p, vector<glm::vec2> &outVerts
 	return (int) outVerts.size() - originalVertCount;
 }
 
-int MitredLine::getVertsBevelled(const std::vector<glm::vec2> &p, std::vector<glm::vec2> &outVerts, std::vector<unsigned int> &indices, bool close) {
+int MitredLine::getVertsBevelled(const std::vector<glm::vec2> &p,
+								 std::vector<glm::vec2> &outVerts,
+								 std::vector<unsigned int> &indices,
+								 bool close) {
 	return getVerts(p, outVerts, indices, close, true);
 }

@@ -26,10 +26,11 @@ void Int16Buffer::fadeIn(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf("ERROR: Int16Buffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n",
-			   length,
-			   numChans,
-			   static_cast<unsigned long>(size()));
+		printf(
+			"ERROR: Int16Buffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n",
+			length,
+			numChans,
+			static_cast<unsigned long>(size()));
 	}
 }
 
@@ -60,10 +61,11 @@ void Int16Buffer::fadeOut(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf("ERROR: Int16Buffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n",
-			   length,
-			   numChans,
-			   static_cast<unsigned long>(size()));
+		printf(
+			"ERROR: Int16Buffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n",
+			length,
+			numChans,
+			static_cast<unsigned long>(size()));
 	}
 }
 
@@ -99,8 +101,8 @@ void Int16Buffer::normalizeAudio() {
 }
 
 float Int16Buffer::interpolate(double p) const noexcept {
-	int a = p;
-	int b = a + 1;
+	int a	= p;
+	int b	= a + 1;
 	float m = p - a;
 	if (b >= size()) {
 		if (a >= size()) {
@@ -113,8 +115,8 @@ float Int16Buffer::interpolate(double p) const noexcept {
 }
 
 void Int16Buffer::interpolateStereo(double p, float &L, float &R) const noexcept {
-	int a = p;
-	int b = a + 1;
+	int a	= p;
+	int b	= a + 1;
 	float m = p - a;
 	if (b * 2 + 1 >= size()) {
 		if (a * 2 + 1 >= size()) {
@@ -141,7 +143,6 @@ void Int16Buffer::mix(const Int16Buffer &other) {
 		assignValue(i, (*this)[i] + other[i]);
 	}
 }
-
 
 void Int16Buffer::append(const FloatBuffer &fd) {
 	auto originalSize = d.size();

@@ -11,8 +11,6 @@
 #include "zipper/minizip/ioapi_mem.h"
 #include "zipper/minizip/unzip.h"
 
-
-
 void ZipStreamer::close() {
 	if (m_zf != NULL) {
 		unzClose(m_zf);
@@ -20,7 +18,7 @@ void ZipStreamer::close() {
 	}
 }
 
-bool ZipStreamer::open(const std::string& zipFile) {
+bool ZipStreamer::open(const std::string &zipFile) {
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
 	fill_win32_filefunc64A(&ffunc);
@@ -28,19 +26,18 @@ bool ZipStreamer::open(const std::string& zipFile) {
 #else
 	m_zf = unzOpen64(zipFile.c_str());
 #endif
-	if(m_zf == NULL) return false;
+	if (m_zf == NULL) return false;
 	return true;
 }
 bool ZipStreamer::openFile(const std::string &pathInZip) {
-
-	if(unzLocateFile(m_zf, pathInZip.c_str(), nullptr)!=UNZ_OK) {
+	if (unzLocateFile(m_zf, pathInZip.c_str(), nullptr) != UNZ_OK) {
 		printf("Failed to locate\n");
 		return false;
 	}
-	
-	int raw = 0;
+
+	int raw	   = 0;
 	int method = 0;
-	if(unzOpenCurrentFile2(m_zf, &method, nullptr, raw)!=UNZ_OK) {
+	if (unzOpenCurrentFile2(m_zf, &method, nullptr, raw) != UNZ_OK) {
 		printf("Failed to open current file\n");
 		return false;
 	}
@@ -50,20 +47,16 @@ bool ZipStreamer::openFile(const std::string &pathInZip) {
 	// 	return false;
 	// }
 	return true;
-
 }
-
-
 
 ZipStreamer::~ZipStreamer() {
 	close();
 }
 
-
 size_t ZipStreamer::read(std::vector<uint8_t> &d) {
-	return (size_t)unzReadCurrentFile(m_zf, d.data(), (unsigned)d.size());
+	return (size_t) unzReadCurrentFile(m_zf, d.data(), (unsigned) d.size());
 }
 
 size_t ZipStreamer::read(void *d, size_t sz) {
-	return (size_t)unzReadCurrentFile(m_zf, d, (unsigned)sz);
+	return (size_t) unzReadCurrentFile(m_zf, d, (unsigned) sz);
 }

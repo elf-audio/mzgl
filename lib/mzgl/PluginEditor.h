@@ -34,4 +34,4 @@ public:
 
 // entry point for plugin editor
 std::shared_ptr<PluginEditor> instantiatePluginEditor(Graphics &g, std::shared_ptr<Plugin> plugin);
-bool						  isPlugin();
+bool isPlugin();

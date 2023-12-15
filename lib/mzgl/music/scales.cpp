@@ -27,7 +27,7 @@ std::string midiNoteNumToString(int note) {
 	if (note < 0) return "n/a";
 
 	int octave = (note / 12) - 2;
-	int index = note % 12;
+	int index  = note % 12;
 	return noteNumToName(index) + std::to_string(octave);
 }
 
@@ -43,7 +43,7 @@ int getScaled(int pos, int scale) {
 	if (scale == CHROMATIC) return pos;
 	else if (scale == PENTATONIC) {
 		int octave = pos / 5;
-		int note = 0;
+		int note   = 0;
 		switch (pos % 5) {
 			case 0: note = 0; break;
 			case 1: note = 3; break;
@@ -56,7 +56,7 @@ int getScaled(int pos, int scale) {
 
 	else if (scale == MINOR) {
 		int octave = pos / 7;
-		int note = 0;
+		int note   = 0;
 		switch (pos % 7) {
 			case 0: note = 0; break;
 			case 1: note = 2; break;
@@ -71,7 +71,7 @@ int getScaled(int pos, int scale) {
 
 	else if (scale == MAJOR) {
 		int octave = pos / 7;
-		int note = 0;
+		int note   = 0;
 		switch (pos % 7) {
 			case 0: note = 0; break;
 			case 1: note = 2; break;
@@ -86,7 +86,7 @@ int getScaled(int pos, int scale) {
 
 	else if (scale == WHOLE) {
 		int octave = pos / 6;
-		int note = 0;
+		int note   = 0;
 		switch (pos % 6) {
 			case 0: note = 0; break;
 			case 1: note = 2; break;

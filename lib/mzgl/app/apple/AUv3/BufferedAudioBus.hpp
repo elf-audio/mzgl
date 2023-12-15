@@ -15,38 +15,38 @@
 
 // Reusable non-ObjC class, accessible from render thread.
 struct BufferedAudioBus {
-	AUAudioUnitBus* bus = nullptr;
+	AUAudioUnitBus *bus			= nullptr;
 	AUAudioFrameCount maxFrames = 0;
-    
-	AVAudioPCMBuffer* pcmBuffer = nullptr;
-    
-	AudioBufferList const* originalAudioBufferList = nullptr;
-	AudioBufferList* mutableAudioBufferList = nullptr;
 
-	void init(AVAudioFormat* defaultFormat, AVAudioChannelCount maxChannels) {
-		maxFrames = 0;
-		pcmBuffer = nullptr;
+	AVAudioPCMBuffer *pcmBuffer = nullptr;
+
+	AudioBufferList const *originalAudioBufferList = nullptr;
+	AudioBufferList *mutableAudioBufferList		   = nullptr;
+
+	void init(AVAudioFormat *defaultFormat, AVAudioChannelCount maxChannels) {
+		maxFrames				= 0;
+		pcmBuffer				= nullptr;
 		originalAudioBufferList = nullptr;
-		mutableAudioBufferList = nullptr;
-		
-        bus = [[AUAudioUnitBus alloc] initWithFormat:defaultFormat error:nil];
+		mutableAudioBufferList	= nullptr;
 
-        bus.maximumChannelCount = maxChannels;
+		bus = [[AUAudioUnitBus alloc] initWithFormat:defaultFormat error:nil];
+
+		bus.maximumChannelCount = maxChannels;
 	}
-	
+
 	void allocateRenderResources(AUAudioFrameCount inMaxFrames) {
 		maxFrames = inMaxFrames;
-		
-		pcmBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:bus.format frameCapacity: maxFrames];
-		
-        originalAudioBufferList = pcmBuffer.audioBufferList;
-        mutableAudioBufferList = pcmBuffer.mutableAudioBufferList;
+
+		pcmBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:bus.format frameCapacity:maxFrames];
+
+		originalAudioBufferList = pcmBuffer.audioBufferList;
+		mutableAudioBufferList	= pcmBuffer.mutableAudioBufferList;
 	}
-    
+
 	void deallocateRenderResources() {
-		pcmBuffer = nullptr;
+		pcmBuffer				= nullptr;
 		originalAudioBufferList = nullptr;
-		mutableAudioBufferList = nullptr;
+		mutableAudioBufferList	= nullptr;
 	}
 };
 
@@ -58,12 +58,12 @@ struct BufferedAudioBus {
 	This class provides a prepareOutputBufferList method to copy the internal buffer pointers
 	to the output buffer list in case the client passed in null buffer pointers.
  */
-struct BufferedOutputBus: BufferedAudioBus {
-	void prepareOutputBufferList(AudioBufferList* outBufferList, AVAudioFrameCount frameCount, bool zeroFill) {
+struct BufferedOutputBus : BufferedAudioBus {
+	void prepareOutputBufferList(AudioBufferList *outBufferList, AVAudioFrameCount frameCount, bool zeroFill) {
 		UInt32 byteSize = frameCount * sizeof(float);
 		for (UInt32 i = 0; i < outBufferList->mNumberBuffers; ++i) {
 			outBufferList->mBuffers[i].mNumberChannels = originalAudioBufferList->mBuffers[i].mNumberChannels;
-			outBufferList->mBuffers[i].mDataByteSize = byteSize;
+			outBufferList->mBuffers[i].mDataByteSize   = byteSize;
 			if (outBufferList->mBuffers[i].mData == nullptr) {
 				outBufferList->mBuffers[i].mData = originalAudioBufferList->mBuffers[i].mData;
 			}
@@ -89,15 +89,15 @@ struct BufferedInputBus : BufferedAudioBus {
         the pullInputBlock.
     */
 	AUAudioUnitStatus pullInput(AudioUnitRenderActionFlags *actionFlags,
-								AudioTimeStamp const* timestamp,
+								AudioTimeStamp const *timestamp,
 								AVAudioFrameCount frameCount,
 								NSInteger inputBusNumber,
 								AURenderPullInputBlock pullInputBlock) {
-        if (pullInputBlock == nullptr) {
+		if (pullInputBlock == nullptr) {
 			return kAudioUnitErr_NoConnection;
 		}
-        
-        /*
+
+		/*
          Important:
              The Audio Unit must supply valid buffers in (inputData->mBuffers[x].mData) and mDataByteSize.
              mDataByteSize must be consistent with frameCount.
@@ -108,28 +108,29 @@ struct BufferedInputBus : BufferedAudioBus {
              
              See prepareInputBufferList()
         */
-		
+
 		prepareInputBufferList();
-		
+
 		return pullInputBlock(actionFlags, timestamp, frameCount, inputBusNumber, mutableAudioBufferList);
 	}
-    
-    /*
+
+	/*
         prepareInputBufferList populates the mutableAudioBufferList with the data
         pointers from the originalAudioBufferList.
      
         The upstream audio unit may overwrite these with its own pointers, so each
         render cycle this function needs to be called to reset them.
      */
-    void prepareInputBufferList() {
-        UInt32 byteSize = maxFrames * sizeof(float);
-		
-        mutableAudioBufferList->mNumberBuffers = originalAudioBufferList->mNumberBuffers;
-		
-        for (UInt32 i = 0; i < originalAudioBufferList->mNumberBuffers; ++i) {
-            mutableAudioBufferList->mBuffers[i].mNumberChannels = originalAudioBufferList->mBuffers[i].mNumberChannels;
-            mutableAudioBufferList->mBuffers[i].mData = originalAudioBufferList->mBuffers[i].mData;
-            mutableAudioBufferList->mBuffers[i].mDataByteSize = byteSize;
-        }
-    }
+	void prepareInputBufferList() {
+		UInt32 byteSize = maxFrames * sizeof(float);
+
+		mutableAudioBufferList->mNumberBuffers = originalAudioBufferList->mNumberBuffers;
+
+		for (UInt32 i = 0; i < originalAudioBufferList->mNumberBuffers; ++i) {
+			mutableAudioBufferList->mBuffers[i].mNumberChannels =
+				originalAudioBufferList->mBuffers[i].mNumberChannels;
+			mutableAudioBufferList->mBuffers[i].mData		  = originalAudioBufferList->mBuffers[i].mData;
+			mutableAudioBufferList->mBuffers[i].mDataByteSize = byteSize;
+		}
+	}
 };

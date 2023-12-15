@@ -48,9 +48,11 @@ public:
 	// mix incoming sample into this one
 	void mix(const Int16Buffer &other);
 
-	inline int16_t clamp16bit(float f) noexcept { return static_cast<int16_t>(std::clamp(f, -1.f, 1.f) * 32767.f); }
+	inline int16_t clamp16bit(float f) noexcept {
+		return static_cast<int16_t>(std::clamp(f, -1.f, 1.f) * 32767.f);
+	}
 	void append(const FloatBuffer &fd);
-	
+
 	void append(const float *data, int length);
 	size_t capacity() { return d.capacity(); }
 	void resize(size_t size, float defaultValue = 0.f) { d.resize(size, defaultValue); }

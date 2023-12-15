@@ -38,8 +38,8 @@ std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
 			fstr.read(data, bytesToRead);
 			fstr.close();
 
-			if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[4] == 'f' && data[5] == 't'
-				&& data[6] == 'y' && data[7] == 'p') {
+			if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[4] == 'f' && data[5] == 't' && data[6] == 'y'
+				&& data[7] == 'p') {
 				// ok this is probably an mp4
 				Log::d() << "It's an mp4 in mp3's clothing";
 
@@ -62,8 +62,8 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 #ifdef __APPLE__
 	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
 
-	CFURLRef audioFileURL = CFURLCreateWithBytes(
-		NULL, (const UInt8 *) path.c_str(), path.size(), kCFStringEncodingASCII, NULL);
+	CFURLRef audioFileURL =
+		CFURLCreateWithBytes(NULL, (const UInt8 *) path.c_str(), path.size(), kCFStringEncodingASCII, NULL);
 
 	ExtAudioFileRef xafref = nullptr;
 
@@ -78,8 +78,7 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 	AudioStreamBasicDescription inputFormat;
 
 	UInt32 propertySize = sizeof(inputFormat);
-	err					= ExtAudioFileGetProperty(
-		xafref, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat);
+	err = ExtAudioFileGetProperty(xafref, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat);
 
 	auto sampleRate = inputFormat.mSampleRate;
 	//	*outSampleRate = (unsigned) inputFormat.mSampleRate;
@@ -98,10 +97,8 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 	audioFormat.mBytesPerPacket	  = audioFormat.mFramesPerPacket * audioFormat.mBytesPerFrame;
 
 	// 3) Apply audio format to my Extended Audio File
-	err = ExtAudioFileSetProperty(xafref,
-								  kExtAudioFileProperty_ClientDataFormat,
-								  sizeof(AudioStreamBasicDescription),
-								  &audioFormat);
+	err = ExtAudioFileSetProperty(
+		xafref, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &audioFormat);
 	if (err != noErr) {
 		printf("Couldn't set client data format on input ext file\n");
 		return false;
@@ -147,10 +144,7 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 }
 
 template <class Buffer>
-bool AudioFile_loadResampled(std::string path,
-							 Buffer &buff,
-							 int newSampleRate,
-							 int *outNumChannels) {
+bool AudioFile_loadResampled(std::string path, Buffer &buff, int newSampleRate, int *outNumChannels) {
 	path = checkItsNotAnMp4PretendingToBeAnMp3(path);
 
 	Log::d() << "Does " << path << " exist? " << fs::exists(path);
@@ -171,8 +165,7 @@ bool AudioFile_loadResampled(std::string path,
 	AudioStreamBasicDescription inputFormat;
 
 	UInt32 propertySize = sizeof(inputFormat);
-	err					= ExtAudioFileGetProperty(
-		xafref, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat);
+	err = ExtAudioFileGetProperty(xafref, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat);
 
 	//*outSampleRate = (unsigned) inputFormat.mSampleRate;
 	*outNumChannels = (unsigned) inputFormat.mChannelsPerFrame;
@@ -190,10 +183,8 @@ bool AudioFile_loadResampled(std::string path,
 	audioFormat.mBytesPerPacket	  = audioFormat.mFramesPerPacket * audioFormat.mBytesPerFrame;
 
 	// 3) Apply audio format to my Extended Audio File
-	err = ExtAudioFileSetProperty(xafref,
-								  kExtAudioFileProperty_ClientDataFormat,
-								  sizeof(AudioStreamBasicDescription),
-								  &audioFormat);
+	err = ExtAudioFileSetProperty(
+		xafref, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &audioFormat);
 	if (err != noErr) {
 		printf("Couldn't set client data format on input ext file\n");
 		return 0;
@@ -234,16 +225,10 @@ bool AudioFile_loadResampled(std::string path,
 	return true;
 }
 
-bool AudioFile::loadResampled(std::string path,
-							  Int16Buffer &buff,
-							  int newSampleRate,
-							  int *outNumChannels) {
+bool AudioFile::loadResampled(std::string path, Int16Buffer &buff, int newSampleRate, int *outNumChannels) {
 	return AudioFile_loadResampled<Int16Buffer>(path, buff, newSampleRate, outNumChannels);
 }
 
-bool AudioFile::loadResampled(std::string path,
-							  FloatBuffer &buff,
-							  int newSampleRate,
-							  int *outNumChannels) {
+bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
 	return AudioFile_loadResampled<FloatBuffer>(path, buff, newSampleRate, outNumChannels);
 }

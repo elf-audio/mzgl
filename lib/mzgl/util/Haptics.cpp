@@ -8,11 +8,10 @@
 
 #include "Haptics.h"
 #ifdef __APPLE__
-#include <TargetConditionals.h>
+#	include <TargetConditionals.h>
 #endif
 using namespace std;
 class HapticsImpl {
-	
 public:
 	virtual ~HapticsImpl() {}
 	virtual void checkInit() {}
@@ -20,9 +19,9 @@ public:
 };
 
 #if TARGET_OS_IOS
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-#include <AVFAudio/AVFAudio.h>
+#	import <Foundation/Foundation.h>
+#	import <UIKit/UIKit.h>
+#	include <AVFAudio/AVFAudio.h>
 @interface Happer : NSObject
 @end
 
@@ -31,45 +30,38 @@ public:
 	// use UIImpactFeedbackGenerator for more different types of haptics
 }
 
-
-- (id) init {
+- (id)init {
 	self = [super init];
-	
-	
-	
-	
-	
-	AVAudioSession * audioSession = [AVAudioSession sharedInstance];
-	
+
+	AVAudioSession *audioSession = [AVAudioSession sharedInstance];
 
 	// in order to have haptics on iOS...
 	// you have to do something like this in your audio system - make sure you do
 	// it after all your other AVAudioSession configuration or it may not work.
-//	NSError * err = nil;
-//	if (@available(iOS 13.0, *)) {
-//		[audioSession setAllowHapticsAndSystemSoundsDuringRecording:YES error:&err];
-//		if(err != nil) {
-//			NSLog(@"Haptics couldn't be enabled because %@", err);
-//			err = nil;
-//		}
-//	}
-//
-	
+	//	NSError * err = nil;
+	//	if (@available(iOS 13.0, *)) {
+	//		[audioSession setAllowHapticsAndSystemSoundsDuringRecording:YES error:&err];
+	//		if(err != nil) {
+	//			NSLog(@"Haptics couldn't be enabled because %@", err);
+	//			err = nil;
+	//		}
+	//	}
+	//
 
-	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];//WithStyle:UIImpactFeedbackStyleLight];
+	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init]; //WithStyle:UIImpactFeedbackStyleLight];
 	[feedbackGenerator prepare];
 	return self;
 }
 
-- (void) lightTap {
+- (void)lightTap {
 	// Trigger selection feedback.
 	[feedbackGenerator selectionChanged];
-//	printf("light tap\n");
+	//	printf("light tap\n");
 	// Keep the generator in a prepared state.
 	[feedbackGenerator prepare];
 }
 
--(void) dealloc {
+- (void)dealloc {
 	feedbackGenerator = nil; // dunno if I need this line
 }
 @end
@@ -77,21 +69,13 @@ public:
 class HapticsIOS : public HapticsImpl {
 public:
 	Happer *happer;
-	HapticsIOS() {
-		happer = [[Happer alloc] init];
-	}
-	virtual ~HapticsIOS() {
-		happer = nil;
-	}
+	HapticsIOS() { happer = [[Happer alloc] init]; }
+	virtual ~HapticsIOS() { happer = nil; }
 	void checkInit() override {
-//		feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];
-
-
+		//		feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];
 	}
-	
-	void lightTap() override {
-		[happer lightTap];
-	}
+
+	void lightTap() override { [happer lightTap]; }
 };
 #endif
 
@@ -104,7 +88,6 @@ Haptics::Haptics() {
 }
 
 Haptics::~Haptics() {
-	
 }
 
 void Haptics::lightTap() {

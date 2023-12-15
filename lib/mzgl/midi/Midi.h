@@ -28,8 +28,8 @@ public:
 
 class MidiPort {
 public:
-	virtual RtMidi *getPort()  = 0;
-	virtual bool	isOutput() = 0;
+	virtual RtMidi *getPort() = 0;
+	virtual bool isOutput()	  = 0;
 
 	virtual ~MidiPort() {}
 
@@ -37,19 +37,18 @@ public:
 
 	void close() { getPort()->closePort(); }
 
-	std::string				 getName() { return name; }
+	std::string getName() { return name; }
 	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(isOutput(), false); }
 
 	static int findPortByName(std::string portSearchName, bool isOutput) {
-		auto		ports				   = MidiPort::getPortNames(isOutput, false);
+		auto ports						   = MidiPort::getPortNames(isOutput, false);
 		std::string portSearchNameOriginal = portSearchName;
 		portSearchName					   = toLowerCase(portSearchName);
 
 		for (int i = 0; i < ports.size(); i++) {
 			ports[i] = toLowerCase(ports[i]);
 			if (ports[i].find(portSearchName) != -1) {
-				Log::v() << "Connecting to port '" << portSearchNameOriginal
-						 << "' ('" + ports[i] + "')";
+				Log::v() << "Connecting to port '" << portSearchNameOriginal << "' ('" + ports[i] + "')";
 				return i;
 			}
 		}
@@ -60,9 +59,9 @@ public:
 	static std::vector<std::string> getPortNames(bool isOutput, bool alsoPrint = false) {
 		std::vector<std::string> names;
 
-		RtMidiIn  midiIn;
+		RtMidiIn midiIn;
 		RtMidiOut midiOut;
-		RtMidi	 *midi;
+		RtMidi *midi;
 
 		if (isOutput) {
 			midi = &midiOut;
@@ -71,8 +70,8 @@ public:
 		}
 
 		try {
-			std::string io	   = isOutput ? "output" : "input";
-			uint32_t	nPorts = midi->getPortCount();
+			std::string io	= isOutput ? "output" : "input";
+			uint32_t nPorts = midi->getPortCount();
 			if (alsoPrint) {
 				std::cout << "\nThere are " << nPorts << " MIDI " << io << " ports available.\n";
 			}
@@ -85,8 +84,7 @@ public:
 				} catch (RtMidiError &error) {
 					error.printMessage();
 				}
-				if (alsoPrint)
-					std::cout << "  " << io << " port #" << i << ": " << portName << '\n';
+				if (alsoPrint) std::cout << "  " << io << " port #" << i << ": " << portName << '\n';
 			}
 		} catch (...) {
 			Log::e() << "RtMidi error";
@@ -104,10 +102,10 @@ public:
 	}
 
 	std::string name;
-	bool		open(int port = 0) {
-		   if (isOpen()) close();
-		   getPort()->openPort(port);
-		   return true;
+	bool open(int port = 0) {
+		if (isOpen()) close();
+		getPort()->openPort(port);
+		return true;
 	}
 };
 
@@ -138,7 +136,7 @@ public:
 	}
 
 	RtMidi *getPort() override { return rtMidiIn.get(); }
-	bool	isOutput() override { return false; }
+	bool isOutput() override { return false; }
 
 	void callback(double deltatime, std::vector<unsigned char> *message) {
 		MidiMessage m(*message);
@@ -177,7 +175,7 @@ private:
 
 class MidiOut : public MidiPort {
 public:
-	bool	isOutput() override { return true; }
+	bool isOutput() override { return true; }
 	RtMidi *getPort() override { return rtMidiOut.get(); }
 
 	static std::vector<std::string> getPortNames(bool alsoPrint = false) {

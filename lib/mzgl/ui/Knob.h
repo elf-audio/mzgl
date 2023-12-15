@@ -16,7 +16,7 @@ public:
 	float min;
 	float max;
 	bool enabled = true;
-	bool down = false;
+	bool down	 = false;
 
 	string niceToString(float val) {
 		if (val < 2) {
@@ -35,16 +35,15 @@ public:
 		, min(min)
 		, max(max) {
 		interactive = true;
-		width = 100;
-		height = 100;
+		width		= 100;
+		height		= 100;
 	}
 
 	void draw() override {
 		vec2 c = centre();
 		g.setColor(1);
 		if (!enabled) g.noFill();
-		else
-			g.fill();
+		else g.fill();
 
 		g.drawCircle(c, width / 2);
 
@@ -79,22 +78,22 @@ public:
 		if (!enabled) return false;
 		down = true;
 
-		startValue = value;
+		startValue	= value;
 		startTouchY = y;
-		currYTouch = y;
+		currYTouch	= y;
 
 		return true;
 	}
-	float currYTouch = 0;
+	float currYTouch  = 0;
 	float startTouchY = 0;
-	float startValue = 0;
+	float startValue  = 0;
 
 	void touchMoved(float x, float y, int id) override {
 		if (!enabled) return;
 
 		currYTouch = y;
 		float gain = 0.0025;
-		value = startValue - (y - startTouchY) * gain * (max - min);
+		value	   = startValue - (y - startTouchY) * gain * (max - min);
 
 		value = std::clamp(value, min, max);
 		if (rounding) value = round(value);

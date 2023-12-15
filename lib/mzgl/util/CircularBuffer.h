@@ -59,7 +59,7 @@ public:
 
 	// was insert
 	void write(T a) {
-		writePos = (writePos + 1) % buff.size();
+		writePos	   = (writePos + 1) % buff.size();
 		buff[writePos] = a;
 	}
 	// was consume
@@ -92,5 +92,5 @@ private:
 	std::vector<T> buff;
 
 	size_t writePos = 0;
-	size_t readPos = 0;
+	size_t readPos	= 0;
 };

@@ -16,10 +16,10 @@
  */
 
 #define PENTATONIC 2
-#define CHROMATIC 1
-#define WHOLE 3
-#define MAJOR 4
-#define MINOR 0
+#define CHROMATIC  1
+#define WHOLE	   3
+#define MAJOR	   4
+#define MINOR	   0
 #include <string>
 
 float mtof(float f);

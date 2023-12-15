@@ -84,7 +84,9 @@ void sleepMicros(long us);
 std::string uniquerizePath(std::string path);
 
 // only works on mac, this one.
-void saveFileDialog(std::string msg, std::string defaultFileName, std::function<void(std::string, bool)> completionCallback);
+void saveFileDialog(std::string msg,
+					std::string defaultFileName,
+					std::function<void(std::string, bool)> completionCallback);
 
 // generates a UUID - not tied to the machine
 // but can be considered globally unique

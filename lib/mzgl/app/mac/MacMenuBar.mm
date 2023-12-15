@@ -10,14 +10,13 @@
 
 using namespace std;
 
-
-map<string,NSMenu*> submenus;
+map<string, NSMenu *> submenus;
 
 @interface LambdaMenuItem : NSMenuItem {
 	function<void()> actionLambda;
 }
-	
-- (id)initWithTitle:(NSString *)title keyEquivalent:(NSString *)keyEquivalent actionLambda: (function<void()>) func;
+
+- (id)initWithTitle:(NSString *)title keyEquivalent:(NSString *)keyEquivalent actionLambda:(function<void()>)func;
 @end
 
 @interface LambdaMenuItem ()
@@ -25,8 +24,8 @@ map<string,NSMenu*> submenus;
 @end
 
 @implementation LambdaMenuItem
-	
-- (id)initWithTitle:(NSString *)title keyEquivalent:(NSString *)keyEquivalent actionLambda:(function<void()>) func {
+
+- (id)initWithTitle:(NSString *)title keyEquivalent:(NSString *)keyEquivalent actionLambda:(function<void()>)func {
 	self = [super initWithTitle:title action:@selector(menuAction:) keyEquivalent:keyEquivalent];
 	if (self) {
 		actionLambda = func;
@@ -34,9 +33,7 @@ map<string,NSMenu*> submenus;
 	}
 	return self;
 }
-	
 
-	
 - (void)menuAction:(NSMenuItem *)item {
 	if ((item == self) && (actionLambda)) {
 		actionLambda();
@@ -44,9 +41,8 @@ map<string,NSMenu*> submenus;
 }
 @end
 
-
 MacMenuBar::MacMenuBar() {
-	NSApp.mainMenu = [[NSMenu alloc] initWithTitle: @"MainMenu"];
+	NSApp.mainMenu = [[NSMenu alloc] initWithTitle:@"MainMenu"];
 }
 
 MacMenuBar &MacMenuBar::instance() {
@@ -55,49 +51,46 @@ MacMenuBar &MacMenuBar::instance() {
 }
 
 shared_ptr<MacMenu> MacMenuBar::getMenu(string name) {
-	if(menus.find(name)==menus.end()) {
+	if (menus.find(name) == menus.end()) {
 		auto menu = make_shared<MacMenu>(name);
-		
+
 		menus[name] = menu;
 		NSString *s = [NSString stringWithUTF8String:name.c_str()];
-		
-		  
+
 		NSMenuItem *title1 = [NSApp.mainMenu addItemWithTitle:s action:nil keyEquivalent:@""];
-		NSMenu *menu1 = [[NSMenu alloc] initWithTitle:s];
+		NSMenu *menu1	   = [[NSMenu alloc] initWithTitle:s];
 		[NSApp.mainMenu setSubmenu:menu1 forItem:title1];
-			
+
 		submenus[name] = menu1;
-	
 	}
 	return menus[name];
 }
 
 ////////////////////////////////////////////////////////////
 
-
 void MacMenu::addItem(std::string title, std::string shortcut, std::function<void()> action) {
 	addItem(title, shortcut, MacMenu::KeyModifier::None, action);
 }
 
-void MacMenu::addItem(std::string title, std::string shortcut, MacMenu::KeyModifier modifier, std::function<void()> action) {
-
+void MacMenu::addItem(std::string title,
+					  std::string shortcut,
+					  MacMenu::KeyModifier modifier,
+					  std::function<void()> action) {
 #if 1
-	id titleNS = [NSString stringWithUTF8String: title.c_str()];
-	id scNS = [NSString stringWithUTF8String:shortcut.c_str()];
-	LambdaMenuItem *item = [[LambdaMenuItem alloc] initWithTitle: titleNS
-											 keyEquivalent:scNS actionLambda:action];
-	if(modifier==MacMenu::KeyModifier::Shift) {
+	id titleNS			 = [NSString stringWithUTF8String:title.c_str()];
+	id scNS				 = [NSString stringWithUTF8String:shortcut.c_str()];
+	LambdaMenuItem *item = [[LambdaMenuItem alloc] initWithTitle:titleNS keyEquivalent:scNS actionLambda:action];
+	if (modifier == MacMenu::KeyModifier::Shift) {
 		item.keyEquivalentModifierMask = NSEventModifierFlagShift;
-	} else if(modifier==MacMenu::KeyModifier::Alt) {
+	} else if (modifier == MacMenu::KeyModifier::Alt) {
 		item.keyEquivalentModifierMask = NSEventModifierFlagOption;
 	}
-	[submenus[name] addItem: item];
+	[submenus[name] addItem:item];
 #endif
 }
 
 void MacMenu::addSeparator() {
 #if 1
-	[submenus[name] addItem: [NSMenuItem separatorItem]];
+	[submenus[name] addItem:[NSMenuItem separatorItem]];
 #endif
 }
-

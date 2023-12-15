@@ -72,7 +72,7 @@ void window_size_callback(GLFWwindow *window, int width, int height) {
 	auto &g = getGraphics(window);
 	glViewport(0, 0, width, height);
 
-	g.width = width;
+	g.width	 = width;
 	g.height = height;
 
 	framebuferResized = true; // just mark that we need to resize
@@ -126,17 +126,16 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 #ifdef METAL_BACKEND
 
-	const id<MTLDevice> gpu = MTLCreateSystemDefaultDevice();
+	const id<MTLDevice> gpu			= MTLCreateSystemDefaultDevice();
 	const id<MTLCommandQueue> queue = [gpu newCommandQueue];
-	CAMetalLayer *swapchain = [CAMetalLayer layer];
-	swapchain.device = gpu;
-	swapchain.opaque = YES;
+	CAMetalLayer *swapchain			= [CAMetalLayer layer];
+	swapchain.device				= gpu;
+	swapchain.opaque				= YES;
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 #else
 
-	
 #	ifdef UNIT_TEST
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -146,25 +145,26 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #	endif
 #endif
-	
+
 	// this is crashing on mac for some reason
-//	const unsigned char *openglVersion = glGetString(GL_VERSION);
-//	if (openglVersion != nullptr) {
-//		Log::d() << "GLFWAppRunner - OpenGL Version: " << openglVersion;
-//	} else {
-//		Log::d() << "OpenGL Version: unknown";
-//	}
-	int requestedWidth = -1;
+	//	const unsigned char *openglVersion = glGetString(GL_VERSION);
+	//	if (openglVersion != nullptr) {
+	//		Log::d() << "GLFWAppRunner - OpenGL Version: " << openglVersion;
+	//	} else {
+	//		Log::d() << "OpenGL Version: unknown";
+	//	}
+	int requestedWidth	= -1;
 	int requestedHeight = -1;
 
 	GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
 	if (primaryMonitor != nullptr) {
 		const GLFWvidmode *currentVideoMode = glfwGetVideoMode(primaryMonitor);
 		if (currentVideoMode != nullptr) {
-			float h = (currentVideoMode->height) * 0.8; // make it 0.9 of max height, so there is room for decorations
-			float w = h * 0.54; // set width as 0.54 of height, that looks OK
+			float h =
+				(currentVideoMode->height) * 0.8; // make it 0.9 of max height, so there is room for decorations
+			float w			= h * 0.54; // set width as 0.54 of height, that looks OK
 			requestedHeight = (int) h;
-			requestedWidth = (int) w;
+			requestedWidth	= (int) w;
 			if (requestedWidth > currentVideoMode->width) {
 				requestedWidth = currentVideoMode->width; // clamp in case of pivoted monitor
 			}
@@ -176,7 +176,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	app = instantiateApp(graphics);
 
 	if (requestedWidth != -1) {
-		graphics.width = requestedWidth;
+		graphics.width	= requestedWidth;
 		graphics.height = requestedHeight;
 	}
 
@@ -189,10 +189,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 #ifdef METAL_BACKEND
-	NSWindow *nswindow = glfwGetCocoaWindow(window);
-	nswindow.contentView.layer = swapchain;
+	NSWindow *nswindow				= glfwGetCocoaWindow(window);
+	nswindow.contentView.layer		= swapchain;
 	nswindow.contentView.wantsLayer = YES;
-	MTLClearColor color = MTLClearColorMake(0, 0, 0, 1);
+	MTLClearColor color				= MTLClearColorMake(0, 0, 0, 1);
 #endif
 
 	int windowH, windowW;
@@ -204,17 +204,18 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwGetFramebufferSize(window, &windowW, &windowH);
 	Log::d() << "FB size: " << windowW << "x" << windowH;
 
-	graphics.width = windowW;
+	graphics.width	= windowW;
 	graphics.height = windowH;
 
-	app->windowHandle = window;
+	app->windowHandle		= window;
 	app->nativeWindowHandle = os::getNativeWindowHandle(window);
 
 	// Create the event dispatcher
 	eventDispatcher = std::make_shared<EventDispatcher>(app);
 
 	// Platform-specific file drag/drop handler.
-	DesktopWindowFileDragHandler windowFileDragHandler {window, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
+	DesktopWindowFileDragHandler windowFileDragHandler {
+		window, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
 
 #ifdef __linux__
 	gtk_init(&argc, &argv);
@@ -244,13 +245,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 			id<CAMetalDrawable> surface = [swapchain nextDrawable];
 
-			MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
-			pass.colorAttachments[0].clearColor = color;
-			pass.colorAttachments[0].loadAction = MTLLoadActionClear;
+			MTLRenderPassDescriptor *pass		 = [MTLRenderPassDescriptor renderPassDescriptor];
+			pass.colorAttachments[0].clearColor	 = color;
+			pass.colorAttachments[0].loadAction	 = MTLLoadActionClear;
 			pass.colorAttachments[0].storeAction = MTLStoreActionStore;
-			pass.colorAttachments[0].texture = surface.texture;
+			pass.colorAttachments[0].texture	 = surface.texture;
 
-			id<MTLCommandBuffer> buffer = [queue commandBuffer];
+			id<MTLCommandBuffer> buffer			= [queue commandBuffer];
 			id<MTLRenderCommandEncoder> encoder = [buffer renderCommandEncoderWithDescriptor:pass];
 			[encoder endEncoding];
 			[buffer presentDrawable:surface];

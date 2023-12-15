@@ -80,11 +80,11 @@ public:
 	}
 
 private:
-	std::map<std::string, std::shared_ptr<MidiIn>>	midiIns;
+	std::map<std::string, std::shared_ptr<MidiIn>> midiIns;
 	std::map<std::string, std::shared_ptr<MidiOut>> midiOuts;
-	std::atomic<bool>								running {false};
-	std::thread										portScannerThread;
-	std::vector<MidiListener *>						listeners;
+	std::atomic<bool> running {false};
+	std::thread portScannerThread;
+	std::vector<MidiListener *> listeners;
 
 	// must be called on main thread
 	void poll() {
@@ -96,8 +96,7 @@ private:
 				if (midiIns.find(names[i]) == midiIns.end()) {
 					// new midi port!
 					auto m = std::make_shared<MidiIn>();
-					Log::d() << "Added port " << names[i]
-							 << " must properly debug this with lots of devices!!";
+					Log::d() << "Added port " << names[i] << " must properly debug this with lots of devices!!";
 					midiIns[names[i]] = m;
 					m->open(i);
 					m->addListener(this);
@@ -117,8 +116,7 @@ private:
 
 			for (auto &n: namesToErase) {
 				midiIns.erase(n);
-				Log::d() << "Removing port " << n
-						 << " must properly debug this with lots of devices!!";
+				Log::d() << "Removing port " << n << " must properly debug this with lots of devices!!";
 			}
 		}
 	}

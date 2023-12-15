@@ -9,12 +9,11 @@
 //#include <string>
 #include "App.h"
 
-
 class TextConsole {
 public:
 	void show();
 	void setText(std::string text);
 	void *theTextView_ = nullptr;
-	
+
 	void setBgColor(glm::vec3 c);
 };

@@ -14,14 +14,13 @@ ScopedUrl::~ScopedUrl() {
 	destructEarly();
 }
 
-
 void ScopedUrl::destructEarly() {
-	if(callback) callback();
+	if (callback) callback();
 	callback = nullptr;
-	if(shouldTryToDelete) {
+	if (shouldTryToDelete) {
 		shouldTryToDelete = false;
 		try {
-			if(fs::exists(url) && fs::is_regular_file(url)) {
+			if (fs::exists(url) && fs::is_regular_file(url)) {
 				fs::remove(url);
 			}
 		} catch (fs::filesystem_error &e) {
