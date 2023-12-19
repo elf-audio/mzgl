@@ -76,7 +76,7 @@ bool AudioFileAndroid_load(
 	LOGD("Using NDK decoder");
 
 	// open asset as file descriptor
-	off_t start, length;
+	off_t start;
 
 	FILE *fp = fopen(path.c_str(), "rb");
 

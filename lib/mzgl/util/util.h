@@ -15,6 +15,9 @@
 
 class App;
 
+
+void setThreadName(const std::string &name);
+
 std::string dataPath(std::string path, std::string bundleId = ""); //com.elf-audio.vst3.koala");
 std::string docsPath(std::string path = "");
 std::string appSupportPath(std::string path);

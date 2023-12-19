@@ -45,9 +45,9 @@ public:
 		if (synchronous) return;
 
 		fut = std::async(std::launch::async, [this]() {
-#ifdef __APPLE__
-			pthread_setname_np(this->name.c_str());
-#endif
+
+			setThreadName(this->name);
+
 			TaskSpec spec;
 
 			int ppp = 0;
@@ -107,9 +107,9 @@ private:
 
 		Task(TaskSpec spec) {
 			taskFuture = std::async(std::launch::async, [this, spec = std::move(spec)]() {
-#if defined(__APPLE__) && (DEBUG || UNIT_TEST)
+#if (DEBUG || UNIT_TEST)
 				// sets a thread name that is readable in xcode when debugging
-				pthread_setname_np("runTask()");
+				setThreadName("runTask()");
 #endif
 				try {
 					spec.task();
