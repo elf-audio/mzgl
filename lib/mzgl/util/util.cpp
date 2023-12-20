@@ -79,20 +79,19 @@ using namespace std;
 #	include <pwd.h>
 #	include <unistd.h>
 
+void setThreadName(const std::string &name) {
+#	if defined(__APPLE__)
+	pthread_setname_np(name.c_str());
+#	elif defined(__ANDROID__)
+	pthread_setname_np(pthread_self(), name.c_str());
+#	endif
+}
+
 #	ifdef __APPLE__
 std::string getHomeDirectory() {
 	return [NSHomeDirectory() UTF8String];
 }
 #	else
-
-
-void setThreadName(const std::string &name) {
-#if defined(__APPLE__)
-		pthread_setname_np(name.c_str());
-#elif defined(__ANDROID__)
-	pthread_setname_np(pthread_self(), name.c_str());
-#endif
-}
 
 std::string getHomeDirectory() {
 	const char *homeDir = getenv("HOME");

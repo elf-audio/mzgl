@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <assert.h>
+#include <cassert>
 #if DEBUG == 1 && !defined(AUTO_TEST)
 #	include "log.h"
 
