@@ -8,16 +8,18 @@
 
 #include "FlexboxLayout.h"
 #include "log.h"
+#include "mzAssert.h"
 
-using namespace std;
 void Flexbox::LayoutBase::addChild(LayoutNodeRef child) {
 	children.push_back(child);
 	YGNodeInsertChild(node, child->node, children.size() - 1);
 }
 
 void Flexbox::LayoutBase::update(float xOffset, float yOffset) {
-	if (isnan(xOffset)) xOffset = 0.0;
-	if (isnan(yOffset)) yOffset = 0.0;
+    mzAssert(!std::isnan(xOffset) && !std::isnan(yOffset));
+
+    if (std::isnan(xOffset)) xOffset = 0.0;
+	if (std::isnan(yOffset)) yOffset = 0.0;
 
 	if (layer != nullptr) {
 		layer->x	  = YGNodeLayoutGetLeft(node) + xOffset;
@@ -33,7 +35,7 @@ void Flexbox::LayoutBase::update(float xOffset, float yOffset) {
 		c->update(xOffset, yOffset);
 	}
 }
-void Flexbox::LayoutNodeCreator::setAttributes(LayoutBase *l, const vector<LayoutAttribute> &attrs) {
+void Flexbox::LayoutNodeCreator::setAttributes(LayoutBase *l, const std::vector<LayoutAttribute> &attrs) {
 	for (auto &a: attrs) {
 		// todo
 		if (a.name == "width") {
