@@ -2,7 +2,7 @@
 # TODO: swap out boost fs for https://github.com/gulrak/filesystem
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18.1)
 project(mzgl)
 # makes clang output colours
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

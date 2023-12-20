@@ -468,7 +468,7 @@ FloatBuffer &FloatBuffer::operator-=(const FloatBuffer &right) {
 
 FloatBuffer &FloatBuffer::operator*=(const FloatBuffer &right) {
 	if (size() != right.size()) {
-		printf("Wrong size - %ld != %ld\n", size(), right.size());
+//		printf("Wrong size - %ld != %ld\n", size(), right.size());
 		assert(size() == right.size());
 	}
 
