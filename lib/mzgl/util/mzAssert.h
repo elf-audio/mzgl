@@ -8,13 +8,20 @@
 
 #pragma once
 
-#include <assert.h>
-#if DEBUG==1
-#include "log.h"
+#include <cassert>
+#if DEBUG == 1 && !defined(AUTO_TEST)
+#	include "log.h"
 
-#define mzAssert(A) if(mzAssertEnabled()) { bool a = (A); if(!a) { Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line "<< __LINE__;} assert(a);}
+#	define mzAssert(A)                                                                                           \
+		if (mzAssertEnabled()) {                                                                                  \
+			bool a = (A);                                                                                         \
+			if (!a) {                                                                                             \
+				Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line " << __LINE__;                        \
+			}                                                                                                     \
+			assert(a);                                                                                            \
+		}
 #else
-#define mzAssert(A) {};
+#	define mzAssert(A) {};
 #endif
 
 void mzEnableAssert(bool enabled);
@@ -22,12 +29,7 @@ bool mzAssertEnabled();
 
 class MZScopedAssertDisable {
 public:
-	MZScopedAssertDisable() {
-		mzEnableAssert(false);
-	}
+	MZScopedAssertDisable() { mzEnableAssert(false); }
 
-	~MZScopedAssertDisable() {
-		mzEnableAssert(true);
-	}
+	~MZScopedAssertDisable() { mzEnableAssert(true); }
 };
-

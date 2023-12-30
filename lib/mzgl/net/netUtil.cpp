@@ -17,22 +17,22 @@
 std::string downloadUrl(std::string url) {
 #ifdef __APPLE__
 	// the URL to save
-	NSURL *urlNS = [NSURL URLWithString:[NSString stringWithUTF8String: url.c_str()]];
-	
-	NSError* error = nil;
+	NSURL *urlNS = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+
+	NSError *error = nil;
 	// turn it into a request and use NSData to load its content
-//	NSURLRequest *request = [NSURLRequest requestWithURL:urlNS];
-//	NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-	NSData* data = [NSData dataWithContentsOfURL:urlNS options:NSDataReadingUncached error:&error];
+	//	NSURLRequest *request = [NSURLRequest requestWithURL:urlNS];
+	//	NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+	NSData *data = [NSData dataWithContentsOfURL:urlNS options:NSDataReadingUncached error:&error];
 
 	if (error != nil) {
 		NSLog(@"Error downloading data: %@", error);
 		std::string errorMessage = [NSString stringWithFormat:@"Error downloading data: %@", error].UTF8String;
 		throw DownloadError(url, errorMessage);
-   }
-	
+	}
+
 	NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-	if(str==nil) {
+	if (str == nil) {
 		throw DownloadError(url, "Couldn't convert NSData to string in downloadUrl");
 	}
 	return [str UTF8String];
@@ -42,19 +42,18 @@ std::string downloadUrl(std::string url) {
 #endif
 }
 
-std::string postToUrl(const std::string url, const std::vector<std::pair<std::string,std::string>> &params) {
+std::string postToUrl(const std::string url, const std::vector<std::pair<std::string, std::string>> &params) {
 #ifdef __APPLE__
-	NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
+	NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc]
+		initWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
 
 	std::string paramStr = "";
-	for (const auto &p : params) {
+	for (const auto &p: params) {
 		if (!paramStr.empty()) paramStr += "&";
 		paramStr += urlencode(p.first) + "=" + urlencode(p.second);
 	}
-	
+
 	NSString *paramNSStr = [NSString stringWithUTF8String:paramStr.c_str()];
-	
-	
 
 	//create the Method "GET" or "POST"
 	[urlRequest setHTTPMethod:@"POST"];
@@ -66,40 +65,42 @@ std::string postToUrl(const std::string url, const std::vector<std::pair<std::st
 	[urlRequest setHTTPBody:data];
 
 	NSURLSession *session = [NSURLSession sharedSession];
-	
+
 	__block bool waitForMe = true;
 	__block std::string responseValue;
 	__block int responseCode = 0;
-	__block int success = false;
-	NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:urlRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-		NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-		
-		responseCode = (int)httpResponse.statusCode;
-		
-		if (httpResponse.statusCode == 200) {
-			NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-			if(str==nil) {
-				success = false;
-				responseValue = "Couldn't convert NSData to string in postToUrl";
-			} else {
-				success = true;
-				responseValue = [str UTF8String];
-			}
-			
-		} else {
-			success = false;
-		}
-		
-		waitForMe = false;
-	}];
-	
+	__block int success		 = false;
+	NSURLSessionDataTask *dataTask =
+		[session dataTaskWithRequest:urlRequest
+				   completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+					 NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
+
+					 responseCode = (int) httpResponse.statusCode;
+
+					 if (httpResponse.statusCode == 200) {
+						 NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+						 if (str == nil) {
+							 success	   = false;
+							 responseValue = "Couldn't convert NSData to string in postToUrl";
+						 } else {
+							 success	   = true;
+							 responseValue = [str UTF8String];
+						 }
+
+					 } else {
+						 success = false;
+					 }
+
+					 waitForMe = false;
+				   }];
+
 	[dataTask resume];
-	
-	while(waitForMe) {
+
+	while (waitForMe) {
 		sleepMicros(1);
 	}
 
-	if(!success) {
+	if (!success) {
 		throw DownloadError(url, responseValue);
 	}
 	return responseValue;
@@ -110,33 +111,27 @@ std::string postToUrl(const std::string url, const std::vector<std::pair<std::st
 #endif
 }
 
-
-
-std::string urlencode(const std::string& value) {
+std::string urlencode(const std::string &value) {
 	static auto hex_digt = "0123456789ABCDEF";
 
 	std::string result;
 	result.reserve(value.size() << 1);
 
-	for (auto ch : value) {
-		if ((ch >= '0' && ch <= '9')
-			|| (ch >= 'A' && ch <= 'Z')
-			|| (ch >= 'a' && ch <= 'z')
-			|| ch == '-' || ch == '_' || ch == '!'
-			|| ch == '\'' || ch == '(' || ch == ')'
-			|| ch == '*' || ch == '~' || ch == '.')  /*  !'()*-._~   */{
+	for (auto ch: value) {
+		if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '-'
+			|| ch == '_' || ch == '!' || ch == '\'' || ch == '(' || ch == ')' || ch == '*' || ch == '~'
+			|| ch == '.') /*  !'()*-._~   */ {
 			result.push_back(ch);
 		} else {
-			result += std::string("%") +
-					  hex_digt[static_cast<unsigned char>(ch) >> 4]
-					  +  hex_digt[static_cast<unsigned char>(ch) & 15];
+			result += std::string("%") + hex_digt[static_cast<unsigned char>(ch) >> 4]
+					  + hex_digt[static_cast<unsigned char>(ch) & 15];
 		}
 	}
 
 	return result;
 }
 
-std::string urldecode(const std::string& value) {
+std::string urldecode(const std::string &value) {
 	std::string result;
 	result.reserve(value.size());
 

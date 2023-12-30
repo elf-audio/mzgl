@@ -17,8 +17,14 @@ g++ main.cpp `pkg-config --libs --cflags gtk+-2.0`
 using namespace std;
 
 void linuxSaveFileDialog(string msg, string defaultFileName, function<void(string, bool)> completionCallback) {
-	GtkWidget *dialog = gtk_file_chooser_dialog_new(
-		msg.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, nullptr);
+	GtkWidget *dialog		= gtk_file_chooser_dialog_new(msg.c_str(),
+													  nullptr,
+													  GTK_FILE_CHOOSER_ACTION_SAVE,
+													  "Cancel",
+													  GTK_RESPONSE_CANCEL,
+													  "Save",
+													  GTK_RESPONSE_ACCEPT,
+													  nullptr);
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
 	gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
@@ -42,9 +48,17 @@ void linuxSaveFileDialog(string msg, string defaultFileName, function<void(strin
 	gtk_widget_destroy(dialog);
 }
 
-void linuxLoadFileDialog(string msg, const vector<string> &allowedExtensions, function<void(string, bool)> completionCallback) {
-	GtkWidget *dialog = gtk_file_chooser_dialog_new(
-		msg.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, nullptr);
+void linuxLoadFileDialog(string msg,
+						 const vector<string> &allowedExtensions,
+						 function<void(string, bool)> completionCallback) {
+	GtkWidget *dialog		= gtk_file_chooser_dialog_new(msg.c_str(),
+													  nullptr,
+													  GTK_FILE_CHOOSER_ACTION_OPEN,
+													  "Cancel",
+													  GTK_RESPONSE_CANCEL,
+													  "Open",
+													  GTK_RESPONSE_ACCEPT,
+													  nullptr);
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
 	if (!allowedExtensions.empty()) {
@@ -62,11 +76,11 @@ void linuxLoadFileDialog(string msg, const vector<string> &allowedExtensions, fu
 		;
 
 	char *filename = nullptr;
-	bool success = false;
+	bool success   = false;
 
 	if (res == GTK_RESPONSE_ACCEPT) {
 		filename = gtk_file_chooser_get_filename(chooser);
-		success = true;
+		success	 = true;
 	}
 
 	gtk_widget_destroy(dialog);
@@ -79,10 +93,14 @@ void linuxLoadFileDialog(string msg, const vector<string> &allowedExtensions, fu
 
 //void linuxChooseFolderDialog(string msg, const vector<string> &allowedExtensions, function<void(string, bool)> completionCallback) {
 void linuxChooseFolderDialog(std::string msg, std::function<void(std::string, bool)> completionCallback) {
-
-	GtkWidget *dialog = gtk_file_chooser_dialog_new(
-		msg.c_str(), nullptr, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-		"Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, nullptr);
+	GtkWidget *dialog = gtk_file_chooser_dialog_new(msg.c_str(),
+													nullptr,
+													GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+													"Cancel",
+													GTK_RESPONSE_CANCEL,
+													"Open",
+													GTK_RESPONSE_ACCEPT,
+													nullptr);
 
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
@@ -91,11 +109,11 @@ void linuxChooseFolderDialog(std::string msg, std::function<void(std::string, bo
 		;
 
 	char *filename = nullptr;
-	bool success = false;
+	bool success   = false;
 
 	if (res == GTK_RESPONSE_ACCEPT) {
 		filename = gtk_file_chooser_get_filename(chooser);
-		success = true;
+		success	 = true;
 	}
 
 	gtk_widget_destroy(dialog);
@@ -106,8 +124,12 @@ void linuxChooseFolderDialog(std::string msg, std::function<void(std::string, bo
 	g_free(filename);
 }
 
-void linuxTextboxDialog(std::string title, std::string msg, std::string text, function<void(string, bool)> completionCallback) {
-	GtkWidget *dialog = gtk_dialog_new_with_buttons(title.c_str(), nullptr, (GtkDialogFlags) 0, "OK", 1, "Cancel", 2, nullptr);
+void linuxTextboxDialog(std::string title,
+						std::string msg,
+						std::string text,
+						function<void(string, bool)> completionCallback) {
+	GtkWidget *dialog =
+		gtk_dialog_new_with_buttons(title.c_str(), nullptr, (GtkDialogFlags) 0, "OK", 1, "Cancel", 2, nullptr);
 
 	GtkWidget *label = gtk_label_new(msg.c_str());
 
@@ -136,8 +158,8 @@ void linuxTextboxDialog(std::string title, std::string msg, std::string text, fu
 }
 
 void linuxAlertDialog(string title, string msg) {
-	auto type = GTK_MESSAGE_INFO;
-	auto buttons = GTK_BUTTONS_OK;
+	auto type		  = GTK_MESSAGE_INFO;
+	auto buttons	  = GTK_BUTTONS_OK;
 	GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, type, buttons, "%s", msg.c_str());
 	gtk_window_set_title(GTK_WINDOW(dialog), title.c_str());
 	gtk_dialog_run(GTK_DIALOG(dialog));
@@ -146,9 +168,12 @@ void linuxAlertDialog(string title, string msg) {
 		;
 }
 
-void linuxConfirmDialog(std::string title, std::string msg, std::function<void()> okPressed, std::function<void()> cancelPressed) {
-	auto type = GTK_MESSAGE_QUESTION;
-	auto buttons = GTK_BUTTONS_OK_CANCEL;
+void linuxConfirmDialog(std::string title,
+						std::string msg,
+						std::function<void()> okPressed,
+						std::function<void()> cancelPressed) {
+	auto type		  = GTK_MESSAGE_QUESTION;
+	auto buttons	  = GTK_BUTTONS_OK_CANCEL;
 	GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, type, buttons, "%s", msg.c_str());
 	gtk_window_set_title(GTK_WINDOW(dialog), title.c_str());
 	auto result = gtk_dialog_run(GTK_DIALOG(dialog));

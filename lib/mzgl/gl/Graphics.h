@@ -18,13 +18,24 @@
 #include <map>
 #include <functional>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846f
-#endif
+#define MZ_KEY_LEFT		 256
+#define MZ_KEY_RIGHT	 257
+#define MZ_KEY_DOWN		 258
+#define MZ_KEY_UP		 259
+#define MZ_KEY_DELETE	 127 // this is actually ascii, but non-printable
+#define MZ_KEY_TAB		 9
+#define MZ_KEY_ESCAPE	 27
+#define MZ_KEY_SHIFT_TAB 25
+#define MZ_KEY_RETURN	 13
+#define MZ_KEY_ENTER	 3
+#define MZ_KEY_SHIFT	 1001
+#define MZ_KEY_FN		 1002
+#define MZ_KEY_CTRL		 1002
+#define MZ_KEY_ALT		 1003
+#define MZ_KEY_CMD		 1004
+
 class Layer;
 class App;
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // COLORS
@@ -37,221 +48,223 @@ struct ScopedTransform;
 
 class Graphics {
 public:
-    int width = 0;
-    int height = 0;
-    float pixelScale = 2.f;
-    double frameDelta = 1.f/60.f;
-    double currFrameTime = 0.f;
+	int width			 = 0;
+	int height			 = 0;
+	float pixelScale	 = 2.f;
+	double frameDelta	 = 1.f / 60.f;
+	double currFrameTime = 0.f;
 
-    void setColor(float r, float g, float b, float a = 1);
-    void setColor(glm::vec3 c);
-    void setColor(glm::vec4 c);
-    void setColor(glm::vec4 c, float alpha);
-    void setColor(float bri);
-    void setHexColor(int hex, float a = 1);
-    void saveScreen(std::string pngPath);
+	void setColor(float r, float g, float b, float a = 1);
+	void setColor(glm::vec3 c);
+	void setColor(glm::vec4 c);
+	void setColor(glm::vec4 c, float alpha);
+	void setColor(float bri);
+	void setHexColor(int hex, float a = 1);
+	void saveScreen(std::string pngPath);
 
-    std::function<void(bool)> setAntialiasing = [](bool){};
+	std::function<void(bool)> setAntialiasing = [](bool) {};
 
 	enum class BlendMode {
 		Alpha, // the classic alpha blending mode
 		Additive,
 	};
-	
-    void setBlending(bool shouldBlend);
+
+	void setBlending(bool shouldBlend);
 	void setBlendMode(BlendMode blendMode);
-    bool isBlending();
-    glm::vec4 getColor();
+	bool isBlending();
+	glm::vec4 getColor();
 
-    void clear(float c);
-    void clear(float r, float g, float b, float a = 1);
-    void clear(glm::vec4 c);
-    void clear(glm::vec3 c);
+	void clear(float c);
+	void clear(float r, float g, float b, float a = 1);
+	void clear(glm::vec4 c);
+	void clear(glm::vec3 c);
 
-    Shader *currShader = nullptr;
+	Shader *currShader = nullptr;
 
-    // these are the default shaders
-    ShaderRef nothingShader;
-    ShaderRef colorShader;
-    ShaderRef colorTextureShader;
-    ShaderRef texShader;
-    ShaderRef fontShader;
+	// these are the default shaders
+	ShaderRef nothingShader;
+	ShaderRef colorShader;
+	ShaderRef colorTextureShader;
+	ShaderRef texShader;
+	ShaderRef fontShader;
 
-    void loadDefaultShaders();
+	void loadDefaultShaders();
 
-	
+	void noFill();
+	void fill();
+	bool isFilling();
 
-    void noFill();
-    void fill();
-    bool isFilling();
+	void setStrokeWeight(float f);
+	float getStrokeWeight();
 
-    void setStrokeWeight(float f);
-    float getStrokeWeight();
+	/////////////////////////////////////////////////////////////////////////////
+	// SHAPES
 
+	void drawRect(float x, float y, float width, float height);
+	void drawRect(const Rectf &r);
+	void draw(const Rectf &r);
 
-    /////////////////////////////////////////////////////////////////////////////
-    // SHAPES
+	// this is very slow - use the RoundedRect class instead to cache
+	void drawRoundedRect(const Rectf &r, float radius);
+	void drawRoundedRectShadow(Rectf r, float radius, float shadow);
+	void draw(const Rectf &r, float radius);
 
-    void drawRect(float x, float y, float width, float height);
-    void drawRect(const Rectf &r);
-    void draw(const Rectf &r);
+	void drawCircle(float x, float y, float r);
+	void drawCircle(glm::vec2 c, float r);
+	void drawArc(glm::vec2 c, float r, float startAngle, float endAngle);
+	void drawLine(glm::vec2 a, glm::vec2 b);
+	void drawLine(float x1, float y1, float x2, float y2);
+	void drawLineStrip(const std::vector<vec2> &pts);
+	void drawPlus(vec2 c, int diameter, int thickness);
 
-    // this is very slow - use the RoundedRect class instead to cache
-    void drawRoundedRect(const Rectf &r, float radius);
-    void drawRoundedRectShadow(Rectf r, float radius, float shadow);
-    void draw(const Rectf &r, float radius);
+	void drawCross(vec2 c, int diameter, int thickness);
 
-    void drawCircle(float x, float y, float r);
-    void drawCircle(glm::vec2 c, float r);
-    void drawArc(glm::vec2 c, float r, float startAngle, float endAngle);
-    void drawLine(glm::vec2 a, glm::vec2 b);
-    void drawLine(float x1, float y1, float x2, float y2);
-    void drawLineStrip(const std::vector<vec2> &pts);
-    void drawPlus(vec2 c, int diameter, int thickness);
+	void drawChevronLeft(vec2 c, int radius, int thickness);
+	void drawChevronRight(vec2 c, int radius, int thickness);
+	void drawChevronUp(vec2 c, int radius, int thickness);
+	void drawChevronDown(vec2 c, int radius, int thickness);
 
-    void drawCross(vec2 c, int diameter, int thickness);
+	void drawShape(const std::vector<vec2> &shape);
+	void drawTriangle(vec2 a, vec2 b, vec2 c);
+	void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
+	void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices);
+	void drawVerts(const std::vector<glm::vec2> &verts,
+				   const std::vector<glm::vec4> &cols,
+				   Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
 
-    void drawChevronLeft(vec2 c, int radius, int thickness);
-    void drawChevronRight(vec2 c, int radius, int thickness);
-    void drawChevronUp(vec2 c, int radius, int thickness);
-    void drawChevronDown(vec2 c, int radius, int thickness);
+	void drawText(const std::string &s, float x, float y);
+	void drawText(const std::string &s, glm::vec2 p);
+	void drawTextWithBG(const std::string &s, vec4 bgColor, float x, float y);
+	void drawTextCentred(const std::string &s, glm::vec2 c);
+	void drawTextVerticallyCentred(const std::string &text, glm::vec2 c);
+	void drawTextHorizontallyCentred(const std::string &text, glm::vec2 c);
 
-    void drawShape(const std::vector<vec2> &shape);
-    void drawTriangle(vec2 a, vec2 b, vec2 c);
-    void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
-    void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices);
-    void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<glm::vec4> &cols, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
+	/////////////////////////////////////////////////////////////////////////////
+	// MATRIX STUFF
+	void pushMatrix();
+	void popMatrix();
 
-    void drawText(const std::string &s, float x, float y);
-    void drawText(const std::string &s, glm::vec2 p);
-    void drawTextWithBG(const std::string &s, vec4 bgColor, float x, float y);
-    void drawTextCentred(const std:: string &s, glm::vec2 c);
-    void drawTextVerticallyCentred(const std::string &text, glm::vec2 c);
-    void drawTextHorizontallyCentred(const std::string &text, glm::vec2 c);
+	void loadIdentity();
+	void translate(glm::vec2 d);
+	void translate(glm::vec3 d);
 
-    /////////////////////////////////////////////////////////////////////////////
-    // MATRIX STUFF
-    void pushMatrix();
-    void popMatrix();
+	void translate(float x, float y, float z = 0);
+	void scale(float amt);
+	void scale(float x, float y, float z = 1);
 
+	void rotate(float angle, glm::vec3 axis);
+	void rotateX(float angle);
+	void rotateY(float angle);
+	void rotateZ(float angle);
+	void setProjectionMatrix(glm::mat4 projMat);
 
+	void setViewMatrix(glm::mat4 viewMat);
+	glm::mat4 getMVP();
+	const glm::mat4 &getModelMatrix();
 
-
-    void loadIdentity();
-    void translate(glm::vec2 d);
-    void translate(glm::vec3 d);
-
-
-    void translate(float x, float y, float z = 0);
-    void scale(float amt);
-    void scale(float x, float y, float z = 1);
-
-    void rotate(float angle, glm::vec3 axis);
-    void rotateX(float angle);
-    void rotateY(float angle);
-    void rotateZ(float angle);
-    void setProjectionMatrix(glm::mat4 projMat);
-
-    void setViewMatrix(glm::mat4 viewMat);
-    glm::mat4 getMVP();
-    const glm::mat4 &getModelMatrix();
-	
-	
-	
 	void maskOn(const Rectf &r);
 	void maskOff();
 	bool isMaskOn();
 	Rectf getMaskRect();
-	
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-    // PRIVATE
-    void initGraphics();
-    void setupView(bool flipped = true, int w = 0, int h = 0);
-    void setupViewOrtho(float w = 0.f, float h = 0.f);
-    unsigned int getFrameNum() { return frameNum; }
-    // when you want to unbind a frame buffer (fbo) you need to bind to this
-    // as on iOS, the default framebuffer is not always 0
-    
-    Font &getFont();
-    void unloadFont();
-    Font *font = nullptr;
-    std::vector<unsigned char> getDefaultFontTTFData();
 
+	/////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////
+	// PRIVATE
+	void initGraphics();
+	void setupView(bool flipped = true, int w = 0, int h = 0);
+	void setupViewOrtho(float w = 0.f, float h = 0.f);
+	unsigned int getFrameNum() { return frameNum; }
+	// when you want to unbind a frame buffer (fbo) you need to bind to this
+	// as on iOS, the default framebuffer is not always 0
 
-    bool firstFrame = true;
+	Font &getFont();
+	void unloadFont();
+	Font *font = nullptr;
+	std::vector<unsigned char> getDefaultFontTTFData();
 
-    // this function will warp a rect so it works with glScissor
-    // - different OS's have different quirks regarding this
-    void warpMaskForScissor(Rectf &a);
+	bool firstFrame = true;
 
-    // currently focused layer once a touch has gone down
-    // this should be replaced by a touch id to Layer* map for multitouch
-    // needs to be here so it's not static
-    std::map<int,Layer*> focusedLayers;
+	// this function will warp a rect so it works with glScissor
+	// - different OS's have different quirks regarding this
+	void warpMaskForScissor(Rectf &a);
 
-    friend class App;
-	
+	// currently focused layer once a touch has gone down
+	// this should be replaced by a touch id to Layer* map for multitouch
+	// needs to be here so it's not static
+	std::map<int, Layer *> focusedLayers;
+
+	Layer *keyboardFocusedLayer = nullptr;
+
+	friend class App;
+
 	// for FBO
 	int32_t getDefaultFrameBufferId();
-	
+
 private:
-    float strokeWeight = 1;
-    
-    bool blendingEnabled = false;
-    bool filling = true;
-    glm::vec4 color;
-    //glm::mat4 mvp;
-    MatrixStack modelMatrixStack;
-    glm::mat4 projectionMatrix;
-    glm::mat4 viewMatrix;
-    // this is cached version of the above multiplied
-    glm::mat4 viewProjectionMatrix;
-    friend class ScopedAlphaBlend;
-    friend struct ScopedTranslate;
+	float strokeWeight = 1;
 
-	
+	bool blendingEnabled = false;
+	bool filling		 = true;
+	glm::vec4 color;
+	//glm::mat4 mvp;
+	MatrixStack modelMatrixStack;
+	glm::mat4 projectionMatrix;
+	glm::mat4 viewMatrix;
+	// this is cached version of the above multiplied
+	glm::mat4 viewProjectionMatrix;
+	friend class ScopedAlphaBlend;
+	friend struct ScopedTranslate;
+
 	int32_t defaultFBO;
-    uint32_t immediateVertexArray = 0;
+	uint32_t immediateVertexArray  = 0;
 	uint32_t immediateVertexBuffer = 0;
-	uint32_t immediateColorBuffer = 0;
-	uint32_t immediateIndexBuffer = 0;
+	uint32_t immediateColorBuffer  = 0;
+	uint32_t immediateIndexBuffer  = 0;
 
-
-    // was in Globals
-    unsigned int frameNum = 0;
+	// was in Globals
+	unsigned int frameNum = 0;
 };
 
 class ScopedAlphaBlend {
 public:
-    Graphics &g;
-    ScopedAlphaBlend(Graphics &g, bool shouldBlend);
-    virtual ~ScopedAlphaBlend();
+	Graphics &g;
+	ScopedAlphaBlend(Graphics &g, bool shouldBlend);
+	virtual ~ScopedAlphaBlend();
+
 private:
-    bool originalBlendState;
-
-
+	bool originalBlendState;
 };
-
 
 struct ScopedTranslate {
-    Graphics &g;
-    ScopedTranslate(Graphics &g, glm::vec2 p) : g(g) { g.pushMatrix(); g.translate(p.x, p.y); }
-    ScopedTranslate(Graphics &g, float x, float y) : g(g) { g.pushMatrix(); g.translate(x, y); }
-    virtual ~ScopedTranslate() { g.popMatrix(); }
+	Graphics &g;
+	ScopedTranslate(Graphics &g, glm::vec2 p)
+		: g(g) {
+		g.pushMatrix();
+		g.translate(p.x, p.y);
+	}
+	ScopedTranslate(Graphics &g, float x, float y)
+		: g(g) {
+		g.pushMatrix();
+		g.translate(x, y);
+	}
+	virtual ~ScopedTranslate() { g.popMatrix(); }
 };
 struct ScopedTransform {
-    Graphics &g;
-    ScopedTransform(Graphics &g) : g(g) { g.pushMatrix(); }
-    virtual ~ScopedTransform() { g.popMatrix(); }
+	Graphics &g;
+	ScopedTransform(Graphics &g)
+		: g(g) {
+		g.pushMatrix();
+	}
+	virtual ~ScopedTransform() { g.popMatrix(); }
 };
 
-
 struct ScopedShaderEnable {
-    ShaderRef sh;
-    ScopedShaderEnable(ShaderRef shader) : sh(shader) {sh->begin();}
-    virtual ~ScopedShaderEnable() { sh->end(); }
+	ShaderRef sh;
+	ScopedShaderEnable(ShaderRef shader)
+		: sh(shader) {
+		sh->begin();
+	}
+	virtual ~ScopedShaderEnable() { sh->end(); }
 };
 
 #include "ScopedMask.h"
-

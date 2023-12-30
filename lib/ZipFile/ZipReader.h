@@ -8,7 +8,6 @@ class ZipReaderFile;
 
 class ZipReader {
 public:
-
 	ZipReader(const std::string &path);
 
 	std::shared_ptr<ZipReaderFile> open(std::string pathInZip);
@@ -20,39 +19,42 @@ public:
 		int offset;
 		int size;
 		bool valid;
-		Entry(const std::string &path, int offset, int size) : path(path), offset(offset), size(size), valid(true) {}
-		Entry() : valid(false) {}
+		Entry(const std::string &path, int offset, int size)
+			: path(path)
+			, offset(offset)
+			, size(size)
+			, valid(true) {}
+		Entry()
+			: valid(false) {}
 	};
 	std::vector<Entry> listEntries() const { return entries; }
 	std::string zipPath;
 
 private:
-
-
 	std::vector<Entry> entries;
 
 	Entry findEntry(const std::string &path);
 };
 
-
 class ZipReaderFile {
 public:
-    ZipReaderFile(const std::string &zipPath, const ZipReader::Entry &entry);
+	ZipReaderFile(const std::string &zipPath, const ZipReader::Entry &entry);
 
-    int fileStart;
-    int fileSize;
+	int fileStart;
+	int fileSize;
 
-    enum class SeekOrigin {
-        Start,
-        Current,
-    };
+	enum class SeekOrigin {
+		Start,
+		Current,
+	};
 
-    bool seek(int offset, SeekOrigin origin = SeekOrigin::Start);
+	bool seek(int offset, SeekOrigin origin = SeekOrigin::Start);
 
-    size_t read(int8_t *d, uint32_t sz);
+	size_t read(int8_t *d, uint32_t sz);
 	std::vector<int8_t> read();
 	void extract(const std::string &path);
+
 private:
 	size_t readSome(std::vector<int8_t> &d);
-    std::ifstream zip;
+	std::ifstream zip;
 };

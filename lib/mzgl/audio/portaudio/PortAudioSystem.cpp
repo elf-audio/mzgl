@@ -68,7 +68,9 @@ static int PortAudioSystem_callback(const void *inputBuffer,
 									void *userData) {
 	PortAudioSystem *as = (PortAudioSystem *) userData;
 
-	as->inputTime = timeInfo->inputBufferAdcTime; /**< The time when the first sample of the input buffer was captured at the ADC input */
+	as->inputTime =
+		timeInfo
+			->inputBufferAdcTime; /**< The time when the first sample of the input buffer was captured at the ADC input */
 	as->outputTime = timeInfo->outputBufferDacTime;
 
 	if (inputBuffer != nullptr) {
@@ -164,7 +166,7 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 		Log::d() << "Setting " << (isOutput ? "output" : "input") << " to " << audioPort.name;
 	}
 
-	bool success = true;
+	bool success			= true;
 	bool shouldStopAndStart = isRunning();
 	if (shouldStopAndStart) {
 		stop();
@@ -173,7 +175,7 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 	if (isOutput) {
 		outPort = audioPort;
 	} else {
-		inPort = audioPort;
+		inPort		  = audioPort;
 		isInPortDummy = (inPort.numInChannels == 0);
 	}
 
@@ -186,7 +188,8 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 			sampleRate = 0; // reset sample rate to port-default
 			setNoInputPort();
 			configureStream();
-			success = false; // even if configureStream() succeeded, we return false to inform that input is set to no-input
+			success =
+				false; // even if configureStream() succeeded, we return false to inform that input is set to no-input
 		}
 
 		if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
@@ -206,9 +209,9 @@ void PortAudioSystem::setup(int numIns, int numOuts) {
 	if (verbose) {
 		Log::d() << "PortAudioSystem::setup(" << numIns << ", " << numOuts << ")";
 	}
-	this->numInChannels = numIns;
-	this->numOutChannels = numOuts;
-	this->desiredNumInChannels = numIns;
+	this->numInChannels			= numIns;
+	this->numOutChannels		= numOuts;
+	this->desiredNumInChannels	= numIns;
 	this->desiredNumOutChannels = numOuts;
 
 	configureStream();
@@ -229,7 +232,7 @@ void PortAudioSystem::configureStream() {
 		Log::d() << "PortAudioSystem::configureStream()";
 	}
 
-	numInChannels = isInPortDummy ? 0 : desiredNumInChannels;
+	numInChannels  = isInPortDummy ? 0 : desiredNumInChannels;
 	numOutChannels = desiredNumOutChannels;
 
 	// just make sure our ports are up to date
@@ -238,7 +241,7 @@ void PortAudioSystem::configureStream() {
 
 	if (this->numInChannels > 0) {
 		if (!inPort.isValid()) {
-			inPort = getPort(Pa_GetDefaultInputDevice());
+			inPort		  = getPort(Pa_GetDefaultInputDevice());
 			isInPortDummy = false;
 		}
 		inputParameters.device = inPort.portId;
@@ -247,9 +250,9 @@ void PortAudioSystem::configureStream() {
 			numInChannels = 0;
 			//return;
 		} else {
-			numInChannels = min(inPort.numInChannels, numInChannels);
-			inputParameters.channelCount = numInChannels;
-			inputParameters.sampleFormat = paFloat32;
+			numInChannels					 = min(inPort.numInChannels, numInChannels);
+			inputParameters.channelCount	 = numInChannels;
+			inputParameters.sampleFormat	 = paFloat32;
 			inputParameters.suggestedLatency = Pa_GetDeviceInfo(inputParameters.device)->defaultLowInputLatency;
 			inputParameters.hostApiSpecificStreamInfo = nullptr;
 		}
@@ -268,10 +271,10 @@ void PortAudioSystem::configureStream() {
 			streamConfigStatus_ = StreamConfigurationStatus::FAILED;
 			return;
 		}
-		numOutChannels = min((int) outPort.numOutChannels, numOutChannels);
+		numOutChannels				  = min((int) outPort.numOutChannels, numOutChannels);
 		outputParameters.channelCount = numOutChannels;
 
-		outputParameters.sampleFormat = paFloat32;
+		outputParameters.sampleFormat	  = paFloat32;
 		outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
 		outputParameters.hostApiSpecificStreamInfo = nullptr;
 	}
@@ -293,7 +296,7 @@ void PortAudioSystem::configureStream() {
 		}
 	}
 
-	auto *inParams = &inputParameters;
+	auto *inParams	= &inputParameters;
 	auto *outParams = &outputParameters;
 
 	if (numInChannels < 1) inParams = nullptr;
@@ -303,15 +306,16 @@ void PortAudioSystem::configureStream() {
 		Log::d() << "Calling Pa_OpenStream";
 	}
 
-	auto err = Pa_OpenStream(&stream,
-							 inParams,
-							 outParams,
-							 sampleRate,
-							 bufferSize,
-							 0,
-							 /* paClipOff, */ /* we won't output out of range samples so don't bother clipping them */
-							 PortAudioSystem_callback,
-							 this);
+	auto err =
+		Pa_OpenStream(&stream,
+					  inParams,
+					  outParams,
+					  sampleRate,
+					  bufferSize,
+					  0,
+					  /* paClipOff, */ /* we won't output out of range samples so don't bother clipping them */
+					  PortAudioSystem_callback,
+					  this);
 	if (!checkPaError(err, "open stream")) {
 		streamConfigStatus_ = StreamConfigurationStatus::FAILED;
 		return;
@@ -323,15 +327,15 @@ void PortAudioSystem::configureStream() {
 	PaAlsa_EnableRealtimeScheduling(stream, true);
 #endif
 	streamConfigStatus_ = StreamConfigurationStatus::OK;
-	
-	
+
 	// when asking for a specific sample rate, we don't
 	// always get it, so we need to update the sampleRate
 	// value to reflect that and make a warning for now
 	const auto *info = Pa_GetStreamInfo(stream);
 	if (info != nullptr) {
-		if (info->sampleRate!=sampleRate) {
-			Log::w() << "Didn't get desired samplerate of " << to_string(sampleRate/1000.f, 0) << "kHz, got " << to_string(info->sampleRate/1000.f, 0) << "kHz instead";
+		if (info->sampleRate != sampleRate) {
+			Log::w() << "Didn't get desired samplerate of " << to_string(sampleRate / 1000.f, 0) << "kHz, got "
+					 << to_string(info->sampleRate / 1000.f, 0) << "kHz instead";
 			sampleRate = info->sampleRate;
 		}
 	}
@@ -339,7 +343,8 @@ void PortAudioSystem::configureStream() {
 void PortAudioSystem::start() {
 	auto err = Pa_StartStream(stream);
 	checkPaError(err, "start stream");
-	Log::d() << to_string(getOutputLatency() * 1000.0, 0) << "ms output latency, buffersize: " << std::to_string(bufferSize) << " samples";
+	Log::d() << to_string(getOutputLatency() * 1000.0, 0)
+			 << "ms output latency, buffersize: " << std::to_string(bufferSize) << " samples";
 }
 
 void PortAudioSystem::stop() {
@@ -388,7 +393,7 @@ void PortAudioSystem::rescanPorts() {
 	}
 	ports.clear();
 
-	int defaultInputDeviceId = Pa_GetDefaultInputDevice();
+	int defaultInputDeviceId  = Pa_GetDefaultInputDevice();
 	int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
 
 	int numDevices = Pa_GetDeviceCount();
@@ -411,9 +416,9 @@ void PortAudioSystem::rescanPorts() {
 		auto dev = Pa_GetDeviceInfo(i);
 
 		AudioPort port;
-		port.portId = i;
-		port.name = dev->name;
-		port.numInChannels = dev->maxInputChannels;
+		port.portId			= i;
+		port.name			= dev->name;
+		port.numInChannels	= dev->maxInputChannels;
 		port.numOutChannels = dev->maxOutputChannels;
 		if (i == defaultInputDeviceId) {
 			port.isDefaultInput = true;

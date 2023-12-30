@@ -11,4 +11,3 @@
 #include <stdint.h>
 uint64_t hostTicksToSeconds(uint64_t ticks);
 uint64_t hostTicksToNanoSeconds(uint64_t ticks);
-

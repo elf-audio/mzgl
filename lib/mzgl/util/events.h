@@ -10,20 +10,15 @@
 #include <stdio.h>
 #include <functional>
 
-enum {
-	UPDATE,
-	DRAW,
-	TOUCH_MOVED
-};
+enum { UPDATE, DRAW, TOUCH_MOVED };
 
-template<class T>
-void addListener(int type, T* const object, void(T::* const mf)(float,float,int));
+template <class T>
+void addListener(int type, T *const object, void (T::*const mf)(float, float, int));
 
 void addListener(int type, void *obj, std::function<void()>);
 void removeListener(int type, void *obj);
 
 void callUpdateListeners();
 void callDrawListeners();
-
 
 void printListenerUsageCount();

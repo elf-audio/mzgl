@@ -15,6 +15,9 @@
 
 class App;
 
+
+void setThreadName(const std::string &name);
+
 std::string dataPath(std::string path, std::string bundleId = ""); //com.elf-audio.vst3.koala");
 std::string docsPath(std::string path = "");
 std::string appSupportPath(std::string path);
@@ -84,7 +87,9 @@ void sleepMicros(long us);
 std::string uniquerizePath(std::string path);
 
 // only works on mac, this one.
-void saveFileDialog(std::string msg, std::string defaultFileName, std::function<void(std::string, bool)> completionCallback);
+void saveFileDialog(std::string msg,
+					std::string defaultFileName,
+					std::function<void(std::string, bool)> completionCallback);
 
 // generates a UUID - not tied to the machine
 // but can be considered globally unique

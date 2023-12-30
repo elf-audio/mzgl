@@ -17,17 +17,16 @@
 class Layer : public Rectf {
 public:
 	std::string name;
-	glm::vec4 color {1.f, 1.f, 1.f, 1.f};
 
 	bool interactive = false;
-	bool visible = true;
+	bool visible	 = true;
 
 	Layer(Graphics &g, std::string name = "");
-	Layer(Graphics &g, std::string name, glm::vec4 c);
 	virtual ~Layer();
+
 	Layer(Graphics &g, std::string name, float x, float y, float w, float h);
 
-	virtual void draw();
+	virtual void draw() {}
 
 	Layer *addChild(Layer *layer);
 	bool removeChild(Layer *layer);
@@ -57,6 +56,9 @@ public:
 	virtual void mouseScrolled(float x, float y, float scrollX, float scrollY) {}
 	virtual void mouseZoomed(float x, float y, float zoom) {}
 
+	virtual bool keyDown(int key) { return false; }
+	virtual void keyUp(int key) {}
+
 	// override to have something to do before the draw
 	virtual void update() {}
 
@@ -79,7 +81,8 @@ public:
 	bool _touchDown(float x, float y, int id);
 	void _mouseScrolled(float x, float y, float scrollX, float scrollY);
 	void _mouseZoomed(float x, float y, float zoom);
-
+	bool _keyDown(int key);
+	bool _keyUp(int key);
 	void _update();
 
 	Layer *getParent();
@@ -103,7 +106,9 @@ public:
 	// same functionality as getAbsolutePosition()
 	void localToAbsoluteCoords(float &xx, float &yy);
 
-	void setBottomCenter(float x, float y) { set(x - this->width / 2, y - this->height, this->width, this->height); }
+	void setBottomCenter(float x, float y) {
+		set(x - this->width / 2, y - this->height, this->width, this->height);
+	}
 
 	// attempt to pass focus from this layer to another
 
@@ -116,6 +121,7 @@ public:
 	void positionLeftOf(Layer *l, float padding = 0);
 	void positionRightOf(Layer *l, float padding = 0);
 	void layoutChildrenAsGrid(int cols, int rows, float padding = 0);
+	void stackChildrenVertically(float padding = 0);
 	void alignChildrenToPixels();
 
 	// used for hacky things, don't use
@@ -145,4 +151,21 @@ private:
 
 	//static void transformFocusedMouse(float &x, float &y);
 	//static glm::vec2 focusedMouseTransform;
+};
+
+class ColouredRectLayer : public Layer {
+public:
+	ColouredRectLayer(Graphics &g)
+		: Layer(g) {}
+	vec4 color;
+	void draw() override {
+		if (color.a == 0) return;
+		g.setColor(color);
+		if (color.a < 1) {
+			ScopedAlphaBlend scp(g, true);
+			g.drawRect(*this);
+		} else {
+			g.drawRect(*this);
+		}
+	}
 };

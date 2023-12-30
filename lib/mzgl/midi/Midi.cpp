@@ -7,7 +7,6 @@
 //
 
 #include "Midi.h"
-void MidiInCallback( double deltatime, std::vector< unsigned char > *message, void *userData ) {
-	((MidiIn*)userData)->callback(deltatime, message);
+void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData) {
+	((MidiIn *) userData)->callback(deltatime, message);
 }
-

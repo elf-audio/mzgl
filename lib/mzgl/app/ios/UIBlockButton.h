@@ -11,10 +11,8 @@
 typedef void (^ActionBlock)();
 
 @interface UIBlockButton : UIButton {
-    ActionBlock _actionBlock;
+	ActionBlock _actionBlock;
 }
 
--(void) handleControlEvent:(UIControlEvents)event
-                 withBlock:(ActionBlock) action;
+- (void)handleControlEvent:(UIControlEvents)event withBlock:(ActionBlock)action;
 @end
-

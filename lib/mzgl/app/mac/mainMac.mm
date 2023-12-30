@@ -14,20 +14,18 @@
 #include "App.h"
 
 Graphics g;
-int main(int argc, const char * argv[]) {
+int main(int argc, const char *argv[]) {
 	[NSApplication sharedApplication];
 	[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
 	loadCommandLineArgs(argc, argv);
 
 	auto app = instantiateApp(g);
-	if(!app->isHeadless()) {
+	if (!app->isHeadless()) {
 		[NSApp activateIgnoringOtherApps:YES];
-		id appDelegate = [[MacAppDelegate alloc] initWithApp: app];
+		id appDelegate = [[MacAppDelegate alloc] initWithApp:app];
 		[NSApp setDelegate:appDelegate];
 		[NSApp run];
 	}
 	return 0;
 }
-
-

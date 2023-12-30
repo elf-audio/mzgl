@@ -10,49 +10,40 @@
 
 class SoftEnable {
 public:
-	
 	bool set(bool en, bool instant = false) {
-		
-		if(en==enabled) {
-			if(instant) amt = enabled?1:0;
+		if (en == enabled) {
+			if (instant) amt = enabled ? 1 : 0;
 			return false;
 		}
 		enabled = en;
-		if(instant) amt = enabled?1:0;
+		if (instant) amt = enabled ? 1 : 0;
 		return true;
 	}
-	
-	float getAmt() const {
-		return amt;
-	}
+
+	float getAmt() const { return amt; }
 	void setDurationInFrames(int f) {
 		// default is 1 / 0.05 = 20
-		increment = 1.f / (float)f;
+		increment = 1.f / (float) f;
 	}
 	void update() {
-		if(enabled) {
+		if (enabled) {
 			amt += increment;
-			if(amt>1) amt = 1.f;
+			if (amt > 1) amt = 1.f;
 		} else {
 			amt -= increment;
-			if(amt<0.f) amt = 0.f;
+			if (amt < 0.f) amt = 0.f;
 		}
 	}
 	// returns true if amt is more than zero or is going to be
-	bool isOn() const {
-		return enabled || amt > 0.01f;
-	}
-	
-	bool getValue() const {
-		return enabled;
-	}
-	void toggle() {
-		set(!isOn());
-	}
-	
+	bool isOn() const { return enabled || amt > 0.01f; }
+
+	bool getValue() const { return enabled; }
+	void toggle() { set(!isOn()); }
+
 	bool &getBoolPtr() { return enabled; }
+
 private:
 	float increment = 0.05f;
-	float amt = 0.f;
-	bool enabled = false;
+	float amt		= 0.f;
+	bool enabled	= false;
 };

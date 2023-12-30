@@ -5,53 +5,53 @@
 
 namespace file_drag_handler {
 
-static auto getEventDispatcher(GLFWwindow* window) -> EventDispatcher* {
-	const auto app{reinterpret_cast<GLFWAppRunner*>(glfwGetWindowUserPointer(window))};
-    return app->eventDispatcher.get();
-}
-
-static auto makePathsVector(int count, const char** paths) {
-	std::vector<std::string> out;
-	out.reserve(count);
-	for (int i = 0; i < count; i++) {
-		out.push_back(paths[i]);
+	static auto getEventDispatcher(GLFWwindow *window) -> EventDispatcher * {
+		const auto app {reinterpret_cast<GLFWAppRunner *>(glfwGetWindowUserPointer(window))};
+		return app->eventDispatcher.get();
 	}
-	return out;
-}
 
-// For Linux we currently just set the drop callback using GLFW, which is only called
-// when the user releases the mouse button to drop files over the window.
-//
-// There won't be visual feedback when the user is dragging files over the window
-// with the button still pressed.
-//
-// To fix that we would need to do something platform-specific here and call these
-// Listener functions at the appropriate times:
-//	- Listener::onDragBegin
-//	- Listener::onDragCancel
-//	- Listener::onDrag
-//	- Listener::onDrop
-//
-// See the Windows implementation for an example of this.
+	static auto makePathsVector(int count, const char **paths) {
+		std::vector<ScopedUrlRef> out;
+		out.reserve(count);
+		for (int i = 0; i < count; i++) {
+			out.push_back(ScopedUrl::create(paths[i]));
+		}
+		return out;
+	}
 
-static auto callback(GLFWwindow* window, int count, const char** paths) -> void {
-	getEventDispatcher(window)->filesDropped(makePathsVector(count, paths), 0, []{});
-}
+	// For Linux we currently just set the drop callback using GLFW, which is only called
+	// when the user releases the mouse button to drop files over the window.
+	//
+	// There won't be visual feedback when the user is dragging files over the window
+	// with the button still pressed.
+	//
+	// To fix that we would need to do something platform-specific here and call these
+	// Listener functions at the appropriate times:
+	//	- Listener::onDragBegin
+	//	- Listener::onDragCancel
+	//	- Listener::onDrag
+	//	- Listener::onDrop
+	//
+	// See the Windows implementation for an example of this.
 
-struct Handler {
-	GLFWwindow* window;
-};
+	static auto callback(GLFWwindow *window, int count, const char **paths) -> void {
+		getEventDispatcher(window)->filesDropped(makePathsVector(count, paths), 0, [] {});
+	}
 
-auto Deleter::operator()(Handler* ptr) const -> void {
-    glfwSetDropCallback(ptr->window, nullptr);
-	delete ptr;
-}
+	struct Handler {
+		GLFWwindow *window;
+	};
 
-auto init(GLFWwindow* window, Listener::Ptr listener) -> Ptr {
-	auto out{std::unique_ptr<Handler, Deleter>(new Handler{}, Deleter{})};
-	out->window = window;
-    glfwSetDropCallback(window, callback);
-	return out;
-}
+	auto Deleter::operator()(Handler *ptr) const -> void {
+		glfwSetDropCallback(ptr->window, nullptr);
+		delete ptr;
+	}
 
-} // file_drag_handler
+	auto init(GLFWwindow *window, Listener::Ptr listener) -> Ptr {
+		auto out {std::unique_ptr<Handler, Deleter>(new Handler {}, Deleter {})};
+		out->window = window;
+		glfwSetDropCallback(window, callback);
+		return out;
+	}
+
+} // namespace file_drag_handler

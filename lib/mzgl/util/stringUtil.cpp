@@ -112,7 +112,7 @@ std::string toSigFigs(float value, int sigFig) {
 	// Create buffer and perform formatting
 	char buffer[50];
 	std::snprintf(buffer, sizeof(buffer), format.c_str(), value);
-//	printf("%f(%d):  %s\n", value, sigFig, buffer);
+	//	printf("%f(%d):  %s\n", value, sigFig, buffer);
 	return std::string(buffer);
 }
 
@@ -139,8 +139,8 @@ std::string toUpperCase(std::string s) {
 
 std::string byteSizeToString(uint64_t bytes) {
 	char buf[256];
-	double size = bytes;
-	int i = 0;
+	double size			= bytes;
+	int i				= 0;
 	const char *units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
 	while (size > 1024) {
 		size /= 1024;
@@ -164,7 +164,8 @@ void replaceAll(std::string &d, std::string toSearch, std::string replaceStr) {
 }
 
 //--------------------------------------------------
-std::vector<std::string> split(const std::string &source, const std::string &delimiter, bool ignoreEmpty, bool _trim) {
+std::vector<std::string>
+	split(const std::string &source, const std::string &delimiter, bool ignoreEmpty, bool _trim) {
 	std::vector<std::string> result;
 	if (delimiter.empty()) {
 		result.push_back(source);
@@ -197,7 +198,8 @@ std::string trimFront(const std::string &src) {
 //--------------------------------------------------
 std::string trimBack(const std::string &src) {
 	auto dst = src;
-	dst.erase(std::find_if_not(dst.rbegin(), dst.rend(), [&](char &c) { return std::isspace(c); }).base(), dst.end());
+	dst.erase(std::find_if_not(dst.rbegin(), dst.rend(), [&](char &c) { return std::isspace(c); }).base(),
+			  dst.end());
 	return dst;
 }
 

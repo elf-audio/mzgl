@@ -2,7 +2,7 @@
 # TODO: swap out boost fs for https://github.com/gulrak/filesystem
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18.1)
 project(mzgl)
 # makes clang output colours
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -97,8 +97,10 @@ set(MZGL_SOURCES
     lib/mzgl/util/FileWatcher.cpp
     lib/mzgl/util/FloatBuffer.cpp
     lib/mzgl/util/Haptics.cpp
+    lib/mzgl/util/Int16Buffer.cpp
     lib/mzgl/util/log.cpp
     lib/mzgl/util/maths.cpp
+    lib/mzgl/util/ScopedUrl.cpp
     lib/mzgl/util/util.cpp
     lib/mzgl/util/mainThread.cpp
     lib/mzgl/util/mzAssert.cpp
@@ -189,6 +191,7 @@ set(HEADERS
     lib/pu_gixml/src
     lib/misc
     lib/yoga
+    lib/farbot/include
     # lib/ghc-filesystem/include
 )
 
@@ -383,7 +386,7 @@ if(ANDROID)
 
 
     #-DAUTO_TEST
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Ofast -fno-stack-protector")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -fno-stack-protector")
 
     # Export ANativeActivity_onCreate(),
     # Refer to: https://github.com/android-ndk/ndk/issues/381.

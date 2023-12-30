@@ -12,8 +12,7 @@
 #import <AppKit/AppKit.h>
 
 @interface FilePickerDelegate : NSObject <NSOpenSavePanelDelegate> {
-
 }
--(void) setAllowedExtensions:(NSArray *)extensions;
--(void) enableFoldersOnly: (BOOL) _allowFoldersOnly;
+- (void)setAllowedExtensions:(NSArray *)extensions;
+- (void)enableFoldersOnly:(BOOL)_allowFoldersOnly;
 @end

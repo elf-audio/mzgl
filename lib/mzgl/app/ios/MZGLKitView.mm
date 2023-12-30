@@ -13,42 +13,36 @@
 #include "Vbo.h"
 #include "PluginEditor.h"
 using namespace std;
-API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInteractionDelegate>
+API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteractionDelegate>
 @end
 
-
 @implementation MZGLKitView {
-
 	std::shared_ptr<App> app;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
-	
-	NSMutableDictionary	* activeTouches;
+
+	NSMutableDictionary *activeTouches;
 	bool firstFrame;
-	NSString *urlToOpen;
-	bool appIsSetup;
 }
 
-- (std::shared_ptr<App>) getApp {
+- (std::shared_ptr<App>)getApp {
 	return app;
 }
 
--(void) dealloc {
+- (void)dealloc {
 	NSLog(@"Tearing down MZGLKitView");
 }
 
-- (id) initWithApp: (std::shared_ptr<App>) _app {
+- (id)initWithApp:(std::shared_ptr<App>)_app {
 	self = [super init];
-	if(self!=nil) {
+	if (self != nil) {
 		app = _app;
-		appIsSetup = false;
-		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		 
-		urlToOpen = nil;
 
-		activeTouches = [[NSMutableDictionary alloc] init];
-		self.multipleTouchEnabled = YES;
+		eventDispatcher = std::make_shared<EventDispatcher>(app);
+
+		activeTouches				= [[NSMutableDictionary alloc] init];
+		self.multipleTouchEnabled	= YES;
 		self.userInteractionEnabled = YES;
-		if(@available(iOS 11, *)) {
+		if (@available(iOS 11, *)) {
 			[self addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
 		}
 		firstFrame = true;
@@ -56,39 +50,37 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInterac
 	return self;
 }
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	//    GLKViewController *ctrl = (__bridge GLKViewController *)app->viewController;
+	//    NSLog(@"%d", ctrl.paused);
+	//    if(ctrl.paused) ctrl.paused = NO;
 
-
-
-- (void) touchesBegan:(NSSet*)touches withEvent:(UIEvent *)event {
-//    GLKViewController *ctrl = (__bridge GLKViewController *)app->viewController;
-//    NSLog(@"%d", ctrl.paused);
-//    if(ctrl.paused) ctrl.paused = NO;
-    
-    for(UITouch *touch in touches) {
+	for (UITouch *touch in touches) {
 		int touchIndex = 0;
-		while([[activeTouches allValues] containsObject:[NSNumber numberWithInt:touchIndex]]){
+		while ([[activeTouches allValues] containsObject:[NSNumber numberWithInt:touchIndex]]) {
 			touchIndex++;
 		}
-		
-		[activeTouches setObject:[NSNumber numberWithInt:touchIndex] forKey:[NSValue valueWithNonretainedObject:touch]];
+
+		[activeTouches setObject:[NSNumber numberWithInt:touchIndex]
+						  forKey:[NSValue valueWithNonretainedObject:touch]];
 		//[activeTouches setObject:[NSNumber numberWithInt:touchIndex] forKey:touch];
-		
+
 		CGPoint touchPoint = [touch locationInView:self];
-		
-		touchPoint.x *= app->g.pixelScale; // this has to be done because retina still returns points in 320x240 but with high percision
+
+		touchPoint.x *=
+			app->g
+				.pixelScale; // this has to be done because retina still returns points in 320x240 but with high percision
 		touchPoint.y *= app->g.pixelScale;
 		eventDispatcher->touchDown(touchPoint.x, touchPoint.y, touchIndex);
 	}
 }
 
-
-- (void) touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-
-	for(UITouch *touch in touches){
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+	for (UITouch *touch in touches) {
 		int touchIndex = [[activeTouches objectForKey:[NSValue valueWithNonretainedObject:touch]] intValue];
-		
+
 		CGPoint touchPoint = [touch locationInView:self];
-		
+
 		// this has to be done because retina still returns points in 320x240 but with high percision
 		touchPoint.x *= app->g.pixelScale;
 		touchPoint.y *= app->g.pixelScale;
@@ -96,83 +88,78 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView (DragDropExtensions)<UIDropInterac
 	}
 }
 
-- (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-	for(UITouch *touch in touches){
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+	for (UITouch *touch in touches) {
 		int touchIndex = [[activeTouches objectForKey:[NSValue valueWithNonretainedObject:touch]] intValue];
-		
+
 		[activeTouches removeObjectForKey:[NSValue valueWithNonretainedObject:touch]];
-		
+
 		CGPoint touchPoint = [touch locationInView:self];
-		
+
 		// this has to be done because retina still returns points in 320x240 but with high percision
 		touchPoint.x *= app->g.pixelScale;
 		touchPoint.y *= app->g.pixelScale;
 		eventDispatcher->touchUp(touchPoint.x, touchPoint.y, touchIndex);
-
 	}
 }
 
-- (void) touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-	for(UITouch *touch in touches){
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+	for (UITouch *touch in touches) {
 		//int touchIndex = [[activeTouches objectForKey:[NSValue valueWithNonretainedObject:touch]] intValue];
-		
+
 		CGPoint touchPoint = [touch locationInView:self];
 		// this has to be done because retina still returns points in 320x240 but with high percision
 		touchPoint.x *= app->g.pixelScale;
 		touchPoint.y *= app->g.pixelScale;
-
 	}
-	
+
 	[self touchesEnded:touches withEvent:event];
 }
 API_AVAILABLE(ios(13.4))
 int uikeyToMz(UIKey *key) {
-	if(key.keyCode==UIKeyboardHIDUsageKeyboardDeleteOrBackspace) {
+	if (key.keyCode == UIKeyboardHIDUsageKeyboardDeleteOrBackspace) {
 		return MZ_KEY_DELETE;
 	}
 	NSString *ch = key.charactersIgnoringModifiers;
-	if([ch isEqualToString:UIKeyInputUpArrow]) {
+	if ([ch isEqualToString:UIKeyInputUpArrow]) {
 		return MZ_KEY_UP;
-	} else if([ch isEqualToString:UIKeyInputDownArrow]) {
+	} else if ([ch isEqualToString:UIKeyInputDownArrow]) {
 		return MZ_KEY_DOWN;
-	} else if([ch isEqualToString:UIKeyInputLeftArrow]) {
+	} else if ([ch isEqualToString:UIKeyInputLeftArrow]) {
 		return MZ_KEY_LEFT;
-	} else if([ch isEqualToString:UIKeyInputRightArrow]) {
+	} else if ([ch isEqualToString:UIKeyInputRightArrow]) {
 		return MZ_KEY_RIGHT;
 	}
 	string keyStr = [key.charactersIgnoringModifiers UTF8String];
-	if(keyStr.size()==1) {
-		if(keyStr[0]==9) {
-			if(key.modifierFlags==UIKeyModifierShift) {
+	if (keyStr.size() == 1) {
+		if (keyStr[0] == 9) {
+			if (key.modifierFlags == UIKeyModifierShift) {
 				return MZ_KEY_SHIFT_TAB;
 			} else {
 				return MZ_KEY_TAB;
 			}
 		}
-		
+
 		keyStr = [key.characters UTF8String];
-		if(keyStr.size()==1) {
+		if (keyStr.size() == 1) {
 			return keyStr[0];
 		} else {
 			return -1;
 		}
 	} else {
 		return -1;
-		
 	}
 }
-
 
 - (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
 	bool handled = false;
 	if (@available(iOS 13.4, *)) {
-		for(UIPress *press in presses) {
+		for (UIPress *press in presses) {
 			UIKey *key = press.key;
-			if(key!=nil) {
+			if (key != nil) {
 				int k = uikeyToMz(key);
-				if(k!=-1) {
-//					Log::d() << "KeyCode: " << k << " UIKey.keycode = " << key.keyCode;
+				if (k != -1) {
+					//					Log::d() << "KeyCode: " << k << " UIKey.keycode = " << key.keyCode;
 					eventDispatcher->keyDown(k);
 				} else {
 					Log::d() << "Don't know how to handle key";
@@ -182,136 +169,77 @@ int uikeyToMz(UIKey *key) {
 				Log::d() << "Key was null";
 			}
 		}
-		
 	}
-	if(!handled) {
+	if (!handled) {
 		[super pressesBegan:presses withEvent:event];
 	}
 }
 
-
 - (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
-	
 	bool handled = false;
-	
-	if (@available(iOS 13.4, *)) {
 
-		for(UIPress *press in presses) {
+	if (@available(iOS 13.4, *)) {
+		for (UIPress *press in presses) {
 			UIKey *key = press.key;
-			
-			if(key!=nil) {
+
+			if (key != nil) {
 				int k = uikeyToMz(key);
-				if(k!=-1) {
+				if (k != -1) {
 					eventDispatcher->keyUp(k);
 				}
 				handled = true;
 			}
 		}
 	}
-	if(!handled) {
+	if (!handled) {
 		[super pressesBegan:presses withEvent:event];
 	}
 }
 
 - (void)drawRect:(CGRect)rect {
-	if(firstFrame) {
+	if (firstFrame) {
 		app->g.pixelScale = [[UIScreen mainScreen] nativeScale];
 		//NSRect r = [[UIScreen mainScreen] nativeBounds];
 
 		initMZGL(app);
 
-		app->g.width = rect.size.width * app->g.pixelScale;
+		app->g.width  = rect.size.width * app->g.pixelScale;
 		app->g.height = rect.size.height * app->g.pixelScale;
-		
-		if(app->g.width==0 || app->g.height==0) {
-			app->g.width = 100;
+
+		if (app->g.width == 0 || app->g.height == 0) {
+			app->g.width  = 100;
 			app->g.height = 100;
 			printf("ERROR: WIDTH OR HEIGHT is ZERO\n");
 		}
-		
+
 		eventDispatcher->setup();
-		appIsSetup = true;
-		// if the app was opened by a url,
-		// we need to defer sending that to
-		// the event dispatcher until the app
-		// is ready (i.e. after setup())
-		if(urlToOpen!=nil) {
-			string url = [urlToOpen UTF8String];
-			eventDispatcher->openUrl(url);
-			try {
-				if(fs::exists(url) && fs::is_regular_file(url)) {
-					fs::remove(url);
-				}
-			} catch(const fs::filesystem_error &e) {
-				Log::e() << "Error deleting file: " << e.what();
-			}
-//			[self removeFileAtPathIfNotDir:urlToOpen];
-		}
+
 		firstFrame = false;
 	}
 	eventDispatcher->runFrame();
 }
 
-
--(std::shared_ptr<EventDispatcher>) getEventDispatcher {
+- (std::shared_ptr<EventDispatcher>)getEventDispatcher {
 	return eventDispatcher;
 }
 
--(void) openURLWhenLoadedAndDeleteFile: (NSString*) url {
-	urlToOpen = url;
-}
-
-- (BOOL) handleNormalOpen: (NSURL*) url {
+- (BOOL)handleNormalOpen:(NSURL *)url {
 	NSLog(@"Standard open");
-	bool mustStopAccessing = false;
+
 	NSString *path = url.path;
-	if(![[NSFileManager defaultManager] isReadableFileAtPath:path]) {
-		NSLog(@"Warning: can't open this file");
+
+	std::function<void()> deleter = []() {};
+	// see if we need a scoped security url
+	if (![[NSFileManager defaultManager] isReadableFileAtPath:path]) {
+		NSLog(@"Using security scoped url\n");
 		[url startAccessingSecurityScopedResource];
-		mustStopAccessing = true;
-	}
-	
-	fs::path src([path UTF8String]);
-	fs::path dst = docsPath() / src.filename();
-	try {
-		fs::copy_file(src, dst, fs::copy_options::overwrite_existing);
-	} catch(const fs::filesystem_error &err) {
-		Log::e() << "Got exception trying to copy the file " << err.what();
-	}
-	
-	NSString *destination = [NSString stringWithUTF8String: dst.c_str()];
-	
-//	NSString *destination = moveFileToDocsDir(path, /* copying: */ true);
-	if(![[NSFileManager defaultManager] fileExistsAtPath:destination]) {
-		NSLog(@"File does not exist at path");
-	}
-	
-	
-	if(mustStopAccessing) {
-		[url stopAccessingSecurityScopedResource];
+
+		deleter = [url]() {
+			NSLog(@"Releasing security scoped url\n");
+			[url stopAccessingSecurityScopedResource];
+		};
 	}
 
-	if(destination==nil) {
-		NSLog(@"temp file copy error %@", destination);
-		return false;
-	}
-//	EventDispatcher *eventDispatcher = [self getEventDispatcher];
-	if(appIsSetup) {//eventDispatcher!=nullptr) {
-		bool a = eventDispatcher->openUrl([destination UTF8String]);
-//		removeFileAtPathIfNotDir(destination);
-		fs::path p([destination UTF8String]);
-		try {
-			if(fs::exists(p) && fs::is_regular_file(p)) {
-				fs::remove(p);
-			}
-		} catch(const fs::filesystem_error &e) {
-			Log::e() << "Error deleting file: " << e.what();
-		}
-		return a;
-	} else {
-		[self openURLWhenLoadedAndDeleteFile: destination];
-		Log::e() << "Event dispatcher not ready";
-		return true;
-	}
+	return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
 }
 @end

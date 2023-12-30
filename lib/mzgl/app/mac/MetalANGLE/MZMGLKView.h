@@ -6,8 +6,6 @@
 //  Copyright © 2021 Marek Bereza. All rights reserved.
 //
 
-
-
 #pragma once
 #import <Cocoa/Cocoa.h>
 #import <MetalANGLE/MGLKView.h>
@@ -18,10 +16,10 @@ class EventDispatcher;
 	EventDispatcher *eventDispatcher;
 }
 
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(void*)evtDispatcherPtr;
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(void *)evtDispatcherPtr;
 - (void)windowResized:(NSNotification *)notification;
-- (void) lock;
-- (void) unlock;
-- (void) shutdown;
-- (void) draw;
+- (void)lock;
+- (void)unlock;
+- (void)shutdown;
+- (void)draw;
 @end

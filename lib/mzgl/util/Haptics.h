@@ -13,7 +13,7 @@ class HapticsImpl;
 class Haptics {
 public:
 	Haptics();
-	
+
 	virtual ~Haptics();
 	void lightTap();
 	std::shared_ptr<HapticsImpl> impl;

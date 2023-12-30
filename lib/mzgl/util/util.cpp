@@ -79,11 +79,20 @@ using namespace std;
 #	include <pwd.h>
 #	include <unistd.h>
 
+void setThreadName(const std::string &name) {
+#	if defined(__APPLE__)
+	pthread_setname_np(name.c_str());
+#	elif defined(__ANDROID__)
+	pthread_setname_np(pthread_self(), name.c_str());
+#	endif
+}
+
 #	ifdef __APPLE__
 std::string getHomeDirectory() {
 	return [NSHomeDirectory() UTF8String];
 }
 #	else
+
 std::string getHomeDirectory() {
 	const char *homeDir = getenv("HOME");
 
@@ -126,9 +135,10 @@ std::string getCWD() {
 
 void deleteOrTrash(const std::string &path) {
 #ifdef __APPLE__
-	[[NSFileManager defaultManager] trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-								  resultingItemURL:nil
-											 error:nil];
+	[[NSFileManager defaultManager]
+		  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+		resultingItemURL:nil
+				   error:nil];
 #else
 	fs::remove_all(path);
 #endif
@@ -198,20 +208,20 @@ string uniquerizePath(string path) {
 	string outPath = p.string();
 	if (fs::exists(p)) {
 		string filenameBase = p.stem().string();
-		int lastSlash = (int) filenameBase.rfind("-");
+		int lastSlash		= (int) filenameBase.rfind("-");
 
 		int startingIndex = 1;
 		if (lastSlash != -1) {
 			string ending = filenameBase.substr(lastSlash + 1);
 			if (is_number(ending)) {
-				filenameBase = filenameBase.substr(0, lastSlash);
+				filenameBase  = filenameBase.substr(0, lastSlash);
 				startingIndex = stoi(ending) + 1;
 			}
 		}
 
 		for (int i = startingIndex; i < 10000; i++) {
 			auto filename = p.stem();
-			auto pp = p.parent_path() / (filenameBase + "-" + to_string(i) + p.extension().string());
+			auto pp		  = p.parent_path() / (filenameBase + "-" + to_string(i) + p.extension().string());
 
 			if (!fs::exists(pp)) {
 				outPath = pp.string();
@@ -238,12 +248,12 @@ std::vector<std::string> getCommandLineArgs() {
 }
 
 namespace Globals {
-string launchUrl = "";
-std::chrono::system_clock::time_point startTime;
+	string launchUrl = "";
+	std::chrono::system_clock::time_point startTime;
 } // namespace Globals
 
 float getSeconds() {
-	auto end = std::chrono::system_clock::now();
+	auto end									  = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end - Globals::startTime;
 	return elapsed_seconds.count();
 }
@@ -268,7 +278,7 @@ void setWindowSize(int w, int h) {
 	//	w /= g.pixelScale;
 	//	h /= g.pixelScale;
 
-	NSRect frame = win.frame;
+	NSRect frame   = win.frame;
 	NSSize newSize = CGSizeMake(w, h);
 
 	frame.origin.y -= frame.size.height;
@@ -279,8 +289,8 @@ void setWindowSize(int w, int h) {
 	  //		// get window delegate which is events view
 	  EventsView *delegate = (EventsView *) win.delegate;
 	  if (delegate == nullptr) return;
-	  auto evts = [delegate getEventDispatcher];
-	  evts->app->g.width = w;
+	  auto evts			  = [delegate getEventDispatcher];
+	  evts->app->g.width  = w;
 	  evts->app->g.height = h;
 	  evts->resized();
 	  //		// then call windowDidEndLiveResize:(NSNotification *)notification
@@ -307,7 +317,7 @@ string tempDir() {
 	string _p;
 	if (@available(macOS 10.12, *)) {
 		NSURL *url = [[NSFileManager defaultManager] temporaryDirectory];
-		_p = [[url path] UTF8String];
+		_p		   = [[url path] UTF8String];
 	} else {
 		// Fallback on earlier versions
 		_p = [NSTemporaryDirectory() UTF8String];
@@ -324,11 +334,11 @@ string tempDir() {
 
 #ifdef UNIT_TEST
 bool isOverridingDataPath = false;
-string dataPathOverride = "";
+string dataPathOverride	  = "";
 
 void setDataPath(string path) {
 	isOverridingDataPath = true;
-	dataPathOverride = path;
+	dataPathOverride	 = path;
 }
 #endif
 
@@ -351,8 +361,8 @@ string dataPath(string path, string appBundleId) {
 #endif
 
 #if defined(MZGL_PLUGIN_VST)
-	const auto bundlePath{getVSTBundlePath()};
-	const auto dataPath{bundlePath / "Contents" / "Resources" / "data"};
+	const auto bundlePath {getVSTBundlePath()};
+	const auto dataPath {bundlePath / "Contents" / "Resources" / "data"};
 	return (dataPath / path).string();
 #endif
 
@@ -364,13 +374,14 @@ string dataPath(string path, string appBundleId) {
 	if (appBundleId == "") {
 		//		Log::e() << "Going for main bundle";
 		NSString *a = [[NSBundle mainBundle] resourcePath];
-		string s = [a UTF8String];
+		string s	= [a UTF8String];
 		s += "/data/" + path;
 		//		Log::e() << s;
 		return s;
 	} else {
 		Log::e() << "Going for bundle" << appBundleId;
-		NSBundle *pBundle = [NSBundle bundleWithIdentifier:[NSString stringWithCString:appBundleId.c_str() encoding:NSUTF8StringEncoding]];
+		NSBundle *pBundle = [NSBundle
+			bundleWithIdentifier:[NSString stringWithCString:appBundleId.c_str() encoding:NSUTF8StringEncoding]];
 		if (pBundle == nil) {
 			return path;
 		} else {
@@ -391,35 +402,55 @@ string dataPath(string path, string appBundleId) {
 
 #ifdef UNIT_TEST
 bool isOverridingDocsPath = false;
-string docsPathOverride = "";
+string docsPathOverride	  = "";
 
 void setDocsPath(string path) {
 	isOverridingDocsPath = true;
-	docsPathOverride = path;
+	docsPathOverride	 = path;
 }
 #endif
 
 #ifdef __APPLE__
 #	include <os/proc.h>
+#	include <mach/mach.h>
+#	include <mach/mach_host.h>
 #endif
 int64_t getAvailableMemory() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	if (@available(iOS 13.0, *)) {
 		return os_proc_available_memory();
-	} else {
-		return -1;
 	}
-#	else
-	return -1;
 #	endif
+	// //else {
+
+	//    vm_size_t pagesize;
+
+	// 	mach_port_t host_port = mach_host_self();
+	// 	mach_msg_type_number_t host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
+	//    host_page_size(host_port, &pagesize);
+
+	//    vm_statistics_data_t vm_stat;
+
+	//    if (host_statistics(host_port, HOST_VM_INFO, (host_info_t)&vm_stat, &host_size) != KERN_SUCCESS) {
+	// 	   NSLog(@"Failed to fetch VM statistics");
+	// 	   return -1;
+	//    }
+
+	//    return vm_stat.free_count * pagesize;
+
+	// //}
+//#	else
+//	return -1;
+//#	endif
 #endif
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
 	Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
-	return 10000000000;
+	return -1;
 }
+bool hasPrintedTheError = false;
 string docsPath(string path) {
 #ifdef UNIT_TEST
 	if (isOverridingDocsPath) {
@@ -427,13 +458,19 @@ string docsPath(string path) {
 	}
 #endif
 #ifdef __APPLE__
-	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask]
+		lastObject];
 	string _path = [[url path] UTF8String];
 	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
 	if (_path == "/Users/marek/Documents") {
 		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
-		printf(
-			"Hack to get this working on marek's computer with vscode because vscode running the app in a way that prevents NSFileManager from working properly\n\n");
+		if (!hasPrintedTheError) {
+			printf("=======================================================================\n\n"
+				   "Hack to get this working on marek's computer with vscode because vscode "
+				   "running the app in a way that prevents NSFileManager from working properly\n\n"
+				   "=======================================================================\n\n");
+			hasPrintedTheError = true;
+		}
 	}
 	return _path + "/" + path;
 #elif defined(__ANDROID__)
@@ -441,7 +478,8 @@ string docsPath(string path) {
 #elif defined(_WIN32)
 
 	wchar_t *documentsDir;
-	HRESULT result = SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
+	HRESULT result =
+		SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
 	string retPath;
 
 	if (result == S_OK) {
@@ -491,7 +529,8 @@ string getAppId() {
 string appSupportPath(string path) {
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
-	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
+	NSURL *url	 = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
+														   inDomains:NSUserDomainMask] lastObject];
 	string _path = [[url path] UTF8String];
 	_path += "/" + getAppId();
 	if (!fs::exists(_path)) {
@@ -514,7 +553,7 @@ string getOSVersion() {
 	return [[[UIDevice currentDevice] systemVersion] UTF8String];
 #	else
 	NSProcessInfo *pInfo = [NSProcessInfo processInfo];
-	NSString *version = [pInfo operatingSystemVersionString];
+	NSString *version	 = [pInfo operatingSystemVersionString];
 	return [version UTF8String];
 #	endif
 #elif defined(__ANDROID__)
@@ -546,20 +585,20 @@ string getPlatformName() {
 uint64_t getStorageRemainingInBytes() {
 #ifdef __APPLE__
 
-	NSURL *fileURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+	NSURL *fileURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
+															 inDomains:NSUserDomainMask] lastObject];
 
 	NSError *error = nil;
 
 	if (@available(macOS 10.13, iOS 11, *)) {
-		
 		// on mac, the NSURLVolumeAvailableCapacityForImportantUsageKey is more accurate
 		// but it spits out loads of garbage to the console, so for now just using
 		// the less accurate version so I can read logs.
-#if TARGET_OS_IOS
+#	if TARGET_OS_IOS
 		auto flag = NSURLVolumeAvailableCapacityForImportantUsageKey;
-#else
+#	else
 		auto flag = NSURLVolumeAvailableCapacityKey;
-#endif
+#	endif
 		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
 		if (!results) {
@@ -624,8 +663,11 @@ string execute(string cmd, int *outExitCode) {
 #endif
 }
 void initMZGL(std::shared_ptr<App> app) {
+	//	Log::d() << "initMZGL()";
 	if (!app->isHeadless()) {
+		//		Log::d() << "Initing graphics";
 		app->g.initGraphics();
+		//		Log::d() << "inited graphics";
 	}
 	Globals::startTime = std::chrono::system_clock::now();
 }
@@ -676,6 +718,9 @@ string getAppVersionString() {
 #ifdef DEBUG
 	version += " DEBUG";
 #endif
+#ifdef EXPERIMENTAL
+	version += " EXPERIMENTAL";
+#endif
 	return version;
 }
 
@@ -702,24 +747,23 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	  NSInteger buttonClicked;
 	  string filePath = "";
 	  @autoreleasepool {
-		  NSSavePanel *saveDialog = [NSSavePanel savePanel];
+		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
-		  
-		  
-		  if (defaultFileName!="") if (@available(macOS 11.0, *)) {
-			  
-			  auto ext = fs::path(defaultFileName).extension().string();
-			  if(ext!="" && ext[0]=='.') {
-				  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
-				  
-				  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
-					  [saveDialog setAllowedContentTypes:@[ type ]];
+
+		  if (defaultFileName != "")
+			  if (@available(macOS 11.0, *)) {
+				  auto ext = fs::path(defaultFileName).extension().string();
+				  if (ext != "" && ext[0] == '.') {
+					  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
+
+					  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
+						  [saveDialog setAllowedContentTypes:@[ type ]];
+					  }
 				  }
 			  }
-		  }
-		  
+
 		  buttonClicked = [saveDialog runModal];
 
 		  [context makeCurrentContext];
@@ -738,42 +782,37 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 #	endif
 #elif defined(_WIN32)
 
-	
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring wide = converter.from_bytes(defaultFileName);
-	
-	
-	size_t extPos = defaultFileName.rfind('.');
+
+	size_t extPos		  = defaultFileName.rfind('.');
 	std::string extension = (extPos != std::string::npos) ? defaultFileName.substr(extPos + 1) : "";
 
-	
-	
 	wchar_t fileName[MAX_PATH] = L"";
-	wcsncpy(fileName, wide.c_str(), MAX_PATH-1);
-	fileName[MAX_PATH-1] = 0;  // null terminate, in case of long string
+	wcsncpy(fileName, wide.c_str(), MAX_PATH - 1);
+	fileName[MAX_PATH - 1] = 0; // null terminate, in case of long string
 
-	
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	HWND hwnd = WindowFromDC(wglGetCurrentDC());
-	ofn.hwndOwner = hwnd;
-	ofn.hInstance = GetModuleHandle(0);
+	ofn.lStructSize	  = sizeof(OPENFILENAME);
+	HWND hwnd		  = WindowFromDC(wglGetCurrentDC());
+	ofn.hwndOwner	  = hwnd;
+	ofn.hInstance	  = GetModuleHandle(0);
 	ofn.nMaxFileTitle = 31;
-	ofn.lpstrFile = fileName;
-	ofn.nMaxFile = MAX_PATH;
-	
-	std::wstring filter = L"All Files (*.*)\0*.*\0";
+	ofn.lpstrFile	  = fileName;
+	ofn.nMaxFile	  = MAX_PATH;
+
+	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
 	std::wstring wideExtension = L"";
 	if (!extension.empty()) {
 		wideExtension = converter.from_bytes(extension);
-		filter = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
+		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
 	}
 
-	ofn.lpstrFilter = filter.c_str();// L"All Files (*.*)\0*.*\0";
+	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";
 	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
-	ofn.lpstrTitle = L"Select Output File";
+	ofn.Flags		= OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+	ofn.lpstrTitle	= L"Select Output File";
 
 	if (GetSaveFileNameW(&ofn)) {
 		std::wstring ws(fileName);
@@ -876,7 +915,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 bool readStringFromFile(const std::string &path, std::string &outStr) {
 	fs::ifstream t(fs::u8path(path));
 	if (t.fail()) {
-		Log::e() << "failed to open stream to " << path;
+		Log::e() << "failed to open file at " << path;
 		return false;
 	}
 
@@ -932,37 +971,37 @@ void oslog(string s) {
  * aparently not unique enough, but for now it will do
  */
 namespace uuid {
-static std::random_device rd;
-static std::mt19937 gen(rd());
-static std::uniform_int_distribution<> dis(0, 15);
-static std::uniform_int_distribution<> dis2(8, 11);
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_int_distribution<> dis(0, 15);
+	static std::uniform_int_distribution<> dis2(8, 11);
 
-std::string generate_uuid_v4() {
-	std::stringstream ss;
-	int i;
-	ss << std::hex;
-	for (i = 0; i < 8; i++) {
-		ss << dis(gen);
+	std::string generate_uuid_v4() {
+		std::stringstream ss;
+		int i;
+		ss << std::hex;
+		for (i = 0; i < 8; i++) {
+			ss << dis(gen);
+		}
+		ss << "-";
+		for (i = 0; i < 4; i++) {
+			ss << dis(gen);
+		}
+		ss << "-4";
+		for (i = 0; i < 3; i++) {
+			ss << dis(gen);
+		}
+		ss << "-";
+		ss << dis2(gen);
+		for (i = 0; i < 3; i++) {
+			ss << dis(gen);
+		}
+		ss << "-";
+		for (i = 0; i < 12; i++) {
+			ss << dis(gen);
+		};
+		return ss.str();
 	}
-	ss << "-";
-	for (i = 0; i < 4; i++) {
-		ss << dis(gen);
-	}
-	ss << "-4";
-	for (i = 0; i < 3; i++) {
-		ss << dis(gen);
-	}
-	ss << "-";
-	ss << dis2(gen);
-	for (i = 0; i < 3; i++) {
-		ss << dis(gen);
-	}
-	ss << "-";
-	for (i = 0; i < 12; i++) {
-		ss << dis(gen);
-	};
-	return ss.str();
-}
 } // namespace uuid
 #endif
 

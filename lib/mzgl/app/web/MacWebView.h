@@ -16,16 +16,18 @@ public:
 	MacWebView(App *app);
 	virtual ~MacWebView();
 
-	void show(const std::string &path,
-			  std::function<void(const std::string &data)> jsCallback,
-			  std::function<void()> loadedCallback = []() {}) override;
-	
+	void show(
+		const std::string &path,
+		std::function<void(const std::string &data)> jsCallback,
+		std::function<void()> loadedCallback = []() {}) override;
+
 	/**
 	 * Call a javascript function inside the html.
 	 */
 	void callJS(const std::string &js) override;
+
 private:
-	App *app = nullptr;
+	App *app	  = nullptr;
 	void *webView = nullptr;
 	void close();
 };

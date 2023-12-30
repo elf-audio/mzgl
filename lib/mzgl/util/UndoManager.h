@@ -18,10 +18,9 @@
  */
 class Undoable {
 public:
-	
 	// the forward action to actually do the thing
 	virtual void redo() = 0;
-	
+
 	// how to reverse the forward action.
 	virtual void undo() = 0;
 };
@@ -30,9 +29,8 @@ using UndoableRef = std::shared_ptr<Undoable>;
 
 class UndoManager {
 public:
-	
 	static constexpr int MAX_UNDO_LEVELS = 40;
-	
+
 	UndoManager();
 
 	/**
@@ -41,14 +39,14 @@ public:
 	 * - instead commit() calls redo() on your Undoable.
 	 */
 	void commit(UndoableRef item);
-	
+
 	/**
 	 * Same thing as above but with lambdas for convenience
 	 */
 	void commit(std::function<void()> &&redo, std::function<void()> &&undo);
 
 	std::size_t size() const;
-	
+
 	/**
 	 * You can group multiple commits by sandwiching between
 	 * beginGroup() and endGroup() - so all the commits in between
@@ -56,43 +54,42 @@ public:
 	 */
 	void beginGroup();
 	void endGroup();
-	
+
 	bool undo();
 	bool redo();
-	
+
 	bool canUndo() const;
 	bool canRedo() const;
-	
+
 	void clear();
-	
+
 private:
 	UndoableRef undoGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;
 };
 
-
 ///////////////////////////////////////////////////////////////////////////////
 /// SOME HELPERS
-template<typename T>
+template <typename T>
 class AssignmentUndoable : public Undoable {
 public:
 	T &ref;
 	T newVal;
 	T oldVal;
-	AssignmentUndoable(T &oldVal, T newVal) :
-	ref(oldVal),
-	oldVal(oldVal), newVal(newVal) {}
-	
+	AssignmentUndoable(T &oldVal, T newVal)
+		: ref(oldVal)
+		, oldVal(oldVal)
+		, newVal(newVal) {}
+
 	void redo() override { ref = newVal; }
 	void undo() override { ref = oldVal; }
 };
 
-template<typename T>
+template <typename T>
 std::shared_ptr<AssignmentUndoable<T>> undoableAssignment(T &oldVal, T newVal) {
 	return std::make_shared<AssignmentUndoable<T>>(oldVal, newVal);
 }
-
 
 /*
  Example of undoableAssigment

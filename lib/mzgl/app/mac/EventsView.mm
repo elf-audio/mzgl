@@ -25,47 +25,45 @@ using namespace std;
 	bool lastOptionState;
 	bool lastCommandState;
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
 	self = [super initWithFrame:frame eventDispatcher:evtDispatcher];
-	if(self!=nil) {
-		dropped = false;
-		lastShiftState = false;
-		lastFnState = false;
+	if (self != nil) {
+		dropped			 = false;
+		lastShiftState	 = false;
+		lastFnState		 = false;
 		lastControlState = false;
-		lastOptionState = false;
+		lastOptionState	 = false;
 		lastCommandState = false;
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
 	}
 	return self;
 }
 
-
-- (BOOL) acceptsFirstResponder {
+- (BOOL)acceptsFirstResponder {
 	return YES;
 }
 
-- (BOOL) becomeFirstResponder {
+- (BOOL)becomeFirstResponder {
 	return YES;
 }
 
 // this is for vst so the window becomes focused and accepts
 // the first mouse event when unfocussed.
-- (BOOL) acceptsFirstMouse:(NSEvent *)theEvent {
+- (BOOL)acceptsFirstMouse:(NSEvent *)theEvent {
 	return YES;
 }
 
-- (BOOL) isOpaque {
+- (BOOL)isOpaque {
 	return YES;
 }
-
 
 int nsEventToKey(NSEvent *evt) {
 	string s = [[evt characters] UTF8String];
-	if(s.size()==1) {
+	if (s.size() == 1) {
 		return s[0];
 	}
 	auto keyCode = [evt keyCode];
-	switch(keyCode) {
+	switch (keyCode) {
 		case 123: return MZ_KEY_LEFT;
 		case 124: return MZ_KEY_RIGHT;
 		case 125: return MZ_KEY_DOWN;
@@ -73,173 +71,134 @@ int nsEventToKey(NSEvent *evt) {
 	}
 	printf("keycode: %u\n", keyCode);
 	return keyCode;
-	
 }
 
-
-- (void) flagsChanged:(NSEvent *)event {
+- (void)flagsChanged:(NSEvent *)event {
 	if ((event.modifierFlags & NSShiftKeyMask) && !lastShiftState) {
 		lastShiftState = true;
-			
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyDown(MZ_KEY_SHIFT);
-		});
+
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_SHIFT); });
 	} else if (!(event.modifierFlags & NSShiftKeyMask) && lastShiftState) {
 		lastShiftState = false;
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyUp(MZ_KEY_SHIFT);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_SHIFT); });
 	} else if ((event.modifierFlags & NSFunctionKeyMask) && !lastFnState) {
 		lastFnState = true;
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyDown(MZ_KEY_FN);
-		});
-			
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_FN); });
+
 	} else if (!(event.modifierFlags & NSFunctionKeyMask) && lastFnState) {
 		lastFnState = false;
 		//Fn released - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyUp(MZ_KEY_FN);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_FN); });
 	} else if ((event.modifierFlags & NSControlKeyMask) && !lastControlState) {
 		lastControlState = true;
 		//Control pressed - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyDown(MZ_KEY_CTRL);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_CTRL); });
 	} else if (!(event.modifierFlags & NSControlKeyMask) && lastControlState) {
 		lastControlState = false;
 		//Control released - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyUp(MZ_KEY_CTRL);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_CTRL); });
 	} else if ((event.modifierFlags & NSAlternateKeyMask) && !lastOptionState) {
 		lastOptionState = true;
 		//Option pressed - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyDown(MZ_KEY_ALT);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_ALT); });
 	} else if (!(event.modifierFlags & NSAlternateKeyMask) && lastOptionState) {
 		lastOptionState = false;
 		//Option released - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyUp(MZ_KEY_ALT);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_ALT); });
 	} else if ((event.modifierFlags & NSCommandKeyMask) && !lastCommandState) {
 		lastCommandState = true;
 		//Command pressed - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyDown(MZ_KEY_CMD);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_CMD); });
 	} else if (!(event.modifierFlags & NSCommandKeyMask) && lastCommandState) {
 		lastCommandState = false;
 		//Command released - do something
-		eventDispatcher->app->main.runOnMainThread(true, [self]() {
-			eventDispatcher->keyUp(MZ_KEY_CMD);
-		});
+		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_CMD); });
 	}
 
-	else NSLog(@"Other");
+	else
+		NSLog(@"Other");
 }
 
-- (void) keyDown: (NSEvent*) event {
-
+- (void)keyDown:(NSEvent *)event {
 	auto keyCode = nsEventToKey(event);
-	eventDispatcher->app->main.runOnMainThread(true, [self,keyCode]() {
-		eventDispatcher->keyDown(keyCode);
-	});
+	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyDown(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
-	
 }
-- (void) keyUp: (NSEvent*) event {
+- (void)keyUp:(NSEvent *)event {
 	auto keyCode = nsEventToKey(event);
-	eventDispatcher->app->main.runOnMainThread(true, [self,keyCode]() {
-		eventDispatcher->keyUp(keyCode);
-	});
+	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyUp(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-
-
-- (void) mouseMoved: (NSEvent*) event {
+- (void)mouseMoved:(NSEvent *)event {
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
-	float x = event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight)  * pixelScale;
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() {
-		eventDispatcher->touchOver(x,y);
-	});
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
+	float x				= event.locationInWindow.x * pixelScale;
+	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() { eventDispatcher->touchOver(x, y); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
-- (void) mouseDown: (NSEvent*) event {
+- (void)mouseDown:(NSEvent *)event {
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
 
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id = (int)[event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
-		eventDispatcher->touchDown(x, y,id);
-	});
-	NSEventDispatcher::instance().dispatch(event, self);
-
-}
-
-- (void) mouseUp: (NSEvent*) event {
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
-
-	float x = event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id = (int)[event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
-		eventDispatcher->touchUp(x, y,id);
-	});
+	int id	= (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, id]() { eventDispatcher->touchDown(x, y, id); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-- (void) mouseDragged: (NSEvent*) event { // Mouse click-and-drag
+- (void)mouseUp:(NSEvent *)event {
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
 
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id = (int)[event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self,x, y, id]() {
-		eventDispatcher->touchMoved(x, y,id);
-	});
+	int id	= (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, id]() { eventDispatcher->touchUp(x, y, id); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-- (void) scrollWheel: (NSEvent*) event { // Mouse scroll wheel movement
+- (void)mouseDragged:(NSEvent *)event { // Mouse click-and-drag
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
 
 	float x = event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+	int id	= (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [self, x, y, id]() { eventDispatcher->touchMoved(x, y, id); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+
+- (void)scrollWheel:(NSEvent *)event { // Mouse scroll wheel movement
+	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
+
+	float x	 = event.locationInWindow.x * pixelScale;
+	float y	 = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
 	float dx = event.deltaX;
 	float dy = event.deltaY;
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, dx, dy]() {
-		eventDispatcher->mouseScrolled(x,y, dx, dy);
-	});
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, x, y, dx, dy]() { eventDispatcher->mouseScrolled(x, y, dx, dy); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-
-- (void) swipeWithEvent: (NSEvent*) event { // Trackpad swipe gesture
+- (void)swipeWithEvent:(NSEvent *)event { // Trackpad swipe gesture
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-- (void) rotateWithEvent: (NSEvent*) event { // Trackpad twist gesture
+- (void)rotateWithEvent:(NSEvent *)event { // Trackpad twist gesture
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-- (void) magnifyWithEvent: (NSEvent*) event { // Trackpad pinch gesture
+- (void)magnifyWithEvent:(NSEvent *)event { // Trackpad pinch gesture
 	NSEventDispatcher::instance().dispatch(event, self);
 
-	if(event.phase==NSEventPhaseChanged) {
-		float zoom = event.magnification;
-		float pixelScale = eventDispatcher->app->g.pixelScale;
+	if (event.phase == NSEventPhaseChanged) {
+		float zoom			= event.magnification;
+		float pixelScale	= eventDispatcher->app->g.pixelScale;
 		auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
 
 		float x = event.locationInWindow.x * pixelScale;
@@ -247,78 +206,72 @@ int nsEventToKey(NSEvent *evt) {
 
 		auto evtDispatcher = eventDispatcher;
 
-		eventDispatcher->app->main.runOnMainThread(true, [x, y, zoom, evtDispatcher]() {
-			evtDispatcher->mouseZoomed(x, y, zoom);
-		});
+		eventDispatcher->app->main.runOnMainThread(
+			true, [x, y, zoom, evtDispatcher]() { evtDispatcher->mouseZoomed(x, y, zoom); });
 	}
 }
 
-- (void) shutdown {
+- (void)shutdown {
 	eventDispatcher->exit();
 	[super shutdown];
-	
 }
 
-- (std::shared_ptr<App>) getApp {
+- (std::shared_ptr<App>)getApp {
 	return eventDispatcher->app;
 }
-- (std::shared_ptr<EventDispatcher>) getEventDispatcher {
+- (std::shared_ptr<EventDispatcher>)getEventDispatcher {
 	return eventDispatcher;
 }
 
-- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender {
-	
-
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
-	NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
+	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
 	vector<string> paths;
-	for(NSString *url in filenames) {
+	for (NSString *url in filenames) {
 		paths.push_back([url UTF8String]);
 	}
 	dropped = false;
-	if(eventDispatcher->canOpenFiles(paths)) {
+	if (eventDispatcher->canOpenFiles(paths)) {
 		acceptedDraggingSequenceNo = sender.draggingSequenceNumber;
-//		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
-//		float pixelScale = eventDispatcher->app->g.pixelScale;
+		//		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
+		//		float pixelScale = eventDispatcher->app->g.pixelScale;
 
-//		float x = sender.draggingLocation.x * pixelScale;
-//		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
-//		runOnMainThread(true, [self,x, y]() {
-//			eventDispatcher->fileDragBegin(x,y,0);
-//		});
-		
+		//		float x = sender.draggingLocation.x * pixelScale;
+		//		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
+		//		runOnMainThread(true, [self,x, y]() {
+		//			eventDispatcher->fileDragBegin(x,y,0);
+		//		});
+
 		return NSDragOperationCopy;
 	} else {
 		return NSDragOperationNone;
 	}
 }
 
-- (void)draggingExited:(nullable id <NSDraggingInfo>)sender {
-	auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
+- (void)draggingExited:(nullable id<NSDraggingInfo>)sender {
+	auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height
+						  - sender.draggingDestinationWindow.contentView.frame.size.height;
 	float pixelScale = eventDispatcher->app->g.pixelScale;
-	
-	float x = sender.draggingLocation.x * pixelScale;
-	float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
-	
-	eventDispatcher->app->main.runOnMainThread(true, [self,x, y]() {
-		eventDispatcher->fileDragExited(x, y, 0);
-   });
-}
 
+	float x = sender.draggingLocation.x * pixelScale;
+	float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)
+			  * pixelScale;
+
+	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() { eventDispatcher->fileDragExited(x, y, 0); });
+}
 
 - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
-	
-	if(sender.draggingSequenceNumber==acceptedDraggingSequenceNo) {
-		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height - sender.draggingDestinationWindow.contentView.frame.size.height;
+	if (sender.draggingSequenceNumber == acceptedDraggingSequenceNo) {
+		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height
+							  - sender.draggingDestinationWindow.contentView.frame.size.height;
 		float pixelScale = eventDispatcher->app->g.pixelScale;
 
-		
 		float x = sender.draggingLocation.x * pixelScale;
-		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)  * pixelScale;
-        auto numItems = sender.numberOfValidItemsForDrop;
-		eventDispatcher->app->main.runOnMainThread(true, [self,x, y, numItems]() {
-			eventDispatcher->fileDragUpdate(x, y, 0, (int)numItems);
-	   });
+		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)
+				  * pixelScale;
+		auto numItems = sender.numberOfValidItemsForDrop;
+		eventDispatcher->app->main.runOnMainThread(
+			true, [self, x, y, numItems]() { eventDispatcher->fileDragUpdate(x, y, 0, (int) numItems); });
 
 		return NSDragOperationCopy;
 	} else {
@@ -326,30 +279,25 @@ int nsEventToKey(NSEvent *evt) {
 	}
 }
 
-
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
-	
 	NSPasteboard *pboard = [sender draggingPasteboard];
-	NSArray *filenames = [pboard propertyListForType:NSFilenamesPboardType];
-	vector<string> paths;
-	for(NSString *url in filenames) {
-		paths.push_back([url UTF8String]);
+	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
+	vector<ScopedUrlRef> paths;
+	for (NSString *url in filenames) {
+		paths.push_back(ScopedUrl::create([url UTF8String]));
 	}
-	
-    
-//    [self lock];
-    eventDispatcher->app->main.runOnMainThreadAndWait([self, paths]() {
-        
-        eventDispatcher->filesDropped(paths, 0, []() {});
-        dropped = true;
-        
-    });
-//    [self unlock];
-	
+
+	//    [self lock];
+	eventDispatcher->app->main.runOnMainThreadAndWait([self, paths]() {
+		eventDispatcher->filesDropped(paths, 0);
+		dropped = true;
+	});
+	//    [self unlock];
+
 	return true;
 }
 - (void)draggingEnded:(id<NSDraggingInfo>)sender {
-	if(!dropped) {
+	if (!dropped) {
 		eventDispatcher->fileDragCancelled(0);
 	}
 }
@@ -360,8 +308,8 @@ int nsEventToKey(NSEvent *evt) {
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
 	NSWindow *window = notification.object;
-	Graphics &g = eventDispatcher->app->g;
-	g.pixelScale = [window backingScaleFactor];
+	Graphics &g		 = eventDispatcher->app->g;
+	g.pixelScale	 = [window backingScaleFactor];
 	Log::e() << "Pixel scale being set for first time: " << g.pixelScale;
 }
 
@@ -373,11 +321,9 @@ int nsEventToKey(NSEvent *evt) {
 }
 // this helps with crashing when resizing, but you don't get nice resizing
 - (void)windowDidEndLiveResize:(NSNotification *)notification {
-//- (void)windowDidResize:(NSNotification *)notification {
-	[super windowResized: notification];
+	//- (void)windowDidResize:(NSNotification *)notification {
+	[super windowResized:notification];
 	[super enableDrawing];
 }
-
-
 
 @end

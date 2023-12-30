@@ -13,8 +13,8 @@
 extern const AudioUnitParameterID myParam1;
 
 @interface MZGLEffectAU : AUAudioUnit
--(std::shared_ptr<Plugin>) getPlugin;
-- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
+- (std::shared_ptr<Plugin>)getPlugin;
+- (instancetype)initWithPlugin:(std::shared_ptr<Plugin>)_plugin
 	   andComponentDescription:(AudioComponentDescription)componentDescription
 						 error:(NSError **)outError;
 

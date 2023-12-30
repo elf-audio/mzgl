@@ -8,7 +8,6 @@
 
 #pragma once
 
-
 /*
  
  MODIFY RTMIDI TO HAVE THIS FILE INCLUDED IN RtMidi.h
@@ -24,19 +23,14 @@
 
 #include <TargetConditionals.h>
 #if TARGET_OS_IOS
-#include "CAHostTimeBase.h"
+#	include "CAHostTimeBase.h"
 //#define AudioGetCurrentHostTime() (0)
 //#define AudioConvertHostTimeToNanos(A) (A)
 //#define EndianS32_BtoN(A) (A)
-#include "Endian.h"
+#	include "Endian.h"
 
 #else
 
-#include <CoreAudio/HostTime.h>
-#include <CoreServices/CoreServices.h>
+#	include <CoreAudio/HostTime.h>
+#	include <CoreServices/CoreServices.h>
 #endif
-
-
-
-
-

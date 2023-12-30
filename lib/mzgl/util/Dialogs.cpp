@@ -26,40 +26,43 @@ using namespace std;
 
 #ifdef UNIT_TEST
 namespace unit_test {
-function<void()> dialogOkPressed;
-function<void()> dialogCancelPressed;
-function<void()> dialogButtonOnePressed;
-function<void()> dialogButtonTwoPressed;
-function<void()> dialogButtonThreePressed;
+	function<void()> dialogOkPressed;
+	function<void()> dialogCancelPressed;
+	function<void()> dialogButtonOnePressed;
+	function<void()> dialogButtonTwoPressed;
+	function<void()> dialogButtonThreePressed;
 
-bool dialogOpen = false;
-bool isDialogOpen() {
-	return dialogOpen;
-}
-void dismissAlert() {
-	dialogOpen = false;
-}
-void pressOk() {
-	dialogOpen = false;
-	dialogOkPressed();
-}
+	bool dialogOpen = false;
+	bool isDialogOpen() {
+		return dialogOpen;
+	}
+	void dismissAlert() {
+		dialogOpen = false;
+	}
+	void pressOk() {
+		dialogOpen = false;
+		dialogOkPressed();
+	}
 
-void pressCancel() {
-	dialogCancelPressed();
-}
-void pressButtonOne() {
-	dialogButtonOnePressed();
-}
-void pressButtonTwo() {
-	dialogButtonTwoPressed();
-}
-void pressButtonThree() {
-	dialogButtonThreePressed();
-}
+	void pressCancel() {
+		dialogCancelPressed();
+	}
+	void pressButtonOne() {
+		dialogButtonOnePressed();
+	}
+	void pressButtonTwo() {
+		dialogButtonTwoPressed();
+	}
+	void pressButtonThree() {
+		dialogButtonThreePressed();
+	}
 } // namespace unit_test
 #endif
 
-void Dialogs::textbox(std::string title, std::string msg, std::string text, function<void(string, bool)> completionCallback) const {
+void Dialogs::textbox(std::string title,
+					  std::string msg,
+					  std::string text,
+					  function<void(string, bool)> completionCallback) const {
 #ifdef AUTO_TEST
 	completionCallback(title, randi(2) == 0);
 	return;
@@ -67,9 +70,10 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction actionWithTitle:@"Ok"
 											  style:UIAlertActionStyleDefault
 											handler:^(UIAlertAction *action) {
@@ -78,9 +82,7 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 											}]];
 	[alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
 											  style:UIAlertActionStyleCancel
-											handler:^(UIAlertAction *action) {
-											  completionCallback("", false);
-											}]];
+											handler:^(UIAlertAction *action) { completionCallback("", false); }]];
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
 	  textField.text = [NSString stringWithUTF8String:text.c_str()];
@@ -102,19 +104,19 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 	  // add text field to alert dialog
 	  [alert setAccessoryView:label];
 
-	  function<void(NSInteger, NSTextField *)> handleResult = [completionCallback, this](NSInteger returnCode, NSTextField *label) {
+	  function<void(NSInteger, NSTextField *)> handleResult = [completionCallback, this](NSInteger returnCode,
+																						 NSTextField *label) {
 		  string txt = "";
 		  if (returnCode == NSAlertFirstButtonReturn) txt = [[label stringValue] UTF8String];
 		  //			[label resignFirstResponder];
 		  //			[[[NSApp mainWindow].contentView.subviews firstObject] becomeFirstResponder];
-		  app.main.runOnMainThread(true,
-								   [txt, returnCode, completionCallback]() { completionCallback(txt, returnCode == NSAlertFirstButtonReturn); });
+		  app.main.runOnMainThread(true, [txt, returnCode, completionCallback]() {
+			  completionCallback(txt, returnCode == NSAlertFirstButtonReturn);
+		  });
 	  };
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result, label);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result, label); }];
 	  [label becomeFirstResponder];
 #		else
 		[label becomeFirstResponder];
@@ -139,38 +141,37 @@ void Dialogs::textbox(std::string title, std::string msg, std::string text, func
 #endif
 }
 
-void Dialogs::confirm(std::string title, std::string msg, std::function<void()> okPressed, std::function<void()> cancelPressed) const {
+void Dialogs::confirm(std::string title,
+					  std::string msg,
+					  std::function<void()> okPressed,
+					  std::function<void()> cancelPressed) const {
 #ifdef AUTO_TEST
 	int i = randi(100) % 2;
 	if (i == 0) okPressed();
-	else
-		cancelPressed();
+	else cancelPressed();
 	return;
 #endif
 
 #ifdef UNIT_TEST
-	unit_test::dialogOkPressed = okPressed;
+	unit_test::dialogOkPressed	   = okPressed;
 	unit_test::dialogCancelPressed = cancelPressed;
-	unit_test::dialogOpen = true;
+	unit_test::dialogOpen		   = true;
 	return;
 #endif
 
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 
 	[alert addAction:[UIAlertAction actionWithTitle:@"Ok"
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  okPressed();
-											}]];
+											handler:^(UIAlertAction *action) { okPressed(); }]];
 	[alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
 											  style:UIAlertActionStyleCancel
-											handler:^(UIAlertAction *action) {
-											  cancelPressed();
-											}]];
+											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -195,9 +196,7 @@ void Dialogs::confirm(std::string title, std::string msg, std::function<void()> 
 	  };
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
@@ -226,7 +225,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 #ifdef _WIN32
 	// we need to convert error message to a wide char message.
 	// first, figure out the length and allocate a wchar_t at that length + 1 (the +1 is for a terminating character)
-	int length = strlen(msg.c_str());
+	int length		   = strlen(msg.c_str());
 	wchar_t *widearray = new wchar_t[length + 1];
 	memset(widearray, 0, sizeof(wchar_t) * (length + 1));
 	// then, call mbstowcs:
@@ -240,9 +239,10 @@ void Dialogs::alert(std::string title, std::string msg) const {
 
 #	if TARGET_OS_IOS
 	dispatch_async(dispatch_get_main_queue(), ^{
-	  UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																	 message:[NSString stringWithUTF8String:msg.c_str()]
-															  preferredStyle:UIAlertControllerStyleAlert];
+	  UIAlertController *alert =
+		  [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											  message:[NSString stringWithUTF8String:msg.c_str()]
+									   preferredStyle:UIAlertControllerStyleAlert];
 
 	  [alert addAction:[UIAlertAction actionWithTitle:@"Ok"
 												style:UIAlertActionStyleDefault
@@ -261,9 +261,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	  [alert setAlertStyle:NSAlertStyleWarning];
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  NSLog(@"Success");
-					}];
+					completionHandler:^(NSInteger result) { NSLog(@"Success"); }];
 #		else
 		[alert runModal];
 #		endif
@@ -286,42 +284,35 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogCancelPressed = cancelPressed;
-	unit_test::dialogOpen = true;
+	unit_test::dialogCancelPressed	  = cancelPressed;
+	unit_test::dialogOpen			  = true;
 	return;
 #endif
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 3;
 	if (i == 0) buttonOnePressed();
-	else if (i == 1)
-		buttonTwoPressed();
-	else
-		cancelPressed();
+	else if (i == 1) buttonTwoPressed();
+	else cancelPressed();
 	return;
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonOnePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonOnePressed(); }]];
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonTwoText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonTwoPressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
 	[alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
 											  style:UIAlertActionStyleCancel
-											handler:^(UIAlertAction *action) {
-											  cancelPressed();
-											}]];
+											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -339,22 +330,21 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 	  [alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
-	  function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, cancelPressed, this](NSInteger result) {
-		  if (result == NSAlertFirstButtonReturn) {
-			  // OK clicked, delete the record
-			  app.main.runOnMainThread(buttonOnePressed);
-		  } else if (result == NSAlertSecondButtonReturn) {
-			  app.main.runOnMainThread(buttonTwoPressed);
-		  } else {
-			  app.main.runOnMainThread(cancelPressed);
-		  }
-	  };
+	  function<void(NSInteger)> handleResult =
+		  [buttonOnePressed, buttonTwoPressed, cancelPressed, this](NSInteger result) {
+			  if (result == NSAlertFirstButtonReturn) {
+				  // OK clicked, delete the record
+				  app.main.runOnMainThread(buttonOnePressed);
+			  } else if (result == NSAlertSecondButtonReturn) {
+				  app.main.runOnMainThread(buttonTwoPressed);
+			  } else {
+				  app.main.runOnMainThread(cancelPressed);
+			  }
+		  };
 
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
@@ -362,11 +352,20 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 #	endif
 
 #elif defined(__ANDROID__)
-	androidTwoOptionCancelDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
+	androidTwoOptionCancelDialog(
+		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
 #elif defined(_WIN32)
-	windowsTwoOptionCancelDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
+	windowsTwoOptionCancelDialog(static_cast<HWND>(app.nativeWindowHandle),
+								 title,
+								 msg,
+								 buttonOneText,
+								 buttonOnePressed,
+								 buttonTwoText,
+								 buttonTwoPressed,
+								 cancelPressed);
 #elif defined(__linux__)
-	linuxTwoOptionCancelDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
+	linuxTwoOptionCancelDialog(
+		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, cancelPressed);
 #endif
 }
 
@@ -379,33 +378,29 @@ void Dialogs::twoOptionDialog(std::string title,
 #ifdef UNIT_TEST
 	unit_test::dialogButtonOnePressed = buttonOnePressed;
 	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogOpen = true;
+	unit_test::dialogOpen			  = true;
 	return;
 #endif
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 2;
 	if (i == 0) buttonOnePressed();
-	else if (i == 1)
-		buttonTwoPressed();
+	else if (i == 1) buttonTwoPressed();
 	return;
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonOnePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonOnePressed(); }]];
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonTwoText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonTwoPressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -433,9 +428,7 @@ void Dialogs::twoOptionDialog(std::string title,
 
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
@@ -468,53 +461,43 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 									  std::function<void()> buttonThreePressed,
 									  std::function<void()> cancelPressed) const {
 #ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed = buttonOnePressed;
-	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
+	unit_test::dialogButtonOnePressed	= buttonOnePressed;
+	unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
 	unit_test::dialogButtonThreePressed = buttonThreePressed;
-	unit_test::dialogCancelPressed = cancelPressed;
-	unit_test::dialogOpen = true;
+	unit_test::dialogCancelPressed		= cancelPressed;
+	unit_test::dialogOpen				= true;
 	return;
 #endif
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 4;
 	if (i == 0) buttonOnePressed();
-	else if (i == 1)
-		buttonTwoPressed();
-	else if (i == 2)
-		buttonThreePressed();
-	else
-		cancelPressed();
+	else if (i == 1) buttonTwoPressed();
+	else if (i == 2) buttonThreePressed();
+	else cancelPressed();
 	return;
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonOnePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonOnePressed(); }]];
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonTwoText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonTwoPressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonThreeText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonThreePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonThreePressed(); }]];
 
 	[alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
 											  style:UIAlertActionStyleCancel
-											handler:^(UIAlertAction *action) {
-											  cancelPressed();
-											}]];
+											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -534,24 +517,23 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 
-	  function<void(NSInteger)> handleResult = [this, buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
-		  if (result == NSAlertFirstButtonReturn) {
-			  // OK clicked, delete the record
-			  app.main.runOnMainThread(buttonOnePressed);
-		  } else if (result == NSAlertSecondButtonReturn) {
-			  app.main.runOnMainThread(buttonTwoPressed);
-		  } else if (result == NSAlertThirdButtonReturn) {
-			  app.main.runOnMainThread(buttonThreePressed);
-		  } else {
-			  app.main.runOnMainThread(cancelPressed);
-		  }
-	  };
+	  function<void(NSInteger)> handleResult =
+		  [this, buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
+			  if (result == NSAlertFirstButtonReturn) {
+				  // OK clicked, delete the record
+				  app.main.runOnMainThread(buttonOnePressed);
+			  } else if (result == NSAlertSecondButtonReturn) {
+				  app.main.runOnMainThread(buttonTwoPressed);
+			  } else if (result == NSAlertThirdButtonReturn) {
+				  app.main.runOnMainThread(buttonThreePressed);
+			  } else {
+				  app.main.runOnMainThread(cancelPressed);
+			  }
+		  };
 
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
@@ -559,14 +541,36 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 #	endif
 
 #elif defined(__ANDROID__)
-	androidThreeOptionCancelDialog(
-		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
+	androidThreeOptionCancelDialog(title,
+								   msg,
+								   buttonOneText,
+								   buttonOnePressed,
+								   buttonTwoText,
+								   buttonTwoPressed,
+								   buttonThreeText,
+								   buttonThreePressed,
+								   cancelPressed);
 #elif defined(_WIN32)
-	windowsThreeOptionCancelDialog(
-		static_cast<HWND>(app.nativeWindowHandle), title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
+	windowsThreeOptionCancelDialog(static_cast<HWND>(app.nativeWindowHandle),
+								   title,
+								   msg,
+								   buttonOneText,
+								   buttonOnePressed,
+								   buttonTwoText,
+								   buttonTwoPressed,
+								   buttonThreeText,
+								   buttonThreePressed,
+								   cancelPressed);
 #elif defined(__linux__)
-	linuxThreeOptionCancelDialog(
-		title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed, buttonThreeText, buttonThreePressed, cancelPressed);
+	linuxThreeOptionCancelDialog(title,
+								 msg,
+								 buttonOneText,
+								 buttonOnePressed,
+								 buttonTwoText,
+								 buttonTwoPressed,
+								 buttonThreeText,
+								 buttonThreePressed,
+								 cancelPressed);
 #endif
 }
 
@@ -579,44 +583,37 @@ void Dialogs::threeOptionDialog(std::string title,
 								std::string buttonThreeText,
 								std::function<void()> buttonThreePressed) const {
 #ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed = buttonOnePressed;
-	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
+	unit_test::dialogButtonOnePressed	= buttonOnePressed;
+	unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
 	unit_test::dialogButtonThreePressed = buttonThreePressed;
-	unit_test::dialogOpen = true;
+	unit_test::dialogOpen				= true;
 	return;
 #endif
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 3;
 	if (i == 0) buttonOnePressed();
-	else if (i == 1)
-		buttonTwoPressed();
-	else
-		buttonThreePressed();
+	else if (i == 1) buttonTwoPressed();
+	else buttonThreePressed();
 	return;
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
-																   message:[NSString stringWithUTF8String:msg.c_str()]
-															preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonOneText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonOnePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonOnePressed(); }]];
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonTwoText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonTwoPressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
 	[alert addAction:[UIAlertAction actionWithTitle:[NSString stringWithUTF8String:buttonThreeText.c_str()]
 											  style:UIAlertActionStyleDefault
-											handler:^(UIAlertAction *action) {
-											  buttonThreePressed();
-											}]];
+											handler:^(UIAlertAction *action) { buttonThreePressed(); }]];
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
@@ -635,22 +632,21 @@ void Dialogs::threeOptionDialog(std::string title,
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 
-	  function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, buttonThreePressed, this](NSInteger result) {
-		  if (result == NSAlertFirstButtonReturn) {
-			  // OK clicked, delete the record
-			  app.main.runOnMainThread(buttonOnePressed);
-		  } else if (result == NSAlertSecondButtonReturn) {
-			  app.main.runOnMainThread(buttonTwoPressed);
-		  } else if (result == NSAlertThirdButtonReturn) {
-			  app.main.runOnMainThread(buttonThreePressed);
-		  }
-	  };
+	  function<void(NSInteger)> handleResult =
+		  [buttonOnePressed, buttonTwoPressed, buttonThreePressed, this](NSInteger result) {
+			  if (result == NSAlertFirstButtonReturn) {
+				  // OK clicked, delete the record
+				  app.main.runOnMainThread(buttonOnePressed);
+			  } else if (result == NSAlertSecondButtonReturn) {
+				  app.main.runOnMainThread(buttonTwoPressed);
+			  } else if (result == NSAlertThirdButtonReturn) {
+				  app.main.runOnMainThread(buttonThreePressed);
+			  }
+		  };
 
 #		ifndef MZGLAU
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) {
-					  handleResult(result);
-					}];
+					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
 		handleResult([alert runModal]);
 #		endif
@@ -698,7 +694,7 @@ void Dialogs::threeOptionDialog(std::string title,
 
 	if (img != nil) {
 		// this fixes embedded rotations in the image
-		img = [self normalizedImage:img];
+		img		   = [self normalizedImage:img];
 		NSURL *url = [info objectForKey:UIImagePickerControllerReferenceURL];
 		if (url == nil) {
 			Log::d() << "UIImagePickerControllerReferenceURL was nil";
@@ -707,7 +703,8 @@ void Dialogs::threeOptionDialog(std::string title,
 		NSString *filename = [url lastPathComponent];
 
 		// save to temp dir
-		NSString *path = [NSString pathWithComponents:@[ [[[NSFileManager defaultManager] temporaryDirectory] path], filename ]];
+		NSString *path = [NSString
+			pathWithComponents:@[ [[[NSFileManager defaultManager] temporaryDirectory] path], filename ]];
 
 		[UIImagePNGRepresentation(img) writeToFile:path atomically:YES];
 
@@ -745,37 +742,36 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 		bgpd = [[BGPickerDelegate alloc] init];
 	}
 	UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-	picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-	picker.mediaTypes = [[NSArray alloc] initWithObjects:(NSString *) kUTTypeImage, nil];
-	picker.delegate = bgpd;
+	picker.sourceType				= UIImagePickerControllerSourceTypePhotoLibrary;
+	picker.mediaTypes				= [[NSArray alloc] initWithObjects:(NSString *) kUTTypeImage, nil];
+	picker.delegate					= bgpd;
 
 	[bgpd setCompletionCallback:completionCallback];
 	UIViewController *vc = ((__bridge UIViewController *) app.viewController);
 
-	[vc presentViewController:picker
-					 animated:YES
-				   completion:^ {
-				   }];
+	[vc presentViewController:picker animated:YES completion:^ {}];
 
 #elif defined(__ANDROID__)
 	androidImageDialog(docsPath("tmpImg.jpg"), completionCallback);
 
 #else // defined(__APPLE__)
-	loadFile("Please choose an image", {"jpg", "jpeg", "bmp", "gif", "png", "tif", "tiff"}, [&, completionCallback](string path, bool success) {
-		if (!success) completionCallback(false, "");
+	loadFile("Please choose an image",
+			 {"jpg", "jpeg", "bmp", "gif", "png", "tif", "tiff"},
+			 [&, completionCallback](string path, bool success) {
+				 if (!success) completionCallback(false, "");
 
-		fs::path p(path);
-		string outPath = tempDir() + "/" + p.filename().string();
-		Log::d() << "Copying image to " << outPath;
+				 fs::path p(path);
+				 string outPath = tempDir() + "/" + p.filename().string();
+				 Log::d() << "Copying image to " << outPath;
 
-		try {
-			fs::copy_file(p, outPath, fs::copy_options::overwrite_existing);
-			completionCallback(true, outPath);
-		} catch (const fs::filesystem_error &err) {
-			Log::d() << "Got filesystem error " << err.what();
-			completionCallback(false, "");
-		}
-	});
+				 try {
+					 fs::copy_file(p, outPath, fs::copy_options::overwrite_existing);
+					 completionCallback(true, outPath);
+				 } catch (const fs::filesystem_error &err) {
+					 Log::d() << "Got filesystem error " << err.what();
+					 completionCallback(false, "");
+				 }
+			 });
 #endif
 }
 
@@ -790,8 +786,8 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 #ifdef __APPLE__
 
 #	if TARGET_OS_IOS
-	WKWebView *wv = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-	NSURL *URL = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:url.c_str()]];
+	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+	NSURL *URL		  = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:url.c_str()]];
 	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -812,17 +808,28 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 	[targetController.view addSubview:wv];
 	[targetController.view addSubview:butt];
 	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
-	targetController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+	targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
 
 	targetController.view.backgroundColor = [UIColor whiteColor];
-	NSDictionary *views = NSDictionaryOfVariableBindings(wv, butt);
-	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|" options:0 metrics:nil views:views]];
+	NSDictionary *views					  = NSDictionaryOfVariableBindings(wv, butt);
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|"
+																				  options:0
+																				  metrics:nil
+																					views:views]];
 	[targetController.view
-		addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|" options:0 metrics:nil views:views]];
+		addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|"
+															   options:0
+															   metrics:nil
+																 views:views]];
 
-	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|" options:0 metrics:nil views:views]];
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|"
+																				  options:0
+																				  metrics:nil
+																					views:views]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:targetController animated:YES completion:nil];
+	[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+																	 animated:YES
+																   completion:nil];
 #	else // mac
 
 #	endif
@@ -867,11 +874,11 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 
 #	if TARGET_OS_IOS
 
-	WKWebView *wv = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
 	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
 	[wv loadHTMLString:htmlStr baseURL:nil];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
-	navDelegate = [[OpenLinksInSafariDelegate alloc] init];
+	navDelegate			  = [[OpenLinksInSafariDelegate alloc] init];
 	wv.navigationDelegate = navDelegate;
 	//////////////////////////
 
@@ -894,17 +901,28 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 	[targetController.view addSubview:wv];
 	[targetController.view addSubview:butt];
 	targetController.modalPresentationStyle = UIModalPresentationFormSheet;
-	targetController.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+	targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
 
 	//	targetController.view.backgroundColor = [UIColor whiteColor];
 	NSDictionary *views = NSDictionaryOfVariableBindings(wv, butt);
-	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|" options:0 metrics:nil views:views]];
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[wv]-0-|"
+																				  options:0
+																				  metrics:nil
+																					views:views]];
 	[targetController.view
-		addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|" options:0 metrics:nil views:views]];
+		addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-10-[butt]-0-[wv]-0-|"
+															   options:0
+															   metrics:nil
+																 views:views]];
 
-	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|" options:0 metrics:nil views:views]];
+	[targetController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[butt]-20-|"
+																				  options:0
+																				  metrics:nil
+																					views:views]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:targetController animated:YES completion:nil];
+	[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+																	 animated:YES
+																   completion:nil];
 #	else // mac
 
 	NSString *tmpPath = [NSString stringWithFormat:@"%@/index.html", NSTemporaryDirectory()];
@@ -928,23 +946,21 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 
 #if TARGET_OS_IOS
 	NSString *str = [NSString stringWithUTF8String:message.c_str()];
-	NSURL *URL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
+	NSURL *URL	  = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
 
-	UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[ URL ] applicationActivities:nil];
+	UIActivityViewController *activityViewController =
+		[[UIActivityViewController alloc] initWithActivityItems:@[ URL ] applicationActivities:nil];
 
 	UIViewController *vc = ((__bridge UIViewController *) app.viewController);
 
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-		[vc presentViewController:activityViewController
-						 animated:YES
-					   completion:^{
-						 completionCallback(true);
-					   }];
+		[vc presentViewController:activityViewController animated:YES completion:^{ completionCallback(true); }];
 	}
 	//if iPad
 	else {
 		// Change Rect to position Popover
-		UIPopoverController *popup = [[UIPopoverController alloc] initWithContentViewController:activityViewController];
+		UIPopoverController *popup =
+			[[UIPopoverController alloc] initWithContentViewController:activityViewController];
 
 		[popup
 
@@ -984,9 +1000,10 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
 }
 
-- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+- (void)documentPicker:(UIDocumentPickerViewController *)controller
+	didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
 	for (int i = 0; i < [urls count]; i++) {
-		NSURL *url = [urls objectAtIndex:i];
+		NSURL *url		 = [urls objectAtIndex:i];
 		std::string path = [[url path] UTF8String];
 		completionCallback(path, true);
 	}

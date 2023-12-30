@@ -7,38 +7,20 @@
 //
 
 #pragma once
-
-/**
- * TODO: get rid of clampf and replace with std::clamp
- */
-
-constexpr inline float clampf(float inp, float from, float to) {
-	if(inp < from) return from;
-	if(inp>to) return to;
-	return inp;
-}
-
+#include <algorithm>
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
-	
 	const float f = outMin + (outMax - outMin) * (inp - inMin) / (inMax - inMin);
-	if(clamp) {
-		if(outMax > outMin) {
-			return clampf(f, outMin, outMax);
+	if (clamp) {
+		if (outMax > outMin) {
+			return std::clamp(f, outMin, outMax);
 		} else {
-			return clampf(f, outMax, outMin);
+			return std::clamp(f, outMax, outMin);
 		}
 	}
 	return f;
 }
 
 double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp = false);
-
-double clampd(double inp, double from, double to);
-
-
-int clampi(int inp, int from, int to);
-long clampl(long inp, long from, long to);
-
 
 float nearestPow2(float v);
 

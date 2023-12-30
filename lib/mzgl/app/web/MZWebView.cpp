@@ -30,7 +30,9 @@ MZWebView::MZWebView(App *app) {
 #endif
 }
 
-void MZWebView::show(const std::string &path, std::function<void(const std::string &data)> jsCallback, std::function<void()> loadedCallback) {
+void MZWebView::show(const std::string &path,
+					 std::function<void(const std::string &data)> jsCallback,
+					 std::function<void()> loadedCallback) {
 	impl->show(path, jsCallback, loadedCallback);
 }
 

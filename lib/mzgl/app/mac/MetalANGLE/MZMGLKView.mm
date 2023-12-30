@@ -14,34 +14,30 @@
 	std::mutex evtMutex;
 }
 
-
-- (void) lock {
+- (void)lock {
 	evtMutex.lock();
 }
 
-- (void) unlock {
+- (void)unlock {
 	evtMutex.unlock();
 }
 
-- (void) shutdown {
-	
+- (void)shutdown {
 }
 
 - (void)windowResized:(NSNotification *)notification {
-	
 }
-- (id) initWithFrame: (NSRect) frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
 	eventDispatcher = evtDispatcher;
-	self = [super initWithFrame: frame];
-	if(self!=nil) {
+	self			= [super initWithFrame:frame];
+	if (self != nil) {
 		// do stuff
 	}
 	return self;
-
 }
--(void) draw {
-//	drawFrame(eventDispatcher->app->g, eventDispatcher);
-	if(eventDispatcher->app->g.firstFrame) {
+- (void)draw {
+	//	drawFrame(eventDispatcher->app->g, eventDispatcher);
+	if (eventDispatcher->app->g.firstFrame) {
 		initMZGL(eventDispatcher->app->g);
 		eventDispatcher->setup();
 		eventDispatcher->app->g.firstFrame = false;

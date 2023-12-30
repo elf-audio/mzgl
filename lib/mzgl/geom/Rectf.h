@@ -14,9 +14,9 @@
 // https://github.com/darrenmothersele/openFrameworks/blob/master/types/ofRectangle.cpp
 class Rectf {
 public:
-	float x = 0;
-	float y = 0;
-	float width = 0;
+	float x		 = 0;
+	float y		 = 0;
+	float width	 = 0;
 	float height = 0;
 	Rectf() {}
 	Rectf(float x, float y, float width, float height)
@@ -64,15 +64,15 @@ public:
 	glm::vec2 centre() const { return glm::vec2(x + width / 2.f, y + height / 2.f); }
 	glm::vec2 size() const { return glm::vec2(width, height); }
 	void size(glm::vec2 s) {
-		width = s.x;
+		width  = s.x;
 		height = s.y;
 	}
 	void size(float w, float h) {
-		width = w;
+		width  = w;
 		height = h;
 	}
 	void size(float d) {
-		width = d;
+		width  = d;
 		height = d;
 	}
 
@@ -102,7 +102,9 @@ public:
 
 	void setCentreX(float cx) { x = cx - width * 0.5f; }
 	void setCentreY(float cy) { x = cy - height * 0.5f; }
-	void setBottomCentre(float x, float y) { set(x - this->width / 2, y - this->height, this->width, this->height); }
+	void setBottomCentre(float x, float y) {
+		set(x - this->width / 2, y - this->height, this->width, this->height);
+	}
 
 	void setTopCentre(float x, float y) { set(x - this->width / 2, y, this->width, this->height); }
 
@@ -174,9 +176,13 @@ public:
 	void alignToPixels();
 	glm::vec2 normToPos(float x, float y) const { return {this->x + x * width, this->y + y * height}; }
 	glm::vec2 normToPos(glm::vec2 a) const { return {x + a.x * width, y + a.y * height}; }
-	bool operator==(const Rectf &o) const { return x == o.x && y == o.y && width == o.width && height == o.height; }
+	bool operator==(const Rectf &o) const {
+		return x == o.x && y == o.y && width == o.width && height == o.height;
+	}
 
-	bool operator!=(const Rectf &o) const { return x != o.x || y != o.y || width != o.width || height != o.height; }
+	bool operator!=(const Rectf &o) const {
+		return x != o.x || y != o.y || width != o.width || height != o.height;
+	}
 
 	Rectf &operator+=(const glm::vec2 &offset) {
 		x += offset.x;

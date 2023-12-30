@@ -10,11 +10,13 @@
 #include "App.h"
 #include "Plugin.h"
 
-class PluginEditor: public App {
+class PluginEditor : public App {
 public:
 	::Plugin &effect;
-	
-	PluginEditor(Graphics &g, ::Plugin &effect) : App(g), effect(effect) {}
+
+	PluginEditor(Graphics &g, ::Plugin &effect)
+		: App(g)
+		, effect(effect) {}
 	virtual ~PluginEditor() {}
 
 	// right now just for auv3
@@ -29,8 +31,6 @@ public:
 
 	std::function<void(unsigned int, float)> uiParameterChanged;
 };
-
-
 
 // entry point for plugin editor
 std::shared_ptr<PluginEditor> instantiatePluginEditor(Graphics &g, std::shared_ptr<Plugin> plugin);

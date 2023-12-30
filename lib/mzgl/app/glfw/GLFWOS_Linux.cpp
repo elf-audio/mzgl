@@ -8,15 +8,15 @@
 
 namespace os {
 
-auto getNativeWindowHandle(GLFWwindow* window) -> void* {
-	return (void*)(glfwGetGLXWindow(window)); // FIXME: don't like that cast, it smells
-}
+	auto getNativeWindowHandle(GLFWwindow *window) -> void * {
+		return (void *) (glfwGetGLXWindow(window)); // FIXME: don't like that cast, it smells
+	}
 
-auto initializeGLContext() -> void {
-	// Linux doesn't need to do anything specific right now?
-}
+	auto initializeGLContext() -> void {
+		// Linux doesn't need to do anything specific right now?
+	}
 
-/*
+	/*
 
 If we build a VST version for Linux then these will need to be implemented:
 
@@ -31,4 +31,4 @@ auto detachWindow(GLFWwindow* window) -> void {
 
 */
 
-} // os
+} // namespace os
