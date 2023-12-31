@@ -35,7 +35,7 @@ namespace file_drag_handler {
 	// See the Windows implementation for an example of this.
 
 	static auto callback(GLFWwindow *window, int count, const char **paths) -> void {
-		getEventDispatcher(window)->filesDropped(makePathsVector(count, paths), 0, [] {});
+		getEventDispatcher(window)->filesDropped(makePathsVector(count, paths), 0);
 	}
 
 	struct Handler {
