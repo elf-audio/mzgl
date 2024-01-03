@@ -15,40 +15,42 @@
 #include "MidiMessage.h"
 #include "Midi.h"
 #include "AllMidiDevicesImpl.h"
-class MidiDevice {
+class CoreMidiDevice : public MidiDevice {
 public:
 	MIDIEndpointRef endpoint;
-	std::string name;
+
 	bool isNetworkSession = false;
-	MidiDevice(MIDIEndpointRef endpoint)
-		: endpoint(endpoint) {}
+	// this populates the name field
+	CoreMidiDevice(MIDIEndpointRef endpoint);
 };
 
-class MidiSource : public MidiDevice {
+class CoreMidiSource : public CoreMidiDevice {
 public:
-	static std::shared_ptr<MidiSource> create(MIDIEndpointRef endpoint) {
-		return std::shared_ptr<MidiSource>(new MidiSource(endpoint));
+	static std::shared_ptr<CoreMidiSource> create(MIDIEndpointRef endpoint) {
+		return std::shared_ptr<CoreMidiSource>(new CoreMidiSource(endpoint));
 	}
 
 private:
-	MidiSource(MIDIEndpointRef endpoint)
-		: MidiDevice(endpoint) {}
+	CoreMidiSource(MIDIEndpointRef endpoint)
+		: CoreMidiDevice(endpoint) {
+		this->name = name;
+	}
 };
 
-class MidiDestination : public MidiDevice {
+class CoreMidiDestination : public CoreMidiDevice {
 public:
-	static std::shared_ptr<MidiDestination> create(MIDIEndpointRef endpoint) {
-		return std::shared_ptr<MidiDestination>(new MidiDestination(endpoint));
+	static std::shared_ptr<CoreMidiDestination> create(MIDIEndpointRef endpoint) {
+		return std::shared_ptr<CoreMidiDestination>(new CoreMidiDestination(endpoint));
 	}
 
 private:
-	MidiDestination(MIDIEndpointRef endpoint)
-		: MidiDevice(endpoint) {}
+	CoreMidiDestination(MIDIEndpointRef endpoint)
+		: CoreMidiDevice(endpoint) {}
 };
 
-typedef std::shared_ptr<MidiDevice> MidiDeviceRef;
-typedef std::shared_ptr<MidiSource> MidiSourceRef;
-typedef std::shared_ptr<MidiDestination> MidiDestinationRef;
+typedef std::shared_ptr<CoreMidiDevice> CoreMidiDeviceRef;
+typedef std::shared_ptr<CoreMidiSource> CoreMidiSourceRef;
+typedef std::shared_ptr<CoreMidiDestination> CoreMidiDestinationRef;
 
 class AllMidiDevicesAppleImpl : public AllMidiDevicesImpl {
 public:
@@ -58,8 +60,8 @@ public:
 	MIDIEndpointRef virtualDestinationEndpoint = 0;
 	MIDIEndpointRef virtualSourceEndpoint	   = 0;
 
-	std::vector<MidiSourceRef> sources;
-	std::vector<MidiDestinationRef> destinations;
+	std::vector<CoreMidiSourceRef> sources;
+	std::vector<CoreMidiDestinationRef> destinations;
 	std::vector<MidiListener *> listeners;
 
 	void setup() override;
@@ -68,14 +70,14 @@ public:
 
 	void scanForDevices();
 
-	void midiReceived(const MidiMessage &msg, uint64_t timestamp);
+	void midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
 
 	virtual ~AllMidiDevicesAppleImpl();
 
 	// needs to be public because it's called by callbacks
-	void packetListReceived(const MIDIPacketList *packetList);
+	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
 	void midiNotify(const MIDINotification *notification);
 
 private:
@@ -88,8 +90,8 @@ private:
 
 	void connectSource(MIDIEndpointRef endpoint);
 	void disconnectSource(MIDIEndpointRef endpoint);
-	MidiSourceRef getSource(MIDIEndpointRef endpoint);
-	MidiDestinationRef getDestination(MIDIEndpointRef endpoint);
+	CoreMidiSourceRef getSource(MIDIEndpointRef endpoint);
+	CoreMidiDestinationRef getDestination(MIDIEndpointRef endpoint);
 
 	std::vector<unsigned char> pendingMsg;
 

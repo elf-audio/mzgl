@@ -63,9 +63,9 @@ public:
 		return nameSet;
 	}
 
-	void midiReceived(const MidiMessage &m, uint64_t timestamp) override {
+	void midiReceived(const MidiDevice &device, const MidiMessage &m, uint64_t timestamp) override {
 		for (auto l: listeners) {
-			l->midiReceived(m, timestamp);
+			l->midiReceived(device, m, timestamp);
 		}
 	}
 

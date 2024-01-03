@@ -21,12 +21,20 @@
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData);
 #include "MidiMessage.h"
 
-class MidiListener {
+/**
+ * This is a midi device info object, hopefully will have more in it.
+ */
+class MidiDevice {
 public:
-	virtual void midiReceived(const MidiMessage &m, uint64_t timestamp) = 0;
+	std::string name;
 };
 
-class MidiPort {
+class MidiListener {
+public:
+	virtual void midiReceived(const MidiDevice &device, const MidiMessage &m, uint64_t timestamp) = 0;
+};
+
+class MidiPort : public MidiDevice {
 public:
 	virtual RtMidi *getPort() = 0;
 	virtual bool isOutput()	  = 0;
@@ -37,7 +45,7 @@ public:
 
 	void close() { getPort()->closePort(); }
 
-	std::string getName() { return name; }
+	std::string getName() const { return name; }
 	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(isOutput(), false); }
 
 	static int findPortByName(std::string portSearchName, bool isOutput) {
@@ -101,7 +109,6 @@ public:
 		return false;
 	}
 
-	std::string name;
 	bool open(int port = 0) {
 		if (isOpen()) close();
 		getPort()->openPort(port);
@@ -141,7 +148,7 @@ public:
 	void callback(double deltatime, std::vector<unsigned char> *message) {
 		MidiMessage m(*message);
 		for (auto *l: listeners)
-			l->midiReceived(m, deltatime);
+			l->midiReceived(*this, m, deltatime);
 	}
 
 	void addListener(MidiListener *listener) { listeners.push_back(listener); }

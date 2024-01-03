@@ -30,9 +30,15 @@ static std::string nameOfEndpoint(MIDIEndpointRef ref) {
 	return [str UTF8String];
 }
 
+CoreMidiDevice::CoreMidiDevice(MIDIEndpointRef endpoint)
+	: endpoint(endpoint) {
+	name = nameOfEndpoint(endpoint);
+}
+
 static void MIDIReadNoteProc(const MIDIPacketList *packetList, void *readProcRefCon, void *srcConnRefCon) {
 	AllMidiDevicesAppleImpl *me = (AllMidiDevicesAppleImpl *) readProcRefCon;
-	me->packetListReceived(packetList);
+	CoreMidiDevice *dev			= (CoreMidiDevice *) srcConnRefCon;
+	me->packetListReceived(*dev, packetList);
 }
 
 static void myMIDINotifyProc(const MIDINotification *message, void *refCon) {
@@ -40,7 +46,7 @@ static void myMIDINotifyProc(const MIDINotification *message, void *refCon) {
 	me->midiNotify(message);
 }
 
-static void removeFirst(std::vector<MidiSourceRef> &devs, MidiSourceRef dev) {
+static void removeFirst(std::vector<CoreMidiSourceRef> &devs, CoreMidiSourceRef dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -48,7 +54,7 @@ static void removeFirst(std::vector<MidiSourceRef> &devs, MidiSourceRef dev) {
 		}
 	}
 }
-static void removeFirst(std::vector<MidiDestinationRef> &devs, MidiDestinationRef dev) {
+static void removeFirst(std::vector<CoreMidiDestinationRef> &devs, CoreMidiDestinationRef dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -86,9 +92,6 @@ void AllMidiDevicesAppleImpl::autoPoll() {
 			[[NSOperationQueue mainQueue] addOperationWithBlock:^{
 			  if (running) scanForDevices();
 			}];
-			//			dispatch_async(dispatch_get_main_queue(), ^{
-			//				if(running) scanForDevices();
-			//            });
 
 			for (int i = 0; i < 100; i++) {
 				sleepMillis(10);
@@ -174,7 +177,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 
 void AllMidiDevicesAppleImpl::connectDestination(MIDIEndpointRef endpoint) {
 	//    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
-	auto dest = MidiDestination::create(endpoint);
+	auto dest = CoreMidiDestination::create(endpoint);
 	destinations.push_back(dest);
 	notifyConnectionChange();
 }
@@ -190,7 +193,7 @@ void AllMidiDevicesAppleImpl::disconnectDestination(MIDIEndpointRef endpoint) {
 
 void AllMidiDevicesAppleImpl::connectSource(MIDIEndpointRef endpoint) {
 	Log::d() << "Connecting source " << nameOfEndpoint(endpoint);
-	auto src = MidiSource::create(endpoint);
+	auto src = CoreMidiSource::create(endpoint);
 	sources.push_back(src);
 
 	notifyConnectionChange();
@@ -198,14 +201,14 @@ void AllMidiDevicesAppleImpl::connectSource(MIDIEndpointRef endpoint) {
 	NSLogError(s, "Connecting to MIDI source");
 }
 
-MidiSourceRef AllMidiDevicesAppleImpl::getSource(MIDIEndpointRef endpoint) {
+CoreMidiSourceRef AllMidiDevicesAppleImpl::getSource(MIDIEndpointRef endpoint) {
 	for (auto s: sources) {
 		if (s->endpoint == endpoint) return s;
 	}
 	return nullptr;
 }
 
-MidiDestinationRef AllMidiDevicesAppleImpl::getDestination(MIDIEndpointRef endpoint) {
+CoreMidiDestinationRef AllMidiDevicesAppleImpl::getDestination(MIDIEndpointRef endpoint) {
 	for (auto d: destinations) {
 		if (d->endpoint == endpoint) return d;
 	}
@@ -224,17 +227,17 @@ void AllMidiDevicesAppleImpl::disconnectSource(MIDIEndpointRef endpoint) {
 	}
 }
 
-void AllMidiDevicesAppleImpl::midiReceived(const MidiMessage &msg, uint64_t timestamp) {
+void AllMidiDevicesAppleImpl::midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp) {
 	uint64_t ts = hostTicksToNanoSeconds(timestamp);
 	for (auto *l: listeners) {
-		l->midiReceived(msg, ts);
+		l->midiReceived(device, msg, ts);
 	}
 }
 
-void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetList) {
-	// if this message is from coremidi, and audiobus is enabled, ignore it.
-	// if this message is from audiobus and it is diabled, ignore it (probs never happens that way round)
-
+void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList) {
+	// there is a bug here probably if you were to send multiple streams of data
+	// there is no distinquishing between different devices with regards to pendingMsg.
+	// you'd need one per device.
 	const MIDIPacket *packet = &packetList->packet[0];
 	for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
 		for (int i = 0; i < packet->length; i++) {
@@ -243,7 +246,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetLis
 			if (d[i] & 0x80) {
 				// this is a status byte, send any previous messages
 				if (pendingMsg.size() > 0) {
-					midiReceived(MidiMessage(pendingMsg), packet->timeStamp);
+					midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
 					pendingMsg.clear();
 				}
 
@@ -252,7 +255,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetLis
 				// if this status byte is for a 1 byte message send it straight away
 				// all status 0xF6 and above are all the 1 byte messages.
 				if (pendingMsg.size() == 1 && pendingMsg[0] >= 0xF6) {
-					midiReceived(MidiMessage(pendingMsg), packet->timeStamp);
+					midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
 					pendingMsg.clear();
 				}
 			} else {
@@ -286,7 +289,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const MIDIPacketList *packetLis
 							break;
 					}
 					if (shouldEmit) {
-						midiReceived(MidiMessage(pendingMsg), packet->timeStamp);
+						midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
 						pendingMsg.clear();
 					}
 				}
