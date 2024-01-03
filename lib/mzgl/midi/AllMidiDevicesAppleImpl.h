@@ -50,15 +50,8 @@ typedef std::shared_ptr<MidiDevice> MidiDeviceRef;
 typedef std::shared_ptr<MidiSource> MidiSourceRef;
 typedef std::shared_ptr<MidiDestination> MidiDestinationRef;
 
-class MidiDeviceListener {
-public:
-	virtual void midiDevicesChanged() {}
-};
-
 class AllMidiDevicesAppleImpl : public AllMidiDevicesImpl {
 public:
-	std::vector<MidiDeviceListener *> deviceListeners;
-
 	MIDIClientRef client					   = 0;
 	MIDIPortRef inputPort					   = 0;
 	MIDIPortRef outputPort					   = 0;
@@ -89,11 +82,6 @@ private:
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;
 	void autoPoll();
-	void notifyChange() {
-		for (auto *l: deviceListeners) {
-			l->midiDevicesChanged();
-		}
-	}
 
 	void connectDestination(MIDIEndpointRef endpoint);
 	void disconnectDestination(MIDIEndpointRef endpoint);

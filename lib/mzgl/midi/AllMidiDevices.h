@@ -16,6 +16,11 @@
 #	import "androidUtil.h"
 #endif
 
+class MidiConnectionListener {
+public:
+	virtual void midiConnectionsChanged() {}
+};
+
 class AllMidiDevicesImpl;
 
 class AllMidiDevices {
@@ -24,7 +29,7 @@ public:
 	std::shared_ptr<AllMidiDevicesImpl> impl;
 	void setup();
 	void addListener(MidiListener *listener);
-
+	void addConnectionListener(MidiConnectionListener *listener);
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
 

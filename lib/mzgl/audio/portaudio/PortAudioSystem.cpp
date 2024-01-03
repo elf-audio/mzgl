@@ -401,7 +401,7 @@ void PortAudioSystem::rescanPorts() {
 		Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
 		return;
 	}
-
+	Log::d() << "Found " << numDevices << " devices";
 	const vector<double> standardSampleRates = {
 
 		//8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
@@ -420,6 +420,10 @@ void PortAudioSystem::rescanPorts() {
 		port.name			= dev->name;
 		port.numInChannels	= dev->maxInputChannels;
 		port.numOutChannels = dev->maxOutputChannels;
+
+		Log::d() << "Found port " << port.name << " with " << port.numInChannels << " in channels and "
+				 << port.numOutChannels << " out channels";
+
 		if (i == defaultInputDeviceId) {
 			port.isDefaultInput = true;
 		}

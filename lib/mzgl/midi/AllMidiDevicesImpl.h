@@ -7,12 +7,18 @@
 //
 
 #pragma once
-
-class MidiListener;
-class MidiMessage;
+#include "AllMidiDevices.h"
 
 class AllMidiDevicesImpl {
 public:
+	std::vector<MidiConnectionListener *> connectionListeners;
+
+	void addConnectionListener(MidiConnectionListener *l) { connectionListeners.push_back(l); }
+	void notifyConnectionChange() {
+		for (auto *l: connectionListeners) {
+			l->midiConnectionsChanged();
+		}
+	}
 	virtual void setup() {}
 	virtual void addListener(MidiListener *l) = 0;
 

@@ -153,3 +153,8 @@ void AllMidiDevices::sendMessage(const MidiMessage &m) {
 		impl->sendMessage(m);
 	}
 }
+void AllMidiDevices::addConnectionListener(MidiConnectionListener *listener) {
+	if (online) {
+		impl->addConnectionListener(listener);
+	}
+}

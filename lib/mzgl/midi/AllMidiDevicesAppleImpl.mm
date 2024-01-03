@@ -77,7 +77,7 @@ void AllMidiDevicesAppleImpl::autoPoll() {
 	// keep checking for new ports
 	running			  = true;
 	portScannerThread = std::thread([this]() {
-#if  DEBUG
+#if DEBUG
 		setThreadName("AllMidiIns::portScanner");
 #endif
 		std::atomic<bool> doneScanning = true;
@@ -176,7 +176,7 @@ void AllMidiDevicesAppleImpl::connectDestination(MIDIEndpointRef endpoint) {
 	//    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
 	auto dest = MidiDestination::create(endpoint);
 	destinations.push_back(dest);
-	notifyChange();
+	notifyConnectionChange();
 }
 
 void AllMidiDevicesAppleImpl::disconnectDestination(MIDIEndpointRef endpoint) {
@@ -184,7 +184,7 @@ void AllMidiDevicesAppleImpl::disconnectDestination(MIDIEndpointRef endpoint) {
 	auto dest = getDestination(endpoint);
 	if (dest) {
 		removeFirst(destinations, dest);
-		notifyChange();
+		notifyConnectionChange();
 	}
 }
 
@@ -193,7 +193,7 @@ void AllMidiDevicesAppleImpl::connectSource(MIDIEndpointRef endpoint) {
 	auto src = MidiSource::create(endpoint);
 	sources.push_back(src);
 
-	notifyChange();
+	notifyConnectionChange();
 	OSStatus s = MIDIPortConnectSource(inputPort, endpoint, (void *) src.get());
 	NSLogError(s, "Connecting to MIDI source");
 }
@@ -220,7 +220,7 @@ void AllMidiDevicesAppleImpl::disconnectSource(MIDIEndpointRef endpoint) {
 		NSLogError(s, "Disconnecting from MIDI source");
 		// [sources removeObject:source];
 		removeFirst(sources, src);
-		notifyChange();
+		notifyConnectionChange();
 	}
 }
 
