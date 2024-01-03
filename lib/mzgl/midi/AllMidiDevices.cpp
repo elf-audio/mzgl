@@ -37,6 +37,17 @@ public:
 	// sends to all
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
+	std::vector<MidiDevice> getConnectedMidiDevices() override {
+		std::vector<MidiDevice> devices;
+		for (auto &m: midiIns) {
+			devices.push_back(*m.second);
+		}
+		for (auto &m: midiOuts) {
+			devices.push_back(*m.second);
+		}
+		return devices;
+	}
+
 	void autoPoll() {
 		if (running) return;
 		// keep checking for new ports
@@ -156,5 +167,19 @@ void AllMidiDevices::sendMessage(const MidiMessage &m) {
 void AllMidiDevices::addConnectionListener(MidiConnectionListener *listener) {
 	if (online) {
 		impl->addConnectionListener(listener);
+	}
+}
+
+void AllMidiDevices::removeConnectionListener(MidiConnectionListener *listener) {
+	if (online) {
+		impl->removeConnectionListener(listener);
+	}
+}
+
+std::vector<MidiDevice> AllMidiDevices::getConnectedMidiDevices() {
+	if (online) {
+		return impl->getConnectedMidiDevices();
+	} else {
+		return {};
 	}
 }

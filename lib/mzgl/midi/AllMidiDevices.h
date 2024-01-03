@@ -18,7 +18,8 @@
 
 class MidiConnectionListener {
 public:
-	virtual void midiConnectionsChanged() {}
+	virtual void midiDeviceConnected(const MidiDevice &dev) {}
+	virtual void midiDeviceDisconnected(const MidiDevice &dev) {}
 };
 
 class AllMidiDevicesImpl;
@@ -30,8 +31,10 @@ public:
 	void setup();
 	void addListener(MidiListener *listener);
 	void addConnectionListener(MidiConnectionListener *listener);
+	void removeConnectionListener(MidiConnectionListener *listener);
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
+	std::vector<MidiDevice> getConnectedMidiDevices();
 
 private:
 	const bool online;

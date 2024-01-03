@@ -24,33 +24,35 @@ public:
 	CoreMidiDevice(MIDIEndpointRef endpoint);
 };
 
-class CoreMidiSource : public CoreMidiDevice {
+class CoreMidiIn : public CoreMidiDevice {
 public:
-	static std::shared_ptr<CoreMidiSource> create(MIDIEndpointRef endpoint) {
-		return std::shared_ptr<CoreMidiSource>(new CoreMidiSource(endpoint));
+	static std::shared_ptr<CoreMidiIn> create(MIDIEndpointRef endpoint) {
+		return std::shared_ptr<CoreMidiIn>(new CoreMidiIn(endpoint));
 	}
 
 private:
-	CoreMidiSource(MIDIEndpointRef endpoint)
+	CoreMidiIn(MIDIEndpointRef endpoint)
 		: CoreMidiDevice(endpoint) {
-		this->name = name;
+		isOutput = false;
 	}
 };
 
-class CoreMidiDestination : public CoreMidiDevice {
+class CoreMidiOut : public CoreMidiDevice {
 public:
-	static std::shared_ptr<CoreMidiDestination> create(MIDIEndpointRef endpoint) {
-		return std::shared_ptr<CoreMidiDestination>(new CoreMidiDestination(endpoint));
+	static std::shared_ptr<CoreMidiOut> create(MIDIEndpointRef endpoint) {
+		return std::shared_ptr<CoreMidiOut>(new CoreMidiOut(endpoint));
 	}
 
 private:
-	CoreMidiDestination(MIDIEndpointRef endpoint)
-		: CoreMidiDevice(endpoint) {}
+	CoreMidiOut(MIDIEndpointRef endpoint)
+		: CoreMidiDevice(endpoint) {
+		isOutput = true;
+	}
 };
 
 typedef std::shared_ptr<CoreMidiDevice> CoreMidiDeviceRef;
-typedef std::shared_ptr<CoreMidiSource> CoreMidiSourceRef;
-typedef std::shared_ptr<CoreMidiDestination> CoreMidiDestinationRef;
+typedef std::shared_ptr<CoreMidiIn> CoreMidiInRef;
+typedef std::shared_ptr<CoreMidiOut> CoreMidiOutRef;
 
 class AllMidiDevicesAppleImpl : public AllMidiDevicesImpl {
 public:
@@ -59,10 +61,6 @@ public:
 	MIDIPortRef outputPort					   = 0;
 	MIDIEndpointRef virtualDestinationEndpoint = 0;
 	MIDIEndpointRef virtualSourceEndpoint	   = 0;
-
-	std::vector<CoreMidiSourceRef> sources;
-	std::vector<CoreMidiDestinationRef> destinations;
-	std::vector<MidiListener *> listeners;
 
 	void setup() override;
 
@@ -76,22 +74,37 @@ public:
 
 	virtual ~AllMidiDevicesAppleImpl();
 
+	std::vector<MidiDevice> getConnectedMidiDevices() override {
+		std::vector<MidiDevice> devices;
+		for (auto m: midiIns) {
+			devices.push_back(*m);
+		}
+		for (auto m: midiOuts) {
+			devices.push_back(*m);
+		}
+		return devices;
+	}
+
 	// needs to be public because it's called by callbacks
 	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
 	void midiNotify(const MIDINotification *notification);
 
 private:
+	std::vector<CoreMidiInRef> midiIns;
+	std::vector<CoreMidiOutRef> midiOuts;
+	std::vector<MidiListener *> listeners;
+
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;
 	void autoPoll();
 
-	void connectDestination(MIDIEndpointRef endpoint);
-	void disconnectDestination(MIDIEndpointRef endpoint);
+	void connectOutput(MIDIEndpointRef endpoint);
+	void disconnectOutput(MIDIEndpointRef endpoint);
 
-	void connectSource(MIDIEndpointRef endpoint);
-	void disconnectSource(MIDIEndpointRef endpoint);
-	CoreMidiSourceRef getSource(MIDIEndpointRef endpoint);
-	CoreMidiDestinationRef getDestination(MIDIEndpointRef endpoint);
+	void connectInput(MIDIEndpointRef endpoint);
+	void disconnectInput(MIDIEndpointRef endpoint);
+	CoreMidiInRef getInput(MIDIEndpointRef endpoint);
+	CoreMidiOutRef getOutput(MIDIEndpointRef endpoint);
 
 	std::vector<unsigned char> pendingMsg;
 

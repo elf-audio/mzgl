@@ -14,7 +14,7 @@
 #include "util.h"
 #include <memory.h>
 
-void NSLogError(OSStatus c, const std::string &str) {
+static void NSLogError(OSStatus c, const std::string &str) {
 	if (c != noErr) {
 		printf("Error trying to : %s\n", str.c_str());
 	}
@@ -46,7 +46,7 @@ static void myMIDINotifyProc(const MIDINotification *message, void *refCon) {
 	me->midiNotify(message);
 }
 
-static void removeFirst(std::vector<CoreMidiSourceRef> &devs, CoreMidiSourceRef dev) {
+static void removeFirst(std::vector<CoreMidiInRef> &devs, CoreMidiInRef dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -54,7 +54,7 @@ static void removeFirst(std::vector<CoreMidiSourceRef> &devs, CoreMidiSourceRef 
 		}
 	}
 }
-static void removeFirst(std::vector<CoreMidiDestinationRef> &devs, CoreMidiDestinationRef dev) {
+static void removeFirst(std::vector<CoreMidiOutRef> &devs, CoreMidiOutRef dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -131,15 +131,15 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 	const ItemCount numberOfDestinations = MIDIGetNumberOfDestinations();
 	const ItemCount numberOfSources		 = MIDIGetNumberOfSources();
 
-	auto removedSources		 = sources;
-	auto removedDestinations = destinations;
+	auto removedSources		 = midiIns;
+	auto removedDestinations = midiOuts;
 
 	for (ItemCount index = 0; index < numberOfDestinations; ++index) {
 		MIDIEndpointRef endpoint = MIDIGetDestination(index);
 		if (endpoint == virtualDestinationEndpoint) continue;
 
 		bool matched = false;
-		for (auto destination: destinations) {
+		for (auto destination: midiOuts) {
 			if (destination->endpoint == endpoint) {
 				removeFirst(removedDestinations, destination);
 				matched = true;
@@ -147,7 +147,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 			}
 		}
 		if (matched) continue;
-		connectDestination(endpoint);
+		connectOutput(endpoint);
 	}
 
 	for (ItemCount index = 0; index < numberOfSources; ++index) {
@@ -155,7 +155,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 		if (endpoint == virtualSourceEndpoint) continue;
 
 		bool matched = false;
-		for (auto source: sources) {
+		for (auto source: midiIns) {
 			if (source->endpoint == endpoint) {
 				removeFirst(removedSources, source);
 				matched = true;
@@ -163,67 +163,70 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 			}
 		}
 		if (matched) continue;
-		connectSource(endpoint);
+		connectInput(endpoint);
 	}
 
 	for (auto destination: removedDestinations) {
-		disconnectDestination(destination->endpoint);
+		disconnectOutput(destination->endpoint);
 	}
 
 	for (auto source: removedSources) {
-		disconnectSource(source->endpoint);
+		disconnectInput(source->endpoint);
 	}
 }
 
-void AllMidiDevicesAppleImpl::connectDestination(MIDIEndpointRef endpoint) {
+void AllMidiDevicesAppleImpl::connectOutput(MIDIEndpointRef endpoint) {
 	//    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
-	auto dest = CoreMidiDestination::create(endpoint);
-	destinations.push_back(dest);
-	notifyConnectionChange();
+	auto dest = CoreMidiOut::create(endpoint);
+	midiOuts.push_back(dest);
+	notifyConnection(*dest);
+	//	notifyConnectionChange();
 }
 
-void AllMidiDevicesAppleImpl::disconnectDestination(MIDIEndpointRef endpoint) {
+void AllMidiDevicesAppleImpl::disconnectOutput(MIDIEndpointRef endpoint) {
 	Log::d() << "Disconnecting destination " << nameOfEndpoint(endpoint);
-	auto dest = getDestination(endpoint);
+	auto dest = getOutput(endpoint);
 	if (dest) {
-		removeFirst(destinations, dest);
-		notifyConnectionChange();
+		removeFirst(midiOuts, dest);
+		//		notifyConnectionChange();
+		notifyDisconnection(*dest);
 	}
 }
 
-void AllMidiDevicesAppleImpl::connectSource(MIDIEndpointRef endpoint) {
+void AllMidiDevicesAppleImpl::connectInput(MIDIEndpointRef endpoint) {
 	Log::d() << "Connecting source " << nameOfEndpoint(endpoint);
-	auto src = CoreMidiSource::create(endpoint);
-	sources.push_back(src);
+	auto src = CoreMidiIn::create(endpoint);
+	midiIns.push_back(src);
 
-	notifyConnectionChange();
+	notifyConnection(*src);
 	OSStatus s = MIDIPortConnectSource(inputPort, endpoint, (void *) src.get());
 	NSLogError(s, "Connecting to MIDI source");
 }
 
-CoreMidiSourceRef AllMidiDevicesAppleImpl::getSource(MIDIEndpointRef endpoint) {
-	for (auto s: sources) {
+CoreMidiInRef AllMidiDevicesAppleImpl::getInput(MIDIEndpointRef endpoint) {
+	for (auto s: midiIns) {
 		if (s->endpoint == endpoint) return s;
 	}
 	return nullptr;
 }
 
-CoreMidiDestinationRef AllMidiDevicesAppleImpl::getDestination(MIDIEndpointRef endpoint) {
-	for (auto d: destinations) {
+CoreMidiOutRef AllMidiDevicesAppleImpl::getOutput(MIDIEndpointRef endpoint) {
+	for (auto d: midiOuts) {
 		if (d->endpoint == endpoint) return d;
 	}
 	return nullptr;
 }
 
-void AllMidiDevicesAppleImpl::disconnectSource(MIDIEndpointRef endpoint) {
+void AllMidiDevicesAppleImpl::disconnectInput(MIDIEndpointRef endpoint) {
 	Log::d() << "Disconnecting source " << nameOfEndpoint(endpoint);
-	auto src = getSource(endpoint);
+	auto src = getInput(endpoint);
 	if (src) {
 		OSStatus s = MIDIPortDisconnectSource(inputPort, endpoint);
 		NSLogError(s, "Disconnecting from MIDI source");
 		// [sources removeObject:source];
-		removeFirst(sources, src);
-		notifyConnectionChange();
+		removeFirst(midiIns, src);
+		//		notifyConnectionChange();
+		notifyDisconnection(*src);
 	}
 }
 
@@ -303,18 +306,18 @@ void AllMidiDevicesAppleImpl::midiNotifyAdd(const MIDIObjectAddRemoveNotificatio
 	if (notification->child == virtualDestinationEndpoint || notification->child == virtualSourceEndpoint) return;
 
 	if (notification->childType == kMIDIObjectType_Destination)
-		connectDestination((MIDIEndpointRef) notification->child);
+		connectOutput((MIDIEndpointRef) notification->child);
 	else if (notification->childType == kMIDIObjectType_Source)
-		connectSource((MIDIEndpointRef) notification->child);
+		connectInput((MIDIEndpointRef) notification->child);
 }
 
 void AllMidiDevicesAppleImpl::midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification) {
 	if (notification->child == virtualDestinationEndpoint || notification->child == virtualSourceEndpoint) return;
 
 	if (notification->childType == kMIDIObjectType_Destination)
-		disconnectDestination((MIDIEndpointRef) notification->child);
+		disconnectOutput((MIDIEndpointRef) notification->child);
 	else if (notification->childType == kMIDIObjectType_Source)
-		disconnectSource((MIDIEndpointRef) notification->child);
+		disconnectInput((MIDIEndpointRef) notification->child);
 }
 
 void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {

@@ -27,6 +27,7 @@ void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void 
 class MidiDevice {
 public:
 	std::string name;
+	bool isOutput = false;
 };
 
 class MidiListener {
@@ -37,7 +38,6 @@ public:
 class MidiPort : public MidiDevice {
 public:
 	virtual RtMidi *getPort() = 0;
-	virtual bool isOutput()	  = 0;
 
 	virtual ~MidiPort() {}
 
@@ -46,7 +46,7 @@ public:
 	void close() { getPort()->closePort(); }
 
 	std::string getName() const { return name; }
-	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(isOutput(), false); }
+	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(isOutput, false); }
 
 	static int findPortByName(std::string portSearchName, bool isOutput) {
 		auto ports						   = MidiPort::getPortNames(isOutput, false);
@@ -102,7 +102,7 @@ public:
 	}
 
 	bool open(std::string portSearchName) {
-		int portId = MidiPort::findPortByName(portSearchName, isOutput());
+		int portId = MidiPort::findPortByName(portSearchName, isOutput);
 		if (portId != -1) {
 			return open(portId);
 		}
@@ -123,6 +123,7 @@ public:
 	}
 
 	MidiIn() {
+		isOutput = false;
 		try {
 			rtMidiIn = std::shared_ptr<RtMidiIn>(new RtMidiIn());
 
@@ -143,7 +144,6 @@ public:
 	}
 
 	RtMidi *getPort() override { return rtMidiIn.get(); }
-	bool isOutput() override { return false; }
 
 	void callback(double deltatime, std::vector<unsigned char> *message) {
 		MidiMessage m(*message);
@@ -182,7 +182,6 @@ private:
 
 class MidiOut : public MidiPort {
 public:
-	bool isOutput() override { return true; }
 	RtMidi *getPort() override { return rtMidiOut.get(); }
 
 	static std::vector<std::string> getPortNames(bool alsoPrint = false) {
@@ -190,6 +189,7 @@ public:
 	}
 
 	MidiOut() {
+		isOutput = true;
 		try {
 			rtMidiOut = std::make_shared<RtMidiOut>();
 		} catch (RtMidiError &error) {
