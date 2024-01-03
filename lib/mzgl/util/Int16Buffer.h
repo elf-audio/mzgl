@@ -1,6 +1,8 @@
 
 #pragma once
+
 #include "FloatBuffer.h"
+#include <algorithm>
 
 class Int16Buffer {
 public:

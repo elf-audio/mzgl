@@ -10,6 +10,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 
 class ScopedUrl;
 using ScopedUrlRef = std::shared_ptr<ScopedUrl>;

@@ -121,7 +121,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	}
 
 	graphics.pixelScale = 1.0f; // actually we don't need any scaling, this is legacy code for compatibility
-
 	glfwWindowHint(GLFW_SAMPLES, 16);
 
 #ifdef METAL_BACKEND
@@ -140,11 +139,23 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #	else
+
+#		ifdef __arm__ // raspberry pi?
+	// so we're going for gles
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#		else
+
 	// this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+#		endif
+
 #	endif
 #endif
+
+
 
 	// this is crashing on mac for some reason
 	//	const unsigned char *openglVersion = glGetString(GL_VERSION);
@@ -180,7 +191,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		graphics.height = requestedHeight;
 	}
 
-	Log::d() << "Request window " << (graphics.width) << "x" << (graphics.height);
+	Log::d() << "Request window " << (graphics.width) << " x " << (graphics.height);
 
 	window = glfwCreateWindow(graphics.width, graphics.height, "mzgl", NULL, NULL);
 	if (!window) {
