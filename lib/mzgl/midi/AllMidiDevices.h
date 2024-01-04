@@ -24,18 +24,27 @@ public:
 
 class AllMidiDevicesImpl;
 
+// this forces the RtMidi implementation for testing on mac
+// not to be used in production.
+//#define FORCE_RTMIDI
+
 class AllMidiDevices {
 public:
+	// you can disable actual midi for testing or offline rendering by passing in online = false
 	AllMidiDevices(bool online = true);
-	std::shared_ptr<AllMidiDevicesImpl> impl;
+
 	void setup();
+
 	void addListener(MidiListener *listener);
+
 	void addConnectionListener(MidiConnectionListener *listener);
 	void removeConnectionListener(MidiConnectionListener *listener);
+
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
 	std::vector<MidiDevice> getConnectedMidiDevices();
 
 private:
 	const bool online;
+	std::shared_ptr<AllMidiDevicesImpl> impl;
 };

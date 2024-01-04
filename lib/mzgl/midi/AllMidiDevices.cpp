@@ -138,7 +138,9 @@ private:
 AllMidiDevices::AllMidiDevices(bool online)
 	: online(online) {
 	if (online) {
-#ifdef __ANDROID__
+#ifdef FORCE_RTMIDI
+		impl = std::make_shared<AllMidiDevicesRtMidiImpl>();
+#elif defined(__ANDROID__)
 		impl = std::make_shared<AllMidiDevicesAndroidImpl>();
 #elif defined(__APPLE__)
 		impl = std::make_shared<AllMidiDevicesAppleImpl>();
