@@ -159,39 +159,10 @@ using namespace std;
 }
 
 - (void)makeMenus {
-#if 1
 	string appName = [[[NSProcessInfo processInfo] processName] UTF8String];
 
 	auto appMenu = MacMenuBar::instance().getMenu(appName);
-	//	appMenu->addItem("About " + appName, "", [self]() {
-	//		[self about:nil];
-	//	});
-	//
-	//
-	//	appMenu->addSeparator();
 	appMenu->addItem("Quit " + appName, "q", []() { [[NSApplication sharedApplication] terminate:nil]; });
-
-#else
-
-	id menubar	   = [NSMenu new];
-	id appMenuItem = [NSMenuItem new];
-	[menubar addItem:appMenuItem];
-	[NSApp setMainMenu:menubar];
-	id appMenu = [NSMenu new];
-
-	id appName		= [[NSProcessInfo processInfo] processName];
-	id quitTitle	= [@"Quit " stringByAppendingString:appName];
-	id quitMenuItem = [[NSMenuItem alloc] initWithTitle:quitTitle action:@selector(terminate:) keyEquivalent:@"q"];
-
-	id aboutMenuItem = [[NSMenuItem alloc] initWithTitle:[@"About " stringByAppendingString:appName]
-												  action:@selector(about:)
-										   keyEquivalent:@""];
-	[appMenu addItem:aboutMenuItem];
-	[appMenu addItem:[NSMenuItem separatorItem]];
-	[appMenu addItem:quitMenuItem];
-
-	[appMenuItem setSubmenu:appMenu];
-#endif
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification {
@@ -227,9 +198,14 @@ using namespace std;
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
 	// Insert code here to tear down your application
-	Log::d() << "applicationWillTerminate";
+	Log::d() << "applicationWillTerminate " << app.use_count();
+	//delete app.get();
 	[view shutdown];
+	eventDispatcher = nullptr;
+	app				= nullptr;
+	Log::d() << "applicationWillTerminate " << app.use_count();
 }
+
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
 	string fn		   = [filename UTF8String];
 	auto evtDispatcher = eventDispatcher;

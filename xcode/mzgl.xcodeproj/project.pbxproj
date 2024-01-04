@@ -716,6 +716,12 @@
 		EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81AA612757CBBB009C911E /* AudioUnitViewController.mm */; };
 		EAA59298281065D10068FD7B /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
+		EABBA6D82B4715E100B483CB /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
+		EABBA6D92B4715E100B483CB /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
+		EABBA6DA2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
+		EABBA6DB2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
+		EABBA6DC2B4715E100B483CB /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
+		EABBA6DD2B4715E100B483CB /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
 		EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
@@ -1612,6 +1618,8 @@
 		EAAA5AB92755437000021ACA /* rotate_normalized_axis.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rotate_normalized_axis.hpp; sourceTree = "<group>"; };
 		EAAA5ABA2755437000021ACA /* projection.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = projection.inl; sourceTree = "<group>"; };
 		EAAA5ABB2755437000021ACA /* type_aligned.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = type_aligned.hpp; sourceTree = "<group>"; };
+		EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = midiMessagePrinting.cpp; sourceTree = "<group>"; };
+		EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midiMessagePrinting.h; sourceTree = "<group>"; };
 		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
 		EACEB2E324DB81A400BF4D1A /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
@@ -1980,6 +1988,8 @@
 				EA92435F273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm */,
 				EA3120BA274143F900370205 /* appleMidiUtils.cpp */,
 				EA3120BB274143F900370205 /* appleMidiUtils.h */,
+				EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */,
+				EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */,
 				EA924360273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h */,
 			);
 			path = midi;
@@ -3089,6 +3099,7 @@
 				EA297C8325C954E600F890AE /* pa_trace.h in Headers */,
 				EA1840482432C18D00A5C3E8 /* stb_truetype.h in Headers */,
 				EA183F922432C18D00A5C3E8 /* TextButton.h in Headers */,
+				EABBA6DC2B4715E100B483CB /* midiMessagePrinting.h in Headers */,
 				EA234AE924A609CA000F057B /* YGLayout.h in Headers */,
 				EA64AD8826A1C039001427AD /* MZGLWebView.h in Headers */,
 				EA234AE524A609CA000F057B /* YGFloatOptional.h in Headers */,
@@ -3317,6 +3328,7 @@
 				EA71A7AF27E39E6C0081A5CB /* unzipper.h in Headers */,
 				EA2B84ED24E7093600EA12BD /* AudioSystem.h in Headers */,
 				EA2B850A24E7093600EA12BD /* mzOpenGL.h in Headers */,
+				EABBA6DD2B4715E100B483CB /* midiMessagePrinting.h in Headers */,
 				EA2B850C24E7093600EA12BD /* LayerExplorer.h in Headers */,
 				EA2B851924E7093600EA12BD /* Midi.h in Headers */,
 				EA2B851C24E7093600EA12BD /* Texture.h in Headers */,
@@ -3536,6 +3548,7 @@
 				EA35518E25CB05D5003DF2FB /* EventsView.mm in Sources */,
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
+				EABBA6D82B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
@@ -3701,6 +3714,7 @@
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
 				EA1841182432C4A500A5C3E8 /* Shader.cpp in Sources */,
 				EA18411E2432C4C500A5C3E8 /* SVG.cpp in Sources */,
+				EABBA6D92B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA1841172432C4A500A5C3E8 /* Texture.cpp in Sources */,
 				EA1841352432C51E00A5C3E8 /* ScrollingList.cpp in Sources */,
 				EA1841242432C4D200A5C3E8 /* AudioSystem.cpp in Sources */,
@@ -3831,6 +3845,7 @@
 				EA2B8AF324E7093600EA12BD /* experiments.cpp in Sources */,
 				EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA2B8AF424E7093600EA12BD /* MacMenuBar.mm in Sources */,
+				EABBA6DA2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */,
 				EA2B8AF824E7093600EA12BD /* LayerExplorer.mm in Sources */,
 				EA71A7B227E39E6C0081A5CB /* ZipFile.cpp in Sources */,
@@ -3945,6 +3960,7 @@
 				EAF67374289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA71FEEC27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA689460261C633500F76B91 /* ScrollingList.cpp in Sources */,
+				EABBA6DB2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA689462261C633500F76B91 /* AudioSystem.cpp in Sources */,
 				EA71A73527E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EA689463261C633500F76B91 /* Image.cpp in Sources */,

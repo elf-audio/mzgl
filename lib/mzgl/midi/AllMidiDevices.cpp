@@ -34,6 +34,9 @@ public:
 	void setup() override { autoPoll(); }
 
 	void addListener(MidiListener *listener) override { listeners.push_back(listener); }
+	void removeListener(MidiListener *listener) override {
+		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
+	}
 	// sends to all
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
@@ -189,5 +192,10 @@ std::vector<MidiDevice> AllMidiDevices::getConnectedMidiDevices() {
 void AllMidiDevices::sendMessage(const MidiDevice &device, const MidiMessage &m) {
 	if (online) {
 		impl->sendMessage(device, m);
+	}
+}
+void AllMidiDevices::removeListener(MidiListener *listener) {
+	if (online) {
+		impl->removeListener(listener);
 	}
 }

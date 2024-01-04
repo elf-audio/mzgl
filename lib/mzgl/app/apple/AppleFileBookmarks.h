@@ -19,7 +19,7 @@ class AppleFileBookmarks {
 private:
 	struct Bookmark {
 		NSData *bookmarkData;
-		NSURL *url;
+		NSURL *url = nil;
 		std::string path;
 		Bookmark(NSData *bookmarkData, NSURL *url)
 			: bookmarkData(bookmarkData)
@@ -28,8 +28,13 @@ private:
 		}
 
 		virtual ~Bookmark() {
-			printf("STOPPING ACCESS FOR %s\n", path.c_str());
+			Log::d() << "STOPPING ACCESS FOR '" << path << "'";
+#if !defined(DEBUG) || TARGET_OS_IOS
+#	pragma warning For some reason, this crashes
 			[url stopAccessingSecurityScopedResource];
+#else
+			Log::d() << "Not actually stopping access for " << path << " because of a bug";
+#endif
 		}
 	};
 

@@ -65,7 +65,9 @@ public:
 	void setup() override;
 
 	void addListener(MidiListener *l) override { listeners.push_back(l); }
-
+	void removeListener(MidiListener *listener) override {
+		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
+	}
 	void scanForDevices();
 
 	void midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp);

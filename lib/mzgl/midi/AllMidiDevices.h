@@ -36,6 +36,7 @@ public:
 	void setup();
 
 	void addListener(MidiListener *listener);
+	void removeListener(MidiListener *listener);
 
 	void addConnectionListener(MidiConnectionListener *listener);
 	void removeConnectionListener(MidiConnectionListener *listener);

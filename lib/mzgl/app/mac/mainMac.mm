@@ -12,6 +12,7 @@
 #include "util.h"
 #include "Graphics.h"
 #include "App.h"
+#include "mzAssert.h"
 
 Graphics g;
 int main(int argc, const char *argv[]) {
@@ -21,11 +22,29 @@ int main(int argc, const char *argv[]) {
 	loadCommandLineArgs(argc, argv);
 
 	auto app = instantiateApp(g);
-	if (!app->isHeadless()) {
-		[NSApp activateIgnoringOtherApps:YES];
-		id appDelegate = [[MacAppDelegate alloc] initWithApp:app];
-		[NSApp setDelegate:appDelegate];
-		[NSApp run];
+	if (app->isHeadless()) {
+		return 0;
 	}
+
+	[NSApp activateIgnoringOtherApps:YES];
+	id appDelegate = [[MacAppDelegate alloc] initWithApp:app];
+	[NSApp setDelegate:appDelegate];
+
+	//
+	// app is quit with [NSApp terminate:] - according to docs
+	//
+	// 	"Don’t bother to put final cleanup code in your app’s
+	// 	 main() function—it will never be executed. If cleanup is
+	//   necessary, perform that cleanup in the delegate’s
+	// 	 applicationWillTerminate: method."
+	//
+	// Delightful...
+	//
+	// so that means lets not retain a copy of the app here
+	// or the app's use count will never hit zero and not be deleted.
+	app = nullptr;
+
+	[NSApp run];
+
 	return 0;
 }

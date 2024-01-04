@@ -213,6 +213,7 @@ int nsEventToKey(NSEvent *evt) {
 
 - (void)shutdown {
 	eventDispatcher->exit();
+	eventDispatcher = nullptr;
 	[super shutdown];
 }
 
