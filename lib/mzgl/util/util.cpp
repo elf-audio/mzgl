@@ -447,7 +447,11 @@ int64_t getAvailableMemory() {
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
-	Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
+	static bool alreadyWarnedAboutGetAvailableMemory = false;
+	if (!alreadyWarnedAboutGetAvailableMemory) {
+		alreadyWarnedAboutGetAvailableMemory = true;
+		Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
+	}
 	return -1;
 }
 bool hasPrintedTheError = false;
