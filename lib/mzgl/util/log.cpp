@@ -64,9 +64,15 @@ Log::Logger::~Logger() {
 			__android_log_print(ANDROID_LOG_INFO, "mzgl", "%s", msg.str().c_str());
 		}
 #else
+		
+		if (level == 4) {
+			fprintf(stderr, "[%s] %s", levelName.c_str(), msg.str().c_str());
+			fflush(stderr);
+		} else {
+			printf("[%s] %s", levelName.c_str(), msg.str().c_str());
+			fflush(stdout);
+		}
 
-		fprintf(stderr, "[%s] %s", levelName.c_str(), msg.str().c_str());
-		fflush(stderr);
 #endif
 		if (isLoggingToFile) {
 			logStream << std::string("[") << levelName << "] " << msg.str();
