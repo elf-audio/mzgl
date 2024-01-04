@@ -23,11 +23,26 @@ void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void 
 
 /**
  * This is a midi device info object, hopefully will have more in it.
+ * At the moment, it's copied around a lot, so to identify it use
+ * the equality operator, which uses the id field which is a temporary
+ * unique counter based id for the current app run.
+ *
+ * Also, don't store this by reference!
  */
 class MidiDevice {
 public:
 	std::string name;
 	bool isOutput = false;
+	int id;
+
+	MidiDevice() {
+		static std::atomic<int> idCounter {0};
+		id = idCounter++;
+	}
+
+	bool operator==(const MidiDevice &other) const { return id == other.id; }
+
+private:
 };
 
 class MidiListener {

@@ -185,3 +185,9 @@ std::vector<MidiDevice> AllMidiDevices::getConnectedMidiDevices() {
 		return {};
 	}
 }
+
+void AllMidiDevices::sendMessage(const MidiDevice &device, const MidiMessage &m) {
+	if (online) {
+		impl->sendMessage(device, m);
+	}
+}

@@ -29,6 +29,7 @@ public:
 			l->midiDeviceDisconnected(dev);
 		}
 	}
+
 	virtual ~AllMidiDevicesImpl() {}
 	virtual std::vector<MidiDevice> getConnectedMidiDevices() = 0;
 	virtual void setup() {}
@@ -37,4 +38,7 @@ public:
 
 	// send message to all connected midi devices that have an input
 	virtual void sendMessage(const MidiMessage &m) = 0;
+
+	// send message to a specific device
+	virtual void sendMessage(const MidiDevice &device, const MidiMessage &m) = 0;
 };

@@ -42,6 +42,8 @@ public:
 
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
+	void sendMessage(const MidiDevice &device, const MidiMessage &m);
+
 	std::vector<MidiDevice> getConnectedMidiDevices();
 
 private:

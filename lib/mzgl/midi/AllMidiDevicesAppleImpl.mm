@@ -409,3 +409,8 @@ void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {
 		Log::e() << "Midi message contained no bytes!";
 	}
 }
+
+void AllMidiDevicesAppleImpl::sendMessage(const MidiDevice &device, const MidiMessage &m) {
+	// TODO: should only send to the specified device
+	sendMessage(m);
+}

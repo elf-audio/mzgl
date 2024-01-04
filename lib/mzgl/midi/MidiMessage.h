@@ -7,8 +7,10 @@
 //
 
 #pragma once
-
+#include <stdint.h>
 #include <string.h> // for memcpy()
+#include <vector>
+
 #define MIDI_UNKNOWN 0x00
 
 // channel voice messages

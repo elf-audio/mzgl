@@ -71,7 +71,7 @@ public:
 	void midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
-
+	void sendMessage(const MidiDevice &device, const MidiMessage &m) override;
 	virtual ~AllMidiDevicesAppleImpl();
 
 	std::vector<MidiDevice> getConnectedMidiDevices() override {
