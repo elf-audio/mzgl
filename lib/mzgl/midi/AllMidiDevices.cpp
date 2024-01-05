@@ -21,9 +21,16 @@ class AllMidiDevicesAndroidImpl : public AllMidiDevicesImpl {
 	void setup() override { androidSetupAllMidiIns(); }
 
 	void addListener(MidiListener *listener) override { androidAddMidiListener(listener); }
-	//    void midiReceived(const MidiMessage &m, uint64_t timestamp) override {}
-	// sends to all
-	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
+    void removeListener(MidiListener *listener) override { androidRemoveMidiListener(listener); }
+
+	void sendMessage(const MidiMessage &m) override { Log::e() << "AllMidiDevicesAndroidImpl::sendMessage() Unimplemented"; }
+    void sendMessage(const MidiDevice &device, const MidiMessage &m) override { Log::e() << "AllMidiDevicesAndroidImpl::sendMessage() Unimplemented";}
+
+
+    std::vector<MidiDevice> getConnectedMidiDevices() override {
+        Log::e() << "AllMidiDevicesAndroidImpl::getConnectedMidiDevices() unimplemented";
+        return {};
+    }
 };
 #else
 

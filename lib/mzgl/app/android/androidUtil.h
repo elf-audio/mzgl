@@ -90,6 +90,7 @@ bool isUsingBluetoothHeadphones();
 
 void androidSetupAllMidiIns();
 void androidAddMidiListener(MidiListener *listener);
+void androidRemoveMidiListener(MidiListener *listener);
 
 android_app *getAndroidAppPtr();
 class EventDispatcher;

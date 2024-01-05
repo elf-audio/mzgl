@@ -333,14 +333,21 @@ void androidAddMidiListener(MidiListener *listener) {
 	androidMidiListeners.push_back(listener);
 }
 
+void androidRemoveMidiListener(MidiListener *listener) {
+    androidMidiListeners.erase(std::remove(androidMidiListeners.begin(), androidMidiListeners.end(), listener), androidMidiListeners.end());
+}
+
 vector<unsigned char> currMsg;
+
+// eventually, we need to actually enumerate android deviced but this not done yet.
+MidiDevice androidMidiDeviceChangeMe;
 
 void androidEmitMidiMessage(const vector<unsigned char> &msg, uint64_t timestamp) {
 	// TODO: Does this need to run on audio thread?
 	MidiMessage m(msg);
 
 	for (int i = 0; i < androidMidiListeners.size(); i++) {
-		androidMidiListeners[i]->midiReceived(m, timestamp);
+		androidMidiListeners[i]->midiReceived(androidMidiDeviceChangeMe, m, timestamp);
 	}
 }
 
