@@ -35,7 +35,7 @@ public:
 	bool isOutput = false;
 	int id;
 
-	MidiDevice() {
+	MidiDevice(std::string name = "") : name(name) {
 		static std::atomic<int> idCounter {0};
 		id = idCounter++;
 	}

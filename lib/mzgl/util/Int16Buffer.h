@@ -9,7 +9,7 @@ public:
 	inline const float operator[](int index) const { return d[index] / 32767.f; }
 
 	inline size_t size() const { return d.size(); }
-
+	inline bool empty() const { return d.empty(); }
 	void reserve(const size_t count) { d.reserve(count); }
 
 	void clear() { d.clear(); }
