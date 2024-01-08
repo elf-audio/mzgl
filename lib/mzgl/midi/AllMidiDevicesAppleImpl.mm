@@ -241,7 +241,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 	// there is a bug here probably if you were to send multiple streams of data
 	// there is no distinquishing between different devices with regards to pendingMsg.
 	// you'd need one per device.
-	Log::e() << "Packet list received from " << device.name;
+	// Log::e() << "Packet list received from " << device.name;
 	const MIDIPacket *packet = &packetList->packet[0];
 	for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
 		for (int i = 0; i < packet->length; i++) {
