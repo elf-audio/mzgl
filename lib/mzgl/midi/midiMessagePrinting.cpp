@@ -15,10 +15,10 @@ std::string bytesToHex(const std::vector<uint8_t> &bytes) {
 }
 std::ostream &operator<<(std::ostream &os, const MidiMessage &midiMsg) {
 	std::vector<uint8_t> msg = midiMsg.getBytes();
-	os << "MidiMessage: [";
+	os << "[MIDI ";
 
 	if (msg.empty()) {
-		os << "Empty MIDI message.]";
+		os << "(empty)]";
 		return os;
 	}
 
@@ -27,15 +27,15 @@ std::ostream &operator<<(std::ostream &os, const MidiMessage &midiMsg) {
 	uint8_t channel		= statusByte & 0x0F;
 
 	switch (messageType) {
-		case MIDI_NOTE_OFF: os << "Note Off, Channel: " << +channel; break;
-		case MIDI_NOTE_ON: os << "Note On, Channel: " << +channel; break;
-		case MIDI_POLY_AFTERTOUCH: os << "Polyphonic Key Pressure (Aftertouch), Channel: " << +channel; break;
-		case MIDI_CONTROL_CHANGE: os << "Control Change, Channel: " << +channel; break;
-		case MIDI_PROGRAM_CHANGE: os << "Program Change, Channel: " << +channel; break;
-		case MIDI_AFTERTOUCH: os << "Channel Pressure (Aftertouch), Channel: " << +channel; break;
-		case MIDI_PITCH_BEND: os << "Pitch Bend Change, Channel: " << +channel; break;
+		case MIDI_NOTE_OFF: os << "note off, ch: " << +channel; break;
+		case MIDI_NOTE_ON: os << "note on, ch: " << +channel; break;
+		case MIDI_POLY_AFTERTOUCH: os << "Polyphonic Key Pressure (Aftertouch), ch: " << +channel; break;
+		case MIDI_CONTROL_CHANGE: os << "CC, ch: " << +channel; break;
+		case MIDI_PROGRAM_CHANGE: os << "PC, ch: " << +channel; break;
+		case MIDI_AFTERTOUCH: os << "Channel Pressure (Aftertouch), ch: " << +channel; break;
+		case MIDI_PITCH_BEND: os << "pitchbend, ch: " << +channel; break;
 		case MIDI_SYSEX:
-			os << "SysEx Message: " << bytesToHex(msg) << "]";
+			os << "SysEx: " << bytesToHex(msg) << "]";
 			return os; // Early return for SysEx messages
 		// Additional System Messages
 		case MIDI_TIME_CODE:

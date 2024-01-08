@@ -41,6 +41,7 @@ public:
 	}
 
 	bool operator==(const MidiDevice &other) const { return id == other.id; }
+	bool operator!=(const MidiDevice &other) const { return id != other.id; }
 
 private:
 };

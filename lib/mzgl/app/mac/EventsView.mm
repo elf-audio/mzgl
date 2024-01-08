@@ -311,7 +311,7 @@ int nsEventToKey(NSEvent *evt) {
 	NSWindow *window = notification.object;
 	Graphics &g		 = eventDispatcher->app->g;
 	g.pixelScale	 = [window backingScaleFactor];
-	Log::e() << "Pixel scale being set for first time: " << g.pixelScale;
+	// Log::e() << "Pixel scale being set for first time: " << g.pixelScale;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
