@@ -42,7 +42,7 @@ HEADERS_COMMON = 									\
 		lib/opt/gzip-hpp/include					\
 		$(PROJECT_HEADERS)							\
 		lib/opt/blahdio/blahdio/include				\
-		lib/opt/blahdio/ext/drlibs					\
+		lib/opt/blahdio/blahdio/ext/drlibs			\
 		lib/opt/libflac/include						\
 		lib/LibTorch-Lite/install/include
 
