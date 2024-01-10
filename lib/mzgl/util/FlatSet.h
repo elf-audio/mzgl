@@ -35,6 +35,9 @@ public:
 		return false;
 	}
 
+	auto begin() const { return storage.cbegin(); }
+	auto end() const { return storage.cend(); }
+
 	bool erase(T p) {
 		for (size_t i = 0; i < storage.size(); i++) {
 			if (storage[i] == p) {
