@@ -74,6 +74,7 @@ set(MZGL_SOURCES
         lib/mzgl/gl/drawing/MitredLine.cpp
         lib/mzgl/midi/Midi.cpp
         lib/mzgl/midi/AllMidiDevices.cpp
+        lib/mzgl/midi/midiMessagePrinting.cpp
         lib/mzgl/music/scales.cpp
         lib/mzgl/net/netUtil.cpp
         lib/mzgl/ui/widgets/ReorderableGrid.cpp
