@@ -105,33 +105,7 @@ std::string getHomeDirectory() {
 #	endif
 #endif
 
-#ifdef _WIN32
-std::string getCWD() {
-	char c[512];
-	_getcwd(c, 512);
-	return c;
-}
-std::string UTF16ToUTF8(const wchar_t *utf16Str) {
-	std::string out;
-	int requiredSize = WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, NULL, 0, NULL, NULL);
-	if (requiredSize > 0) {
-		out.resize(requiredSize - 1);
-		WideCharToMultiByte(CP_UTF8, 0, utf16Str, -1, out.data(), requiredSize, NULL, NULL);
-	}
-	return out;
-}
-std::string GetKnownFolder(int identifier, int flags = 0) {
-	wchar_t wideBuffer[1024];
-	SHGetFolderPathW(NULL, identifier, NULL, flags, wideBuffer);
-	return UTF16ToUTF8(wideBuffer);
-}
-#else
-std::string getCWD() {
-	char c[512];
-	getcwd(c, 512);
-	return c;
-}
-#endif
+
 
 void deleteOrTrash(const std::string &path) {
 #ifdef __APPLE__

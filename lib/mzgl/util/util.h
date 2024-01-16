@@ -22,7 +22,6 @@ std::string dataPath(std::string path, std::string bundleId = ""); //com.elf-aud
 std::string docsPath(std::string path = "");
 std::string appSupportPath(std::string path);
 std::string getHomeDirectory();
-std::string getCWD();
 void loadCommandLineArgs(int argc, const char *argv[]);
 std::vector<std::string> getCommandLineArgs();
 

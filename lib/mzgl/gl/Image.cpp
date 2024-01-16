@@ -15,12 +15,13 @@
 
 #include <cstring>
 #include "util.h"
+#include "filesystem.h"
 
 using namespace std;
 
 Image::Image(const std::string &filePath) {
 	if (!load(filePath)) {
-		throw std::runtime_error("Can't load file at " + filePath + " cwd is: " + getCWD());
+		throw std::runtime_error("Can't load file at " + filePath + " cwd is: " + fs::current_path().string());
 	}
 }
 bool Image::loadPngFromData(const vector<uint8_t> &inData,
