@@ -197,6 +197,7 @@ typedef struct MPEPolyPoint
   poly_float Y;
 	unsigned int index;
 	unsigned int array;
+  
 } MPEPolyPoint;
 
 typedef struct MPEPolyTriangle

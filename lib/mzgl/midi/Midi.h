@@ -12,15 +12,13 @@
 #include <atomic>
 //#include <algorithm>
 #include "stringUtil.h"
-#include "mzgl/util/log.h"
+#include <util/log.h>
 #include <memory>
-
-#include "RtMidi.h"
-
 #include "log.h"
+#include "MidiMessage.h"
+
 
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData);
-#include "MidiMessage.h"
 
 /**
  * This is a midi device info object, hopefully will have more in it.
@@ -56,6 +54,13 @@ public:
 	virtual void
 		midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m, uint64_t timestamp) = 0;
 };
+
+#ifdef __APPLE__
+#    include <TargetConditionals.h>
+#endif
+
+#if ! TARGET_OS_IOS
+#include "RtMidi.h"
 
 class MidiPort : public MidiDevice {
 public:
@@ -249,3 +254,4 @@ public:
 private:
 	std::shared_ptr<RtMidiOut> rtMidiOut;
 };
+#endif

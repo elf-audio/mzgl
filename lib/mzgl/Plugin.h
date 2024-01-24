@@ -12,6 +12,7 @@
 #include <functional>
 #include <map>
 #include <atomic>
+#include <fsystem/fsystem.h>
 
 #include "util.h"
 #include "util/log.h"
@@ -49,8 +50,6 @@ public:
 	EffectPreset(std::string name)
 		: name(name) {}
 };
-
-#include "filesystem.h"
 
 // presets are always files, their names are the file name
 class PresetManager {

@@ -6,8 +6,8 @@
 //  Copyright © 2023 Marek Bereza. All rights reserved.
 //
 
+#include <fsystem/fsystem.h>
 #include "ScopedUrl.h"
-#include "filesystem.h"
 #include "log.h"
 
 ScopedUrl::~ScopedUrl() {

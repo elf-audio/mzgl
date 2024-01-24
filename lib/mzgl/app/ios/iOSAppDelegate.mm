@@ -12,7 +12,7 @@
 #import "MZGLKitViewController.h"
 #include "App.h"
 #include "EventDispatcher.h"
-#include "AudioShareSDK.h"
+#include <AudioShare/AudioShareSDK.h>
 #include "log.h"
 #include "PluginEditor.h"
 #include "DateTime.h"

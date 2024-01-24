@@ -1450,9 +1450,9 @@ namespace pu_gi
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const pu_gi::xml_node_iterator&);
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const pu_gi::xml_attribute_iterator&);
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const pu_gi::xml_named_node_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const elfxml::pugi::xml_node_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const elfxml::pugi::xml_attribute_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION _Iter_cat(const elfxml::pugi::xml_named_node_iterator&);
 }
 #endif
 
@@ -1460,9 +1460,9 @@ namespace std
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const pu_gi::xml_node_iterator&);
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const pu_gi::xml_attribute_iterator&);
-	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const pu_gi::xml_named_node_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const elfxml::pugi::xml_node_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const elfxml::pugi::xml_attribute_iterator&);
+	std::bidirectional_iterator_tag PU_GIXML_FUNCTION __iterator_category(const elfxml::pugi::xml_named_node_iterator&);
 }
 #endif
 

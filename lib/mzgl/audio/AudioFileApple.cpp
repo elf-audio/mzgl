@@ -143,8 +143,7 @@ public:
 #endif
 
 #include <fstream>
-
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 
 #include "util.h"
 #include "log.h"

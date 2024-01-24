@@ -7,7 +7,7 @@
 #include <vector>
 #include <Urlmon.h>
 #include <wininet.h>
-#include "filesystem.h"
+#include <filesystem>
 #include "Rectf.h"
 #include "log.h"
 #include "util.h"
@@ -460,7 +460,7 @@ struct DownloadBSCallback : public IBindStatusCallback {
 
 private:
 	STDMETHODIMP
-		OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
+	OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
 		if (ulProgressMax == 0) {
 			return S_OK;
 		}

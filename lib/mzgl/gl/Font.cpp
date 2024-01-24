@@ -14,7 +14,7 @@
 #define FONTSTASH_IMPLEMENTATION // Expands implementation
 
 #include "mzOpenGL.h"
-#include "fontstash.h"
+#include <fontstash/fontstash.h>
 #include "util.h"
 #ifdef __APPLE__ // I don't think this block is needed
 #	include <TargetConditionals.h>
@@ -23,7 +23,7 @@
 #include "log.h"
 #define GLFONTSTASH_IMPLEMENTATION // Expands implementation
 
-#include "filesystem.h"
+#include <filesystem>
 using namespace std;
 
 #ifdef __ANDROID__
@@ -52,7 +52,7 @@ vector<Font *> Font::fonts;
  (Changing GL_RED internal format for GL_R8 - seems to work on both mac and iOS)
  */
 
-#include "gl3corefontstash.h"
+#include <fontstash/gl3corefontstash.h>
 #include "error.h"
 
 using namespace std;

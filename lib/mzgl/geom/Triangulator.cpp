@@ -8,7 +8,7 @@
 
 #include "Triangulator.h"
 #define MPE_POLY2TRI_IMPLEMENTATION
-#include "MPE_fastpoly2tri.h"
+#include <MPE_fastpoly2tri.h>
 #include "log.h"
 
 using namespace std;

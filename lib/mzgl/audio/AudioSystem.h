@@ -137,6 +137,6 @@ public:
 #	include "AudioSystemIOS.h"
 #else
 #	ifndef __ANDROID__
-#		include "PortAudioSystem.h"
+#		include <portaudio/PortAudioSystem.h>
 #	endif
 #endif

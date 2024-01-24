@@ -11,7 +11,8 @@
 #include <string>
 #include "EventDispatcher.h"
 #include "log.h"
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
+
 @implementation MZGLWebView {
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 }

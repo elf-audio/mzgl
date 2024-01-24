@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "MPE_fastpoly2tri.h"
-
 #include "Graphics.h"
 class Triangulator {
 public:
