@@ -1,7 +1,7 @@
 
 struct GLFWwindow;
 
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 
 class GLFWAppRunner {
 public:

@@ -8,7 +8,7 @@ g++ main.cpp `pkg-config --libs --cflags gtk+-2.0`
 
 */
 #include "linuxUtil.h"
-#include "log.h"
+#include <mzgl/util/log.h>
 
 #include <stdio.h>
 

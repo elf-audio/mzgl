@@ -1,7 +1,7 @@
 #include "tests.h"
 
-#include "filesystem.h"
-#include "util.h"
+#include <fsystem/fsystem.h>
+#include <mzgl/util/util.h>
 
 TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
 	auto path = fs::path {tempDir()} / "temp.txt";

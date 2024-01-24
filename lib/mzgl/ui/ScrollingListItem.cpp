@@ -1,6 +1,6 @@
 
-#include "ScrollingList.h"
-#include "Drawer.h"
+#include <mzgl/ui/ScrollingList.h>
+#include <mzgl/gl/drawing/Drawer.h>
 
 void ScrollingListStringView::draw() {
 	g.drawTextVerticallyCentred(item->name, glm::vec2(x + 20 * g.pixelScale, y + height / 2));

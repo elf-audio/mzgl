@@ -6,7 +6,7 @@
 
 #pragma once
 #include <functional>
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 #include "ofMain.h"
 
 class ToggleButton : public Layer {

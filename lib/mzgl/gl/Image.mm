@@ -12,7 +12,7 @@
 #if TARGET_OS_IOS
 #	import <MobileCoreServices/MobileCoreServices.h>
 #endif
-#include "log.h"
+#include <mzgl/util/log.h>
 
 using namespace std;
 

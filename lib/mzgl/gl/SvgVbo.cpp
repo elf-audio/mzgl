@@ -6,11 +6,11 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "SvgVbo.h"
+#include <mzgl/gl/SvgVbo.h>
 
-#include "SVG.h"
-#include "util.h"
-#include "log.h"
+#include <mzgl/geom/SVG.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
 
 using namespace std;
 

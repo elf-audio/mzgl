@@ -7,7 +7,7 @@
 //
 
 #pragma once
-#include "Texture.h"
+#include <mzgl/gl/Texture.h>
 
 class Graphics;
 // with help from http://www.songho.ca/opengl/gl_fbo.html

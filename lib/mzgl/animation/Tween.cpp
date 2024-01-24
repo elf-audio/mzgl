@@ -8,8 +8,8 @@
 //
 
 #include "Tween.h"
-#include "maths.h"
-#include "util.h"
+#include <mzgl/util/maths.h>
+#include <mzgl/util/util.h>
 
 using namespace std;
 

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "DrawingFunction.h"
+#include <mzgl/ui/DrawingFunction.h>
 
 // this is what your dragger should inherit from
 class Dragger {

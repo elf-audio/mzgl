@@ -9,9 +9,10 @@
 #import "MZGLWebView.h"
 
 #include <string>
-#include "EventDispatcher.h"
-#include "log.h"
-#include "filesystem.h"
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/util/log.h>
+#include <fsystem/fsystem.h>
+
 @implementation MZGLWebView {
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 }

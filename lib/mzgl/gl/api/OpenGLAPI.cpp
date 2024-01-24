@@ -1,7 +1,7 @@
 #include "OpenGLAPI.h"
 #include "OpenGLDefaultShaders.h"
-#include "log.h"
-#include "mzOpenGL.h"
+#include <mzgl/util/log.h>
+#include <mzgl/gl/mzOpenGL.h>
 
 static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 	switch (mode) {

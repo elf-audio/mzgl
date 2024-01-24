@@ -6,7 +6,7 @@
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
 
-#include "stringUtil.h"
+#include <mzgl/util/stringUtil.h>
 
 #include <sstream>
 #include <iomanip>

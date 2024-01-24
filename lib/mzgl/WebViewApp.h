@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "App.h"
-#include "json.hpp"
+#include <mzgl/App.h>
+#include <nlohmann/json.hpp>
 
 class WebViewApp : public App {
 public:

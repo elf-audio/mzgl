@@ -7,7 +7,7 @@
 //
 
 //#include <string>
-#include "App.h"
+#include <mzgl/App.h>
 
 class TextConsole {
 public:

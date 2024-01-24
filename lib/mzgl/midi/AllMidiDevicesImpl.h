@@ -7,8 +7,8 @@
 //
 
 #pragma once
-#include "AllMidiDevices.h"
-#include "Listenable.h"
+#include <mzgl/midi/AllMidiDevices.h>
+#include <mzgl/util/Listenable.h>
 
 class AllMidiDevicesImpl : public Listenable<MidiListener> {
 public:

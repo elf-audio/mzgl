@@ -7,11 +7,11 @@
 //
 
 #import "MZGLKitView.h"
-#include "App.h"
-#include "EventDispatcher.h"
+#include <mzgl/App.h>
+#include <mzgl/util/EventDispatcher.h>
 #include "mzgl/util/log.h"
-#include "Vbo.h"
-#include "PluginEditor.h"
+#include <mzgl/gl/Vbo.h>
+#include <mzgl/PluginEditor.h>
 using namespace std;
 API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteractionDelegate>
 @end
@@ -24,8 +24,8 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteract
 	bool firstFrame;
 }
 
-- (void) deleteCppObjects {
-	app = nullptr;
+- (void)deleteCppObjects {
+	app				= nullptr;
 	eventDispatcher = nullptr;
 }
 

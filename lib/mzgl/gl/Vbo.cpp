@@ -6,16 +6,16 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "mzOpenGL.h"
+#include <mzgl/gl/mzOpenGL.h>
 
-#include "Vbo.h"
-#include "Shader.h"
-#include "error.h"
-#include "Graphics.h"
-#include "log.h"
-#include "Graphics.h"
-#include "util.h"
-#include "Geometry.h"
+#include <mzgl/gl/Vbo.h>
+#include <mzgl/gl/Shader.h>
+#include <mzgl/gl/error.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/log.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/util.h>
+#include <mzgl/gl/Geometry.h>
 
 void Vbo::Buffer::deallocate() {
 	if (id != 0) {

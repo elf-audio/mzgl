@@ -7,7 +7,7 @@
 // #define DR_MP3_IMPLEMENTATION
 // #endif
 
-#include "dr_wav.h"
+#include <dr_wav.h>
 #include <algorithm>
 using namespace std;
 

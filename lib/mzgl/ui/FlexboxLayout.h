@@ -7,12 +7,14 @@
 //
 
 #pragma once
-#include "Yoga.h"
 
+#include <yoga/Yoga.h>
 #include <memory>
 #include <vector>
-#include "Layer.h"
-#include "stringUtil.h"
+
+#include <mzgl/ui/Layer.h>
+#include <mzgl/util/stringUtil.h>
+
 namespace Flexbox {
 
 	class LayoutNode;

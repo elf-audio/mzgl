@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 #include <vector>
-#include "ScopedUrl.h"
+#include <mzgl/util/ScopedUrl.h>
 
 class EventDispatcher;
 

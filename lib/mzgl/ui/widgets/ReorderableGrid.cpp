@@ -6,9 +6,9 @@
 //  Copyright © 2020 Marek Bereza. All rights reserved.
 //
 
-#include "ReorderableGrid.h"
+#include <mzgl/ui/widgets/ReorderableGrid.h>
 
-#include "log.h"
+#include <mzgl/util/log.h>
 
 ReorderableGrid::ReorderableGrid(Graphics &g)
 	: Layer(g) {

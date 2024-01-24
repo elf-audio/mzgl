@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "Scroller.h"
-#include "log.h"
+#include <mzgl/ui/Scroller.h>
+#include <mzgl/util/log.h>
 
 class LogViewer : public Layer {
 public:

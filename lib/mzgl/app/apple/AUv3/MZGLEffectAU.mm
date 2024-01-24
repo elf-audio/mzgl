@@ -13,11 +13,11 @@
 
 #import "BufferedAudioBus.hpp"
 #include <os/log.h>
-#include "Plugin.h"
-#include "log.h"
+#include <mzgl/Plugin.h>
+#include <mzgl/util/log.h>
 #include <mach/mach_time.h>
-#include "FloatBuffer.h"
-#include "Midi.h"
+#include <mzgl/util/FloatBuffer.h>
+#include <mzgl/midi/Midi.h>
 
 using namespace std;
 static int instanceNumber = 0;
@@ -285,11 +285,12 @@ struct Blocks {
 
 	// Create the input and output bus arrays (AUAudioUnitBusArray).
 	// @invalidname
-	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-															busType:AUAudioUnitBusTypeInput
-															 busses:@[ _inputBus.bus ]];
-	_outputBusArray =
-		[[AUAudioUnitBusArray alloc] initWithAudioUnit:self busType:AUAudioUnitBusTypeOutput busses:outBusses];
+	_inputBusArray	= [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
+															 busType:AUAudioUnitBusTypeInput
+															  busses:@[ _inputBus.bus ]];
+	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
+															 busType:AUAudioUnitBusTypeOutput
+															  busses:outBusses];
 
 	[_outputBusArray addObserverToAllBusses:self
 								 forKeyPath:@"format"

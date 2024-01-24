@@ -10,8 +10,8 @@
 #include <Foundation/Foundation.h>
 
 #include "appleMidiUtils.h"
-#include "mainThread.h"
-#include "util.h"
+#include <mzgl/util/mainThread.h>
+#include <mzgl/util/util.h>
 #include <memory.h>
 
 static void NSLogError(OSStatus c, const std::string &str) {

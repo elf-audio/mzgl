@@ -14,7 +14,7 @@
 #	define GL_VIEW_CLASS MZMGLKView
 
 #else
-#	include "MZGLView.h"
+#	include <mzgl/app/mac/GL/MZGLView.h>
 #	define GL_VIEW_CLASS MZGLView
 #endif
 

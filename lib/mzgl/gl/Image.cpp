@@ -8,24 +8,21 @@
 
 #include "Image.h"
 
-#include "log.h"
+#include <mzgl/util/log.h>
 #include "stb_image.h"
 
 #include <algorithm>
 
 #include <cstring>
-#include "util.h"
-#include "filesystem.h"
-
-using namespace std;
+#include <fsystem/fsystem.h>
 
 Image::Image(const std::string &filePath) {
 	if (!load(filePath)) {
 		throw std::runtime_error("Can't load file at " + filePath + " cwd is: " + fs::current_path().string());
 	}
 }
-bool Image::loadPngFromData(const vector<uint8_t> &inData,
-							vector<uint8_t> &outData,
+bool Image::loadPngFromData(const std::vector<uint8_t> &inData,
+							std::vector<uint8_t> &outData,
 							int &outWidth,
 							int &outHeight,
 							int &outNumChannels,
@@ -44,7 +41,7 @@ bool Image::loadPngFromData(const vector<uint8_t> &inData,
 
 void Image::flipVertical() {
 	int n = bytesPerChannel * numChannels;
-	vector<uint8_t> pixel(n);
+	std::vector<uint8_t> pixel(n);
 	for (int y = 0; y < height / 2; y++) {
 		for (int x = 0; x < width; x++) {
 			int upperPos = (x + (y * width)) * n;
@@ -61,7 +58,7 @@ void Image::flipVertical() {
 	}
 }
 
-void rgb2rgba(vector<uint8_t> &d) {
+void rgb2rgba(std::vector<uint8_t> &d) {
 	int sz3 = (int) d.size() / 3;
 	d.resize(sz3 * 4);
 	for (int i = sz3 - 1; i >= 0; i--) {
@@ -71,7 +68,7 @@ void rgb2rgba(vector<uint8_t> &d) {
 		d[i * 4]	 = 255;
 	}
 }
-void rgba2rgb(vector<uint8_t> &d) {
+void rgba2rgb(std::vector<uint8_t> &d) {
 	auto sz4 = d.size() / 4;
 	for (int i = 0; i < sz4; i++) {
 		d[i * 3]	 = d[i * 4];
@@ -133,16 +130,16 @@ float bicubicInterpolate(const float *patch, float x, float y, float x2, float y
 					  + a20 * x2 + a21 * x2 * y + a22 * x2 * y2 + a23 * x2 * y3 + a30 * x3 + a31 * x3 * y
 					  + a32 * x3 * y2 + a33 * x3 * y3;
 
-	return min(static_cast<size_t>(255), max(static_cast<size_t>(out), static_cast<size_t>(0)));
+	return std::min(static_cast<size_t>(255), std::max(static_cast<size_t>(out), static_cast<size_t>(0)));
 }
 
 // SO SLOW - maybe use something like this instead? https://blog.demofox.org/2015/08/15/resizing-images-with-bicubic-interpolation/
 
 void Image::resize(int newWidth, int newHeight) {
 	//	avir :: CImageResizer<> ImageResizer( bytesPerChannel*8 );
-	//	vector<uint8_t> OutBuf(newWidth * newHeight * bytesPerChannel*numChannels);
-	//	ImageResizer.resizeImage(data.data(), width, height, 0, OutBuf.data(), newWidth, newHeight, numChannels, 0 );
-	//	data = OutBuf;
+	//	vector<uint8_t> outputBuffer(newWidth * newHeight * bytesPerChannel*numChannels);
+	//	ImageResizer.resizeImage(data.data(), width, height, 0, outputBuffer.data(), newWidth, newHeight, numChannels, 0 );
+	//	data = outputBuffer;
 	//	width = newWidth;
 	//	height = newHeight;
 	//}
@@ -154,9 +151,9 @@ void Image::resize(int newWidth, int newHeight) {
 	size_t dstHeight	 = newHeight;
 	size_t bytesPerPixel = bytesPerChannel * numChannels;
 
-	vector<uint8_t> OutBuf(newWidth * newHeight * bytesPerChannel * numChannels);
+	std::vector<uint8_t> outputBuffer(newWidth * newHeight * bytesPerChannel * numChannels);
 
-	uint8_t *dstPixels		   = OutBuf.data();
+	uint8_t *dstPixels		   = outputBuffer.data();
 	const int BICUBIC		   = 0;
 	const int NEAREST_NEIGHBOR = 1;
 	int interpMethod		   = BICUBIC;
@@ -206,8 +203,8 @@ void Image::resize(int newWidth, int newHeight) {
 					size_t dstIndex0 = (dsty * dstWidth + dstx) * bytesPerPixel;
 					float srcxf		 = srcWidth * (float) dstx / (float) dstWidth;
 					float srcyf		 = srcHeight * (float) dsty / (float) dstHeight;
-					size_t srcx		 = static_cast<size_t>(min(srcWidth - 1, static_cast<size_t>(srcxf)));
-					size_t srcy		 = static_cast<size_t>(min(srcHeight - 1, static_cast<size_t>(srcyf)));
+					size_t srcx		 = static_cast<size_t>(std::min(srcWidth - 1, static_cast<size_t>(srcxf)));
+					size_t srcy		 = static_cast<size_t>(std::min(srcHeight - 1, static_cast<size_t>(srcyf)));
 					size_t srcIndex0 = (srcy * srcWidth + srcx) * bytesPerPixel;
 
 					px1 = srcxf - srcx;
@@ -239,7 +236,7 @@ void Image::resize(int newWidth, int newHeight) {
 			}
 			break;
 	}
-	data   = OutBuf;
+	data   = outputBuffer;
 	width  = newWidth;
 	height = newHeight;
 	Log::d() << "Done resize";

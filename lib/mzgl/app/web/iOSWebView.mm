@@ -8,9 +8,9 @@
 
 #include "iOSWebView.h"
 
-#include "App.h"
-#include "EventDispatcher.h"
-#include "AppleWebView.h"
+#include <mzgl/App.h>
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/app/apple/AppleWebView.h>
 
 iOSWebView::iOSWebView(App *app)
 	: app(app) {

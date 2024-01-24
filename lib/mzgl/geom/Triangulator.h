@@ -8,9 +8,8 @@
 
 #pragma once
 
-#include "MPE_fastpoly2tri.h"
+#include <mzgl/gl/Graphics.h>
 
-#include "Graphics.h"
 class Triangulator {
 public:
 	// first member of verts is the shape, next ones are the holes

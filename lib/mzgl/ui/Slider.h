@@ -5,7 +5,7 @@
 //
 
 #pragma once
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 #include <functional>
 
 class Slider : public Layer {

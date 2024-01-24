@@ -11,12 +11,12 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 #include <map>
 
 #define SVG_CIRCLE_RESOLUTION 3
 #define SVG_CUBIC_RESOLUTION  1
-namespace pu_gi {
+namespace elfxml::pugi {
 	class xml_node;
 };
 
@@ -86,6 +86,6 @@ private:
 	SVGGroupRef rootGroup;
 
 	void parseViewBox(std::string s);
-	void parseDefs(const pu_gi::xml_node &root);
-	void parse(const pu_gi::xml_node &n, int depth = 0);
+	void parseDefs(const elfxml::pugi::xml_node &root);
+	void parse(const elfxml::pugi::xml_node &n, int depth = 0);
 };

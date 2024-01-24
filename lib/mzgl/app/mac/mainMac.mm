@@ -10,9 +10,9 @@
 
 #include "MacAppDelegate.h"
 #include "util.h"
-#include "Graphics.h"
-#include "App.h"
-#include "mzAssert.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/App.h>
+#include <mzgl/util/mzAssert.h>
 
 Graphics g;
 int main(int argc, const char *argv[]) {

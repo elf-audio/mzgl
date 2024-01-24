@@ -10,18 +10,18 @@
 
 #include <string>
 
-#include "Texture.h"
-#include "Font.h"
+#include <mzgl/gl/Texture.h>
+#include <mzgl/gl/Font.h>
 #include "AudioSystem.h"
-#include "Graphics.h"
-#include "util.h"
-#include "maths.h"
-#include "Vbo.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/maths.h>
+#include <mzgl/gl/Vbo.h>
 #include "AudioSystem.h"
-#include "RootLayer.h"
-#include "Dialogs.h"
-#include "mainThread.h"
-#include "ScopedUrl.h"
+#include <mzgl/ui/RootLayer.h>
+#include <mzgl/util/Dialogs.h>
+#include <mzgl/util/mainThread.h>
+#include <mzgl/util/ScopedUrl.h>
 
 class App : public AudioIO {
 public:

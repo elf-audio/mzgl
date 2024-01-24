@@ -4,12 +4,12 @@
 //
 //
 
-#include "Layer.h"
-#include "Graphics.h"
-#include "util.h"
-#include "stringUtil.h"
+#include <mzgl/ui/Layer.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/stringUtil.h>
 #include <iostream>
-#include "log.h"
+#include <mzgl/util/log.h>
 
 using namespace std;
 

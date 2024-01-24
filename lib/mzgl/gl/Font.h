@@ -9,7 +9,7 @@
 #pragma once
 
 #include <string>
-#include "Texture.h"
+#include <mzgl/gl/Texture.h>
 struct FONScontext;
 
 enum class HTextAlign { Left, Centre, Right };

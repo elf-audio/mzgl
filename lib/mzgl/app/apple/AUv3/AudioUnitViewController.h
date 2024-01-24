@@ -9,9 +9,11 @@
 #import <CoreAudioKit/CoreAudioKit.h>
 
 #include <TargetConditionals.h>
+
 #if TARGET_OS_IOS
-#	import "MZGLKitView.h"
+@class MZGLKitView;
 #endif
+
 @interface AudioUnitViewController : AUViewController <AUAudioUnitFactory>
 #if TARGET_OS_IOS
 - (MZGLKitView *)getView;

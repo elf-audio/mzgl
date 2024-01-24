@@ -6,7 +6,7 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "MitredLine.h"
+#include <mzgl/gl/drawing/MitredLine.h>
 using namespace std;
 
 void MitredLine::getStripCoord(

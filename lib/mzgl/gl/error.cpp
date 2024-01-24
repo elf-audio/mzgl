@@ -6,6 +6,6 @@
 //  Copyright © 2019 Marek Bereza. All rights reserved.
 //
 
-#include "error.h"
+#include <mzgl/gl/error.h>
 
 bool alreadyHadGLError = false;

@@ -6,22 +6,19 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Shader.h"
-#include "error.h"
+#include <mzgl/gl/Shader.h>
+#include <mzgl/gl/error.h>
 #include <sstream>
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
+#include <fstream>
 #include <vector>
-#include "log.h"
-#include "stringUtil.h"
-#include "Graphics.h"
-#include "mzOpenGL.h"
-
-using namespace std;
-
-#define DEBUG 1
+#include <mzgl/util/log.h>
+#include <mzgl/util/stringUtil.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/gl/mzOpenGL.h>
 
 #ifdef __ANDROID__
-vector<Shader *> Shader::shaders;
+std::vector<Shader *> Shader::shaders;
 #endif
 
 Shader::Shader(Graphics &g)
@@ -68,7 +65,7 @@ void Shader::end() {
 	glUseProgram(0);
 	GetError();
 }
-void Shader::uniform(string name, const glm::mat4 &m) {
+void Shader::uniform(std::string name, const glm::mat4 &m) {
 	GetError();
 	GLuint matId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
@@ -76,7 +73,7 @@ void Shader::uniform(string name, const glm::mat4 &m) {
 	GetError();
 }
 
-void Shader::uniform(string name, glm::vec2 p) {
+void Shader::uniform(std::string name, glm::vec2 p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
 
@@ -84,14 +81,14 @@ void Shader::uniform(string name, glm::vec2 p) {
 	GetError();
 }
 
-void Shader::uniform(string name, int p) {
+void Shader::uniform(std::string name, int p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
 
 	glUniform1i(vecId, p);
 	GetError();
 }
-void Shader::uniform(string name, glm::ivec2 p) {
+void Shader::uniform(std::string name, glm::ivec2 p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
 
@@ -99,7 +96,7 @@ void Shader::uniform(string name, glm::ivec2 p) {
 	GetError();
 }
 
-void Shader::uniform(string name, float p) {
+void Shader::uniform(std::string name, float p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
 
@@ -107,14 +104,14 @@ void Shader::uniform(string name, float p) {
 	GetError();
 }
 
-void Shader::uniform(string name, glm::vec3 p) {
+void Shader::uniform(std::string name, glm::vec3 p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	GetError();
 
 	glUniform3fv(vecId, 1, (const GLfloat *) &p);
 	GetError();
 }
-void Shader::uniform(string name, glm::vec4 p) {
+void Shader::uniform(std::string name, glm::vec4 p) {
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	//GetError();
 
@@ -148,7 +145,7 @@ void Shader::setInstanceUniforms(int whichInstance) {
 }
 #endif
 
-void Shader::uniform(string name, const glm::mat4 *p, size_t length) {
+void Shader::uniform(std::string name, const glm::mat4 *p, size_t length) {
 #ifdef MZGL_GL2
 	instanceUniforms.push_back(make_shared<InstanceUniform>(name, (float *) p, length, 16));
 #else
@@ -157,7 +154,7 @@ void Shader::uniform(string name, const glm::mat4 *p, size_t length) {
 #endif
 }
 
-void Shader::uniform(string name, const float *p, size_t length) {
+void Shader::uniform(std::string name, const float *p, size_t length) {
 #ifdef MZGL_GL2
 	instanceUniforms.push_back(make_shared<InstanceUniform>(name, (float *) p, length, 1));
 #else
@@ -166,7 +163,7 @@ void Shader::uniform(string name, const float *p, size_t length) {
 #endif
 }
 
-void Shader::uniform(string name, const glm::vec2 *p, size_t length) {
+void Shader::uniform(std::string name, const glm::vec2 *p, size_t length) {
 #ifdef MZGL_GL2
 	instanceUniforms.push_back(make_shared<InstanceUniform>(name, (float *) p, length, 2));
 #else
@@ -175,7 +172,7 @@ void Shader::uniform(string name, const glm::vec2 *p, size_t length) {
 #endif
 }
 
-void Shader::uniform(string name, const glm::vec3 *p, size_t length) {
+void Shader::uniform(std::string name, const glm::vec3 *p, size_t length) {
 #ifdef MZGL_GL2
 	instanceUniforms.push_back(make_shared<InstanceUniform>(name, (float *) p, length, 3));
 #else
@@ -184,7 +181,7 @@ void Shader::uniform(string name, const glm::vec3 *p, size_t length) {
 #endif
 }
 
-void Shader::uniform(string name, const glm::vec4 *p, size_t length) {
+void Shader::uniform(std::string name, const glm::vec4 *p, size_t length) {
 #ifdef MZGL_GL2
 	instanceUniforms.push_back(make_shared<InstanceUniform>(name, (float *) p, length, 4));
 #else
@@ -193,23 +190,23 @@ void Shader::uniform(string name, const glm::vec4 *p, size_t length) {
 #endif
 }
 
-void Shader::uniform(string name, const vector<glm::vec4> &p) {
+void Shader::uniform(std::string name, const std::vector<glm::vec4> &p) {
 	uniform(name, p.data(), p.size());
 }
-void Shader::uniform(string name, const vector<float> &p) {
+void Shader::uniform(std::string name, const std::vector<float> &p) {
 	uniform(name, p.data(), p.size());
 }
-void Shader::uniform(string name, const vector<glm::vec2> &p) {
+void Shader::uniform(std::string name, const std::vector<glm::vec2> &p) {
 	uniform(name, p.data(), p.size());
 }
-void Shader::uniform(string name, const vector<glm::vec3> &p) {
+void Shader::uniform(std::string name, const std::vector<glm::vec3> &p) {
 	uniform(name, p.data(), p.size());
 }
-void Shader::uniform(string name, const vector<glm::mat4> &p) {
+void Shader::uniform(std::string name, const std::vector<glm::mat4> &p) {
 	uniform(name, p.data(), p.size());
 }
 
-void Shader::loadFromString(string vertCode, string fragCode) {
+void Shader::loadFromString(std::string vertCode, std::string fragCode) {
 	if (vertCode.find("#version") == -1) {
 		vertCode = Shader::getVersionForPlatform(true) + vertCode;
 	}
@@ -226,19 +223,19 @@ void Shader::loadFromString(string vertCode, string fragCode) {
 	createProgram(vertexShader, fragmentShader);
 }
 
-void Shader::load(string vertex_file_path, string fragment_file_path) {
+void Shader::load(std::string vertex_file_path, std::string fragment_file_path) {
 	loadFromString(readFile2(vertex_file_path), readFile2(fragment_file_path));
 }
 
-string Shader::getVersionForPlatform(bool isVertShader) {
+std::string Shader::getVersionForPlatform(bool isVertShader) {
 #ifdef MZGL_GL2
 
 	// convert GL3 shader to GL2 shader
-	string version = "#version 120\n" // this is gl version 2.1
-					 "#define lowp\n"
-					 "#define highp\n"
-					 "#define mediump\n"
-					 "#define texture texture2D\n";
+	std::string version = "#version 120\n" // this is gl version 2.1
+						  "#define lowp\n"
+						  "#define highp\n"
+						  "#define mediump\n"
+						  "#define texture texture2D\n";
 	if (isVertShader) {
 		version += "#define out varying\n";
 		version += "#define in attribute\n";
@@ -247,7 +244,7 @@ string Shader::getVersionForPlatform(bool isVertShader) {
 		version += "#define fragColor gl_FragColor\n";
 	}
 #else
-	string version = "#version 150\n"; // this is GL version 3.2
+	std::string version = "#version 150\n"; // this is GL version 3.2
 #endif
 
 #if TARGET_OS_IOS || defined(__ANDROID__) || defined(__arm__) || defined(USE_METALANGLE) || defined(__linux__)
@@ -319,25 +316,25 @@ void Shader::createProgram(GLuint vertexShader, GLuint fragmentShader) {
 	}
 }
 
-string Shader::readFile2(const string &fileName) {
-	fs::ifstream ifs(fs::u8path(fileName.c_str()), ios::in | ios::binary | ios::ate);
+std::string Shader::readFile2(const std::string &fileName) {
+	std::ifstream ifs(fs::path(fileName.c_str()), std::ios::in | std::ios::binary | std::ios::ate);
 
 	if (!ifs.good()) {
 		Log::e() << "Error loading shader from " << fileName;
 		return "";
 	}
-	ifstream::pos_type fileSize = ifs.tellg();
-	ifs.seekg(0, ios::beg);
+	std::ifstream::pos_type fileSize = ifs.tellg();
+	ifs.seekg(0, std::ios::beg);
 
-	vector<char> bytes(fileSize);
+	std::vector<char> bytes(fileSize);
 	ifs.read(bytes.data(), fileSize);
 
-	return string(bytes.data(), fileSize);
+	return std::string(bytes.data(), fileSize);
 }
 
 #ifdef MZGL_GL2
-string removeSquareBrackets(const string &s) {
-	string out		 = "";
+std::string removeSquareBrackets(const std::string &s) {
+	std::string out	 = "";
 	bool bracketOpen = false;
 	for (int i = 0; i < s.size(); i++) {
 		if (s[i] == '[') {
@@ -351,8 +348,8 @@ string removeSquareBrackets(const string &s) {
 }
 #endif
 
-GLuint Shader::compileShader(GLenum type, string src) {
-	string typeString = "unknown";
+GLuint Shader::compileShader(GLenum type, std::string src) {
+	std::string typeString = "unknown";
 	if (type == GL_VERTEX_SHADER) typeString = "Vert";
 	else if (type == GL_FRAGMENT_SHADER) typeString = "Frag";
 
@@ -378,8 +375,7 @@ GLuint Shader::compileShader(GLenum type, string src) {
 	GetError();
 	glCompileShader(shader);
 	GetError();
-	//#if defined(DEBUG)
-
+	
 	// Check compile status
 	GLint compileStatus;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
@@ -406,7 +402,6 @@ GLuint Shader::compileShader(GLenum type, string src) {
 			free(log);
 		}
 	}
-	//#endif
 
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -425,7 +420,6 @@ void Shader::linkProgram(GLuint program) {
 	glLinkProgram(program);
 	GetError();
 
-#if defined(DEBUG)
 	GLint logLength;
 
 	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
@@ -437,7 +431,6 @@ void Shader::linkProgram(GLuint program) {
 		Log::e() << "Shader program linking failed with error:\n" << log;
 		free(log);
 	}
-#endif
 
 	GLint status;
 	glGetProgramiv(program, GL_LINK_STATUS, &status);

@@ -6,24 +6,25 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Font.h"
+#include <mzgl/gl/Font.h>
 #include <stdio.h> // malloc, free, fopen, fclose, ftell, fseek, fread
 #include <string.h> // memset
-#include "Shader.h"
-#include "Graphics.h"
+#include <mzgl/gl/Shader.h>
+#include <mzgl/gl/Graphics.h>
 #define FONTSTASH_IMPLEMENTATION // Expands implementation
 
-#include "mzOpenGL.h"
-#include "fontstash.h"
-#include "util.h"
+#include <mzgl/gl/mzOpenGL.h>
+#include <fontstash/fontstash.h>
+#include <mzgl/util/util.h>
 #ifdef __APPLE__ // I don't think this block is needed
 #	include <TargetConditionals.h>
 
 #endif
-#include "log.h"
+#include <mzgl/util/log.h>
 #define GLFONTSTASH_IMPLEMENTATION // Expands implementation
 
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
+
 using namespace std;
 
 #ifdef __ANDROID__
@@ -52,8 +53,8 @@ vector<Font *> Font::fonts;
  (Changing GL_RED internal format for GL_R8 - seems to work on both mac and iOS)
  */
 
-#include "gl3corefontstash.h"
-#include "error.h"
+#include <fontstash/gl3corefontstash.h>
+#include <mzgl/gl/error.h>
 
 using namespace std;
 
@@ -373,7 +374,7 @@ Font::Font() {
 #endif
 }
 
-#include "stringUtil.h"
+#include <mzgl/util/stringUtil.h>
 
 static std::pair<std::string, std::string> splitAtWidth(const Font &f, const std::string &word, float width) {
 	std::string first  = "";

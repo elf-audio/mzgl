@@ -8,8 +8,7 @@
 
 #include "ZipStreamer.h"
 #include <stdio.h>
-#include "zipper/minizip/ioapi_mem.h"
-#include "zipper/minizip/unzip.h"
+#include <minizip/unzip.h>
 
 void ZipStreamer::close() {
 	if (m_zf != NULL) {

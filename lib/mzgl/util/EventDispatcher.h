@@ -7,8 +7,8 @@
 //
 
 #pragma once
-#include "WebViewApp.h"
-#include "ScopedUrl.h"
+#include <mzgl/WebViewApp.h>
+#include <mzgl/util/ScopedUrl.h>
 
 class EventDispatcher {
 public:

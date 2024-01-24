@@ -8,7 +8,7 @@
 
 #include "AudioSystemRtAudio.h"
 #include "RtAudio.h"
-#include "log.h"
+#include <mzgl/util/log.h>
 #ifdef __APPLE__
 #	import <AVFoundation/AVFoundation.h>
 #endif

@@ -4,10 +4,10 @@
 #include <vector>
 #include <functional>
 #include <android/log.h>
-#include "App.h"
-#include "Midi.h"
-#include "mzAssert.h"
-#include "FloatBuffer.h"
+#include <mzgl/App.h>
+#include <mzgl/midi/Midi.h>
+#include <mzgl/util/mzAssert.h>
+#include <mzgl/util/FloatBuffer.h>
 
 #define LOGE(...) ((void) __android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #define LOGD(...) ((void) __android_log_print(ANDROID_LOG_DEBUG, "native-activity", __VA_ARGS__))

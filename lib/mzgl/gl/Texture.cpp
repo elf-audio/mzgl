@@ -6,15 +6,15 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Texture.h"
+#include <mzgl/gl/Texture.h>
 //#include "picopng.hpp"
-#include "Vbo.h"
+#include <mzgl/gl/Vbo.h>
 #include <vector>
-#include "Graphics.h"
-#include "error.h"
-#include "log.h"
-#include "mzAssert.h"
-#include "mzOpenGL.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/gl/error.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/mzAssert.h>
+#include <mzgl/gl/mzOpenGL.h>
 
 using namespace std;
 
@@ -28,7 +28,7 @@ Texture::Texture() {
 #endif
 }
 
-#include "Image.h"
+#include <mzgl/gl/Image.h>
 
 void Texture::setSamplingMethod(Texture::SamplingMethod sampling) {
 	bind();

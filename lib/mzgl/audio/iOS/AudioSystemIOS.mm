@@ -9,7 +9,7 @@
 #include "AudioSystemIOS.h"
 #include <string>
 #import <AVFoundation/AVFoundation.h>
-#include "log.h"
+#include <mzgl/util/log.h>
 using namespace std;
 
 // don't know why this is needed

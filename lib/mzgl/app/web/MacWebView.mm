@@ -8,10 +8,10 @@
 
 #include "MacWebView.h"
 
-#include "MZGLWebView.h"
-#include "App.h"
-#include "EventDispatcher.h"
-#include "AppleWebView.h"
+#include <mzgl/app/apple/MZGLWebView.h>
+#include <mzgl/App.h>
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/app/apple/AppleWebView.h>
 
 MacWebView::MacWebView(App *app)
 	: app(app) {

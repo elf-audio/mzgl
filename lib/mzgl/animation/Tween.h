@@ -8,9 +8,10 @@
 
 #pragma once
 
-#include "animation.h"
+#include <mzgl/animation/animation.h>
 #include <functional>
-#include "Rectf.h"
+#include <mzgl/geom/Rectf.h>
+#include <mzgl/util/util.h>
 #include <vector>
 
 #include <memory>
@@ -70,7 +71,7 @@ void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float 
 	start(valuePtr, valuePtr, to, duration, type, delay);
 }
 
-#include "util.h"
+#include <mzgl/util/util.h>
 
 template <class T>
 void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {

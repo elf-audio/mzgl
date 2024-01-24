@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "zipper/minizip/zip.h"
+#include <minizip/zip.h>
 
 /**
  * This class is the old way or reading from zip files - it can't seek - ZipReader is the new version.

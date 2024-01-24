@@ -7,7 +7,7 @@
 //
 
 #pragma once
-#include "LineEquation.h"
+#include <mzgl/geom/LineEquation.h>
 
 #include <vector>
 

@@ -37,7 +37,7 @@
  */
 #pragma once
 
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 
 #define VERTICAL   "v"
 #define HORIZONTAL "h"

@@ -6,10 +6,10 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Triangulator.h"
+#include <mzgl/geom/Triangulator.h>
 #define MPE_POLY2TRI_IMPLEMENTATION
-#include "MPE_fastpoly2tri.h"
-#include "log.h"
+#include <MPE_fastpoly2tri.h>
+#include <mzgl/util/log.h>
 
 using namespace std;
 

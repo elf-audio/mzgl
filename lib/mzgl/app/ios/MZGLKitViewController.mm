@@ -7,10 +7,10 @@
 //
 
 #import "MZGLKitViewController.h"
-#include "App.h"
-#include "EventDispatcher.h"
+#include <mzgl/App.h>
+#include <mzgl/util/EventDispatcher.h>
 #include "util.h"
-#include "log.h"
+#include <mzgl/util/log.h>
 #import "MZGLKitView.h"
 
 #ifdef MZGL_PLUGIN
@@ -20,7 +20,7 @@
 	MZGLKitView *mzView;
 	BOOL currentlyPaused;
 }
-- (void) deleteCppObjects {
+- (void)deleteCppObjects {
 	[mzView deleteCppObjects];
 }
 // in an AUV3, all instances of the plugin run

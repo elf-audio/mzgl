@@ -6,7 +6,13 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Midi.h"
+#include <mzgl/midi/Midi.h>
+#ifdef __APPLE__
+#	include <TargetConditionals.h>
+#endif
+
+#if TARGET_OS_MAC && !TARGET_OS_IOS
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData) {
 	((MidiIn *) userData)->callback(deltatime, message);
 }
+#endif

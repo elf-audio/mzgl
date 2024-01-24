@@ -1,5 +1,5 @@
-#include "ScrollingList.h"
-#include "log.h"
+#include <mzgl/ui/ScrollingList.h>
+#include <mzgl/util/log.h>
 
 using namespace std;
 

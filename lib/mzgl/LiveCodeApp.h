@@ -7,13 +7,13 @@
 //
 
 #pragma once
-#include "App.h"
+#include <mzgl/App.h>
 #include "RecompilingAppDylib.h"
 #include "TextConsole.h"
-#include "MacMenuBar.h"
+#include <mzgl/app/mac/MacMenuBar.h>
 
 #include "NSEventDispatcher.h"
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 
 class LiveCodeApp : public App {
 public:

@@ -6,7 +6,7 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Image.h"
+#include <mzgl/gl/Image.h>
 
 #include <cstring>
 //#include "picopng.hpp"

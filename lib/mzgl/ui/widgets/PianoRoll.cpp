@@ -1,8 +1,8 @@
 
 #include "PianoRoll.h"
-#include "Graphics.h"
-#include "util.h"
-#include "maths.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/maths.h>
 PianoRoll::PianoRoll(Graphics &g)
 	: Layer(g, "piano roll") {
 	bank		 = 0;

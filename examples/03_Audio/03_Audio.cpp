@@ -1,7 +1,7 @@
 
-#include "App.h"
+#include <mzgl/App.h>
 #include <cmath>
-#include "mzAssert.h"
+#include <mzgl/util/mzAssert.h>
 
 class MyApp : public App {
 public:

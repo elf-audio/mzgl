@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 
 struct ScopedMask {
 	// you can initialize with empty constructor

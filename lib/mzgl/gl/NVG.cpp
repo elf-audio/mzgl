@@ -5,8 +5,8 @@
 //  Created by Marek Bereza on 18/05/2020.
 //  Copyright © 2020 Marek Bereza. All rights reserved.
 //
-#include "Graphics.h"
-#include "log.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/log.h>
 #include "NVG.h"
 
 #include "nanovg.h"
@@ -16,7 +16,7 @@
 //#include <OpenGL/gl3.h>
 //#endif
 
-#include "mzOpenGL.h"
+#include <mzgl/gl/mzOpenGL.h>
 
 #ifdef MZGL_GL2
 #	define NANOVG_GL2_IMPLEMENTATION

@@ -7,8 +7,8 @@
 //
 
 #pragma once
-#include "App.h"
-#include "Plugin.h"
+#include <mzgl/App.h>
+#include <mzgl/Plugin.h>
 
 class PluginEditor : public App {
 public:

@@ -7,7 +7,7 @@
 //
 
 #pragma once
-#include "Midi.h"
+#include <mzgl/midi/Midi.h>
 #include <thread>
 #include <map>
 #include <set>

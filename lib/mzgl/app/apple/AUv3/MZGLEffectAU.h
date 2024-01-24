@@ -8,7 +8,7 @@
 
 #import <AudioToolbox/AudioToolbox.h>
 #include <memory>
-#include "Plugin.h"
+#include <mzgl/Plugin.h>
 // Define parameter addresses.
 extern const AudioUnitParameterID myParam1;
 

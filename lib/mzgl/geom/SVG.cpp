@@ -8,18 +8,16 @@
 
 #define NOMINMAX // Avoids name conflicts on Windows
 
-#include "SVG.h"
-#include "stringUtil.h"
-#include "Triangulator.h"
-#include "MitredLine.h"
+#include <mzgl/geom/SVG.h>
+#include <mzgl/util/stringUtil.h>
+#include <mzgl/geom/Triangulator.h>
+#include <mzgl/gl/drawing/MitredLine.h>
 #include <algorithm>
-#include "log.h"
-#include "RoundedRect.h"
+#include <fsystem/fsystem.h>
+#include <mzgl/util/log.h>
+#include <mzgl/geom/RoundedRect.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "choc/platform/choc_DisableAllWarnings.h"
-#include "pu_gixml.hpp"
-#include "filesystem.h"
-#include "choc/platform/choc_ReenableAllWarnings.h"
+#include <elfxml/elfxml.h>
 
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
@@ -101,7 +99,7 @@ glm::mat3 parseTransform(string tr) {
 
 class SVGShape : public SVGNode {
 public:
-	static SVGShapeRef create(pu_gi::xml_node &n) { return SVGShapeRef(new SVGShape(n)); }
+	static SVGShapeRef create(elfxml::pugi::xml_node &n) { return SVGShapeRef(new SVGShape(n)); }
 
 	string id = "";
 	vector<vector<glm::vec2>> verts;
@@ -216,7 +214,7 @@ public:
 
 	void translate(float x, float y) override { applyTransformToPoints({1, 0, 0, 0, 1, 0, x, y, 1}); }
 
-	void setUseInfo(pu_gi::xml_node &n) {
+	void setUseInfo(elfxml::pugi::xml_node &n) {
 		if (n.attribute("stroke-width")) {
 			strokeWeightSet = true;
 			strokeWeight	= n.attribute("stroke-width").as_float();
@@ -258,7 +256,7 @@ private:
 		}
 	}
 
-	void parseRect(pu_gi::xml_node &n) {
+	void parseRect(elfxml::pugi::xml_node &n) {
 		Rectf r(n.attribute("x").as_float(),
 				n.attribute("y").as_float(),
 				n.attribute("width").as_float(),
@@ -277,13 +275,13 @@ private:
 		closed = true;
 	}
 
-	void parseCircle(pu_gi::xml_node &n) {
+	void parseCircle(elfxml::pugi::xml_node &n) {
 		glm::vec2 c(n.attribute("cx").as_float(), n.attribute("cy").as_float());
 		float radius = n.attribute("r").as_float();
 		doEllipse(c, radius, radius);
 	}
 
-	void parseEllipse(pu_gi::xml_node &n) {
+	void parseEllipse(elfxml::pugi::xml_node &n) {
 		glm::vec2 c(n.attribute("cx").as_float(), n.attribute("cy").as_float());
 		float rx = n.attribute("rx").as_float();
 		float ry = n.attribute("ry").as_float();
@@ -300,7 +298,7 @@ private:
 		closed = true;
 	}
 
-	void parsePolygon(pu_gi::xml_node &n) {
+	void parsePolygon(elfxml::pugi::xml_node &n) {
 		vector<string> points = split(n.attribute("points").value(), " ");
 		verts.push_back(vector<glm::vec2>(points.size() / 2));
 		for (int i = 0; i < points.size(); i += 2) {
@@ -342,7 +340,7 @@ private:
 		return commands;
 	}
 
-	void parsePath(pu_gi::xml_node &n) {
+	void parsePath(elfxml::pugi::xml_node &n) {
 		string d = n.attribute("d").value();
 
 		auto commands = splitSVGPath(d);
@@ -404,7 +402,7 @@ private:
 
 	// groups can have opacity
 	// but shapes have fill-opacity and stroke-opacity
-	SVGShape(pu_gi::xml_node &n) {
+	SVGShape(elfxml::pugi::xml_node &n) {
 		transform	= {1, 0, 0, 0, 1, 0, 0, 0, 1};
 		string name = n.name();
 		id			= n.attribute("id").value();
@@ -450,7 +448,7 @@ public:
 
 	float strokeOpacity = 1;
 
-	static SVGGroupRef create(pu_gi::xml_node &n, map<string, SVGShapeRef> &defs) {
+	static SVGGroupRef create(elfxml::pugi::xml_node &n, map<string, SVGShapeRef> &defs) {
 		return SVGGroupRef(new SVGGroup(n, defs));
 	}
 
@@ -532,7 +530,7 @@ public:
 	}
 
 private:
-	SVGGroup(pu_gi::xml_node &n, map<string, SVGShapeRef> &defs) {
+	SVGGroup(elfxml::pugi::xml_node &n, map<string, SVGShapeRef> &defs) {
 		transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 		if (n.attribute("transform")) {
@@ -613,7 +611,7 @@ void SVGDoc::parseViewBox(string s) {
 	// printf("%f %f %f %f\n", viewBox.x, viewBox.y, viewBox.width, viewBox.height);
 }
 
-void SVGDoc::parseDefs(const pu_gi::xml_node &root) {
+void SVGDoc::parseDefs(const elfxml::pugi::xml_node &root) {
 	auto xpathNode = root.select_node("defs");
 	if (xpathNode) {
 		auto defsNode = xpathNode.node();
@@ -624,7 +622,7 @@ void SVGDoc::parseDefs(const pu_gi::xml_node &root) {
 		}
 	}
 }
-void SVGDoc::parse(const pu_gi::xml_node &n, int depth) {
+void SVGDoc::parse(const elfxml::pugi::xml_node &n, int depth) {
 	for (auto &c: n) {
 		parse(c, depth + 1);
 	}
@@ -651,7 +649,7 @@ void SVGDoc::rotate(float theta) {
 }
 
 #ifdef __ANDROID__
-#	include "androidUtil.h"
+#	include <mzgl/app/android/androidUtil.h>
 
 #endif
 void SVGDoc::translate(float x, float y) {
@@ -660,15 +658,15 @@ void SVGDoc::translate(float x, float y) {
 
 bool SVGDoc::loadFromString(const string &svgData) {
 	defs.clear();
-	pu_gi::xml_document doc;
+	elfxml::pugi::xml_document doc;
 	auto status = doc.load_string(svgData.c_str());
-	if (status.status != pu_gi::status_ok) {
+	if (status.status != elfxml::pugi::status_ok) {
 		Log::e() << "ERROR: couldn't load SVG from string - must be a parse error - msg is "
 				 << status.description() << " - at character " << status.offset;
 		Log::e() << svgData;
 		return false;
 	}
-	pu_gi::xml_node root = doc.document_element();
+	elfxml::pugi::xml_node root = doc.document_element();
 
 	parseViewBox(root.attribute("viewBox").value());
 	width  = viewBox.width;
@@ -683,14 +681,14 @@ bool SVGDoc::loadFromString(const string &svgData) {
 
 bool SVGDoc::load(string path) {
 	defs.clear();
-	pu_gi::xml_document doc;
+	elfxml::pugi::xml_document doc;
 
 #ifdef __ANDROID__
 	vector<unsigned char> data;
 	loadAndroidAsset(path, data);
 	auto status = doc.load_buffer(data.data(), data.size());
 
-	if (status.status != pu_gi::status_ok) {
+	if (status.status != elfxml::pugi::status_ok) {
 		Log::e() << "Error: Couldn't load svg from buffer - got " << data.size()
 				 << "bytes - message from pu_gi is " << status.description() << " - at character "
 				 << status.offset;
@@ -703,14 +701,14 @@ bool SVGDoc::load(string path) {
 	wstring unicodePath = fs::path(path).wstring();
 	auto status			= doc.load_file((wchar_t *) (unicodePath.c_str()));
 
-	if (status.status != pu_gi::status_ok) {
+	if (status.status != elfxml::pugi::status_ok) {
 		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description() << " - at character "
 				 << status.offset;
 		return false;
 	}
 #endif
 
-	pu_gi::xml_node root = doc.document_element();
+	elfxml::pugi::xml_node root = doc.document_element();
 
 	parseViewBox(root.attribute("viewBox").value());
 	width  = viewBox.width;

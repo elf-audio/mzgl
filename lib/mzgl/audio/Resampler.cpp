@@ -1,7 +1,7 @@
 
 #include "Resampler.h"
 
-#include "speex_resampler.h"
+#include <speex/speex_resampler.h>
 #include <stdio.h>
 
 using namespace std;

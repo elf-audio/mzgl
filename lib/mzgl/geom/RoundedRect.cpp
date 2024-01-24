@@ -6,10 +6,10 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "RoundedRect.h"
-#include "maths.h"
-#include "Graphics.h"
-#include "MitredLine.h"
+#include <mzgl/geom/RoundedRect.h>
+#include <mzgl/util/maths.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/gl/drawing/MitredLine.h>
 
 using namespace std;
 

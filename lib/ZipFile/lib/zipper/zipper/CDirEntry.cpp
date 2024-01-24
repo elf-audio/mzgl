@@ -18,7 +18,7 @@
 #include "CDirEntry.h"
 #include <algorithm>
 #include <sys/types.h>
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 
 using namespace zipper;
 

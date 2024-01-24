@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "MidiMessage.h"
+#include <mzgl/midi/MidiMessage.h>
 #include <functional>
 
 class MidiMessageParser {

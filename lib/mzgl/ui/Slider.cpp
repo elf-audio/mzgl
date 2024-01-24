@@ -7,8 +7,10 @@
 //
 
 #include "Slider.h"
-#include "maths.h"
-#include "stringUtil.h"
+
+#include <mzgl/util/maths.h>
+#include <mzgl/util/stringUtil.h>
+
 Slider &Slider::darkTheme() {
 	color		= hexColor(0x474747);
 	railColor	= hexColor(0x232323);

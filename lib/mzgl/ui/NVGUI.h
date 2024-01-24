@@ -8,8 +8,9 @@
 
 #pragma once
 #include "NVG.h"
-#include "Tween.h"
-#include "maths.h"
+#include <mzgl/animation/Tween.h>
+#include <mzgl/util/maths.h>
+
 
 namespace NVGUI {
 

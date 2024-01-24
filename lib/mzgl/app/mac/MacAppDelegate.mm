@@ -8,14 +8,14 @@
 
 #import "MacAppDelegate.h"
 #import "EventsView.h"
-#include "mainThread.h"
-#include "MacMenuBar.h"
-#include "App.h"
-#include "Graphics.h"
-#include "EventDispatcher.h"
-#include "log.h"
+#include <mzgl/util/mainThread.h>
+#include <mzgl/app/mac/MacMenuBar.h>
+#include <mzgl/App.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/util/log.h>
 #include "EventsView.h"
-#include "MZGLWebView.h"
+#include <mzgl/app/apple/MZGLWebView.h>
 #include "util.h"
 
 #ifdef USE_METALANGLE

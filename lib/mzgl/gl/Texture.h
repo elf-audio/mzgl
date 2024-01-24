@@ -10,9 +10,9 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "Image.h"
+#include <mzgl/gl/Image.h>
 
-#include "Rectf.h"
+#include <mzgl/geom/Rectf.h>
 
 class Graphics;
 class Texture;

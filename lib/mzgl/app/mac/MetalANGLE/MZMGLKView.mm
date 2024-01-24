@@ -8,7 +8,7 @@
 
 #import "MZMGLKView.h"
 #include <mutex>
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 
 @implementation MZMGLKView {
 	std::mutex evtMutex;

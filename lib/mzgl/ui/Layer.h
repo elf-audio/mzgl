@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 #include <string>
-#include "Texture.h"
-#include "RoundedRect.h"
+#include <mzgl/gl/Texture.h>
+#include <mzgl/geom/RoundedRect.h>
 #include <map>
-#include "Font.h"
+#include <mzgl/gl/Font.h>
 #include <functional>
 
 class Layer : public Rectf {

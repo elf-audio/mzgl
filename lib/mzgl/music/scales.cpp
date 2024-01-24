@@ -4,7 +4,7 @@
  *  Created by Marek Bereza on 05/02/2013.
  */
 
-#include "scales.h"
+#include <mzgl/music/scales.h>
 #include <math.h>
 #include <vector>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AllMidiDevicesImpl.h"
-#include "androidUtil.h"
+#include <mzgl/app/android/androidUtil.h>
 
 using AndroidMidiIdentifier = int;
 

@@ -9,14 +9,14 @@
 #import "AudioUnitViewController.h"
 #import "MZGLEffectAU.h"
 #if TARGET_OS_IPHONE
-#	import "MZGLKitViewController.h"
-#	import "MZGLKitView.h"
+#	import <mzgl/app/ios/MZGLKitViewController.h>
+#	import <mzgl/app/ios/MZGLKitView.h>
 #else
-#	import "EventsView.h"
+#	import <mzgl/app/mac/EventsView.h>
 #endif
-#include "Plugin.h"
-#include "PluginEditor.h"
-#include "EventDispatcher.h"
+#include <mzgl/Plugin.h>
+#include <mzgl/PluginEditor.h>
+#include <mzgl/util/EventDispatcher.h>
 
 @interface AudioUnitViewController ()
 
@@ -152,7 +152,7 @@ using namespace std;
 		glView = (MZGLKitView *) vc.view;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		glView = [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
 #endif
 		glView.frame = self.view.frame;
 #if !TARGET_OS_IOS

@@ -1,6 +1,6 @@
-#include "Dialogs.h"
-#include "log.h"
-#include "App.h"
+#include <mzgl/util/Dialogs.h>
+#include <mzgl/util/log.h>
+#include <mzgl/App.h>
 
 #ifdef __APPLE__
 #	include <TargetConditionals.h>
@@ -11,16 +11,19 @@
 #		import <AppKit/AppKit.h>
 #	endif
 #elif defined(__ANDROID__)
-#	include "androidUtil.h"
+#	include <mzgl/app/android/androidUtil.h>
 #elif defined(_WIN32)
 #	include "winUtil.h"
 #elif defined(__linux__)
 #	include "linuxUtil.h"
 #endif
-#include "mzAssert.h"
+#include <mzgl/util/mzAssert.h>
 
-#include "filesystem.h"
-#include "mainThread.h"
+#include <fsystem/fsystem.h>
+#include <fstream>
+#include <string>
+#include <functional>
+#include <mzgl/util/mainThread.h>
 
 namespace unit_test {
 
@@ -722,7 +725,7 @@ BGPickerDelegate *bgpd = nil;
 #	import <CoreServices/CoreServices.h>
 #endif
 
-//#include "Image.h"
+//#include <mzgl/gl/Image.h>
 
 void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)> completionCallback) const {
 #ifdef AUTO_TEST
@@ -767,7 +770,7 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 }
 
 #if TARGET_OS_IOS
-#	include "UIBlockButton.h"
+#	include <mzgl/app/ios/UIBlockButton.h>
 #endif
 void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
@@ -967,9 +970,9 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 
 	std::string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
-	fs::ifstream src(fs::u8path(path), std::ios::binary);
+	std::ifstream src(fs::path {path}, std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
-	fs::ofstream dst(fs::u8path(destPath), std::ios::binary);
+	std::ofstream dst(fs::path {destPath}, std::ios::binary);
 
 	dst << src.rdbuf();
 #endif
@@ -1005,7 +1008,7 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 FilePickerDelegate *fpd = nil;
 
 #	else
-#		import "MacFilePickerDelegate.h"
+#		import <mzgl/app/mac/MacFilePickerDelegate.h>
 FilePickerDelegate *impikD = nil;
 #	endif
 #endif

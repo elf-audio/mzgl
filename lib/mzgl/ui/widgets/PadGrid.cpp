@@ -7,7 +7,7 @@
 //
 
 #include "PadGrid.h"
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 using namespace std;
 class PadButton : public Layer {
 public:

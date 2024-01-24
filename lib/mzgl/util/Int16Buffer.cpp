@@ -1,6 +1,6 @@
 
-#include "Int16Buffer.h"
-#include "maths.h"
+#include <mzgl/util/Int16Buffer.h>
+#include <mzgl/util/maths.h>
 void Int16Buffer::fadeIn(int length, int numChans, bool smooth) {
 	if (size() * numChans > length) {
 		if (numChans == 1) {

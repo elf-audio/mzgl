@@ -7,7 +7,7 @@
 //
 
 #include "AudioSystem.h"
-#include "log.h"
+#include <mzgl/util/log.h>
 void _AudioSystem::bindToApp(AudioIO *app) {
 	outputCallback = [app](float *a, int b, int c) { app->audioOut(a, b, c); };
 

@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "Rectf.h"
-#include "Vbo.h"
-#include "Graphics.h"
+#include <mzgl/geom/Rectf.h>
+#include <mzgl/gl/Vbo.h>
+#include <mzgl/gl/Graphics.h>
 
 void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid = true, float strokeWeight = 1);
 

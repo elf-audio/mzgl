@@ -1,6 +1,6 @@
 #include "GLFWOS.h"
-#include <glew.h>
-#include "glfw3.h"
+#include <glew/include/GL/glew.h>
+#include <glfw/glfw3.h>
 // #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_NATIVE_INCLUDE_NONE
 #include <GLFW/glfw3native.h>

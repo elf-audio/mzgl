@@ -7,25 +7,25 @@
 //
 
 #include <array>
-#include "Graphics.h"
-#include "Shader.h"
-#include "util.h"
-#include "Vbo.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/gl/Shader.h>
+#include <mzgl/util/util.h>
+#include <mzgl/gl/Vbo.h>
 #include "glm/gtc/matrix_transform.hpp"
 #include "MatrixStack.h"
-#include "RoundedRect.h"
-#include "Image.h"
-#include "error.h"
+#include <mzgl/geom/RoundedRect.h>
+#include <mzgl/gl/Image.h>
+#include <mzgl/gl/error.h>
 
-#include "log.h"
-#include "MitredLine.h"
-#include "Drawer.h"
+#include <mzgl/util/log.h>
+#include <mzgl/gl/drawing/MitredLine.h>
+#include <mzgl/gl/drawing/Drawer.h>
 
-#include "GraphicsAPI.h"
+#include <mzgl/gl/api/GraphicsAPI.h>
+#include <mzgl/gl/api/OpenGLAPI.h>
 
 #include <array>
 #include <utility>
-
 
 Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
@@ -322,14 +322,14 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 	drawCircle(c.x, c.y, r);
 }
 void Graphics::drawCircle(float x, float y, float r) {
-	static constexpr auto circleResolution										  = 100;
-	auto circleResolationFun = [] {
-		std::array<std::pair<float, float>, circleResolution + 1> values {};
-		for (int i = 0; i <= circleResolution; ++i) {
-			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
-			values[i] = {std::cos(phi), std::sin(phi)};
-		}
-		return values;
+	static constexpr auto circleResolution = 100;
+	auto circleResolationFun			   = [] {
+		  std::array<std::pair<float, float>, circleResolution + 1> values {};
+		  for (int i = 0; i <= circleResolution; ++i) {
+			  float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			  values[i] = {std::cos(phi), std::sin(phi)};
+		  }
+		  return values;
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
@@ -476,7 +476,7 @@ void Graphics::warpMaskForScissor(Rectf &a) {
 	// currently does nothing
 }
 
-#include "Triangulator.h"
+#include <mzgl/geom/Triangulator.h>
 void Graphics::drawShape(const std::vector<vec2> &shape) {
 	if (isFilling()) {
 		Triangulator t;
@@ -551,7 +551,6 @@ void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
 }
 
-#include "OpenGLAPI.h"
 Graphics::Graphics() {
 	api = std::make_unique<OpenGLAPI>(*this);
 }

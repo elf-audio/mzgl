@@ -10,10 +10,10 @@
 #ifdef __APPLE__
 #	include <CoreFoundation/CoreFoundation.h>
 #	include <AudioToolbox/AudioToolbox.h>
-#	include "mzAssert.h"
+#	include <mzgl/util/mzAssert.h>
 #	include <optional>
 #	include <string>
-#	include "log.h"
+#	include <mzgl/util/log.h>
 
 std::string stringFromOSStatus(OSStatus status) {
 	switch (status) {
@@ -143,11 +143,10 @@ public:
 #endif
 
 #include <fstream>
+#include <fsystem/fsystem.h>
 
-#include "filesystem.h"
-
-#include "util.h"
-#include "log.h"
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
 
 /**
  * This checks the magic numbers of a file if it has .mp3 extension.

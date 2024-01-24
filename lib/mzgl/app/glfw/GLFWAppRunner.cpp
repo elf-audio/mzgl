@@ -21,15 +21,15 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif // __linux__ //////////////////////////////////////////
 
 #include "GLFWAppRunner.h"
-#include "glfw3.h"
+#include <glfw/glfw3.h>
 #include <optional>
 #include <stdlib.h>
 #include <stdio.h>
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 #include "DesktopWindowEventHandler.h"
 #include "DesktopWindowFileDragHandler.h"
-#include "util.h"
-#include "log.h"
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
 #include "GLFWOS.h"
 
 #if defined(WIN32) || defined(__linux__)
@@ -237,7 +237,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #endif
 
 	if (argc > 0) {
-		glfwSetWindowTitle(window, fs::path(argv[0]).filename().string().c_str());
+		glfwSetWindowTitle(window, fs::path {argv[0]}.filename().string().c_str());
 	}
 
 	setCallbacks();

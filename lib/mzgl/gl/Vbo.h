@@ -11,7 +11,7 @@
 #define DO_DRAW_STATS
 
 #include <glm/glm.hpp>
-#include "log.h"
+#include <mzgl/util/log.h>
 // TODO: this should go somewhere more global
 using vec2 = glm::vec2;
 using vec3 = glm::vec3;

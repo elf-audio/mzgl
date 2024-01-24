@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Scroller.h"
-#include "util.h"
-#include "Drawer.h"
+#include <mzgl/ui/Scroller.h>
+#include <mzgl/util/util.h>
+#include <mzgl/gl/drawing/Drawer.h>
 #include <memory>
 
-#include "ScrollingListItem.h"
+#include <mzgl/ui/ScrollingListItem.h>
 
 class ScrollingList : public Scroller {
 public:

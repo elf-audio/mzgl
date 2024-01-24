@@ -6,7 +6,7 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "Rectf.h"
+#include <mzgl/geom/Rectf.h>
 
 void Rectf::inset(float amt) {
 	x += amt;

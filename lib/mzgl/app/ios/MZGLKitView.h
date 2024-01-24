@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
-#include "App.h"
+#include <mzgl/App.h>
 
 class EventDispatcher;
 

@@ -12,8 +12,8 @@
 #include <thread>
 
 #include <CoreMIDI/CoreMIDI.h>
-#include "MidiMessage.h"
-#include "Midi.h"
+#include <mzgl/midi/MidiMessage.h>
+#include <mzgl/midi/Midi.h>
 #include "AllMidiDevicesImpl.h"
 class CoreMidiDevice : public MidiDevice {
 public:

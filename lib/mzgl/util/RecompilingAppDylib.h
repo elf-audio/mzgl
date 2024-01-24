@@ -1,8 +1,8 @@
 #pragma once
 
 #include "RecompilingDylib.h"
-#include "Graphics.h"
-#include "log.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/log.h>
 
 class RecompilingAppDylib : public RecompilingDylib<App> {
 public:

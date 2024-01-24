@@ -1,5 +1,5 @@
 #include "DesktopWindowEventHandler.h"
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 #include <GLFW/glfw3.h>
 
 #ifdef _WIN32

@@ -1,5 +1,5 @@
 #include "tests.h"
-#include "MidiMessageParser.h"
+#include <mzgl/midi/MidiMessageParser.h>
 
 SCENARIO("Input sysex is parsed properly", "[midi-parser]") {
 	GIVEN("Some sysex and a parser") {
@@ -14,7 +14,7 @@ SCENARIO("Input sysex is parsed properly", "[midi-parser]") {
 		}};
 
 		WHEN("The data is parsed") {
-			parser.parse(sysex, 666, 0, 0);
+			parser.parse(sysex, static_cast<uint64_t>(666), static_cast<int32_t>(0), static_cast<int32_t>(0));
 			THEN("We should have got the callback") {
 				REQUIRE(gotCallback);
 			}
@@ -38,8 +38,8 @@ SCENARIO("Input sysex is parsed properly in parts", "[midi-parser]") {
 		}};
 
 		WHEN("The data is parsed in parts") {
-			parser.parse(sysex1, 666, 0, 0);
-			parser.parse(sysex2, 666, 0, 0);
+			parser.parse(sysex1, static_cast<uint64_t>(666), static_cast<int32_t>(0), static_cast<int32_t>(0));
+			parser.parse(sysex2, static_cast<uint64_t>(666), static_cast<int32_t>(0), static_cast<int32_t>(0));
 			THEN("We should have got the callback") {
 				REQUIRE(gotCallback);
 			}
@@ -87,7 +87,7 @@ SCENARIO("Delimits multiple note ons off properly", "[midi-parser]") {
 
 		WHEN("The messages are sent") {
 			for (auto &msg: msgs) {
-				parser.parse(msg, 666, 0, 0);
+				parser.parse(msg, static_cast<uint64_t>(666), static_cast<int32_t>(0), static_cast<int32_t>(0));
 			}
 			THEN("We should have got the callback") {
 				REQUIRE(messageCounter == originalMessages.size());

@@ -12,12 +12,13 @@
 #include <functional>
 #include <map>
 #include <atomic>
+#include <fsystem/fsystem.h>
 
-#include "util.h"
-#include "util/log.h"
-#include "FloatBuffer.h"
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/FloatBuffer.h>
 #include "PluginParameter.h"
-#include "Midi.h"
+#include <mzgl/midi/Midi.h>
 
 struct MidiMessage;
 
@@ -49,8 +50,6 @@ public:
 	EffectPreset(std::string name)
 		: name(name) {}
 };
-
-#include "filesystem.h"
 
 // presets are always files, their names are the file name
 class PresetManager {

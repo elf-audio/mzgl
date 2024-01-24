@@ -8,14 +8,14 @@
 
 #include "AudioFile.h"
 #ifdef __ANDROID__
-#	include "androidUtil.h"
+#	include <mzgl/app/android/androidUtil.h>
 #	include "media/NdkMediaExtractor.h"
 #endif
 
-#include "filesystem.h"
-#include "util.h"
-#include "util/log.h"
-#include "log.h"
+#include <fsystem/fsystem.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/log.h>
 
 #include "Resampler.h"
 #include "DrAudioFileReader.h"

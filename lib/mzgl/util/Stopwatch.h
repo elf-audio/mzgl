@@ -8,7 +8,7 @@
 #pragma once
 
 #include <chrono>
-#include "log.h"
+#include <mzgl/util/log.h>
 struct Stopwatch {
 	std::chrono::steady_clock::time_point startTime;
 

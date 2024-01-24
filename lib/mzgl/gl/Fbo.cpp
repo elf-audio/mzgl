@@ -8,18 +8,18 @@
 
 #include "Fbo.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include "Graphics.h"
-#include "util.h"
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/util.h>
 #include <iostream>
-#include "error.h"
-#include "log.h"
-#include "mzOpenGL.h"
+#include <mzgl/gl/error.h>
+#include <mzgl/util/log.h>
+#include <mzgl/gl/mzOpenGL.h>
 
 using namespace std;
 
 // with help from http://www.songho.ca/opengl/gl_fbo.html
 
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 
 bool checkFramebufferStatus(GLuint fbo) {
 	// check FBO status

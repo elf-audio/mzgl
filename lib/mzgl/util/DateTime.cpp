@@ -4,7 +4,7 @@
  *  Created by Marek Bereza on 05/12/2011.
  */
 
-#include "DateTime.h"
+#include <mzgl/util/DateTime.h>
 
 #include <time.h>
 #include <stdlib.h>

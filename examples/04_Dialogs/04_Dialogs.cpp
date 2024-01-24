@@ -1,8 +1,8 @@
 
-#include "App.h"
+#include <mzgl/App.h>
 #include <cmath>
-#include "mzAssert.h"
-#include "Dialogs.h"
+#include <mzgl/util/mzAssert.h>
+#include <mzgl/util/Dialogs.h>
 
 /**
  * Very very simple button ui element class

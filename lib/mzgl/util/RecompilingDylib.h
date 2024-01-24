@@ -17,13 +17,19 @@
  */
 
 #pragma once
-#include "FileWatcher.h"
+#include <mzgl/util/FileWatcher.h>
 #include "Dylib.h"
 
-#include "filesystem.h"
+#include <filesystem>
 
 #include <sys/stat.h>
-#include "util.h"
+
+#include <mzgl/util/util.h>
+
+#ifndef SRCROOT
+#	define SRCROOT "BUMBO"
+#	pragma warning Must set SRCROOT if you want to do livecoding
+#endif
 
 template <class T>
 class RecompilingDylib {

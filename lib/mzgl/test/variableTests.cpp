@@ -1,5 +1,5 @@
 #include "tests.h"
-#include "Variable.h"
+#include <mzgl/util/Variable.h>
 #include <array>
 
 class VariableListener : public Variable<float>::Listener {

@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <string>
-#include "Texture.h"
+#include <mzgl/gl/Texture.h>
 #import <CoreGraphics/CoreGraphics.h>
 
 class AVFoundationVideoGrabber {

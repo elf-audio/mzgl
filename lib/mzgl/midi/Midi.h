@@ -11,16 +11,13 @@
 #include <string>
 #include <atomic>
 //#include <algorithm>
-#include "stringUtil.h"
-#include "mzgl/util/log.h"
+#include <mzgl/util/stringUtil.h>
+#include <mzgl/util/log.h>
 #include <memory>
-
-#include "RtMidi.h"
-
-#include "log.h"
+#include <mzgl/util/log.h>
+#include <mzgl/midi/MidiMessage.h>
 
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData);
-#include "MidiMessage.h"
 
 /**
  * This is a midi device info object, hopefully will have more in it.
@@ -56,6 +53,13 @@ public:
 	virtual void
 		midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m, uint64_t timestamp) = 0;
 };
+
+#ifdef __APPLE__
+#	include <TargetConditionals.h>
+#endif
+
+#if TARGET_OS_MAC && !TARGET_OS_IOS
+#include "RtMidi.h"
 
 class MidiPort : public MidiDevice {
 public:
@@ -204,6 +208,7 @@ private:
 	std::shared_ptr<RtMidiIn> rtMidiIn;
 };
 
+
 class MidiOut : public MidiPort {
 public:
 	RtMidi *getPort() override { return rtMidiOut.get(); }
@@ -231,13 +236,9 @@ public:
 		sendMessage(MidiMessage::noteOn(channel, pitch, velocity));
 	}
 
-	void noteOff(int channel, int pitch) {
-		sendMessage(MidiMessage::noteOff(channel, pitch));
-	}
+	void noteOff(int channel, int pitch) { sendMessage(MidiMessage::noteOff(channel, pitch)); }
 
-	void cc(int channel, int control, int value) {
-		sendMessage(MidiMessage::cc(channel, control, value));
-	}
+	void cc(int channel, int control, int value) { sendMessage(MidiMessage::cc(channel, control, value)); }
 
 	void sendMessage(const MidiMessage &m) {
 		auto b = m.getBytes();
@@ -249,3 +250,4 @@ public:
 private:
 	std::shared_ptr<RtMidiOut> rtMidiOut;
 };
+#endif

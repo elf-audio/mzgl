@@ -7,11 +7,11 @@
 //
 
 #include "ScrollingListDeletable.h"
-#include "maths.h"
-#include "animation.h"
-#include "Drawer.h"
-#include "util.h"
-#include "Dialogs.h"
+#include <mzgl/util/maths.h>
+#include <mzgl/animation/animation.h>
+#include <mzgl/gl/drawing/Drawer.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/Dialogs.h>
 #include <algorithm>
 
 void ScrollingListDeletableView::draw() {

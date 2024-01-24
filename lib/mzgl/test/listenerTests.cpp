@@ -1,5 +1,5 @@
 #include "tests.h"
-#include "Listenable.h"
+#include <mzgl/util/Listenable.h>
 
 class MyListener {
 public:

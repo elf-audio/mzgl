@@ -2,14 +2,14 @@
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
-#include "util.h"
-#include "EventDispatcher.h"
+#include <mzgl/util/util.h>
+#include <mzgl/util/EventDispatcher.h>
 #include <android_native_app_glue.h>
-#include <util/log.h>
+#include <mzgl/util/log.h>
 
 #include "androidUtil.h"
-#include "Shader.h"
-#include "Texture.h"
+#include <mzgl/gl/Shader.h>
+#include <mzgl/gl/Texture.h>
 
 using namespace std;
 
@@ -28,7 +28,7 @@ struct engine {
 	int32_t height = 0;
 };
 
-#include "Graphics.h"
+#include <mzgl/gl/Graphics.h>
 
 bool firstFrameAlreadyRendered = false;
 Graphics graphics;

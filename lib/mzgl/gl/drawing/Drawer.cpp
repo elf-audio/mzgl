@@ -1,10 +1,10 @@
 
 
-#include "Drawer.h"
-#include "RoundedRect.h"
-#include "maths.h"
-#include "mzAssert.h"
-#include "log.h"
+#include <mzgl/gl/drawing/Drawer.h>
+#include <mzgl/geom/RoundedRect.h>
+#include <mzgl/util/maths.h>
+#include <mzgl/util/mzAssert.h>
+#include <mzgl/util/log.h>
 using namespace std;
 
 void Drawer::setColor(const glm::vec4 &c) {

@@ -6,7 +6,7 @@
 //  Copyright © 2021 Marek Bereza. All rights reserved.
 //
 
-#include "Haptics.h"
+#include <mzgl/util/Haptics.h>
 #ifdef __APPLE__
 #	include <TargetConditionals.h>
 #endif

@@ -1,4 +1,4 @@
-#include "FileWatcher.h"
+#include <mzgl/util/FileWatcher.h>
 
 #ifndef _WIN32
 #	include <sys/stat.h>

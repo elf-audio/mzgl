@@ -7,7 +7,7 @@
 //
 #pragma once
 
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 
 #include "NotePattern.h"
 #define START_NOTE		0

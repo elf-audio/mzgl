@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "MidiMessage.h"
+#include <mzgl/midi/MidiMessage.h>
 #include <string>
 #include <sstream>
 

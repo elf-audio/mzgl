@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 #define FONS_INVALID -1
-//#include "error.h"
+//#include <mzgl/gl/error.h>
 
 //
 //
@@ -62,7 +62,7 @@ extern "C" {
 //#include <GL/gl.h>
 //#endif
 
-#include "mzOpenGL.h" // this is an experiment so we don't have to have crazy gl includes all the time
+#include <mzgl/gl/mzOpenGL.h> // this is an experiment so we don't have to have crazy gl includes all the time
 
 enum FONSflags {
 	FONS_ZERO_TOPLEFT = 1,

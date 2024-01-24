@@ -12,8 +12,7 @@
 #include <future>
 #include <functional>
 #include <stdexcept>
-#include "util.h"
-
+#include <mzgl/util/util.h>
 
 class ThreadPool {
 public:
@@ -39,7 +38,6 @@ inline ThreadPool::ThreadPool(size_t threads)
 	: stop(false) {
 	for (size_t i = 0; i < threads; ++i)
 		workers.emplace_back([this, i] {
-
 			setThreadName("ThreadPool worker " + std::to_string(i));
 
 			for (;;) {

@@ -6,12 +6,11 @@
 //  Copyright © 2021 Marek Bereza. All rights reserved.
 //
 
-#include "AllMidiDevices.h"
+#include <mzgl/midi/AllMidiDevices.h>
 #include "AllMidiDevicesImpl.h"
 #include <atomic>
-#include "mainThread.h"
-#include "util.h"
-#include "mainThread.h"
+#include <mzgl/util/mainThread.h>
+#include <mzgl/util/util.h>
 
 #ifdef __APPLE__
 #	include "AllMidiDevicesAppleImpl.h"

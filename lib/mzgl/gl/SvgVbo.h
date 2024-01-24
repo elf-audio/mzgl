@@ -7,11 +7,11 @@
 //
 
 #pragma once
-#include "Vbo.h"
+#include <mzgl/gl/Vbo.h>
 #include <string>
 #include <memory>
-#include "SVG.h"
-#include "Geometry.h"
+#include <mzgl/geom/SVG.h>
+#include <mzgl/gl/Geometry.h>
 
 class SvgVbo;
 typedef std::shared_ptr<SvgVbo> SvgVboRef;

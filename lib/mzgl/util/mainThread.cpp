@@ -6,9 +6,9 @@
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
 
-#include "mainThread.h"
-#include "log.h"
-#include "mzAssert.h"
+#include <mzgl/util/mainThread.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/mzAssert.h>
 #include "concurrentqueue.h"
 
 class MainThreadRunner::LambdaQueue : public moodycamel::ConcurrentQueue<std::function<void()>> {};

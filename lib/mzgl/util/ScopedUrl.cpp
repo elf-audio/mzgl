@@ -6,9 +6,9 @@
 //  Copyright © 2023 Marek Bereza. All rights reserved.
 //
 
-#include "ScopedUrl.h"
-#include "filesystem.h"
-#include "log.h"
+#include <fsystem/fsystem.h>
+#include <mzgl/util/ScopedUrl.h>
+#include <mzgl/util/log.h>
 
 ScopedUrl::~ScopedUrl() {
 	destructEarly();

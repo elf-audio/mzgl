@@ -1,6 +1,6 @@
 #pragma once
-#include "Layer.h"
-#include "Tween.h"
+#include <mzgl/ui/Layer.h>
+#include <mzgl/animation/Tween.h>
 /**
  * UI Widgets that look sort of like the ios ones
  */

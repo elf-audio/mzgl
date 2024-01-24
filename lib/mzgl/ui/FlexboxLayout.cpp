@@ -7,8 +7,8 @@
 //
 
 #include "FlexboxLayout.h"
-#include "log.h"
-#include "mzAssert.h"
+#include <mzgl/util/log.h>
+#include <mzgl/util/mzAssert.h>
 
 void Flexbox::LayoutBase::addChild(LayoutNodeRef child) {
 	children.push_back(child);
@@ -16,9 +16,9 @@ void Flexbox::LayoutBase::addChild(LayoutNodeRef child) {
 }
 
 void Flexbox::LayoutBase::update(float xOffset, float yOffset) {
-    mzAssert(!std::isnan(xOffset) && !std::isnan(yOffset));
+	mzAssert(!std::isnan(xOffset) && !std::isnan(yOffset));
 
-    if (std::isnan(xOffset)) xOffset = 0.0;
+	if (std::isnan(xOffset)) xOffset = 0.0;
 	if (std::isnan(yOffset)) yOffset = 0.0;
 
 	if (layer != nullptr) {

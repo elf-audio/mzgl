@@ -7,10 +7,10 @@
 //
 
 #pragma once
-#include "ScrollingList.h"
-#include "animation.h"
-#include "log.h"
-#include "mzAssert.h"
+#include <mzgl/ui/ScrollingList.h>
+#include <mzgl/animation/animation.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/mzAssert.h>
 #include <list>
 class HierarchicalScrollingList : public ScrollingList {
 public:

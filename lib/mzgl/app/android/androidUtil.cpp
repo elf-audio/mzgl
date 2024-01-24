@@ -2,9 +2,9 @@
 #include "androidUtil.h"
 #include <functional>
 #include <string>
-#include <util/log.h>
-#include "util.h"
-#include "mainThread.h"
+#include <mzgl/util/log.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/mainThread.h>
 
 #define PCM_OUT_BUFF_SIZE (32 * 1024)
 
@@ -319,8 +319,8 @@ string jstringToString(JNIEnv *jni, jstring text) {
 	return s;
 }
 
-#include "AllMidiDevicesAndroidImpl.h"
-#include "MidiMessageParser.h"
+#include <mzgl/midi/AllMidiDevicesAndroidImpl.h>
+#include <mzgl/midi/MidiMessageParser.h>
 
 std::vector<AudioPort> convertAudioPortFromNames(const std::vector<std::string> &audioPortNames) {
 	AudioPort basicPort {-1, 0, 0, 44100.0, {}, "EMPTY-PORT", false, false};

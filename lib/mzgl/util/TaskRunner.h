@@ -11,8 +11,8 @@
 #include <list>
 #include <future>
 #include <thread>
-#include "log.h"
-#include "mainThread.h"
+#include <mzgl/util/log.h>
+#include <mzgl/util/mainThread.h>
 #include "concurrentqueue.h"
 
 /**
@@ -45,7 +45,6 @@ public:
 		if (synchronous) return;
 
 		fut = std::async(std::launch::async, [this]() {
-
 			setThreadName(this->name);
 
 			TaskSpec spec;

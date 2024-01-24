@@ -1,5 +1,5 @@
 
-#include "App.h"
+#include <mzgl/App.h>
 
 /**
  * Every executable has a subclass of App, which is the main class.

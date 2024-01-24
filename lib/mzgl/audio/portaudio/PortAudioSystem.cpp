@@ -7,11 +7,11 @@
 //
 
 #include "PortAudioSystem.h"
-#include "log.h"
+#include <mzgl/util/log.h>
 // #ifdef __APPLE__
 // #import <AVFoundation/AVFoundation.h>
 // #endif
-#include "portaudio.h"
+#include <portaudio.h>
 #ifdef __linux__
 #	include "pa_linux_alsa.h"
 #endif

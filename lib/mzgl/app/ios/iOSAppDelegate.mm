@@ -10,15 +10,15 @@
 #import <GLKit/GLKit.h>
 //#import "MZGLKitView.h"
 #import "MZGLKitViewController.h"
-#include "App.h"
-#include "EventDispatcher.h"
-#include "AudioShareSDK.h"
-#include "log.h"
-#include "PluginEditor.h"
-#include "DateTime.h"
-#include "ScopedUrl.h"
-#include "util.h"
-#include "mzAssert.h"
+#include <mzgl/App.h>
+#include <mzgl/util/EventDispatcher.h>
+#include <AudioShareSDK.h>
+#include <mzgl/util/log.h>
+#include <mzgl/PluginEditor.h>
+#include <mzgl/util/DateTime.h>
+#include <mzgl/util/ScopedUrl.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/mzAssert.h>
 
 #if defined(__APPLE__)
 void quitApplication() {

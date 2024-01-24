@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "ScrollingListItem.h"
-#include "Haptics.h"
+#include <mzgl/ui/ScrollingListItem.h>
+#include <mzgl/util/Haptics.h>
 
 class Dialogs;
 // swipe left to delete

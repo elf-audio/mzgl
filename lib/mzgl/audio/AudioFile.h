@@ -8,8 +8,8 @@
 
 #pragma once
 #include <string>
-#include "FloatBuffer.h"
-#include "Int16Buffer.h"
+#include <mzgl/util/FloatBuffer.h>
+#include <mzgl/util/Int16Buffer.h>
 
 namespace AudioFile {
 	// these probably throw std::bad_alloc if running out of RAM

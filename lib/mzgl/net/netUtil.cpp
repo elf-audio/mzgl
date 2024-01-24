@@ -6,10 +6,10 @@
 //  Copyright © 2023 Marek Bereza. All rights reserved.
 //
 
-#include "netUtil.h"
-#include "stringUtil.h"
-#include "util.h"
-#include "log.h"
+#include <mzgl/net/netUtil.h>
+#include <mzgl/util/stringUtil.h>
+#include <mzgl/util/util.h>
+#include <mzgl/util/log.h>
 #ifdef __APPLE__
 #	include <Foundation/Foundation.h>
 #endif

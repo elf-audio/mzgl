@@ -6,7 +6,7 @@
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
 
-#include "geomutils.h"
+#include <mzgl/geom/geomutils.h>
 #include <algorithm>
 
 static inline float length_squared(const vec2 &v, const vec2 &w) noexcept {

@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 
 struct GLFWwindow;
 

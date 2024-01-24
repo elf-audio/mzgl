@@ -6,7 +6,7 @@
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
 
-#include "mzAssert.h"
+#include <mzgl/util/mzAssert.h>
 
 bool assertsEnabled = true;
 

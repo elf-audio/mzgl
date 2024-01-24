@@ -10,7 +10,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "stringUtil.h"
+#include <mzgl/util/stringUtil.h>
 
 struct AudioPort {
 	int portId		   = -1;
@@ -134,9 +134,9 @@ public:
 
 #if TARGET_OS_IOS
 #	include <AudioToolbox/AudioToolbox.h>
-#	include "AudioSystemIOS.h"
+#	include <mzgl/audio/iOS/AudioSystemIOS.h>
 #else
 #	ifndef __ANDROID__
-#		include "PortAudioSystem.h"
+#		include <portaudio/PortAudioSystem.h>
 #	endif
 #endif

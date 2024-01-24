@@ -1,5 +1,5 @@
 #include "DesktopWindowFileDragHandler.h"
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 #include "GLFWAppRunner.h"
 #include <GLFW/glfw3.h>
 

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 
 class DrawingFunction : public Layer {
 public:

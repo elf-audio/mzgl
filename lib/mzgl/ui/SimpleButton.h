@@ -6,7 +6,7 @@
 
 #pragma once
 #include <functional>
-#include "Layer.h"
+#include <mzgl/ui/Layer.h>
 
 class SimpleButton : public Layer {
 public:

@@ -7,15 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "iOSAppDelegate.h"
-#include "log.h"
+#import <mzgl/app/ios/iOSAppDelegate.h>
+#include <mzgl/util/log.h>
 int main(int argc, char *argv[]) {
 	NSString *appDelegateClassName;
 
-	@autoreleasepool {
-		// Setup code that might create autoreleased objects goes here.
-		appDelegateClassName = NSStringFromClass([iOSAppDelegate class]);
-	}
+	//@autoreleasepool {
+	// Setup code that might create autoreleased objects goes here.
+	appDelegateClassName = NSStringFromClass([iOSAppDelegate class]);
+	//}
 	try {
 		return UIApplicationMain(argc, argv, nil, appDelegateClassName);
 	} catch (const std::exception &e) {

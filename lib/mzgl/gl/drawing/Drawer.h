@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "MitredLine.h"
-#include "Graphics.h"
-#include "Geometry.h"
+#include <mzgl/gl/drawing/MitredLine.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/gl/Geometry.h>
 
 class Drawer {
 public:

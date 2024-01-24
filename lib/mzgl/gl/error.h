@@ -11,7 +11,8 @@
 
 #	include <stdlib.h>
 #	include <assert.h>
-#	include "log.h"
+#	include <mzgl/util/log.h>
+
 extern bool alreadyHadGLError;
 #	define GetError()                                                                                            \
 		{                                                                                                         \

@@ -9,10 +9,10 @@
 #import "EventsView.h"
 #include "util.h"
 #include "mzgl/util/log.h"
-#include "mainThread.h"
+#include <mzgl/util/mainThread.h>
 
 #include "NSEventDispatcher.h"
-#include "EventDispatcher.h"
+#include <mzgl/util/EventDispatcher.h>
 
 using namespace std;
 

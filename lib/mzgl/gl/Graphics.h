@@ -9,12 +9,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "Vbo.h"
-#include "Rectf.h"
+#include <mzgl/gl/Vbo.h>
+#include <mzgl/geom/Rectf.h>
 #include "Fbo.h"
 #include "MatrixStack.h"
-#include "Shader.h"
-#include "Font.h"
+#include <mzgl/gl/Shader.h>
+#include <mzgl/gl/Font.h>
 #include <map>
 #include <functional>
 

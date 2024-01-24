@@ -6,12 +6,12 @@
 //  Copyright © 2023 Marek Bereza. All rights reserved.
 //
 
-#include "AppleWebView.h"
+#include <mzgl/app/apple/AppleWebView.h>
 
 #include <string>
-#include "EventDispatcher.h"
-#include "log.h"
-#include "filesystem.h"
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/util/log.h>
+#include <fsystem/fsystem.h>
 #include <TargetConditionals.h>
 
 @implementation AppleWebView {

@@ -11,7 +11,7 @@
 #import <Cocoa/Cocoa.h>
 #include <memory>
 
-//#include "App.h"
+//#include <mzgl/App.h>
 class EffectPlugin;
 #ifdef USE_METALANGLE
 #	import <MetalANGLE/MGLKView.h>

@@ -1,5 +1,5 @@
 
-#include "App.h"
+#include <mzgl/App.h>
 #include <cmath>
 
 class MyApp : public App {

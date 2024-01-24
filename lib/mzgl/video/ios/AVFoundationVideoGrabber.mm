@@ -38,7 +38,7 @@
 iOSVideoGrabber *grabber;
 
 #include <TargetConditionals.h>
-#include "Log.h"
+#include <mzgl/util/log.h>
 #include <OpenGLES/ES3/gl.h>
 
 #include <OpenGLES/gltypes.h>

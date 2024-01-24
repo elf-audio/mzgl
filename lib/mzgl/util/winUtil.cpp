@@ -7,10 +7,10 @@
 #include <vector>
 #include <Urlmon.h>
 #include <wininet.h>
-#include "filesystem.h"
-#include "Rectf.h"
-#include "log.h"
-#include "util.h"
+#include <fsystem/fsystem.h>
+#include <mzgl/geom/Rectf.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/util.h>
 
 namespace { ///////////////////////////////////////////////////////////////////////
 
@@ -460,7 +460,7 @@ struct DownloadBSCallback : public IBindStatusCallback {
 
 private:
 	STDMETHODIMP
-		OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
+	OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
 		if (ulProgressMax == 0) {
 			return S_OK;
 		}

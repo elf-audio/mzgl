@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "FloatBuffer.h"
+#include <mzgl/util/FloatBuffer.h>
 #include <algorithm>
 
 class Int16Buffer {
@@ -26,12 +26,12 @@ public:
 
 	void interpolateStereo(double p, float &L, float &R) const noexcept;
 	void assignValue(int index, float v) { d[index] = clamp16bit(v); }
-	
+
 	auto begin() { return std::begin(d); }
 	auto end() { return std::end(d); }
-	
-	template< class InputIt >
-	auto insert( std::vector<int16_t>::const_iterator pos, InputIt first, InputIt last ){
+
+	template <class InputIt>
+	auto insert(std::vector<int16_t>::const_iterator pos, InputIt first, InputIt last) {
 		return d.insert(pos, first, last);
 	}
 
@@ -70,5 +70,4 @@ public:
 	std::vector<int16_t> d;
 	const int16_t *data() { return d.data(); }
 	std::optional<size_t> findFirstOnset(float threshold = FloatBuffer::defaultThresholdForOnsets) const;
-
 };

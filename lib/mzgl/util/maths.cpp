@@ -6,7 +6,7 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "maths.h"
+#include <mzgl/util/maths.h>
 #include <stdlib.h>
 #include <math.h>
 

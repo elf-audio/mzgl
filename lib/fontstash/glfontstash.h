@@ -32,7 +32,7 @@ struct GLFONScontext {
 	int width, height;
 };
 typedef struct GLFONScontext GLFONScontext;
-#include "error.h"
+#include <mzgl/gl/error.h>
 static int glfons__renderCreate(void* userPtr, int width, int height)
 {
 	
@@ -113,7 +113,7 @@ static void glfons__renderDelete(void* userPtr)
 	free(gl);
 }
 
-#include "error.h"
+#include <mzgl/gl/error.h>
 FONScontext* glfonsCreate(int width, int height, int flags)
 {
 	GetError();

@@ -7,16 +7,16 @@
 //
 
 #import "MZGLView.h"
-#include "App.h"
-#include "mainThread.h"
-#include "log.h"
+#include <mzgl/App.h>
+#include <mzgl/util/mainThread.h>
+#include <mzgl/util/log.h>
 
-#include "mzOpenGL.h"
-#include "Graphics.h"
-#include "EventDispatcher.h"
-#include "NSEventDispatcher.h"
-#include "PluginEditor.h"
-#include "Vbo.h"
+#include <mzgl/gl/mzOpenGL.h>
+#include <mzgl/gl/Graphics.h>
+#include <mzgl/util/EventDispatcher.h>
+#include <mzgl/app/mac/NSEventDispatcher.h>
+#include <mzgl/PluginEditor.h>
+#include <mzgl/gl/Vbo.h>
 #include <mutex>
 
 @implementation MZGLView {

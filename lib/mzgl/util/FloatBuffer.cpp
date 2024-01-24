@@ -1,8 +1,8 @@
 
-#include "FloatBuffer.h"
+#include <mzgl/util/FloatBuffer.h>
 #include <assert.h>
-//#include "util.h"
-#include "maths.h"
+//#include <mzgl/util/util.h>
+#include <mzgl/util/maths.h>
 #include <fstream>
 #include <limits> // std::numeric_limits
 #include <cmath> // std::isnan()

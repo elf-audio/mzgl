@@ -6,9 +6,9 @@
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
 
-#include "UndoManager.h"
-#include "log.h"
-#include "mzAssert.h"
+#include <mzgl/util/UndoManager.h>
+#include <mzgl/util/log.h>
+#include <mzgl/util/mzAssert.h>
 #include <algorithm>
 
 class LambdaUndoable : public Undoable {
