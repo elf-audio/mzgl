@@ -221,6 +221,8 @@ private:
 	uint32_t immediateColorBuffer  = 0;
 	uint32_t immediateIndexBuffer  = 0;
 
+	Rectf scissor;
+	
 	// was in Globals
 	unsigned int frameNum = 0;
 };
