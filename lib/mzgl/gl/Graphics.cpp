@@ -419,9 +419,7 @@ void Graphics::unloadFont() {
 	}
 }
 
-void Graphics::warpMaskForScissor(Rectf &a) {
-	// currently does nothing
-}
+
 
 #include "Triangulator.h"
 void Graphics::drawShape(const std::vector<vec2> &shape) {

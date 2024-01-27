@@ -184,10 +184,6 @@ public:
 
 	bool firstFrame = true;
 
-	// this function will warp a rect so it works with glScissor
-	// - different OS's have different quirks regarding this
-	void warpMaskForScissor(Rectf &a);
-
 	// currently focused layer once a touch has gone down
 	// this should be replaced by a touch id to Layer* map for multitouch
 	// needs to be here so it's not static
