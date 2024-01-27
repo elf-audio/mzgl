@@ -1,9 +1,16 @@
 //
+//         _  __                   _ _
+//        | |/ _|                 | (_)
+//     ___| | |_    __ _ _   _  __| |_  ___
+//    / _ \ |  _|  / _` | | | |/ _` | |/ _ \
+//   |  __/ | |   | (_| | |_| | (_| | | (_) |
+//    \___|_|_|    \__,_|\__,_|\__,_|_|\___/
+//
+//
 //  MZOpenGLView.h - this is the OpenGL View wrapper
 //  MZGL
 //
 //  Created by Marek Bereza on 15/01/2018.
-//  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
 #pragma once
@@ -11,13 +18,10 @@
 #import <Cocoa/Cocoa.h>
 #include <memory>
 
-//#include "App.h"
-class EffectPlugin;
 #ifdef USE_METALANGLE
 #	import <MetalANGLE/MGLKView.h>
-#else
-
 #endif
+
 class App;
 class EventDispatcher;
 @interface MZGLView : NSOpenGLView {
@@ -33,7 +37,5 @@ class EventDispatcher;
 - (void)shutdown;
 - (std::shared_ptr<App>)getApp;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
-
-@property(nonatomic, readwrite, retain) IBOutlet MZGLView *view;
 
 @end

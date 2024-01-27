@@ -26,8 +26,6 @@
 	bool drawing;
 }
 
-@synthesize view;
-
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
 	eventDispatcher = evtDispatcher;
 
@@ -59,7 +57,7 @@
 	self = [super initWithFrame:frame pixelFormat:pixelFormat];
 	if (self != nil) {
 		[self setWantsBestResolutionOpenGLSurface:YES];
-		[self createGLResources];
+		[[self openGLContext] makeCurrentContext];
 		[self createDisplayLink];
 		drawing = true;
 
@@ -109,14 +107,15 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	CGDirectDisplayID displayID = CGMainDisplayID();
 	CVReturn error				= CVDisplayLinkCreateWithCGDisplay(displayID, &displayLink);
 
-	if (kCVReturnSuccess == error) {
-		// is CFBRidgingRetain ok?
-		CVDisplayLinkSetOutputCallback(displayLink, displayCallback, (__bridge void *) (self));
-		CVDisplayLinkStart(displayLink);
-	} else {
+	if (error != kCVReturnSuccess) {
 		NSLog(@"Display Link created with error: %d", error);
 		displayLink = NULL;
+		return;
 	}
+		
+	// is CFBRidgingRetain ok?
+	CVDisplayLinkSetOutputCallback(displayLink, displayCallback, (__bridge void *) (self));
+	CVDisplayLinkStart(displayLink);
 }
 
 - (void)setWindowSize:(float)x y:(float)y {
@@ -127,36 +126,9 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	frame.origin.y += newSize.height;
 	frame.size = newSize;
 	[self.window setFrame:frame display:YES animate:NO];
-	//	eventDispatcher->resized();
 }
 
-- (void)createGLResources {
-	[[self openGLContext] makeCurrentContext];
-	Graphics &g = eventDispatcher->app->g;
-	//	glViewport(0, 0, g.width/g.pixelScale, g.height/g.pixelScale);
-}
 
-//- (BOOL)windowShouldClose:(NSWindow *)sender {
-//	Log::d() << "windowShouldClose";
-//	return YES;
-//}
-//
-//
-//- (void)windowDidBecomeKey:(NSNotification *)notification {
-//	NSWindow *window = notification.object;
-//	Graphics &g = eventDispatcher->app->g;
-//
-//	g.pixelScale = [window backingScaleFactor];
-//}
-//
-//
-//
-//- (void)windowWillClose:(NSNotification *)notification {
-//	//[self shutdown];
-//	Log::d() << "windowWillClose";
-//	[[NSApplication sharedApplication] terminate:nil];
-//	//EventDispatcher::instance()->exit();
-//}
 
 - (void)windowResized:(NSNotification *)notification {
 	Log::d() << "windowDidResize";
@@ -171,7 +143,6 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	f.size.width  = g.width;
 	f.size.height = g.height;
 
-	//	evtMutex.lock();
 	self.frame = f;
 	glViewport(0, 0, g.width, g.height);
 	g.width *= g.pixelScale;
@@ -179,26 +150,19 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 
 	auto evtDispatcher = eventDispatcher;
 	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher, &g]() { evtDispatcher->resized(); });
-	//	evtMutex.unlock();
+	
 }
 
 - (void)renderForTime:(CVTimeStamp)time {
 	[[self openGLContext] makeCurrentContext];
 	[self lock];
 
-	//	drawFrame(eventDispatcher->app->g, eventDispatcher);
 	if (eventDispatcher->app->g.firstFrame) {
 		initMZGL(eventDispatcher->app);
 		eventDispatcher->setup();
 		eventDispatcher->app->g.firstFrame = false;
 	}
-	//	if(self.window!=nil && (eventDispatcher->app->g.width!=self.frame.size.width ||
-	//	   eventDispatcher->app->g.height!=self.frame.size.height)
-	//	   ) {
-	//		NSNotification *notif = [NSNotification notificationWithName:@"resized" object:self.window];
-	//		[self windowResized: notif];
-	//	}
-
+	
 	eventDispatcher->runFrame();
 	[self unlock];
 	[[self openGLContext] flushBuffer];
