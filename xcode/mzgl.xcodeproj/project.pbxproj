@@ -1618,6 +1618,8 @@
 		EAAA5AB92755437000021ACA /* rotate_normalized_axis.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = rotate_normalized_axis.hpp; sourceTree = "<group>"; };
 		EAAA5ABA2755437000021ACA /* projection.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = projection.inl; sourceTree = "<group>"; };
 		EAAA5ABB2755437000021ACA /* type_aligned.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = type_aligned.hpp; sourceTree = "<group>"; };
+		EAB308E62B64DF8C00B1F228 /* MZMetalView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMetalView.mm; sourceTree = "<group>"; };
+		EAB308E72B64DF8C00B1F228 /* MZMetalView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZMetalView.h; sourceTree = "<group>"; };
 		EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = midiMessagePrinting.cpp; sourceTree = "<group>"; };
 		EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midiMessagePrinting.h; sourceTree = "<group>"; };
 		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
@@ -1907,6 +1909,7 @@
 		EA1835CD2432C18B00A5C3E8 /* mac */ = {
 			isa = PBXGroup;
 			children = (
+				EAB308E52B64DED600B1F228 /* Metal */,
 				EA3551BA25CB2028003DF2FB /* MetalANGLE */,
 				EA3551B225CB201F003DF2FB /* GL */,
 				EA1835CE2432C18B00A5C3E8 /* TextConsole.mm */,
@@ -3016,6 +3019,15 @@
 				EAAA5ABB2755437000021ACA /* type_aligned.hpp */,
 			);
 			path = gtx;
+			sourceTree = "<group>";
+		};
+		EAB308E52B64DED600B1F228 /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+				EAB308E72B64DF8C00B1F228 /* MZMetalView.h */,
+				EAB308E62B64DF8C00B1F228 /* MZMetalView.mm */,
+			);
+			path = Metal;
 			sourceTree = "<group>";
 		};
 		EAD03BA2297FD98F00D0C04A /* web */ = {

@@ -28,7 +28,7 @@ include(CPM.cmake)
 #     "JSON_BuildTests OFF"
 # )
 
-
+add_compile_definitions(MZGL_METAL=1)
 if (CMAKE_BUILD_TYPE MATCHES DEBUG)
     add_compile_definitions(DEBUG=1)
 
@@ -120,10 +120,11 @@ set(MZGL_SOURCES
         lib/mzgl/app/mac/mainMac.mm
         lib/mzgl/app/apple/MZGLWebView.mm
         lib/mzgl/app/apple/AppleWebView.mm
-        lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
+        # lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
         lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
         lib/mzgl/app/web/MacWebView.mm
         lib/mzgl/app/web/MZWebView.cpp
+        lib/mzgl/app/mac/Metal/MZMetalView.mm
         >
 )
 if (NOT ANDROID)
@@ -164,6 +165,7 @@ set(HEADERS
         lib/mzgl/app/apple/AUv3
         lib/mzgl/app/mac
         lib/mzgl/app/mac/GL
+        lib/mzgl/app/mac/Metal
         lib/mzgl/app/glfw
         lib/mzgl/app/web
         lib/mzgl/audio
@@ -403,7 +405,7 @@ elseif (APPLE)
     # MZGL_GL2
     #MZGL_MAC_GLFW
     add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__ MZGL_GL2)
-    target_link_libraries(libmzgl "-framework OpenGL -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit -framework UniformTypeIdentifiers")
+    target_link_libraries(libmzgl "-framework OpenGL -framework Metal -framework MetalKit -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit -framework UniformTypeIdentifiers")
 
 elseif (WIN32)
 

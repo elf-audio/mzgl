@@ -9,7 +9,10 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
-#ifdef USE_METALANGLE
+#if MZGL_METAL==1
+#	include "MZMetalView.h"
+#	define GL_VIEW_CLASS MZMetalView
+#elif defined(USE_METALANGLE)
 #	include "MZMGLKView.h"
 #	define GL_VIEW_CLASS MZMGLKView
 

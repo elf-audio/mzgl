@@ -17,9 +17,10 @@
 #include "EventsView.h"
 #include "MZGLWebView.h"
 
-#ifdef USE_METALANGLE
+#if defined(USE_METALANGLE)
 #	import "MZMGLKViewController.h"
 #endif
+
 using namespace std;
 
 @interface MacAppDelegate () {
@@ -29,7 +30,7 @@ using namespace std;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
 
-#ifdef USE_METALANGLE
+#if defined(USE_METALANGLE)
 	MZMGLKViewController *controller;
 #endif
 }
@@ -117,7 +118,10 @@ using namespace std;
 - (void)makeWindow {
 	NSRect windowRect = [self setupWindow];
 
-#ifdef USE_METALANGLE
+// #if MZGL_METAL == 1
+// 	controller = [[MZMetalViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
+// 	view	   = controller.view;
+#if defined(USE_METALANGLE)
 	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 	view	   = controller.view;
 #else
@@ -128,7 +132,8 @@ using namespace std;
 	[[window contentView] addSubview:view];
 	[window makeKeyAndOrderFront:nil];
 	[window makeMainWindow];
-#ifdef USE_METALANGLE
+
+#if defined(USE_METALANGLE)
 	app->viewController = controller;
 #else
 	// this doesn't work - there is no contentViewController

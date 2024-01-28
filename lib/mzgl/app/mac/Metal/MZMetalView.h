@@ -8,19 +8,12 @@
 
 #pragma once
 
-#import <Cocoa/Cocoa.h>
+#import <MetalKit/MetalKit.h>
 #include <memory>
 
-//#include "App.h"
-class EffectPlugin;
-#ifdef USE_METALANGLE
-#	import <MetalANGLE/MGLKView.h>
-#else
-
-#endif
 class App;
 class EventDispatcher;
-@interface MZGLView : NSOpenGLView {
+@interface MZMetalView : MTKView <MTKViewDelegate> {
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 }
 
@@ -33,7 +26,5 @@ class EventDispatcher;
 - (void)shutdown;
 - (std::shared_ptr<App>)getApp;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
-
-@property(nonatomic, readwrite, retain) IBOutlet MZGLView *view;
 
 @end
