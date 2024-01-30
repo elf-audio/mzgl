@@ -16,7 +16,7 @@
 
 static void NSLogError(OSStatus c, const std::string &str) {
 	if (c != noErr) {
-		printf("Error trying to : %s\n", str.c_str());
+		printf("Error trying to : %s, with status %d\n", str.c_str(), c);
 	}
 }
 
@@ -26,7 +26,7 @@ static std::string nameOfEndpoint(MIDIEndpointRef ref) {
 	if (s != noErr) {
 		return "Unknown name";
 	}
-	NSString *str = (NSString *) CFBridgingRelease(string);
+	auto str = (NSString *) CFBridgingRelease(string);
 	return [str UTF8String];
 }
 
@@ -36,13 +36,13 @@ CoreMidiDevice::CoreMidiDevice(MIDIEndpointRef endpoint)
 }
 
 static void MIDIReadNoteProc(const MIDIPacketList *packetList, void *readProcRefCon, void *srcConnRefCon) {
-	AllMidiDevicesAppleImpl *me = (AllMidiDevicesAppleImpl *) readProcRefCon;
-	CoreMidiDevice *dev			= (CoreMidiDevice *) srcConnRefCon;
+	auto *me  = (AllMidiDevicesAppleImpl *) readProcRefCon;
+	auto *dev = (CoreMidiDevice *) srcConnRefCon;
 	me->packetListReceived(*dev, packetList);
 }
 
 static void myMIDINotifyProc(const MIDINotification *message, void *refCon) {
-	AllMidiDevicesAppleImpl *me = (AllMidiDevicesAppleImpl *) refCon;
+	auto *me = (AllMidiDevicesAppleImpl *) refCon;
 	me->midiNotify(message);
 }
 
@@ -139,7 +139,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 		if (endpoint == virtualDestinationEndpoint) continue;
 
 		bool matched = false;
-		for (auto destination: midiOuts) {
+		for (const auto &destination: midiOuts) {
 			if (destination->endpoint == endpoint) {
 				removeFirst(removedDestinations, destination);
 				matched = true;
@@ -155,7 +155,7 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 		if (endpoint == virtualSourceEndpoint) continue;
 
 		bool matched = false;
-		for (auto source: midiIns) {
+		for (const auto &source: midiIns) {
 			if (source->endpoint == endpoint) {
 				removeFirst(removedSources, source);
 				matched = true;
@@ -166,11 +166,11 @@ void AllMidiDevicesAppleImpl::scanForDevices() {
 		connectInput(endpoint);
 	}
 
-	for (auto destination: removedDestinations) {
+	for (const auto &destination: removedDestinations) {
 		disconnectOutput(destination->endpoint);
 	}
 
-	for (auto source: removedSources) {
+	for (const auto &source: removedSources) {
 		disconnectInput(source->endpoint);
 	}
 }
@@ -239,7 +239,7 @@ void AllMidiDevicesAppleImpl::midiReceived(const MidiDevice &device, const MidiM
 
 void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList) {
 	// there is a bug here probably if you were to send multiple streams of data
-	// there is no distinquishing between different devices with regards to pendingMsg.
+	// there is no distinguishing between different devices in regard to pendingMsg.
 	// you'd need one per device.
 	// Log::e() << "Packet list received from " << device.name;
 	const MIDIPacket *packet = &packetList->packet[0];
@@ -249,7 +249,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 
 			if (d[i] & 0x80) {
 				// this is a status byte, send any previous messages
-				if (pendingMsg.size() > 0) {
+				if (!pendingMsg.empty()) {
 					midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
 					pendingMsg.clear();
 				}
@@ -266,7 +266,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 				// a data byte
 
 				// first check we have a status in the gun, otherwise can this message
-				if (pendingMsg.size() == 0 || (pendingMsg[0] & 0x80) == 0) {
+				if (pendingMsg.empty() || (pendingMsg[0] & 0x80) == 0) {
 					pendingMsg.clear();
 				} else {
 					pendingMsg.push_back(d[i]);
@@ -335,83 +335,97 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 	}
 }
 
-void AllMidiDevicesAppleImpl::sendPacketList(const MIDIPacketList *packetList) {
+std::optional<MIDIEndpointRef> getEndpointRefForDevice(const MidiDevice &device,
+													   const std::vector<CoreMidiOutRef> &midiOuts) {
 	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
-		MIDIEndpointRef outputEndpoint = MIDIGetDestination(index);
-		if (outputEndpoint) {
-			// Send it
-			OSStatus s = MIDISend(outputPort, outputEndpoint, packetList);
-			NSLogError(s, "Sending MIDI");
-		}
+		auto endpoint = MIDIGetDestination(index);
+		if (endpoint == 0) continue;
+
+		for (const auto &destination: midiOuts)
+			if (destination->endpoint == endpoint && device == *destination) return endpoint;
 	}
+
+	return std::nullopt;
 }
 
-void AllMidiDevicesAppleImpl::sendBytes(const UInt8 *data, UInt32 size) {
-	//    NSLog(@"%s(%u bytes to core MIDI)", __func__, unsigned(size));
-	assert(size < 65536);
-	Byte packetBuffer[size + 100];
-	MIDIPacketList *packetList = (MIDIPacketList *) packetBuffer;
-	MIDIPacket *packet		   = MIDIPacketListInit(packetList);
+void AllMidiDevicesAppleImpl::sendBytes(const MidiDevice &device, const MidiMessage &midiMessage) {
+	const auto *data = midiMessage.getBytes().data();
+	const auto size	 = midiMessage.getBytes().size();
+
+	static constexpr auto maxSize = 655336;
+	assert(size < maxSize);
+
+	static constexpr auto packetExtraSpace = 100;
+	Byte packetBuffer[size + packetExtraSpace];
+
+	auto *packetList   = (MIDIPacketList *) packetBuffer;
+	MIDIPacket *packet = MIDIPacketListInit(packetList);
 
 	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, size, data);
 
-	sendPacketList(packetList);
+	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
+		auto result = MIDISend(outputPort, *endpoint, packetList);
+		NSLogError(result, "Sending MIDI bytes");
+	} else {
+		NSLog(@"Failed to find end point for device");
+	}
 }
 
-/*
- struct MIDISysexSendRequest
- {
-     MIDIEndpointRef        destination;
-     const Byte *          data;
-     UInt32                bytesToSend;
-     Boolean                complete;
-     Byte                reserved[3];
-     MIDICompletionProc     completionProc;
-     void * __nullable    completionRefCon;
- };
- */
-
 static void cleanupSysex(MIDISysexSendRequest *request) {
-	//    delete [] request->data;
-	//    printf("cleanup %d\n", request->complete);
 	delete request;
 }
 
-void AllMidiDevicesAppleImpl::sendSysex(const UInt8 *data, UInt32 size) {
-	//    NSLog(@"%s(%u sysex bytes to core MIDI)", __func__, unsigned(size));
+void AllMidiDevicesAppleImpl::sendSysex(const MidiDevice &device, const MidiMessage &midiMessage) {
+	const auto *data = midiMessage.getBytes().data();
+	const auto size	 = midiMessage.getBytes().size();
+
+	static constexpr auto maxSize = 655336;
 	assert(size < 65536);
 
-	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
-		MIDISysexSendRequest *request = new MIDISysexSendRequest();
+	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
+		auto request = new MIDISysexSendRequest;
 
 		request->data = new Byte[size];
 		memcpy((void *) request->data, (void *) data, size);
+
 		request->bytesToSend	  = size;
 		request->completionProc	  = &cleanupSysex;
 		request->completionRefCon = request;
 		request->complete		  = false;
-		request->destination	  = MIDIGetDestination(index);
-		OSStatus res			  = MIDISendSysex(request);
-		if (res != noErr) {
-			printf("error sending sysex\n");
-		}
+		request->destination	  = *endpoint;
+
+		auto result = MIDISendSysex(request);
+		NSLogError(result, "Sending MIDI sysex");
 	}
 }
 
-void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &m) {
-	const auto b = m.getBytes();
-	if (b.size() > 0) {
-		if (m.isSysex()) {
-			sendSysex(b.data(), b.size());
-		} else {
-			sendBytes(b.data(), b.size());
-		}
-	} else {
+bool midiMessageHasValidBytes(const MidiMessage &midiMessage) {
+	if (midiMessage.getBytes().empty()) {
 		Log::e() << "Midi message contained no bytes!";
+		return false;
+	}
+
+	return true;
+}
+
+void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &midiMessage) {
+	if (!midiMessageHasValidBytes(midiMessage)) {
+		return;
+	}
+
+	for (const auto &output: midiOuts) {
+		sendMessage(*output, midiMessage);
 	}
 }
 
-void AllMidiDevicesAppleImpl::sendMessage(const MidiDevice &device, const MidiMessage &m) {
-	// TODO: should only send to the specified device
-	sendMessage(m);
+void AllMidiDevicesAppleImpl::sendMessage(const MidiDevice &device, const MidiMessage &midiMessage) {
+	if (!midiMessageHasValidBytes(midiMessage)) {
+		return;
+	}
+
+	if (midiMessage.isSysex()) {
+		sendSysex(device, midiMessage);
+	} else {
+		sendBytes(device, midiMessage);
+	}
 }
