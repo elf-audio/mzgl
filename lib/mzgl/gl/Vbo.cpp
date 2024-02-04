@@ -7,7 +7,7 @@
 //
 
 #include "mzOpenGL.h"
-
+#include "glUtil.h"
 #include "Vbo.h"
 #include "Shader.h"
 #include "error.h"
@@ -105,43 +105,27 @@ void Vbo::clear() {
 #endif
 }
 
-Vbo &Vbo::setVertices(const vector<vec4> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 4) updating = true;
 
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 4);
-	return *this;
+Vbo &Vbo::setVertices(const float *data, int numVertices, int numDims) {
+    if(numVerts==0) {
+        Log::e() << "Trying to setVertices with no vertices";
+        return *this;
+    }
+
+    if (numVertices == this->numVerts && vertexBuffer != 0 && vertDimensions == numDims) updateVertBuffer(data);
+    else generateVertBuffer(data, numVertices, numDims);
+    return *this;
+}
+Vbo &Vbo::setVertices(const vector<vec4> &verts) {
+    return setVertices(&verts[0].x, verts.size(), 4);
 }
 
 Vbo &Vbo::setVertices(const vector<vec3> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 3) updating = true;
-
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 3);
-	return *this;
+    return setVertices(&verts[0].x, verts.size(), 3);
 }
 
 Vbo &Vbo::setVertices(const vector<vec2> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 2) updating = true;
-
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 2);
-	return *this;
+    return setVertices(&verts[0].x, verts.size(), 2);
 }
 
 void Vbo::generateVertBuffer(const float *data, size_t numVerts, int numDims) {
@@ -216,23 +200,19 @@ Vbo &Vbo::setIndices(const vector<unsigned int> &indices) {
 }
 
 Vbo &Vbo::setColors(const vector<vec3> &cols) {
-	if (cols.size() == 0) {
-		Log::e() << "Trying to setColors with 0 colors";
-		return *this;
-	}
 	generateColorBuffer(&cols[0].x, cols.size(), 3);
 	return *this;
 }
 Vbo &Vbo::setColors(const vector<vec4> &cols) {
-	if (cols.size() == 0) {
-		Log::e() << "Trying to setColors with 0 colors";
-		return *this;
-	}
 	generateColorBuffer(&cols[0].x, cols.size(), 4);
 	return *this;
 }
 
 void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
+    if(numCols==0) {
+        Log::e() << "Trying to generateColorBuffer with 0 colors";
+        return;
+    }
 	if (colorbuffer != 0) glDeleteBuffers(1, &colorbuffer);
 
 #ifndef MZGL_GL2
@@ -246,25 +226,8 @@ void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
 	glBufferData(GL_ARRAY_BUFFER, numCols * sizeof(float) * colDimensions, data, GL_STATIC_DRAW);
 }
 
-static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
-	switch (mode) {
-		case Vbo::PrimitiveType::Triangles: return GL_TRIANGLES;
-		case Vbo::PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
-		case Vbo::PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
-		case Vbo::PrimitiveType::LineLoop: return GL_LINE_LOOP;
-		case Vbo::PrimitiveType::LineStrip: return GL_LINE_STRIP;
-		case Vbo::PrimitiveType::Lines: return GL_LINES;
-
-		default: {
-			Log::e() << "ERROR!! invalid primitive type " << (int) mode;
-			return GL_TRIANGLES;
-		}
-	}
-}
 void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	if (numVerts == 0) {
-		//	    Log::d() << "This is so hard to find";
-		//		Log::i() << "Trying to draw Vbo with no vertices";
 		return;
 	}
 

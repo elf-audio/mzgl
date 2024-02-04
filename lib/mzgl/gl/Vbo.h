@@ -83,6 +83,8 @@ public:
 	static void resetDrawStats();
 #endif
 private:
+    Vbo &setVertices(const float *data, int numVertices, int numDims);
+
 #ifdef DO_DRAW_STATS
 	static int _numDrawnVerts;
 	static int _numDrawCalls;
