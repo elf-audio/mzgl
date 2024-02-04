@@ -390,7 +390,7 @@ private:
     static void uploadBuffer(int32_t attribute, uint32_t buffer, float *data, int numElements, int numComponents) {
         glEnableVertexAttribArray(attribute);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(GL_ARRAY_BUFFER, numElements * numComponents, data, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, numElements * numComponents * sizeof(float), data, GL_DYNAMIC_DRAW);
         glVertexAttribPointer(attribute, numComponents, GL_FLOAT, GL_FALSE, 0, NULL);
     }
 };
