@@ -299,11 +299,10 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 }
 void Graphics::drawCircle(float x, float y, float r) {
 	vector<glm::vec2> verts;
-	//vector<glm::vec4> cols;
 
 	int circleResolution = 100;
 	verts.reserve(circleResolution + 2);
-	//verts.push_back(glm::vec2(x, y));
+
 	for (int i = 0; i <= circleResolution; i++) {
 		float phi = M_PI * 2.f * i / (float) circleResolution;
 		verts.emplace_back(x + cos(phi) * r, y + sin(phi) * r);

@@ -92,14 +92,14 @@ public:
 		loadDefaultShaders();
 
 #ifndef MZGL_GL2
-		if (immediateVertexArray != 0) {
+		if (state.immediateVertexArray != 0) {
 			Log::e()
 				<< "Immediate vertex array recreated - is this bad? if on android, probs should clean this up";
 		}
-		glGenVertexArrays(1, &immediateVertexArray);
+		glGenVertexArrays(1, &state.immediateVertexArray);
 		GetError();
 
-		glBindVertexArray(immediateVertexArray);
+		glBindVertexArray(state.immediateVertexArray);
 		GetError();
 #endif
 		if (state.immediateVertexBuffer != 0) {
