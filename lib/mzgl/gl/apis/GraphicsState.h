@@ -21,7 +21,9 @@ public:
 	uint32_t immediateVertexBuffer = 0;
 	uint32_t immediateColorBuffer  = 0;
 	uint32_t immediateIndexBuffer  = 0;
-
+    glm::mat4 getMVP() const {
+        return viewProjectionMatrix * modelMatrixStack.getMatrix();
+    }
 	Rectf scissor;
 
 	// could probs be a shared ptr/ShaderRef

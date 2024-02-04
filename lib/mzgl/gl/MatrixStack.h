@@ -16,7 +16,7 @@ public:
 	std::vector<glm::mat4> stack;
 	glm::mat4 curr; // identity is default
 	MatrixStack() { curr = glm::mat4(1.0); }
-	const glm::mat4 &getMatrix() { return curr; }
+	const glm::mat4 &getMatrix() const { return curr; }
 
 	void pushMatrix() { stack.push_back(curr); }
 

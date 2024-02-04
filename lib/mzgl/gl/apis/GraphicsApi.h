@@ -30,6 +30,12 @@ public:
 
 	virtual bool isMaskOn() = 0;
 
+    virtual void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles) = 0;
+    virtual void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices) = 0;
+    virtual void drawVerts(const std::vector<glm::vec2> &verts,
+                   const std::vector<glm::vec4> &cols,
+                   Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles) = 0;
+
 protected:
 	GraphicsState &state;
 };

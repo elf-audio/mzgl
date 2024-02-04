@@ -274,5 +274,123 @@ private:
         state.fontShader->isDefaultShader			= true;
 	}
 
-	int32_t defaultFBO;
+
+
+
+    void drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type) override {
+        state.nothingShader->begin();
+
+        state.currShader->uniform("mvp", state.getMVP());
+        if (state.currShader->needsColorUniform) {
+            state.currShader->uniform("color", state.color);
+        }
+
+        // now draw
+
+#ifndef MZGL_GL2
+        if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
+#endif
+
+        uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+        // glEnableVertexAttribArray(currShader->positionAttribute);
+        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        auto glType = primitiveTypeToGLMode(type);
+
+        glDrawArrays(glType, 0, (GLsizei) verts.size());
+
+        glDisableVertexAttribArray(state.currShader->positionAttribute);
+
+#ifndef MZGL_GL2
+        glBindVertexArray(0);
+#endif
+    }
+
+    void drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, Vbo::PrimitiveType type) override {
+        state.colorShader->begin();
+
+        state.currShader->uniform("mvp", state.getMVP());
+        if (state.currShader->needsColorUniform) {
+            state.currShader->uniform("color", state.color);
+        }
+
+        // now draw
+
+#ifndef MZGL_GL2
+        if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
+#endif
+
+        uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+        // glEnableVertexAttribArray(currShader->positionAttribute);
+        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        uploadBuffer(state.currShader->colorAttribute, state.immediateColorBuffer, (float *) cols.data(), cols.size(), 4);
+        // glEnableVertexAttribArray(currShader->colorAttribute);
+        // glBindBuffer(GL_ARRAY_BUFFER, immediateColorBuffer);
+        // glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
+        // glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei) verts.size());
+
+        glDisableVertexAttribArray(state.currShader->positionAttribute);
+        glDisableVertexAttribArray(state.currShader->colorAttribute);
+
+#ifndef MZGL_GL2
+        glBindVertexArray(0);
+#endif
+    }
+
+    void drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> &indices) override {
+        //	VboRef vbo = Vbo::create();
+        //	vbo->setVertices(verts);
+        //	vbo->setIndices(indices);
+        //	vbo->draw(*this);
+
+        state.nothingShader->begin();
+        state.currShader->uniform("mvp", state.getMVP());
+        if (state.currShader->needsColorUniform) {
+            state.currShader->uniform("color", state.color);
+        }
+        // now draw
+
+        Log::e() << "drawVerts(verts, indices) has changed and is not tested";
+
+#ifndef MZGL_GL2
+        if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
+#endif
+
+        uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+        // glEnableVertexAttribArray(currShader->positionAttribute);
+        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, state.immediateColorBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_DYNAMIC_DRAW);
+
+        glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
+
+        glDisableVertexAttribArray(state.currShader->positionAttribute);
+
+#ifndef MZGL_GL2
+        glBindVertexArray(0);
+#endif
+    }
+
+
+    int32_t defaultFBO;
+private:
+    static void uploadBuffer(int32_t attribute, uint32_t buffer, float *data, int numElements, int numComponents) {
+        glEnableVertexAttribArray(attribute);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, numElements * numComponents, data, GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(attribute, numComponents, GL_FLOAT, GL_FALSE, 0, NULL);
+    }
 };
