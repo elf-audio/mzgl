@@ -19,7 +19,6 @@
 #include "MitredLine.h"
 #include "Drawer.h"
 
-
 using namespace std;
 
 glm::vec4 hexColor(int hex, float a) {
@@ -65,7 +64,7 @@ glm::vec4 hexColor(string inp) {
 
 ScopedAlphaBlend::ScopedAlphaBlend(Graphics &g, bool shouldBlend)
 	: g(g) {
-	originalBlendState = g.blendingEnabled;
+	originalBlendState = g.isBlending();
 	g.setBlending(shouldBlend);
 }
 
@@ -74,33 +73,31 @@ ScopedAlphaBlend::~ScopedAlphaBlend() {
 }
 
 bool Graphics::isBlending() {
-	return blendingEnabled;
+	return state.blendingEnabled;
 }
 
 glm::mat4 Graphics::getMVP() {
-	return viewProjectionMatrix * modelMatrixStack.getMatrix();
+	return state.viewProjectionMatrix * state.modelMatrixStack.getMatrix();
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // MATRIX STUFF
 
 const glm::mat4 &Graphics::getModelMatrix() {
-	return modelMatrixStack.getMatrix();
+	return state.modelMatrixStack.getMatrix();
 }
 void Graphics::pushMatrix() {
-	if (modelMatrixStack.size() > 100) {
+	if (state.modelMatrixStack.size() > 100) {
 		Log::w() << "WARNING: model matrix stack is over 100 deep";
 	}
-	modelMatrixStack.pushMatrix();
+	state.modelMatrixStack.pushMatrix();
 }
 void Graphics::popMatrix() {
-	modelMatrixStack.popMatrix();
+	state.modelMatrixStack.popMatrix();
 }
 
 void Graphics::loadIdentity() {
-	modelMatrixStack.loadIdentity();
+	state.modelMatrixStack.loadIdentity();
 }
 
 void Graphics::translate(glm::vec2 d) {
@@ -110,37 +107,37 @@ void Graphics::translate(glm::vec3 d) {
 	translate(d.x, d.y, d.z);
 }
 void Graphics::translate(float x, float y, float z) {
-	modelMatrixStack.translate(x, y, z);
+	state.modelMatrixStack.translate(x, y, z);
 }
 void Graphics::scale(float amt) {
-	modelMatrixStack.scale(amt, amt, amt);
+	state.modelMatrixStack.scale(amt, amt, amt);
 }
 
 void Graphics::scale(float x, float y, float z) {
-	modelMatrixStack.scale(x, y, z);
+	state.modelMatrixStack.scale(x, y, z);
 }
 
 void Graphics::rotate(float angle, glm::vec3 axis) {
-	modelMatrixStack.rotate(angle, axis);
+	state.modelMatrixStack.rotate(angle, axis);
 }
 void Graphics::rotateX(float angle) {
-	modelMatrixStack.rotate(angle, glm::vec3(1, 0, 0));
+	state.modelMatrixStack.rotate(angle, glm::vec3(1, 0, 0));
 }
 void Graphics::rotateY(float angle) {
-	modelMatrixStack.rotate(angle, glm::vec3(0, 1, 0));
+	state.modelMatrixStack.rotate(angle, glm::vec3(0, 1, 0));
 }
 void Graphics::rotateZ(float angle) {
-	modelMatrixStack.rotate(angle, glm::vec3(0, 0, 1));
+	state.modelMatrixStack.rotate(angle, glm::vec3(0, 0, 1));
 }
 
 void Graphics::setProjectionMatrix(glm::mat4 projMat) {
-	projectionMatrix	 = projMat;
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+	state.projectionMatrix	   = projMat;
+	state.viewProjectionMatrix = state.projectionMatrix * state.viewMatrix;
 }
 
 void Graphics::setViewMatrix(glm::mat4 viewMat) {
-	viewMatrix			 = viewMat;
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+	state.viewMatrix		   = viewMat;
+	state.viewProjectionMatrix = state.projectionMatrix * state.viewMatrix;
 }
 
 void Graphics::setupViewOrtho(float w, float h) {
@@ -152,9 +149,9 @@ void Graphics::setupViewOrtho(float w, float h) {
 		height = h = 100;
 	}
 
-	projectionMatrix	 = glm::ortho(0.f, w, h, 0.f, -1000.f, 1000.f);
-	viewMatrix			 = glm::mat4(1.f);
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+	state.projectionMatrix	   = glm::ortho(0.f, w, h, 0.f, -1000.f, 1000.f);
+	state.viewMatrix		   = glm::mat4(1.f);
+	state.viewProjectionMatrix = state.projectionMatrix * state.viewMatrix;
 }
 
 void Graphics::setupView(bool flipped, int w, int h) {
@@ -178,13 +175,13 @@ void Graphics::setupView(bool flipped, int w, int h) {
 	float nearDist = dist / 10.0f;
 	float farDist  = dist * 10.0f;
 
-	projectionMatrix = glm::perspective(glm::radians(fov), w / (float) h, nearDist, farDist);
-	viewMatrix =
+	state.projectionMatrix = glm::perspective(glm::radians(fov), w / (float) h, nearDist, farDist);
+	state.viewMatrix =
 		glm::lookAt(glm::vec3(eyeX, eyeY, dist * (flipped ? -1 : 1)), // Camera is at (4,3,-3), in World Space
 					glm::vec3(eyeX, eyeY, 0), // and looks at the origin
 					glm::vec3(0, (flipped ? -1 : 1), 0) // Head is up (set to 0,-1,0 to look upside-down)
 		);
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+	state.viewProjectionMatrix = state.projectionMatrix * state.viewMatrix;
 
 	//	projectionMatrix = glm::ortho(-w, w, -h, h, -1000, 1000);
 	//	viewMatrix = glm::mat4(1.f);
@@ -204,9 +201,8 @@ void Graphics::fill() {
 }
 
 float Graphics::getStrokeWeight() {
-	return strokeWeight;
+	return state.strokeWeight;
 }
-
 
 void Graphics::setHexColor(int hex, float a) {
 	auto c = hexColor(hex);
@@ -217,25 +213,24 @@ void Graphics::setColor(float bri) {
 	setColor(bri, bri, bri, 1);
 }
 void Graphics::setColor(float r, float g, float b, float a) {
-	color = glm::vec4(r, g, b, a);
+	state.color = glm::vec4(r, g, b, a);
 }
 
 void Graphics::setColor(glm::vec3 c) {
-	color = glm::vec4(c.r, c.g, c.b, 1.0);
-	;
+	state.color = glm::vec4(c.r, c.g, c.b, 1.0);
 }
 
 void Graphics::setColor(glm::vec4 c) {
-	color = c;
+	state.color = c;
 }
 
 void Graphics::setColor(glm::vec4 c, float alpha) {
-	color	= c;
-	color.a = alpha;
+	state.color	  = c;
+	state.color.a = alpha;
 }
 
 glm::vec4 Graphics::getColor() {
-	return color;
+	return state.color;
 }
 
 void Graphics::drawPlus(vec2 c, int diameter, int thickness) {
@@ -348,7 +343,6 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 	}
 }
 
-
 void Graphics::drawLine(glm::vec2 a, glm::vec2 b) {
 	drawVerts({a, b}, Vbo::PrimitiveType::Lines);
 }
@@ -387,10 +381,10 @@ void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
 	int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 
-	auto c = color;
+	auto c = state.color;
 	c.a	   = 0.f;
 	for (int i = 0; i < numVerts; i += 2) {
-		geom.cols.push_back(color);
+		geom.cols.push_back(state.color);
 		geom.cols.push_back(c);
 	}
 
@@ -418,8 +412,6 @@ void Graphics::unloadFont() {
 		font = nullptr;
 	}
 }
-
-
 
 #include "Triangulator.h"
 void Graphics::drawShape(const std::vector<vec2> &shape) {
@@ -468,8 +460,6 @@ void Graphics::drawTextHorizontallyCentred(const std::string &text, glm::vec2 c)
 	getFont().drawHorizontallyCentred(*this, text, c);
 }
 
-
-
 void Graphics::clear(float c) {
 	clear(c, c, c);
 }
@@ -481,63 +471,84 @@ void Graphics::clear(vec3 bgColor) {
 	clear({bgColor, 1.0});
 }
 
-
 Rectf Graphics::getMaskRect() {
-	return scissor;
+	return state.scissor;
 }
-
 
 #pragma mark -
 
 ////////////////////////////////////////////
 /// BELOW IS STUFF WITH GL CALLS
-#include "mzOpenGL.h"
-#include "glUtil.h"
+
+#if MZGL_METAL == 1
+#	include "MetalApi.h"
+#else
+#	include "OpenGLApi.h"
+#endif
+
+int Graphics::getDefaultFrameBufferId() const {
+#if MZGL_METAL == 1
+	return 0;
+#else
+	return ((OpenGLApi *) api.get())->getDefaultFrameBufferId();
+#endif
+}
+
+Graphics::Graphics() : state(width,height) {
+#if MZGL_METAL == 1
+	api = std::make_unique<MetalApi>(state);
+#else
+	api = std::make_unique<OpenGLApi>(state);
+#endif
+}
+
 void Graphics::clear(vec4 bgColor) {
-	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	api->clear(bgColor);
 }
 
 void Graphics::saveScreen(string pngPath) {
-	ImageRef img = Image::create(width, height, 4);
-
-	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, img->data.data());
-	img->flipVertical();
-
-	// for some reason on OSX there is a bit of alpha - this makes it fully opaque
-	for (int i = 0; i < img->data.size(); i += 4) {
-		img->data[i + 3] = 255;
-	}
-	img->save(pngPath);
+	api->saveScreen(pngPath, width, height);
+}
+void Graphics::initGraphics() {
+	api->initGraphics();
 }
 
 // DRAW VERTS //////////////////////////////////////////////////////////////
+#include "mzOpenGL.h"
+#include "glUtil.h"
+void uploadBuffer(int32_t attribute, uint32_t buffer, float *data, int numElements, int numComponents) {
+	glEnableVertexAttribArray(attribute);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, numElements * numComponents, data, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(attribute, numComponents, GL_FLOAT, GL_FALSE, 0, NULL);
+}
 
 void Graphics::drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type) {
-	nothingShader->begin();
+	state.nothingShader->begin();
 
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
+	state.currShader->uniform("mvp", getMVP());
+	if (state.currShader->needsColorUniform) {
+		state.currShader->uniform("color", getColor());
 	}
 
 	// now draw
 
 #ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
+	if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
 #endif
 
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+	// glEnableVertexAttribArray(currShader->positionAttribute);
+	// glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+	// glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+	// glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	auto glType = primitiveTypeToGLMode(type);
 
 	glDrawArrays(glType, 0, (GLsizei) verts.size());
 
-	glDisableVertexAttribArray(currShader->positionAttribute);
+	glDisableVertexAttribArray(state.currShader->positionAttribute);
 
 #ifndef MZGL_GL2
 	glBindVertexArray(0);
@@ -545,34 +556,36 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type
 }
 
 void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, Vbo::PrimitiveType type) {
-	colorShader->begin();
+	state.colorShader->begin();
 
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
+	state.currShader->uniform("mvp", getMVP());
+	if (state.currShader->needsColorUniform) {
+		state.currShader->uniform("color", getColor());
 	}
 
 	// now draw
 
 #ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
+	if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
 #endif
 
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+	// glEnableVertexAttribArray(currShader->positionAttribute);
+	// glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+	// glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+	// glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-	glEnableVertexAttribArray(currShader->colorAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	uploadBuffer(state.currShader->colorAttribute, state.immediateColorBuffer, (float *) cols.data(), cols.size(), 4);
+	// glEnableVertexAttribArray(currShader->colorAttribute);
+	// glBindBuffer(GL_ARRAY_BUFFER, immediateColorBuffer);
+	// glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
+	// glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei) verts.size());
 
-	glDisableVertexAttribArray(currShader->positionAttribute);
-	glDisableVertexAttribArray(currShader->colorAttribute);
+	glDisableVertexAttribArray(state.currShader->positionAttribute);
+	glDisableVertexAttribArray(state.currShader->colorAttribute);
 
 #ifndef MZGL_GL2
 	glBindVertexArray(0);
@@ -585,32 +598,32 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> 
 	//	vbo->setIndices(indices);
 	//	vbo->draw(*this);
 
-	nothingShader->begin();
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
+	state.nothingShader->begin();
+	state.currShader->uniform("mvp", getMVP());
+	if (state.currShader->needsColorUniform) {
+		state.currShader->uniform("color", getColor());
 	}
 	// now draw
 
 	Log::e() << "drawVerts(verts, indices) has changed and is not tested";
 
 #ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
+	if (state.immediateVertexArray == 0) return;
+	glBindVertexArray(state.immediateVertexArray);
 #endif
 
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
+	// glEnableVertexAttribArray(currShader->positionAttribute);
+	// glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
+	// glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
+	// glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-	//	glEnableVertexAttribArray(currShader->);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, immediateColorBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, state.immediateColorBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_DYNAMIC_DRAW);
 
 	glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
-	
-	glDisableVertexAttribArray(currShader->positionAttribute);
+
+	glDisableVertexAttribArray(state.currShader->positionAttribute);
 
 #ifndef MZGL_GL2
 	glBindVertexArray(0);
@@ -619,252 +632,27 @@ void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> 
 // BLENDING //////////////////////////////////////////////////////////////
 
 void Graphics::setBlendMode(BlendMode blendMode) {
-	if (blendMode == BlendMode::Additive) {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	} else {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	api->setBlendMode(blendMode);
 }
 
-
 void Graphics::setBlending(bool shouldBlend) {
-	// blend mode is already the same, jump out.
-	if (shouldBlend == blendingEnabled) return;
-
-	blendingEnabled = shouldBlend;
-	if (shouldBlend) {
-		glEnable(GL_BLEND);
-	} else {
-		glDisable(GL_BLEND);
-	}
+	api->setBlending(shouldBlend);
 }
 
 // MASK //////////////////////////////////////////////////////////////
 
 void Graphics::maskOn(const Rectf &r) {
-	glEnable(GL_SCISSOR_TEST);
-	scissor = r;
-	glScissor(r.x, height - (r.bottom()), r.width, r.height);
+	api->maskOn(r);
 }
 
 void Graphics::maskOff() {
-	glDisable(GL_SCISSOR_TEST);
+	api->maskOff();
 }
 
 bool Graphics::isMaskOn() {
-	return glIsEnabled(GL_SCISSOR_TEST);
-}
-
-GLint Graphics::getDefaultFrameBufferId() {
-	return defaultFBO;
-}
-
-void Graphics::initGraphics() {
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-	const unsigned char *openglVersion = glGetString(GL_VERSION);
-	if (openglVersion != nullptr) {
-		Log::d() << "OpenGL Version: " << openglVersion;
-#ifdef MZGL_GL2
-		Log::d() << "MZGL Compiled with MZGL_GL2==TRUE";
-#else
-		Log::d() << "MZGL Compiled with MZGL_GL2==FALSE";
-#endif
-	} else {
-		Log::d() << "OpenGL Version: null";
-	}
-	setBlending(true);
-
-	// setBlending only works on change, so calling
-	// glEnable(GL_BLEND) ensures state sync. It's a
-	// bit sloppy but fixes android bugs for persistence
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	loadDefaultShaders();
-
-#ifndef MZGL_GL2
-	if (immediateVertexArray != 0) {
-		Log::e() << "Immediate vertex array recreated - is this bad? if on android, probs should clean this up";
-	}
-	glGenVertexArrays(1, &immediateVertexArray);
-	GetError();
-
-	glBindVertexArray(immediateVertexArray);
-	GetError();
-#endif
-	if (immediateVertexBuffer != 0) {
-		Log::e() << "Immediate vertex buffer recreated - is this bad?";
-	}
-
-	glGenBuffers(1, &immediateVertexBuffer);
-	glGenBuffers(1, &immediateColorBuffer);
-	glGenBuffers(1, &immediateIndexBuffer);
-	GetError();
-}
-
-void Graphics::loadDefaultShaders() {
-	// zero out all shaders before loading any, for android mostly,
-	// as the context may have reset itself
-	nothingShader	   = nullptr;
-	colorShader		   = nullptr;
-	colorTextureShader = nullptr;
-	fontShader		   = nullptr;
-	texShader		   = nullptr;
-
-	nothingShader = Shader::create(*this);
-
-	nothingShader->loadFromString(STRINGIFY(uniform mat4 mvp;
-
-											in vec4 Position;
-											uniform lowp vec4 color;
-											out lowp vec4 colorV;
-
-											void main(void) {
-												colorV		= color;
-												gl_Position = mvp * Position;
-											}
-
-											),
-
-								  STRINGIFY(
-
-									  in lowp vec4 colorV; out vec4 fragColor;
-
-									  void main(void) { fragColor = colorV; }
-
-									  )
-
-	);
-
-	colorShader = Shader::create(*this);
-	colorShader->loadFromString(STRINGIFY(
-
-									uniform mat4 mvp; uniform lowp vec4 color;
-
-									in vec4 Position;
-									in lowp vec4 Color;
-
-									out lowp vec4 colorV;
-
-									void main(void) {
-										colorV		= Color * color;
-										gl_Position = mvp * Position;
-									}
-
-									),
-
-								STRINGIFY(
-
-									in lowp vec4 colorV; out vec4 fragColor;
-
-									void main(void) { fragColor = colorV; }
-
-									)
-
-	);
-
-	colorTextureShader = Shader::create(*this);
-	colorTextureShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in lowp vec2 TexCoord;
-			in lowp vec4 Color;
-
-			out lowp vec4 colorV;
-			out lowp vec2 texCoordV;
-			void main(void) {
-				colorV		= Color;
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
-
-			)
-
-	);
-
-	// this is temporary - it is just like colorTextureShader, but divides the color by 255
-	// TODO: need to write my own gl backend for fontstash
-	fontShader = Shader::create(*this);
-	fontShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in vec2 TexCoord;
-
-			uniform lowp vec4 color;
-
-			out vec2 texCoordV;
-
-			void main() {
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			uniform lowp vec4 color; in vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main() {
-				fragColor = color;
-				fragColor.a *= texture(myTextureSampler, texCoordV).a;
-			}
-
-			)
-
-	);
-	texShader = Shader::create(*this);
-	texShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in lowp vec2 TexCoord;
-			uniform lowp vec4 color;
-
-			out lowp vec4 colorV;
-			out lowp vec2 texCoordV;
-			void main(void) {
-				colorV		= color;
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
-
-			)
-
-	);
-
-	nothingShader->isDefaultShader		= true;
-	colorShader->isDefaultShader		= true;
-	colorTextureShader->isDefaultShader = true;
-	texShader->isDefaultShader			= true;
-	fontShader->isDefaultShader			= true;
+	return api->isMaskOn();
 }
 
 void Graphics::setStrokeWeight(float f) {
-	if (f != this->strokeWeight) {
-		this->strokeWeight = f;
-		glLineWidth(f);
-	}
+	api->setStrokeWeight(f);
 }

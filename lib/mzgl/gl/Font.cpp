@@ -211,13 +211,13 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 	if (gl->VERTEX_ATTRIB == 0) {
-		gl->VERTEX_ATTRIB = g.fontShader->positionAttribute;
-		gl->TCOORD_ATTRIB = g.fontShader->texCoordAttribute;
+		gl->VERTEX_ATTRIB = g.state.fontShader->positionAttribute;
+		gl->TCOORD_ATTRIB = g.state.fontShader->texCoordAttribute;
 	}
 
-	g.fontShader->begin();
+	g.state.fontShader->begin();
 
-	g.fontShader->uniform("mvp", g.getMVP());
+	g.state.fontShader->uniform("mvp", g.getMVP());
 
 #ifdef __ANDROID__
 	// ok this is mega shit, but Huawei phones, when they receive an alpha of 1 here
@@ -225,9 +225,9 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	// this code just turns it shy of 1
 	auto c = g.getColor();
 	if (c.a == 1) c.a = 0.999;
-	g.fontShader->uniform("color", c);
+	g.state.fontShader->uniform("color", c);
 #else
-	g.fontShader->uniform("color", g.getColor());
+	g.state.fontShader->uniform("color", g.getColor());
 #endif
 
 	ScopedAlphaBlend b(g, true);

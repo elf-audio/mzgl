@@ -28,7 +28,7 @@ include(CPM.cmake)
 #     "JSON_BuildTests OFF"
 # )
 
-add_compile_definitions(MZGL_METAL=1)
+# add_compile_definitions(MZGL_METAL=1)
 if (CMAKE_BUILD_TYPE MATCHES DEBUG)
     add_compile_definitions(DEBUG=1)
 
@@ -174,6 +174,7 @@ set(HEADERS
         lib/mzgl/file
         lib/mzgl/geom
         lib/mzgl/gl
+        lib/mzgl/gl/apis
         lib/mzgl/gl/drawing
         lib/mzgl/midi
         lib/mzgl/music

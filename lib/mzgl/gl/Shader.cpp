@@ -20,16 +20,17 @@ using namespace std;
 
 #define DEBUG 1
 
-#ifdef __ANDROID__
-vector<Shader *> Shader::shaders;
-#endif
 
-Shader::Shader(Graphics &g)
-	: g(g) {
-#ifdef __ANDROID__
-	shaders.push_back(this);
-#endif
+ShaderRef Shader::create(Graphics &g) { return std::shared_ptr<Shader>(new Shader(g.state)); }
+
+ShaderRef Shader::create(GraphicsState &state) { return std::shared_ptr<Shader>(new Shader(state)); }
+
+
+Shader::Shader(GraphicsState &state)
+	: state(state) {
+	state.shaders.push_back(this);
 }
+
 
 void Shader::deallocate() {
 	if (shaderProgram != 0) {
@@ -42,14 +43,12 @@ void Shader::deallocate() {
 Shader::~Shader() {
 	deallocate();
 
-#ifdef __ANDROID__
-	for (int i = 0; i < shaders.size(); i++) {
-		if (shaders[i] == this) {
-			shaders.erase(shaders.begin() + i);
+	for (int i = 0; i < state.shaders.size(); i++) {
+		if (state.shaders[i] == this) {
+			state.shaders.erase(state.shaders.begin() + i);
 			break;
 		}
 	}
-#endif
 }
 
 void Shader::begin() {
@@ -57,13 +56,13 @@ void Shader::begin() {
 	instanceUniforms.clear();
 #endif
 
-	g.currShader = this;
+	state.currShader = this;
 	GetError();
 	glUseProgram(shaderProgram);
 	GetError();
 }
 void Shader::end() {
-	g.currShader = nullptr;
+	state.currShader = nullptr;
 	GetError();
 	glUseProgram(0);
 	GetError();

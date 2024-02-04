@@ -288,25 +288,25 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	}
 
 	// TODO: I don't know if this would switch between different default shaders
-	if (g.currShader == NULL || g.currShader->isDefaultShader) {
+	if (g.state.currShader == NULL || g.state.currShader->isDefaultShader) {
 		if (numCols == 0 && numTcs == 0) {
-			g.nothingShader->begin();
+			g.state.nothingShader->begin();
 		} else if (numTcs > 0 && numCols == 0) {
-			if (g.currShader == g.fontShader.get()) {
-				g.fontShader->begin();
+			if (g.state.currShader == g.state.fontShader.get()) {
+				g.state.fontShader->begin();
 			} else {
-				g.texShader->begin();
+				g.state.texShader->begin();
 			}
 		} else if (numTcs == 0 && numCols > 0) {
-			g.colorShader->begin();
+			g.state.colorShader->begin();
 		} else {
-			g.colorTextureShader->begin();
+			g.state.colorTextureShader->begin();
 		}
 	}
 
-	g.currShader->uniform("mvp", g.getMVP());
-	if (g.currShader->needsColorUniform) {
-		g.currShader->uniform("color", g.getColor());
+	g.state.currShader->uniform("mvp", g.getMVP());
+	if (g.state.currShader->needsColorUniform) {
+		g.state.currShader->uniform("color", g.getColor());
 	}
 
 #ifndef MZGL_GL2
@@ -314,13 +314,13 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 #endif
 
 	GetError();
-	glEnableVertexAttribArray(g.currShader->positionAttribute);
+	glEnableVertexAttribArray(g.state.currShader->positionAttribute);
 	GetError();
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	GetError();
 
-	glVertexAttribPointer(g.currShader->positionAttribute,
+	glVertexAttribPointer(g.state.currShader->positionAttribute,
 						  vertDimensions, // size
 						  GL_FLOAT, // type
 						  GL_FALSE, // normalized?
@@ -330,18 +330,18 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	GetError();
 
 	if (colorbuffer != 0) {
-		if (g.currShader->colorAttribute == -1) {
+		if (g.state.currShader->colorAttribute == -1) {
 			Log::e()
 				<< "There is no Color attribute in this shader - are you using Drawer and not setting ignoreColor = true?";
 		} else {
 			// 2nd attribute buffer : colors
-			glEnableVertexAttribArray(g.currShader->colorAttribute);
+			glEnableVertexAttribArray(g.state.currShader->colorAttribute);
 			GetError();
 
 			glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
 			GetError();
 
-			glVertexAttribPointer(g.currShader->colorAttribute,
+			glVertexAttribPointer(g.state.currShader->colorAttribute,
 								  colDimensions, // size
 								  GL_FLOAT, // type
 								  GL_FALSE, // normalized?
@@ -353,16 +353,16 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	}
 
 	if (texCoordBuffer != 0) {
-		if (g.currShader->texCoordAttribute == -1) {
+		if (g.state.currShader->texCoordAttribute == -1) {
 			Log::e() << "There is no TexCoord attribute in this shader";
 		} else {
-			glEnableVertexAttribArray(g.currShader->texCoordAttribute);
+			glEnableVertexAttribArray(g.state.currShader->texCoordAttribute);
 			GetError();
 
 			glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
 			GetError();
 
-			glVertexAttribPointer(g.currShader->texCoordAttribute,
+			glVertexAttribPointer(g.state.currShader->texCoordAttribute,
 								  2, // size
 								  GL_FLOAT, // type
 								  GL_FALSE, // normalized?
@@ -374,16 +374,16 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	}
 
 	if (normalBuffer != 0) {
-		if (g.currShader->normAttribute == -1) {
+		if (g.state.currShader->normAttribute == -1) {
 			Log::e() << "There is no Normal attribute in this shader";
 		} else {
-			glEnableVertexAttribArray(g.currShader->normAttribute);
+			glEnableVertexAttribArray(g.state.currShader->normAttribute);
 			GetError();
 
 			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 			GetError();
 
-			glVertexAttribPointer(g.currShader->normAttribute,
+			glVertexAttribPointer(g.state.currShader->normAttribute,
 								  3, // size
 								  GL_FLOAT, // type
 								  GL_FALSE, // normalized?
@@ -405,7 +405,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 #ifdef MZGL_GL2
 			// simulate instancing in gl2
 			for (int i = 0; i < instances; i++) {
-				g.currShader->setInstanceUniforms(i);
+				g.state.currShader->setInstanceUniforms(i);
 				glDrawElements(glMode, (GLsizei) numIndices, GL_UNSIGNED_INT, (void *) 0);
 			}
 #else
@@ -415,7 +415,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 #ifdef MZGL_GL2
 			// simulate instancing in gl2
 			for (int i = 0; i < instances; i++) {
-				g.currShader->setInstanceUniforms(i);
+				g.state.currShader->setInstanceUniforms(i);
 				glDrawArrays(glMode, 0, (GLsizei) numVerts);
 			}
 #else
@@ -437,21 +437,21 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	glBindVertexArray(0);
 #endif
 
-	glDisableVertexAttribArray(g.currShader->positionAttribute);
+	glDisableVertexAttribArray(g.state.currShader->positionAttribute);
 	GetError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	GetError();
-	if (colorbuffer != 0 && g.currShader->colorAttribute != -1) {
-		glDisableVertexAttribArray(g.currShader->colorAttribute);
+	if (colorbuffer != 0 && g.state.currShader->colorAttribute != -1) {
+		glDisableVertexAttribArray(g.state.currShader->colorAttribute);
 	}
 	GetError();
-	if (normalBuffer != 0 && g.currShader->normAttribute != -1) {
-		glDisableVertexAttribArray(g.currShader->normAttribute);
+	if (normalBuffer != 0 && g.state.currShader->normAttribute != -1) {
+		glDisableVertexAttribArray(g.state.currShader->normAttribute);
 	}
 	GetError();
 
-	if (texCoordBuffer != 0 && g.currShader->texCoordAttribute != -1) {
-		glDisableVertexAttribArray(g.currShader->texCoordAttribute);
+	if (texCoordBuffer != 0 && g.state.currShader->texCoordAttribute != -1) {
+		glDisableVertexAttribArray(g.state.currShader->texCoordAttribute);
 	}
 	GetError();
 }

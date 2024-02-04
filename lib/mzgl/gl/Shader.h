@@ -16,19 +16,20 @@
 
 #define STRINGIFY(s) #s
 class Graphics;
-
+class GraphicsState;
 class Shader;
 typedef std::shared_ptr<Shader> ShaderRef;
 
 class Shader {
 private:
-	Shader(Graphics &g);
-	Graphics &g;
+	Shader(GraphicsState &state);
 
 public:
-	static ShaderRef create(Graphics &g) { return std::shared_ptr<Shader>(new Shader(g)); }
+    static ShaderRef create(Graphics &g);
 
-	int32_t positionAttribute = -1;
+    static ShaderRef create(GraphicsState &state);
+
+    int32_t positionAttribute = -1;
 	int32_t colorAttribute	  = -1;
 	int32_t texCoordAttribute = -1;
 	int32_t normAttribute	  = -1;
@@ -75,9 +76,6 @@ public:
 	void setInstanceUniforms(int whichInstance);
 #endif
 
-#ifdef __ANDROID__
-	static std::vector<Shader *> shaders;
-#endif
 	void deallocate();
 
 private:
@@ -91,7 +89,7 @@ private:
 	void validateProgram(uint32_t program);
 
 	// this is supposed to be for GL2 simulating instancing
-
+	GraphicsState &state;
 #ifdef MZGL_GL2
 
 	struct InstanceUniform {

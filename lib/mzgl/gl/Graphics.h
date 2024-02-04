@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <glm/glm.hpp>
 #include "Vbo.h"
 #include "Rectf.h"
 #include "Fbo.h"
@@ -17,6 +16,7 @@
 #include "Font.h"
 #include <map>
 #include <functional>
+#include "GraphicsApi.h"
 
 #define MZ_KEY_LEFT		 256
 #define MZ_KEY_RIGHT	 257
@@ -48,6 +48,8 @@ struct ScopedTransform;
 
 class Graphics {
 public:
+	Graphics();
+	GraphicsState state;
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;
@@ -64,11 +66,6 @@ public:
 
 	std::function<void(bool)> setAntialiasing = [](bool) {};
 
-	enum class BlendMode {
-		Alpha, // the classic alpha blending mode
-		Additive,
-	};
-
 	void setBlending(bool shouldBlend);
 	void setBlendMode(BlendMode blendMode);
 	bool isBlending();
@@ -79,16 +76,8 @@ public:
 	void clear(glm::vec4 c);
 	void clear(glm::vec3 c);
 
-	Shader *currShader = nullptr;
 
-	// these are the default shaders
-	ShaderRef nothingShader;
-	ShaderRef colorShader;
-	ShaderRef colorTextureShader;
-	ShaderRef texShader;
-	ShaderRef fontShader;
 
-	void loadDefaultShaders();
 
 	void noFill();
 	void fill();
@@ -192,35 +181,15 @@ public:
 	Layer *keyboardFocusedLayer = nullptr;
 
 	friend class App;
-
-	// for FBO
-	int32_t getDefaultFrameBufferId();
+	int getDefaultFrameBufferId() const;
 
 private:
-	float strokeWeight = 1;
-
-	bool blendingEnabled = false;
-	bool filling		 = true;
-	glm::vec4 color;
-	//glm::mat4 mvp;
-	MatrixStack modelMatrixStack;
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
-	// this is cached version of the above multiplied
-	glm::mat4 viewProjectionMatrix;
-	friend class ScopedAlphaBlend;
-	friend struct ScopedTranslate;
-
-	int32_t defaultFBO;
-	uint32_t immediateVertexArray  = 0;
-	uint32_t immediateVertexBuffer = 0;
-	uint32_t immediateColorBuffer  = 0;
-	uint32_t immediateIndexBuffer  = 0;
-
-	Rectf scissor;
-	
 	// was in Globals
 	unsigned int frameNum = 0;
+
+	bool filling = true;
+
+	std::unique_ptr<GraphicsApi> api;
 };
 
 class ScopedAlphaBlend {
