@@ -18,10 +18,7 @@
 class CoreMidiDevice : public MidiDevice {
 public:
 	MIDIEndpointRef endpoint;
-
-	bool isNetworkSession = false;
-	// this populates the name field
-	CoreMidiDevice(MIDIEndpointRef endpoint);
+	explicit CoreMidiDevice(MIDIEndpointRef endpoint);
 };
 
 class CoreMidiIn : public CoreMidiDevice {
@@ -31,7 +28,7 @@ public:
 	}
 
 private:
-	CoreMidiIn(MIDIEndpointRef endpoint)
+	explicit CoreMidiIn(MIDIEndpointRef endpoint)
 		: CoreMidiDevice(endpoint) {
 		isOutput = false;
 	}
@@ -44,7 +41,7 @@ public:
 	}
 
 private:
-	CoreMidiOut(MIDIEndpointRef endpoint)
+	explicit CoreMidiOut(MIDIEndpointRef endpoint)
 		: CoreMidiDevice(endpoint) {
 		isOutput = true;
 	}
@@ -74,16 +71,20 @@ public:
 
 	void sendMessage(const MidiMessage &m) override;
 	void sendMessage(const MidiDevice &device, const MidiMessage &m) override;
-	virtual ~AllMidiDevicesAppleImpl();
+	~AllMidiDevicesAppleImpl() override;
 
 	std::vector<MidiDevice> getConnectedMidiDevices() override {
 		std::vector<MidiDevice> devices;
-		for (auto m: midiIns) {
+		devices.reserve(midiIns.size() + midiOuts.size());
+
+		for (const auto &m: midiIns) {
 			devices.push_back(*m);
 		}
-		for (auto m: midiOuts) {
+
+		for (const auto &m: midiOuts) {
 			devices.push_back(*m);
 		}
+
 		return devices;
 	}
 
@@ -113,7 +114,6 @@ private:
 	void midiNotifyAdd(const MIDIObjectAddRemoveNotification *notification);
 	void midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification);
 
-	void sendPacketList(const MIDIPacketList *packetList);
-	void sendBytes(const UInt8 *data, UInt32 size);
-	void sendSysex(const UInt8 *data, UInt32 size);
+	void sendBytes(const MidiDevice &device, const MidiMessage &midiMessage);
+	void sendSysex(const MidiDevice &device, const MidiMessage &midiMessage);
 };

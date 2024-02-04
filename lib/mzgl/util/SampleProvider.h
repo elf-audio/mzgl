@@ -28,11 +28,24 @@ public:
 
 	// from to to-1 (e.g. end bounds exclusive)
 	virtual void findMinMax(int from, int to, float &min, float &max) const = 0;
+
+	[[nodiscard]] bool operator==(const SampleProvider &other) const {
+		if (this == &other) return true;
+		if (size() != other.size()) return false;
+
+		for (size_t index = 0; index < size(); ++index) {
+			if (std::abs((*this)[index] - other[index]) > 1e-4) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 };
 
 class FloatSampleProvider : public SampleProvider {
 public:
-	virtual ~FloatSampleProvider() {}
+	~FloatSampleProvider() override = default;
 	FloatSampleProvider(const FloatBuffer &data)
 		: data(data) {}
 
@@ -62,32 +75,37 @@ public:
 		// the algo below it
 //#if 0
 #ifdef __ARM_NEON
-		int numIterations = (to - from) / 4; // Each iteration processes 4 values
+        int numIterations = (to - from) / 4; // Each iteration processes 4 values
 
-		float32x4_t minVec = vdupq_n_f32(1);
-		float32x4_t maxVec = vdupq_n_f32(-1);
+        float32x4_t minVec = vdupq_n_f32(1);
+        float32x4_t maxVec = vdupq_n_f32(-1);
 
-		for (int i = 0; i < numIterations; i++) {
-			float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);
-			minVec			   = vminq_f32(minVec, values);
-			maxVec			   = vmaxq_f32(maxVec, values);
-		}
+        for (int i = 0; i < numIterations; i++) {
+            float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);
+            minVec = vminq_f32(minVec, values);
+            maxVec = vmaxq_f32(maxVec, values);
+        }
 
-		float resultsMin[4], resultsMax[4];
-		vst1q_f32(resultsMin, minVec);
-		vst1q_f32(resultsMax, maxVec);
+#ifdef __ANDROID__
+        float resultsMin[4], resultsMax[4];
+        vst1q_f32(resultsMin, minVec);
+        vst1q_f32(resultsMax, maxVec);
 
-		float _min = std::min({resultsMin[0], resultsMin[1], resultsMin[2], resultsMin[3]});
-		float _max = std::max({resultsMax[0], resultsMax[1], resultsMax[2], resultsMax[3]});
+        auto _min = std::min({resultsMin[0], resultsMin[1], resultsMin[2], resultsMin[3]});
+        auto _max = std::max({resultsMax[0], resultsMax[1], resultsMax[2], resultsMax[3]});
+#else
+        auto _min = vminvq_f32(minVec);
+        auto _max = vmaxvq_f32(maxVec);
+#endif
 
-		// Handle any remaining values that aren't a multiple of 4
-		for (int j = from + numIterations * 4; j < to; j++) {
-			float v = this->data[j];
-			if (_max < v) _max = v;
-			if (_min > v) _min = v;
-		}
-		min = _min;
-		max = _max;
+
+        for (int j = from + numIterations * 4; j < to; j++) {
+            float v = this->data[j];
+            if (_max < v) _max = v;
+            if (_min > v) _min = v;
+        }
+        min = _min;
+        max = _max;
 
 #else
 		// Fallback for platforms without NEON support
