@@ -107,7 +107,7 @@ void Vbo::clear() {
 
 
 Vbo &Vbo::setVertices(const float *data, int numVertices, int numDims) {
-    if(numVerts==0) {
+    if(numVertices==0) {
         Log::e() << "Trying to setVertices with no vertices";
         return *this;
     }
