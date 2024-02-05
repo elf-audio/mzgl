@@ -494,7 +494,7 @@ void clearUpGLResources() {
 		font->clear();
 	}
 
-	for (auto *shader: Shader::shaders) {
+	for (auto *shader: graphics.state.shaders) {
 		shader->shaderProgram = 0;
 	}
 }

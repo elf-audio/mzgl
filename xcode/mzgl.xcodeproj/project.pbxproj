@@ -828,6 +828,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EA014B5F2B705CAE005A1A4E /* GraphicsApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphicsApi.h; sourceTree = "<group>"; };
+		EA014B602B705CAE005A1A4E /* MetalApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MetalApi.h; sourceTree = "<group>"; };
+		EA014B612B705CAE005A1A4E /* GraphicsState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphicsState.h; sourceTree = "<group>"; };
+		EA014B622B705CAE005A1A4E /* OpenGLApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLApi.h; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
 		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
@@ -1706,6 +1710,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EA014B5E2B705CAE005A1A4E /* apis */ = {
+			isa = PBXGroup;
+			children = (
+				EA014B5F2B705CAE005A1A4E /* GraphicsApi.h */,
+				EA014B602B705CAE005A1A4E /* MetalApi.h */,
+				EA014B612B705CAE005A1A4E /* GraphicsState.h */,
+				EA014B622B705CAE005A1A4E /* OpenGLApi.h */,
+			);
+			path = apis;
+			sourceTree = "<group>";
+		};
 		EA182D302432C15000A5C3E8 = {
 			isa = PBXGroup;
 			children = (
@@ -2074,6 +2089,7 @@
 		EA1836272432C18B00A5C3E8 /* gl */ = {
 			isa = PBXGroup;
 			children = (
+				EA014B5E2B705CAE005A1A4E /* apis */,
 				EA78556C2472E31C0072FD05 /* NVG.h */,
 				EA78556D2472E3320072FD05 /* NVG.cpp */,
 				EA18362A2432C18B00A5C3E8 /* MatrixStack.h */,
