@@ -150,7 +150,8 @@ private:
         state.colorShader = Shader::create(state);
         state.colorShader->loadFromString(STRINGIFY(
 
-										uniform mat4 mvp; uniform lowp vec4 color;
+										uniform mat4 mvp;
+                                        uniform lowp vec4 color;
 
 										in vec4 Position;
 										in lowp vec4 Color;
@@ -227,7 +228,10 @@ private:
 				),
 			STRINGIFY(
 
-				uniform lowp vec4 color; in vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
+				uniform lowp vec4 color;
+                in vec2 texCoordV;
+                out vec4 fragColor;
+                uniform sampler2D myTextureSampler;
 
 				void main() {
 					fragColor = color;
@@ -274,18 +278,11 @@ private:
         state.fontShader->isDefaultShader			= true;
 	}
 
-
-
-
     void drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type) override {
         state.nothingShader->begin();
 
         state.currShader->uniform("mvp", state.getMVP());
-        if (state.currShader->needsColorUniform) {
-            state.currShader->uniform("color", state.color);
-        }
-
-        // now draw
+        state.currShader->uniform("color", state.color);
 
 #ifndef MZGL_GL2
         if (state.immediateVertexArray == 0) return;
@@ -293,14 +290,8 @@ private:
 #endif
 
         uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
-        // glEnableVertexAttribArray(currShader->positionAttribute);
-        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-        auto glType = primitiveTypeToGLMode(type);
-
-        glDrawArrays(glType, 0, (GLsizei) verts.size());
+        glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei) verts.size());
 
         glDisableVertexAttribArray(state.currShader->positionAttribute);
 
@@ -313,11 +304,7 @@ private:
         state.colorShader->begin();
 
         state.currShader->uniform("mvp", state.getMVP());
-        if (state.currShader->needsColorUniform) {
-            state.currShader->uniform("color", state.color);
-        }
-
-        // now draw
+        state.currShader->uniform("color", state.color);
 
 #ifndef MZGL_GL2
         if (state.immediateVertexArray == 0) return;
@@ -325,16 +312,7 @@ private:
 #endif
 
         uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
-        // glEnableVertexAttribArray(currShader->positionAttribute);
-        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
         uploadBuffer(state.currShader->colorAttribute, state.immediateColorBuffer, (float *) cols.data(), cols.size(), 4);
-        // glEnableVertexAttribArray(currShader->colorAttribute);
-        // glBindBuffer(GL_ARRAY_BUFFER, immediateColorBuffer);
-        // glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
-        // glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 
         glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei) verts.size());
 
@@ -347,19 +325,10 @@ private:
     }
 
     void drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> &indices) override {
-        //	VboRef vbo = Vbo::create();
-        //	vbo->setVertices(verts);
-        //	vbo->setIndices(indices);
-        //	vbo->draw(*this);
 
         state.nothingShader->begin();
         state.currShader->uniform("mvp", state.getMVP());
-        if (state.currShader->needsColorUniform) {
-            state.currShader->uniform("color", state.color);
-        }
-        // now draw
-
-        Log::e() << "drawVerts(verts, indices) has changed and is not tested";
+        state.currShader->uniform("color", state.color);
 
 #ifndef MZGL_GL2
         if (state.immediateVertexArray == 0) return;
@@ -367,10 +336,6 @@ private:
 #endif
 
         uploadBuffer(state.currShader->positionAttribute, state.immediateVertexBuffer, (float *) verts.data(), verts.size(), 2);
-        // glEnableVertexAttribArray(currShader->positionAttribute);
-        // glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-        // glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-        // glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, state.immediateColorBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_DYNAMIC_DRAW);
