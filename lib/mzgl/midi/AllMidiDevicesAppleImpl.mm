@@ -349,19 +349,17 @@ std::optional<MIDIEndpointRef> getEndpointRefForDevice(const MidiDevice &device,
 }
 
 void AllMidiDevicesAppleImpl::sendBytes(const MidiDevice &device, const MidiMessage &midiMessage) {
-	const auto *data = midiMessage.getBytes().data();
-	const auto size	 = midiMessage.getBytes().size();
+	const auto bytes = midiMessage.getBytes();
 
-	static constexpr auto maxSize = 655336;
-	assert(size < maxSize);
+	assert(bytes.size() < 65536);
 
 	static constexpr auto packetExtraSpace = 100;
-	Byte packetBuffer[size + packetExtraSpace];
+	Byte packetBuffer[bytes.size() + packetExtraSpace];
 
 	auto *packetList   = (MIDIPacketList *) packetBuffer;
 	MIDIPacket *packet = MIDIPacketListInit(packetList);
 
-	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, size, data);
+	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, bytes.size(), bytes.data());
 
 	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
 		auto result = MIDISend(outputPort, *endpoint, packetList);
@@ -376,17 +374,16 @@ static void cleanupSysex(MIDISysexSendRequest *request) {
 }
 
 void AllMidiDevicesAppleImpl::sendSysex(const MidiDevice &device, const MidiMessage &midiMessage) {
-	const auto *data = midiMessage.getBytes().data();
-	const auto size	 = midiMessage.getBytes().size();
+	auto bytes = midiMessage.getBytes();
 
-	static constexpr auto maxSize = 655336;
-	assert(size < 65536);
+	assert(bytes.size() < 65536);
 
 	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
-		auto request = new MIDISysexSendRequest;
+		auto request	= new MIDISysexSendRequest;
+		const auto size = midiMessage.getBytes().size();
 
-		request->data = new Byte[size];
-		memcpy((void *) request->data, (void *) data, size);
+		request->data = new Byte[bytes.size()];
+		memcpy((void *) request->data, (void *) bytes.data(), bytes.size());
 
 		request->bytesToSend	  = size;
 		request->completionProc	  = &cleanupSysex;
