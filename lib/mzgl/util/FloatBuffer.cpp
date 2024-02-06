@@ -468,7 +468,7 @@ FloatBuffer &FloatBuffer::operator-=(const FloatBuffer &right) {
 
 FloatBuffer &FloatBuffer::operator*=(const FloatBuffer &right) {
 	if (size() != right.size()) {
-//		printf("Wrong size - %ld != %ld\n", size(), right.size());
+		//		printf("Wrong size - %ld != %ld\n", size(), right.size());
 		assert(size() == right.size());
 	}
 
@@ -654,34 +654,44 @@ float FloatBuffer::interpolateWrapping(double index) const noexcept {
 	return (*this)[i] * (1.f - frac) + (*this)[j] * frac;
 }
 
-void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept {
-	int a	= p;
-	int b	= a + 1;
-	float m = p - a;
-	if (b * 2 + 1 >= size()) {
-		if (a * 2 + 1 >= size()) {
-			a = b = (int) size() / 2 - 2;
+void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &outputRight) const noexcept {
+	auto index1		   = static_cast<int>(std::floor(position));
+	auto index2		   = index1 + 1;
+	auto coefficient   = static_cast<float>(position - static_cast<double>(index1));
+	const auto ourSize = static_cast<int>(size());
+
+	if (index2 * 2 + 1 >= ourSize) {
+		if (index1 * 2 + 1 >= ourSize) {
+			index1 = index2 = ourSize / 2 - 2;
 		} else {
-			b = a;
+			index2 = index1;
 		}
 	}
-	if (a < 0) {
-		a = 0;
-		b = 1;
+
+	if (index1 < 0) {
+		index1 = 0;
+		index2 = 1;
 	}
-#ifdef DEBUG
-	if (std::isnan((*this)[a * 2])) {
-		printf("Nan a*2 - pos: %d, size %lu\n", a * 2, size());
-	} else if (std::isnan((*this)[a * 2 + 1])) {
-		printf("Nan a*2+1 - pos: %d, size %lu\n", a * 2 + 1, size());
-	} else if (std::isnan((*this)[b * 2])) {
-		printf("Nan b*2 - pos: %d, size %lu\n", b * 2, size());
-	} else if (std::isnan((*this)[b * 2 + 1])) {
-		printf("Nan b*2+1 - pos: %d, size %lu\n", b * 2 + 1, size());
+
+	const size_t left[2]  = {static_cast<size_t>(index1 * 2), static_cast<size_t>(index1 * 2 + 1)};
+	const size_t right[2] = {static_cast<size_t>(index2 * 2), static_cast<size_t>(index2 * 2 + 1)};
+
+	if (left[0] >= size() || left[1] >= size() || right[0] >= size() || right[1] >= size()) {
+		outputLeft	= 0.f;
+		outputRight = 0.f;
+		return;
 	}
-#endif
-	L = (*this)[a * 2] * (1.f - m) + (*this)[b * 2] * m;
-	R = (*this)[a * 2 + 1] * (1.f - m) + (*this)[b * 2 + 1] * m;
+
+	const auto inverseCoefficient = 1.f - coefficient;
+
+	try {
+		outputLeft	= at(left[0]) * inverseCoefficient + at(left[1]) * coefficient;
+		outputRight = at(right[0]) * inverseCoefficient + at(right[1]) * coefficient;
+	} catch (std::out_of_range const &exc) {
+		assert(false);
+		outputLeft	= 0.f;
+		outputRight = 0.f;
+	}
 }
 
 // splits this stereo float buffer into 2 mono float buffers passed in param
