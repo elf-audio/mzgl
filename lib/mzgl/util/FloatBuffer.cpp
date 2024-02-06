@@ -655,85 +655,43 @@ float FloatBuffer::interpolateWrapping(double index) const noexcept {
 }
 
 void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &outputRight) const noexcept {
-	struct Index {
-		Index(int _index)
-			: index(_index) {}
+	auto index1		   = static_cast<int>(std::floor(position));
+	auto index2		   = index1 + 1;
+	auto coefficient   = static_cast<float>(position - static_cast<double>(index1));
+	const auto ourSize = static_cast<int>(size());
 
-		[[nodiscard]] bool inRange(size_t size) const { return index < static_cast<int>(size); }
-		[[nodiscard]] bool isValid() const { return !std::isnan(index); }
-		operator size_t() const { return index; }
-
-		int index;
-	};
-
-	struct Indices {
-		Indices(int _first, int _second)
-			: first {_first}
-			, second(_second) {}
-
-		[[nodiscard]] bool inRange(size_t size) const { return first.inRange(size) && second.inRange(size); }
-		[[nodiscard]] bool isValid() const { return first.isValid() && second.isValid(); }
-
-		Index first;
-		Index second;
-	};
-
-	struct InterpolationPosition {
-		InterpolationPosition(double position)
-			: index1 {static_cast<int>(std::floor(position))}
-			, index2 {index1 + 1}
-			, coefficient {static_cast<float>(position - static_cast<double>(index1))} {}
-
-		void clamp(int size) {
-			if (index2 * 2 + 1 >= size) {
-				if (index1 * 2 + 1 >= size) {
-					index1 = index2 = size / 2 - 2;
-				} else {
-					index2 = index1;
-				}
-			}
-
-			if (index1 < 0) {
-				index1 = 0;
-				index2 = 1;
-			}
+	if (index2 * 2 + 1 >= ourSize) {
+		if (index1 * 2 + 1 >= ourSize) {
+			index1 = index2 = ourSize / 2 - 2;
+		} else {
+			index2 = index1;
 		}
+	}
 
-		[[nodiscard]] Indices leftIndices() const { return {index1 * 2, index2 * 2}; }
-		[[nodiscard]] Indices rightIndices() const { return {index1 * 2 + 1, index2 * 2 + 1}; }
+	if (index1 < 0) {
+		index1 = 0;
+		index2 = 1;
+	}
 
-		[[nodiscard]] float value(const Indices &indices, const std::vector<float> &buffer) const {
-			try {
-				return buffer.at(static_cast<size_t>(indices.first)) * (1.f - coefficient)
-					   + buffer.at(static_cast<size_t>(indices.second)) * coefficient;
-			} catch (std::out_of_range const &exc) {
-				assert(false);
-				return 0.f;
-			}
-		}
+	const size_t left[2]  = {static_cast<size_t>(index1 * 2), static_cast<size_t>(index1 * 2 + 1)};
+	const size_t right[2] = {static_cast<size_t>(index2 * 2), static_cast<size_t>(index2 * 2 + 1)};
 
-		int index1;
-		int index2;
-		float coefficient;
-	};
-
-	InterpolationPosition interpolation {position};
-	interpolation.clamp(static_cast<int>(size()));
-
-	const auto leftIndices	= interpolation.leftIndices();
-	const auto rightIndices = interpolation.rightIndices();
-
-	assert(leftIndices.isValid());
-	assert(rightIndices.isValid());
-
-	if (!leftIndices.inRange(size()) || !rightIndices.inRange(size())) {
+	if (left[0] >= size() || left[1] >= size() || right[0] >= size() || right[1] >= size()) {
 		outputLeft	= 0.f;
 		outputRight = 0.f;
 		return;
 	}
 
-	outputLeft	= interpolation.value(leftIndices, *this);
-	outputRight = interpolation.value(rightIndices, *this);
+	const auto inverseCoefficient = 1.f - coefficient;
+
+	try {
+		outputLeft	= at(left[0]) * inverseCoefficient + at(left[1]) * coefficient;
+		outputRight = at(right[0]) * inverseCoefficient + at(right[1]) * coefficient;
+	} catch (std::out_of_range const &exc) {
+		assert(false);
+		outputLeft	= 0.f;
+		outputRight = 0.f;
+	}
 }
 
 // splits this stereo float buffer into 2 mono float buffers passed in param
