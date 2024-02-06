@@ -468,7 +468,7 @@ FloatBuffer &FloatBuffer::operator-=(const FloatBuffer &right) {
 
 FloatBuffer &FloatBuffer::operator*=(const FloatBuffer &right) {
 	if (size() != right.size()) {
-//		printf("Wrong size - %ld != %ld\n", size(), right.size());
+		//		printf("Wrong size - %ld != %ld\n", size(), right.size());
 		assert(size() == right.size());
 	}
 
@@ -654,34 +654,86 @@ float FloatBuffer::interpolateWrapping(double index) const noexcept {
 	return (*this)[i] * (1.f - frac) + (*this)[j] * frac;
 }
 
-void FloatBuffer::interpolateStereo(double p, float &L, float &R) const noexcept {
-	int a	= p;
-	int b	= a + 1;
-	float m = p - a;
-	if (b * 2 + 1 >= size()) {
-		if (a * 2 + 1 >= size()) {
-			a = b = (int) size() / 2 - 2;
-		} else {
-			b = a;
+void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &outputRight) const noexcept {
+	struct Index {
+		Index(int _index)
+			: index(_index) {}
+
+		[[nodiscard]] bool inRange(size_t size) const { return index < static_cast<int>(size); }
+		[[nodiscard]] bool isValid() const { return !std::isnan(index); }
+		operator size_t() const { return index; }
+
+		int index;
+	};
+
+	struct Indices {
+		Indices(int _first, int _second)
+			: first {_first}
+			, second(_second) {}
+
+		[[nodiscard]] bool inRange(size_t size) const { return first.inRange(size) && second.inRange(size); }
+		[[nodiscard]] bool isValid() const { return first.isValid() && second.isValid(); }
+
+		Index first;
+		Index second;
+	};
+
+	struct InterpolationPosition {
+		InterpolationPosition(double position)
+			: index1 {static_cast<int>(std::floor(position))}
+			, index2 {index1 + 1}
+			, coefficient {static_cast<float>(position - static_cast<double>(index1))} {}
+
+		void clamp(int size) {
+			if (index2 * 2 + 1 >= size) {
+				if (index1 * 2 + 1 >= size) {
+					index1 = index2 = size / 2 - 2;
+				} else {
+					index2 = index1;
+				}
+			}
+
+			if (index1 < 0) {
+				index1 = 0;
+				index2 = 1;
+			}
 		}
+
+		[[nodiscard]] Indices leftIndices() const { return {index1 * 2, index2 * 2}; }
+		[[nodiscard]] Indices rightIndices() const { return {index1 * 2 + 1, index2 * 2 + 1}; }
+
+		[[nodiscard]] float value(const Indices &indices, const std::vector<float> &buffer) const {
+			try {
+				return buffer.at(static_cast<size_t>(indices.first)) * (1.f - coefficient)
+					   + buffer.at(static_cast<size_t>(indices.second)) * coefficient;
+			} catch (std::out_of_range const &exc) {
+				assert(false);
+				return 0.f;
+			}
+		}
+
+		int index1;
+		int index2;
+		float coefficient;
+	};
+
+	InterpolationPosition interpolation {position};
+	interpolation.clamp(static_cast<int>(size()));
+
+	const auto leftIndices	= interpolation.leftIndices();
+	const auto rightIndices = interpolation.rightIndices();
+
+	assert(leftIndices.isValid());
+	assert(rightIndices.isValid());
+
+	if (!leftIndices.inRange(size()) || !rightIndices.inRange(size())) {
+		outputLeft	= 0.f;
+		outputRight = 0.f;
+		return;
 	}
-	if (a < 0) {
-		a = 0;
-		b = 1;
-	}
-#ifdef DEBUG
-	if (std::isnan((*this)[a * 2])) {
-		printf("Nan a*2 - pos: %d, size %lu\n", a * 2, size());
-	} else if (std::isnan((*this)[a * 2 + 1])) {
-		printf("Nan a*2+1 - pos: %d, size %lu\n", a * 2 + 1, size());
-	} else if (std::isnan((*this)[b * 2])) {
-		printf("Nan b*2 - pos: %d, size %lu\n", b * 2, size());
-	} else if (std::isnan((*this)[b * 2 + 1])) {
-		printf("Nan b*2+1 - pos: %d, size %lu\n", b * 2 + 1, size());
-	}
-#endif
-	L = (*this)[a * 2] * (1.f - m) + (*this)[b * 2] * m;
-	R = (*this)[a * 2 + 1] * (1.f - m) + (*this)[b * 2 + 1] * m;
+
+	outputLeft	= interpolation.value(leftIndices, *this);
+	outputRight = interpolation.value(rightIndices, *this);
 }
 
 // splits this stereo float buffer into 2 mono float buffers passed in param
