@@ -105,16 +105,30 @@ std::string getHomeDirectory() {
 #	endif
 #endif
 
-
-
 void deleteOrTrash(const std::string &path) {
+	auto stdDeleteFn = [path]() {
+		try {
+			fs::remove_all(path);
+		} catch (const fs::filesystem_error &e) {
+			Log::e() << "Error deleting file: " << e.what();
+		}
+	};
 #ifdef __APPLE__
-	[[NSFileManager defaultManager]
-		  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-		resultingItemURL:nil
-				   error:nil];
+	if ([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)]) {
+		NSError *error = nil;
+		BOOL success   = [[NSFileManager defaultManager]
+				trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+			  resultingItemURL:nil
+						 error:&error];
+		if (!success || error) {
+			NSLog(@"Error moving file to trash: %@", error);
+			stdDeleteFn();
+		}
+	} else {
+		stdDeleteFn();
+	}
 #else
-	fs::remove_all(path);
+	stdDeleteFn();
 #endif
 }
 
@@ -297,11 +311,10 @@ string tempDir() {
 		_p = [NSTemporaryDirectory() UTF8String];
 	}
 
-//	string _p = [NSTemporaryDirectory() UTF8String];
 #elif defined(__ANDROID__)
 	string _p = getAndroidTempDir();
 #else
-	string _p = "/tmp";
+	string _p = fs::temp_directory_path().string();
 #endif
 	return _p;
 }
