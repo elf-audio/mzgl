@@ -61,7 +61,8 @@ public:
 	}
 
 	~AtomicVariableWatcher() { variable.removeListener(this); }
-	void updateVariableNoNotify(T newValue) { variable.updateNoNotify(newValue); }
+	T getValue() { return variable; }
+	void setValue(bool newValue) { variable = newValue; }
 
 private:
 	void variableChanged() override { callback(variable); }
