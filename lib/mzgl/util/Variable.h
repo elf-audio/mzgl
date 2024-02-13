@@ -14,11 +14,7 @@ public:
 		virtual void variableChanged() = 0;
 	};
 
-	explicit Variable(const T &var)
-	//	: variable(var)
-	{
-		*this = var;
-	}
+	explicit Variable(const T &var) { *this = var; }
 
 	[[maybe_unused]] const Variable<T> &operator=(const T &var) {
 		if (variable == var) return *this;
@@ -53,6 +49,7 @@ public:
 						std::end(listeners));
 	}
 
+private:
 	template <typename InnerT = T>
 	struct is_atomic {
 		static const bool value = false;
@@ -62,7 +59,6 @@ public:
 		static const bool value = true;
 	};
 
-private:
 	T variable;
 
 	std::vector<Listener *> listeners;
@@ -78,8 +74,8 @@ public:
 	}
 
 	~VariableWatcher() { variable.removeListener(this); }
-	const T &getValue() { return variable; }
-	void setValue(bool newValue) { variable = newValue; }
+	const T &getValue() const { return variable; }
+	void setValue(const T &newValue) { variable = newValue; }
 
 private:
 	void variableChanged() override { callback(variable); }
