@@ -29,8 +29,8 @@ public:
 			variable = var;
 		}
 
-		for (auto *l: listeners) {
-			l->variableChanged();
+		for (auto *listener: listeners) {
+			listener->variableChanged();
 		}
 		return *this;
 	}
