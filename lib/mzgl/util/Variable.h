@@ -1,10 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <atomic>
 #include <algorithm>
+#include <functional>
 
 template <class T>
-class AtomicVariable {
+class Variable {
 public:
 	class Listener {
 	public:
@@ -12,16 +14,21 @@ public:
 		virtual void variableChanged() = 0;
 	};
 
-	explicit AtomicVariable(const T &var)
-	// : variable(Var)
+	explicit Variable(const T &var)
+	//	: variable(var)
 	{
-		variable.store(var);
+		*this = var;
 	}
 
-	[[nodiscard]] AtomicVariable<T> &operator=(const T &var) {
+	const Variable<T> &operator=(const T &var) {
 		if (variable == var) return *this;
 
-		variable = var;
+		if constexpr (is_atomic<T>::value) {
+			variable.store(var.load());
+		} else {
+			variable = var;
+		}
+
 		for (auto *l: listeners) {
 			l->variableChanged();
 		}
@@ -32,9 +39,11 @@ public:
 	bool operator!=(const T &var) { return variable != var; }
 	bool operator==(const T &var) const { return variable == var; }
 	bool operator!=(const T &var) const { return variable != var; }
+	bool operator!() const { return !variable; }
 
-	[[nodiscard]] operator T() { return variable; }
-	[[nodiscard]] operator T() const { return variable; }
+	[[nodiscard]] operator T &() { return variable; }
+
+	[[nodiscard]] operator const T &() const { return variable; }
 	auto getNumListeners() { return listeners.size(); }
 	void addListener(Listener *listener) { listeners.push_back(listener); }
 	void removeListener(Listener *listener) {
@@ -44,29 +53,37 @@ public:
 						std::end(listeners));
 	}
 
-	void updateNoNotify(T newValue) { variable.store(newValue); }
+	template <typename InnerT = T>
+	struct is_atomic {
+		static const bool value = false;
+	};
+	template <typename InnerT>
+	struct is_atomic<std::atomic<InnerT>> {
+		static const bool value = true;
+	};
 
 private:
-	std::atomic<T> variable;
+	T variable;
+
 	std::vector<Listener *> listeners;
 };
 
 template <class T>
-class AtomicVariableWatcher : private AtomicVariable<T>::Listener {
+class VariableWatcher : private Variable<T>::Listener {
 public:
-	AtomicVariableWatcher(AtomicVariable<T> &var, const std::function<void(T)> &onChanged)
+	VariableWatcher(Variable<T> &var, const std::function<void(const T &)> &onChanged)
 		: variable(var)
 		, callback(std::move(onChanged)) {
 		variable.addListener(this);
 	}
 
-	~AtomicVariableWatcher() { variable.removeListener(this); }
-	T getValue() { return variable; }
+	~VariableWatcher() { variable.removeListener(this); }
+	const T &getValue() { return variable; }
 	void setValue(bool newValue) { variable = newValue; }
 
 private:
 	void variableChanged() override { callback(variable); }
 
-	AtomicVariable<T> &variable;
-	std::function<void(T)> callback;
+	Variable<T> &variable;
+	std::function<void(const T &)> callback;
 };
