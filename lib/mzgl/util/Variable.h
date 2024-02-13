@@ -20,7 +20,7 @@ public:
 		*this = var;
 	}
 
-	const Variable<T> &operator=(const T &var) {
+	[[maybe_unused]] const Variable<T> &operator=(const T &var) {
 		if (variable == var) return *this;
 
 		if constexpr (is_atomic<T>::value) {
