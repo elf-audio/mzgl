@@ -34,6 +34,12 @@
 #define MZ_KEY_ALT		 1003
 #define MZ_KEY_CMD		 1004
 
+// these aren't keys as such but if there's
+// 1 rotary encoder then this is the message
+// they send.
+#define MZ_KEY_INCREMENT 2099
+#define MZ_KEY_DECREMENT 2098
+
 class Layer;
 class App;
 

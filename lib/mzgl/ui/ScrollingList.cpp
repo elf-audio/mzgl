@@ -317,7 +317,7 @@ void ScrollingList::unselect() {
 }
 
 bool ScrollingList::keyDown(int key) {
-	if (key == MZ_KEY_DOWN) {
+	if (key == MZ_KEY_DOWN || key == MZ_KEY_INCREMENT) {
 		if (getNumItems() == 0) {
 			// do nothing
 			return true;
@@ -327,7 +327,7 @@ bool ScrollingList::keyDown(int key) {
 			focus(getSelectedIndex() + 1);
 		}
 		return true;
-	} else if (key == MZ_KEY_UP) {
+	} else if (key == MZ_KEY_UP || key == MZ_KEY_DECREMENT) {
 		if (getSelectedIndex() > 0) {
 			focus(getSelectedIndex() - 1);
 		} else if (getSelectedIndex() == -1) {
