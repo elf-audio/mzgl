@@ -78,6 +78,7 @@ struct MidiMessage {
 
 	bool isModWheel() const { return status == MIDI_CONTROL_CHANGE && control == 1; }
 	bool isCC() const { return status == MIDI_CONTROL_CHANGE; }
+	bool isPC() const { return status == MIDI_PROGRAM_CHANGE; }
 	bool isSysex() const { return status == MIDI_SYSEX; }
 
 	bool isAllNotesOff() const { return status == MIDI_CONTROL_CHANGE && control == MIDI_CC_ALL_NOTES_OFF; }
