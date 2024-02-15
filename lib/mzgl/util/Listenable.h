@@ -32,3 +32,18 @@ public:
 protected:
 	std::vector<T *> listeners;
 };
+
+template <class T>
+class ScopedListener {
+public:
+	ScopedListener(Listenable<T> &listenable, T *listener)
+		: listenable(listenable)
+		, listener(listener) {
+		listenable.addListener(listener);
+	}
+	~ScopedListener() { listenable.removeListener(listener); }
+
+private:
+	Listenable<T> &listenable;
+	T *listener;
+};
