@@ -73,6 +73,19 @@ public:
 		variable.addListener(this);
 	}
 
+	VariableWatcher &operator=(const VariableWatcher &other) {
+		variable.removeListener(this);
+		variable = other.variable;
+		callback = other.callback;
+		variable.addListener(this);
+		return *this;
+	}
+
+	VariableWatcher(const VariableWatcher &other)
+		: variable(other.variable)
+		, callback(other.callback) {
+		variable.addListener(this);
+	}
 	~VariableWatcher() { variable.removeListener(this); }
 	const T &getValue() const { return variable; }
 	void setValue(const T &newValue) { variable = newValue; }
