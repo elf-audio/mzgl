@@ -82,7 +82,10 @@ public:
 	VariableWatcher(Variable<T> &var, const std::function<void(const T &)> &onChanged)
 		: VariableWatcher(std::ref(var), onChanged) {}
 
-	explicit VariableWatcher(const VariableWatcher &other) { *this = other; }
+	explicit VariableWatcher(const VariableWatcher &other)
+		: variable {other.variable} {
+		*this = other;
+	}
 
 	VariableWatcher &operator=(const VariableWatcher &other) {
 		if (this != &other) {
@@ -97,8 +100,8 @@ public:
 
 	~VariableWatcher() { variable.get().removeListener(this); }
 
-	const T &getValue() const { return variable; }
-	void setValue(const T &newValue) { variable = newValue; }
+	const T &getValue() const { return variable.get(); }
+	void setValue(const T &newValue) { variable.get() = newValue; }
 
 private:
 	void variableChanged() override {
