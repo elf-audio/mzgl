@@ -84,7 +84,8 @@ public:
 	VariableWatcher(const VariableWatcher &other)
 		: variable(other.variable)
 		, callback(other.callback) {
-		variable.addListener(this);
+		*this = other;
+		//		variable.addListener(this);
 	}
 	~VariableWatcher() { variable.removeListener(this); }
 	const T &getValue() const { return variable; }
