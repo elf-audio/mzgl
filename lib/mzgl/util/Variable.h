@@ -38,8 +38,8 @@ public:
 	bool operator!() const { return !variable; }
 
 	[[nodiscard]] operator T &() { return variable; }
-
 	[[nodiscard]] operator const T &() const { return variable; }
+
 	auto getNumListeners() { return listeners.size(); }
 	void addListener(Listener *listener) { listeners.push_back(listener); }
 	void removeListener(Listener *listener) {
@@ -47,6 +47,12 @@ public:
 									   std::end(listeners),
 									   [listener](auto &&l) { return l == listener; }),
 						std::end(listeners));
+	}
+	[[nodiscard]] bool isListener(Listener *listener) const {
+		return std::find_if(std::begin(listeners),
+							std::end(listeners),
+							[listener](auto &&otherListener) { return otherListener == listener; })
+			   != std::end(listeners);
 	}
 
 private:
@@ -67,19 +73,40 @@ private:
 template <class T>
 class VariableWatcher : private Variable<T>::Listener {
 public:
-	VariableWatcher(Variable<T> &var, const std::function<void(const T &)> &onChanged)
+	VariableWatcher(std::reference_wrapper<Variable<T>> var, const std::function<void(const T &)> &onChanged)
 		: variable(var)
 		, callback(std::move(onChanged)) {
-		variable.addListener(this);
+		variable.get().addListener(this);
 	}
 
-	~VariableWatcher() { variable.removeListener(this); }
+	VariableWatcher(Variable<T> &var, const std::function<void(const T &)> &onChanged)
+		: VariableWatcher(std::ref(var), onChanged) {}
+
+	explicit VariableWatcher(const VariableWatcher &other) { *this = other; }
+
+	VariableWatcher &operator=(const VariableWatcher &other) {
+		if (this != &other) {
+			variable.get().removeListener(this);
+			variable = other.variable;
+			callback = other.callback;
+			variable.get().addListener(this);
+		}
+
+		return *this;
+	}
+
+	~VariableWatcher() { variable.get().removeListener(this); }
+
 	const T &getValue() const { return variable; }
 	void setValue(const T &newValue) { variable = newValue; }
 
 private:
-	void variableChanged() override { callback(variable); }
+	void variableChanged() override {
+		if (callback != nullptr) {
+			callback(variable.get());
+		}
+	}
 
-	Variable<T> &variable;
+	std::reference_wrapper<Variable<T>> variable;
 	std::function<void(const T &)> callback;
 };
