@@ -18,6 +18,13 @@ bool Resampler::init(int numChannels, int inSampleRate, int outSampleRate, int q
 		printf("resampler couldn't be created\n");
 		return false;
 	}
+
+	error = speex_resampler_skip_zeros(resampler);
+	if (error != 0) {
+		printf("Could not skip zeros: %d\n", error);
+		return false;
+	}
+
 	return true;
 }
 
