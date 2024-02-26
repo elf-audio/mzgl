@@ -12,10 +12,6 @@
 #include <map>
 #include <set>
 
-#ifdef __ANDROID__
-#	import "androidUtil.h"
-#endif
-
 class MidiConnectionListener {
 public:
 	virtual void midiDeviceConnected(const MidiDevice &dev) {}
