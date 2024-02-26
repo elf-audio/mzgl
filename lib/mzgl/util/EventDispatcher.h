@@ -136,6 +136,10 @@ public:
 		app->g.setupView();
 		app->updateInternal();
 
+		updateFrame();
+	}
+
+	void updateFrame() {
 		update();
 		callUpdateListeners();
 

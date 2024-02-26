@@ -25,7 +25,11 @@ bool MainThreadRunner::isMainThread() {
 }
 
 void MainThreadRunner::setMainThreadId() {
-	mainThreadId = std::this_thread::get_id();
+	setMainThreadId(std::this_thread::get_id());
+}
+
+void MainThreadRunner::setMainThreadId(std::thread::id threadId) {
+	mainThreadId = threadId;
 }
 
 void MainThreadRunner::runOnMainThread(std::function<void()> fn) {

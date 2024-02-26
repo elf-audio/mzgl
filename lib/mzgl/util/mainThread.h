@@ -43,6 +43,7 @@ public:
 	 * thread you want to set.
 	 */
 	void setMainThreadId();
+	void setMainThreadId(std::thread::id threadId);
 
 	/**
 	 * this is called internally on the
