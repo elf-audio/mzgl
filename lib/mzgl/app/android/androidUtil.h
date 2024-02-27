@@ -9,6 +9,7 @@
 #include "mzAssert.h"
 #include "FloatBuffer.h"
 
+
 #define LOGE(...) ((void) __android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #define LOGD(...) ((void) __android_log_print(ANDROID_LOG_DEBUG, "native-activity", __VA_ARGS__))
 #define LOGI(...) ((void) __android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
@@ -87,10 +88,8 @@ bool isUsingHeadphones();
 bool isUsingUSBInterface();
 bool isUsingAirplay();
 bool isUsingBluetoothHeadphones();
-
-void androidSetupAllMidiIns();
-void androidAddMidiListener(MidiListener *listener);
-void androidRemoveMidiListener(MidiListener *listener);
+class AllMidiDevicesAndroidImpl;
+void androidSetupAllMidiIns(std::weak_ptr<AllMidiDevicesAndroidImpl> impl);
 
 android_app *getAndroidAppPtr();
 class EventDispatcher;

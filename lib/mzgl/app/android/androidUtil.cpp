@@ -321,34 +321,25 @@ string jstringToString(JNIEnv *jni, jstring text) {
 	return s;
 }
 
-void androidSetupAllMidiIns() {
+static std::weak_ptr<AllMidiDevicesAndroidImpl> allMidiDevicesAndroidImpl;
+void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
+    allMidiDevicesAndroidImpl = impl;
 	Log::d() << "About to call allmidiIns";
 	callJNI("setupAllMidiIns");
 	Log::d() << "Finished setting up all midi ins";
-}
-
-vector<MidiListener *> androidMidiListeners;
-
-void androidAddMidiListener(MidiListener *listener) {
-	androidMidiListeners.push_back(listener);
-}
-
-void androidRemoveMidiListener(MidiListener *listener) {
-    androidMidiListeners.erase(std::remove(androidMidiListeners.begin(), androidMidiListeners.end(), listener), androidMidiListeners.end());
 }
 
 vector<unsigned char> currMsg;
 
 // eventually, we need to actually enumerate android deviced but this not done yet.
 MidiDevice androidMidiDeviceChangeMe;
+#include "AllMidiDevicesAndroidImpl.h"
 
 void androidEmitMidiMessage(const vector<unsigned char> &msg, uint64_t timestamp) {
 	// TODO: Does this need to run on audio thread?
-	MidiMessage m(msg);
-
-	for (int i = 0; i < androidMidiListeners.size(); i++) {
-		androidMidiListeners[i]->midiReceived(androidMidiDeviceChangeMe, m, timestamp);
-	}
+    if(auto impl = allMidiDevicesAndroidImpl.lock()) {
+        impl->messageReceived(androidMidiDeviceChangeMe, {msg}, timestamp);
+    }
 }
 
 // BE CAREFUL HERE - THIS IS A DUPLICATION OF KOALAMIDIIN PARSER LOGIC
