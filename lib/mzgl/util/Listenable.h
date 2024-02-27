@@ -12,25 +12,20 @@ template <class T>
 class Listenable {
 public:
 	void addListener(T *listener) {
-		for (int i = 0; i < listeners.size(); i++) {
-			if (listeners[i] == listener) {
-				return;
-			}
+		if (std::find(listeners.begin(), listeners.end(), listener) != listeners.end()) {
+			return;
 		}
+
 		listeners.push_back(listener);
 	}
 
 	void removeListener(T *listener) {
-		for (int i = 0; i < listeners.size(); i++) {
-			if (listeners[i] == listener) {
-				listeners.erase(listeners.begin() + i);
-				return;
-			}
-		}
+		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
+	[[nodiscard]] int getNumListeners() const { return listeners.size(); }
 
 protected:
-	std::vector<T *> listeners;
+	std::vector<T *> listeners {};
 };
 
 template <class T>

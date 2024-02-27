@@ -8,8 +8,8 @@
 
 #pragma once
 #include "AllMidiDevices.h"
-
-class AllMidiDevicesImpl {
+#include "Listenable.h"
+class AllMidiDevicesImpl : public Listenable<MidiListener> {
 public:
 	std::vector<MidiConnectionListener *> connectionListeners;
 
@@ -33,10 +33,6 @@ public:
 	virtual ~AllMidiDevicesImpl() {}
 	virtual std::vector<MidiDevice> getConnectedMidiDevices() = 0;
 	virtual void setup() {}
-
-	// these shouldn't really be handled by subclass
-	virtual void addListener(MidiListener *l)			= 0;
-	virtual void removeListener(MidiListener *listener) = 0;
 
 	// send message to all connected midi devices that have an input
 	virtual void sendMessage(const MidiMessage &m) = 0;

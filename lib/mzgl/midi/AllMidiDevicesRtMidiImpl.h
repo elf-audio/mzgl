@@ -10,10 +10,6 @@ class AllMidiDevicesRtMidiImpl
 public:
 	void setup() override { autoPoll(); }
 
-	void addListener(MidiListener *listener) override { listeners.push_back(listener); }
-	void removeListener(MidiListener *listener) override {
-		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
-	}
 	// sends to all
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
@@ -75,7 +71,6 @@ private:
 	std::map<std::string, std::shared_ptr<MidiOut>> midiOuts;
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;
-	std::vector<MidiListener *> listeners;
 
 	// must be called on main thread
 	void poll() {
