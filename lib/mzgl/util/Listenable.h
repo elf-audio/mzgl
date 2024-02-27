@@ -18,6 +18,8 @@ public:
 
 		listeners.push_back(listener);
 	}
+	
+	virtual ~Listenable() = default;
 
 	void removeListener(T *listener) {
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
@@ -25,7 +27,7 @@ public:
 	[[nodiscard]] int getNumListeners() const { return listeners.size(); }
 
 protected:
-	std::vector<T *> listeners {};
+	std::vector<T *> listeners;
 };
 
 template <class T>

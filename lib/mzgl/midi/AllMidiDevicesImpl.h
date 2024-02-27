@@ -30,7 +30,7 @@ public:
 		}
 	}
 
-	virtual ~AllMidiDevicesImpl() {}
+	~AllMidiDevicesImpl() override							  = default;
 	virtual std::vector<MidiDevice> getConnectedMidiDevices() = 0;
 	virtual void setup() {}
 

@@ -9,6 +9,7 @@ public:
 
 class MyClass : public Listenable<MyListener> {
 public:
+	~MyClass() override = default;
 	void fireEvent() {
 		for (auto l: listeners) {
 			l->onEvent();
