@@ -322,7 +322,7 @@ string jstringToString(JNIEnv *jni, jstring text) {
 }
 
 static std::weak_ptr<AllMidiDevicesAndroidImpl> allMidiDevicesAndroidImpl;
-void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
+void androidSetupAllMidiIns(std::weak_ptr<AllMidiDevicesAndroidImpl> impl) {
     allMidiDevicesAndroidImpl = impl;
 	Log::d() << "About to call allmidiIns";
 	callJNI("setupAllMidiIns");
