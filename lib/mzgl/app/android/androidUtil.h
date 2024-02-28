@@ -89,7 +89,7 @@ bool isUsingUSBInterface();
 bool isUsingAirplay();
 bool isUsingBluetoothHeadphones();
 class AllMidiDevicesAndroidImpl;
-void androidSetupAllMidiIns(std::weak_ptr<AllMidiDevicesAndroidImpl> impl);
+void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
 
 android_app *getAndroidAppPtr();
 class EventDispatcher;

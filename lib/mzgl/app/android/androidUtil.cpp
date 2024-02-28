@@ -321,9 +321,9 @@ string jstringToString(JNIEnv *jni, jstring text) {
 	return s;
 }
 
-static std::weak_ptr<AllMidiDevicesAndroidImpl> allMidiDevicesAndroidImpl;
-void androidSetupAllMidiIns(std::weak_ptr<AllMidiDevicesAndroidImpl> impl) {
-    allMidiDevicesAndroidImpl = impl;
+static std::weak_ptr<AllMidiDevicesAndroidImpl> midiImpl;
+void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
+    midiImpl = impl;
 	Log::d() << "About to call allmidiIns";
 	callJNI("setupAllMidiIns");
 	Log::d() << "Finished setting up all midi ins";
@@ -337,8 +337,10 @@ MidiDevice androidMidiDeviceChangeMe;
 
 void androidEmitMidiMessage(const vector<unsigned char> &msg, uint64_t timestamp) {
 	// TODO: Does this need to run on audio thread?
-    if(auto impl = allMidiDevicesAndroidImpl.lock()) {
+    if(auto impl = midiImpl.lock()) {
         impl->messageReceived(androidMidiDeviceChangeMe, {msg}, timestamp);
+    } else {
+        Log::e() << "ERROR: android allMidiDevices not assigned";
     }
 }
 

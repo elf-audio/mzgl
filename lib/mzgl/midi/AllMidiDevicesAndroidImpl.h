@@ -8,9 +8,9 @@
 
 class AllMidiDevicesAndroidImpl
 	: public AllMidiDevicesImpl
-	, std::enable_shared_from_this<AllMidiDevicesAndroidImpl> {
+	, public std::enable_shared_from_this<AllMidiDevicesAndroidImpl> {
 public:
-	void setup() override { androidSetupAllMidiIns(weak_from_this()); }
+	void setup() override { androidSetupAllMidiIns(shared_from_this()); }
 
 	void messageReceived(const MidiDevice &device, const MidiMessage &m, uint64_t timestamp) {
 		for (auto l: listeners)
