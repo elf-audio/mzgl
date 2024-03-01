@@ -13,6 +13,9 @@ public:
 	// sends to all
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
+	// send message to a specific device
+	void sendMessage(const MidiDevice &device, const MidiMessage &m) override { Log::e() << "Unimplemented"; }
+
 	std::vector<MidiDevice> getConnectedMidiDevices() override {
 		std::vector<MidiDevice> devices;
 		for (auto &m: midiIns) {
