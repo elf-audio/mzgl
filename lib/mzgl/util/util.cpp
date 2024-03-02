@@ -40,22 +40,20 @@
 
 #	include <shlobj.h>
 #	include <tchar.h>
-#	include <stdio.h>
 #	include <ShObjIdl_core.h>
 #	include <locale>
 #	include <codecvt>
-
+#	include <locale>
+#	include <sstream>
+#	include <processthreadsapi.h>
 #endif
 
-#include "Graphics.h"
 #include <chrono>
 #include <fstream>
 
 #include "log.h"
-#include <sstream>
 #include <iomanip>
 #include <algorithm>
-#include "Graphics.h"
 
 #include "filesystem.h"
 
@@ -65,32 +63,29 @@
 using namespace std;
 
 // this from openframeworks
-#ifdef _WIN32
-#	include <locale>
-#	include <sstream>
-#	include <string>
-
+#ifndef _WIN32
+#	include <pwd.h>
+#	include <unistd.h>
 #endif
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef _WIN32
 void setThreadName(const std::string &name) {
-	Log::e() << "setThreadName() unimplemented on windows";
-}
-#else
-#	include <pwd.h>
-#	include <unistd.h>
-
-void setThreadName(const std::string &name) {
-#	if defined(__APPLE__)
+#if defined(__APPLE__)
 	pthread_setname_np(name.c_str());
-#	elif defined(__ANDROID__)
+#elif defined(_WIN32)
+	const wchar_t *wName = reinterpret_cast<const wchar_t *>(name.data());
+	HRESULT hr			 = SetThreadDescription(GetCurrentThread(), wName);
+	if (FAILED(hr)) {
+		Log::e() << "Error setting thread name: " << hr;
+	}
+#else
 	pthread_setname_np(pthread_self(), name.c_str());
-#	endif
+#endif
 }
 
+#ifndef _WIN32
 #	ifdef __APPLE__
 std::string getHomeDirectory() {
 	return [NSHomeDirectory() UTF8String];
