@@ -75,7 +75,11 @@ using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+void setThreadName(const std::string &name) {
+	Log::e() << "setThreadName() unimplemented on windows";
+}
+#else
 #	include <pwd.h>
 #	include <unistd.h>
 
