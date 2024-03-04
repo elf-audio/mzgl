@@ -19,6 +19,7 @@ class CoreMidiDevice : public MidiDevice {
 public:
 	MIDIEndpointRef endpoint;
 	explicit CoreMidiDevice(MIDIEndpointRef endpoint);
+	~CoreMidiDevice() override = default;
 };
 
 class CoreMidiIn : public CoreMidiDevice {
@@ -26,6 +27,7 @@ public:
 	static std::shared_ptr<CoreMidiIn> create(MIDIEndpointRef endpoint) {
 		return std::shared_ptr<CoreMidiIn>(new CoreMidiIn(endpoint));
 	}
+	~CoreMidiIn() override = default;
 
 private:
 	explicit CoreMidiIn(MIDIEndpointRef endpoint)
@@ -39,6 +41,7 @@ public:
 	static std::shared_ptr<CoreMidiOut> create(MIDIEndpointRef endpoint) {
 		return std::shared_ptr<CoreMidiOut>(new CoreMidiOut(endpoint));
 	}
+	~CoreMidiOut() override = default;
 
 private:
 	explicit CoreMidiOut(MIDIEndpointRef endpoint)
@@ -63,26 +66,13 @@ public:
 
 	void scanForDevices();
 
-	void midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp);
+	void midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
-	void sendMessage(const MidiDevice &device, const MidiMessage &m) override;
+	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) override;
 	~AllMidiDevicesAppleImpl() override;
 
-	std::vector<MidiDevice> getConnectedMidiDevices() override {
-		std::vector<MidiDevice> devices;
-		devices.reserve(midiIns.size() + midiOuts.size());
-
-		for (const auto &m: midiIns) {
-			devices.push_back(*m);
-		}
-
-		for (const auto &m: midiOuts) {
-			devices.push_back(*m);
-		}
-
-		return devices;
-	}
+	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
 
 	// needs to be public because it's called by callbacks
 	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
@@ -109,6 +99,6 @@ private:
 	void midiNotifyAdd(const MIDIObjectAddRemoveNotification *notification);
 	void midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification);
 
-	void sendBytes(const MidiDevice &device, const MidiMessage &midiMessage);
-	void sendSysex(const MidiDevice &device, const MidiMessage &midiMessage);
+	void sendBytes(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
+	void sendSysex(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
 };

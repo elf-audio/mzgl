@@ -14,11 +14,12 @@
 
 class MidiConnectionListener {
 public:
-	virtual void midiDeviceConnected(const MidiDevice &dev) {}
-	virtual void midiDeviceDisconnected(const MidiDevice &dev) {}
+	virtual void midiDeviceConnected(const std::shared_ptr<MidiDevice> &dev) {}
+	virtual void midiDeviceDisconnected(const std::shared_ptr<MidiDevice> &dev) {}
 };
 
 class AllMidiDevicesImpl;
+class MainThreadRunner;
 
 // this forces the RtMidi implementation for testing on mac
 // not to be used in production.
@@ -30,6 +31,7 @@ public:
 	AllMidiDevices(bool online = true);
 
 	void setup();
+	void setMainThreadRunner(MainThreadRunner *runner);
 
 	void addListener(MidiListener *listener);
 	void removeListener(MidiListener *listener);
@@ -39,9 +41,9 @@ public:
 
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
-	void sendMessage(const MidiDevice &device, const MidiMessage &m);
+	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m);
 
-	std::vector<MidiDevice> getConnectedMidiDevices();
+	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const;
 
 private:
 	const bool online;
