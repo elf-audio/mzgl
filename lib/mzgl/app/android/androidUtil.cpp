@@ -473,6 +473,20 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_imageDialogComplete(JNIEnv *env
 	androidGetApp()->main.runOnMainThread([succ, path]() { android_statics.imgDialogCallback(succ, path); });
 }
 
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_importFileComplete(JNIEnv *env,
+																	 jobject thiz,
+																	 jboolean success,
+																	 jstring filePath) {
+	string path = jstringToString(env, filePath);
+	bool succ	= success;
+
+	androidGetApp()->main.runOnMainThread([succ, path]() {
+		android_statics.fileDialogCallback(path, succ);
+	});
+}
+
+
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_textboxDialogComplete(JNIEnv *jni,
 																	   jobject,
 																	   jboolean success,
