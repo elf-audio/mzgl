@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <string>
+#include <atomic>
 //#include <algorithm>
 #include "stringUtil.h"
 #include "mzgl/util/log.h"
@@ -35,7 +36,8 @@ public:
 	bool isOutput = false;
 	int id;
 
-	MidiDevice(std::string name = "") : name(name) {
+	MidiDevice(std::string name = "")
+		: name(name) {
 		static std::atomic<int> idCounter {0};
 		id = idCounter++;
 	}
