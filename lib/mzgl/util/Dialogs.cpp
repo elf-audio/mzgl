@@ -1149,7 +1149,9 @@ void Dialogs::loadFile(std::string msg,
 	  completionCallback(filePath, buttonClicked == NSModalResponseOK);
 	});
 #	endif
-#elif !defined(__ANDROID__) && defined(__linux__)
+#elif defined(__ANDROID__)
+    androidFileDialog(msg, allowedExtensions, completionCallback);
+#elif defined(__linux__)
 	linuxLoadFileDialog(msg, allowedExtensions, completionCallback);
 #endif
 }

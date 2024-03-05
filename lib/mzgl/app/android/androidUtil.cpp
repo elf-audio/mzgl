@@ -20,7 +20,8 @@ struct android_statics {
 	std::function<void()> cancelPressed;
 	std::function<void(bool)> shareCompleteCallback;
 	function<void(string, bool)> completionCallback;
-	std::function<void(bool success, string imgPath)> imgDialogCallback;
+    std::function<void(bool success, string imgPath)> imgDialogCallback;
+    std::function<void(string filePath, bool success)> fileDialogCallback;
 } android_statics;
 
 bool androidIsOnWifi() {
@@ -300,6 +301,23 @@ void androidImageDialog(std::string copyToPath,
 	android_statics.imgDialogCallback = completionCallback;
 	callJNI("imageDialog", copyToPath);
 }
+static std::string csv(const std::vector<std::string>& vec) {
+    std::string result;
+    for(size_t i = 0; i < vec.size(); ++i) {
+        result += vec[i];
+        if (i != vec.size() - 1) { // Check so we don't add a comma after the last element
+            result += ", ";
+        }
+    }
+    return result;
+}
+void androidFileDialog(std::string copyToPath,
+                       const std::vector<std::string> &allowedExtensions,
+                       std::function<void(std::string resultingPath, bool success)> completionCallback) {
+	android_statics.fileDialogCallback = completionCallback;
+    callJNI("fileDialog", csv(allowedExtensions));
+}
+
 
 void androidShareDialog(std::string message, std::string path, std::function<void(bool)> completionCallback) {
 	android_statics.shareCompleteCallback = completionCallback;

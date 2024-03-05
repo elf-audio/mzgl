@@ -66,6 +66,9 @@ std::string androidGetAppVersionString();
 void androidShareDialog(std::string message, std::string path, std::function<void(bool)> completionCallback);
 void androidImageDialog(std::string copyToPath,
 						std::function<void(bool success, std::string imgPath)> completionCallback);
+void androidFileDialog(std::string copyToPath,
+                        const std::vector<std::string> &allowedExtensions,
+                        std::function<void(std::string resultingPath, bool success)> completionCallback);
 
 void androidLaunchUrl(const std::string &url);
 
