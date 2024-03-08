@@ -733,6 +733,9 @@ void saveFileDialog(const std::string &msg,
 #endif
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
+	auto msgCopy			   = msg;
+	auto defaultFileNameCopy   = defaultFileName;
+	auto allowedExtensionsCopy = allowedExtensions;
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  // do work here
 	  NSModalResponse buttonClicked = -1;
@@ -740,23 +743,19 @@ void saveFileDialog(const std::string &msg,
 	  @autoreleasepool {
 		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
-		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
-		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
+		  [saveDialog setMessage:[NSString stringWithUTF8String:msgCopy.c_str()]];
+		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileNameCopy.c_str()]];
 
-		  if (!defaultFileName.empty()) {
-			  if (@available(macOS 11.0, *)) {
-				  //				  auto ext = fs::path(defaultFileName).extension().string();
-				  //				  if (ext != "" && ext[0] == '.') {
-				  NSMutableArray<UTType *> *exts = [[NSMutableArray alloc] init];
-				  for (const auto &ext: allowedExtensions) {
-					  NSString *nsExt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
+		  if (@available(macOS 11.0, *)) {
+			  NSMutableArray<UTType *> *exts = [[NSMutableArray alloc] init];
+			  for (const auto &ext: allowedExtensionsCopy) {
+				  NSString *nsExt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
 
-					  if (UTType *type = [UTType typeWithFilenameExtension:nsExt]) {
-						  [exts addObject:type];
-					  }
+				  if (UTType *type = [UTType typeWithFilenameExtension:nsExt]) {
+					  [exts addObject:type];
 				  }
-				  [saveDialog setAllowedContentTypes:exts];
 			  }
+			  [saveDialog setAllowedContentTypes:exts];
 		  }
 
 		  buttonClicked = [saveDialog runModal];
