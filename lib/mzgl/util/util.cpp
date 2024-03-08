@@ -468,7 +468,7 @@ std::string docsPath(const std::string &path) {
 	wchar_t *documentsDir;
 	HRESULT result =
 		SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
-	string retPath;
+	std::string retPath;
 
 	if (result == S_OK) {
 		std::wstring ws(documentsDir);
