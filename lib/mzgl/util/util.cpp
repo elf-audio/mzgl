@@ -795,8 +795,8 @@ void saveFileDialog(const std::string &msg,
 	ofn.lpstrFile	  = fileName;
 	ofn.nMaxFile	  = MAX_PATH;
 
-	//	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
-	//	std::wstring wideExtension = L"";
+	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
+	std::wstring wideExtension = L"";
 	//	if (!extension.empty()) {
 	//		wideExtension = converter.from_bytes(extension);
 	//		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
