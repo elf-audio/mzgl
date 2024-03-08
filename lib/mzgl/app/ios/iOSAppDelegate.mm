@@ -17,8 +17,10 @@
 #include "PluginEditor.h"
 #include "DateTime.h"
 #include "ScopedUrl.h"
+
 @interface iOSAppDelegate () {
 	std::shared_ptr<App> app;
+	std::shared_ptr<Plugin> plugin;
 	Graphics g;
 	MZGLKitViewController *mzViewController;
 }
@@ -32,7 +34,6 @@
 			options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
 	//NSString* urlPath = url.path;
 	NSLog(@"openURL: %@", url);
-
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	std::string urlStr	 = [[url absoluteString] UTF8String];
 	bool isLocalFilePath = urlStr.size() > 0 && urlStr[0] == '/';
@@ -89,7 +90,8 @@ public:
 
 	try {
 		if (isPlugin()) {
-			app = instantiatePluginEditor(g, instantiatePlugin());
+			plugin = instantiatePlugin();
+			app = instantiatePluginEditor(g, plugin);
 		} else {
 			app = instantiateApp(g);
 		}
@@ -144,12 +146,20 @@ public:
 
 - (void)applicationWillTerminate:(UIApplication *)application {
 	// Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-	auto eventDispatcher = [mzViewController getEventDispatcher];
-	eventDispatcher->exit();
-	Log::d() << "KoalaApp use_count: " << app.use_count();
+	{
+		auto eventDispatcher = [mzViewController getEventDispatcher];
+		eventDispatcher->exit();
+	}
+	
+	// do not rely on iOS to destroy your shared pointers in iOSAppDelegate - for
+	// some reason, iOSAppDelegate is not destroyed conventionally, so deleting
+	// all the mzgl shared_ptrs owned by it and the objects it owns is the only
+	// way I can work out to make sure ~App() is called.
+	[mzViewController deleteCppObjects];
 	app = nullptr;
 	
-	
+	// destroy plugin last! it must live longer than app.
+	plugin = nullptr;
 }
 
 - (void)dealloc {

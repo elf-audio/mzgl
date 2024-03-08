@@ -24,6 +24,11 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteract
 	bool firstFrame;
 }
 
+- (void) deleteCppObjects {
+	app = nullptr;
+	eventDispatcher = nullptr;
+}
+
 - (std::shared_ptr<App>)getApp {
 	return app;
 }

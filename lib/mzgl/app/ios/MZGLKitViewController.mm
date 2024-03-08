@@ -20,7 +20,9 @@
 	MZGLKitView *mzView;
 	BOOL currentlyPaused;
 }
-
+- (void) deleteCppObjects {
+	[mzView deleteCppObjects];
+}
 // in an AUV3, all instances of the plugin run
 // in the same process, maybe even on the same
 // thread. So we're going to share the context
