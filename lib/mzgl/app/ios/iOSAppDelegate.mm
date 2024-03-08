@@ -93,21 +93,15 @@ public:
 		} else {
 			app = instantiateApp(g);
 		}
-
-		mzViewController		  = [[MZGLKitViewController alloc] initWithApp:app];
-		window.rootViewController = mzViewController;
-		app->viewController		  = (__bridge void *) mzViewController;
-		app->windowHandle		  = (__bridge void *) window;
-
 	} catch (std::exception &e) {
 		writeStringToFile("instantiateAppError.txt", e.what());
-
 		app = std::make_shared<ErrorApp>(g, e.what());
 	}
 
 	mzViewController		  = [[MZGLKitViewController alloc] initWithApp:app];
 	window.rootViewController = mzViewController;
 	app->viewController		  = (__bridge void *) mzViewController;
+	app->windowHandle		  = (__bridge void *) window;
 
 	[window makeKeyAndVisible];
 
