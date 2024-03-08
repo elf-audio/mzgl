@@ -144,7 +144,7 @@ void initMZGL(std::shared_ptr<App> app);
 
 #ifdef UNIT_TEST
 
-void setDocsPath(std::string newDocsPath);
-void setDataPath(std::string newDataPath);
+void setDocsPath(const std::string &newDocsPath);
+void setDataPath(const std::string &newDataPath);
 
 #endif
