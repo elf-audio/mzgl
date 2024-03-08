@@ -15,12 +15,11 @@
 
 class App;
 
-
 void setThreadName(const std::string &name);
 
-std::string dataPath(std::string path, std::string bundleId = ""); //com.elf-audio.vst3.koala");
-std::string docsPath(std::string path = "");
-std::string appSupportPath(std::string path);
+std::string dataPath(const std::string &path, const std::string &bundleId = ""); //com.elf-audio.vst3.koala");
+std::string docsPath(const std::string &path = "");
+std::string appSupportPath(const std::string &path);
 std::string getHomeDirectory();
 void loadCommandLineArgs(int argc, const char *argv[]);
 std::vector<std::string> getCommandLineArgs();
@@ -50,7 +49,7 @@ void eraseIf(std::vector<T, A> &c, Predicate pred) {
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __APPLE__
-void oslog(std::string s);
+void oslog(const std::string &s);
 #endif
 
 std::string getAppId();
@@ -62,16 +61,14 @@ bool copyDir(const std::string &source, const std::string &destination, std::str
 void deleteOrTrash(const std::string &path);
 
 void setWindowSize(int w, int h);
-void setWindowTitle(std::string title);
-
-extern std::vector<std::string> commandLineArgs;
+void setWindowTitle(const std::string &title);
 
 // on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
 // this is only for internal, it's so
 // the app delegate can set this variable
 // when loading the app
-void setLaunchUrl(std::string url);
+void setLaunchUrl(const std::string &url);
 
 std::string tempDir();
 
@@ -83,11 +80,12 @@ void sleepMicros(long us);
 // this makes sure a file path is unique by appending
 // a number to the end of the filename (before the
 // file extension)
-std::string uniquerizePath(std::string path);
+std::string uniquerizePath(const std::string &path);
 
 // only works on mac, this one.
-void saveFileDialog(std::string msg,
-					std::string defaultFileName,
+void saveFileDialog(const std::string &msg,
+					const std::string &defaultFileName,
+					const std::vector<std::string> &allowedExtensions,
 					std::function<void(std::string, bool)> completionCallback);
 
 // generates a UUID - not tied to the machine
@@ -95,13 +93,13 @@ void saveFileDialog(std::string msg,
 std::string generateUUID();
 
 // only works on iOS. this one
-void launchUrl(std::string url);
+void launchUrl(const std::string &url);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Easy file writing
 
-bool readFile(std::string filename, std::vector<unsigned char> &outData);
-std::vector<unsigned char> readFile(std::string filename);
+bool readFile(const std::string &filename, std::vector<unsigned char> &outData);
+std::vector<unsigned char> readFile(const std::string &filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
 bool writeStringToFile(const std::string &path, const std::string &data);
 bool readStringFromFile(const std::string &path, std::string &outStr);

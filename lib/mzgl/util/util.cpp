@@ -60,7 +60,6 @@
 #include "App.h"
 #include "mainThread.h"
 #include <thread>
-using namespace std;
 
 // this from openframeworks
 #ifndef _WIN32
@@ -131,7 +130,7 @@ void deleteOrTrash(const std::string &path) {
 #endif
 }
 
-bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg) {
+bool copyDir(const fs::path &source, const fs::path &destination, std::string &errMsg) {
 	try {
 		// Check whether the function call is valid
 		if (!fs::exists(source) || !fs::is_directory(source)) {
@@ -150,7 +149,7 @@ bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg
 			return false;
 		}
 	} catch (fs::filesystem_error const &e) {
-		errMsg = string(e.what());
+		errMsg = std::string(e.what());
 		return false;
 	}
 
@@ -167,14 +166,14 @@ bool copyDir(const fs::path &source, const fs::path &destination, string &errMsg
 				fs::copy_file(current, destination / current.filename());
 			}
 		} catch (fs::filesystem_error const &e) {
-			errMsg = string(e.what());
+			errMsg = std::string(e.what());
 			return false;
 		}
 	}
 	return true;
 }
 
-bool copyDir(const std::string &source, const std::string &destination, string &errMsg) {
+bool copyDir(const std::string &source, const std::string &destination, std::string &errMsg) {
 	return copyDir(fs::path(source), fs::path(destination), errMsg);
 }
 
@@ -190,16 +189,16 @@ bool is_number(const std::string &s) {
 	return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
 
-string uniquerizePath(string path) {
+std::string uniquerizePath(const std::string &path) {
 	fs::path p(path);
-	string outPath = p.string();
+	std::string outPath = p.string();
 	if (fs::exists(p)) {
-		string filenameBase = p.stem().string();
-		int lastSlash		= (int) filenameBase.rfind("-");
+		std::string filenameBase = p.stem().string();
+		int lastSlash			 = (int) filenameBase.rfind("-");
 
 		int startingIndex = 1;
 		if (lastSlash != -1) {
-			string ending = filenameBase.substr(lastSlash + 1);
+			std::string ending = filenameBase.substr(lastSlash + 1);
 			if (is_number(ending)) {
 				filenameBase  = filenameBase.substr(0, lastSlash);
 				startingIndex = stoi(ending) + 1;
@@ -208,7 +207,7 @@ string uniquerizePath(string path) {
 
 		for (int i = startingIndex; i < 10000; i++) {
 			auto filename = p.stem();
-			auto pp		  = p.parent_path() / (filenameBase + "-" + to_string(i) + p.extension().string());
+			auto pp		  = p.parent_path() / (filenameBase + "-" + std::to_string(i) + p.extension().string());
 
 			if (!fs::exists(pp)) {
 				outPath = pp.string();
@@ -222,22 +221,22 @@ string uniquerizePath(string path) {
 	return outPath;
 }
 
-vector<string> commandLineArgs;
+namespace Globals {
+	std::string launchUrl = "";
+	std::chrono::system_clock::time_point startTime;
+	std::vector<std::string> commandLineArgs;
+} // namespace Globals
+
 void loadCommandLineArgs(int argc, const char *argv[]) {
-	commandLineArgs.clear();
+	Globals::commandLineArgs.clear();
 	for (int i = 0; i < argc; i++) {
-		commandLineArgs.push_back(argv[i]);
+		Globals::commandLineArgs.emplace_back(argv[i]);
 	}
 }
 
 std::vector<std::string> getCommandLineArgs() {
-	return commandLineArgs;
+	return Globals::commandLineArgs;
 }
-
-namespace Globals {
-	string launchUrl = "";
-	std::chrono::system_clock::time_point startTime;
-} // namespace Globals
 
 float getSeconds() {
 	auto end									  = std::chrono::system_clock::now();
@@ -289,19 +288,20 @@ void setWindowSize(int w, int h) {
 #endif
 }
 
-void setWindowTitle(string title) {
+void setWindowTitle(const std::string &title) {
+	std::string titleLocalCopy = title;
 #if defined(__APPLE__) && !TARGET_OS_IOS
 
 	dispatch_async(dispatch_get_main_queue(), ^(void) {
 	  NSWindow *win = [NSApp mainWindow];
-	  [win setTitle:[NSString stringWithUTF8String:title.c_str()]];
+	  [win setTitle:[NSString stringWithUTF8String:titleLocalCopy.c_str()]];
 	});
 #endif
 }
 
-string tempDir() {
+std::string tempDir() {
 #if defined(__APPLE__) // && TARGET_OS_IOS
-	string _p;
+	std::string _p;
 	if (@available(macOS 10.12, *)) {
 		NSURL *url = [[NSFileManager defaultManager] temporaryDirectory];
 		_p		   = [[url path] UTF8String];
@@ -311,18 +311,18 @@ string tempDir() {
 	}
 
 #elif defined(__ANDROID__)
-	string _p = getAndroidTempDir();
+	std::string _p = getAndroidTempDir();
 #else
-	string _p = fs::temp_directory_path().string();
+	std::string _p = fs::temp_directory_path().string();
 #endif
 	return _p;
 }
 
 #ifdef UNIT_TEST
-bool isOverridingDataPath = false;
-string dataPathOverride	  = "";
+bool isOverridingDataPath	 = false;
+std::string dataPathOverride = "";
 
-void setDataPath(string path) {
+void setDataPath(const std::string &path) {
 	isOverridingDataPath = true;
 	dataPathOverride	 = path;
 }
@@ -338,9 +338,9 @@ static auto getVSTBundlePath() -> fs::path {
 }
 
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
-string dataPath(string path, string appBundleId) {
+std::string dataPath(const std::string &path, const std::string &appBundleId) {
 	// it's an absolute path, don't do anything to it
-	if (path.size() > 0 && path[0] == '/') return path;
+	if (!path.empty() && path[0] == '/') return path;
 
 #ifdef UNIT_TEST
 	if (isOverridingDataPath) return dataPathOverride + "/" + path;
@@ -357,12 +357,10 @@ string dataPath(string path, string appBundleId) {
 	return "data/" + path;
 #elif defined(__APPLE__)
 
-	if (appBundleId == "") {
-		//		Log::e() << "Going for main bundle";
-		NSString *a = [[NSBundle mainBundle] resourcePath];
-		string s	= [a UTF8String];
+	if (appBundleId.empty()) {
+		NSString *a	  = [[NSBundle mainBundle] resourcePath];
+		std::string s = [a UTF8String];
 		s += "/data/" + path;
-		//		Log::e() << s;
 		return s;
 	} else {
 		Log::e() << "Going for bundle" << appBundleId;
@@ -371,7 +369,7 @@ string dataPath(string path, string appBundleId) {
 		if (pBundle == nil) {
 			return path;
 		} else {
-			string returnPath = string([[pBundle resourcePath] UTF8String]) + "/data/" + path;
+			std::string returnPath = std::string([[pBundle resourcePath] UTF8String]) + "/data/" + path;
 			Log::e() << "final path: " << returnPath;
 
 			return returnPath;
@@ -387,10 +385,10 @@ string dataPath(string path, string appBundleId) {
 }
 
 #ifdef UNIT_TEST
-bool isOverridingDocsPath = false;
-string docsPathOverride	  = "";
+bool isOverridingDocsPath	 = false;
+std::string docsPathOverride = "";
 
-void setDocsPath(string path) {
+void setDocsPath(const std::string &path) {
 	isOverridingDocsPath = true;
 	docsPathOverride	 = path;
 }
@@ -441,7 +439,7 @@ int64_t getAvailableMemory() {
 	return -1;
 }
 bool hasPrintedTheError = false;
-string docsPath(string path) {
+std::string docsPath(const std::string &path) {
 #ifdef UNIT_TEST
 	if (isOverridingDocsPath) {
 		return docsPathOverride + "/" + path;
@@ -450,7 +448,7 @@ string docsPath(string path) {
 #ifdef __APPLE__
 	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask]
 		lastObject];
-	string _path = [[url path] UTF8String];
+	std::string _path = [[url path] UTF8String];
 	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
 	if (_path == "/Users/marek/Documents") {
 		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
@@ -507,7 +505,7 @@ string docsPath(string path) {
 #endif
 }
 
-string getAppId() {
+std::string getAppId() {
 #ifdef __APPLE__
 	return [[[NSBundle mainBundle] bundleIdentifier] UTF8String];
 #else
@@ -516,12 +514,12 @@ string getAppId() {
 #endif
 }
 
-string appSupportPath(string path) {
+std::string appSupportPath(const std::string &path) {
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
-	NSURL *url	 = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
-														   inDomains:NSUserDomainMask] lastObject];
-	string _path = [[url path] UTF8String];
+	NSURL *url		  = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
+															inDomains:NSUserDomainMask] lastObject];
+	std::string _path = [[url path] UTF8String];
 	_path += "/" + getAppId();
 	if (!fs::exists(_path)) {
 		fs::create_directory(_path);
@@ -537,7 +535,7 @@ string appSupportPath(string path) {
 #endif
 }
 
-string getOSVersion() {
+std::string getOSVersion() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	return [[[UIDevice currentDevice] systemVersion] UTF8String];
@@ -553,7 +551,7 @@ string getOSVersion() {
 #endif
 }
 
-string getPlatformName() {
+std::string getPlatformName() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	return "iOS";
@@ -623,14 +621,14 @@ uint64_t getStorageRemainingInBytes() {
 }
 
 // on iOS/mac this'll give the launched url
-string getLaunchUrl() {
+std::string getLaunchUrl() {
 	return Globals::launchUrl;
 }
 
-void setLaunchUrl(string url) {
+void setLaunchUrl(const std::string &url) {
 	Globals::launchUrl = url;
 }
-string execute(string cmd, int *outExitCode) {
+std::string execute(std::string cmd, int *outExitCode) {
 #ifdef __APPLE__
 	//	printf("Executing %s\n", cmd.c_str());
 	cmd += " 2>&1";
@@ -667,7 +665,7 @@ void initMZGL(std::shared_ptr<App> app) {
 //#	import <WebKit/WebKit.h>
 #endif
 
-void launchUrl(string url) {
+void launchUrl(const std::string &url) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	NSString *urlStr = [NSString stringWithUTF8String:url.c_str()];
@@ -683,18 +681,18 @@ void launchUrl(string url) {
 #endif
 }
 
-string getAppVersionString() {
-	std::string version = "";
+std::string getAppVersionString() {
+	std::string version;
 #ifdef __APPLE__
 	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	if (str == nil) {
 		return "not available";
 	}
-	std::string v = string([str UTF8String]);
+	std::string v = std::string([str UTF8String]);
 
 	NSString *ver = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
 	if (ver != nil) {
-		v += " (" + string([ver UTF8String]) + ")";
+		v += " (" + std::string([ver UTF8String]) + ")";
 	}
 
 	version = v;
@@ -725,7 +723,10 @@ string getAppVersionString() {
 #	include <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #endif
 
-void saveFileDialog(string msg, string defaultFileName, function<void(string, bool)> completionCallback) {
+void saveFileDialog(const std::string &msg,
+					const std::string &defaultFileName,
+					const std::vector<std::string> &allowedExtensions,
+					std::function<void(std::string, bool)> completionCallback) {
 #ifdef AUTO_TEST
 	completionCallback(defaultFileName, randi(2) == 0);
 	return;
@@ -734,25 +735,29 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 #	if !TARGET_OS_IOS
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  // do work here
-	  NSInteger buttonClicked;
-	  string filePath = "";
+	  NSModalResponse buttonClicked = -1;
+	  std::string filePath;
 	  @autoreleasepool {
 		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
 
-		  if (defaultFileName != "")
+		  if (!defaultFileName.empty()) {
 			  if (@available(macOS 11.0, *)) {
-				  auto ext = fs::path(defaultFileName).extension().string();
-				  if (ext != "" && ext[0] == '.') {
-					  NSString *extt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
+				  //				  auto ext = fs::path(defaultFileName).extension().string();
+				  //				  if (ext != "" && ext[0] == '.') {
+				  NSMutableArray<UTType *> *exts = [[NSMutableArray alloc] init];
+				  for (const auto &ext: allowedExtensions) {
+					  NSString *nsExt = [NSString stringWithUTF8String:ext.substr(1).c_str()];
 
-					  if (UTType *type = [UTType typeWithFilenameExtension:extt]) {
-						  [saveDialog setAllowedContentTypes:@[ type ]];
+					  if (UTType *type = [UTType typeWithFilenameExtension:nsExt]) {
+						  [exts addObject:type];
 					  }
 				  }
+				  [saveDialog setAllowedContentTypes:exts];
 			  }
+		  }
 
 		  buttonClicked = [saveDialog runModal];
 
@@ -764,14 +769,13 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 			  return;
 		  }
 		  if (buttonClicked == NSModalResponseOK) {
-			  filePath = string([[[saveDialog URL] path] UTF8String]);
+			  filePath = std::string([[[saveDialog URL] path] UTF8String]);
 		  }
 	  }
 	  completionCallback(filePath, buttonClicked == NSModalResponseOK);
 	});
 #	endif
 #elif defined(_WIN32)
-
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring wide = converter.from_bytes(defaultFileName);
 
@@ -792,11 +796,20 @@ void saveFileDialog(string msg, string defaultFileName, function<void(string, bo
 	ofn.lpstrFile	  = fileName;
 	ofn.nMaxFile	  = MAX_PATH;
 
-	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
-	std::wstring wideExtension = L"";
-	if (!extension.empty()) {
-		wideExtension = converter.from_bytes(extension);
-		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
+	//	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
+	//	std::wstring wideExtension = L"";
+	//	if (!extension.empty()) {
+	//		wideExtension = converter.from_bytes(extension);
+	//		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
+	//	}
+
+	for (const auto &extension: allowedExtensions) {
+		if (!extension.empty()) {
+			// Convert each extension to a wide string
+			wideExtension = converter.from_bytes(extension);
+			// Construct the filter part for this extension
+			filter = wideExtension + L" Files (*" + wideExtension + L")\0*" + wideExtension + L"\0" + filter;
+		}
 	}
 
 	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";
@@ -851,7 +864,7 @@ void hideMouse() {
 #endif
 }
 
-bool readFile(string filename, std::vector<unsigned char> &outData) {
+bool readFile(const std::string &filename, std::vector<unsigned char> &outData) {
 	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);
 	if (!strm) {
 		printf("cannot open file\n");
@@ -869,7 +882,7 @@ bool readFile(string filename, std::vector<unsigned char> &outData) {
 }
 
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data) {
-	fs::ofstream outfile(fs::u8path(path), ios::out | ios::binary);
+	fs::ofstream outfile(fs::u8path(path), std::ios::out | std::ios::binary);
 	if (outfile.fail()) return false;
 	outfile.write((const char *) data.data(), data.size());
 	if (outfile.fail()) return false;
@@ -878,14 +891,14 @@ bool writeFile(const std::string &path, const std::vector<unsigned char> &data) 
 	return true;
 }
 
-std::vector<unsigned char> readFile(string filename) {
+std::vector<unsigned char> readFile(const std::string &filename) {
 	std::vector<unsigned char> outData;
 	readFile(filename, outData);
 	return outData;
 }
 
 bool writeStringToFile(const std::string &path, const std::string &data) {
-	fs::ofstream outfile(fs::u8path(path), ios::out);
+	fs::ofstream outfile(fs::u8path(path), std::ios::out);
 	if (outfile.fail()) {
 		Log::e() << "writeStringToFile() open failed: " << strerror(errno) << path;
 		return false;
@@ -945,7 +958,7 @@ bool moveFile(const std::string &from, const std::string &to) {
 }
 #ifdef __APPLE__
 os_log_t logObject = nullptr;
-void oslog(string s) {
+void oslog(const std::string &s) {
 	if (logObject == nullptr) {
 		logObject = os_log_create("com.elf-audio.koala", "testing log");
 	}
@@ -997,9 +1010,8 @@ namespace uuid {
 
 std::string generateUUID() {
 #ifdef __APPLE__
-
 	NSUUID *uuid = [[NSUUID alloc] init];
-	return std::string([uuid.UUIDString UTF8String]);
+	return {[uuid.UUIDString UTF8String]};
 #else
 	return uuid::generate_uuid_v4();
 #endif

@@ -152,6 +152,10 @@ public:
 	// Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->exit();
+	Log::d() << "KoalaApp use_count: " << app.use_count();
+	app = nullptr;
+	
+	
 }
 
 - (void)dealloc {
