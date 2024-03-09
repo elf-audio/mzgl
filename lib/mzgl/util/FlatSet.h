@@ -8,16 +8,16 @@
 
 #pragma once
 #include <vector>
-
+#include <cstddef>
 /**
  If you need to use a set but want it to not allocate
  */
 template <typename T>
 class FlatSet {
 public:
-	FlatSet(size_t initialSize = 0) { reserve(initialSize); }
+	FlatSet(std::size_t initialSize = 0) { reserve(initialSize); }
 
-	void reserve(size_t sz) { storage.reserve(sz); }
+	void reserve(std::size_t sz) { storage.reserve(sz); }
 
 	bool insert(T s) {
 		// only insert if not already inside
@@ -39,7 +39,7 @@ public:
 	auto end() const { return storage.cend(); }
 
 	bool erase(T p) {
-		for (size_t i = 0; i < storage.size(); i++) {
+		for (std::size_t i = 0; i < storage.size(); i++) {
 			if (storage[i] == p) {
 				storage.erase(storage.begin() + i);
 				return true;
@@ -50,7 +50,7 @@ public:
 
 	bool empty() const { return storage.empty(); }
 	void clear() { storage.clear(); }
-	size_t size() const { return storage.size(); }
+	std::size_t size() const { return storage.size(); }
 	const T &operator[](int i) const { return storage[i]; }
 
 	const std::vector<T> &getVector() const { return storage; }
