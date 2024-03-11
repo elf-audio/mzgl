@@ -733,9 +733,9 @@ void saveFileDialog(const std::string &msg,
 #endif
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
-	auto msgCopy			   = msg;
-	auto defaultFileNameCopy   = defaultFileName;
-	auto allowedExtensionsCopy = allowedExtensions;
+	const auto msgCopy				 = msg;
+	const auto defaultFileNameCopy	 = defaultFileName;
+	const auto allowedExtensionsCopy = allowedExtensions;
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  // do work here
 	  NSModalResponse buttonClicked = -1;
