@@ -14,15 +14,17 @@ public:
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
 	// send message to a specific device
-	void sendMessage(const MidiDevice &device, const MidiMessage &m) override { Log::e() << "Unimplemented"; }
+	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) override {
+		Log::e() << "Unimplemented";
+	}
 
-	std::vector<MidiDevice> getConnectedMidiDevices() override {
-		std::vector<MidiDevice> devices;
+	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override {
+		std::vector<std::shared_ptr<MidiDevice>> devices;
 		for (auto &m: midiIns) {
-			devices.push_back(*m.second);
+			devices.push_back(m.second);
 		}
 		for (auto &m: midiOuts) {
-			devices.push_back(*m.second);
+			devices.push_back(m.second);
 		}
 		return devices;
 	}
@@ -53,7 +55,9 @@ public:
 		return nameSet;
 	}
 
-	void midiReceived(const MidiDevice &device, const MidiMessage &m, uint64_t timestamp) override {
+	void midiReceived(const std::shared_ptr<MidiDevice> &device,
+					  const MidiMessage &m,
+					  uint64_t timestamp) override {
 		for (auto l: listeners) {
 			l->midiReceived(device, m, timestamp);
 		}

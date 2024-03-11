@@ -35,6 +35,34 @@ CoreMidiDevice::CoreMidiDevice(MIDIEndpointRef endpoint)
 	name = nameOfEndpoint(endpoint);
 }
 
+std::shared_ptr<MidiDevice> getDeviceForEndpointRef(const CoreMidiDevice &device,
+													const std::vector<CoreMidiOutRef> &midiOuts) {
+	for (const auto &destination: midiOuts) {
+		if (destination->endpoint == device.endpoint) {
+			return destination;
+		}
+	}
+	return nullptr;
+}
+
+std::optional<MIDIEndpointRef> getEndpointRefForDevice(const std::shared_ptr<MidiDevice> &device,
+													   const std::vector<CoreMidiOutRef> &midiOuts) {
+	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
+		auto endpoint = MIDIGetDestination(index);
+		if (endpoint == 0) {
+			continue;
+		}
+
+		for (const auto &destination: midiOuts) {
+			if (destination->endpoint == endpoint && *device == *destination) {
+				return endpoint;
+			}
+		}
+	}
+
+	return std::nullopt;
+}
+
 static void MIDIReadNoteProc(const MIDIPacketList *packetList, void *readProcRefCon, void *srcConnRefCon) {
 	auto *me  = (AllMidiDevicesAppleImpl *) readProcRefCon;
 	auto *dev = (CoreMidiDevice *) srcConnRefCon;
@@ -46,7 +74,7 @@ static void myMIDINotifyProc(const MIDINotification *message, void *refCon) {
 	me->midiNotify(message);
 }
 
-static void removeFirst(std::vector<CoreMidiInRef> &devs, CoreMidiInRef dev) {
+static void removeFirst(std::vector<CoreMidiInRef> &devs, const CoreMidiInRef &dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -54,7 +82,7 @@ static void removeFirst(std::vector<CoreMidiInRef> &devs, CoreMidiInRef dev) {
 		}
 	}
 }
-static void removeFirst(std::vector<CoreMidiOutRef> &devs, CoreMidiOutRef dev) {
+static void removeFirst(std::vector<CoreMidiOutRef> &devs, const CoreMidiOutRef &dev) {
 	for (int i = 0; i < devs.size(); i++) {
 		if (devs[i] == dev) {
 			devs.erase(devs.begin() + i);
@@ -179,7 +207,7 @@ void AllMidiDevicesAppleImpl::connectOutput(MIDIEndpointRef endpoint) {
 	//    Log::d() << "Connecting destination " << nameOfEndpoint(endpoint);
 	auto dest = CoreMidiOut::create(endpoint);
 	midiOuts.push_back(dest);
-	notifyConnection(*dest);
+	notifyConnection(dest);
 	//	notifyConnectionChange();
 }
 
@@ -188,8 +216,7 @@ void AllMidiDevicesAppleImpl::disconnectOutput(MIDIEndpointRef endpoint) {
 	auto dest = getOutput(endpoint);
 	if (dest) {
 		removeFirst(midiOuts, dest);
-		//		notifyConnectionChange();
-		notifyDisconnection(*dest);
+		notifyDisconnection(dest);
 	}
 }
 
@@ -198,7 +225,7 @@ void AllMidiDevicesAppleImpl::connectInput(MIDIEndpointRef endpoint) {
 	auto src = CoreMidiIn::create(endpoint);
 	midiIns.push_back(src);
 
-	notifyConnection(*src);
+	notifyConnection(src);
 	OSStatus s = MIDIPortConnectSource(inputPort, endpoint, (void *) src.get());
 	NSLogError(s, "Connecting to MIDI source");
 }
@@ -226,14 +253,16 @@ void AllMidiDevicesAppleImpl::disconnectInput(MIDIEndpointRef endpoint) {
 		// [sources removeObject:source];
 		removeFirst(midiIns, src);
 		//		notifyConnectionChange();
-		notifyDisconnection(*src);
+		notifyDisconnection(src);
 	}
 }
 
-void AllMidiDevicesAppleImpl::midiReceived(const MidiDevice &device, const MidiMessage &msg, uint64_t timestamp) {
+void AllMidiDevicesAppleImpl::midiReceived(const std::shared_ptr<MidiDevice> &device,
+										   const MidiMessage &msg,
+										   uint64_t timestamp) {
 	uint64_t ts = hostTicksToNanoSeconds(timestamp);
-	for (auto *l: listeners) {
-		l->midiReceived(device, msg, ts);
+	for (auto *listener: listeners) {
+		listener->midiReceived(device, msg, ts);
 	}
 }
 
@@ -242,6 +271,11 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 	// there is no distinguishing between different devices in regard to pendingMsg.
 	// you'd need one per device.
 	// Log::e() << "Packet list received from " << device.name;
+	auto theDevice = getDeviceForEndpointRef(device, midiOuts);
+	if (theDevice == nullptr) {
+		return;
+	}
+
 	const MIDIPacket *packet = &packetList->packet[0];
 	for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
 		for (int i = 0; i < packet->length; i++) {
@@ -250,7 +284,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 			if (d[i] & 0x80) {
 				// this is a status byte, send any previous messages
 				if (!pendingMsg.empty()) {
-					midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
+					midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
 					pendingMsg.clear();
 				}
 
@@ -259,7 +293,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 				// if this status byte is for a 1 byte message send it straight away
 				// all status 0xF6 and above are all the 1 byte messages.
 				if (pendingMsg.size() == 1 && pendingMsg[0] >= 0xF6) {
-					midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
+					midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
 					pendingMsg.clear();
 				}
 			} else {
@@ -293,7 +327,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 							break;
 					}
 					if (shouldEmit) {
-						midiReceived(device, MidiMessage(pendingMsg), packet->timeStamp);
+						midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
 						pendingMsg.clear();
 					}
 				}
@@ -335,20 +369,15 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 	}
 }
 
-std::optional<MIDIEndpointRef> getEndpointRefForDevice(const MidiDevice &device,
-													   const std::vector<CoreMidiOutRef> &midiOuts) {
-	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
-		auto endpoint = MIDIGetDestination(index);
-		if (endpoint == 0) continue;
-
-		for (const auto &destination: midiOuts)
-			if (destination->endpoint == endpoint && device == *destination) return endpoint;
-	}
-
-	return std::nullopt;
+std::vector<std::shared_ptr<MidiDevice>> AllMidiDevicesAppleImpl::getConnectedMidiDevices() const {
+	std::vector<std::shared_ptr<MidiDevice>> devices;
+	devices.insert(std::end(devices), std::begin(midiIns), std::end(midiIns));
+	devices.insert(std::end(devices), std::begin(midiOuts), std::end(midiOuts));
+	return devices;
 }
 
-void AllMidiDevicesAppleImpl::sendBytes(const MidiDevice &device, const MidiMessage &midiMessage) {
+void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &device,
+										const MidiMessage &midiMessage) {
 	const auto bytes = midiMessage.getBytes();
 
 	assert(bytes.size() < 65536);
@@ -373,7 +402,8 @@ static void cleanupSysex(MIDISysexSendRequest *request) {
 	delete request;
 }
 
-void AllMidiDevicesAppleImpl::sendSysex(const MidiDevice &device, const MidiMessage &midiMessage) {
+void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &device,
+										const MidiMessage &midiMessage) {
 	auto bytes = midiMessage.getBytes();
 
 	assert(bytes.size() < 65536);
@@ -411,11 +441,12 @@ void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &midiMessage) {
 	}
 
 	for (const auto &output: midiOuts) {
-		sendMessage(*output, midiMessage);
+		sendMessage(output, midiMessage);
 	}
 }
 
-void AllMidiDevicesAppleImpl::sendMessage(const MidiDevice &device, const MidiMessage &midiMessage) {
+void AllMidiDevicesAppleImpl::sendMessage(const std::shared_ptr<MidiDevice> &device,
+										  const MidiMessage &midiMessage) {
 	if (!midiMessageHasValidBytes(midiMessage)) {
 		return;
 	}

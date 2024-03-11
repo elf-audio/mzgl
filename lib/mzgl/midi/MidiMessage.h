@@ -70,6 +70,18 @@ struct MidiMessage {
 		//		timeOffset = deltaTime;
 	}
 
+	~MidiMessage() = default;
+	MidiMessage (const MidiMessage &other) {
+		*this = other;
+	}
+	MidiMessage &operator= (const MidiMessage &other) {
+        if (this != &other) {
+			auto data = other.getBytes();
+			setFromBytes(data.data(), data.size());
+		}
+		return *this;
+    }
+
 	bool isNoteOn() const { return status == MIDI_NOTE_ON && velocity > 0; }
 
 	bool isNoteOff() const { return status == MIDI_NOTE_OFF || (status == MIDI_NOTE_ON && velocity == 0); }

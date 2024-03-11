@@ -9,7 +9,6 @@
 #include "mzAssert.h"
 #include "FloatBuffer.h"
 
-
 #define LOGE(...) ((void) __android_log_print(ANDROID_LOG_ERROR, "native-activity", __VA_ARGS__))
 #define LOGD(...) ((void) __android_log_print(ANDROID_LOG_DEBUG, "native-activity", __VA_ARGS__))
 #define LOGI(...) ((void) __android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
@@ -34,37 +33,39 @@ std::string getAndroidExternalDataPath();
 std::string getAndroidExternalStorageDirectory();
 void androidAlertDialog(const std::string &title, const std::string &msg);
 bool androidHasMicPermission();
-void androidConfirmDialog(std::string title,
-						  std::string msg,
+void androidConfirmDialog(const std::string &title,
+						  const std::string &msg,
 						  std::function<void()> okPressed,
 						  std::function<void()> cancelPressed);
 
-void androidTextboxDialog(std::string title,
-						  std::string msg,
-						  std::string text,
+void androidTextboxDialog(const std::string &title,
+						  const std::string &msg,
+						  const std::string &text,
 						  std::function<void(std::string, bool)> completionCallback);
 
-void androidTwoOptionCancelDialog(std::string title,
-								  std::string msg,
-								  std::string buttonOneText,
+void androidTwoOptionCancelDialog(const std::string &title,
+								  const std::string &msg,
+								  const std::string &buttonOneText,
 								  std::function<void()> buttonOnePressed,
-								  std::string buttonTwoText,
+								  const std::string &buttonTwoText,
 								  std::function<void()> buttonTwoPressed,
 								  std::function<void()> cancelPressed);
 
-void androidThreeOptionCancelDialog(std::string title,
-									std::string msg,
-									std::string buttonOneText,
+void androidThreeOptionCancelDialog(const std::string &title,
+									const std::string &msg,
+									const std::string &buttonOneText,
 									std::function<void()> buttonOnePressed,
-									std::string buttonTwoText,
+									const std::string &buttonTwoText,
 									std::function<void()> buttonTwoPressed,
-									std::string buttonThreeText,
+									const std::string &buttonThreeText,
 									std::function<void()> buttonThreePressed,
 									std::function<void()> cancelPressed);
 
 std::string androidGetAppVersionString();
-void androidShareDialog(std::string message, std::string path, std::function<void(bool)> completionCallback);
-void androidImageDialog(std::string copyToPath,
+void androidShareDialog(const std::string &message,
+						const std::string &path,
+						std::function<void(bool)> completionCallback);
+void androidImageDialog(const std::string &copyToPath,
 						std::function<void(bool success, std::string imgPath)> completionCallback);
 void androidFileDialog(std::string copyToPath,
                         const std::vector<std::string> &allowedExtensions,
@@ -80,10 +81,9 @@ void androidLaunchUrl(const std::string &url);
 //------------------------------------------------------------------------------------------------------------------------------
 void androidDisplayHtml(const std::string &html);
 
-bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
+bool androidEncodeAAC(const std::string &pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
 std::string getAndroidTempDir();
-std::vector<std::string> androidGetMidiDeviceNames();
 
 bool androidIsOnWifi();
 
@@ -92,45 +92,55 @@ bool isUsingUSBInterface();
 bool isUsingAirplay();
 bool isUsingBluetoothHeadphones();
 class AllMidiDevicesAndroidImpl;
+
+void androidSetMainThreadRunner(MainThreadRunner *runner);
 void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
+void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId);
 
 android_app *getAndroidAppPtr();
 class EventDispatcher;
 EventDispatcher *getAndroidEventDispatcher();
-void callJNI(std::string methodName,
-			 std::string arg1,
-			 std::string arg2,
-			 std::string arg3,
-			 std::string arg4,
-			 std::string arg5);
-void callJNI(std::string methodName, std::string arg1, std::string arg2, std::string arg3, std::string arg4);
-void callJNI(std::string methodName, std::string arg1, std::string arg2, std::string arg3);
-void callJNI(std::string methodName, std::string arg1, std::string arg2);
-void callJNI(std::string methodName, std::string arg1);
-void callJNI(std::string methodName);
-void callJNI(std::string methodName, int32_t arg1);
-void callJNI(std::string methodName, float arg1);
+void callJNI(const std::string &methodName,
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3,
+			 const std::string &arg4,
+			 const std::string &arg5);
+void callJNI(const std::string &methodName,
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3,
+			 const std::string &arg4);
+void callJNI(const std::string &methodName,
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3);
+void callJNI(const std::string &methodName, const std::string &arg1, const std::string &arg2);
+void callJNI(const std::string &methodName, const std::string &arg1);
+void callJNI(const std::string &methodName);
+void callJNI(const std::string &methodName, int32_t arg1);
+void callJNI(const std::string &methodName, float arg1);
 
-bool callJNIForBoolean(std::string methodName);
-bool callJNIForBoolean(std::string methodName, int arg1);
-bool callJNIForBoolean(std::string methodName, std::string arg1);
-bool callJNIForBoolean(std::string methodName, const std::string &arg1, int arg2);
-bool callJNIForBoolean(std::string methodName, const std::string &arg1, const std::string &arg2);
+bool callJNIForBoolean(const std::string &methodName);
+bool callJNIForBoolean(const std::string &methodName, int arg1);
+bool callJNIForBoolean(const std::string &methodName, const std::string &arg1);
+bool callJNIForBoolean(const std::string &methodName, const std::string &arg1, int arg2);
+bool callJNIForBoolean(const std::string &methodName, const std::string &arg1, const std::string &arg2);
 
-void callJNIForStringArray(std::string methodName, std::vector<std::string> &data);
+void callJNIForStringArray(const std::string &methodName, std::vector<std::string> &data);
 
-float callJNIForFloat(std::string methodName);
+float callJNIForFloat(const std::string &methodName);
 
-int64_t callJNIForLong(std::string methodName);
-int32_t callJNIForInt(std::string methodName);
+int64_t callJNIForLong(const std::string &methodName);
+int32_t callJNIForInt(const std::string &methodName);
 
-std::string callJNIForString(std::string methodName, int32_t arg1);
-int64_t callJNIForLong(std::string methodName, int32_t arg1);
+std::string callJNIForString(const std::string &methodName, int32_t arg1);
+int64_t callJNIForLong(const std::string &methodName, int32_t arg1);
 
-void callJNI(std::string methodName, const std::string &arg1, int32_t arg2);
+void callJNI(const std::string &methodName, const std::string &arg1, int32_t arg2);
 
-std::string callJNIForString(std::string methodName);
-std::string callJNIForString(std::string methodName, std::string arg1);
+std::string callJNIForString(const std::string &methodName);
+std::string callJNIForString(const std::string &methodName, const std::string &arg1);
 std::string jstringToString(JNIEnv *jni, jstring text);
 class ScopedJniAttachmentBlocker {
 public:
@@ -158,6 +168,7 @@ public:
 			//  }
 		}
 	}
+	[[nodiscard]] JNIEnv *operator->() { return j(); }
 	JNIEnv *j() { return jni; }
 	jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
 		auto *cl = getClass();

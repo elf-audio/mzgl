@@ -20,8 +20,8 @@ struct android_statics {
 	std::function<void()> cancelPressed;
 	std::function<void(bool)> shareCompleteCallback;
 	function<void(string, bool)> completionCallback;
-    std::function<void(bool success, string imgPath)> imgDialogCallback;
-    std::function<void(string filePath, bool success)> fileDialogCallback;
+	std::function<void(bool success, string imgPath)> imgDialogCallback;
+	std::function<void(string filePath, bool success)> fileDialogCallback;
 } android_statics;
 
 bool androidIsOnWifi() {
@@ -85,35 +85,6 @@ std::vector<std::string> androidListAssetDir(const std::string &path) {
 	AAssetDir_close(dir);
 	return filenames;
 }
-////////////////////////////////////////////////////////////////////////////
-
-std::vector<std::string> androidGetMidiDeviceNames() {
-	if (getAndroidAppPtr() == nullptr) return std::vector<std::string>();
-	std::vector<std::string> outDevs;
-	JNIEnv *jni;
-	int success = getAndroidAppPtr()->activity->vm->AttachCurrentThread(&jni, nullptr);
-	if (success != JNI_OK) {
-		Log::e() << "Got a problem with androidGetMidiDeviceNames";
-	}
-
-	jclass clazz = jni->GetObjectClass(getAndroidAppPtr()->activity->clazz);
-
-	jmethodID methodID = jni->GetMethodID(clazz, "getMidiPorts", "()[Lcom.elf.MidiPort;");
-
-	jobjectArray res = (jobjectArray) jni->CallObjectMethod(getAndroidAppPtr()->activity->clazz, methodID);
-
-	int numDevs = jni->GetArrayLength(res);
-	for (int i = 0; i < numDevs; i++) {
-		jobject dev		= jni->GetObjectArrayElement(res, i);
-		jclass devClass = jni->GetObjectClass(dev);
-		jstring nameStr =
-			(jstring) jni->GetObjectField(dev, jni->GetFieldID(devClass, "name", "Ljava.lang.String;"));
-		outDevs.push_back(jstringToString(jni, nameStr));
-	}
-
-	getAndroidAppPtr()->activity->vm->DetachCurrentThread();
-	return outDevs;
-}
 
 std::string androidGetAppVersionString() {
 	return callJNIForString("getAppVersionString");
@@ -129,7 +100,6 @@ std::string loadAndroidAssetAsString(const std::string &path) {
 bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outData) {
 	if (getAndroidAppPtr() == nullptr) return false;
 
-	//LOGE("loadAndroidAsset('%s')", path.c_str());
 	AAsset *pAsset =
 		AAssetManager_open(getAndroidAppPtr()->activity->assetManager, path.c_str(), AASSET_MODE_BUFFER);
 	if (pAsset == nullptr) {
@@ -189,7 +159,10 @@ void androidDisplayHtml(const std::string &html) {
 	callJNI("displayHtml", html);
 }
 
-bool androidEncodeAAC(std::string pathToOutput, const FloatBuffer &inputBuffer, int numChannels, int sampleRate) {
+bool androidEncodeAAC(const std::string &pathToOutput,
+					  const FloatBuffer &inputBuffer,
+					  int numChannels,
+					  int sampleRate) {
 	ScopedJni scp;
 	jmethodID methodID = scp.getMethodID("getAACEncoder", "()Lcom/elf/aacencoder/Encoder;");
 	JNIEnv *jni		   = scp.j();
@@ -257,8 +230,8 @@ void androidAlertDialog(const std::string &title, const std::string &message) {
 	callJNI("alertDialog", title, message);
 }
 
-void androidConfirmDialog(std::string title,
-						  std::string msg,
+void androidConfirmDialog(const std::string &title,
+						  const std::string &msg,
 						  std::function<void()> okPressed,
 						  std::function<void()> cancelPressed) {
 	android_statics.okPressed	  = okPressed;
@@ -266,11 +239,11 @@ void androidConfirmDialog(std::string title,
 	callJNI("confirmDialog", title, msg);
 }
 
-void androidTwoOptionCancelDialog(std::string title,
-								  std::string msg,
-								  std::string buttonOneText,
+void androidTwoOptionCancelDialog(const std::string &title,
+								  const std::string &msg,
+								  const std::string &buttonOneText,
 								  std::function<void()> buttonOnePressed,
-								  std::string buttonTwoText,
+								  const std::string &buttonTwoText,
 								  std::function<void()> buttonTwoPressed,
 								  std::function<void()> cancelPressed) {
 	android_statics.buttonOnePressed = buttonOnePressed;
@@ -279,13 +252,13 @@ void androidTwoOptionCancelDialog(std::string title,
 	callJNI("twoOptionCancelDialog", title, msg, buttonOneText, buttonTwoText);
 }
 
-void androidThreeOptionCancelDialog(std::string title,
-									std::string msg,
-									std::string buttonOneText,
+void androidThreeOptionCancelDialog(const std::string &title,
+									const std::string &msg,
+									const std::string &buttonOneText,
 									std::function<void()> buttonOnePressed,
-									std::string buttonTwoText,
+									const std::string &buttonTwoText,
 									std::function<void()> buttonTwoPressed,
-									std::string buttonThreeText,
+									const std::string &buttonThreeText,
 									std::function<void()> buttonThreePressed,
 									std::function<void()> cancelPressed) {
 	android_statics.buttonOnePressed   = buttonOnePressed;
@@ -295,38 +268,39 @@ void androidThreeOptionCancelDialog(std::string title,
 	callJNI("threeOptionCancelDialog", title, msg, buttonOneText, buttonTwoText, buttonThreeText);
 }
 
-void androidImageDialog(std::string copyToPath,
+void androidImageDialog(const std::string &copyToPath,
 						std::function<void(bool success, string imgPath)> completionCallback) {
 	// TODO: safe callback to android_statics
 	android_statics.imgDialogCallback = completionCallback;
 	callJNI("imageDialog", copyToPath);
 }
-static std::string csv(const std::vector<std::string>& vec) {
-    std::string result;
-    for(size_t i = 0; i < vec.size(); ++i) {
-        result += vec[i];
-        if (i != vec.size() - 1) { // Check so we don't add a comma after the last element
-            result += ", ";
-        }
-    }
-    return result;
+static std::string csv(const std::vector<std::string> &vec) {
+	std::string result;
+	for (size_t i = 0; i < vec.size(); ++i) {
+		result += vec[i];
+		if (i != vec.size() - 1) { // Check so we don't add a comma after the last element
+			result += ", ";
+		}
+	}
+	return result;
 }
 void androidFileDialog(std::string copyToPath,
-                       const std::vector<std::string> &allowedExtensions,
-                       std::function<void(std::string resultingPath, bool success)> completionCallback) {
+					   const std::vector<std::string> &allowedExtensions,
+					   std::function<void(std::string resultingPath, bool success)> completionCallback) {
 	android_statics.fileDialogCallback = completionCallback;
-    callJNI("fileDialog", csv(allowedExtensions));
+	callJNI("fileDialog", csv(allowedExtensions));
 }
 
-
-void androidShareDialog(std::string message, std::string path, std::function<void(bool)> completionCallback) {
+void androidShareDialog(const std::string &message,
+						const std::string &path,
+						std::function<void(bool)> completionCallback) {
 	android_statics.shareCompleteCallback = completionCallback;
 	callJNI("shareDialog", message, path);
 }
 
-void androidTextboxDialog(std::string title,
-						  std::string msg,
-						  std::string text,
+void androidTextboxDialog(const std::string &title,
+						  const std::string &msg,
+						  const std::string &text,
 						  function<void(string, bool)> completionCallback) {
 	android_statics.completionCallback = completionCallback;
 	callJNI("textboxDialog", title, msg, text);
@@ -339,108 +313,199 @@ string jstringToString(JNIEnv *jni, jstring text) {
 	return s;
 }
 
+#include "AllMidiDevicesAndroidImpl.h"
+#include "MidiMessageParser.h"
+
 static std::weak_ptr<AllMidiDevicesAndroidImpl> midiImpl;
 void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
-    midiImpl = impl;
+	midiImpl = impl;
 	Log::d() << "About to call allmidiIns";
 	callJNI("setupAllMidiIns");
 	Log::d() << "Finished setting up all midi ins";
 }
 
-vector<unsigned char> currMsg;
-
-// eventually, we need to actually enumerate android deviced but this not done yet.
-MidiDevice androidMidiDeviceChangeMe;
-#include "AllMidiDevicesAndroidImpl.h"
-
-void androidEmitMidiMessage(const vector<unsigned char> &msg, uint64_t timestamp) {
-	// TODO: Does this need to run on audio thread?
-    if(auto impl = midiImpl.lock()) {
-        impl->messageReceived(androidMidiDeviceChangeMe, {msg}, timestamp);
-    } else {
-        Log::e() << "ERROR: android allMidiDevices not assigned";
-    }
+void androidSetMainThreadRunner(MainThreadRunner *runner) {
+	if (auto impl = midiImpl.lock()) {
+		impl->setMainThreadRunner(runner);
+	}
 }
 
-// BE CAREFUL HERE - THIS IS A DUPLICATION OF KOALAMIDIIN PARSER LOGIC
-void androidParseMidiData(vector<unsigned char> d, uint64_t timestamp) {
-	// so find the first message that has a 1 at the front
-	for (int i = 0; i < d.size(); i++) {
-		//printBinary(d[i]);
-		if (d[i] & 0x80) {
-			// this is a status byte, send any previous messages
-			if (currMsg.size() > 0) {
-				androidEmitMidiMessage(currMsg, timestamp);
-				currMsg.clear();
-			}
-			currMsg.push_back(d[i]);
-			// if this status byte is for a 1 byte message send it straight away
-			// all status 0xF6 and above are all the 1 byte messages.
-			if (currMsg.size() == 1 && currMsg[0] >= 0xF6) {
-				androidEmitMidiMessage(currMsg, timestamp);
-				currMsg.clear();
-			}
+#include "concurrentqueue.h"
 
+class AndroidMidiThread {
+public:
+	AndroidMidiThread() { start(); }
+	~AndroidMidiThread() {
+		shouldContinueProcessing.store(false);
+		thread.join();
+	}
+
+	struct MidiByteMessage {
+		std::vector<uint8_t> bytes;
+		int deviceId;
+		int portId;
+	};
+
+	void send(const MidiByteMessage &message) { messages.enqueue(message); }
+
+private:
+	class Bytes {
+	public:
+		JNIEnv *jni;
+		jbyteArray midiBytes;
+		jbyteArray kotlinMidiBytes;
+
+		void cleanup() {
+			jni->DeleteLocalRef(kotlinMidiBytes);
+			jni->DeleteLocalRef(midiBytes);
+		}
+	};
+
+	void start() {
+		thread = std::thread([this]() {
+			jni			  = std::make_unique<ScopedJni>();
+			auto methodID = jni->getMethodID("sendMidiData", "([BII)V");
+			auto clazz	  = getAndroidAppPtr()->activity->clazz;
+			Bytes bytes;
+			bytes.jni = jni->j();
+
+			while (shouldContinueProcessing) {
+				MidiByteMessage message;
+				while (messages.try_dequeue(message)) {
+					if (convert(message, bytes)) {
+						jni->j()->CallVoidMethod(
+							clazz, methodID, bytes.kotlinMidiBytes, message.deviceId, message.portId);
+						bytes.cleanup();
+					}
+				}
+
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
+			}
+		});
+	}
+
+	bool convert(const MidiByteMessage &message, Bytes &bytes) {
+		const jsize sizeOfData = static_cast<jsize>(message.bytes.size());
+
+		bytes.midiBytes = jni->j()->NewByteArray(sizeOfData);
+		if (bytes.midiBytes == nullptr) {
+			mzAssert(false);
+			return false;
+		}
+
+		jni->j()->SetByteArrayRegion(
+			bytes.midiBytes, 0, message.bytes.size(), reinterpret_cast<const jbyte *>(message.bytes.data()));
+
+		jbyte *elements		  = jni->j()->GetByteArrayElements(bytes.midiBytes, nullptr);
+		jsize length		  = jni->j()->GetArrayLength(bytes.midiBytes);
+		bytes.kotlinMidiBytes = jni->j()->NewByteArray(length);
+		if (bytes.kotlinMidiBytes == nullptr) {
+			mzAssert(false);
+			return false;
+		}
+		jni->j()->SetByteArrayRegion(bytes.kotlinMidiBytes, 0, length, elements);
+		jni->j()->ReleaseByteArrayElements(bytes.midiBytes, elements, JNI_ABORT);
+		return true;
+	}
+
+	std::thread thread;
+	std::atomic<bool> shouldContinueProcessing {true};
+	std::unique_ptr<ScopedJni> jni;
+	moodycamel::ConcurrentQueue<MidiByteMessage> messages;
+};
+
+void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId) {
+	static AndroidMidiThread androidMidiThread;
+
+	androidMidiThread.send({midiData, deviceId, portId});
+}
+
+void androidOnMidiInputDeviceConnected(int32_t deviceId,
+									   int32_t portId,
+									   bool isInput,
+									   const std::string &deviceName) {
+	if (auto impl = midiImpl.lock()) {
+		if (isInput) {
+			impl->inputDeviceConnected(
+				std::make_shared<AndroidMidiDevice>(deviceName, deviceId, portId, AndroidMidiDevice::Type::input));
 		} else {
-			// a data byte
-
-			// first check we have a status in the gun, otherwise can this message
-			if (currMsg.size() == 0 || (currMsg[0] & 0x80) == 0) {
-				currMsg.clear();
-			} else {
-				currMsg.push_back(d[i]);
-				// now check to see if the message is finished
-				// by seeing which status we have and looking it
-				// up in known statuses/lengths
-				int status		= currMsg[0] & 0xF0;
-				bool shouldEmit = false;
-				switch (status) {
-					case MIDI_NOTE_OFF:
-					case MIDI_NOTE_ON:
-					case MIDI_PITCH_BEND:
-					case MIDI_POLY_AFTERTOUCH:
-					case MIDI_SONG_POS_POINTER:
-					case MIDI_CONTROL_CHANGE:
-						if (currMsg.size() == 3) shouldEmit = true;
-						break;
-					case MIDI_PROGRAM_CHANGE:
-					case MIDI_AFTERTOUCH:
-						if (currMsg.size() == 2) shouldEmit = true;
-						break;
-
-					default: // status unknown, don't send, next message will push this through
-						break;
-				}
-				if (shouldEmit) {
-					androidEmitMidiMessage(currMsg, timestamp);
-					currMsg.clear();
-				}
-			}
+			impl->outputDeviceConnected(std::make_shared<AndroidMidiDevice>(
+				deviceName, deviceId, portId, AndroidMidiDevice::Type::output));
 		}
 	}
+}
+
+void androidOnMidiInputDeviceDisconnected(int32_t deviceId, int32_t portId, bool isInput) {
+	if (auto impl = midiImpl.lock()) {
+		if (isInput) {
+			impl->inputDeviceDisconnected(std::make_shared<AndroidMidiDevice>(
+				"DISCONNECTED", deviceId, portId, AndroidMidiDevice::Type::input));
+		} else {
+			impl->outputDeviceDisconnected(std::make_shared<AndroidMidiDevice>(
+				"DISCONNECTED", deviceId, portId, AndroidMidiDevice::Type::output));
+		}
+	}
+}
+
+void androidParseMidiData(vector<unsigned char> midiMessage,
+						  uint64_t timestamp,
+						  int32_t deviceId,
+						  int32_t portId) {
+	static std::map<std::pair<int32_t, int32_t>, MidiMessageParser> parsers;
+
+	auto key  = std::make_pair(deviceId, portId);
+	auto iter = parsers.find(key);
+
+	if (iter == std::cend(parsers)) {
+		parsers.insert(std::make_pair(
+			key, MidiMessageParser {[key](const MidiMessageParser::MidiData &data) {
+				if (auto impl = midiImpl.lock()) {
+					impl->messageReceived(std::make_shared<AndroidMidiDevice>(
+											  "RECEIVED", key.first, key.second, AndroidMidiDevice::Type::input),
+										  {data.data},
+										  data.timestamp);
+				}
+			}}));
+		iter = parsers.find(key);
+	}
+
+	iter->second.parse(midiMessage, timestamp, deviceId, portId);
+}
+
+std::vector<unsigned char> copyRawMidiData(jbyte *rawMidiData, jsize size) {
+	std::vector<unsigned char> midiData(size);
+	for (int i = 0; i < size; i++) {
+		midiData[i] = ((unsigned char *) rawMidiData)[i];
+	}
+	return midiData;
+}
+
+std::vector<unsigned char> copyMidiBytes(JNIEnv *env, jbyteArray bytes) {
+	jboolean isCopy;
+	jsize size		   = env->GetArrayLength(bytes);
+	jbyte *rawMidiData = env->GetByteArrayElements(bytes, &isCopy);
+	auto midiData	   = copyRawMidiData(rawMidiData, size);
+	env->ReleaseByteArrayElements(bytes, rawMidiData, 0);
+	return midiData;
 }
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_midiReceived(JNIEnv *env,
-															  jobject thiz,
-															  jbyteArray bytes,
-															  jlong timestamp) {
-	// TODO: implement midiReceived()
-	// just assume it's a single message
-	jboolean isCopy;
-	int size = env->GetArrayLength(bytes);
-	jbyte *b = env->GetByteArrayElements(bytes, &isCopy);
-	vector<unsigned char> data(size);
-	for (int i = 0; i < size; i++) {
-		data[i] = ((unsigned char *) b)[i];
-	}
-	env->ReleaseByteArrayElements(bytes, b, 0);
+JNIEXPORT void JNICALL Java_com_elf_AllMidiIns_deviceAdded(
+	JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput, jstring deviceName) {
+	androidOnMidiInputDeviceConnected(deviceId, portId, isInput == JNI_TRUE, jstringToString(env, deviceName));
+}
 
-	// now we need to split the message(s)
-	androidParseMidiData(data, timestamp);
+JNIEXPORT void JNICALL Java_com_elf_AllMidiIns_deviceRemoved(
+	JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput) {
+	androidOnMidiInputDeviceDisconnected(deviceId, portId, isInput == JNI_TRUE);
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLMidiReceiver_midiReceived(
+	JNIEnv *env, jobject thiz, jbyteArray bytes, jlong timestamp, jint deviceId, jint portId) {
+	androidParseMidiData(copyMidiBytes(env, bytes), timestamp, deviceId, portId);
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_okPressed(JNIEnv *, jobject) {
@@ -473,19 +538,15 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_imageDialogComplete(JNIEnv *env
 	androidGetApp()->main.runOnMainThread([succ, path]() { android_statics.imgDialogCallback(succ, path); });
 }
 
-
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_importFileComplete(JNIEnv *env,
-																	 jobject thiz,
-																	 jboolean success,
-																	 jstring filePath) {
+																	jobject thiz,
+																	jboolean success,
+																	jstring filePath) {
 	string path = jstringToString(env, filePath);
 	bool succ	= success;
 
-	androidGetApp()->main.runOnMainThread([succ, path]() {
-		android_statics.fileDialogCallback(path, succ);
-	});
+	androidGetApp()->main.runOnMainThread([succ, path]() { android_statics.fileDialogCallback(path, succ); });
 }
-
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_textboxDialogComplete(JNIEnv *jni,
 																	   jobject,

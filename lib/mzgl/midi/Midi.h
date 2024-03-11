@@ -36,21 +36,25 @@ public:
 	bool isOutput = false;
 	int id;
 
-	MidiDevice(std::string name = "")
-		: name(name) {
+	MidiDevice(std::string name = "", bool output = false)
+		: name(name)
+		, isOutput(output) {
 		static std::atomic<int> idCounter {0};
 		id = idCounter++;
 	}
 
-	bool operator==(const MidiDevice &other) const { return id == other.id; }
-	bool operator!=(const MidiDevice &other) const { return id != other.id; }
+	virtual ~MidiDevice() = default;
+
+	[[nodiscard]] virtual bool operator==(const MidiDevice &other) const { return id == other.id; }
+	[[nodiscard]] virtual bool operator!=(const MidiDevice &other) const { return id != other.id; }
 
 private:
 };
 
 class MidiListener {
 public:
-	virtual void midiReceived(const MidiDevice &device, const MidiMessage &m, uint64_t timestamp) = 0;
+	virtual void
+		midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m, uint64_t timestamp) = 0;
 };
 
 class MidiPort : public MidiDevice {
@@ -134,7 +138,9 @@ public:
 	}
 };
 
-class MidiIn : public MidiPort {
+class MidiIn
+	: public MidiPort
+	, public std::enable_shared_from_this<MidiIn> {
 public:
 	static std::vector<std::string> getPortNames(bool alsoPrint = false) {
 		return MidiPort::getPortNames(false, alsoPrint);
@@ -165,8 +171,8 @@ public:
 
 	void callback(double deltatime, std::vector<unsigned char> *message) {
 		MidiMessage m(*message);
-		for (auto *l: listeners)
-			l->midiReceived(*this, m, deltatime);
+		for (auto *listener: listeners)
+			listener->midiReceived(shared_from_this(), m, deltatime);
 	}
 
 	void addListener(MidiListener *listener) { listeners.push_back(listener); }

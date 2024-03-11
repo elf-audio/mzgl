@@ -11,6 +11,7 @@
 #include <atomic>
 #include "mainThread.h"
 #include "util.h"
+#include "mainThread.h"
 
 #ifdef __APPLE__
 #	include "AllMidiDevicesAppleImpl.h"
@@ -33,6 +34,14 @@ AllMidiDevices::AllMidiDevices(bool online)
 		impl = std::make_shared<AllMidiDevicesRtMidiImpl>();
 #endif
 	}
+}
+
+void AllMidiDevices::setMainThreadRunner(MainThreadRunner *runner) {
+#ifdef __ANDROID__
+	if (auto ptr = dynamic_cast<AllMidiDevicesAndroidImpl *>(impl.get())) {
+		ptr->setMainThreadRunner(runner);
+	}
+#endif
 }
 
 void AllMidiDevices::setup() {
@@ -63,15 +72,15 @@ void AllMidiDevices::removeConnectionListener(MidiConnectionListener *listener) 
 	}
 }
 
-std::vector<MidiDevice> AllMidiDevices::getConnectedMidiDevices() {
+std::vector<std::shared_ptr<MidiDevice>> AllMidiDevices::getConnectedMidiDevices() const {
 	if (online) {
 		return impl->getConnectedMidiDevices();
-	} else {
-		return {};
 	}
+
+	return {};
 }
 
-void AllMidiDevices::sendMessage(const MidiDevice &device, const MidiMessage &m) {
+void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) {
 	if (online) {
 		impl->sendMessage(device, m);
 	}
