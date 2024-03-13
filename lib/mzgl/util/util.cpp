@@ -104,6 +104,10 @@ std::string getHomeDirectory() {
 #endif
 
 void deleteOrTrash(const std::string &path) {
+	if (!fs::exists(fs::path {path})) {
+		return;
+	}
+
 	auto stdDeleteFn = [path]() {
 		try {
 			fs::remove_all(path);

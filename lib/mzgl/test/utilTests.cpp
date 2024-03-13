@@ -2,13 +2,13 @@
 
 #include "filesystem.h"
 #include "util.h"
-TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
-	auto path = tempDir() + "/tmp.txt";
 
+TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
+	auto path = fs::path {tempDir()} / "temp.txt";
 	writeStringToFile(path, "test");
 
-	REQUIRE(fs::exists(path) == true);
+	REQUIRE(fs::exists(path));
 	deleteOrTrash(path);
-	REQUIRE(fs::exists(path) == false);
+	REQUIRE_FALSE(fs::exists(path));
 	REQUIRE_NOTHROW(deleteOrTrash(path));
 }

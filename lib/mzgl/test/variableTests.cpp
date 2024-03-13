@@ -233,38 +233,40 @@ SCENARIO("Callbacks of watchers are called on change", "[Variable]") {
 }
 
 SCENARIO("when you copy assign a watcher it should be removed from the original variable", "[Variable]") {
-	Variable<bool> variable1 {false};
-	Variable<bool> variable2 {false};
-	int watcher1Count = 0;
-	int watcher2Count = 0;
-	VariableWatcher<bool> watcher1 {variable1, [&](bool) { ++watcher1Count; }};
-	VariableWatcher<bool> watcher2 {variable2, [&](bool) { ++watcher2Count; }};
+	GIVEN("Some variables and watchers") {
+		Variable<bool> variable1 {false};
+		Variable<bool> variable2 {false};
+		int watcher1Count = 0;
+		int watcher2Count = 0;
+		VariableWatcher<bool> watcher1 {variable1, [&](bool) { ++watcher1Count; }};
+		VariableWatcher<bool> watcher2 {variable2, [&](bool) { ++watcher2Count; }};
 
-	REQUIRE(watcher1Count == 0);
-	REQUIRE(watcher2Count == 0);
-	REQUIRE(variable1.getNumListeners() == 1);
-	REQUIRE(variable2.getNumListeners() == 1);
+		REQUIRE(watcher1Count == 0);
+		REQUIRE(watcher2Count == 0);
+		REQUIRE(variable1.getNumListeners() == 1);
+		REQUIRE(variable2.getNumListeners() == 1);
 
-	WHEN("the first watcher is copied to the second variable") {
-		watcher1 = watcher2;
-		THEN("The listeners are updated properly") {
-			REQUIRE(watcher1Count == 0);
-			REQUIRE(watcher2Count == 0);
-			REQUIRE(variable1.getNumListeners() == 0);
-			REQUIRE(variable2.getNumListeners() == 2);
-			AND_WHEN("Variable 1 is changed") {
-				variable1 = true;
+		WHEN("the first watcher is copied to the second variable") {
+			watcher1 = watcher2;
+			THEN("The listeners are updated properly") {
+				REQUIRE(watcher1Count == 0);
+				REQUIRE(watcher2Count == 0);
+				REQUIRE(variable1.getNumListeners() == 0);
+				REQUIRE(variable2.getNumListeners() == 2);
+				AND_WHEN("Variable 1 is changed") {
+					variable1 = true;
 
-				THEN("no watchers are notified") {
-					REQUIRE(watcher1Count == 0);
-					REQUIRE(watcher2Count == 0);
+					THEN("no watchers are notified") {
+						REQUIRE(watcher1Count == 0);
+						REQUIRE(watcher2Count == 0);
+					}
 				}
-			}
-			AND_WHEN("the second variable is changed") {
-				variable2 = true;
-				THEN("both watcher notifications are the same") {
-					REQUIRE(watcher1Count == 0);
-					REQUIRE(watcher2Count == 2);
+				AND_WHEN("the second variable is changed") {
+					variable2 = true;
+					THEN("both watcher notifications are the same") {
+						REQUIRE(watcher1Count == 0);
+						REQUIRE(watcher2Count == 2);
+					}
 				}
 			}
 		}
