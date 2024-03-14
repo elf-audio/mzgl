@@ -5,7 +5,7 @@
 
 TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
 	auto path = fs::path {tempDir()} / "temp.txt";
-	writeStringToFile(path, "test");
+	writeStringToFile(path.string(), "test");
 
 	REQUIRE(fs::exists(path));
 	deleteOrTrash(path.string());
