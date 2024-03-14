@@ -14,11 +14,29 @@
 #	include <optional>
 #	include <string>
 
+std::string stringFromOSStatus(OSStatus status) {
+	switch (status) {
+		case noErr: return "No error";
+		case kAudioFileInvalidFileError: return "The file is malformed or not recognized as a valid audio file";
+		case kAudioFileUnspecifiedError: return "An unspecified error occurred";
+		case kAudioFileUnsupportedFileTypeError: return "The file type is not supported or recognized";
+		case kAudioFileUnsupportedDataFormatError:
+			return "The data format in the file is not supported or recognized";
+		case kAudioFilePermissionsError: return "The file permissions do not allow the operation";
+		case kAudioFileNotOptimizedError: return "The file is not optimized for the operation";
+		case kAudioFileInvalidPacketOffsetError: return "The packet offset is not valid or supported";
+		default: return "Unknown error: " + std::to_string(int(status));
+	}
+}
+
 class Url {
 public:
 	explicit Url(const std::string &path)
-		: url {CFURLCreateWithBytes(
-			  nullptr, (const UInt8 *) path.c_str(), path.size(), kCFStringEncodingASCII, nullptr)} {}
+		: url {CFURLCreateWithFileSystemPath(
+			  kCFAllocatorDefault,
+			  CFStringCreateWithCString(kCFAllocatorDefault, path.c_str(), kCFStringEncodingUTF8),
+			  kCFURLPOSIXPathStyle,
+			  false)} {}
 	~Url() { CFRelease(url); }
 
 	CFURLRef url;
@@ -44,19 +62,28 @@ public:
 		}
 	}
 
+	[[nodiscard]] bool checkStatus(OSStatus result, const std::string &action) const {
+		if (result == noErr) {
+			return true;
+		}
+		Log::e() << "Got an error whilst " + action + " -> " + stringFromOSStatus(result);
+		return false;
+	}
+
 	[[nodiscard]] bool open(const Url &url) {
 		try {
-			return ExtAudioFileOpenURL(url.url, &file) == noErr;
+			return checkStatus(ExtAudioFileOpenURL(url.url, &file), "opening");
 		} catch (...) {
-			fprintf(stderr, "Caught exception whilst opening ExtAudioFile\n");
+			Log::e() << "Caught exception whilst opening ExtAudioFile";
 		}
 		return false;
 	}
 
 	[[nodiscard]] bool getInputFormat(AudioStreamBasicDescription &inputFormat) {
 		UInt32 propertySize = sizeof(inputFormat);
-		return ExtAudioFileGetProperty(file, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat)
-			   == noErr;
+		return checkStatus(
+			ExtAudioFileGetProperty(file, kExtAudioFileProperty_FileDataFormat, &propertySize, &inputFormat),
+			"getting input format");
 	}
 
 	void getReadFormat(AudioStreamBasicDescription &audioFormat, Float64 sampleRate, UInt32 numberOfChannels) {
@@ -71,9 +98,10 @@ public:
 	}
 
 	[[nodiscard]] bool applyReadFormat(AudioStreamBasicDescription &audioFormat) {
-		return ExtAudioFileSetProperty(
-				   file, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &audioFormat)
-			   == noErr;
+		return checkStatus(
+			ExtAudioFileSetProperty(
+				file, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &audioFormat),
+			"applying read format");
 	}
 
 	template <class Buffer>
@@ -97,7 +125,7 @@ public:
 		while (!done) {
 			auto frameCount = packetsPerBuffer;
 
-			if (ExtAudioFileRead(file, &frameCount, &convertedData) != noErr) {
+			if (!checkStatus(ExtAudioFileRead(file, &frameCount, &convertedData), "reading packet")) {
 				return false;
 			}
 
