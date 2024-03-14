@@ -8,7 +8,7 @@ TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
 	writeStringToFile(path, "test");
 
 	REQUIRE(fs::exists(path));
-	deleteOrTrash(path);
+	deleteOrTrash(path.string());
 	REQUIRE_FALSE(fs::exists(path));
-	REQUIRE_NOTHROW(deleteOrTrash(path));
+	REQUIRE_NOTHROW(deleteOrTrash(path.string()));
 }
