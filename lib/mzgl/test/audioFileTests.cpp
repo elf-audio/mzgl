@@ -2,6 +2,7 @@
 
 #include "filesystem.h"
 #include "AudioFile.h"
+#include <optional>
 
 std::vector<std::string> split(const std::string &str, char delimiter) {
 	std::vector<std::string> tokens;
