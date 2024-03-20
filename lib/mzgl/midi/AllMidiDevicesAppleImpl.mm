@@ -35,18 +35,18 @@ CoreMidiDevice::CoreMidiDevice(MIDIEndpointRef endpoint)
 	name = nameOfEndpoint(endpoint);
 }
 
-std::shared_ptr<MidiDevice> getDeviceForEndpointRef(const CoreMidiDevice &device,
-													const std::vector<CoreMidiOutRef> &midiOuts) {
-	for (const auto &destination: midiOuts) {
-		if (destination->endpoint == device.endpoint) {
-			return destination;
+std::shared_ptr<MidiDevice> getInputDeviceForEndpointRef(const CoreMidiDevice &device,
+														 const std::vector<CoreMidiInRef> &midiIns) {
+	for (const auto &src: midiIns) {
+		if (src->endpoint == device.endpoint) {
+			return src;
 		}
 	}
 	return nullptr;
 }
 
-std::optional<MIDIEndpointRef> getEndpointRefForDevice(const std::shared_ptr<MidiDevice> &device,
-													   const std::vector<CoreMidiOutRef> &midiOuts) {
+std::optional<MIDIEndpointRef> getEndpointRefForOutputDevice(const std::shared_ptr<MidiDevice> &device,
+															 const std::vector<CoreMidiOutRef> &midiOuts) {
 	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
 		auto endpoint = MIDIGetDestination(index);
 		if (endpoint == 0) {
@@ -271,7 +271,7 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 	// there is no distinguishing between different devices in regard to pendingMsg.
 	// you'd need one per device.
 	// Log::e() << "Packet list received from " << device.name;
-	auto theDevice = getDeviceForEndpointRef(device, midiOuts);
+	auto theDevice = getInputDeviceForEndpointRef(device, midiIns);
 	if (theDevice == nullptr) {
 		return;
 	}
@@ -390,7 +390,7 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 
 	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, bytes.size(), bytes.data());
 
-	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
+	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
 		auto result = MIDISend(outputPort, *endpoint, packetList);
 		NSLogError(result, "Sending MIDI bytes");
 	} else {
@@ -408,7 +408,7 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 
 	assert(bytes.size() < 65536);
 
-	if (auto endpoint = getEndpointRefForDevice(device, midiOuts); endpoint.has_value()) {
+	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
 		auto request	= new MIDISysexSendRequest;
 		const auto size = midiMessage.getBytes().size();
 
