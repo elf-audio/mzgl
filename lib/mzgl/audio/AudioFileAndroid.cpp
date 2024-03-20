@@ -15,6 +15,7 @@
 #include "filesystem.h"
 #include "util.h"
 #include "util/log.h"
+#include "log.h"
 
 #include "Resampler.h"
 #include "DrAudioFileReader.h"

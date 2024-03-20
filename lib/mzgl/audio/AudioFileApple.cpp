@@ -13,6 +13,7 @@
 #	include "mzAssert.h"
 #	include <optional>
 #	include <string>
+#	include "log.h"
 
 std::string stringFromOSStatus(OSStatus status) {
 	switch (status) {
