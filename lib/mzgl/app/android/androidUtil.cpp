@@ -458,12 +458,23 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 
 	if (iter == std::cend(parsers)) {
 		parsers.insert(std::make_pair(
-			key, MidiMessageParser {[key](const MidiMessageParser::MidiData &data) {
+			key, MidiMessageParser {[key, deviceId, portId](const MidiMessageParser::MidiData &data) {
 				if (auto impl = midiImpl.lock()) {
-					impl->messageReceived(std::make_shared<AndroidMidiDevice>(
-											  "RECEIVED", key.first, key.second, AndroidMidiDevice::Type::input),
-										  {data.data},
-										  data.timestamp);
+					auto devices = impl->getConnectedMidiDevices();
+					auto deviceIter	 = std::find_if(
+						   std::begin(devices), std::end(devices), [deviceId, portId](auto &&deviceToTest) {
+							   if (auto *androidInput = dynamic_cast<AndroidMidiDevice *>(deviceToTest.get())) {
+								   return androidInput->deviceIdentifier == deviceId
+										  && androidInput->devicePort == portId && !androidInput->isOutput;
+							   }
+							   return false;
+						   });
+					if (deviceIter != std::end(devices)) {
+                        impl->messageReceived(*deviceIter, {data.data}, data.timestamp);
+					}
+                    else {
+                        Log::e() << "Didnt find device " << std::to_string(deviceId) << " and port " << std::to_string(portId);
+                    }
 				}
 			}}));
 		iter = parsers.find(key);
