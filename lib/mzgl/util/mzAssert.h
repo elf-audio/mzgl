@@ -9,7 +9,7 @@
 #pragma once
 
 #include <cassert>
-#if DEBUG == 1 && !defined(AUTO_TEST)
+#if defined(DEBUG) && !defined(AUTO_TEST)
 #	include "log.h"
 
 #	define mzAssert(A)                                                                                           \
