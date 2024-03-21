@@ -162,8 +162,4 @@ public:
 	plugin = nullptr;
 }
 
-- (void)dealloc {
-	NSLog(@"dealloc iOSAppDelegate");
-}
-
 @end

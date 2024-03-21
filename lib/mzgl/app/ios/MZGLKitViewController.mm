@@ -108,10 +108,9 @@ EAGLContext *context = nil;
 }
 
 - (void)glkViewController:(GLKViewController *)controller willPause:(BOOL)pause {
-	if (pause != currentlyPaused) {
-		[self getEventDispatcher]->iosViewWillPause(pause);
-		currentlyPaused = pause;
-	}
+	if (pause == currentlyPaused) return;
+	[self getEventDispatcher]->iosViewWillPause(pause);
+	currentlyPaused = pause;
 }
 
 - (void)glkViewControllerUpdate:(nonnull GLKViewController *)controller {
