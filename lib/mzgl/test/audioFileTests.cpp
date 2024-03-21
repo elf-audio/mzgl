@@ -61,10 +61,10 @@ struct TestFile {
 		std::cout << "    " << TestFile::toString(channels) << std::endl;
 	}
 
-	void load() { REQUIRE(AudioFile::load(filePath, buffer, &outNumChannels, &outSampleRate)); }
+	void load() { REQUIRE(AudioFile::load(filePath.string(), buffer, &outNumChannels, &outSampleRate)); }
 	void loadResampled() {
 		outSampleRate = sampleRate * 2;
-		REQUIRE(AudioFile::loadResampled(filePath, buffer, outSampleRate, &outNumChannels));
+		REQUIRE(AudioFile::loadResampled(filePath.string(), buffer, outSampleRate, &outNumChannels));
 	}
 
 	FloatBuffer getFrequencyBuffer() {
@@ -114,12 +114,12 @@ public:
 
 struct InvalidTestFile {
 	void load() {
-		REQUIRE_FALSE(AudioFile::load(filePath, buffer, &outNumChannels, &outSampleRate));
-		REQUIRE_NOTHROW(AudioFile::load(filePath, buffer, &outNumChannels, &outSampleRate));
+		REQUIRE_FALSE(AudioFile::load(filePath.string(), buffer, &outNumChannels, &outSampleRate));
+		REQUIRE_NOTHROW(AudioFile::load(filePath.string(), buffer, &outNumChannels, &outSampleRate));
 	}
 	void loadResampled() {
-		REQUIRE_FALSE(AudioFile::loadResampled(filePath, buffer, 88200, &outNumChannels));
-		REQUIRE_NOTHROW(AudioFile::loadResampled(filePath, buffer, 88200, &outNumChannels));
+		REQUIRE_FALSE(AudioFile::loadResampled(filePath.string(), buffer, 88200, &outNumChannels));
+		REQUIRE_NOTHROW(AudioFile::loadResampled(filePath.string(), buffer, 88200, &outNumChannels));
 	}
 
 	fs::path filePath;
@@ -232,10 +232,10 @@ SCENARIO("Non existent files dont load", "[audio-file]") {
 		int sampleRate;
 
 		WHEN("File at " + doesntExist.string() + " is loaded it should fail and not throw") {
-			REQUIRE_FALSE(AudioFile::load(doesntExist, buffer, &channels, &sampleRate));
+			REQUIRE_FALSE(AudioFile::load(doesntExist.string(), buffer, &channels, &sampleRate));
 		}
 		AND_WHEN("File at " + doesntExist.string() + " is loaded and resampled it should fail and not throw") {
-			REQUIRE_FALSE(AudioFile::loadResampled(doesntExist, buffer, 88200, &channels));
+			REQUIRE_FALSE(AudioFile::loadResampled(doesntExist.string(), buffer, 88200, &channels));
 		}
 	}
 }
@@ -270,7 +270,7 @@ SCENARIO("Files that cant be read fail to load", "[audio-file]") {
 		makeFileWriteOnly(filePath);
 
 		WHEN("The file is loaded it should fail") {
-			REQUIRE_FALSE(AudioFile::load(filePath, buffer, &channels, &sampleRate));
+			REQUIRE_FALSE(AudioFile::load(filePath.string(), buffer, &channels, &sampleRate));
 			removeFile(filePath);
 		}
 	}
@@ -287,7 +287,7 @@ SCENARIO("Files that cant be read fail to load and resample", "[audio-file]") {
 		makeFileWriteOnly(filePath);
 
 		WHEN("The file is loaded it should fail") {
-			REQUIRE_FALSE(AudioFile::loadResampled(filePath, buffer, 88200, &channels));
+			REQUIRE_FALSE(AudioFile::loadResampled(filePath.string(), buffer, 88200, &channels));
 			removeFile(filePath);
 		}
 	}
