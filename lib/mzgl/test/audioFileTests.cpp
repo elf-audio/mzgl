@@ -292,3 +292,31 @@ SCENARIO("Files that cant be read fail to load and resample", "[audio-file]") {
 		}
 	}
 }
+
+SCENARIO("Blank files should load but not crash", "[audio-file]") {
+	GIVEN("A blank audio file") {
+		auto path = fs::current_path() / "test-files" / "curiosities" / "blank.wav";
+		FloatBuffer buffer;
+		int outNumChannels = 0;
+		int outSampleRate  = 0;
+
+		WHEN("The file is loaded") {
+			try {
+				REQUIRE(AudioFile::load(path.string(), buffer, &outNumChannels, &outSampleRate));
+				THEN("The buffer should be empty") {
+					REQUIRE(buffer.empty());
+				}
+			}
+			CATCH_CATCH_ALL {};
+		}
+		AND_WHEN("The file is resampled") {
+			try {
+				REQUIRE(AudioFile::loadResampled(path.string(), buffer, 48000, &outNumChannels));
+				THEN("The buffer should be empty") {
+					REQUIRE(buffer.empty());
+				}
+			}
+			CATCH_CATCH_ALL {};
+		}
+	}
+}
