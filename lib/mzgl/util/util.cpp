@@ -69,6 +69,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "filesystem.h"
 
 void setThreadName(const std::string &name) {
 #if defined(__APPLE__)
@@ -242,6 +243,44 @@ std::vector<std::string> getCommandLineArgs() {
 	return Globals::commandLineArgs;
 }
 
+bool hasCommandLineFlag(const std::string &flag) {
+	auto args = getCommandLineArgs();
+	return std::find_if(std::begin(args), std::end(args), [flag](auto &&arg) { return arg == flag; })
+		   != std::end(args);
+}
+
+std::string convertToSettingString(const std::string &setting) {
+	return setting + "=";
+}
+
+bool hasCommandLineSetting(const std::string &setting) {
+	auto args = getCommandLineArgs();
+	return std::find_if(
+			   std::begin(args),
+			   std::end(args),
+			   [setting](auto &&arg) { return arg.find(convertToSettingString(setting)) != std::string::npos; })
+		   != std::end(args);
+}
+
+std::string getCommandLineSetting(const std::string &setting, const std::string &defaultValue) {
+	auto args = getCommandLineArgs();
+	auto iter = std::find_if(std::begin(args), std::end(args), [setting](auto &&arg) {
+		return arg.find(convertToSettingString(setting)) != std::string::npos;
+	});
+
+	if (iter == std::end(args)) {
+		return defaultValue;
+	}
+
+	auto arg = *iter;
+	arg.erase(0, convertToSettingString(setting).length());
+	return arg;
+}
+
+int getCommandLineSetting(const std::string &setting, int defaultValue) {
+	return std::stoi(getCommandLineSetting(setting, std::to_string(defaultValue)));
+}
+
 float getSeconds() {
 	auto end									  = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end - Globals::startTime;
@@ -322,7 +361,6 @@ std::string tempDir() {
 	return _p;
 }
 
-#ifdef UNIT_TEST
 bool isOverridingDataPath	 = false;
 std::string dataPathOverride = "";
 
@@ -330,7 +368,6 @@ void setDataPath(const std::string &path) {
 	isOverridingDataPath = true;
 	dataPathOverride	 = path;
 }
-#endif
 
 static auto getVSTBundlePath() -> fs::path {
 #ifdef _WIN32
@@ -388,7 +425,7 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #endif
 }
 
-#ifdef UNIT_TEST
+//#ifdef UNIT_TEST
 bool isOverridingDocsPath	 = false;
 std::string docsPathOverride = "";
 
@@ -396,41 +433,34 @@ void setDocsPath(const std::string &path) {
 	isOverridingDocsPath = true;
 	docsPathOverride	 = path;
 }
-#endif
+//#endif
 
 #ifdef __APPLE__
 #	include <os/proc.h>
-#	include <mach/mach.h>
 #	include <mach/mach_host.h>
+#	if !TARGET_OS_IOS
+#		include <sys/sysctl.h>
+#	endif
 #endif
+
 int64_t getAvailableMemory() {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	if (@available(iOS 13.0, *)) {
 		return os_proc_available_memory();
 	}
+#	else
+	int request[] = {CTL_HW, HW_MEMSIZE};
+	unsigned long long memory;
+	auto memoryLength = sizeof(memory);
+
+	if (sysctl(request, 2, &memory, &memoryLength, nullptr, 0) == 0) {
+		return static_cast<int64_t>(memory);
+	} else {
+		Log::e() << "Failed to query available memory";
+	}
+	return -1;
 #	endif
-	// //else {
-
-	//    vm_size_t pagesize;
-
-	// 	mach_port_t host_port = mach_host_self();
-	// 	mach_msg_type_number_t host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
-	//    host_page_size(host_port, &pagesize);
-
-	//    vm_statistics_data_t vm_stat;
-
-	//    if (host_statistics(host_port, HOST_VM_INFO, (host_info_t)&vm_stat, &host_size) != KERN_SUCCESS) {
-	// 	   NSLog(@"Failed to fetch VM statistics");
-	// 	   return -1;
-	//    }
-
-	//    return vm_stat.free_count * pagesize;
-
-	// //}
-//#	else
-//	return -1;
-//#	endif
 #endif
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
@@ -442,18 +472,82 @@ int64_t getAvailableMemory() {
 	}
 	return -1;
 }
+
+std::string nowAsString() {
+	auto now				= std::chrono::system_clock::now();
+	std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+	std::tm *timeInfo		= std::localtime(&currentTime);
+	std::ostringstream oss;
+	oss << std::put_time(timeInfo, "%Y-%m-%d--%H.%M.%S");
+	return oss.str();
+}
+
+fs::path findNewestSubdirectory(const fs::path &parentPath) {
+	fs::path newestSubdirectory;
+	std::optional<fs::file_time_type> newestTime;
+
+	for (const auto &entry: fs::directory_iterator(parentPath)) {
+		if (entry.is_directory()) {
+			auto lastModified = fs::last_write_time(entry);
+			if (!newestTime.has_value() || lastModified > newestTime) {
+				newestTime		   = lastModified;
+				newestSubdirectory = entry.path();
+			}
+		}
+	}
+
+	return newestSubdirectory;
+}
+
+void updateDocumentsDirectory() {
+	auto testDir	  = fs::temp_directory_path() / "koala" / "unit-tests";
+	auto documentsDir = testDir;
+
+	if (hasCommandLineFlag("--reset-documents-directory")) {
+		documentsDir = testDir / nowAsString();
+		if (fs::exists(documentsDir)) {
+			fs::remove_all(documentsDir);
+		}
+		fs::create_directories(documentsDir);
+	} else if (hasCommandLineFlag("--use-last-documents-directory")) {
+		documentsDir = findNewestSubdirectory(testDir);
+	}
+
+	Log::d() << "[TESTS]: Documents path: " << documentsDir.string().c_str();
+	setDocsPath(documentsDir.string());
+
+	if (!fs::exists(documentsDir / "settings")) {
+		Log::d() << "[TESTS]: Documents path, making settings:  " << (documentsDir / "settings").string().c_str();
+		fs::create_directories(documentsDir / "settings");
+	}
+}
+
+void checkForDocumentsDirectoryUpdate() {
+	static bool hasUpdated = false;
+	if (hasUpdated) {
+		return;
+	}
+
+	hasUpdated = true;
+
+	if (!hasCommandLineFlag("--use-test-documents-directory")) {
+		return;
+	}
+
+	updateDocumentsDirectory();
+}
+
 bool hasPrintedTheError = false;
 std::string docsPath(const std::string &path) {
-#ifdef UNIT_TEST
+	checkForDocumentsDirectoryUpdate();
 	if (isOverridingDocsPath) {
 		return docsPathOverride + "/" + path;
 	}
-#endif
+
 #ifdef __APPLE__
 	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask]
 		lastObject];
 	std::string _path = [[url path] UTF8String];
-	// printf("\n\ndocsPath('%s') = %s\n\n", path.c_str(), _path.c_str());
 	if (_path == "/Users/marek/Documents") {
 		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
 		if (!hasPrintedTheError) {

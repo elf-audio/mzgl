@@ -22,15 +22,18 @@
 #include "filesystem.h"
 #include "mainThread.h"
 
-using namespace std;
-
-#ifdef UNIT_TEST
 namespace unit_test {
-	function<void()> dialogOkPressed;
-	function<void()> dialogCancelPressed;
-	function<void()> dialogButtonOnePressed;
-	function<void()> dialogButtonTwoPressed;
-	function<void()> dialogButtonThreePressed;
+
+	[[nodiscard]] bool dialogSpoofingIsEnabled() {
+		const static bool spoof = hasCommandLineFlag("--enable-dialog-spoofing");
+		return spoof;
+	}
+
+	std::function<void()> dialogOkPressed;
+	std::function<void()> dialogCancelPressed;
+	std::function<void()> dialogButtonOnePressed;
+	std::function<void()> dialogButtonTwoPressed;
+	std::function<void()> dialogButtonThreePressed;
 
 	bool dialogOpen = false;
 	bool isDialogOpen() {
@@ -57,12 +60,11 @@ namespace unit_test {
 		dialogButtonThreePressed();
 	}
 } // namespace unit_test
-#endif
 
 void Dialogs::textbox(std::string title,
 					  std::string msg,
 					  std::string text,
-					  function<void(string, bool)> completionCallback) const {
+					  std::function<void(std::string, bool)> completionCallback) const {
 #ifdef AUTO_TEST
 	completionCallback(title, randi(2) == 0);
 	return;
@@ -104,9 +106,9 @@ void Dialogs::textbox(std::string title,
 	  // add text field to alert dialog
 	  [alert setAccessoryView:label];
 
-	  function<void(NSInteger, NSTextField *)> handleResult = [completionCallback, this](NSInteger returnCode,
-																						 NSTextField *label) {
-		  string txt = "";
+	  std::function<void(NSInteger, NSTextField *)> handleResult = [completionCallback, this](NSInteger returnCode,
+																							  NSTextField *label) {
+		  std::string txt = "";
 		  if (returnCode == NSAlertFirstButtonReturn) txt = [[label stringValue] UTF8String];
 		  //			[label resignFirstResponder];
 		  //			[[[NSApp mainWindow].contentView.subviews firstObject] becomeFirstResponder];
@@ -152,12 +154,12 @@ void Dialogs::confirm(std::string title,
 	return;
 #endif
 
-#ifdef UNIT_TEST
-	unit_test::dialogOkPressed	   = okPressed;
-	unit_test::dialogCancelPressed = cancelPressed;
-	unit_test::dialogOpen		   = true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogOkPressed	   = okPressed;
+		unit_test::dialogCancelPressed = cancelPressed;
+		unit_test::dialogOpen		   = true;
+		return;
+	}
 
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
@@ -187,7 +189,7 @@ void Dialogs::confirm(std::string title,
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 
-	  function<void(NSInteger)> handleResult = [okPressed, cancelPressed, this](NSInteger result) {
+	  std::function<void(NSInteger)> handleResult = [okPressed, cancelPressed, this](NSInteger result) {
 		  if (result == NSAlertFirstButtonReturn) {
 			  app.main.runOnMainThread(okPressed);
 		  } else {
@@ -218,10 +220,11 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	return;
 #endif
 
-#if defined(UNIT_TEST)
-	unit_test::dialogOpen = true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogOpen = true;
+		return;
+	}
+
 #ifdef _WIN32
 	// we need to convert error message to a wide char message.
 	// first, figure out the length and allocate a wchar_t at that length + 1 (the +1 is for a terminating character)
@@ -281,13 +284,13 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 									std::string buttonTwoText,
 									std::function<void()> buttonTwoPressed,
 									std::function<void()> cancelPressed) const {
-#ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed = buttonOnePressed;
-	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogCancelPressed	  = cancelPressed;
-	unit_test::dialogOpen			  = true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogButtonOnePressed = buttonOnePressed;
+		unit_test::dialogButtonTwoPressed = buttonTwoPressed;
+		unit_test::dialogCancelPressed	  = cancelPressed;
+		unit_test::dialogOpen			  = true;
+		return;
+	}
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 3;
@@ -330,7 +333,7 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 	  [alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
-	  function<void(NSInteger)> handleResult =
+	  std::function<void(NSInteger)> handleResult =
 		  [buttonOnePressed, buttonTwoPressed, cancelPressed, this](NSInteger result) {
 			  if (result == NSAlertFirstButtonReturn) {
 				  // OK clicked, delete the record
@@ -375,12 +378,12 @@ void Dialogs::twoOptionDialog(std::string title,
 							  std::function<void()> buttonOnePressed,
 							  std::string buttonTwoText,
 							  std::function<void()> buttonTwoPressed) const {
-#ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed = buttonOnePressed;
-	unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-	unit_test::dialogOpen			  = true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogButtonOnePressed = buttonOnePressed;
+		unit_test::dialogButtonTwoPressed = buttonTwoPressed;
+		unit_test::dialogOpen			  = true;
+		return;
+	}
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 2;
@@ -417,7 +420,7 @@ void Dialogs::twoOptionDialog(std::string title,
 	  [alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
-	  function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, this](NSInteger result) {
+	  std::function<void(NSInteger)> handleResult = [buttonOnePressed, buttonTwoPressed, this](NSInteger result) {
 		  if (result == NSAlertFirstButtonReturn) {
 			  // OK clicked, delete the record
 			  app.main.runOnMainThread(buttonOnePressed);
@@ -460,14 +463,14 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 									  std::string buttonThreeText,
 									  std::function<void()> buttonThreePressed,
 									  std::function<void()> cancelPressed) const {
-#ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed	= buttonOnePressed;
-	unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
-	unit_test::dialogButtonThreePressed = buttonThreePressed;
-	unit_test::dialogCancelPressed		= cancelPressed;
-	unit_test::dialogOpen				= true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogButtonOnePressed	= buttonOnePressed;
+		unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
+		unit_test::dialogButtonThreePressed = buttonThreePressed;
+		unit_test::dialogCancelPressed		= cancelPressed;
+		unit_test::dialogOpen				= true;
+		return;
+	}
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 4;
@@ -517,7 +520,7 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 
-	  function<void(NSInteger)> handleResult =
+	  std::function<void(NSInteger)> handleResult =
 		  [this, buttonOnePressed, buttonTwoPressed, buttonThreePressed, cancelPressed](NSInteger result) {
 			  if (result == NSAlertFirstButtonReturn) {
 				  // OK clicked, delete the record
@@ -582,13 +585,13 @@ void Dialogs::threeOptionDialog(std::string title,
 								std::function<void()> buttonTwoPressed,
 								std::string buttonThreeText,
 								std::function<void()> buttonThreePressed) const {
-#ifdef UNIT_TEST
-	unit_test::dialogButtonOnePressed	= buttonOnePressed;
-	unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
-	unit_test::dialogButtonThreePressed = buttonThreePressed;
-	unit_test::dialogOpen				= true;
-	return;
-#endif
+	if (unit_test::dialogSpoofingIsEnabled()) {
+		unit_test::dialogButtonOnePressed	= buttonOnePressed;
+		unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
+		unit_test::dialogButtonThreePressed = buttonThreePressed;
+		unit_test::dialogOpen				= true;
+		return;
+	}
 
 #ifdef AUTO_TEST
 	int i = randi(100) % 3;
@@ -632,7 +635,7 @@ void Dialogs::threeOptionDialog(std::string title,
 	  //[alert setInformativeText:@"Deleted records cannot be restored."];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 
-	  function<void(NSInteger)> handleResult =
+	  std::function<void(NSInteger)> handleResult =
 		  [buttonOnePressed, buttonTwoPressed, buttonThreePressed, this](NSInteger result) {
 			  if (result == NSAlertFirstButtonReturn) {
 				  // OK clicked, delete the record
@@ -733,7 +736,7 @@ BGPickerDelegate *bgpd = nil;
 
 //#include "Image.h"
 
-void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> completionCallback) const {
+void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
 #endif
@@ -757,11 +760,11 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 #else // defined(__APPLE__)
 	loadFile("Please choose an image",
 			 {"jpg", "jpeg", "bmp", "gif", "png", "tif", "tiff"},
-			 [&, completionCallback](string path, bool success) {
+			 [&, completionCallback](std::string path, bool success) {
 				 if (!success) completionCallback(false, "");
 
 				 fs::path p(path);
-				 string outPath = tempDir() + "/" + p.filename().string();
+				 std::string outPath = tempDir() + "/" + p.filename().string();
 				 Log::d() << "Copying image to " << outPath;
 
 				 try {
@@ -778,7 +781,7 @@ void Dialogs::chooseImage(std::function<void(bool success, string imgPath)> comp
 #if TARGET_OS_IOS
 #	include "UIBlockButton.h"
 #endif
-void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback) const {
+void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
 #endif
@@ -865,7 +868,7 @@ void Dialogs::launchUrlInWebView(string url, function<void()> completionCallback
 @end
 OpenLinksInSafariDelegate *navDelegate = nil;
 #endif
-void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> completionCallback) const {
+void Dialogs::displayHtmlInWebView(const std::string &html, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
 #endif
@@ -939,7 +942,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, function<void()> com
 #endif
 }
 
-void Dialogs::share(std::string message, std::string path, function<void(bool)> completionCallback) const {
+void Dialogs::share(std::string message, std::string path, std::function<void(bool)> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
 #endif
@@ -974,7 +977,7 @@ void Dialogs::share(std::string message, std::string path, function<void(bool)> 
 	androidShareDialog(message, path, completionCallback);
 #else
 
-	string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
+	std::string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
 	fs::ifstream src(fs::u8path(path), std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
@@ -1117,7 +1120,7 @@ void Dialogs::loadFile(std::string msg,
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  // do work here
 	  NSInteger buttonClicked;
-	  string filePath = "";
+	  std::string filePath = "";
 	  @autoreleasepool {
 		  NSOpenPanel *loadDialog = [NSOpenPanel openPanel];
 
@@ -1125,7 +1128,7 @@ void Dialogs::loadFile(std::string msg,
 			  if (impikD == nil) {
 				  impikD = [[FilePickerDelegate alloc] init];
 			  }
-			  vector<NSString *> nsExts;
+			  std::vector<NSString *> nsExts;
 			  for (const auto &ext: allowedExts) {
 				  nsExts.push_back([NSString stringWithUTF8String:ext.c_str()]);
 			  }
@@ -1143,14 +1146,14 @@ void Dialogs::loadFile(std::string msg,
 		  [context makeCurrentContext];
 
 		  if (buttonClicked == NSModalResponseOK) {
-			  filePath = string([[[loadDialog URL] path] UTF8String]);
+			  filePath = std::string([[[loadDialog URL] path] UTF8String]);
 		  }
 	  }
 	  completionCallback(filePath, buttonClicked == NSModalResponseOK);
 	});
 #	endif
 #elif defined(__ANDROID__)
-    androidFileDialog(msg, allowedExtensions, completionCallback);
+	androidFileDialog(msg, allowedExtensions, completionCallback);
 #elif defined(__linux__)
 	linuxLoadFileDialog(msg, allowedExtensions, completionCallback);
 #endif

@@ -24,6 +24,12 @@ struct android_statics {
 	std::function<void(string filePath, bool success)> fileDialogCallback;
 } android_statics;
 
+#if !defined(__APPLE__)
+void quitApplication() {
+	mzAssert(false);
+}
+#endif
+
 bool androidIsOnWifi() {
 	return callJNIForBoolean("isOnWifi");
 }
@@ -460,21 +466,21 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 		parsers.insert(std::make_pair(
 			key, MidiMessageParser {[key, deviceId, portId](const MidiMessageParser::MidiData &data) {
 				if (auto impl = midiImpl.lock()) {
-					auto devices = impl->getConnectedMidiDevices();
-					auto deviceIter	 = std::find_if(
-						   std::begin(devices), std::end(devices), [deviceId, portId](auto &&deviceToTest) {
-							   if (auto *androidInput = dynamic_cast<AndroidMidiDevice *>(deviceToTest.get())) {
-								   return androidInput->deviceIdentifier == deviceId
-										  && androidInput->devicePort == portId && !androidInput->isOutput;
-							   }
-							   return false;
-						   });
+					auto devices	= impl->getConnectedMidiDevices();
+					auto deviceIter = std::find_if(
+						std::begin(devices), std::end(devices), [deviceId, portId](auto &&deviceToTest) {
+							if (auto *androidInput = dynamic_cast<AndroidMidiDevice *>(deviceToTest.get())) {
+								return androidInput->deviceIdentifier == deviceId
+									   && androidInput->devicePort == portId && !androidInput->isOutput;
+							}
+							return false;
+						});
 					if (deviceIter != std::end(devices)) {
-                        impl->messageReceived(*deviceIter, {data.data}, data.timestamp);
+						impl->messageReceived(*deviceIter, {data.data}, data.timestamp);
+					} else {
+						Log::e() << "Didnt find device " << std::to_string(deviceId) << " and port "
+								 << std::to_string(portId);
 					}
-                    else {
-                        Log::e() << "Didnt find device " << std::to_string(deviceId) << " and port " << std::to_string(portId);
-                    }
 				}
 			}}));
 		iter = parsers.find(key);

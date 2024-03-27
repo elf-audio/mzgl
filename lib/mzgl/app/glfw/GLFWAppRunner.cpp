@@ -32,6 +32,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "log.h"
 #include "GLFWOS.h"
 
+#if defined(WIN32) || defined(__linux__)
+void quitApplication() {
+	glfwTerminate();
+}
+#endif
+
 using namespace std;
 
 DesktopWindowEventHandler windowEventHandler;
@@ -143,7 +149,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #		ifdef __arm__ // raspberry pi?
 	// so we're going for gles
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #		else
 
@@ -154,8 +160,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 #	endif
 #endif
-
-
 
 	// this is crashing on mac for some reason
 	//	const unsigned char *openglVersion = glGetString(GL_VERSION);

@@ -17,6 +17,14 @@
 #include "PluginEditor.h"
 #include "DateTime.h"
 #include "ScopedUrl.h"
+#include "util.h"
+#include "mzAssert.h"
+
+#if defined(__APPLE__)
+void quitApplication() {
+	mzAssert(false);
+}
+#endif
 
 @interface iOSAppDelegate () {
 	std::shared_ptr<App> app;
@@ -91,7 +99,7 @@ public:
 	try {
 		if (isPlugin()) {
 			plugin = instantiatePlugin();
-			app = instantiatePluginEditor(g, plugin);
+			app	   = instantiatePluginEditor(g, plugin);
 		} else {
 			app = instantiateApp(g);
 		}
@@ -150,14 +158,14 @@ public:
 		auto eventDispatcher = [mzViewController getEventDispatcher];
 		eventDispatcher->exit();
 	}
-	
+
 	// do not rely on iOS to destroy your shared pointers in iOSAppDelegate - for
 	// some reason, iOSAppDelegate is not destroyed conventionally, so deleting
 	// all the mzgl shared_ptrs owned by it and the objects it owns is the only
 	// way I can work out to make sure ~App() is called.
 	[mzViewController deleteCppObjects];
 	app = nullptr;
-	
+
 	// destroy plugin last! it must live longer than app.
 	plugin = nullptr;
 }
