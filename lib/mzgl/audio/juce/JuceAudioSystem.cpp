@@ -13,8 +13,9 @@ class JuceImpl
 public:
 	std::shared_ptr<AudioIODeviceType> type;
 	std::shared_ptr<AudioIODevice> dev;
-	JuceImpl()
-		: type(createJuceIODeviceType()) {
+	_AudioSystem &sys;
+	JuceImpl(_AudioSystem &sys)
+		: type(createJuceIODeviceType()), sys(sys) {
 		type->addListener(this);
 		type->scanForDevices();
 		printDevices();
@@ -25,17 +26,48 @@ public:
 		printDevices();
 	}
 
-	double phase = 0;
-	double freq	 = 440;
+	std::vector<float> interleavedIns;
+	std::vector<float> interleavedOuts;
+
 	void audioDeviceIOCallbackWithContext(const float *const *inputChannelData,
 										  int numInputChannels,
 										  float *const *outputChannelData,
 										  int numOutputChannels,
 										  int numSamples,
 										  const AudioIODeviceCallbackContext &context) override {
-		for (int i = 0; i < numSamples; i++) {
-			outputChannelData[0][i] = outputChannelData[1][i] = sin(phase) * inputChannelData[0][i];
-			phase += M_PI * 2.0 * freq / 48000.0;
+
+		if(numInputChannels > 0) {
+			interleave(interleavedIns, inputChannelData, numInputChannels, numSamples);
+			if(sys.inputCallback) {
+				sys.inputCallback(interleavedIns.data(), numSamples, numInputChannels);
+			}
+		}
+
+		if(numOutputChannels > 0) {
+			interleavedOuts.resize(numOutputChannels * numSamples);
+			if(sys.outputCallback) {
+				sys.outputCallback(interleavedOuts.data(), numSamples, numOutputChannels);
+			}
+			deinterleave(interleavedOuts, outputChannelData, numOutputChannels, numSamples);
+		}
+
+	}
+
+	static void interleave(std::vector<float> &interleaved, const float *const *data, int numChans, int numFrames) {
+		interleaved.resize(numChans * numFrames);
+		// interleave the input channels
+		for(int chan = 0; chan < numChans; chan++) {
+			for(int j = 0; j < numFrames; j++) {
+				interleaved[chan + j * numChans] = data[chan][j];
+			}
+		}
+	}
+
+	static void deinterleave(std::vector<float> &interleaved, float *const *data, int numChans, int numFrames) {
+		for(int chan = 0; chan < numChans; chan++) {
+			for(int j = 0; j < numFrames; j++) {
+				data[chan][j] = interleaved[j*numChans + chan];
+			}
 		}
 	}
 
@@ -55,7 +87,7 @@ public:
 };
 
 JuceAudioSystem::JuceAudioSystem()
-	: impl(std::make_shared<JuceImpl>()) {
+	: impl(std::make_shared<JuceImpl>(*this)) {
 }
 
 String partialMatch(const StringArray &names, const std::string &term) {
@@ -144,10 +176,10 @@ std::vector<AudioPort> JuceAudioSystem::getOutputs() {
 
 float JuceAudioSystem::getSampleRate() const {
 	if (!impl->dev) return 0;
-	impl->dev->getCurrentSampleRate();
+	return impl->dev->getCurrentSampleRate();
 }
 
 int JuceAudioSystem::getBufferSize() const {
 	if (!impl->dev) return 0;
-	impl->dev->getCurrentBufferSizeSamples();
+	return impl->dev->getCurrentBufferSizeSamples();
 }
