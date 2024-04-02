@@ -52,6 +52,10 @@ set(MZGL_SOURCES
         lib/mzgl/animation/Tween.cpp
         lib/mzgl/audio/AudioSystem.cpp
         lib/mzgl/audio/DrAudioFileReader.cpp
+        lib/mzgl/audio/juce/JuceAudioSystem.cpp
+#        lib/mzgl/audio/juce/lib/juce_AudioIODeviceType.cpp
+        lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
+        lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
         lib/mzgl/geom/Rectf.cpp
         lib/mzgl/geom/RoundedRect.cpp
         lib/mzgl/geom/SVG.cpp
@@ -171,6 +175,8 @@ set(HEADERS
         lib/mzgl/audio
         lib/mzgl/audio/portaudio
         lib/mzgl/audio/iOS
+        lib/mzgl/audio/juce
+        lib/mzgl/audio/juce/lib
         lib/mzgl/file
         lib/mzgl/geom
         lib/mzgl/gl
