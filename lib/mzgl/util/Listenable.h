@@ -18,13 +18,18 @@ public:
 
 		listeners.push_back(listener);
 	}
-	
+
 	virtual ~Listenable() = default;
 
 	void removeListener(T *listener) {
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
 	[[nodiscard]] int getNumListeners() const { return listeners.size(); }
+
+	void notify(std::function<void(T *)> f) {
+		for (auto *l: listeners)
+			f(l);
+	}
 
 protected:
 	std::vector<T *> listeners;

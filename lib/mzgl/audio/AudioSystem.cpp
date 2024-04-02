@@ -112,3 +112,20 @@ double _AudioSystem::getOutputLatency() {
 	Log::e() << "Error: AudioSystem::getLatency() not implemented!";
 	return 0.0;
 }
+
+std::vector<std::string> _AudioSystem::getInputDeviceNames() {
+	auto ins = getInputs();
+	std::vector<std::string> names;
+	for (auto &in: ins) {
+		names.push_back(in.name);
+	}
+	return names;
+}
+std::vector<std::string> _AudioSystem::getOutputDeviceNames() {
+	auto outs = getOutputs();
+	std::vector<std::string> names;
+	for (auto &out: outs) {
+		names.push_back(out.name);
+	}
+	return names;
+}
