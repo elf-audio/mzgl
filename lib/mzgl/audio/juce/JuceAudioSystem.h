@@ -21,6 +21,17 @@ public:
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
 
+	bool setInput(const AudioPort &audioInput) override;
+	bool setOutput(const AudioPort &audioOutput) override;
+
+	AudioPort getInput() override;
+	AudioPort getOutput() override;
+
 private:
 	std::shared_ptr<JuceImpl> impl;
+	std::string currInputName;
+	std::string currOutputName;
+	int numInChannels  = 2;
+	int numOutChannels = 2;
+	void startCurrConfig();
 };

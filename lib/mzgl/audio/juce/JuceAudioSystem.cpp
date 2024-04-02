@@ -23,7 +23,6 @@ public:
 	}
 
 	void audioDeviceListChanged() override {
-		Log::d() << "DEVICES CHANGED";
 		printDevices();
 		sys.deviceChanges.notify([](auto *l) { l->audioDeviceChanged(); });
 	}
@@ -44,7 +43,7 @@ public:
 			}
 		}
 
-		if (numOutputChannels > 0) {
+		if (numOutputChannels > 0 && outputChannelData != nullptr) {
 			interleavedOuts.resize(numOutputChannels * numSamples);
 			if (sys.outputCallback) {
 				sys.outputCallback(interleavedOuts.data(), numSamples, numOutputChannels);
@@ -100,37 +99,35 @@ String partialMatch(const StringArray &names, const std::string &term) {
 	return "";
 }
 
-void JuceAudioSystem::setup(int numInChannels, int numOutChannels) {
-	auto ins  = impl->type->getDeviceNames(true);
-	auto outs = impl->type->getDeviceNames(false);
+std::string defaultName(std::shared_ptr<AudioIODeviceType> type, bool isInput) {
+	auto ins	 = type->getDeviceNames(isInput);
+	auto inIndex = type->getDefaultDeviceIndex(isInput);
 
-	auto in	 = partialMatch(ins, "2i2");
-	auto out = partialMatch(outs, "2i2");
-	if (in == "" || out == "") {
-		Log::d() << "Didn't find outputs";
-		return;
+	if (inIndex >= 0 && inIndex < ins.size()) {
+		return ins[inIndex];
 	}
+	return "";
+}
 
-	Log::d() << "Found our outputs";
-	impl->dev = std::shared_ptr<AudioIODevice>(impl->type->createDevice(out, in));
+void printOutFactoids(std::shared_ptr<AudioIODevice> dev) {
 	Log::d() << "==========================";
-	Log::d() << "Type: " << impl->dev->getTypeName();
-	Log::d() << "Name: " << impl->dev->getName();
-	auto srs			 = impl->dev->getAvailableSampleRates();
+	Log::d() << "Type: " << dev->getTypeName();
+	Log::d() << "Name: " << dev->getName();
+	auto srs			 = dev->getAvailableSampleRates();
 	std::string srString = "";
 	for (auto sr: srs) {
 		srString += std::to_string(sr) + ", ";
 	}
 	Log::d() << "Sample Rates: " << srString;
 
-	auto bss			 = impl->dev->getAvailableBufferSizes();
+	auto bss			 = dev->getAvailableBufferSizes();
 	std::string bsString = "";
 	for (auto bs: bss) {
 		bsString += std::to_string(bs) + ", ";
 	}
 	Log::d() << "Buffer Sizes: " << bsString;
-	auto inChNames		   = impl->dev->getInputChannelNames();
-	auto outChNames		   = impl->dev->getOutputChannelNames();
+	auto inChNames		   = dev->getInputChannelNames();
+	auto outChNames		   = dev->getOutputChannelNames();
 	std::string inChString = "";
 	for (auto ch: inChNames) {
 		inChString += ch + ", ";
@@ -141,19 +138,41 @@ void JuceAudioSystem::setup(int numInChannels, int numOutChannels) {
 		outChString += ch + ", ";
 	}
 	Log::d() << "Output Channels: " << outChString;
+}
+
+void JuceAudioSystem::setup(int numInChans, int numOutChans) {
+	currInputName = "";
+
+	this->numInChannels	 = numInChans;
+	this->numOutChannels = numOutChans;
+	if (numInChans > 0) {
+		currInputName = defaultName(impl->type, true);
+	}
+
+	currOutputName = defaultName(impl->type, false);
+
+	startCurrConfig();
+}
+
+void JuceAudioSystem::startCurrConfig() {
+	if (isRunning()) {
+		stop();
+		impl->dev->close();
+	}
+	impl->dev = std::shared_ptr<AudioIODevice>(impl->type->createDevice(currOutputName, currInputName));
+	printOutFactoids(impl->dev);
 
 	BigInteger inChannels;
 	BigInteger outChannels;
 	inChannels.setRange(0, numInChannels, true);
 	outChannels.setRange(0, numOutChannels, true);
-	auto err = impl->dev->open(inChannels, outChannels, 48000, 128);
+	auto err = impl->dev->open(inChannels, outChannels, 48000, 256);
 	if (!err.empty()) {
 		Log::e() << "Got error trying to start audio: " << err;
 	}
 
 	impl->dev->start(impl.get());
 }
-
 void JuceAudioSystem::start() {
 	if (impl->dev == nullptr) return;
 	impl->dev->start(impl.get());
@@ -199,4 +218,32 @@ float JuceAudioSystem::getSampleRate() const {
 int JuceAudioSystem::getBufferSize() const {
 	if (!impl->dev) return 0;
 	return impl->dev->getCurrentBufferSizeSamples();
+}
+
+bool JuceAudioSystem::setInput(const AudioPort &audioInput) {
+	if (audioInput.name == currInputName) return false;
+	currInputName = audioInput.name;
+	startCurrConfig();
+	return true;
+}
+
+bool JuceAudioSystem::setOutput(const AudioPort &audioOutput) {
+	if (audioOutput.name == currOutputName) return false;
+	currOutputName = audioOutput.name;
+	startCurrConfig();
+	return true;
+}
+
+AudioPort JuceAudioSystem::getInput() {
+	if (impl->dev == nullptr) return {};
+	AudioPort p;
+	p.name = currInputName;
+	return p;
+}
+
+AudioPort JuceAudioSystem::getOutput() {
+	if (impl->dev == nullptr) return {};
+	AudioPort p;
+	p.name = currOutputName;
+	return p;
 }
