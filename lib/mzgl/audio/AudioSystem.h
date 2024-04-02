@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include "stringUtil.h"
+#include "Listenable.h"
 
 struct AudioPort {
 	int portId		   = -1;
@@ -54,8 +55,15 @@ enum class StreamConfigurationStatus {
 	FAILED, // TODO: more descriptive errors can be added here
 };
 
+class AudioDeviceChangeListener {
+public:
+	virtual void audioDeviceChanged() = 0;
+};
+
 class _AudioSystem {
 public:
+	Listenable<AudioDeviceChangeListener> deviceChanges;
+
 	void bindToApp(AudioIO *app);
 	virtual ~_AudioSystem() {}
 	virtual void setup(int numInChannels, int numOutChannels) = 0;
@@ -99,6 +107,9 @@ public:
 	void removeSampleRateChangeListener(SampleRateChangeListener *listener);
 
 	[[nodiscard]] virtual double getNanoSecondsAtBufferBegin() { return 0; }
+
+	std::vector<std::string> getInputDeviceNames();
+	std::vector<std::string> getOutputDeviceNames();
 
 	StreamConfigurationStatus getStreamConfigurationStatus() { return streamConfigStatus_; }
 
