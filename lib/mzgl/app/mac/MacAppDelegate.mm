@@ -16,11 +16,26 @@
 #include "log.h"
 #include "EventsView.h"
 #include "MZGLWebView.h"
+#include "util.h"
 
 #ifdef USE_METALANGLE
 #	import "MZMGLKViewController.h"
 #endif
 using namespace std;
+
+#if defined(__APPLE__)
+void quitApplication() {
+	[NSApp terminate:nil];
+}
+#endif
+
+void handleTerminateSignal(int signal) {
+	Log::d() << "Got a terminate signal";
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  Log::d() << "Terminating the app";
+	  quitApplication();
+	});
+}
 
 @interface MacAppDelegate () {
 	id view;
@@ -171,7 +186,8 @@ using namespace std;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
 	Log::d() << "applicationDidFinishLaunching";
-	// Insert code here to initialize your application
+
+	signal(SIGTERM, handleTerminateSignal);
 
 	eventDispatcher = std::make_shared<EventDispatcher>(app);
 

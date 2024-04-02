@@ -147,19 +147,15 @@ public:
 	/**
 	 * launches a web view pointing to a web url - only really needed on iOS (for ableton lite download)
 	 */
-	void launchUrlInWebView(
-		std::string url, std::function<void()> completionCallback = []() {}) const;
+	void launchUrlInWebView(std::string url, std::function<void()> completionCallback = []() {}) const;
 
 	/**
 	 * launch a webview that displays the html contained in the string. Optionally calls completionCallback if webview is dismissed
 	 */
-	void displayHtmlInWebView(
-		const std::string &html, std::function<void()> completionCallback = []() {}) const;
+	void displayHtmlInWebView(const std::string &html, std::function<void()> completionCallback = []() {}) const;
 
 	void chooseFolder(std::string msg, std::function<void(std::string, bool)> completionCallback) const;
 };
-
-#ifdef UNIT_TEST
 
 namespace unit_test {
 	bool isDialogOpen();
@@ -170,5 +166,3 @@ namespace unit_test {
 	void pressButtonTwo();
 	void pressButtonThree();
 } // namespace unit_test
-
-#endif

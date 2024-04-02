@@ -23,6 +23,10 @@ std::string appSupportPath(const std::string &path);
 std::string getHomeDirectory();
 void loadCommandLineArgs(int argc, const char *argv[]);
 std::vector<std::string> getCommandLineArgs();
+bool hasCommandLineFlag(const std::string &flag);
+bool hasCommandLineSetting(const std::string &setting);
+std::string getCommandLineSetting(const std::string &setting, const std::string &defaultValue = "");
+int getCommandLineSetting(const std::string &setting, int defaultValue = -1);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -142,9 +146,7 @@ void hideMouse();
 ///// internal! Should definitely go elsewhere
 void initMZGL(std::shared_ptr<App> app);
 
-#ifdef UNIT_TEST
-
 void setDocsPath(const std::string &newDocsPath);
 void setDataPath(const std::string &newDataPath);
 
-#endif
+void quitApplication();
