@@ -11,4 +11,4 @@ used directly.
 One day will probs come back to this and remove more of my own implementations of juce objects and replace with actual
 unmodified juce code
 
-microjuce.h contains most of this glue. 
+microjuce.h contains most of this glue.

@@ -19,19 +19,71 @@
 #define jassertfalse mzAssert(false)
 #define JUCE_API
 #define JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#define TRANS(A) A
 #define JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(a)
-#define JUCE_DECLARE_NON_COPYABLE(a)
-#define JUCE_CALLTYPE
+#define JUCE_DECLARE_NON_COPYABLE(className)                                                                      \
+	className(const className &)			= delete;                                                             \
+	className &operator=(const className &) = delete;
 
-#define jmin std::min
-#define jmax std::max
+/** This is a shorthand macro for deleting a class's move constructor and
+    move assignment operator.
+*/
+#define JUCE_DECLARE_NON_MOVEABLE(className)                                                                      \
+	className(className &&)			   = delete;                                                                  \
+	className &operator=(className &&) = delete;
+
+#define JUCE_CALLTYPE
+#define JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE(A)
+//#define JUCE_DECLARE_WEAK_REFERENCEABLE(A)
+
+/** Returns the larger of two values. */
+template <typename Type>
+constexpr Type jmax(Type a, Type b) {
+	return a < b ? b : a;
+}
+
+/** Returns the larger of three values. */
+template <typename Type>
+constexpr Type jmax(Type a, Type b, Type c) {
+	return a < b ? (b < c ? c : b) : (a < c ? c : a);
+}
+
+/** Returns the larger of four values. */
+template <typename Type>
+constexpr Type jmax(Type a, Type b, Type c, Type d) {
+	return jmax(a, jmax(b, c, d));
+}
+
+/** Returns the smaller of two values. */
+template <typename Type>
+constexpr Type jmin(Type a, Type b) {
+	return b < a ? b : a;
+}
+
+/** Returns the smaller of three values. */
+template <typename Type>
+constexpr Type jmin(Type a, Type b, Type c) {
+	return b < a ? (c < b ? c : b) : (c < a ? c : a);
+}
+
+/** Returns the smaller of four values. */
+template <typename Type>
+constexpr Type jmin(Type a, Type b, Type c, Type d) {
+	return jmin(a, jmin(b, c, d));
+}
+
 #include <stdint.h>
+
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 using int32	 = int32_t;
 using int64	 = int64_t;
 using uint8	 = uint8_t;
 #define exactlyEqual(A, B) ((A) == (B))
+template <typename T>
+std::unique_ptr<T> rawToUniquePtr(T *ptr) {
+	return std::unique_ptr<T>(ptr);
+}
 
 class String : public std::string {
 public:
@@ -50,6 +102,21 @@ public:
 		std::string::operator=(s);
 		return *this;
 	}
+
+	// << operator
+	String &operator<<(const std::string &s) {
+		append(s);
+		return *this;
+	}
+	String &operator<<(const char *s) {
+		append(s);
+		return *this;
+	}
+	// << with double
+	String &operator<<(double d) {
+		append(std::to_string(d));
+		return *this;
+	}
 	String &operator=(String &&s) noexcept {
 		std::string::operator=(std::move(s));
 		return *this;
@@ -66,11 +133,18 @@ public:
 		snprintf(buf, sizeof(buf), "%x", v);
 		return buf;
 	}
+
+	static String fromCFString(CFStringRef cfString);
 };
 
 template <typename T>
-using Atomic = std::atomic<T>;
-
+//using Atomic = std::atomic<T>;
+class Atomic : public std::atomic<T> {
+public:
+	T get() const { return std::atomic<T>::load(); }
+	// assign bool operator
+	void operator=(const bool &newValue) { std::atomic<T>::store(newValue); }
+};
 template <typename T>
 class Array : public std::vector<T> {
 public:
@@ -183,11 +257,16 @@ using namespace juce;
 //public:
 //};
 using CriticalSection = std::mutex;
-class StringArray : public Array<std::string> {
+class StringArray : public Array<String> {
 public:
 	StringArray() = default;
-	StringArray(std::initializer_list<std::string> il)
-		: Array<std::string>(il) {}
+	StringArray(std::initializer_list<String> il)
+		: Array<String>(il) {}
+	StringArray(const StringArray &other)
+		: Array<String>(other) {}
+	StringArray(const Array<String> &other)
+		: Array<String>(other) {}
+
 	void add(const std::string &newElement) { emplace_back(newElement); }
 	void add(const char *newElement) { emplace_back(newElement); }
 	void add(const String &newElement) { emplace_back(newElement); }
@@ -356,6 +435,9 @@ constexpr bool approximatelyEqual(Type a, Type b) {
 }
 
 // rename weak_ptr to WeakReference
-template <typename T>
-using WeakReference = std::weak_ptr<T>;
+//template <typename T>
+//using WeakReference = std::weak_ptr<T>;
+#include "juce_ContainerDeletePolicy.h"
+#include "juce_ReferenceCountedObject.h"
+#include "juce_WeakReference.h"
 #include "juce_AudioSampleBuffer.h"
