@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "Variable.h"
+#include <array>
 
 class VariableListener : public Variable<float>::Listener {
 public:
@@ -123,7 +124,7 @@ SCENARIO("Multiple Listeners can be removed from variables", "[Variable]") {
 	}
 }
 
-SCENARIO("Removing a non existant listener doesnt cause an issue", "[Variable]") {
+SCENARIO("Removing a non existent listener doesnt cause an issue", "[Variable]") {
 	GIVEN("A primitive variable and a listener") {
 		Variable<float> var {0.5f};
 		VariableListener listener;
