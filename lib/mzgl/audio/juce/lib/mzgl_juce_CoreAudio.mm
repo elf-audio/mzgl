@@ -45,6 +45,15 @@ namespace FloatVectorOperations {
 	void copy(float *dest, const float *src, int num) {
 		memcpy(dest, src, num * sizeof(float));
 	}
+
+	void clear(float *dest, int num) {
+		memset(dest, 0, num * sizeof(float));
+	}
+	void multiply(float *dest, const float amt, int num) {
+		for (int i = 0; i < num; ++i) {
+			dest[i] *= amt;
+		}
+	}
 } // namespace FloatVectorOperations
 
 template <typename CFType>

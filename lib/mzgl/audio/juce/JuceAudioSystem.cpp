@@ -27,6 +27,10 @@ public:
 		sys.deviceChanges.notify([](auto *l) { l->audioDeviceChanged(); });
 	}
 
+	void audioDeviceError(const String &errorMessage) override {
+		Log::e() << "Audio device error: " << errorMessage;
+	}
+
 	std::vector<float> interleavedIns;
 	std::vector<float> interleavedOuts;
 

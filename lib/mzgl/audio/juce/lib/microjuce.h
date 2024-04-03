@@ -128,43 +128,42 @@ public:
 		}
 	}
 };
+inline void zeromem(void *memory, size_t numBytes) noexcept {
+	memset(memory, 0, numBytes);
+}
 
-class AudioSampleBuffer : public std::vector<float> {
-public:
-	void setSize(int numCh, int numFrames) {}
-	int getNumSamples() {
-		//		return size();
-		return 0;
-	}
-	int getNumChannels() { return 0; }
-	float *getReadPointer(int channel, int pos) { return nullptr; }
-	float *getWritePointer(int channel, int pos) { return nullptr; }
-	float *const *getArrayOfWritePointers() noexcept { return nullptr; }
-};
+namespace FloatVectorOperations {
+	void copy(float *dest, const float *src, int num);
+	void clear(float *dest, int num);
+	void multiply(float *dest, const float amt, int num);
+} // namespace FloatVectorOperations
+//==============================================================================
+/** Casts a pointer to another type via `void*`, which suppresses the cast-align
+    warning which sometimes arises when casting pointers to types with different
+    alignment.
+    You should only use this when you know for a fact that the input pointer points
+    to a region that has suitable alignment for `Type`, e.g. regions returned from
+    malloc/calloc that should be suitable for any non-over-aligned type.
+*/
+template <typename Type>
+inline Type unalignedPointerCast(void *ptr) noexcept {
+	static_assert(std::is_pointer_v<Type>);
+	return reinterpret_cast<Type>(ptr);
+}
 
 #define jlimit(A, B, C) std::clamp(C, A, B)
 class AudioWorkgroup {};
-template <typename T>
-class HeapBlock {
-public:
-	T *data		= nullptr;
-	HeapBlock() = default;
-	void calloc(int sz) { data = static_cast<T *>(std::calloc(sz, sizeof(T))); }
-	void malloc(int sz) { data = static_cast<T *>(std::malloc(sz * sizeof(T))); }
-	void realloc(int sz) { data = static_cast<T *>(std::realloc(data, sz * sizeof(T))); }
 
-	~HeapBlock() { std::free(data); }
-	// subscript operator
-	T &operator[](int i) { return data[i]; }
-	T *get() const { return data; }
-	void swapWith(HeapBlock<T> &other) noexcept { std::swap(data, other.data); }
-	void free() noexcept {
-		std::free(data);
-		data = nullptr;
-	}
-	inline bool operator!=(const T *otherPointer) const noexcept { return otherPointer != data; }
-	inline bool operator==(const T *otherPointer) const noexcept { return otherPointer == data; }
-};
+/** This macro can be added to class definitions to disable the use of new/delete to
+    allocate the object on the heap, forcing it to only be used as a stack or member variable.
+*/
+#define JUCE_PREVENT_HEAP_ALLOCATION                                                                              \
+private:                                                                                                          \
+	static void *operator new(size_t)	= delete;                                                                 \
+	static void operator delete(void *) = delete;
+#define JUCE_BEGIN_IGNORE_WARNINGS_MSVC(A)
+#define JUCE_END_IGNORE_WARNINGS_MSVC
+#include "juce_HeapBlock.h"
 using ScopedLock = std::lock_guard<std::mutex>;
 
 class ScopedUnlock {
@@ -295,3 +294,4 @@ constexpr bool approximatelyEqual(Type a, Type b) {
 // rename weak_ptr to WeakReference
 template <typename T>
 using WeakReference = std::weak_ptr<T>;
+#include "juce_AudioSampleBuffer.h"
