@@ -322,12 +322,57 @@ string jstringToString(JNIEnv *jni, jstring text) {
 #include "AllMidiDevicesAndroidImpl.h"
 #include "MidiMessageParser.h"
 
+std::vector<AudioPort> convertAudioPortFromNames(const std::vector<std::string> &audioPortNames) {
+	AudioPort basicPort {-1, 0, 0, 44100.0, {}, "EMPTY-PORT", false, false};
+
+	std::vector<AudioPort> ports;
+	for (auto name: audioPortNames) {
+		basicPort.name = name;
+		ports.push_back(basicPort);
+	}
+
+	return ports;
+}
+
+std::vector<AudioPort> getAudioInputPorts(const std::string &accessorName) {
+	std::vector<std::string> audioPortNames;
+	callJNIForStringArray(accessorName, audioPortNames);
+	return convertAudioPortFromNames(audioPortNames);
+}
+
+std::vector<AudioPort> getAudioInputPorts() {
+	return getAudioInputPorts("getAudioInputs");
+}
+
+std::vector<AudioPort> getBuiltInAudioInputPorts() {
+	return getAudioInputPorts("getBuiltInAudioInputs");
+}
+
+std::vector<AudioPort> getAllAudioInputPorts() {
+	auto inputs	 = getAudioInputPorts();
+	auto builtIn = getBuiltInAudioInputPorts();
+	inputs.insert(std::end(inputs), std::begin(builtIn), std::end(builtIn));
+	return inputs;
+}
+
+bool hasExternalAudioInputs() {
+	return callJNIForBoolean("hasExternalAudioInputs");
+}
+
+std::string getAudioInputName(int32_t deviceId) {
+	return callJNIForString("getAudioInputName", deviceId);
+}
+
+int getAudioInputId(const std::string &name) {
+	return callJNIForInt("getAudioInputId", name);
+}
+
 static std::weak_ptr<AllMidiDevicesAndroidImpl> midiImpl;
-void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
+void androidSetupMidiManager(std::shared_ptr<AllMidiDevicesAndroidImpl> impl) {
 	midiImpl = impl;
-	Log::d() << "About to call allmidiIns";
-	callJNI("setupAllMidiIns");
-	Log::d() << "Finished setting up all midi ins";
+	Log::d() << "About to call setupMidiManager";
+	callJNI("setupMidiManager");
+	Log::d() << "Finished setting up MidiManager";
 }
 
 void androidSetMainThreadRunner(MainThreadRunner *runner) {
@@ -510,12 +555,12 @@ std::vector<unsigned char> copyMidiBytes(JNIEnv *env, jbyteArray bytes) {
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL Java_com_elf_AllMidiIns_deviceAdded(
+JNIEXPORT void JNICALL Java_com_elf_MZGLMidiManager_deviceAdded(
 	JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput, jstring deviceName) {
 	androidOnMidiInputDeviceConnected(deviceId, portId, isInput == JNI_TRUE, jstringToString(env, deviceName));
 }
 
-JNIEXPORT void JNICALL Java_com_elf_AllMidiIns_deviceRemoved(
+JNIEXPORT void JNICALL Java_com_elf_MZGLMidiManager_deviceRemoved(
 	JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput) {
 	androidOnMidiInputDeviceDisconnected(deviceId, portId, isInput == JNI_TRUE);
 }

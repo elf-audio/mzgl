@@ -68,8 +68,8 @@ void androidShareDialog(const std::string &message,
 void androidImageDialog(const std::string &copyToPath,
 						std::function<void(bool success, std::string imgPath)> completionCallback);
 void androidFileDialog(std::string copyToPath,
-                        const std::vector<std::string> &allowedExtensions,
-                        std::function<void(std::string resultingPath, bool success)> completionCallback);
+					   const std::vector<std::string> &allowedExtensions,
+					   std::function<void(std::string resultingPath, bool success)> completionCallback);
 
 void androidLaunchUrl(const std::string &url);
 
@@ -94,8 +94,15 @@ bool isUsingBluetoothHeadphones();
 class AllMidiDevicesAndroidImpl;
 
 void androidSetMainThreadRunner(MainThreadRunner *runner);
-void androidSetupAllMidiIns(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
+void androidSetupMidiManager(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
 void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId);
+
+[[nodiscard]] std::vector<AudioPort> getAudioInputPorts();
+[[nodiscard]] std::vector<AudioPort> getBuiltInAudioInputPorts();
+[[nodiscard]] std::vector<AudioPort> getAllAudioInputPorts();
+[[nodiscard]] bool hasExternalAudioInputs();
+[[nodiscard]] std::string getAudioInputName(int32_t deviceId);
+[[nodiscard]] int getAudioInputId(const std::string &name);
 
 android_app *getAndroidAppPtr();
 class EventDispatcher;
@@ -133,6 +140,8 @@ float callJNIForFloat(const std::string &methodName);
 
 int64_t callJNIForLong(const std::string &methodName);
 int32_t callJNIForInt(const std::string &methodName);
+int32_t callJNIForInt(const std::string &methodName, int32_t arg1);
+int32_t callJNIForInt(const std::string &methodName, const std::string &arg1);
 
 std::string callJNIForString(const std::string &methodName, int32_t arg1);
 int64_t callJNIForLong(const std::string &methodName, int32_t arg1);

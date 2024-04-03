@@ -5,7 +5,7 @@ void AllMidiDevicesAndroidImpl::setMainThreadRunner(MainThreadRunner *runner) {
 }
 
 void AllMidiDevicesAndroidImpl::setup() {
-	androidSetupAllMidiIns(shared_from_this());
+	androidSetupMidiManager(shared_from_this());
 }
 
 void AllMidiDevicesAndroidImpl::messageReceived(const std::shared_ptr<MidiDevice> &device,
