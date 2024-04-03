@@ -69,6 +69,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <optional>
 #include "filesystem.h"
 
 void setThreadName(const std::string &name) {
