@@ -5,6 +5,8 @@
 #pragma once
 #include <memory>
 #include "AudioSystem.h"
+#include "mainThread.h"
+
 class JuceImpl;
 class JuceAudioSystem : public _AudioSystem {
 public:

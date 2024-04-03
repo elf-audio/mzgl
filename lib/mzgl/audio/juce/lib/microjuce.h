@@ -243,20 +243,86 @@ public:
 		}
 	}
 };
+
+#include <dispatch/dispatch.h>
 class Timer {
 public:
-	virtual ~Timer() = default;
-	virtual void timerCallback() {}
-	void stopTimer() noexcept {}
-	void startTimer(int ms) noexcept {}
+	Timer()
+		: dispatchSource(nullptr) {}
+
+	virtual ~Timer() { stopTimer(); }
+
+	virtual void timerCallback() {
+		// Timer ticked
+	}
+
+	void stopTimer() noexcept {
+		if (dispatchSource != nullptr) {
+			dispatch_source_cancel(dispatchSource);
+			dispatch_release(dispatchSource);
+			dispatchSource = nullptr;
+		}
+	}
+
+	void startTimer(int ms) noexcept {
+		if (dispatchSource != nullptr) {
+			stopTimer(); // Ensure we don't create multiple timers
+		}
+
+		// Create a new dispatch source timer
+		dispatchSource = dispatch_source_create(
+			DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+
+		if (dispatchSource == nullptr) {
+			return;
+		}
+
+		dispatch_source_set_timer(dispatchSource,
+								  dispatch_time(DISPATCH_TIME_NOW, ms * NSEC_PER_MSEC),
+								  ms * NSEC_PER_MSEC,
+								  (1ull * NSEC_PER_MSEC) / 10);
+		dispatch_source_set_event_handler(dispatchSource, ^{ this->timerCallback(); });
+
+		dispatch_resume(dispatchSource);
+	}
+
+private:
+	dispatch_source_t dispatchSource;
 };
 
 class AsyncUpdater {
 public:
+	AsyncUpdater()
+		: isPending(false) {}
+
 	virtual ~AsyncUpdater() = default;
-	virtual void handleAsyncUpdate() {}
-	void cancelPendingUpdate() {}
-	void triggerAsyncUpdate() { handleAsyncUpdate(); }
+
+	virtual void handleAsyncUpdate() {
+		// Override this method to perform your asynchronous operation on the main thread
+	}
+
+	void cancelPendingUpdate() {
+		// Atomic flag check and set to ensure thread safety
+		__sync_bool_compare_and_swap(&isPending, true, false);
+	}
+
+	void triggerAsyncUpdate() {
+		if (!__sync_bool_compare_and_swap(&isPending, false, true)) {
+			// If an update is already pending, don't queue another
+			return;
+		}
+
+		dispatch_async(dispatch_get_main_queue(), ^{
+		  if (this->isPending) {
+			  this->handleAsyncUpdate();
+			  // Reset the pending flag after handling
+			  this->isPending = false;
+		  }
+		});
+	}
+
+private:
+	volatile bool isPending;
 };
 template <class T>
 class ListenerList : public Array<T *> {
