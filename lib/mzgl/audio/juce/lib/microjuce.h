@@ -252,9 +252,7 @@ public:
 
 	virtual ~Timer() { stopTimer(); }
 
-	virtual void timerCallback() {
-		// Timer ticked
-	}
+	virtual void timerCallback() = 0;
 
 	void stopTimer() noexcept {
 		if (dispatchSource != nullptr) {
