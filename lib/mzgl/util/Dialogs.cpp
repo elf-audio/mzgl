@@ -663,14 +663,14 @@ void Dialogs::threeOptionDialog(std::string title,
 
 #if TARGET_OS_IOS
 @interface BGPickerDelegate : NSObject <UIImagePickerControllerDelegate> {
-	std::function<void(bool success, string imgPath)> callback;
+	std::function<void(bool success, std::string imgPath)> callback;
 }
-- (void)setCompletionCallback:(std::function<void(bool success, string imgPath)>)cb;
+- (void)setCompletionCallback:(std::function<void(bool success, std::string imgPath)>)cb;
 @end
 
 @implementation BGPickerDelegate
 
-- (void)setCompletionCallback:(std::function<void(bool success, string imgPath)>)cb {
+- (void)setCompletionCallback:(std::function<void(bool success, std::string imgPath)>)cb {
 	callback = cb;
 }
 - (UIImage *)normalizedImage:(UIImage *)img {
