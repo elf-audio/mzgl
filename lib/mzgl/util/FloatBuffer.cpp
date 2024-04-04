@@ -673,8 +673,8 @@ void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &o
 		index2 = 1;
 	}
 
-	const size_t left[2]  = {static_cast<size_t>(index1 * 2), static_cast<size_t>(index1 * 2 + 1)};
-	const size_t right[2] = {static_cast<size_t>(index2 * 2), static_cast<size_t>(index2 * 2 + 1)};
+	const size_t left[2]  = {static_cast<size_t>(index1 * 2), static_cast<size_t>(index2 * 2)};
+	const size_t right[2] = {static_cast<size_t>(index1 * 2 + 1), static_cast<size_t>(index2 * 2 + 1)};
 
 	if (left[0] >= size() || left[1] >= size() || right[0] >= size() || right[1] >= size()) {
 		outputLeft	= 0.f;
