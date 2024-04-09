@@ -28,8 +28,15 @@ void MidiMessageParser::parse(const std::vector<MidiByte> &midiData,
 				}
 				break;
 			case MIDI_SYSEX:
-				if (currentData.back() == MIDI_SYSEX_END) {
-					emitCurrent(timestamp);
+				switch (currentData.back()) {
+					case MIDI_TIME_CLOCK:
+					case MIDI_START:
+					case MIDI_CONTINUE:
+					case MIDI_STOP:
+					case MIDI_ACTIVE_SENSING:
+					case MIDI_SYSTEM_RESET:
+					case MIDI_SYSEX_END: emitCurrent(timestamp); break;
+					default: break;
 				}
 				break;
 			default: break;

@@ -46,3 +46,52 @@ SCENARIO("Input sysex is parsed properly in parts", "[midi-parser]") {
 		}
 	}
 }
+
+SCENARIO("Delimits multiple note ons off properly", "[midi-parser]") {
+	GIVEN("Some midi data and a parser") {
+		const std::vector<std::vector<uint8_t>> originalMessages {
+			// note on, note off
+			{0x92, 0x30, 0x40},
+			{0x82, 0x30, 0x00},
+
+			// 4 cc messages
+			{0xB0, 0x0A, 0x20},
+			{0xB0, 0x0A, 0x40},
+			{0xB0, 0x0A, 0x60},
+			{0xB0, 0x0A, 0x7F},
+			// midi start
+			{0xFA},
+			/// random sysex
+			{0xF0, 0x25, 0xC1, 0x50, 0xF4, 0xC5, 0xF7},
+			// midi note off again
+			{0x82, 0x30, 0x00},
+			// sysex
+			{0xF0, 0x25, 0xC1, 0xF7},
+
+			{0x92, 0x30, 0x40},
+		};
+
+		// concatenate all the vectors into one
+		std::vector<uint8_t> concatenatedMessages;
+		for (auto &msg: originalMessages) {
+			concatenatedMessages.insert(concatenatedMessages.end(), msg.begin(), msg.end());
+		}
+
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> msgs {concatenatedMessages};
+
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(data.data == originalMessages[messageCounter]);
+			messageCounter++;
+		}};
+
+		WHEN("The messages are sent") {
+			for (auto &msg: msgs) {
+				parser.parse(msg, 666, 0, 0);
+			}
+			THEN("We should have got the callback") {
+				REQUIRE(messageCounter == originalMessages.size());
+			}
+		}
+	}
+}
