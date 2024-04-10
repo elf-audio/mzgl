@@ -261,6 +261,11 @@ static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 		}
 	}
 }
+
+void Vbo::draw(Graphics &g, vec2 offset) {
+	ScopedTranslate t(g, offset);
+	draw(g);
+}
 void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	if (numVerts == 0) {
 		//	    Log::d() << "This is so hard to find";

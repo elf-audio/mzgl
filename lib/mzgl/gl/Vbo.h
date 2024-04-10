@@ -74,6 +74,7 @@ public:
 
 	// if primitive type is none, it will use whatever PrimitiveType stored in the vbo
 	void draw(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1);
+	void draw(Graphics &g, vec2 offset);
 	void drawInstanced(Graphics &g, size_t instances) { draw(g, PrimitiveType::None, instances); };
 	size_t getNumVerts() { return numVerts; }
 
