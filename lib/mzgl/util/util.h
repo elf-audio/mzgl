@@ -12,11 +12,22 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <optional>
+#include <map>
 
 class App;
 
 void setThreadName(const std::string &name);
 
+template <typename K, typename V>
+std::optional<K> findKeyByValue(const std::map<K, V> &map, const V &value) {
+	for (const auto &pair: map) {
+		if (pair.second == value) {
+			return pair.first; // Return the first key matching the value
+		}
+	}
+	return {}; // Return an empty std::optional if the value is not found
+}
 std::string dataPath(const std::string &path, const std::string &bundleId = ""); //com.elf-audio.vst3.koala");
 std::string docsPath(const std::string &path = "");
 std::string appSupportPath(const std::string &path);
