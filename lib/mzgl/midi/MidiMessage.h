@@ -71,16 +71,14 @@ struct MidiMessage {
 	}
 
 	~MidiMessage() = default;
-	MidiMessage (const MidiMessage &other) {
-		*this = other;
-	}
-	MidiMessage &operator= (const MidiMessage &other) {
-        if (this != &other) {
+	MidiMessage(const MidiMessage &other) { *this = other; }
+	MidiMessage &operator=(const MidiMessage &other) {
+		if (this != &other) {
 			auto data = other.getBytes();
 			setFromBytes(data.data(), data.size());
 		}
 		return *this;
-    }
+	}
 
 	bool isNoteOn() const { return status == MIDI_NOTE_ON && velocity > 0; }
 
@@ -136,6 +134,15 @@ struct MidiMessage {
 		if (status == MIDI_SYSEX) {
 			return sysexData;
 		}
+
+		static const std::vector<uint8_t> singleByteMessages {
+			MIDI_TIME_CLOCK, MIDI_START, MIDI_CONTINUE, MIDI_STOP, MIDI_ACTIVE_SENSING, MIDI_SYSTEM_RESET};
+
+		if (std::find(std::begin(singleByteMessages), std::end(singleByteMessages), status)
+			!= std::end(singleByteMessages)) {
+			return {static_cast<uint8_t>(status)};
+		}
+
 		std::vector<uint8_t> bytes;
 
 		bytes.push_back(status + (channel - 1));
