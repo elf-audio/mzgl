@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h> // for memcpy()
 #include <vector>
+#include <algorithm>
 
 #define MIDI_UNKNOWN 0x00
 
