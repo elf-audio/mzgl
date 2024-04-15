@@ -44,9 +44,6 @@ struct MidiMessage {
 	int status	= 0;
 	int channel = 0;
 
-	// only used with RtAudio I think.
-	//	double timeOffset = 0;
-
 	union {
 		int pitch;
 		int control;
@@ -60,15 +57,9 @@ struct MidiMessage {
 	MidiMessage() {}
 	MidiMessage(int status)
 		: status(status) {}
-	MidiMessage(const uint8_t *bytes, int length /*, double deltaTime = 0*/) {
-		setFromBytes(bytes, length);
-		//		timeOffset = deltaTime;
-	}
+	MidiMessage(const uint8_t *bytes, int length) { setFromBytes(bytes, length); }
 
-	MidiMessage(const std::vector<uint8_t> &bytes /*, double deltaTime = 0*/) {
-		setFromBytes(bytes.data(), (int) bytes.size());
-		//		timeOffset = deltaTime;
-	}
+	MidiMessage(const std::vector<uint8_t> &bytes) { setFromBytes(bytes.data(), (int) bytes.size()); }
 
 	~MidiMessage() = default;
 	MidiMessage(const MidiMessage &other) { *this = other; }
@@ -190,7 +181,7 @@ private:
 	std::vector<uint8_t> sysexData;
 	void setFromBytes(const uint8_t *bytes, int length) {
 		if (bytes[0] > MIDI_SYSEX) {
-			status	= (bytes[0] & 0xFF);
+			status	= bytes[0];
 			channel = 0;
 		} else if (bytes[0] == MIDI_SYSEX) {
 			status	= MIDI_SYSEX;
