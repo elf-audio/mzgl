@@ -453,8 +453,11 @@ endif()
 target_link_libraries(libmzgl ${MZGL_LIBS})
 
 if(NOT ANDROID)
-  target_link_libraries(libmzgl_unit_test ${MZGL_LIBS}
-                        "-framework CoreVideo -framework WebKit")
+  target_link_libraries(libmzgl_unit_test ${MZGL_LIBS})
+  if(APPLE)
+    target_link_libraries(libmzgl_unit_test
+                          "-framework CoreVideo -framework WebKit")
+  endif()
 endif()
 
 if(NOT WIN32)
