@@ -116,6 +116,7 @@ public:
 		: _AudioSystem() {
 		sampleRate = 48000.f;
 	}
+	void setSampleRate(float sampleRate) override { this->sampleRate = sampleRate; }
 	void setup(int numInChannels, int numOutChannels) override {}
 	void start() override {}
 	void stop() override {}
