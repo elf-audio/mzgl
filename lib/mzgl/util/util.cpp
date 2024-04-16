@@ -104,7 +104,21 @@ std::string getHomeDirectory() {
 }
 #	endif
 #endif
+std::string utf8decomposedToPrecomposed(const std::string &str) {
+#ifdef __APPLE__
+	// Convert std::string to NSString
+	NSString *decomposedNSString = [NSString stringWithUTF8String:str.c_str()];
 
+	// Normalize the NSString to precomposed form
+	NSString *precomposedNSString = [decomposedNSString precomposedStringWithCanonicalMapping];
+
+	return [precomposedNSString UTF8String];
+
+#else
+	// no implementation yet
+	return str;
+#endif
+}
 void deleteOrTrash(const std::string &path) {
 	if (!fs::exists(fs::path {path})) {
 		return;
