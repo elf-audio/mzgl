@@ -72,18 +72,19 @@ struct MidiMessage {
 		return *this;
 	}
 
-	bool isNoteOn() const { return status == MIDI_NOTE_ON && velocity > 0; }
-
-	bool isNoteOff() const { return status == MIDI_NOTE_OFF || (status == MIDI_NOTE_ON && velocity == 0); }
-
-	bool isPitchBend() const { return status == MIDI_PITCH_BEND; }
-
-	bool isModWheel() const { return status == MIDI_CONTROL_CHANGE && control == 1; }
-	bool isCC() const { return status == MIDI_CONTROL_CHANGE; }
-	bool isPC() const { return status == MIDI_PROGRAM_CHANGE; }
-	bool isSysex() const { return status == MIDI_SYSEX; }
-
-	bool isAllNotesOff() const { return status == MIDI_CONTROL_CHANGE && control == MIDI_CC_ALL_NOTES_OFF; }
+	[[nodiscard]] bool isNoteOn() const { return status == MIDI_NOTE_ON && velocity > 0; }
+	[[nodiscard]] bool isNoteOff() const {
+		return status == MIDI_NOTE_OFF || (status == MIDI_NOTE_ON && velocity == 0);
+	}
+	[[nodiscard]] bool isPitchBend() const { return status == MIDI_PITCH_BEND; }
+	[[nodiscard]] bool isModWheel() const { return status == MIDI_CONTROL_CHANGE && control == 1; }
+	[[nodiscard]] bool isCC() const { return status == MIDI_CONTROL_CHANGE; }
+	[[nodiscard]] bool isPC() const { return status == MIDI_PROGRAM_CHANGE; }
+	[[nodiscard]] bool isSysex() const { return status == MIDI_SYSEX; }
+	[[nodiscard]] bool isAllNotesOff() const {
+		return status == MIDI_CONTROL_CHANGE && control == MIDI_CC_ALL_NOTES_OFF;
+	}
+	[[nodiscard]] bool isSongPositionPointer() const { return status == MIDI_SONG_POS_POINTER; }
 
 	static MidiMessage noteOn(int channel, int pitch, int velocity) {
 		MidiMessage m;
@@ -176,6 +177,14 @@ struct MidiMessage {
 		} else {
 			return (value - 8192) / 8192.f;
 		}
+	}
+
+	double getSongPosition() const {
+		if (!isSongPositionPointer()) {
+			return -1.0;
+		}
+
+		return static_cast<double>((((value >> 7) & 0x7F) << 7) | (value & 0x7F)) / 24.0;
 	}
 
 private:
