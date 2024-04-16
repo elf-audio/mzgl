@@ -228,21 +228,15 @@ public:
 	}
 
 	void noteOn(int channel, int pitch, int velocity) {
-		MidiMessage m;
-		m.noteOn(channel, pitch, velocity);
-		sendMessage(m);
+		sendMessage(MidiMessage::noteOn(channel, pitch, velocity));
 	}
 
 	void noteOff(int channel, int pitch) {
-		MidiMessage m;
-		m.noteOff(channel, pitch);
-		sendMessage(m);
+		sendMessage(MidiMessage::noteOff(channel, pitch));
 	}
 
 	void cc(int channel, int control, int value) {
-		MidiMessage m;
-		m.cc(channel, control, value);
-		sendMessage(m);
+		sendMessage(MidiMessage::cc(channel, control, value));
 	}
 
 	void sendMessage(const MidiMessage &m) {
