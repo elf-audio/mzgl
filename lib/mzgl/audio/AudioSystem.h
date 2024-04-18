@@ -99,7 +99,7 @@ public:
 	void notifySampleRateChanged();
 
 	//
-	virtual double getTimeAtBufferBegin() { return 0; }
+	[[nodiscard]] virtual double getTimeAtBufferBegin() { return 0; }
 
 	StreamConfigurationStatus getStreamConfigurationStatus() { return streamConfigStatus_; }
 

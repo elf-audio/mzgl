@@ -71,7 +71,7 @@ static int PortAudioSystem_callback(const void *inputBuffer,
 	as->inputTime =
 		timeInfo
 			->inputBufferAdcTime; /**< The time when the first sample of the input buffer was captured at the ADC input */
-	as->outputTime = timeInfo->outputBufferDacTime;
+	as->outputTime = timeInfo->outputBufferDacTime * 1e9;
 
 	if (inputBuffer != nullptr) {
 		as->inputCallback((float *) inputBuffer, (int) framesPerBuffer, as->numInChannels);
