@@ -41,6 +41,11 @@ public:
 		return *this;
 	}
 
+	FloatBuffer &operator=(FloatBuffer &&other) noexcept {
+		std::vector<float>::operator=(std::move(other));
+		return *this;
+	}
+
 	FloatBuffer(FloatBuffer &&other) noexcept
 		: std::vector<float>(std::move(other)) {}
 
