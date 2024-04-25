@@ -21,12 +21,15 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <optional>
 //#include "xsimd/xsimd.hpp"
 
 //class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
 // class FloatBuffer : public std::vector<float, AlignedAllocator<float>> {
 class FloatBuffer : public std::vector<float> {
 public:
+	static constexpr auto defaultThresholdForOnsets = 0.05;
+
 	FloatBuffer(size_t sz);
 
 	FloatBuffer() = default;
@@ -171,6 +174,8 @@ public:
 	FloatBuffer &operator-=(const float &right);
 	FloatBuffer &operator*=(const float &right);
 	FloatBuffer &operator/=(const float &right);
+
+	std::optional<size_t> findFirstOnset(float threshold = defaultThresholdForOnsets) const;
 };
 
 FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r);

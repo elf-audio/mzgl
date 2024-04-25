@@ -717,3 +717,20 @@ void FloatBuffer::combineStereo(const FloatBuffer &l, const FloatBuffer &r) {
 		(*this)[i * 2 + 1] = r[i];
 	}
 }
+
+std::optional<size_t> FloatBuffer::findFirstOnset(float threshold) const {
+	if (empty()) {
+		return std::nullopt;
+	}
+
+	size_t sampleCounter = 0;
+	for (const auto &sample: *this) {
+		if (std::abs(sample) > threshold) {
+			return sampleCounter;
+		}
+
+		++sampleCounter;
+	}
+
+	return std::nullopt;
+}
