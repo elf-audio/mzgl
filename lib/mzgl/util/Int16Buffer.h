@@ -61,4 +61,6 @@ public:
 
 	std::vector<int16_t> d;
 	const int16_t *data() { return d.data(); }
+	std::optional<size_t> findFirstOnset(float threshold = FloatBuffer::defaultThresholdForOnsets) const;
+
 };

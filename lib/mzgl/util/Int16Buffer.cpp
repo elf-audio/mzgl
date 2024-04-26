@@ -100,6 +100,26 @@ void Int16Buffer::normalizeAudio() {
 	}
 }
 
+std::optional<size_t> Int16Buffer::findFirstOnset(float threshold) const {
+	if (empty()) {
+		return std::nullopt;
+	}
+
+	size_t sampleCounter = 0;
+	
+	auto thresholdInt16 = static_cast<int16_t>(threshold * 32767.f);
+	for (int i = 0; i < size(); i++) {
+		if (std::abs((*this)[i]) > thresholdInt16) {
+			return sampleCounter;
+		}
+
+		++sampleCounter;
+	}
+
+	return std::nullopt;
+}
+
+
 float Int16Buffer::interpolate(double p) const noexcept {
 	int a	= p;
 	int b	= a + 1;

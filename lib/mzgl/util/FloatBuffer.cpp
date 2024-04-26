@@ -258,7 +258,7 @@ void FloatBuffer::normalizeAudio() {
 	(*this) *= gain;
 }
 
-void FloatBuffer::append(float *buff, int length) {
+void FloatBuffer::append(const float *buff, int length) {
 	insert(end(), buff, buff + length);
 }
 

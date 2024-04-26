@@ -143,7 +143,7 @@ public:
 
 	void clamp(float min = -1, float max = 1);
 
-	void append(float *buff, int length);
+	void append(const float *buff, int length);
 	void append(const FloatBuffer &b);
 
 	// multiplies the buffer by left and right gain if it's
