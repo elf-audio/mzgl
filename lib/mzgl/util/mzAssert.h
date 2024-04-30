@@ -13,13 +13,15 @@
 #	include "log.h"
 
 #	define mzAssert(A)                                                                                           \
-		if (mzAssertEnabled()) {                                                                                  \
-			bool a = (A);                                                                                         \
-			if (!a) {                                                                                             \
-				Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line " << __LINE__;                        \
+		do {                                                                                                      \
+			if (mzAssertEnabled()) {                                                                              \
+				bool a = (A);                                                                                     \
+				if (!a) {                                                                                         \
+					Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line " << __LINE__;                    \
+				}                                                                                                 \
+				assert(a);                                                                                        \
 			}                                                                                                     \
-			assert(a);                                                                                            \
-		}
+		} while (0)
 #else
 #	define mzAssert(A) {};
 #endif
