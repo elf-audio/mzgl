@@ -26,6 +26,14 @@ public:
 
 	void interpolateStereo(double p, float &L, float &R) const noexcept;
 	void assignValue(int index, float v) { d[index] = clamp16bit(v); }
+	
+	auto begin() { return std::begin(d); }
+	auto end() { return std::end(d); }
+	
+	template< class InputIt >
+	auto insert( std::vector<int16_t>::const_iterator pos, InputIt first, InputIt last ){
+		return d.insert(pos, first, last);
+	}
 
 	void set(const float *_d, size_t l) {
 		d.resize(l);
