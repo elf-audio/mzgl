@@ -293,6 +293,8 @@ void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign ha
 		y = c.y - a.centre().y;
 	} else if (valign == VTextAlign::Bottom) {
 		y = c.y - a.bottom();
+	} else if (valign == VTextAlign::Baseline) {
+		y = c.y;
 	}
 
 	draw(g, text, x, y);

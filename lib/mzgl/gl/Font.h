@@ -13,7 +13,7 @@
 struct FONScontext;
 
 enum class HTextAlign { Left, Centre, Right };
-enum class VTextAlign { Top, Centre, Bottom };
+enum class VTextAlign { Top, Centre, Bottom, Baseline };
 
 class Font {
 public:
