@@ -111,6 +111,11 @@ bool Font::load(const vector<unsigned char> &data, float size) {
 	fonsSetSize(fs, (int) this->size);
 	fonsSetFont(fs, fontNormal);
 
+	fonsVertMetrics(fs, &verticalMetrics.ascender, &verticalMetrics.descender, &verticalMetrics.lineHeight);
+	verticalMetrics.textHeight = verticalMetrics.ascender + verticalMetrics.descender;
+
+	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
+
 	return true;
 }
 
@@ -135,7 +140,8 @@ bool Font::load(string path, float size) {
 	fonsSetSize(fs, this->size);
 	fonsSetFont(fs, fontNormal);
 
-	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
+	fonsVertMetrics(fs, &verticalMetrics.ascender, &verticalMetrics.descender, &verticalMetrics.lineHeight);
+	verticalMetrics.textHeight = verticalMetrics.ascender + verticalMetrics.descender;
 
 	return true;
 }
@@ -277,6 +283,9 @@ void Font::addVerts(const std::string &text,
 	fonsAddVerts(fs, c.x, c.y, text.c_str(), NULL, verts, uvs);
 }
 
+Font::VerticalMetrics Font::getVerticalMetrics() {
+	return verticalMetrics;
+}
 void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign) {
 	auto a = getRect(text, 0, 0);
 

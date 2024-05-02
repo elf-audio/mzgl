@@ -30,6 +30,14 @@ public:
 				  HTextAlign halign,
 				  VTextAlign valign);
 
+	struct VerticalMetrics {
+		float ascender;
+		float descender;
+		float textHeight;
+		float lineHeight;
+	};
+	VerticalMetrics getVerticalMetrics();
+
 	void
 		addVerts(const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs);
 
@@ -70,6 +78,7 @@ public:
 	static std::vector<Font *> fonts;
 #endif
 private:
+	VerticalMetrics verticalMetrics;
 	FONScontext *fs = nullptr;
 	int fontNormal	= -1;
 	float size		= 0;
