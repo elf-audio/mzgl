@@ -375,7 +375,7 @@ Font::Font() {
 
 #include "stringUtil.h"
 
-static std::pair<std::string, std::string> splitAtWidth(Font &f, const std::string &word, float width) {
+static std::pair<std::string, std::string> splitAtWidth(const Font &f, const std::string &word, float width) {
 	std::string first  = "";
 	std::string second = "";
 	for (int i = word.size(); i > 0; i--) {
@@ -417,7 +417,7 @@ static std::vector<std::string> tokenize(const std::string &source, const std::s
 	return tokens;
 }
 
-static void addLines(Font &f, std::vector<std::string> &lines, const std::string &para, float width) {
+static void addLines(const Font &f, std::vector<std::string> &lines, const std::string &para, float width) {
 	if (para.empty()) lines.push_back("");
 
 	auto words			 = tokenize(para, " \t,./-:");
@@ -455,12 +455,12 @@ static void addLines(Font &f, std::vector<std::string> &lines, const std::string
 		lines.push_back(currLine);
 	}
 }
-std::vector<std::string> wrapText(Font &font, const std::string &text, float width) {
+std::vector<std::string> Font::wrapText(const std::string &text, float width) const {
 	std::vector<std::string> lines;
 	auto paragraphs = split(text, "\n", false, true);
 
 	for (auto &para: paragraphs) {
-		addLines(font, lines, para, width);
+		addLines(*this, lines, para, width);
 	}
 	return lines;
 }

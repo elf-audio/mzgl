@@ -57,6 +57,9 @@ public:
 	glm::vec2 getDims(const std::string &text) const;
 	float getWidth(const std::string &text) const;
 	float getHeight(const std::string &text) const;
+
+	std::vector<std::string> wrapText(const std::string &text, float width) const;
+
 	TextureRef getAtlasTexture();
 
 	Font();
@@ -84,4 +87,3 @@ private:
 	float size		= 0;
 	float scale		= 1;
 };
-std::vector<std::string> wrapText(Font &font, const std::string &text, float width);
