@@ -372,3 +372,95 @@ Font::Font() {
 	fonts.push_back(this);
 #endif
 }
+
+#include "stringUtil.h"
+
+static std::pair<std::string, std::string> splitAtWidth(Font &f, const std::string &word, float width) {
+	std::string first  = "";
+	std::string second = "";
+	for (int i = word.size(); i > 0; i--) {
+		auto sub = word.substr(0, i);
+		if (f.getWidth(sub) <= width) {
+			first  = sub;
+			second = word.substr(i);
+			break;
+		}
+	}
+	return std::make_pair(first, second);
+}
+
+static bool isDelimiter(char c, const std::string &delimiters) {
+	return delimiters.find(c) != std::string::npos;
+}
+
+// Tokenizer function that includes delimiters as separate tokens
+static std::vector<std::string> tokenize(const std::string &source, const std::string &delimiters) {
+	std::vector<std::string> tokens;
+	std::string currentToken;
+
+	for (char c: source) {
+		if (isDelimiter(c, delimiters)) {
+			if (!currentToken.empty()) {
+				tokens.push_back(currentToken);
+				currentToken.clear();
+			}
+			tokens.push_back(std::string(1, c)); // Push the delimiter as a separate token
+		} else {
+			currentToken += c;
+		}
+	}
+
+	if (!currentToken.empty()) {
+		tokens.push_back(currentToken); // Add the last token if it exists
+	}
+
+	return tokens;
+}
+
+static void addLines(Font &f, std::vector<std::string> &lines, const std::string &para, float width) {
+	if (para.empty()) lines.push_back("");
+
+	auto words			 = tokenize(para, " \t,./-:");
+	std::string currLine = "";
+	for (auto it = words.begin(); it != words.end(); it++) {
+		auto lineWithNextWord = currLine + (*it);
+		if (f.getWidth(lineWithNextWord) > width) {
+			if (f.getWidth((*it)) > width) {
+				// this word is too long for the given paragraph width.
+				// If the string contains one or more '/', work backwards
+				// searching for '/' to find the longest string that will
+				// fit on the line with a '/'
+				// printf("Word too long: %s\n", (*it).c_str());
+				// break the word down
+				auto &word		 = *it;
+				auto beforeAfter = splitAtWidth(f, lineWithNextWord, width);
+				lines.push_back(beforeAfter.first);
+				*it = beforeAfter.second;
+				// printf("first: %s second: %s\n", beforeAfter.first.c_str(), beforeAfter.second.c_str());
+				// it--;
+				// continue;
+			}
+
+			if (!currLine.empty()) {
+				lines.push_back(currLine);
+			}
+			it--;
+			currLine = "";
+		} else {
+			currLine = lineWithNextWord;
+			if (currLine == " ") currLine = "";
+		}
+	}
+	if (!currLine.empty()) {
+		lines.push_back(currLine);
+	}
+}
+std::vector<std::string> splitTextIntoLines(Font &font, const std::string &text, float width) {
+	std::vector<std::string> lines;
+	auto paragraphs = split(text, "\n", false, true);
+
+	for (auto &para: paragraphs) {
+		addLines(font, lines, para, width);
+	}
+	return lines;
+}
