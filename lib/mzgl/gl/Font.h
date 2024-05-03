@@ -84,4 +84,4 @@ private:
 	float size		= 0;
 	float scale		= 1;
 };
-std::vector<std::string> splitTextIntoLines(Font &font, const std::string &text, float width);
+std::vector<std::string> wrapText(Font &font, const std::string &text, float width);

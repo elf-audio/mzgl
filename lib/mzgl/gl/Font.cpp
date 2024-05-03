@@ -455,7 +455,7 @@ static void addLines(Font &f, std::vector<std::string> &lines, const std::string
 		lines.push_back(currLine);
 	}
 }
-std::vector<std::string> splitTextIntoLines(Font &font, const std::string &text, float width) {
+std::vector<std::string> wrapText(Font &font, const std::string &text, float width) {
 	std::vector<std::string> lines;
 	auto paragraphs = split(text, "\n", false, true);
 
