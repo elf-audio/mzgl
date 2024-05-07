@@ -15,6 +15,7 @@
 #include <optional>
 #include <algorithm>
 #include <map>
+#include <iterator>
 
 class App;
 
