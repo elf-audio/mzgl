@@ -1,6 +1,6 @@
 #include "tests.h"
 
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 #include "util.h"
 
 TEST_CASE("trashOrDeleteTest", "[mzgl][util]") {
