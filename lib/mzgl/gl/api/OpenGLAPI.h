@@ -2,7 +2,7 @@
 
 #include "GraphicsAPI.h"
 #include "mzOpenGL.h"
-#include "glUtil.h"
+
 class OpenGLAPI : public GraphicsAPI {
 public:
 	OpenGLAPI(Graphics &g)
@@ -357,6 +357,22 @@ public:
 			case Graphics::BlendMode::Multiply: glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA); break;
 			case Graphics::BlendMode::Screen: glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR); break;
 			case Graphics::BlendMode::Subtract: glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR); break;
+		}
+	}
+
+	int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
+		switch (mode) {
+			case Vbo::PrimitiveType::Triangles: return GL_TRIANGLES;
+			case Vbo::PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
+			case Vbo::PrimitiveType::TriangleFan: return GL_TRIANGLE_FAN;
+			case Vbo::PrimitiveType::LineLoop: return GL_LINE_LOOP;
+			case Vbo::PrimitiveType::LineStrip: return GL_LINE_STRIP;
+			case Vbo::PrimitiveType::Lines: return GL_LINES;
+
+			default: {
+				Log::e() << "ERROR!! invalid primitive type " << (int) mode;
+				return GL_TRIANGLES;
+			}
 		}
 	}
 
