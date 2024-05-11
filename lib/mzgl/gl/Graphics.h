@@ -51,9 +51,12 @@ glm::vec4 hexColor(std::string s);
 class ScopedAlphaBlend;
 struct ScopedTranslate;
 struct ScopedTransform;
-
+class GraphicsAPI;
+class OpenGLAPI;
 class Graphics {
 public:
+	Graphics();
+	~Graphics();
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;
@@ -73,6 +76,9 @@ public:
 	enum class BlendMode {
 		Alpha, // the classic alpha blending mode
 		Additive,
+		Multiply,
+		Screen,
+		Subtract,
 	};
 
 	void setBlending(bool shouldBlend);
@@ -220,12 +226,10 @@ private:
 	glm::mat4 viewProjectionMatrix;
 	friend class ScopedAlphaBlend;
 	friend struct ScopedTranslate;
-
+	friend class GraphicsAPI;
+	friend class OpenGLAPI;
+	std::unique_ptr<GraphicsAPI> api;
 	int32_t defaultFBO;
-	uint32_t immediateVertexArray  = 0;
-	uint32_t immediateVertexBuffer = 0;
-	uint32_t immediateColorBuffer  = 0;
-	uint32_t immediateIndexBuffer  = 0;
 
 	// was in Globals
 	unsigned int frameNum = 0;

@@ -166,6 +166,7 @@ set(HEADERS
     lib/mzgl/file
     lib/mzgl/geom
     lib/mzgl/gl
+    lib/mzgl/gl/api
     lib/mzgl/gl/drawing
     lib/mzgl/midi
     lib/mzgl/music
