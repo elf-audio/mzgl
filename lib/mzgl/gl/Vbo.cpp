@@ -12,13 +12,10 @@
 #include "Shader.h"
 #include "error.h"
 #include "Graphics.h"
-#include "maths.h"
 #include "log.h"
 #include "Graphics.h"
 #include "util.h"
 #include "Geometry.h"
-#include "mzAssert.h"
-#include "mainThread.h"
 
 using namespace std;
 
@@ -48,7 +45,6 @@ void Vbo::printVbos() {
 #endif
 
 Vbo::Vbo() {
-//	mzAssert(isMainThread());
 #ifndef MZGL_GL2
 	glGenVertexArrays(1, &vertexArrayObject);
 #endif
@@ -58,7 +54,6 @@ Vbo::Vbo() {
 #endif
 }
 Vbo::~Vbo() {
-	//Log::e() << "~Vbo()";
 	deallocateResources();
 
 #ifdef __ANDROID__
@@ -160,8 +155,6 @@ void Vbo::generateVertBuffer(const float *data, size_t numVerts, int numDims) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(float) * vertDimensions, data, GL_STATIC_DRAW);
 	GetError();
-
-	//printf("generating vert buffer: %d\n", vertexBuffer);
 }
 
 void Vbo::updateVertBuffer(const float *data) {
