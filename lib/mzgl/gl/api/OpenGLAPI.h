@@ -30,21 +30,16 @@ public:
 				<< "Immediate vertex array recreated - is this bad? if on android, probs should clean this up";
 		}
 		glGenVertexArrays(1, &immediateVertexArray);
-		GetError();
-
 		glBindVertexArray(immediateVertexArray);
-		GetError();
+
 #endif
 		if (immediateVertexBuffer != 0) {
 			Log::e() << "Immediate vertex buffer recreated - is this bad?";
 		}
 
 		glGenBuffers(1, &immediateVertexBuffer);
-		GetError();
 		glGenBuffers(1, &immediateColorBuffer);
-		GetError();
 		glGenBuffers(1, &immediateIndexBuffer);
-		GetError();
 	}
 
 	void loadDefaultShaders() {
@@ -56,150 +51,153 @@ public:
 		g.fontShader		 = nullptr;
 		g.texShader			 = nullptr;
 
+		// clang-format off
 		g.nothingShader = Shader::create(g);
 
-		g.nothingShader->loadFromString(STRINGIFY(uniform mat4 mvp;
+		g.nothingShader->loadFromString(STRINGIFY(
+			uniform mat4 mvp;
 
-												  in vec4 Position;
-												  uniform lowp vec4 color;
-												  out lowp vec4 colorV;
+			in vec4 Position;
+			uniform lowp vec4 color;
+			out lowp vec4 colorV;
 
-												  void main(void) {
-													  colorV	  = color;
-													  gl_Position = mvp * Position;
-												  }
+			void main(void) {
+				colorV	  = color;
+				gl_Position = mvp * Position;
+			}
 
-												  ),
+		),
+		STRINGIFY(
+			in lowp vec4 colorV;
+			out vec4 fragColor;
 
-										STRINGIFY(
-
-											in lowp vec4 colorV; out vec4 fragColor;
-
-											void main(void) { fragColor = colorV; }
-
-											)
-
-		);
+			void main(void) {
+				fragColor = colorV;
+			}
+		));
 
 		g.colorShader = Shader::create(g);
 		g.colorShader->loadFromString(STRINGIFY(
 
-										  uniform mat4 mvp; uniform lowp vec4 color;
+			uniform mat4 mvp;
+			uniform lowp vec4 color;
 
-										  in vec4 Position;
-										  in lowp vec4 Color;
+			in vec4 Position;
+			in lowp vec4 Color;
 
-										  out lowp vec4 colorV;
+			out lowp vec4 colorV;
 
-										  void main(void) {
-											  colorV	  = Color * color;
-											  gl_Position = mvp * Position;
-										  }
+			void main(void) {
+				colorV	  = Color * color;
+				gl_Position = mvp * Position;
+			}
 
-										  ),
+		),
 
-									  STRINGIFY(
+		STRINGIFY(
 
-										  in lowp vec4 colorV; out vec4 fragColor;
+			in lowp vec4 colorV;
+			out vec4 fragColor;
 
-										  void main(void) { fragColor = colorV; }
+			void main(void) {
+				fragColor = colorV;
+			}
 
-										  )
-
-		);
+		));
 
 		g.colorTextureShader = Shader::create(g);
-		g.colorTextureShader->loadFromString(
-			STRINGIFY(
+		g.colorTextureShader->loadFromString(STRINGIFY(
 
-				uniform mat4 mvp;
+			uniform mat4 mvp;
 
-				in vec4 Position;
-				in lowp vec2 TexCoord;
-				in lowp vec4 Color;
+			in vec4 Position;
+			in lowp vec2 TexCoord;
+			in lowp vec4 Color;
 
-				out lowp vec4 colorV;
-				out lowp vec2 texCoordV;
-				void main(void) {
-					colorV		= Color;
-					texCoordV	= TexCoord;
-					gl_Position = mvp * Position;
-				}
+			out lowp vec4 colorV;
+			out lowp vec2 texCoordV;
+			void main(void) {
+				colorV		= Color;
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-				),
-			STRINGIFY(
+		),
+STRINGIFY(
 
-				in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor;
-				uniform sampler2D myTextureSampler;
+			in lowp vec4 colorV;
+			in lowp vec2 texCoordV;
+			out vec4 fragColor;
+			uniform sampler2D myTextureSampler;
 
-				void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
+			void main(void) {
+				fragColor = texture(myTextureSampler, texCoordV) * colorV;
+			}
 
-				)
+		));
 
-		);
-
-		// this is temporary - it is just like colorTextureShader, but divides the color by 255
-		// TODO: need to write my own gl backend for fontstash
 		g.fontShader = Shader::create(g);
-		g.fontShader->loadFromString(
-			STRINGIFY(
+		g.fontShader->loadFromString(STRINGIFY(
 
-				uniform mat4 mvp;
+			uniform mat4 mvp;
 
-				in vec4 Position;
-				in vec2 TexCoord;
+			in vec4 Position;
+			in vec2 TexCoord;
 
-				uniform lowp vec4 color;
+			uniform lowp vec4 color;
 
-				out vec2 texCoordV;
+			out vec2 texCoordV;
 
-				void main() {
-					texCoordV	= TexCoord;
-					gl_Position = mvp * Position;
-				}
+			void main() {
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-				),
-			STRINGIFY(
+		),
+STRINGIFY(
 
-				uniform lowp vec4 color; in vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
+			uniform lowp vec4 color;
+			in vec2 texCoordV;
+			out vec4 fragColor;
+			uniform sampler2D myTextureSampler;
 
-				void main() {
-					fragColor = color;
-					fragColor.a *= texture(myTextureSampler, texCoordV).a;
-				}
+			void main() {
+				fragColor = color;
+				fragColor.a *= texture(myTextureSampler, texCoordV).a;
+			}
 
-				)
-
-		);
+		));
 		g.texShader = Shader::create(g);
-		g.texShader->loadFromString(
-			STRINGIFY(
+		g.texShader->loadFromString(STRINGIFY(
 
-				uniform mat4 mvp;
+			uniform mat4 mvp;
 
-				in vec4 Position;
-				in lowp vec2 TexCoord;
-				uniform lowp vec4 color;
+			in vec4 Position;
+			in lowp vec2 TexCoord;
+			uniform lowp vec4 color;
 
-				out lowp vec4 colorV;
-				out lowp vec2 texCoordV;
-				void main(void) {
-					colorV		= color;
-					texCoordV	= TexCoord;
-					gl_Position = mvp * Position;
-				}
+			out lowp vec4 colorV;
+			out lowp vec2 texCoordV;
+			void main(void) {
+				colorV		= color;
+				texCoordV	= TexCoord;
+				gl_Position = mvp * Position;
+			}
 
-				),
-			STRINGIFY(
+		),
+	STRINGIFY(
 
-				in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor;
-				uniform sampler2D myTextureSampler;
+			in lowp vec4 colorV;
+			in lowp vec2 texCoordV;
+			out vec4 fragColor;
+			uniform sampler2D myTextureSampler;
 
-				void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
+			void main(void) {
+				fragColor = texture(myTextureSampler, texCoordV) * colorV;
+			}
 
-				)
-
-		);
+		));
+		// clang-format on
 
 		g.nothingShader->isDefaultShader	  = true;
 		g.colorShader->isDefaultShader		  = true;
@@ -224,8 +222,6 @@ public:
 		if (g.currShader->needsColorUniform) {
 			g.currShader->uniform("color", g.getColor());
 		}
-
-		// now draw
 
 #ifndef MZGL_GL2
 		if (immediateVertexArray == 0) return;
@@ -258,8 +254,6 @@ public:
 			g.currShader->uniform("color", g.getColor());
 		}
 
-		// now draw
-
 #ifndef MZGL_GL2
 		if (immediateVertexArray == 0) return;
 		glBindVertexArray(immediateVertexArray);
@@ -279,47 +273,6 @@ public:
 
 		glDisableVertexAttribArray(g.currShader->positionAttribute);
 		glDisableVertexAttribArray(g.currShader->colorAttribute);
-
-#ifndef MZGL_GL2
-		glBindVertexArray(0);
-#endif
-	}
-
-	void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices) override {
-		//	VboRef vbo = Vbo::create();
-		//	vbo->setVertices(verts);
-		//	vbo->setIndices(indices);
-		//	vbo->draw(*this);
-
-		g.nothingShader->begin();
-		g.currShader->uniform("mvp", g.getMVP());
-		if (g.currShader->needsColorUniform) {
-			g.currShader->uniform("color", g.getColor());
-		}
-		// now draw
-
-		Log::e() << "drawVerts(verts, indices) has changed and is not tested";
-
-#ifndef MZGL_GL2
-		if (immediateVertexArray == 0) return;
-		glBindVertexArray(immediateVertexArray);
-#endif
-
-		glEnableVertexAttribArray(g.currShader->positionAttribute);
-		glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(g.currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		//	glEnableVertexAttribArray(currShader->);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, immediateColorBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_DYNAMIC_DRAW);
-		//	glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
-		//	glDrawArrays(type, 0, verts.size());
-
-		glDisableVertexAttribArray(g.currShader->positionAttribute);
-		//	glDisableVertexAttribArray(currShader->colorAttribute);
 
 #ifndef MZGL_GL2
 		glBindVertexArray(0);
@@ -360,7 +313,7 @@ public:
 		}
 	}
 
-	int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
+	static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 		switch (mode) {
 			case Vbo::PrimitiveType::Triangles: return GL_TRIANGLES;
 			case Vbo::PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;

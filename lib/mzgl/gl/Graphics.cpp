@@ -375,9 +375,6 @@ void Graphics::drawVerts(const std::vector<glm::vec2> &verts,
 						 Vbo::PrimitiveType type) {
 	api->drawVerts(verts, cols, type);
 }
-void Graphics::drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices) {
-	api->drawVerts(verts, indices);
-}
 
 void Graphics::drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) {
 	api->drawVerts(verts, type);

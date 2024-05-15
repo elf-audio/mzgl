@@ -139,7 +139,6 @@ public:
 	void drawShape(const std::vector<vec2> &shape);
 	void drawTriangle(vec2 a, vec2 b, vec2 c);
 	void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);
-	void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices);
 	void drawVerts(const std::vector<glm::vec2> &verts,
 				   const std::vector<glm::vec4> &cols,
 				   Vbo::PrimitiveType type = Vbo::PrimitiveType::Triangles);

@@ -22,8 +22,6 @@ public:
 
 	virtual void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) = 0;
 
-	virtual void drawVerts(const std::vector<glm::vec2> &verts, const std::vector<uint32_t> &indices) = 0;
-
 	virtual void drawVerts(const std::vector<glm::vec2> &verts,
 						   const std::vector<glm::vec4> &cols,
 						   Vbo::PrimitiveType type) = 0;
