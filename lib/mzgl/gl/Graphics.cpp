@@ -96,8 +96,7 @@ int32_t Graphics::getDefaultFrameBufferId() {
 
 void Graphics::initGraphics() {
 	api->init();
-	blendingEnabled = !blendingEnabled;
-	setBlending(!blendingEnabled);
+	setBlending(true);
 	setBlendMode(BlendMode::Alpha);
 }
 
