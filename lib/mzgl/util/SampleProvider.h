@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstring>
+#include <algorithm>
 
 #ifdef __ARM_NEON
 #	include <arm_neon.h>
@@ -75,37 +76,36 @@ public:
 		// the algo below it
 //#if 0
 #ifdef __ARM_NEON
-        int numIterations = (to - from) / 4; // Each iteration processes 4 values
+		int numIterations = (to - from) / 4; // Each iteration processes 4 values
 
-        float32x4_t minVec = vdupq_n_f32(1);
-        float32x4_t maxVec = vdupq_n_f32(-1);
+		float32x4_t minVec = vdupq_n_f32(1);
+		float32x4_t maxVec = vdupq_n_f32(-1);
 
-        for (int i = 0; i < numIterations; i++) {
-            float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);
-            minVec = vminq_f32(minVec, values);
-            maxVec = vmaxq_f32(maxVec, values);
-        }
+		for (int i = 0; i < numIterations; i++) {
+			float32x4_t values = vld1q_f32(this->data.data() + from + i * 4);
+			minVec			   = vminq_f32(minVec, values);
+			maxVec			   = vmaxq_f32(maxVec, values);
+		}
 
-#ifdef __ANDROID__
-        float resultsMin[4], resultsMax[4];
-        vst1q_f32(resultsMin, minVec);
-        vst1q_f32(resultsMax, maxVec);
+#	ifdef __ANDROID__
+		float resultsMin[4], resultsMax[4];
+		vst1q_f32(resultsMin, minVec);
+		vst1q_f32(resultsMax, maxVec);
 
-        auto _min = std::min({resultsMin[0], resultsMin[1], resultsMin[2], resultsMin[3]});
-        auto _max = std::max({resultsMax[0], resultsMax[1], resultsMax[2], resultsMax[3]});
-#else
-        auto _min = vminvq_f32(minVec);
-        auto _max = vmaxvq_f32(maxVec);
-#endif
+		auto _min = std::min({resultsMin[0], resultsMin[1], resultsMin[2], resultsMin[3]});
+		auto _max = std::max({resultsMax[0], resultsMax[1], resultsMax[2], resultsMax[3]});
+#	else
+		auto _min = vminvq_f32(minVec);
+		auto _max = vmaxvq_f32(maxVec);
+#	endif
 
-
-        for (int j = from + numIterations * 4; j < to; j++) {
-            float v = this->data[j];
-            if (_max < v) _max = v;
-            if (_min > v) _min = v;
-        }
-        min = _min;
-        max = _max;
+		for (int j = from + numIterations * 4; j < to; j++) {
+			float v = this->data[j];
+			if (_max < v) _max = v;
+			if (_min > v) _min = v;
+		}
+		min = _min;
+		max = _max;
 
 #else
 		// Fallback for platforms without NEON support
