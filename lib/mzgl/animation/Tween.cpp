@@ -8,7 +8,6 @@
 //
 
 #include "Tween.h"
-#include "events.h"
 #include "maths.h"
 #include "util.h"
 
@@ -19,14 +18,13 @@ void Tween_<T>::update(float t) {
 	if (!running) return;
 	float v	  = mapf(t, startTime, endTime, 0, 1, true);
 	v		  = ease(v);
-	*valuePtr = v * (to - from) + from; //ofMap(v, 0, 1, from, to, true);
+	*valuePtr = v * (to - from) + from;
 
 	if (t > endTime) {
 		running = false;
 		if (tweenComplete) {
 			tweenComplete();
 		}
-		//		removeListener(UPDATE, this);
 	}
 }
 
@@ -39,6 +37,33 @@ float Tween_<T>::ease(float v) {
 		case EaseType::EASE_LINEAR:
 		default: return v;
 	}
+}
+
+class Timeout : public Animation {
+public:
+	Timeout(float delayDuration, std::function<void()> theCallback)
+		: callback(theCallback) {
+		endTime = getSeconds() + delayDuration;
+	}
+
+	bool isRunning() override { return !hasCalledCallback; }
+
+	void update(float currTime) override {
+		if (currTime >= endTime && !hasCalledCallback) {
+			callback();
+			hasCalledCallback = true;
+		}
+	}
+
+private:
+	bool hasCalledCallback = false;
+	std::function<void()> callback;
+	float endTime;
+};
+
+void AnimationManager::setTimeout(float duration, std::function<void()> callback) {
+	animations.push_back(std::make_shared<Timeout>(duration, callback));
+	cleanUpCompletedAnimations();
 }
 
 void AnimationManager::tweenTo(float &val, float to, float duration, EaseType easing, float delay) {
@@ -82,13 +107,6 @@ void AnimationManager::tweenTo(glm::vec4 &val, glm::vec4 to, float duration, Eas
 	cleanUpCompletedAnimations();
 }
 
-void AnimationManager::animate(float duration,
-							   function<void(float)> progressFunc,
-							   function<void()> completionFunc) {
-	auto fa = std::make_shared<FunctionAnimation>(duration, progressFunc, completionFunc);
-	animations.push_back(fa);
-	cleanUpCompletedAnimations();
-}
 void AnimationManager::cleanUpCompletedAnimations() {
 	for (int i = 0; i < animations.size(); i++) {
 		if (!animations[i]->isRunning()) {
@@ -96,44 +114,10 @@ void AnimationManager::cleanUpCompletedAnimations() {
 			i--;
 		}
 	}
-	//	printf("Num tweens on the go: %d\n", animations.size());
 }
 
-void AnimationManager::update() {
-	if (!animations.empty()) {
-		float t = getSeconds();
-
-		for (auto &a: animations) {
-			a->update(t);
-		}
-	}
-}
-
-FunctionAnimation::FunctionAnimation(float duration,
-									 function<void(float)> progressFunc,
-									 function<void()> completionFunc)
-	: duration(duration)
-	, progressFunc(progressFunc)
-	, completionFunc(completionFunc) {
-	running	  = true;
-	startTime = getSeconds();
-	endTime	  = startTime + duration;
-}
-void FunctionAnimation::update(float t) {
-	if (!running) return;
-
-	float v = mapf(t, startTime, endTime, 0, 1, true);
-	progressFunc(v);
-	if (t > endTime) {
-		completionFunc();
-		running = false;
-		removeListener(UPDATE, this);
-	}
-}
-FunctionAnimation::~FunctionAnimation() {
-	if (running) {
-		printf("ERROR! FunctionAnimation was not allowed to complete before deleting\n");
-		completionFunc();
-		removeListener(UPDATE, this);
+void AnimationManager::update(double currFrameTime) {
+	for (auto &a: animations) {
+		a->update(currFrameTime);
 	}
 }

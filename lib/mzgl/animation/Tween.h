@@ -75,7 +75,6 @@ void Tween_<T>::tweenTo(T &valuePtr, T to, float duration, EaseType type, float 
 template <class T>
 void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, float delay) {
 	if (!running) {
-		//		addListener(UPDATE, this, [this]() { update(); });
 		running = true;
 	}
 	this->type		= type;
@@ -88,32 +87,11 @@ void Tween_<T>::start(T &valuePtr, T from, T to, float duration, EaseType type, 
 
 typedef Tween_<float> Tween;
 
-// not sure if this works
-//typedef Tween_<glm::vec2> Tween2f;
-
-class FunctionAnimation : public Animation {
-public:
-	float startTime;
-	float endTime;
-	bool running = false;
-
-	float duration;
-	std::function<void(float)> progressFunc;
-	std::function<void()> completionFunc;
-	FunctionAnimation(float duration,
-					  std::function<void(float)> progressFunc,
-					  std::function<void()> completionFunc);
-
-	bool isRunning() override { return running; }
-	void update(float currTime) override;
-	~FunctionAnimation();
-};
-
 class AnimationManager {
 public:
 	AnimationManager() {}
 
-	void animate(float duration, std::function<void(float)> progressFunc, std::function<void()> completionFunc);
+	void setTimeout(float duration, std::function<void()> callback);
 	void tweenTo(float &val, float to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
 	void tweenTo(
 		glm::vec2 &val, glm::vec2 to, float duration, EaseType easing = EaseType::EASE_LINEAR, float delay = 0);
@@ -131,7 +109,7 @@ public:
 	void easeInOut(Rectf &var, Rectf to, float duration) {
 		return tweenTo(var, to, duration, EaseType::EASE_IN_OUT_CUBIC);
 	}
-	void update();
+	void update(double currFrameTime);
 
 private:
 	std::vector<std::shared_ptr<Animation>> animations;
