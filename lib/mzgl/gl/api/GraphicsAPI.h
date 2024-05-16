@@ -7,7 +7,7 @@ class GraphicsAPI {
 public:
 	GraphicsAPI(Graphics &g)
 		: g(g) {}
-	Graphics &g;
+
 	virtual ~GraphicsAPI()									 = default;
 	virtual void init()										 = 0;
 	virtual void setBlending(bool shouldBlend)				 = 0;
@@ -20,11 +20,14 @@ public:
 	[[nodiscard]] virtual bool isMaskOn() const				= 0;
 	[[nodiscard]] virtual Rectf getMaskRect() const			= 0;
 
-	virtual void readScreenPixels(uint8_t *data, const Rectf &r) = 0;
+	virtual void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) = 0;
 
 	virtual void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) = 0;
 
 	virtual void drawVerts(const std::vector<glm::vec2> &verts,
 						   const std::vector<glm::vec4> &cols,
 						   Vbo::PrimitiveType type) = 0;
+
+protected:
+	Graphics &g;
 };

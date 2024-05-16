@@ -173,9 +173,11 @@ Rectf OpenGLAPI::getMaskRect() {
 	return r;
 }
 
-void OpenGLAPI::readScreenPixels(uint8_t *data, const Rectf &r) {
-	glReadPixels(r.x, r.y, r.width, r.height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+void OpenGLAPI::readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) {
+	outData.resize(r.width * r.height * 4);
+	glReadPixels(r.x, r.y, r.width, r.height, GL_RGBA, GL_UNSIGNED_BYTE, outData.data());
 }
+
 void OpenGLAPI::clear(vec4 c) {
 	glClearColor(c.r, c.g, c.b, c.a);
 	glClear(GL_COLOR_BUFFER_BIT);

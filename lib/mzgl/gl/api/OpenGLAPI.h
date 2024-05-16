@@ -26,7 +26,7 @@ public:
 
 	Rectf getMaskRect() override;
 
-	void readScreenPixels(uint8_t *data, const Rectf &r) override;
+	void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) override;
 	void clear(vec4 c) override;
 	void setBlendMode(Graphics::BlendMode blendMode) override;
 

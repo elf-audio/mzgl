@@ -216,8 +216,8 @@ float Graphics::getStrokeWeight() {
 	return strokeWeight;
 }
 void Graphics::setStrokeWeight(float f) {
-	if (f != this->strokeWeight) {
-		this->strokeWeight = f;
+	if (f != strokeWeight) {
+		strokeWeight = f;
 		api->setLineWidth(f);
 	}
 }
