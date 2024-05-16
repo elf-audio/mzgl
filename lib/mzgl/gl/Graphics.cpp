@@ -15,19 +15,19 @@
 #include "RoundedRect.h"
 #include "Image.h"
 #include "error.h"
-#include "mzOpenGL.h"
+
 #include "log.h"
 #include "MitredLine.h"
 #include "Drawer.h"
-#include "glUtil.h"
 
-using namespace std;
+#include "GraphicsAPI.h"
 
+Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
-	c.r = ((hex >> 16) & 0xFF) / 255.f; // Extract the RR byte
-	c.g = ((hex >> 8) & 0xFF) / 255.f; // Extract the GG byte
-	c.b = ((hex) &0xFF) / 255.f; // Extract the BB byte
+	c.r = ((hex >> 16) & 0xFF) / 255.f;
+	c.g = ((hex >> 8) & 0xFF) / 255.f;
+	c.b = ((hex) & 0xFF) / 255.f;
 	c.a = a;
 	return c;
 }
@@ -40,7 +40,7 @@ int hexCharToInt(char c) {
 	return c;
 }
 
-glm::vec4 hexColor(string inp) {
+glm::vec4 hexColor(std::string inp) {
 	vec4 a;
 
 	// work out the format first
@@ -50,11 +50,11 @@ glm::vec4 hexColor(string inp) {
 		inp = inp.substr(2);
 	}
 	if (inp.size() == 3) {
-		inp = string(2, inp[0]) + string(2, inp[1]) + string(2, inp[2]);
+		inp = std::string(2, inp[0]) + std::string(2, inp[1]) + std::string(2, inp[2]);
 	}
 
 	if (inp.size() != 6) {
-		Log::e() << "bad colour format in hexColor (" << to_string(inp.size()) << " characters instead of 6)";
+		Log::e() << "bad colour format in hexColor (" << std::to_string(inp.size()) << " characters instead of 6)";
 	}
 
 	a.x = (hexCharToInt(inp[0]) * 16 + hexCharToInt(inp[1])) / 255.f;
@@ -69,11 +69,7 @@ void Graphics::setBlending(bool shouldBlend) {
 	if (shouldBlend == blendingEnabled) return;
 
 	blendingEnabled = shouldBlend;
-	if (shouldBlend) {
-		glEnable(GL_BLEND);
-	} else {
-		glDisable(GL_BLEND);
-	}
+	api->setBlending(shouldBlend);
 }
 
 ScopedAlphaBlend::ScopedAlphaBlend(Graphics &g, bool shouldBlend)
@@ -94,212 +90,10 @@ glm::mat4 Graphics::getMVP() {
 	return viewProjectionMatrix * modelMatrixStack.getMatrix();
 }
 
-GLint Graphics::getDefaultFrameBufferId() {
-	return defaultFBO;
-}
 void Graphics::initGraphics() {
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-	const unsigned char *openglVersion = glGetString(GL_VERSION);
-	if (openglVersion != nullptr) {
-		Log::d() << "OpenGL Version: " << openglVersion;
-#ifdef MZGL_GL2
-		Log::d() << "MZGL Compiled with MZGL_GL2==TRUE";
-#else
-		Log::d() << "MZGL Compiled with MZGL_GL2==FALSE";
-#endif
-	} else {
-		Log::d() << "OpenGL Version: null";
-	}
+	api->init();
 	setBlending(true);
-
-	// setBlending only works on change, so calling
-	// glEnable(GL_BLEND) ensures state sync. It's a
-	// bit sloppy but fixes android bugs for persistence
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	loadDefaultShaders();
-
-#ifndef MZGL_GL2
-	if (immediateVertexArray != 0) {
-		Log::e() << "Immediate vertex array recreated - is this bad? if on android, probs should clean this up";
-	}
-	glGenVertexArrays(1, &immediateVertexArray);
-	GetError();
-
-	glBindVertexArray(immediateVertexArray);
-	GetError();
-#endif
-	if (immediateVertexBuffer != 0) {
-		Log::e() << "Immediate vertex buffer recreated - is this bad?";
-	}
-
-	glGenBuffers(1, &immediateVertexBuffer);
-	GetError();
-	glGenBuffers(1, &immediateColorBuffer);
-	GetError();
-	glGenBuffers(1, &immediateIndexBuffer);
-	GetError();
-}
-
-void Graphics::loadDefaultShaders() {
-	// zero out all shaders before loading any, for android mostly,
-	// as the context may have reset itself
-	nothingShader	   = nullptr;
-	colorShader		   = nullptr;
-	colorTextureShader = nullptr;
-	fontShader		   = nullptr;
-	texShader		   = nullptr;
-
-	nothingShader = Shader::create(*this);
-
-	nothingShader->loadFromString(STRINGIFY(uniform mat4 mvp;
-
-											in vec4 Position;
-											uniform lowp vec4 color;
-											out lowp vec4 colorV;
-
-											void main(void) {
-												colorV		= color;
-												gl_Position = mvp * Position;
-											}
-
-											),
-
-								  STRINGIFY(
-
-									  in lowp vec4 colorV; out vec4 fragColor;
-
-									  void main(void) { fragColor = colorV; }
-
-									  )
-
-	);
-
-	colorShader = Shader::create(*this);
-	colorShader->loadFromString(STRINGIFY(
-
-									uniform mat4 mvp; uniform lowp vec4 color;
-
-									in vec4 Position;
-									in lowp vec4 Color;
-
-									out lowp vec4 colorV;
-
-									void main(void) {
-										colorV		= Color * color;
-										gl_Position = mvp * Position;
-									}
-
-									),
-
-								STRINGIFY(
-
-									in lowp vec4 colorV; out vec4 fragColor;
-
-									void main(void) { fragColor = colorV; }
-
-									)
-
-	);
-
-	colorTextureShader = Shader::create(*this);
-	colorTextureShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in lowp vec2 TexCoord;
-			in lowp vec4 Color;
-
-			out lowp vec4 colorV;
-			out lowp vec2 texCoordV;
-			void main(void) {
-				colorV		= Color;
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
-
-			)
-
-	);
-
-	// this is temporary - it is just like colorTextureShader, but divides the color by 255
-	// TODO: need to write my own gl backend for fontstash
-	fontShader = Shader::create(*this);
-	fontShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in vec2 TexCoord;
-
-			uniform lowp vec4 color;
-
-			out vec2 texCoordV;
-
-			void main() {
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			uniform lowp vec4 color; in vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main() {
-				fragColor = color;
-				fragColor.a *= texture(myTextureSampler, texCoordV).a;
-			}
-
-			)
-
-	);
-	texShader = Shader::create(*this);
-	texShader->loadFromString(
-		STRINGIFY(
-
-			uniform mat4 mvp;
-
-			in vec4 Position;
-			in lowp vec2 TexCoord;
-			uniform lowp vec4 color;
-
-			out lowp vec4 colorV;
-			out lowp vec2 texCoordV;
-			void main(void) {
-				colorV		= color;
-				texCoordV	= TexCoord;
-				gl_Position = mvp * Position;
-			}
-
-			),
-		STRINGIFY(
-
-			in lowp vec4 colorV; in lowp vec2 texCoordV; out vec4 fragColor; uniform sampler2D myTextureSampler;
-
-			void main(void) { fragColor = texture(myTextureSampler, texCoordV) * colorV; }
-
-			)
-
-	);
-
-	nothingShader->isDefaultShader		= true;
-	colorShader->isDefaultShader		= true;
-	colorTextureShader->isDefaultShader = true;
-	texShader->isDefaultShader			= true;
-	fontShader->isDefaultShader			= true;
+	setBlendMode(BlendMode::Alpha);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -404,10 +198,6 @@ void Graphics::setupView(bool flipped, int w, int h) {
 					glm::vec3(0, (flipped ? -1 : 1), 0) // Head is up (set to 0,-1,0 to look upside-down)
 		);
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
-
-	//	projectionMatrix = glm::ortho(-w, w, -h, h, -1000, 1000);
-	//	viewMatrix = glm::mat4(1.f);
-	//	viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
 bool Graphics::isFilling() {
@@ -426,9 +216,9 @@ float Graphics::getStrokeWeight() {
 	return strokeWeight;
 }
 void Graphics::setStrokeWeight(float f) {
-	if (f != this->strokeWeight) {
-		this->strokeWeight = f;
-		glLineWidth(f);
+	if (f != strokeWeight) {
+		strokeWeight = f;
+		api->setLineWidth(f);
 	}
 }
 
@@ -527,15 +317,21 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 	drawCircle(c.x, c.y, r);
 }
 void Graphics::drawCircle(float x, float y, float r) {
-	vector<glm::vec2> verts;
-	//vector<glm::vec4> cols;
+	static constexpr auto circleResolution										  = 100;
+	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = [] {
+		std::array<std::pair<float, float>, circleResolution + 1> values {};
+		for (int i = 0; i <= circleResolution; ++i) {
+			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			values[i] = {std::cos(phi), std::sin(phi)};
+		}
+		return values;
+	}();
 
-	int circleResolution = 100;
+	std::vector<glm::vec2> verts;
 	verts.reserve(circleResolution + 2);
-	//verts.push_back(glm::vec2(x, y));
-	for (int i = 0; i <= circleResolution; i++) {
-		float phi = M_PI * 2.f * i / (float) circleResolution;
-		verts.emplace_back(x + cos(phi) * r, y + sin(phi) * r);
+
+	for (const auto &[cosVal, sinVal]: sinCos) {
+		verts.emplace_back(x + cosVal * r, y + sinVal * r);
 	}
 
 	if (isFilling()) {
@@ -546,7 +342,7 @@ void Graphics::drawCircle(float x, float y, float r) {
 }
 
 void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
-	vector<glm::vec2> verts;
+	std::vector<glm::vec2> verts;
 
 	if (startAngle > endAngle) {
 		Log::e() << "drawArc doesn't wrap angles for now! Feel like implementing it?";
@@ -572,140 +368,34 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 	}
 }
 
-void Graphics::drawVerts(const vector<glm::vec2> &verts, Vbo::PrimitiveType type) {
-	nothingShader->begin();
-
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
-	}
-
-	// now draw
-
-#ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
-#endif
-
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	auto glType = primitiveTypeToGLMode(type);
-
-	glDrawArrays(glType, 0, (GLsizei) verts.size());
-
-	glDisableVertexAttribArray(currShader->positionAttribute);
-
-#ifndef MZGL_GL2
-	glBindVertexArray(0);
-#endif
-}
-
-void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<glm::vec4> &cols, Vbo::PrimitiveType type) {
-	colorShader->begin();
-
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
-	}
-
-	// now draw
-
-#ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
-#endif
-
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glEnableVertexAttribArray(currShader->colorAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, cols.size() * 4 * sizeof(float), cols.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glDrawArrays(primitiveTypeToGLMode(type), 0, (GLsizei) verts.size());
-
-	glDisableVertexAttribArray(currShader->positionAttribute);
-	glDisableVertexAttribArray(currShader->colorAttribute);
-
-#ifndef MZGL_GL2
-	glBindVertexArray(0);
-#endif
-}
-
 void Graphics::setBlendMode(BlendMode blendMode) {
-	if (blendMode == BlendMode::Additive) {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	} else {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	api->setBlendMode(blendMode);
 }
 
-void Graphics::drawVerts(const vector<glm::vec2> &verts, const vector<uint32_t> &indices) {
-	//	VboRef vbo = Vbo::create();
-	//	vbo->setVertices(verts);
-	//	vbo->setIndices(indices);
-	//	vbo->draw(*this);
+void Graphics::drawVerts(const std::vector<glm::vec2> &verts,
+						 const std::vector<glm::vec4> &cols,
+						 Vbo::PrimitiveType type) {
+	api->drawVerts(verts, cols, type);
+}
 
-	nothingShader->begin();
-	currShader->uniform("mvp", getMVP());
-	if (currShader->needsColorUniform) {
-		currShader->uniform("color", getColor());
-	}
-	// now draw
-
-	Log::e() << "drawVerts(verts, indices) has changed and is not tested";
-
-#ifndef MZGL_GL2
-	if (immediateVertexArray == 0) return;
-	glBindVertexArray(immediateVertexArray);
-#endif
-
-	glEnableVertexAttribArray(currShader->positionAttribute);
-	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * 2 * sizeof(float), verts.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(currShader->positionAttribute, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	//	glEnableVertexAttribArray(currShader->);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, immediateColorBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_DYNAMIC_DRAW);
-	//	glVertexAttribPointer(currShader->colorAttribute, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glDrawElements(GL_TRIANGLES, (GLsizei) indices.size(), GL_UNSIGNED_INT, 0);
-	//	glDrawArrays(type, 0, verts.size());
-
-	glDisableVertexAttribArray(currShader->positionAttribute);
-	//	glDisableVertexAttribArray(currShader->colorAttribute);
-
-#ifndef MZGL_GL2
-	glBindVertexArray(0);
-#endif
+void Graphics::drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) {
+	api->drawVerts(verts, type);
 }
 
 void Graphics::maskOn(const Rectf &r) {
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(r.x, height - (r.bottom()), r.width, r.height);
+	api->maskOn(r);
 }
 
 void Graphics::maskOff() {
-	glDisable(GL_SCISSOR_TEST);
+	api->maskOff();
 }
 
 bool Graphics::isMaskOn() {
-	return glIsEnabled(GL_SCISSOR_TEST);
+	return api->isMaskOn();
 }
 
 Rectf Graphics::getMaskRect() {
-	Rectf r;
-	glGetFloatv(GL_SCISSOR_BOX, (float *) &r);
-
-	r.y = height - r.y - r.height;
-	return r;
+	return api->getMaskRect();
 }
 
 void Graphics::drawLine(glm::vec2 a, glm::vec2 b) {
@@ -716,7 +406,7 @@ void Graphics::drawLine(float x1, float y1, float x2, float y2) {
 	drawLine(glm::vec2(x1, y1), glm::vec2(x2, y2));
 }
 
-void Graphics::drawLineStrip(const vector<vec2> &pts) {
+void Graphics::drawLineStrip(const std::vector<vec2> &pts) {
 	drawVerts(pts, Vbo::PrimitiveType::LineStrip);
 }
 
@@ -733,9 +423,7 @@ void Graphics::draw(const Rectf &r, float radius) {
 }
 
 void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
-	//	r.inset(-shadow/2);
-	//	radius += 1.5;
-	vector<glm::vec2> v;
+	std::vector<glm::vec2> v;
 	getPerfectRoundedRectVerts(r, radius, v);
 
 	v.pop_back();
@@ -760,7 +448,7 @@ void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
 
 #include "DefaultFont.inc.h"
 
-vector<unsigned char> Graphics::getDefaultFontTTFData() {
+std::vector<unsigned char> Graphics::getDefaultFontTTFData() {
 	return getDefaultFontData();
 }
 Font &Graphics::getFont() {
@@ -786,9 +474,9 @@ void Graphics::warpMaskForScissor(Rectf &a) {
 void Graphics::drawShape(const std::vector<vec2> &shape) {
 	if (isFilling()) {
 		Triangulator t;
-		vector<vector<vec2>> verts = {shape};
-		vector<vec2> outs;
-		vector<unsigned int> indices;
+		std::vector<std::vector<vec2>> verts = {shape};
+		std::vector<vec2> outs;
+		std::vector<unsigned int> indices;
 		t.triangulate(verts, outs, indices);
 		VboRef vbo = Vbo::create();
 		vbo->setVertices(outs);
@@ -829,10 +517,10 @@ void Graphics::drawTextHorizontallyCentred(const std::string &text, glm::vec2 c)
 	getFont().drawHorizontallyCentred(*this, text, c);
 }
 
-void Graphics::saveScreen(string pngPath) {
+void Graphics::saveScreen(std::string pngPath) {
 	ImageRef img = Image::create(width, height, 4);
 
-	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, img->data.data());
+	api->readScreenPixels(img->data, Rectf(0, 0, width, height));
 	img->flipVertical();
 
 	// for some reason on OSX there is a bit of alpha - this makes it fully opaque
@@ -843,13 +531,11 @@ void Graphics::saveScreen(string pngPath) {
 }
 
 void Graphics::clear(vec4 bgColor) {
-	glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	api->clear(bgColor);
 }
 
 void Graphics::clear(vec3 bgColor) {
-	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	clear({bgColor.r, bgColor.g, bgColor.b, 1.0});
 }
 
 void Graphics::clear(float c) {
@@ -857,4 +543,17 @@ void Graphics::clear(float c) {
 }
 void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
+}
+
+#include "OpenGLAPI.h"
+Graphics::Graphics() {
+	api = std::make_unique<OpenGLAPI>(*this);
+}
+
+int32_t Graphics::getDefaultFrameBufferId() {
+	if (auto *openGLApi = dynamic_cast<OpenGLAPI *>(api.get())) {
+		openGLApi->getDefaultFrameBufferId();
+	}
+	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
+	return 0;
 }
