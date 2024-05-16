@@ -17,8 +17,8 @@ public:
 
 	virtual void maskOn(const Rectf &r) = 0;
 	virtual void maskOff()				= 0;
-	virtual bool isMaskOn()				= 0;
-	virtual Rectf getMaskRect()			= 0;
+	[[nodiscard]] virtual bool isMaskOn() const				= 0;
+	[[nodiscard]] virtual Rectf getMaskRect() const			= 0;
 
 	virtual void readScreenPixels(uint8_t *data, const Rectf &r) = 0;
 
