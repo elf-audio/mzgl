@@ -8,7 +8,7 @@
 
 #pragma once
 #include "Layer.h"
-#include "events.h"
+
 class RootLayer : public Layer {
 public:
 	RootLayer(Graphics &g)
@@ -32,30 +32,4 @@ public:
 			g.drawRect(r);
 		}
 	}
-
-	//`
-	//#ifdef __APPLE__
-	//#if !TARGET_OS_IOS
-	//	// JUST FOR IMGUI
-	//	function<bool(void)> isMouseInteractionEnabled = []() { return true; };
-	//
-	//	void _touchUp(float x, float y, int id) override {
-	//		if(isMouseInteractionEnabled()) Layer::_touchUp(x, y, id);
-	//	}
-	//	void _touchMoved(float x, float y, int id) override {
-	//		if(isMouseInteractionEnabled()) Layer::_touchMoved(x, y, id);
-	//	}
-	//
-	//	bool _touchDown(float x, float y, int id) override {
-	//		if(isMouseInteractionEnabled()) return Layer::_touchDown(x, y, id);
-	//		return false;
-	//	}
-	//	void _mouseScrolled(float x, float y, float scrollX, float scrollY ) override {
-	//		if(isMouseInteractionEnabled()) Layer::_mouseScrolled(x, y, scrollX, scrollY);
-	//	}
-	//	void _mouseZoomed(float x, float y, float zoom) override {
-	//		if(isMouseInteractionEnabled()) Layer::_mouseZoomed(x, y, zoom);
-	//	}
-	//#endif
-	//#endif`
 };

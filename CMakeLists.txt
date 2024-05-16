@@ -89,7 +89,6 @@ set(MZGL_SOURCES
         lib/mzgl/util/Dialogs.cpp
         lib/mzgl/util/Dylib.cpp
         lib/mzgl/util/errors.cpp
-        lib/mzgl/util/events.cpp
         lib/mzgl/util/FileWatcher.cpp
         lib/mzgl/util/FloatBuffer.cpp
         lib/mzgl/util/Haptics.cpp
