@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "Graphics.h"
+
 class GraphicsAPI {
 public:
 	GraphicsAPI(Graphics &g)

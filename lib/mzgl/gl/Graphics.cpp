@@ -25,9 +25,9 @@
 Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
-	c.r = ((hex >> 16) & 0xFF) / 255.f; // Extract the RR byte
-	c.g = ((hex >> 8) & 0xFF) / 255.f; // Extract the GG byte
-	c.b = ((hex) & 0xFF) / 255.f; // Extract the BB byte
+	c.r = ((hex >> 16) & 0xFF) / 255.f;
+	c.g = ((hex >> 8) & 0xFF) / 255.f;
+	c.b = ((hex) & 0xFF) / 255.f;
 	c.a = a;
 	return c;
 }
@@ -88,10 +88,6 @@ bool Graphics::isBlending() {
 
 glm::mat4 Graphics::getMVP() {
 	return viewProjectionMatrix * modelMatrixStack.getMatrix();
-}
-
-int32_t Graphics::getDefaultFrameBufferId() {
-	return defaultFBO;
 }
 
 void Graphics::initGraphics() {
@@ -323,7 +319,7 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 void Graphics::drawCircle(float x, float y, float r) {
 	std::vector<glm::vec2> verts;
 
-	int circleResolution = 100;
+	static constexpr auto circleResolution = 100;
 	verts.reserve(circleResolution + 2);
 
 	for (int i = 0; i <= circleResolution; i++) {
@@ -545,4 +541,12 @@ void Graphics::clear(float r, float g, float b, float a) {
 #include "OpenGLAPI.h"
 Graphics::Graphics() {
 	api = std::make_unique<OpenGLAPI>(*this);
+}
+
+int32_t Graphics::getDefaultFrameBufferId() {
+	if (auto *openGLApi = dynamic_cast<OpenGLAPI *>(api.get())) {
+		openGLApi->getDefaultFrameBufferId();
+	}
+	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
+	return 0;
 }

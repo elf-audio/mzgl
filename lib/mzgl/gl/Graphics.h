@@ -74,7 +74,7 @@ public:
 	std::function<void(bool)> setAntialiasing = [](bool) {};
 
 	enum class BlendMode {
-		Alpha, // the classic alpha blending mode
+		Alpha,
 		Additive,
 		Multiply,
 		Screen,
@@ -208,7 +208,7 @@ public:
 
 	friend class App;
 
-	// for FBO
+	// OpenGL only
 	int32_t getDefaultFrameBufferId();
 
 private:
@@ -225,10 +225,7 @@ private:
 	glm::mat4 viewProjectionMatrix;
 	friend class ScopedAlphaBlend;
 	friend struct ScopedTranslate;
-	friend class GraphicsAPI;
-	friend class OpenGLAPI;
 	std::unique_ptr<GraphicsAPI> api;
-	int32_t defaultFBO;
 
 	// was in Globals
 	unsigned int frameNum = 0;

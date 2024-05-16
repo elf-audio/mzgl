@@ -53,6 +53,7 @@ set(MZGL_SOURCES
         lib/mzgl/geom/Triangulator.cpp
         lib/mzgl/geom/geomutils.cpp
         lib/mzgl/geom/3D/Camera.cpp
+        lib/mzgl/gl/api/OpenGLAPI.cpp
         lib/mzgl/gl/error.cpp
         lib/mzgl/gl/Fbo.cpp
         lib/mzgl/gl/Font.cpp
