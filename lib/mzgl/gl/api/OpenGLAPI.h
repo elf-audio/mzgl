@@ -22,9 +22,9 @@ public:
 
 	void maskOff() override;
 
-	bool isMaskOn() override;
+	[[nodiscard]] bool isMaskOn() const override;
 
-	Rectf getMaskRect() override;
+	[[nodiscard]] Rectf getMaskRect() const override;
 
 	void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) override;
 	void clear(vec4 c) override;

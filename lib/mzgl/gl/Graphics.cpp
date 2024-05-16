@@ -317,14 +317,21 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 	drawCircle(c.x, c.y, r);
 }
 void Graphics::drawCircle(float x, float y, float r) {
-	std::vector<glm::vec2> verts;
+	static constexpr auto circleResolution										  = 100;
+	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = [] {
+		std::array<std::pair<float, float>, circleResolution + 1> values {};
+		for (int i = 0; i <= circleResolution; ++i) {
+			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			values[i] = {std::cos(phi), std::sin(phi)};
+		}
+		return values;
+	}();
 
-	static constexpr auto circleResolution = 100;
+	std::vector<glm::vec2> verts;
 	verts.reserve(circleResolution + 2);
 
-	for (int i = 0; i <= circleResolution; i++) {
-		float phi = M_PI * 2.f * i / (float) circleResolution;
-		verts.emplace_back(x + cos(phi) * r, y + sin(phi) * r);
+	for (const auto &[cosVal, sinVal]: sinCos) {
+		verts.emplace_back(x + cosVal * r, y + sinVal * r);
 	}
 
 	if (isFilling()) {
@@ -513,7 +520,7 @@ void Graphics::drawTextHorizontallyCentred(const std::string &text, glm::vec2 c)
 void Graphics::saveScreen(std::string pngPath) {
 	ImageRef img = Image::create(width, height, 4);
 
-	api->readScreenPixels(img->data.data(), Rectf(0, 0, width, height));
+	api->readScreenPixels(img->data, Rectf(0, 0, width, height));
 	img->flipVertical();
 
 	// for some reason on OSX there is a bit of alpha - this makes it fully opaque

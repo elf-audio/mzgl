@@ -161,11 +161,11 @@ void OpenGLAPI::maskOff() {
 	glDisable(GL_SCISSOR_TEST);
 }
 
-bool OpenGLAPI::isMaskOn() {
+bool OpenGLAPI::isMaskOn() const {
 	return glIsEnabled(GL_SCISSOR_TEST);
 }
 
-Rectf OpenGLAPI::getMaskRect() {
+Rectf OpenGLAPI::getMaskRect() const {
 	Rectf r;
 	glGetFloatv(GL_SCISSOR_BOX, (float *) &r);
 
