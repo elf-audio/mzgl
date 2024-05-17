@@ -59,6 +59,7 @@ class Graphics {
 public:
 	Graphics();
 	~Graphics();
+	void init();
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;
@@ -85,9 +86,10 @@ public:
 
 	void setBlending(bool shouldBlend);
 	void setBlendMode(BlendMode blendMode);
+
 	BlendMode getBlendMode() const;
 	bool isBlending();
-	glm::vec4 getColor();
+	[[nodiscard]] const glm::vec4 &getColor() const;
 
 	void clear(float c);
 	void clear(float r, float g, float b, float a = 1);
@@ -213,10 +215,12 @@ public:
 
 	// OpenGL only
 	int32_t getDefaultFrameBufferId();
+	GraphicsAPI &getAPI() { return *api; }
 
 private:
-	float strokeWeight	 = 1;
-	BlendMode blendMode	 = BlendMode::Alpha;
+	float strokeWeight	= 1;
+	BlendMode blendMode = BlendMode::Alpha;
+
 	bool blendingEnabled = false;
 	bool filling		 = true;
 	glm::vec4 color;

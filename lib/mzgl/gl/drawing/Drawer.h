@@ -71,6 +71,7 @@ public:
 	VboRef createVbo(bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	void addGeometry(Geometry &_geom);
 	bool isEmpty();
+	int getNumVerts() const { return geom.indices.size(); }
 
 private:
 	void getPerfectRoundedRectVerts(
