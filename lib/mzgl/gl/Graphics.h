@@ -70,6 +70,7 @@ class Graphics {
 public:
 	Graphics();
 	~Graphics();
+	void init();
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;
@@ -225,10 +226,12 @@ public:
 
 	// OpenGL only
 	int32_t getDefaultFrameBufferId();
+	GraphicsAPI &getAPI() { return *api; }
 
 private:
-	float strokeWeight	 = 1;
-	BlendMode blendMode	 = BlendMode::Alpha;
+	float strokeWeight	= 1;
+	BlendMode blendMode = BlendMode::Alpha;
+
 	bool blendingEnabled = false;
 	bool filling		 = true;
 	glm::vec4 color;
