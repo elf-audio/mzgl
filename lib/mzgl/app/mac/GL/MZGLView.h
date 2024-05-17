@@ -13,11 +13,7 @@
 
 //#include "App.h"
 class EffectPlugin;
-#ifdef USE_METALANGLE
-#	import <MetalANGLE/MGLKView.h>
-#else
 
-#endif
 class App;
 class EventDispatcher;
 @interface MZGLView : NSOpenGLView {

@@ -25,6 +25,7 @@
 
 #include "filesystem.h"
 using namespace std;
+#include "OpenGLShader.h"
 
 #ifdef __ANDROID__
 vector<Font *> Font::fonts;
@@ -52,7 +53,12 @@ vector<Font *> Font::fonts;
  (Changing GL_RED internal format for GL_R8 - seems to work on both mac and iOS)
  */
 
-#include "gl3corefontstash.h"
+#ifdef MZGL_SOKOL_METAL
+#	include "sokolFontstash.h"
+
+#else
+#	include "gl3corefontstash.h"
+#endif
 #include "error.h"
 
 using namespace std;
@@ -85,18 +91,21 @@ bool Font::isLoaded() const {
 	return fs != nullptr;
 }
 
-bool Font::load(const vector<unsigned char> &data, float size) {
+bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	// todo - this is just a copy of the next method
 	clear();
 
 	GetError();
 	this->size = size / 2.f;
-	fs		   = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+#ifdef MZGL_SOKOL_METAL
+	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#else
+	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+#endif
 	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
 
-	//fs = glfonsCreate(1024, 1024, FONS_ZERO_TOPLEFT);
 	GetError();
-	if (fs == NULL) {
+	if (fs == nullptr) {
 		Log::e() << "Could not create stash.";
 		return false;
 	}
@@ -120,14 +129,16 @@ bool Font::load(const vector<unsigned char> &data, float size) {
 	return true;
 }
 
-bool Font::load(string path, float size) {
+bool Font::load(Graphics &g, string path, float size) {
 	clear();
 
-	GetError();
 	this->size = size / 2.f;
-	fs		   = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
-	GetError();
-	if (fs == NULL) {
+#ifdef MZGL_SOKOL_METAL
+	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#else
+	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+#endif
+	if (fs == nullptr) {
 		Log::e() << "Could not create stash.";
 		return false;
 	}
@@ -147,9 +158,14 @@ bool Font::load(string path, float size) {
 	return true;
 }
 
-TextureRef Font::getAtlasTexture() {
+TextureRef Font::getAtlasTexture(Graphics &g) {
+#ifdef MZGL_SOKOL_METAL
+	sokolFONScontext *sg = (sokolFONScontext *) (fs->params.userPtr);
+	return Texture::create(g, sg->tex.id, sg->width, sg->height);
+#else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
-	return Texture::create(gl->tex, gl->width, gl->height);
+	return Texture::create(g, gl->tex, gl->width, gl->height);
+#endif
 }
 
 std::string Font::ellipsize(const std::string &str, int w) const {
@@ -178,7 +194,7 @@ Rectf Font::getRect(const string &text, float x, float y) const {
 		return Rectf();
 	}
 	float b[4];
-	fonsTextBounds(fs, x, y, text.c_str(), NULL, b);
+	fonsTextBounds(fs, x, y, text.c_str(), nullptr, b);
 	auto r = Rectf(b[0], b[1], b[2] - b[0], b[3] - b[1]);
 	return r;
 }
@@ -216,15 +232,21 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 		g.scale(scale);
 	}
 
+	auto shader = g.fontShader;
+
+#ifdef MZGL_SOKOL_METAL
+#else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
+
 	if (gl->VERTEX_ATTRIB == 0) {
-		gl->VERTEX_ATTRIB = g.fontShader->positionAttribute;
-		gl->TCOORD_ATTRIB = g.fontShader->texCoordAttribute;
+		auto *glShader	  = dynamic_cast<OpenGLShader *>(shader.get());
+		gl->VERTEX_ATTRIB = glShader->positionAttribute;
+		gl->TCOORD_ATTRIB = glShader->texCoordAttribute;
 	}
+#endif
+	shader->begin();
 
-	g.fontShader->begin();
-
-	g.fontShader->uniform("mvp", g.getMVP());
+	shader->setMVP(g.getMVP());
 
 #ifdef __ANDROID__
 	// ok this is mega shit, but Huawei phones, when they receive an alpha of 1 here
@@ -232,18 +254,18 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	// this code just turns it shy of 1
 	auto c = g.getColor();
 	if (c.a == 1) c.a = 0.999;
-	g.fontShader->uniform("color", c);
+	shader->setColor(c);
 #else
-	g.fontShader->uniform("color", g.getColor());
+	shader->setColor(g.getColor());
 #endif
 
 	ScopedAlphaBlend b(g, true);
 
 	if (scale != 1) {
-		fonsDrawText(fs, 0, 0, text.c_str(), NULL);
+		fonsDrawText(fs, 0, 0, text.c_str(), nullptr);
 		g.popMatrix();
 	} else {
-		fonsDrawText(fs, x, y, text.c_str(), NULL);
+		fonsDrawText(fs, x, y, text.c_str(), nullptr);
 	}
 }
 void Font::addVerts(const std::string &text,
@@ -281,7 +303,7 @@ void Font::addVerts(const std::string &text,
 		return;
 	}
 
-	fonsAddVerts(fs, c.x, c.y, text.c_str(), NULL, verts, uvs);
+	fonsAddVerts(fs, c.x, c.y, text.c_str(), nullptr, verts, uvs);
 }
 
 Font::VerticalMetrics Font::getVerticalMetrics() const {
@@ -357,6 +379,7 @@ Font::~Font() {
 }
 
 void Font::clear() {
+#if !defined(MZGL_SOKOL_METAL)
 	if (fs) {
 		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 
@@ -366,6 +389,7 @@ void Font::clear() {
 		glfonsDelete(fs);
 		fs = nullptr;
 	}
+#endif
 }
 
 Font::Font() {

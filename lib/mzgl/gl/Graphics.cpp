@@ -18,7 +18,244 @@
 #include <utility>
 #include "GraphicsAPI.h"
 
+#include <array>
+#include <utility>
+
+void Graphics::init() {
+	api->init();
+}
+
 Graphics::~Graphics() = default;
+glm::vec4 hexColor(int hex, float a) {
+	glm::vec4 c;
+	c.r = ((hex >> 16) & 0xFF) / 255.f;
+	c.g = ((hex >> 8) & 0xFF) / 255.f;
+	c.b = ((hex) &0xFF) / 255.f;
+	c.a = a;
+	return c;
+}
+
+vec3 rgb2hsv(vec4 rgb) {
+	float r = rgb.x;
+	float g = rgb.y;
+	float b = rgb.z;
+
+	float maxVal = std::max({r, g, b});
+	float minVal = std::min({r, g, b});
+	float delta	 = maxVal - minVal;
+
+	float h, s, v;
+	v = maxVal;
+
+	if (delta == 0) {
+		h = 0;
+		s = 0;
+	} else {
+		s = delta / maxVal;
+
+		if (r == maxVal) {
+			h = (g - b) / delta;
+		} else if (g == maxVal) {
+			h = 2 + (b - r) / delta;
+		} else {
+			h = 4 + (r - g) / delta;
+		}
+
+		h *= 60;
+		if (h < 0) h += 360;
+	}
+
+	h = h / 360.0f; // Normalize to [0, 1]
+	return {h, s, v};
+}
+
+vec4 hsv2rgb(vec3 hsv) {
+	float h = hsv.x * 360.0f; // Convert back to 360 range
+	float s = hsv.y;
+	float v = hsv.z;
+
+	int i	= int(std::floor(h / 60.0)) % 6;
+	float f = h / 60.f - i;
+	float p = v * (1 - s);
+	float q = v * (1 - f * s);
+	float t = v * (1 - (1 - f) * s);
+
+	float r = 0.f, g = 0.f, b = 0.f;
+
+	switch (i) {
+		case 0:
+			r = v;
+			g = t;
+			b = p;
+			break;
+		case 1:
+			r = q;
+			g = v;
+			b = p;
+			break;
+		case 2:
+			r = p;
+			g = v;
+			b = t;
+			break;
+		case 3:
+			r = p;
+			g = q;
+			b = v;
+			break;
+		case 4:
+			r = t;
+			g = p;
+			b = v;
+			break;
+		case 5:
+			r = v;
+			g = p;
+			b = q;
+			break;
+	}
+
+	return {r, g, b, 1.f};
+}
+
+int hexCharToInt(char c) {
+	if (c >= '0' && c <= '9') return c - '0';
+	if (c >= 'a' && c <= 'f') return 10 + c - 'a';
+	if (c >= 'A' && c <= 'F') return 10 + c - 'A';
+	Log::e() << "Char is not in range in hexCharToInt " << c;
+	return c;
+}
+
+glm::vec4 hexColor(std::string inp) {
+	vec4 a;
+
+	// work out the format first
+	if (inp.size() > 1 && inp[0] == '#') {
+		inp = inp.substr(1);
+	} else if (inp.size() > 2 && inp[0] == '0' && inp[1] == 'x') {
+		inp = inp.substr(2);
+	}
+	if (inp.size() == 3) {
+		inp = std::string(2, inp[0]) + std::string(2, inp[1]) + std::string(2, inp[2]);
+	}
+
+	if (inp.size() != 6) {
+		Log::e() << "bad colour format in hexColor (" << std::to_string(inp.size()) << " characters instead of 6)";
+	}
+
+	a.x = (hexCharToInt(inp[0]) * 16 + hexCharToInt(inp[1])) / 255.f;
+	a.y = (hexCharToInt(inp[2]) * 16 + hexCharToInt(inp[3])) / 255.f;
+	a.z = (hexCharToInt(inp[4]) * 16 + hexCharToInt(inp[5])) / 255.f;
+	a.w = 1.f;
+	return a;
+}
+
+glm::vec4 svgHexColor(std::string hex) {
+	return hexColor(static_cast<int>(strtol(hex.substr(1).c_str(), nullptr, 16)));
+}
+
+glm::vec4 rgbColor(std::string colourString) {
+	auto start = colourString.find("rgb(");
+	auto end   = colourString.find(")");
+
+	if (start == std::string::npos && end == std::string::npos || start >= end) {
+		Log::e() << "Bad RGB string format (" << colourString << ")";
+		return {};
+	}
+
+	std::string numbers = colourString.substr(start + 4, end - (start + 4));
+	std::istringstream iss(numbers);
+	std::string token;
+	int i = 0;
+	std::array<float, 3> colours {1.f, 1.f, 1.f};
+	while (std::getline(iss, token, ',') && i < 3) {
+		colours[i++] = static_cast<float>(std::clamp(std::stoi(token), 0, 255)) / 255.0f;
+	}
+
+	if (i != 3) {
+		Log::e() << "RGB Colour didn't have enough elements " << colourString;
+	}
+
+	return glm::vec4 {colours[0], colours[1], colours[2], 1.f};
+}
+
+glm::vec4 rgbaColor(std::string colourString) {
+	auto start = colourString.find("rgba(");
+	auto end   = colourString.find(")");
+
+	if (start == std::string::npos && end == std::string::npos || start >= end) {
+		Log::e() << "Bad RGBA string format (" << colourString << ")";
+		return {};
+	}
+
+	std::string numbers = colourString.substr(start + 5, end - (start + 5));
+	std::istringstream iss(numbers);
+	std::string token;
+	int i = 0;
+	std::array<float, 4> colours {1.f, 1.f, 1.f, 1.f};
+	while (std::getline(iss, token, ',') && i < 3) {
+		colours[i++] = static_cast<float>(std::clamp(std::stoi(token), 0, 255)) / 255.0f;
+	}
+
+	std::getline(iss, token, ',');
+	colours[i++] = static_cast<float>(std::clamp(std::stof(token), 0.f, 1.f));
+
+	if (i != 4) {
+		Log::e() << "RGB Colour didn't have enough elements " << colourString;
+	}
+
+	return glm::vec4 {colours[0], colours[1], colours[2], colours[3]};
+}
+
+glm::vec4 namedColor(std::string name) {
+	if (name == "none" || name == "transparent") return {0, 0, 0, 0};
+	if (name == "black") return hexColor(0);
+	if (name == "silver") return hexColor(0xC0C0C0);
+	if (name == "gray") return hexColor(0x808080);
+	if (name == "white") return hexColor(0xFFFFFF);
+	if (name == "maroon") return hexColor(0x800000);
+	if (name == "red") return hexColor(0xFF0000);
+	if (name == "purple") return hexColor(0x800080);
+	if (name == "fuchsia") return hexColor(0xFF00FF);
+	if (name == "green") return hexColor(0x008000);
+	if (name == "lime") return hexColor(0x00FF00);
+	if (name == "olive") return hexColor(0x808000);
+	if (name == "yellow") return hexColor(0xFFFF00);
+	if (name == "navy") return hexColor(0x000080);
+	if (name == "blue") return hexColor(0x0000FF);
+	if (name == "teal") return hexColor(0x008080);
+	if (name == "aqua") return hexColor(0x00FFFF);
+
+	Log::e() << "Didnt find colour named " << name;
+	return hexColor(0xFFFFFF);
+}
+
+bool isHexColour(std::string s) {
+	if (s.empty() || s[0] != '#' || (s.size() != 4 && s.size() != 7)) {
+		return false;
+	}
+
+	return std::all_of(s.begin() + 1, s.end(), [](char c) { return std::isxdigit(c); });
+}
+
+bool isRGBColour(std::string s) {
+	if (s.size() < 10 || s.find("rgb(") != 0 || s.back() != ')') {
+		return false;
+	}
+
+	return std::all_of(
+		s.begin() + 4, s.end() - 1, [](char c) { return std::isdigit(c) || c == ',' || std::isspace(c); });
+}
+
+bool isRGBAColour(std::string s) {
+	if (s.size() < 15 || s.find("rgba(") != 0 || s.back() != ')') {
+		return false;
+	}
+
+	return std::all_of(s.begin() + 5, s.end() - 1, [](char c) {
+		return std::isdigit(c) || c == ',' || c == '.' || std::isspace(c);
+	});
+}
 
 void Graphics::setBlending(bool shouldBlend) {
 	// blend mode is already the same, jump out.
@@ -236,7 +473,7 @@ void Graphics::setColor(glm::vec4 c, float alpha) {
 	color.a = alpha;
 }
 
-glm::vec4 Graphics::getColor() const {
+const glm::vec4 &Graphics::getColor() const {
 	return color;
 }
 
@@ -293,7 +530,7 @@ void Graphics::drawRect(const Rectf &r) {
 	if (isFilling()) {
 		drawVerts({r.tl(), r.tr(), r.br(), r.br(), r.bl(), r.tl()});
 	} else {
-		drawVerts({r.tl(), r.tr(), r.br(), r.bl()}, Vbo::PrimitiveType::LineLoop);
+		drawVerts({r.tl(), r.tr(), r.br(), r.bl(), r.tl()}, Vbo::PrimitiveType::LineStrip);
 	}
 }
 
@@ -316,17 +553,26 @@ void Graphics::drawCircle(float x, float y, float r) {
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
-	std::vector<glm::vec2> verts;
-	verts.reserve(circleResolution + 2);
-
-	for (const auto &[cosVal, sinVal]: sinCos) {
-		verts.emplace_back(x + cosVal * r, y + sinVal * r);
-	}
-
 	if (isFilling()) {
-		drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
+		std::vector<glm::vec2> verts;
+		verts.reserve(circleResolution * 2 + 2);
+
+		verts.emplace_back(x, y);
+		for (const auto &[cosVal, sinVal]: sinCos) {
+			verts.emplace_back(x + cosVal * r, y + sinVal * r);
+			verts.emplace_back(verts[0]);
+		}
+		verts.pop_back();
+		drawVerts(verts, Vbo::PrimitiveType::TriangleStrip);
 	} else {
-		drawVerts(verts, Vbo::PrimitiveType::LineLoop);
+		std::vector<glm::vec2> verts;
+		verts.reserve(circleResolution + 2);
+
+		for (const auto &[cosVal, sinVal]: sinCos) {
+			verts.emplace_back(x + cosVal * r, y + sinVal * r);
+		}
+		verts.emplace_back(verts.front());
+		drawVerts(verts, Vbo::PrimitiveType::LineStrip);
 	}
 }
 
@@ -336,32 +582,46 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 	if (startAngle > endAngle) {
 		Log::e() << "drawArc doesn't wrap angles for now! Feel like implementing it?";
 	}
-	verts.reserve((endAngle - startAngle) / 0.1f + 2.f);
 
 	if (isFilling()) {
+		verts.reserve((endAngle - startAngle) * 2.f / 0.1f + 2.f);
+
 		verts.emplace_back(c);
-	}
 
-	// resolution is about 60
-	for (float f = startAngle; f < endAngle; f += 0.1) {
-		verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
-	}
-	if (startAngle != endAngle) {
-		verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
-	}
+		// resolution is about 60
+		for (float f = startAngle; f < endAngle; f += 0.1) {
+			verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+			verts.emplace_back(c);
+		}
+		if (startAngle != endAngle) {
+			verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
+			verts.emplace_back(c);
+		}
 
-	if (isFilling()) {
-		drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
+		verts.pop_back();
+		drawVerts(verts, Vbo::PrimitiveType::TriangleStrip);
 	} else {
-		Log::e() << "Warning! non-filled arcs not implemented in drawArc";
+		verts.reserve((endAngle - startAngle) / 0.1f + 2.f);
+
+		// resolution is about 60
+		for (float f = startAngle; f < endAngle; f += 0.1) {
+			verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+		}
+		if (startAngle != endAngle) {
+			verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
+		}
+		drawLineStrip(verts);
 	}
 }
 
-void Graphics::setBlendMode(BlendMode blendMode) {
-	this->blendMode = blendMode;
+void Graphics::setBlendMode(BlendMode newBlendMode) {
+	blendMode = newBlendMode;
 	api->setBlendMode(blendMode);
 }
 
+Graphics::BlendMode Graphics::getBlendMode() {
+	return blendMode;
+}
 void Graphics::drawVerts(const std::vector<glm::vec2> &verts,
 						 const std::vector<glm::vec4> &cols,
 						 Vbo::PrimitiveType type) {
@@ -402,8 +662,7 @@ void Graphics::drawLineStrip(const std::vector<vec2> &pts) {
 
 void Graphics::drawRoundedRect(const Rectf &r, float radius) {
 	if (radius < 2) drawRect(r);
-	VboRef m = Vbo::create();
-	makeRoundedRectVbo(m, r, radius, isFilling());
+	auto m = makeRoundedRectVbo(r, radius, isFilling());
 	m->draw(*this);
 }
 
@@ -444,7 +703,7 @@ std::vector<unsigned char> Graphics::getDefaultFontTTFData() {
 Font &Graphics::getFont() {
 	if (font == nullptr) {
 		font = new Font();
-		font->load(getDefaultFontData(), 42);
+		font->load(*this, getDefaultFontData(), 42);
 	}
 	return *font;
 }
@@ -469,6 +728,7 @@ void Graphics::warpMaskForScissor(Rectf &a) {
 
 #include "Triangulator.h"
 void Graphics::drawShape(const std::vector<vec2> &shape) {
+	if (shape.empty()) return;
 	if (isFilling()) {
 		Triangulator t;
 		std::vector<std::vector<vec2>> verts = {shape};
@@ -480,7 +740,9 @@ void Graphics::drawShape(const std::vector<vec2> &shape) {
 		vbo->setIndices(indices);
 		vbo->draw(*this, Vbo::PrimitiveType::Triangles);
 	} else {
-		drawVerts(shape, Vbo::PrimitiveType::LineLoop);
+		auto verts = shape;
+		verts.push_back(verts[0]);
+		drawVerts(verts, Vbo::PrimitiveType::LineStrip);
 	}
 }
 void Graphics::drawText(const std::string &s, float x, float y) {
@@ -543,8 +805,13 @@ void Graphics::clear(float r, float g, float b, float a) {
 }
 
 #include "OpenGLAPI.h"
+#include "SokolAPI.h"
 Graphics::Graphics() {
+#ifdef MZGL_SOKOL_METAL
+	api = std::make_unique<SokolAPI>(*this);
+#else
 	api = std::make_unique<OpenGLAPI>(*this);
+#endif
 }
 
 int32_t Graphics::getDefaultFrameBufferId() {

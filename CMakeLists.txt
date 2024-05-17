@@ -53,6 +53,11 @@ set(MZGL_SOURCES
     lib/mzgl/geom/geomutils.cpp
     lib/mzgl/geom/3D/Camera.cpp
     lib/mzgl/gl/api/OpenGLAPI.cpp
+    lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp
+    lib/mzgl/gl/api/Sokol/SokolAPI.cpp
+    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
+    lib/mzgl/gl/api/Sokol/SokolVbo.cpp
+    lib/mzgl/gl/api/Sokol/SokolShader.cpp
     lib/mzgl/gl/error.cpp
     lib/mzgl/gl/Fbo.cpp
     lib/mzgl/gl/Font.cpp
@@ -125,6 +130,7 @@ set(MZGL_SOURCES
     lib/mzgl/app/mac/NSBlockButton.m
     lib/mzgl/app/mac/MacFilePickerDelegate.mm
     lib/mzgl/app/mac/GL/MZGLView.mm
+    lib/mzgl/app/mac/Metal/MZMetalView.mm
     lib/mzgl/app/mac/LayerExplorer.mm
     lib/mzgl/app/mac/TextConsole.mm
     lib/mzgl/app/mac/mainMac.mm
@@ -159,6 +165,7 @@ if(NOT ANDROID)
     >)
 endif()
 
+
 foreach(source IN LISTS MZGL_SOURCES)
   get_filename_component(source_path "${source}" PATH)
   string(REPLACE "/" "\\" source_path_group "${source_path}")
@@ -173,6 +180,7 @@ set(HEADERS
     lib/mzgl/app/apple/AUv3
     lib/mzgl/app/mac
     lib/mzgl/app/mac/GL
+    lib/mzgl/app/mac/Metal
     lib/mzgl/app/glfw
     lib/mzgl/app/web
     lib/mzgl/audio
@@ -184,6 +192,8 @@ set(HEADERS
     lib/mzgl/geom
     lib/mzgl/gl
     lib/mzgl/gl/api
+    lib/mzgl/gl/api/OpenGL
+    lib/mzgl/gl/api/sokol
     lib/mzgl/gl/drawing
     lib/mzgl/midi
     lib/mzgl/music
@@ -225,6 +235,8 @@ set(YOGA_SOURCES
 # lib/zipper/minizip/iowin32.c) list(APPEND HEADERS lib/zipper/zipper/tps)
 # endif()
 
+
+
 option(
   MZGL_UNIT_TEST
   "should this be a unit testing build - omits a main, so catch2 can take control"
@@ -264,6 +276,8 @@ if(APPLE)
     lib/mzgl/util/log.cpp
     lib/mzgl/util/WebViewOverlay.cpp
     lib/mzgl/net/netUtil.cpp
+    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
+
     lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
@@ -312,6 +326,65 @@ target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 include_directories(libmzgl PUBLIC ${HEADERS})
 include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
+
+
+
+## COMPILE SOKOL SHADERS
+# List of shader files
+set(SHADER_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/nothing.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/color.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorTexture.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/tex.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl"
+)
+
+
+# Optional: Specify the path if sokol-shdc is not in your PATH
+set(SOKOL_SHDC "sokol-shdc")
+
+
+
+# Process each shader file
+foreach (SHADER_SOURCE ${SHADER_SOURCES})
+    # Create a corresponding header file name
+    get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
+    set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
+
+    # Custom command that runs sokol-shdc for each shader
+    add_custom_command(
+            OUTPUT ${SHADER_HEADER}
+            COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
+            DEPENDS ${SHADER_SOURCE}
+            COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
+            VERBATIM
+    )
+
+    # Append the output header to a list of all generated headers
+    list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
+endforeach ()
+
+# Custom target that depends on all generated shader headers
+add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
+
+# Ensure your main application depends on this custom target
+add_dependencies(libmzgl CompileShaders)
+
+target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+
+
+
+# choose the sokol backend for platform
+add_compile_definitions(SOKOL_METAL)
+
+# uncomment to turn on sokol
+add_compile_definitions(MZGL_SOKOL_METAL)
+
+
+
+
+
 
 set(MZGL_LIBS ZipFile yoga pu_gixml ghc_filesystem)
 
@@ -379,11 +452,12 @@ if(ANDROID)
     log
     mediandk)
 
+
 elseif(APPLE)
   add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
   target_link_libraries(
     libmzgl
-    "-framework OpenGL -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit -framework UniformTypeIdentifiers"
+    "-framework OpenGL -framework Metal -framework MetalKit -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit -framework UniformTypeIdentifiers"
   )
 
 elseif(WIN32)

@@ -8,6 +8,9 @@ public:
 	GraphicsAPI(Graphics &g)
 		: g(g) {}
 
+	GraphicsAPI(const GraphicsAPI &)			= delete;
+	GraphicsAPI &operator=(const GraphicsAPI &) = delete;
+
 	virtual ~GraphicsAPI()									 = default;
 	virtual void init()										 = 0;
 	virtual void setBlending(bool shouldBlend)				 = 0;
@@ -15,10 +18,10 @@ public:
 	virtual void setBlendMode(Graphics::BlendMode blendMode) = 0;
 	virtual void clear(vec4 c)								 = 0;
 
-	virtual void maskOn(const Rectf &r) = 0;
-	virtual void maskOff()				= 0;
-	[[nodiscard]] virtual bool isMaskOn() const				= 0;
-	[[nodiscard]] virtual Rectf getMaskRect() const			= 0;
+	virtual void maskOn(const Rectf &r)				= 0;
+	virtual void maskOff()							= 0;
+	[[nodiscard]] virtual bool isMaskOn() const		= 0;
+	[[nodiscard]] virtual Rectf getMaskRect() const = 0;
 
 	virtual void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) = 0;
 

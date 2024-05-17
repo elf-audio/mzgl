@@ -526,11 +526,9 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 }
 
 void clearUpGLResources() {
-	//  Vbo::printVbos();
 	Log::d() << "cleaning up GL resources";
 	for (auto *vbo: Vbo::vbos) {
-		vbo->clear();
-		vbo->vertexArrayObject = 0;
+		vbo->deallocate();
 	}
 
 	for (auto *tex: Texture::textures) {
