@@ -74,7 +74,6 @@
 		EA183FBE2432C18D00A5C3E8 /* FloatBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */; };
 		EA183FBF2432C18D00A5C3E8 /* RecompilingDylib.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */; };
 		EA183FC02432C18D00A5C3E8 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E32432C18B00A5C3E8 /* util.cpp */; };
-		EA183FC12432C18D00A5C3E8 /* events.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E42432C18B00A5C3E8 /* events.h */; };
 		EA183FC22432C18D00A5C3E8 /* errors.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E52432C18B00A5C3E8 /* errors.h */; };
 		EA183FC32432C18D00A5C3E8 /* DateTime.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E62432C18B00A5C3E8 /* DateTime.h */; };
 		EA183FC42432C18D00A5C3E8 /* maths.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E72432C18B00A5C3E8 /* maths.h */; };
@@ -82,7 +81,6 @@
 		EA183FC72432C18D00A5C3E8 /* log.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EA2432C18B00A5C3E8 /* log.h */; };
 		EA183FC82432C18D00A5C3E8 /* Dylib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */; };
 		EA183FC92432C18D00A5C3E8 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EC2432C18B00A5C3E8 /* util.h */; };
-		EA183FCA2432C18D00A5C3E8 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835ED2432C18B00A5C3E8 /* events.cpp */; };
 		EA183FCC2432C18D00A5C3E8 /* FileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EF2432C18B00A5C3E8 /* FileWatcher.h */; };
 		EA183FCD2432C18D00A5C3E8 /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
 		EA183FCE2432C18D00A5C3E8 /* errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F12432C18B00A5C3E8 /* errors.cpp */; };
@@ -175,7 +173,6 @@
 		EA1841252432C4E800A5C3E8 /* Tween.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836052432C18B00A5C3E8 /* Tween.cpp */; };
 		EA1841282432C4F300A5C3E8 /* Midi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F82432C18B00A5C3E8 /* Midi.cpp */; };
 		EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */; };
-		EA18412B2432C4FF00A5C3E8 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835ED2432C18B00A5C3E8 /* events.cpp */; };
 		EA18412D2432C4FF00A5C3E8 /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
 		EA18412E2432C4FF00A5C3E8 /* errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F12432C18B00A5C3E8 /* errors.cpp */; };
 		EA18412F2432C4FF00A5C3E8 /* DateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F22432C18B00A5C3E8 /* DateTime.cpp */; };
@@ -303,7 +300,6 @@
 		EA2B845324E7093600EA12BD /* RoundedRect.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836262432C18B00A5C3E8 /* RoundedRect.h */; };
 		EA2B846024E7093600EA12BD /* NVGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA6ACC642475DE7000BC0012 /* NVGUI.h */; };
 		EA2B847324E7093600EA12BD /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
-		EA2B848B24E7093600EA12BD /* events.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E42432C18B00A5C3E8 /* events.h */; };
 		EA2B849324E7093600EA12BD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18363F2432C18B00A5C3E8 /* Font.h */; };
 		EA2B84BA24E7093600EA12BD /* Draggable.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835B22432C18B00A5C3E8 /* Draggable.h */; };
 		EA2B84ED24E7093600EA12BD /* AudioSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836172432C18B00A5C3E8 /* AudioSystem.h */; };
@@ -390,7 +386,6 @@
 		EA2B8AD824E7093600EA12BD /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835B32432C18B00A5C3E8 /* Slider.cpp */; };
 		EA2B8ADB24E7093600EA12BD /* MacAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835D72432C18B00A5C3E8 /* MacAppDelegate.mm */; };
 		EA2B8ADC24E7093600EA12BD /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234ACE24A609CA000F057B /* YGLayout.cpp */; };
-		EA2B8ADD24E7093600EA12BD /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835ED2432C18B00A5C3E8 /* events.cpp */; };
 		EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234B1124A611AE000F057B /* ylog.cpp */; };
 		EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18363D2432C18B00A5C3E8 /* Vbo.cpp */; };
 		EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */; };
@@ -495,7 +490,6 @@
 		EA68947B261C633500F76B91 /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18363C2432C18B00A5C3E8 /* Graphics.cpp */; };
 		EA68947E261C633500F76B91 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AE424A609CA000F057B /* event.cpp */; };
 		EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */; };
-		EA689483261C633500F76B91 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835ED2432C18B00A5C3E8 /* events.cpp */; };
 		EA689485261C633500F76B91 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD124A609CA000F057B /* Yoga.cpp */; };
 		EA689486261C633500F76B91 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234ACE24A609CA000F057B /* YGLayout.cpp */; };
 		EA689487261C633500F76B91 /* Tween.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836052432C18B00A5C3E8 /* Tween.cpp */; };
@@ -663,6 +657,16 @@
 		EA759B3E2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3F2715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
 		EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
+		EA7721082BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
+		EA7721092BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
+		EA77210A2BF74F5B003607EB /* GraphicsAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721052BF74F5B003607EB /* GraphicsAPI.h */; };
+		EA77210B2BF74F5B003607EB /* GraphicsAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721052BF74F5B003607EB /* GraphicsAPI.h */; };
+		EA77210C2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		EA77210D2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		EA77210E2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		EA77210F2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		EA7721102BF74F5B003607EB /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
+		EA7721112BF74F5B003607EB /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
 		EA7855662472DBF40072FD05 /* nanovg_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855622472DBF40072FD05 /* nanovg_gl.h */; };
 		EA7855672472DBF40072FD05 /* nanovg.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855632472DBF40072FD05 /* nanovg.h */; };
 		EA7855682472DBF40072FD05 /* nanovg_gl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */; };
@@ -704,12 +708,6 @@
 		EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
 		EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
 		EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
-		EA9C32F8299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
-		EA9C32F9299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
-		EA9C32FA299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
-		EA9C32FB299FCF4C000C1DD2 /* glUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */; };
-		EA9C32FC299FCF4C000C1DD2 /* glUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32F7299FCF4C000C1DD2 /* glUtil.h */; };
-		EA9C32FD299FCF4C000C1DD2 /* glUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32F7299FCF4C000C1DD2 /* glUtil.h */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -891,7 +889,6 @@
 		EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloatBuffer.h; sourceTree = "<group>"; };
 		EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecompilingDylib.h; sourceTree = "<group>"; };
 		EA1835E32432C18B00A5C3E8 /* util.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = util.cpp; sourceTree = "<group>"; };
-		EA1835E42432C18B00A5C3E8 /* events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = events.h; sourceTree = "<group>"; };
 		EA1835E52432C18B00A5C3E8 /* errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errors.h; sourceTree = "<group>"; };
 		EA1835E62432C18B00A5C3E8 /* DateTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateTime.h; sourceTree = "<group>"; };
 		EA1835E72432C18B00A5C3E8 /* maths.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maths.h; sourceTree = "<group>"; };
@@ -900,7 +897,6 @@
 		EA1835EA2432C18B00A5C3E8 /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log.h; sourceTree = "<group>"; };
 		EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Dylib.cpp; sourceTree = "<group>"; };
 		EA1835EC2432C18B00A5C3E8 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		EA1835ED2432C18B00A5C3E8 /* events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = events.cpp; sourceTree = "<group>"; };
 		EA1835EF2432C18B00A5C3E8 /* FileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileWatcher.h; sourceTree = "<group>"; };
 		EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileWatcher.cpp; sourceTree = "<group>"; };
 		EA1835F12432C18B00A5C3E8 /* errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = errors.cpp; sourceTree = "<group>"; };
@@ -1162,6 +1158,10 @@
 		EA73F05E28E4670900395945 /* geomutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geomutils.h; sourceTree = "<group>"; };
 		EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HierarchicalScrollingList.cpp; sourceTree = "<group>"; };
 		EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HierarchicalScrollingList.h; sourceTree = "<group>"; };
+		EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLDefaultShaders.h; sourceTree = "<group>"; };
+		EA7721052BF74F5B003607EB /* GraphicsAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsAPI.h; sourceTree = "<group>"; };
+		EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLAPI.cpp; sourceTree = "<group>"; };
+		EA7721072BF74F5B003607EB /* OpenGLAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLAPI.h; sourceTree = "<group>"; };
 		EA7855622472DBF40072FD05 /* nanovg_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl.h; sourceTree = "<group>"; };
 		EA7855632472DBF40072FD05 /* nanovg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg.h; sourceTree = "<group>"; };
 		EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl_utils.h; sourceTree = "<group>"; };
@@ -1186,8 +1186,6 @@
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
 		EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedMask.cpp; sourceTree = "<group>"; };
 		EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedMask.h; sourceTree = "<group>"; };
-		EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = glUtil.cpp; sourceTree = "<group>"; };
-		EA9C32F7299FCF4C000C1DD2 /* glUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glUtil.h; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAA9BE5D2A30E180008BFEF4 /* Listenable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Listenable.h; sourceTree = "<group>"; };
@@ -1951,7 +1949,6 @@
 				EA1835E32432C18B00A5C3E8 /* util.cpp */,
 				EA15B27A291D49E70051570A /* UndoManager.cpp */,
 				EA15B27B291D49E70051570A /* UndoManager.h */,
-				EA1835E42432C18B00A5C3E8 /* events.h */,
 				EA1835E52432C18B00A5C3E8 /* errors.h */,
 				EA1835E62432C18B00A5C3E8 /* DateTime.h */,
 				EAD47FB125892D4100D2172A /* ThreadPool.h */,
@@ -1963,7 +1960,6 @@
 				EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */,
 				EA1835E82432C18B00A5C3E8 /* Dylib.h */,
 				EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */,
-				EA1835ED2432C18B00A5C3E8 /* events.cpp */,
 				EA1835EF2432C18B00A5C3E8 /* FileWatcher.h */,
 				EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */,
 				EA1835F12432C18B00A5C3E8 /* errors.cpp */,
@@ -2071,6 +2067,7 @@
 		EA1836272432C18B00A5C3E8 /* gl */ = {
 			isa = PBXGroup;
 			children = (
+				EA7721032BF74F5B003607EB /* api */,
 				EA78556C2472E31C0072FD05 /* NVG.h */,
 				EA78556D2472E3320072FD05 /* NVG.cpp */,
 				EA18362A2432C18B00A5C3E8 /* MatrixStack.h */,
@@ -2087,8 +2084,6 @@
 				EA1836362432C18B00A5C3E8 /* Font.cpp */,
 				EA1732BB245AD802009E7B55 /* DefaultFont.inc.h */,
 				EA1836372432C18B00A5C3E8 /* Vbo.h */,
-				EA9C32F6299FCF4C000C1DD2 /* glUtil.cpp */,
-				EA9C32F7299FCF4C000C1DD2 /* glUtil.h */,
 				EA18363D2432C18B00A5C3E8 /* Vbo.cpp */,
 				EA18363E2432C18B00A5C3E8 /* mzOpenGL.h */,
 				EA1836402432C18B00A5C3E8 /* Texture.h */,
@@ -2510,6 +2505,17 @@
 				EA71A6FC27E39E6B0081A5CB /* unzipper.h */,
 			);
 			path = zipper;
+			sourceTree = "<group>";
+		};
+		EA7721032BF74F5B003607EB /* api */ = {
+			isa = PBXGroup;
+			children = (
+				EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */,
+				EA7721052BF74F5B003607EB /* GraphicsAPI.h */,
+				EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */,
+				EA7721072BF74F5B003607EB /* OpenGLAPI.h */,
+			);
+			path = api;
 			sourceTree = "<group>";
 		};
 		EA7855612472DBF40072FD05 /* nanovg */ = {
@@ -3093,6 +3099,7 @@
 				EA183FED2432C18D00A5C3E8 /* Camera.h in Headers */,
 				EA183FFC2432C18D00A5C3E8 /* MitredLine.h in Headers */,
 				EA1840062432C18D00A5C3E8 /* Vbo.h in Headers */,
+				EA7721082BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */,
 				EA1840102432C18D00A5C3E8 /* Graphics.h in Headers */,
 				EA18404B2432C18D00A5C3E8 /* glfontstash.h in Headers */,
 				EA71A75827E39E6C0081A5CB /* pwd2key.h in Headers */,
@@ -3115,6 +3122,7 @@
 				EA297C6625C954E600F890AE /* pa_win_wmme.h in Headers */,
 				EA71A77427E39E6C0081A5CB /* brg_endian.h in Headers */,
 				EA297CAE25C954E600F890AE /* pa_mac_core_blocking.h in Headers */,
+				EA77210A2BF74F5B003607EB /* GraphicsAPI.h in Headers */,
 				EA234AF224A609CA000F057B /* YGNode.h in Headers */,
 				EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */,
 				EA71A79E27E39E6C0081A5CB /* tools.h in Headers */,
@@ -3134,12 +3142,10 @@
 				EA71A79027E39E6C0081A5CB /* zipper.h in Headers */,
 				EAD03BA0297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA71A78627E39E6C0081A5CB /* fileenc.h in Headers */,
-				EA183FC12432C18D00A5C3E8 /* events.h in Headers */,
 				EA71A74C27E39E6C0081A5CB /* prng.h in Headers */,
 				EA18400E2432C18D00A5C3E8 /* Font.h in Headers */,
 				EA71A79227E39E6C0081A5CB /* defs.h in Headers */,
 				EA183F992432C18D00A5C3E8 /* Draggable.h in Headers */,
-				EA9C32FC299FCF4C000C1DD2 /* glUtil.h in Headers */,
 				EA924365273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h in Headers */,
 				EA71A75627E39E6C0081A5CB /* aestab.h in Headers */,
 				EA71A78427E39E6C0081A5CB /* sha1.h in Headers */,
@@ -3241,6 +3247,7 @@
 				EA183FC92432C18D00A5C3E8 /* util.h in Headers */,
 				EA234AFF24A609CA000F057B /* YGStyle.h in Headers */,
 				EA183FA02432C18D00A5C3E8 /* iOSStyleWidgets.h in Headers */,
+				EA7721102BF74F5B003607EB /* OpenGLAPI.h in Headers */,
 				EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */,
 				EA183FB52432C18D00A5C3E8 /* TextConsole.h in Headers */,
 				EA71FEE727F33B310005C47A /* ZipReader.h in Headers */,
@@ -3319,7 +3326,6 @@
 				EA71A78727E39E6C0081A5CB /* fileenc.h in Headers */,
 				EA2B847324E7093600EA12BD /* DropDown.h in Headers */,
 				EAF6737E289BC441001F778D /* stringUtil.h in Headers */,
-				EA2B848B24E7093600EA12BD /* events.h in Headers */,
 				EA2B849324E7093600EA12BD /* Font.h in Headers */,
 				EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
 				EA924366273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h in Headers */,
@@ -3387,17 +3393,18 @@
 				EA2B884A24E7093600EA12BD /* DrawingCanvas.h in Headers */,
 				EA2B887324E7093600EA12BD /* Plugin.h in Headers */,
 				EA2B887924E7093600EA12BD /* DrawingFunction.h in Headers */,
-				EA9C32FD299FCF4C000C1DD2 /* glUtil.h in Headers */,
 				EAD03BA1297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA2B889524E7093600EA12BD /* LineEquation.h in Headers */,
 				EA2B88BA24E7093600EA12BD /* DateTime.h in Headers */,
 				EA71A77327E39E6C0081A5CB /* hmac.h in Headers */,
 				EA2B88CA24E7093600EA12BD /* mzgl_platform.h in Headers */,
+				EA7721092BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */,
 				EA2B88E024E7093600EA12BD /* AlphaButton.h in Headers */,
 				EA71A7B927E39E6C0081A5CB /* ZipFile.h in Headers */,
 				EA2B88F324E7093600EA12BD /* Layout.h in Headers */,
 				EA2B88F524E7093600EA12BD /* AudioShareSDK.h in Headers */,
 				EA2B88F824E7093600EA12BD /* Rectf.h in Headers */,
+				EA7721112BF74F5B003607EB /* OpenGLAPI.h in Headers */,
 				EA2B890824E7093600EA12BD /* AudioFile.h in Headers */,
 				EA2B891224E7093600EA12BD /* Yoga.h in Headers */,
 				EA2B891324E7093600EA12BD /* RtMidiExtras.h in Headers */,
@@ -3428,6 +3435,7 @@
 				EA71A77127E39E6C0081A5CB /* entropy.h in Headers */,
 				EA2B8A9A24E7093600EA12BD /* error.h in Headers */,
 				EA71A73B27E39E6C0081A5CB /* unzip.h in Headers */,
+				EA77210B2BF74F5B003607EB /* GraphicsAPI.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3549,6 +3557,7 @@
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
 				EABBA6D82B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
+				EA77210C2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
@@ -3566,7 +3575,6 @@
 				EA71A79A27E39E6C0081A5CB /* zipper.cpp in Sources */,
 				EA183FB72432C18D00A5C3E8 /* MacAppDelegate.mm in Sources */,
 				EA234AF024A609CA000F057B /* YGLayout.cpp in Sources */,
-				EA183FCA2432C18D00A5C3E8 /* events.cpp in Sources */,
 				EA234B1324A611AF000F057B /* ylog.cpp in Sources */,
 				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
@@ -3636,7 +3644,6 @@
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA183F8F2432C18D00A5C3E8 /* Layer.cpp in Sources */,
-				EA9C32F8299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */,
 				EA924361273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA183FEF2432C18D00A5C3E8 /* SVG.cpp in Sources */,
@@ -3733,7 +3740,7 @@
 				EAD03BAF297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924362273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */,
-				EA9C32F9299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
+				EA77210D2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EA1841302432C4FF00A5C3E8 /* maths.cpp in Sources */,
 				EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
@@ -3758,7 +3765,6 @@
 				EAD03BB72980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
-				EA18412B2432C4FF00A5C3E8 /* events.cpp in Sources */,
 				EAF6737A289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA234AF524A609CA000F057B /* Yoga.cpp in Sources */,
 				EA234AF124A609CA000F057B /* YGLayout.cpp in Sources */,
@@ -3814,7 +3820,6 @@
 				EA71A7B627E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA2B8ADC24E7093600EA12BD /* YGLayout.cpp in Sources */,
 				EA71A75427E39E6C0081A5CB /* hmac.c in Sources */,
-				EA2B8ADD24E7093600EA12BD /* events.cpp in Sources */,
 				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
 				EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */,
 				EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */,
@@ -3854,6 +3859,7 @@
 				EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */,
 				EA2B8AF924E7093600EA12BD /* util.cpp in Sources */,
 				EA2B8AFA24E7093600EA12BD /* AudioSystem.cpp in Sources */,
+				EA77210E2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EA2B8AFC24E7093600EA12BD /* FlexboxLayout.cpp in Sources */,
 				EA2B8AFF24E7093600EA12BD /* Fbo.cpp in Sources */,
 				EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */,
@@ -3897,7 +3903,6 @@
 				EA71A72027E39E6B0081A5CB /* unzip.c in Sources */,
 				EA71A79627E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
 				EA16DACF25FFABDA001C0460 /* pa_converters.c in Sources */,
-				EA9C32FA299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
 				EA2B8B1F24E7093600EA12BD /* YGStyle.cpp in Sources */,
 				EA924363273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A76027E39E6C0081A5CB /* fileenc.c in Sources */,
@@ -3979,7 +3984,7 @@
 				EAD03BB1297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924364273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A77F27E39E6C0081A5CB /* pwd2key.c in Sources */,
-				EA9C32FB299FCF4C000C1DD2 /* glUtil.cpp in Sources */,
+				EA77210F2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EAF91F782AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA68946D261C633500F76B91 /* maths.cpp in Sources */,
@@ -4003,7 +4008,6 @@
 				EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EAD03BB92980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */,
-				EA689483261C633500F76B91 /* events.cpp in Sources */,
 				EA689485261C633500F76B91 /* Yoga.cpp in Sources */,
 				EAF6737C289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA71A7B727E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
