@@ -11,20 +11,28 @@
 #include <cassert>
 #if defined(DEBUG) && !defined(AUTO_TEST)
 #	include "log.h"
-
-#	define mzAssert(A)                                                                                           \
+#	define mzAssertImpl(COND, MESSAGE)                                                                           \
 		do {                                                                                                      \
 			if (mzAssertEnabled()) {                                                                              \
-				bool a = (A);                                                                                     \
+				bool a = (COND);                                                                                  \
 				if (!a) {                                                                                         \
-					Log::e() << "ASSERTION FAILED IN " << __FILE__ << " at line " << __LINE__;                    \
+					std::string msgStr = MESSAGE; /* Convert MESSAGE to std::string */                            \
+                                                                                                                  \
+					std::string errorMsg = "ASSERTION FAILED IN " + std::string(__FILE__) + " at line "           \
+										   + std::to_string(__LINE__) + (msgStr.empty() ? "" : (": " + msgStr));  \
+					Log::e() << errorMsg;                                                                         \
 				}                                                                                                 \
 				assert(a);                                                                                        \
 			}                                                                                                     \
 		} while (0)
+
 #else
-#	define mzAssert(A) {};
+#	define mzAssertImpl(A, ...) {};
+
 #endif
+
+#define mzAssert(A, ...)  mzAssertImpl((A), #__VA_ARGS__)
+#define mzAssertFail(...) mzAssertImpl(false, #__VA_ARGS__)
 
 void mzEnableAssert(bool enabled);
 bool mzAssertEnabled();
@@ -32,6 +40,5 @@ bool mzAssertEnabled();
 class MZScopedAssertDisable {
 public:
 	MZScopedAssertDisable() { mzEnableAssert(false); }
-
 	~MZScopedAssertDisable() { mzEnableAssert(true); }
 };

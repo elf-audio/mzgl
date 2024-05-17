@@ -29,7 +29,8 @@ using namespace std;
 	MZGLKitViewController *vc;
 	MZGLKitView *glView;
 #else
-	MZGLView *glView;
+
+	EventsView *glView;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 #endif
 	Graphics g;
@@ -84,7 +85,7 @@ using namespace std;
 	return glView;
 }
 #else
-- (MZGLView *)getView {
+- (EventsView *)getView {
 	return glView;
 }
 #endif
@@ -152,7 +153,7 @@ using namespace std;
 		glView = (MZGLKitView *) vc.view;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		glView = [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
 #endif
 		glView.frame = self.view.frame;
 #if !TARGET_OS_IOS

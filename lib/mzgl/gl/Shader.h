@@ -21,88 +21,53 @@ class Shader;
 typedef std::shared_ptr<Shader> ShaderRef;
 
 class Shader {
-private:
+protected:
 	Shader(Graphics &g);
+	Shader(Graphics &g, std::string name);
 	Graphics &g;
 
 public:
-	static ShaderRef create(Graphics &g) { return std::shared_ptr<Shader>(new Shader(g)); }
-
-	int32_t positionAttribute = -1;
-	int32_t colorAttribute	  = -1;
-	int32_t texCoordAttribute = -1;
-	int32_t normAttribute	  = -1;
-
-	uint32_t shaderProgram = 0;
+	static ShaderRef create(Graphics &g);
+	static ShaderRef create(Graphics &g, std::string name);
 
 	bool isDefaultShader = false;
 
-	// should be private in some way but vbo needs it because it manages shaders
-	bool needsColorUniform = false;
-
 	virtual ~Shader();
 
-	void begin();
-	void end();
-	void uniform(std::string name, const glm::mat4 &m);
+	virtual void begin()											  = 0;
+	virtual void end()												  = 0;
+	virtual void uniform(const std::string &name, const glm::mat4 &m) = 0;
 
-	void uniform(std::string name, int p);
-	void uniform(std::string name, glm::ivec2 p);
+	virtual void setMVP(const glm::mat4 &mvp) = 0;
+	virtual void setColor(const glm::vec4 &c) = 0;
 
-	void uniform(std::string name, float p);
-	void uniform(std::string name, glm::vec2 p);
-	void uniform(std::string name, glm::vec3 p);
-	void uniform(std::string name, glm::vec4 p);
+	virtual void uniform(const std::string &name, int p)		= 0;
+	virtual void uniform(const std::string &name, glm::ivec2 p) = 0;
 
-	void uniform(std::string name, const std::vector<glm::mat4> &p);
-	void uniform(std::string name, const std::vector<float> &p);
-	void uniform(std::string name, const std::vector<glm::vec2> &p);
-	void uniform(std::string name, const std::vector<glm::vec3> &p);
-	void uniform(std::string name, const std::vector<glm::vec4> &p);
+	virtual void uniform(const std::string &name, float p)	   = 0;
+	virtual void uniform(const std::string &name, glm::vec2 p) = 0;
+	virtual void uniform(const std::string &name, glm::vec3 p) = 0;
+	virtual void uniform(const std::string &name, glm::vec4 p) = 0;
 
-	void uniform(std::string name, const glm::mat4 *p, size_t length);
-	void uniform(std::string name, const float *p, size_t length);
-	void uniform(std::string name, const glm::vec2 *p, size_t length);
-	void uniform(std::string name, const glm::vec3 *p, size_t length);
-	void uniform(std::string name, const glm::vec4 *p, size_t length);
+	virtual void uniform(const std::string &name, const std::vector<glm::mat4> &p) = 0;
+	virtual void uniform(const std::string &name, const std::vector<float> &p)	   = 0;
+	virtual void uniform(const std::string &name, const std::vector<glm::vec2> &p) = 0;
+	virtual void uniform(const std::string &name, const std::vector<glm::vec3> &p) = 0;
+	virtual void uniform(const std::string &name, const std::vector<glm::vec4> &p) = 0;
 
-	void loadFromString(std::string vertCode, std::string fragCode);
+	virtual void uniform(const std::string &name, const glm::mat4 *p, size_t length) = 0;
+	virtual void uniform(const std::string &name, const float *p, size_t length)	 = 0;
+	virtual void uniform(const std::string &name, const glm::vec2 *p, size_t length) = 0;
+	virtual void uniform(const std::string &name, const glm::vec3 *p, size_t length) = 0;
+	virtual void uniform(const std::string &name, const glm::vec4 *p, size_t length) = 0;
 
-	void load(std::string vertex_file_path, std::string fragment_file_path);
-	static std::string getVersionForPlatform(bool isVertShader);
+	virtual void loadFromString(std::string vertCode, std::string fragCode) = 0;
 
-#ifdef MZGL_GL2
-	void setInstanceUniforms(int whichInstance);
-#endif
+	virtual void load(const std::string &vertexFilePath, const std::string &fragFilePath) = 0;
+
+	virtual void deallocate() = 0;
 
 #ifdef __ANDROID__
 	static std::vector<Shader *> shaders;
-#endif
-	void deallocate();
-
-private:
-	void createProgram(uint32_t vertexShader, uint32_t fragmentShader);
-
-	std::string readFile2(const std::string &fileName);
-	uint32_t compileShader(uint32_t type, std::string src);
-
-	void linkProgram(uint32_t program);
-
-	void validateProgram(uint32_t program);
-
-	// this is supposed to be for GL2 simulating instancing
-
-#ifdef MZGL_GL2
-
-	struct InstanceUniform {
-		int dimensions = 0;
-		std::vector<float> data;
-		std::string name;
-		InstanceUniform(std::string name, float *data, int numItems, int dimensions)
-			: name(name)
-			, dimensions(dimensions)
-			, data(data, data + numItems * dimensions) {}
-	};
-	std::vector<std::shared_ptr<InstanceUniform>> instanceUniforms;
 #endif
 };
