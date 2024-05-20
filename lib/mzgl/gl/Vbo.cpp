@@ -99,49 +99,48 @@ void Vbo::clear() {
 	glGenVertexArrays(1, &vertexArrayObject);
 #endif
 }
-
-Vbo &Vbo::setVertices(const vector<vec4> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 4) updating = true;
-
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 4);
-	return *this;
-}
-
-Vbo &Vbo::setVertices(const vector<vec3> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 3) updating = true;
-
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 3);
-	return *this;
-}
-
-Vbo &Vbo::setVertices(const vector<vec2> &verts) {
-	if (verts.size() == 0) {
-		Log::e() << "Trying to setVertices with no vertices";
-		return *this;
-	}
-	bool updating = false;
-	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 2) updating = true;
-
-	if (updating) updateVertBuffer(&verts[0].x);
-	else generateVertBuffer(&verts[0].x, verts.size(), 2);
-	return *this;
-}
+//
+//Vbo &Vbo::setVertices(const vector<vec4> &verts) {
+//	if (verts.size() == 0) {
+//		Log::e() << "Trying to setVertices with no vertices";
+//		return *this;
+//	}
+//	bool updating = false;
+//	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 4) updating = true;
+//
+//	if (updating) updateVertBuffer(&verts[0].x);
+//	else generateVertBuffer(&verts[0].x, verts.size(), 4);
+//	return *this;
+//}
+//
+//Vbo &Vbo::setVertices(const vector<vec3> &verts) {
+//	if (verts.size() == 0) {
+//		Log::e() << "Trying to setVertices with no vertices";
+//		return *this;
+//	}
+//	bool updating = false;
+//	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 3) updating = true;
+//
+//	if (updating) updateVertBuffer(&verts[0].x);
+//	else generateVertBuffer(&verts[0].x, verts.size(), 3);
+//	return *this;
+//}
+//
+//Vbo &Vbo::setVertices(const vector<vec2> &verts) {
+//	if (verts.size() == 0) {
+//		Log::e() << "Trying to setVertices with no vertices";
+//		return *this;
+//	}
+//	bool updating = false;
+//	if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == 2) updating = true;
+//
+//	if (updating) updateVertBuffer(&verts[0].x);
+//	else generateVertBuffer(&verts[0].x, verts.size(), 2);
+//	return *this;
+//}
 
 void Vbo::generateVertBuffer(const float *data, size_t numVerts, int numDims) {
 	if (vertexBuffer != 0) {
-		//printf("deleting vert buffer %d\n", vertexBuffer);
 		glDeleteBuffers(1, &vertexBuffer);
 		vertexBuffer = 0;
 	}
@@ -208,22 +207,22 @@ Vbo &Vbo::setIndices(const vector<unsigned int> &indices) {
 	return *this;
 }
 
-Vbo &Vbo::setColors(const vector<vec3> &cols) {
-	if (cols.size() == 0) {
-		Log::e() << "Trying to setColors with 0 colors";
-		return *this;
-	}
-	generateColorBuffer(&cols[0].x, cols.size(), 3);
-	return *this;
-}
-Vbo &Vbo::setColors(const vector<vec4> &cols) {
-	if (cols.size() == 0) {
-		Log::e() << "Trying to setColors with 0 colors";
-		return *this;
-	}
-	generateColorBuffer(&cols[0].x, cols.size(), 4);
-	return *this;
-}
+//Vbo &Vbo::setColors(const vector<vec3> &cols) {
+//	if (cols.size() == 0) {
+//		Log::e() << "Trying to setColors with 0 colors";
+//		return *this;
+//	}
+//	generateColorBuffer(&cols[0].x, cols.size(), 3);
+//	return *this;
+//}
+//Vbo &Vbo::setColors(const vector<vec4> &cols) {
+//	if (cols.size() == 0) {
+//		Log::e() << "Trying to setColors with 0 colors";
+//		return *this;
+//	}
+//	generateColorBuffer(&cols[0].x, cols.size(), 4);
+//	return *this;
+//}
 
 void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
 	if (colorbuffer != 0) glDeleteBuffers(1, &colorbuffer);

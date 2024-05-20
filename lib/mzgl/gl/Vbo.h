@@ -11,6 +11,7 @@
 #define DO_DRAW_STATS
 
 #include <glm/glm.hpp>
+#include "log.h"
 // TODO: this should go somewhere more global
 using vec2 = glm::vec2;
 using vec3 = glm::vec3;
@@ -54,14 +55,38 @@ public:
 #endif
 	void clear();
 
-	Vbo &setVertices(const std::vector<vec4> &verts);
-	Vbo &setVertices(const std::vector<vec3> &verts);
-	Vbo &setVertices(const std::vector<vec2> &verts);
+	template <typename T>
+	Vbo &setVertices(const std::vector<T> &verts) {
+		if (verts.size() == 0) {
+			Log::e() << "Trying to setVertices with no vertices";
+			return *this;
+		}
+		bool updating = false;
+		if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == sizeof(T) / 4) updating = true;
+
+		if (updating) updateVertBuffer(&verts[0].x);
+		else generateVertBuffer(&verts[0].x, verts.size(), 4);
+		return *this;
+	}
+
+	template <typename T>
+	Vbo &setColors(const std::vector<T> &cols) {
+		if (cols.size() == 0) {
+			Log::e() << "Trying to setColors with 0 colors";
+			return *this;
+		}
+		generateColorBuffer(&cols[0].x, cols.size(), sizeof(T) / 4);
+		return *this;
+	}
+
+	//	Vbo &setVertices(const std::vector<vec4> &verts);
+	//	Vbo &setVertices(const std::vector<vec3> &verts);
+	//	Vbo &setVertices(const std::vector<vec2> &verts);
 
 	Vbo &setTexCoords(const std::vector<vec2> &tcs);
 
-	Vbo &setColors(const std::vector<vec3> &cols);
-	Vbo &setColors(const std::vector<vec4> &cols);
+	//	Vbo &setColors(const std::vector<vec3> &cols);
+	//	Vbo &setColors(const std::vector<vec4> &cols);
 
 	Vbo &setNormals(const std::vector<vec3> &norms);
 	Vbo &setIndices(const std::vector<unsigned int> &indices);
