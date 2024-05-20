@@ -32,7 +32,7 @@ public:
 		uint32_t id			= 0;
 		uint32_t size		= 0;
 		uint32_t dimensions = 0;
-		void upload();
+
 		void deallocate();
 	};
 	enum class PrimitiveType {

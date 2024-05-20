@@ -17,11 +17,6 @@
 #include "util.h"
 #include "Geometry.h"
 
-using namespace std;
-
-void Vbo::Buffer::upload() {
-}
-
 void Vbo::Buffer::deallocate() {
 	if (id != 0) glDeleteBuffers(1, &id);
 	size = 0;
@@ -163,17 +158,17 @@ Vbo &Vbo::setColors(const std::vector<vec4> &cols) {
 	return *this;
 }
 
-Vbo &Vbo::setTexCoords(const vector<vec2> &tcs) {
+Vbo &Vbo::setTexCoords(const std::vector<vec2> &tcs) {
 	setBuffer(*this, texCoordBuffer, tcs);
 	return *this;
 }
 
-Vbo &Vbo::setNormals(const vector<vec3> &norms) {
+Vbo &Vbo::setNormals(const std::vector<vec3> &norms) {
 	setBuffer(*this, normalBuffer, norms);
 	return *this;
 }
 
-Vbo &Vbo::setIndices(const vector<unsigned int> &indices) {
+Vbo &Vbo::setIndices(const std::vector<unsigned int> &indices) {
 	if (indexBuffer.id != 0) glDeleteBuffers(1, &indexBuffer.id);
 
 #ifndef MZGL_GL2
