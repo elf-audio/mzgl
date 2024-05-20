@@ -45,7 +45,7 @@ public:
 		None,
 	};
 
-	Buffer vertexArrayObject;
+	uint32_t vertexArrayObject;
 	Buffer vertexBuffer;
 	Buffer colorbuffer;
 	Buffer texCoordBuffer;
@@ -62,39 +62,17 @@ public:
 #endif
 	void clear();
 
-	template <typename T>
-	Vbo &setVertices(const std::vector<T> &verts) {
-		if (verts.size() == 0) {
-			Log::e() << "Trying to setVertices with no vertices";
-			return *this;
-		}
-		bool updating = false;
-		if (verts.size() == vertexBuffer.size && vertexBuffer.id != 0 && vertexBuffer.dimensions == sizeof(T) / 4)
-			updating = true;
+	Vbo &setVertices(const std::vector<vec2> &verts);
+	Vbo &setVertices(const std::vector<vec3> &verts);
+	Vbo &setVertices(const std::vector<vec4> &verts);
 
-		if (updating) updateVertBuffer(&verts[0].x);
-		else generateVertBuffer(&verts[0].x, verts.size(), sizeof(T) / 4);
-		return *this;
-	}
-
-	template <typename T>
-	Vbo &setColors(const std::vector<T> &cols) {
-		if (cols.size() == 0) {
-			Log::e() << "Trying to setColors with 0 colors";
-			return *this;
-		}
-		generateColorBuffer(&cols[0].x, cols.size(), sizeof(T) / 4);
-		return *this;
-	}
-
+	Vbo &setColors(const std::vector<vec4> &cols);
 	Vbo &setTexCoords(const std::vector<vec2> &tcs);
 	Vbo &setNormals(const std::vector<vec3> &norms);
 	Vbo &setIndices(const std::vector<unsigned int> &indices);
 
 	Vbo &setGeometry(const Geometry &geom);
-	//void addNormalizedTexCoords();
 
-	// GL_TRIANGLES etc optional
 	Vbo &setMode(PrimitiveType mode);
 
 	// if primitive type is none, it will use whatever PrimitiveType stored in the vbo
@@ -115,11 +93,6 @@ private:
 #endif
 
 	PrimitiveType mode = PrimitiveType::None;
-
-	void generateVertBuffer(const float *data, size_t numVerts, int numDims);
-	void updateVertBuffer(const float *data);
-
-	void generateColorBuffer(const float *data, size_t numCols, int numDims);
 
 	void deallocateResources();
 

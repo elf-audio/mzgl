@@ -97,55 +97,79 @@ void Vbo::clear() {
 #endif
 }
 
-void Vbo::updateVertBuffer(const float *data) {
+template <class T>
+static void setBuffer(Vbo &vbo, Vbo::Buffer &buff, const std::vector<T> &v) {
+	if (buff.id != 0) glDeleteBuffers(1, &buff.id);
+
 #ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(vbo.vertexArrayObject);
 #endif
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer.size * sizeof(float) * vertexBuffer.dimensions, data);
+	buff.dimensions = sizeof(T) / 4;
+	buff.size		= v.size();
+	glGenBuffers(1, &buff.id);
+	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
+	glBufferData(GL_ARRAY_BUFFER, buff.size * sizeof(T), v.data(), GL_STATIC_DRAW);
 }
 
-void Vbo::generateVertBuffer(const float *data, size_t numVerts, int numDims) {
-	if (vertexBuffer.id != 0) glDeleteBuffers(1, &vertexBuffer.id);
-
-	vertexBuffer.dimensions = numDims;
-	vertexBuffer.size		= numVerts;
+template <class T>
+static void updateVertBuffer(Vbo::Buffer &buff, const std::vector<T> &data) {
 #ifndef MZGL_GL2
 	glBindVertexArray(vertexArrayObject);
 #endif
-	glGenBuffers(1, &vertexBuffer.id);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id);
-	glBufferData(
-		GL_ARRAY_BUFFER, vertexBuffer.size * sizeof(float) * vertexBuffer.dimensions, data, GL_STATIC_DRAW);
-	GetError();
+	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, buff.size * sizeof(float) * buff.dimensions, data.data());
+}
+template <class T>
+static void generateVertBuffer(Vbo::Buffer &buff, const std::vector<T> &data) {
+	if (buff.id != 0) glDeleteBuffers(1, &buff.id);
+
+	buff.dimensions = sizeof(T) / 4;
+	buff.size		= data.size();
+#ifndef MZGL_GL2
+	glBindVertexArray(vertexArrayObject);
+#endif
+	glGenBuffers(1, &buff.id);
+	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
+	glBufferData(GL_ARRAY_BUFFER, buff.size * sizeof(float) * buff.dimensions, data.data(), GL_STATIC_DRAW);
+}
+
+template <class T>
+static Vbo &setVboVertices(Vbo &vbo, const std::vector<T> &verts) {
+	if (verts.size() == 0) {
+		Log::e() << "Trying to setVertices with no vertices";
+		return vbo;
+	}
+	bool updating = false;
+	if (verts.size() == vbo.vertexBuffer.size && vbo.vertexBuffer.id != 0
+		&& vbo.vertexBuffer.dimensions == sizeof(T) / 4)
+		updating = true;
+
+	if (updating) updateVertBuffer(vbo.vertexBuffer, verts);
+	else generateVertBuffer(vbo.vertexBuffer, verts);
+	return vbo;
+}
+Vbo &Vbo::setVertices(const std::vector<vec2> &verts) {
+	return setVboVertices(*this, verts);
+}
+Vbo &Vbo::setVertices(const std::vector<vec3> &verts) {
+	return setVboVertices(*this, verts);
+}
+Vbo &Vbo::setVertices(const std::vector<vec4> &verts) {
+	return setVboVertices(*this, verts);
+}
+
+Vbo &Vbo::setColors(const std::vector<vec4> &cols) {
+	setBuffer(*this, colorbuffer, cols);
+	return *this;
 }
 
 Vbo &Vbo::setTexCoords(const vector<vec2> &tcs) {
-	if (texCoordBuffer.id != 0) glDeleteBuffers(1, &texCoordBuffer.id);
-#ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
-#endif
-
-	texCoordBuffer.size = tcs.size();
-	glGenBuffers(1, &texCoordBuffer.id);
-	glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer.id);
-	glBufferData(GL_ARRAY_BUFFER, tcs.size() * sizeof(vec2), tcs.data(), GL_STATIC_DRAW);
-
+	setBuffer(*this, texCoordBuffer, tcs);
 	return *this;
 }
 
 Vbo &Vbo::setNormals(const vector<vec3> &norms) {
-	if (normalBuffer.id != 0) glDeleteBuffers(1, &normalBuffer.id);
-
-#ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
-#endif
-
-	normalBuffer.size = norms.size();
-	glGenBuffers(1, &normalBuffer.id);
-	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer.id);
-	glBufferData(GL_ARRAY_BUFFER, norms.size() * sizeof(vec3), norms.data(), GL_STATIC_DRAW);
-
+	setBuffer(*this, normalBuffer, norms);
 	return *this;
 }
 
@@ -161,20 +185,6 @@ Vbo &Vbo::setIndices(const vector<unsigned int> &indices) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 	return *this;
-}
-
-void Vbo::generateColorBuffer(const float *data, size_t numCols, int numDims) {
-	if (colorbuffer.id != 0) glDeleteBuffers(1, &colorbuffer.id);
-
-#ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
-#endif
-
-	glGenBuffers(1, &colorbuffer.id);
-	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer.id);
-	colorbuffer.size	   = numCols;
-	colorbuffer.dimensions = numDims;
-	glBufferData(GL_ARRAY_BUFFER, numCols * sizeof(float) * colorbuffer.dimensions, data, GL_STATIC_DRAW);
 }
 
 static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
@@ -193,6 +203,30 @@ static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 	}
 }
 
+static void bindBuffer(Vbo::Buffer &buffer, int attribute) {
+	glEnableVertexAttribArray(attribute);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
+	glVertexAttribPointer(attribute,
+						  buffer.dimensions, // size
+						  GL_FLOAT, // type
+						  GL_FALSE, // normalized?
+						  0, // stride
+						  (void *) 0 // array buffer offset
+	);
+	GetError();
+}
+
+static void checkAndBindBuffer(Vbo::Buffer &buffer, int attribute) {
+	if (buffer.id == 0) return;
+
+	if (attribute == -1) {
+		Log::e()
+			<< "There is a missing attribute in this shader maybe? - are you using Drawer and not setting ignoreColor = true?";
+		return;
+	}
+	bindBuffer(buffer, attribute);
+}
+
 void Vbo::draw(Graphics &g, vec2 offset) {
 	ScopedTranslate t(g, offset);
 	draw(g);
@@ -204,7 +238,6 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 
 #ifndef MZGL_GL2
 	if (vertexArrayObject == 0) {
-		//        Log::e() << "Vertex is 0";
 		return;
 	}
 #endif
@@ -222,7 +255,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	}
 
 	// TODO: I don't know if this would switch between different default shaders
-	if (g.currShader == NULL || g.currShader->isDefaultShader) {
+	if (g.currShader == nullptr || g.currShader->isDefaultShader) {
 		if (colorbuffer.size == 0 && texCoordBuffer.size == 0) {
 			g.nothingShader->begin();
 		} else if (texCoordBuffer.size > 0 && colorbuffer.size == 0) {
@@ -247,90 +280,14 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 	glBindVertexArray(vertexArrayObject);
 #endif
 
-	GetError();
-	glEnableVertexAttribArray(g.currShader->positionAttribute);
-	GetError();
+	bindBuffer(vertexBuffer, g.currShader->positionAttribute);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer.id);
-	GetError();
-
-	glVertexAttribPointer(g.currShader->positionAttribute,
-						  vertexBuffer.dimensions, // size
-						  GL_FLOAT, // type
-						  GL_FALSE, // normalized?
-						  0, // stride
-						  (void *) 0 // array buffer offset
-	);
-	GetError();
-
-	if (colorbuffer.id != 0) {
-		if (g.currShader->colorAttribute == -1) {
-			Log::e()
-				<< "There is no Color attribute in this shader - are you using Drawer and not setting ignoreColor = true?";
-		} else {
-			// 2nd attribute buffer : colors
-			glEnableVertexAttribArray(g.currShader->colorAttribute);
-			GetError();
-
-			glBindBuffer(GL_ARRAY_BUFFER, colorbuffer.id);
-			GetError();
-
-			glVertexAttribPointer(g.currShader->colorAttribute,
-								  colorbuffer.dimensions, // size
-								  GL_FLOAT, // type
-								  GL_FALSE, // normalized?
-								  0, // stride
-								  (void *) 0 // array buffer offset
-			);
-			GetError();
-		}
-	}
-
-	if (texCoordBuffer.id != 0) {
-		if (g.currShader->texCoordAttribute == -1) {
-			Log::e() << "There is no TexCoord attribute in this shader";
-		} else {
-			glEnableVertexAttribArray(g.currShader->texCoordAttribute);
-			GetError();
-
-			glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer.id);
-			GetError();
-
-			glVertexAttribPointer(g.currShader->texCoordAttribute,
-								  texCoordBuffer.dimensions, // size
-								  GL_FLOAT, // type
-								  GL_FALSE, // normalized?
-								  0, // stride
-								  (void *) 0 // array buffer offset
-			);
-			GetError();
-		}
-	}
-
-	if (normalBuffer.id != 0) {
-		if (g.currShader->normAttribute == -1) {
-			Log::e() << "There is no Normal attribute in this shader";
-		} else {
-			glEnableVertexAttribArray(g.currShader->normAttribute);
-			GetError();
-
-			glBindBuffer(GL_ARRAY_BUFFER, normalBuffer.id);
-			GetError();
-
-			glVertexAttribPointer(g.currShader->normAttribute,
-								  normalBuffer.dimensions, // size
-								  GL_FLOAT, // type
-								  GL_FALSE, // normalized?
-								  0, // stride
-								  (void *) 0 // array buffer offset
-			);
-			GetError();
-		}
-	}
+	checkAndBindBuffer(colorbuffer, g.currShader->colorAttribute);
+	checkAndBindBuffer(texCoordBuffer, g.currShader->texCoordAttribute);
+	checkAndBindBuffer(normalBuffer, g.currShader->normAttribute);
 
 	if (indexBuffer.id != 0) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
-		GetError();
 	}
 
 	auto glMode = primitiveTypeToGLMode(mode);
@@ -340,10 +297,10 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 			// simulate instancing in gl2
 			for (int i = 0; i < instances; i++) {
 				g.currShader->setInstanceUniforms(i);
-				glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, (void *) 0);
+				glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr);
 			}
 #else
-			glDrawElementsInstanced(glMode, (GLsizei) numIndices, GL_UNSIGNED_INT, (void *) 0, instances);
+			glDrawElementsInstanced(glMode, (GLsizei) numIndices, GL_UNSIGNED_INT, nullptr, instances);
 #endif
 		} else {
 #ifdef MZGL_GL2
@@ -358,13 +315,12 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 		}
 	} else {
 		if (indexBuffer.id) {
-			glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, (void *) 0);
+			glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr);
 		} else {
 			glDrawArrays(glMode, 0, (GLsizei) vertexBuffer.size);
 		}
 	}
 
-	GetError();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 #ifndef MZGL_GL2
@@ -372,22 +328,18 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 #endif
 
 	glDisableVertexAttribArray(g.currShader->positionAttribute);
-	GetError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	GetError();
+
 	if (colorbuffer.id != 0 && g.currShader->colorAttribute != -1) {
 		glDisableVertexAttribArray(g.currShader->colorAttribute);
 	}
-	GetError();
 	if (normalBuffer.id != 0 && g.currShader->normAttribute != -1) {
 		glDisableVertexAttribArray(g.currShader->normAttribute);
 	}
-	GetError();
 
 	if (texCoordBuffer.id != 0 && g.currShader->texCoordAttribute != -1) {
 		glDisableVertexAttribArray(g.currShader->texCoordAttribute);
 	}
-	GetError();
 }
 
 Vbo &Vbo::setMode(PrimitiveType mode) {
@@ -396,9 +348,9 @@ Vbo &Vbo::setMode(PrimitiveType mode) {
 }
 
 Vbo &Vbo::setGeometry(const Geometry &geom) {
-	if (geom.cols.size() > 0) setColors(geom.cols);
-	if (geom.verts.size() > 0) setVertices(geom.verts);
-	if (geom.indices.size() > 0) setIndices(geom.indices);
-	if (geom.texCoords.size() > 0) setTexCoords(geom.texCoords);
+	if (!geom.cols.empty()) setColors(geom.cols);
+	if (!geom.verts.empty()) setVertices(geom.verts);
+	if (!geom.indices.empty()) setIndices(geom.indices);
+	if (!geom.texCoords.empty()) setTexCoords(geom.texCoords);
 	return *this;
 }
