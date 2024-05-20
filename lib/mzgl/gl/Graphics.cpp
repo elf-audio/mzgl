@@ -6,6 +6,7 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+#include <array>
 #include "Graphics.h"
 #include "Shader.h"
 #include "util.h"

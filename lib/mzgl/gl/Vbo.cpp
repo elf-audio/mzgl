@@ -37,7 +37,7 @@ void Vbo::resetDrawStats() {
 }
 // TODO BUG: this is all stupid, deleteing and generating vertex arrays etc.
 #ifdef __ANDROID__
-vector<Vbo *> Vbo::vbos;
+std::vector<Vbo *> Vbo::vbos;
 void Vbo::printVbos() {
 	Log::e() << "BEGIN -----------------------------------------";
 	for (int i = 0; i < vbos.size(); i++) {
@@ -110,21 +110,21 @@ static void setBuffer(Vbo &vbo, Vbo::Buffer &buff, const std::vector<T> &v) {
 }
 
 template <class T>
-static void updateVertBuffer(Vbo::Buffer &buff, const std::vector<T> &data) {
+static void updateVertBuffer(const uint32_t &vao, Vbo::Buffer &buff, const std::vector<T> &data) {
 #ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(vao);
 #endif
 	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, buff.size * sizeof(float) * buff.dimensions, data.data());
 }
 template <class T>
-static void generateVertBuffer(Vbo::Buffer &buff, const std::vector<T> &data) {
+static void generateVertBuffer(const uint32_t &vao, Vbo::Buffer &buff, const std::vector<T> &data) {
 	if (buff.id != 0) glDeleteBuffers(1, &buff.id);
 
 	buff.dimensions = sizeof(T) / 4;
 	buff.size		= data.size();
 #ifndef MZGL_GL2
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(vao);
 #endif
 	glGenBuffers(1, &buff.id);
 	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
@@ -132,7 +132,7 @@ static void generateVertBuffer(Vbo::Buffer &buff, const std::vector<T> &data) {
 }
 
 template <class T>
-static Vbo &setVboVertices(Vbo &vbo, const std::vector<T> &verts) {
+static Vbo &setVboVertices(const uint32_t &vao, Vbo &vbo, const std::vector<T> &verts) {
 	if (verts.size() == 0) {
 		Log::e() << "Trying to setVertices with no vertices";
 		return vbo;
@@ -142,18 +142,18 @@ static Vbo &setVboVertices(Vbo &vbo, const std::vector<T> &verts) {
 		&& vbo.vertexBuffer.dimensions == sizeof(T) / 4)
 		updating = true;
 
-	if (updating) updateVertBuffer(vbo.vertexBuffer, verts);
-	else generateVertBuffer(vbo.vertexBuffer, verts);
+	if (updating) updateVertBuffer(vao, vbo.vertexBuffer, verts);
+	else generateVertBuffer(vao, vbo.vertexBuffer, verts);
 	return vbo;
 }
 Vbo &Vbo::setVertices(const std::vector<vec2> &verts) {
-	return setVboVertices(*this, verts);
+	return setVboVertices(vertexArrayObject, *this, verts);
 }
 Vbo &Vbo::setVertices(const std::vector<vec3> &verts) {
-	return setVboVertices(*this, verts);
+	return setVboVertices(vertexArrayObject, *this, verts);
 }
 Vbo &Vbo::setVertices(const std::vector<vec4> &verts) {
-	return setVboVertices(*this, verts);
+	return setVboVertices(vertexArrayObject, *this, verts);
 }
 
 Vbo &Vbo::setColors(const std::vector<vec4> &cols) {
@@ -298,7 +298,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 				glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr);
 			}
 #else
-			glDrawElementsInstanced(glMode, (GLsizei) numIndices, GL_UNSIGNED_INT, nullptr, instances);
+			glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, instances);
 #endif
 		} else {
 #ifdef MZGL_GL2
@@ -308,7 +308,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 				glDrawArrays(glMode, 0, (GLsizei) indexBuffer.size);
 			}
 #else
-			glDrawArraysInstanced(glMode, 0, (GLsizei) numVerts, instances);
+			glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, instances);
 #endif
 		}
 	} else {
