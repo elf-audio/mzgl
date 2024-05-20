@@ -27,6 +27,14 @@ class Geometry;
 
 class Vbo {
 public:
+	class Buffer {
+	public:
+		uint32_t id			= 0;
+		uint32_t size		= 0;
+		uint32_t dimensions = 0;
+		void upload();
+		void deallocate();
+	};
 	enum class PrimitiveType {
 		Triangles,
 		TriangleStrip,
@@ -37,13 +45,12 @@ public:
 		None,
 	};
 
-	// these were GLuints
-	uint32_t vertexArrayObject = 0;
-	uint32_t vertexBuffer	   = 0;
-	uint32_t colorbuffer	   = 0;
-	uint32_t texCoordBuffer	   = 0;
-	uint32_t normalBuffer	   = 0;
-	uint32_t indexBuffer	   = 0;
+	Buffer vertexArrayObject;
+	Buffer vertexBuffer;
+	Buffer colorbuffer;
+	Buffer texCoordBuffer;
+	Buffer normalBuffer;
+	Buffer indexBuffer;
 
 	static VboRef create() { return VboRef(new Vbo()); }
 
@@ -62,10 +69,11 @@ public:
 			return *this;
 		}
 		bool updating = false;
-		if (verts.size() == numVerts && vertexBuffer != 0 && vertDimensions == sizeof(T) / 4) updating = true;
+		if (verts.size() == vertexBuffer.size && vertexBuffer.id != 0 && vertexBuffer.dimensions == sizeof(T) / 4)
+			updating = true;
 
 		if (updating) updateVertBuffer(&verts[0].x);
-		else generateVertBuffer(&verts[0].x, verts.size(), 4);
+		else generateVertBuffer(&verts[0].x, verts.size(), sizeof(T) / 4);
 		return *this;
 	}
 
@@ -79,15 +87,7 @@ public:
 		return *this;
 	}
 
-	//	Vbo &setVertices(const std::vector<vec4> &verts);
-	//	Vbo &setVertices(const std::vector<vec3> &verts);
-	//	Vbo &setVertices(const std::vector<vec2> &verts);
-
 	Vbo &setTexCoords(const std::vector<vec2> &tcs);
-
-	//	Vbo &setColors(const std::vector<vec3> &cols);
-	//	Vbo &setColors(const std::vector<vec4> &cols);
-
 	Vbo &setNormals(const std::vector<vec3> &norms);
 	Vbo &setIndices(const std::vector<unsigned int> &indices);
 
@@ -101,7 +101,7 @@ public:
 	void draw(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1);
 	void draw(Graphics &g, vec2 offset);
 	void drawInstanced(Graphics &g, size_t instances) { draw(g, PrimitiveType::None, instances); };
-	size_t getNumVerts() { return numVerts; }
+	size_t getNumVerts() { return vertexBuffer.size; }
 
 #ifdef DO_DRAW_STATS
 	static int numDrawnVerts;
@@ -115,16 +115,6 @@ private:
 #endif
 
 	PrimitiveType mode = PrimitiveType::None;
-
-	size_t numVerts	  = 0;
-	size_t numIndices = 0;
-	size_t numCols	  = 0;
-
-	size_t numTcs	= 0;
-	size_t numNorms = 0;
-
-	int vertDimensions = 0;
-	int colDimensions  = 0;
 
 	void generateVertBuffer(const float *data, size_t numVerts, int numDims);
 	void updateVertBuffer(const float *data);
