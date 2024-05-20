@@ -18,7 +18,10 @@
 #include "Geometry.h"
 
 void Vbo::Buffer::deallocate() {
-	if (id != 0) glDeleteBuffers(1, &id);
+	if (id != 0) {
+		glDeleteBuffers(1, &id);
+		id = 0;
+	}
 	size = 0;
 }
 
