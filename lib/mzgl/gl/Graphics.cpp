@@ -23,6 +23,10 @@
 
 #include "GraphicsAPI.h"
 
+#include <array>
+#include <utility>
+
+
 Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
@@ -319,14 +323,15 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 }
 void Graphics::drawCircle(float x, float y, float r) {
 	static constexpr auto circleResolution										  = 100;
-	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = [] {
+	auto circleResolationFun = [] {
 		std::array<std::pair<float, float>, circleResolution + 1> values {};
 		for (int i = 0; i <= circleResolution; ++i) {
 			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
 			values[i] = {std::cos(phi), std::sin(phi)};
 		}
 		return values;
-	}();
+	};
+	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
 	std::vector<glm::vec2> verts;
 	verts.reserve(circleResolution + 2);
