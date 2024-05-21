@@ -91,6 +91,7 @@ private:
 	static int _numDrawnVerts;
 	static int _numDrawCalls;
 #endif
+	void chooseShaderAndSetDefaults(Graphics &g);
 
 	PrimitiveType mode = PrimitiveType::None;
 

@@ -117,43 +117,30 @@ static void updateVertBuffer(const uint32_t &vao, Vbo::Buffer &buff, const std::
 	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, buff.size * sizeof(float) * buff.dimensions, data.data());
 }
-template <class T>
-static void generateVertBuffer(const uint32_t &vao, Vbo::Buffer &buff, const std::vector<T> &data) {
-	if (buff.id != 0) glDeleteBuffers(1, &buff.id);
-
-	buff.dimensions = sizeof(T) / 4;
-	buff.size		= data.size();
-#ifndef MZGL_GL2
-	glBindVertexArray(vao);
-#endif
-	glGenBuffers(1, &buff.id);
-	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
-	glBufferData(GL_ARRAY_BUFFER, buff.size * sizeof(float) * buff.dimensions, data.data(), GL_STATIC_DRAW);
-}
 
 template <class T>
-static Vbo &setVboVertices(const uint32_t &vao, Vbo &vbo, const std::vector<T> &verts) {
-	if (verts.size() == 0) {
+static Vbo &setVboVertices(Vbo &vbo, const std::vector<T> &data) {
+	if (data.size() == 0) {
 		Log::e() << "Trying to setVertices with no vertices";
 		return vbo;
 	}
 	bool updating = false;
-	if (verts.size() == vbo.vertexBuffer.size && vbo.vertexBuffer.id != 0
+	if (data.size() == vbo.vertexBuffer.size && vbo.vertexBuffer.id != 0
 		&& vbo.vertexBuffer.dimensions == sizeof(T) / 4)
 		updating = true;
 
-	if (updating) updateVertBuffer(vao, vbo.vertexBuffer, verts);
-	else generateVertBuffer(vao, vbo.vertexBuffer, verts);
+	if (updating) updateVertBuffer(vbo.vertexArrayObject, vbo.vertexBuffer, data);
+	else setBuffer(vbo, vbo.vertexBuffer, data);
 	return vbo;
 }
 Vbo &Vbo::setVertices(const std::vector<vec2> &verts) {
-	return setVboVertices(vertexArrayObject, *this, verts);
+	return setVboVertices(*this, verts);
 }
 Vbo &Vbo::setVertices(const std::vector<vec3> &verts) {
-	return setVboVertices(vertexArrayObject, *this, verts);
+	return setVboVertices(*this, verts);
 }
 Vbo &Vbo::setVertices(const std::vector<vec4> &verts) {
-	return setVboVertices(vertexArrayObject, *this, verts);
+	return setVboVertices(*this, verts);
 }
 
 Vbo &Vbo::setColors(const std::vector<vec4> &cols) {
@@ -229,29 +216,8 @@ void Vbo::draw(Graphics &g, vec2 offset) {
 	ScopedTranslate t(g, offset);
 	draw(g);
 }
-void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
-	if (vertexBuffer.size == 0) {
-		return;
-	}
 
-#ifndef MZGL_GL2
-	if (vertexArrayObject == 0) {
-		return;
-	}
-#endif
-
-#ifdef DO_DRAW_STATS
-	_numDrawnVerts += vertexBuffer.size;
-	_numDrawCalls++;
-#endif
-	if (mode == PrimitiveType::None) {
-		if (this->mode != PrimitiveType::None) {
-			mode = this->mode;
-		} else {
-			mode = PrimitiveType::Triangles;
-		}
-	}
-
+void Vbo::chooseShaderAndSetDefaults(Graphics &g) {
 	// TODO: I don't know if this would switch between different default shaders
 	if (g.currShader == nullptr || g.currShader->isDefaultShader) {
 		if (colorbuffer.size == 0 && texCoordBuffer.size == 0) {
@@ -268,11 +234,35 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 			g.colorTextureShader->begin();
 		}
 	}
-
 	g.currShader->uniform("mvp", g.getMVP());
 	if (g.currShader->needsColorUniform) {
 		g.currShader->uniform("color", g.getColor());
 	}
+}
+void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
+	if (vertexBuffer.size == 0) {
+		return;
+	}
+
+#ifndef MZGL_GL2
+	if (vertexArrayObject == 0) {
+		return;
+	}
+#endif
+
+#ifdef DO_DRAW_STATS
+	_numDrawnVerts += vertexBuffer.size;
+	_numDrawCalls++;
+#endif
+	if (_mode == PrimitiveType::None) {
+		if (this->mode != PrimitiveType::None) {
+			_mode = this->mode;
+		} else {
+			_mode = PrimitiveType::Triangles;
+		}
+	}
+
+	chooseShaderAndSetDefaults(g);
 
 #ifndef MZGL_GL2
 	glBindVertexArray(vertexArrayObject);
@@ -288,7 +278,7 @@ void Vbo::draw(Graphics &g, PrimitiveType mode, size_t instances) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
 	}
 
-	auto glMode = primitiveTypeToGLMode(mode);
+	auto glMode = primitiveTypeToGLMode(_mode);
 	if (instances > 1) {
 		if (indexBuffer.id) {
 #ifdef MZGL_GL2
