@@ -88,30 +88,27 @@ void Dialogs::textbox(std::string title,
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
 	  textField.text = [NSString stringWithUTF8String:text.c_str()];
+	  dispatch_async(dispatch_get_main_queue(), ^{ [textField selectAll:nil]; });
 	}];
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
 
 #	else
 	dispatch_async(dispatch_get_main_queue(), ^{
-	  // do work here
-
-	  // create alert dialog
 	  NSAlert *alert = [[NSAlert alloc] init];
 	  [alert addButtonWithTitle:@"OK"];
 	  [alert addButtonWithTitle:@"Cancel"];
 	  [alert setMessageText:[NSString stringWithCString:msg.c_str() encoding:NSUTF8StringEncoding]];
-	  // create text field
 	  NSTextField *label = [[NSTextField alloc] initWithFrame:NSRectFromCGRect(CGRectMake(0, 0, 300, 40))];
 	  [label setStringValue:[NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding]];
-	  // add text field to alert dialog
+	  [label selectText:nil];
 	  [alert setAccessoryView:label];
 
 	  std::function<void(NSInteger, NSTextField *)> handleResult = [completionCallback, this](NSInteger returnCode,
 																							  NSTextField *label) {
 		  std::string txt = "";
-		  if (returnCode == NSAlertFirstButtonReturn) txt = [[label stringValue] UTF8String];
-		  //			[label resignFirstResponder];
-		  //			[[[NSApp mainWindow].contentView.subviews firstObject] becomeFirstResponder];
+		  if (returnCode == NSAlertFirstButtonReturn) {
+			  txt = [[label stringValue] UTF8String];
+		  }
 		  app.main.runOnMainThread(true, [txt, returnCode, completionCallback]() {
 			  completionCallback(txt, returnCode == NSAlertFirstButtonReturn);
 		  });
@@ -122,16 +119,8 @@ void Dialogs::textbox(std::string title,
 	  [label becomeFirstResponder];
 #		else
 		[label becomeFirstResponder];
-
 		handleResult([alert runModal], label);
 #		endif
-
-	  //
-	  //		NSInteger returnCode = [alert runModal];
-	  //		handleResult(returnCode, label);
-	  //
-
-	  // if OK was clicked, assign value to text
 	});
 #	endif
 #elif defined(__ANDROID__)
@@ -215,7 +204,6 @@ void Dialogs::confirm(std::string title,
 }
 
 void Dialogs::alert(std::string title, std::string msg) const {
-	Log::d() << "alertDialog(" << title << ", " << msg << ")";
 #ifdef AUTO_TEST
 	return;
 #endif
