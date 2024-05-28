@@ -77,8 +77,8 @@ public:
 		execute(cmd);
 	}
 
+	bool tryLock() { return mut.try_lock(); }
 	void lock() { mut.lock(); }
-
 	void unlock() { mut.unlock(); }
 
 	void recompile() {
