@@ -23,7 +23,8 @@
 #include "log.h"
 #define GLFONTSTASH_IMPLEMENTATION // Expands implementation
 
-#include <filesystem>
+#include <fsystem/fsystem.h>
+
 using namespace std;
 
 #ifdef __ANDROID__
