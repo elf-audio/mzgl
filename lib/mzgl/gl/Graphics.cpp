@@ -21,11 +21,11 @@
 #include "MitredLine.h"
 #include "Drawer.h"
 
-#include "GraphicsAPI.h"
+#include <api/GraphicsAPI.h>
+#include <api/OpenGLAPI.h>
 
 #include <array>
 #include <utility>
-
 
 Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
@@ -322,14 +322,14 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 	drawCircle(c.x, c.y, r);
 }
 void Graphics::drawCircle(float x, float y, float r) {
-	static constexpr auto circleResolution										  = 100;
-	auto circleResolationFun = [] {
-		std::array<std::pair<float, float>, circleResolution + 1> values {};
-		for (int i = 0; i <= circleResolution; ++i) {
-			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
-			values[i] = {std::cos(phi), std::sin(phi)};
-		}
-		return values;
+	static constexpr auto circleResolution = 100;
+	auto circleResolationFun			   = [] {
+		  std::array<std::pair<float, float>, circleResolution + 1> values {};
+		  for (int i = 0; i <= circleResolution; ++i) {
+			  float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			  values[i] = {std::cos(phi), std::sin(phi)};
+		  }
+		  return values;
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
@@ -551,7 +551,6 @@ void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
 }
 
-#include "OpenGLAPI.h"
 Graphics::Graphics() {
 	api = std::make_unique<OpenGLAPI>(*this);
 }

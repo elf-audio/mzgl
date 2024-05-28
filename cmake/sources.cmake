@@ -14,7 +14,10 @@ set (
   lib/mzgl/gl/error.cpp
   lib/mzgl/gl/Fbo.cpp
   lib/mzgl/gl/Font.cpp
-  lib/mzgl/gl/glUtil.cpp
+  lib/mzgl/gl/api/GraphicsAPI.h
+  lib/mzgl/gl/api/OpenGLAPI.cpp
+  lib/mzgl/gl/api/OpenGLAPI.h
+  lib/mzgl/gl/api/OpenGLDefaultShaders.h
   lib/mzgl/gl/Graphics.cpp
   lib/mzgl/gl/Image-win.cpp
   lib/mzgl/gl/Image.cpp
@@ -44,7 +47,6 @@ set (
   lib/mzgl/util/Dialogs.cpp
   lib/mzgl/util/Dylib.cpp
   lib/mzgl/util/errors.cpp
-  lib/mzgl/util/events.cpp
   lib/mzgl/util/FileWatcher.cpp
   lib/mzgl/util/FloatBuffer.cpp
   lib/mzgl/util/Haptics.cpp
