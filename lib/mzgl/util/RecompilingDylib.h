@@ -37,6 +37,7 @@
 #	define MZGL_LIBROOT "BUMBO"
 #	pragma error Must set LIBROOT if you want to do livecoding
 #endif
+template <class T>
 class RecompilingDylib {
 public:
 	Dylib dylib;
@@ -44,8 +45,8 @@ public:
 	FileWatcher watcher;
 	std::string path;
 
-	std::function<void(void *)> recompiled = [](void *) {};
-	std::function<void()> willCloseDylib   = []() {};
+	std::function<void(std::shared_ptr<T>)> recompiled = [](std::shared_ptr<T>) {};
+	std::function<void()> willCloseDylib			   = []() {};
 
 	std::function<void()> successCallback			 = []() {};
 	std::function<void(std::string)> failureCallback = [](std::string) {};
@@ -190,16 +191,16 @@ private:
 		outFile.close();
 	}
 
-	virtual void loadDylib(std::string dylibPath) {
+	virtual void loadDylib(const std::string &dylibPath) {
 		lock();
 		if (dylib.isOpen()) {
 			if (willCloseDylib) willCloseDylib();
 			dylib.close();
 		}
 		if (dylib.open(dylibPath)) {
-			void *dlib = dylib.get("getPluginPtr");
+			auto *dlib = static_cast<T *>(dylib.get("getPluginPtr"));
 			if (recompiled) {
-				recompiled(dlib);
+				recompiled(std::shared_ptr<T>(dlib));
 			}
 		} else {
 			printf("Couldn't open dylib\n");
@@ -209,7 +210,7 @@ private:
 
 	std::mutex mut;
 
-	std::string findFile(std::string file) {
+	std::string findFile(const std::string &file) {
 		auto f = file;
 		if (fs::exists(f)) return f;
 		f = "src/" + f;

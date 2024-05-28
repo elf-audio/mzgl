@@ -8,73 +8,52 @@
 
 #include "Slider.h"
 #include "maths.h"
+#include "stringUtil.h"
 Slider &Slider::darkTheme() {
-	color		  = hexColor(0x474747);
-	rail->color	  = hexColor(0x232323);
-	handle->color = hexColor(0xb2b2b2);
+	color		= hexColor(0x474747);
+	railColor	= hexColor(0x232323);
+	handleColor = hexColor(0xb2b2b2);
 	return *this;
 }
 
 void Slider::setValue(float f) {
-	drag(mapf(f, min, max, x + handle->width / 2, x + width - handle->width / 2));
+	drag(mapf(f, min, max, x + height / 2, x + width - height / 2));
 }
 
-Slider::Slider(Graphics &g, float *value, float min, float max)
-	: Layer(g, "") {
-	this->value = value;
+Slider::Slider(Graphics &g, const std::string &name, float &value, float min, float max, float curve)
+	: Layer(g, name) {
+	interactive = true;
+	this->value = &value;
 	this->min	= min;
 	this->max	= max;
-	width		= 200;
-	height		= DEFAULT_HEIGHT;
-
-	rail = new ColouredRectLayer(g);
-
-	rail->color = glm::vec4(0.6, 0.6, 0.6, 1);
-	addChild(rail);
-
-	handle		  = new ColouredRectLayer(g);
-	handle->width = HANDLE_WIDTH;
-
-	_resized();
-	handle->color = hexColor(0xCCCCCC);
-
-	addChild(handle);
-	interactive	 = true;
-	originalDims = glm::vec2(width, height);
+	this->curve = curve;
 }
 
-void Slider::_resized() {
-	rail->x		 = HANDLE_WIDTH / 2 + RADIUS;
-	rail->width	 = width - HANDLE_WIDTH - RADIUS * 2;
-	rail->height = 2;
-
-	rail->y = height / 2;
-
-	if (value == NULL) {
-		handle->x = RADIUS;
-	} else {
-		setValue(*value);
-	}
-	handle->y = RADIUS;
-
-	handle->height = height - RADIUS * 2;
-	originalDims   = glm::vec2(width, height);
+static std::string str(float val) {
+	if (std::abs(val) < 1) return toSigFigs(val, 2);
+	if (std::abs(val) < 20) return to_string(val, 1);
+	return to_string(val, 0);
 }
 
-void Slider::update() {
-	if (originalDims != glm::vec2(width, height)) {
-		_resized();
+void Slider::draw() {
+	g.setColor(railColor);
+	g.drawRect(*this);
+	g.setColor(handleColor);
+	float handleWidth = height;
+	float normVal	  = mapf(*value, min, max, 0, 1, true);
+	float val		  = powf(normVal, 1.0f / curve) * (width - height) + height / 2;
+	g.drawRect(x + val - handleWidth / 2, y, handleWidth, height);
+	if (!name.empty()) {
+		g.setColor(0);
+		g.drawText(name + ": " + str(*value), x + 5, y + height - 5);
 	}
 }
-
 void Slider::drag(float x) {
-	handle->x = x - this->x - handle->width / 2;
-	if (handle->centre().x < rail->x) handle->x = rail->x - handle->width / 2;
-	if (handle->centre().x > rail->right()) handle->x = rail->right() - handle->width / 2;
+	float handleWidth = height;
+	float normVal	  = mapf(x, handleWidth / 2, width - handleWidth / 2, 0, 1, true);
+	float val		  = powf(normVal, curve) * (max - min) + min;
 
-	float val = mapf(handle->centre().x, rail->x, rail->right() - handle->width, min, max);
-
-	if (value != NULL) {
+	if (value != nullptr) {
 		*value = val;
 	}
 
@@ -86,7 +65,6 @@ void Slider::drag(float x) {
 bool Slider::touchDown(float x, float y, int id) {
 	if (inside(x, y)) {
 		drag(x);
-
 		return true;
 	}
 	return false;

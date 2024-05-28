@@ -4,11 +4,11 @@
 #include "Graphics.h"
 #include "log.h"
 
-class RecompilingAppDylib : public RecompilingDylib {
+class RecompilingAppDylib : public RecompilingDylib<App> {
 public:
 	Graphics &g;
 	RecompilingAppDylib(Graphics &g)
-		: RecompilingDylib()
+		: RecompilingDylib<App>()
 		, g(g) {}
 
 	void makeCppFile(const std::string &path, const std::string &objName) override {
@@ -22,7 +22,7 @@ public:
 		outFile.close();
 	}
 
-	void loadDylib(std::string dylibPath) override {
+	void loadDylib(const std::string &dylibPath) override {
 		lock();
 		if (dylib.isOpen()) {
 			willCloseDylib();
@@ -31,9 +31,9 @@ public:
 		if (dylib.open(dylibPath)) {
 			void *funcPtr = dylib.getFunctionPointer("getPluginPtr");
 			if (funcPtr != nullptr) {
-				void *dlib = ((App * (*) (Graphics &) ) funcPtr)(g);
+				App *app = static_cast<App *>(((App * (*) (Graphics &) ) funcPtr)(g));
 				if (recompiled) {
-					recompiled(dlib);
+					recompiled(std::shared_ptr<App>(app));
 				}
 			} else {
 				Log::e() << "Couldn't reload dylib";

@@ -54,6 +54,7 @@ bool DropDown::touchDown(float x, float y, int id) {
 	touchStart = glm::vec2(x, y);
 	if (collapsed) {
 		toggle();
+		sendToFront();
 		expandingClick = true;
 	}
 	touchHasMoved = false;
