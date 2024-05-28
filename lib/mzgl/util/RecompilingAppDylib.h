@@ -1,3 +1,5 @@
+#pragma once
+
 #include "RecompilingDylib.h"
 #include "Graphics.h"
 #include "log.h"
@@ -9,7 +11,7 @@ public:
 		: RecompilingDylib()
 		, g(g) {}
 
-	virtual void makeCppFile(std::string path, std::string objName) override {
+	void makeCppFile(const std::string &path, const std::string &objName) override {
 		fs::ofstream outFile(fs::u8path(path));
 
 		outFile << "#include \"" + objName + ".h\"\n\n";
@@ -20,7 +22,7 @@ public:
 		outFile.close();
 	}
 
-	virtual void loadDylib(std::string dylibPath) override {
+	void loadDylib(std::string dylibPath) override {
 		lock();
 		if (dylib.isOpen()) {
 			willCloseDylib();

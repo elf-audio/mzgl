@@ -61,18 +61,6 @@ add_library(ZipFile STATIC
     ZipFile.cpp
     ZipStreamer.cpp
     ZipReader.cpp
-
-    lib/zipper/zipper/CDirEntry.cpp
-    lib/zipper/zipper/tools.cpp
-    lib/zipper/zipper/unzipper.cpp
-    lib/zipper/zipper/zipper.cpp
-
-    lib/zipper/minizip/unzip.c
-    lib/zipper/minizip/zip.c
-    lib/zipper/minizip/ioapi.c
-    lib/zipper/minizip/ioapi_buf.c
-    lib/zipper/minizip/ioapi_mem.c
-    # lib/zipper/zipper/tps/dirent.c
 )
 
 endif()
@@ -96,6 +84,5 @@ target_include_directories(ZipFile PUBLIC
     lib
 )
 target_link_libraries(ZipFile staticZipper)
-
 
 endif()
