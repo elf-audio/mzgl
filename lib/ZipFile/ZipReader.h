@@ -1,8 +1,10 @@
 #pragma once
 
-#include "filesystem.h"
 #include <vector>
 #include <memory>
+#include <string>
+#include <fstream>
+#include <fsystem/fsystem.h>
 
 class ZipReaderFile;
 

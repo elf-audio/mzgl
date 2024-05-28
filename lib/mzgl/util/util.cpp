@@ -6,12 +6,26 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#include "util.h"
 #include <algorithm>
 #include <cctype>
+#include <chrono>
+#include <fstream>
+#include <fsystem/fsystem.h>
+#include <iomanip>
 #include <iterator>
+#include <sstream>
+#include <thread>
+#include <stdlib.h>
+#include <stdio.h>
+#include <optional>
 
+#include "App.h"
+#include "Graphics.h"
+#include "log.h"
+#include "mainThread.h"
 #include "mzgl_platform.h"
+#include "util.h"
+
 #ifdef __APPLE__
 #	include <os/log.h>
 #	include <TargetConditionals.h>
@@ -48,29 +62,11 @@
 #	include <processthreadsapi.h>
 #endif
 
-#include <chrono>
-#include <fstream>
-
-#include "log.h"
-#include <iomanip>
-#include <algorithm>
-
-#include "filesystem.h"
-
-#include "App.h"
-#include "mainThread.h"
-#include <thread>
-
 // this from openframeworks
 #ifndef _WIN32
 #	include <pwd.h>
 #	include <unistd.h>
 #endif
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <optional>
-#include "filesystem.h"
 
 void setThreadName(const std::string &name) {
 #if defined(__APPLE__)
@@ -367,7 +363,6 @@ std::string tempDir() {
 		// Fallback on earlier versions
 		_p = [NSTemporaryDirectory() UTF8String];
 	}
-
 #elif defined(__ANDROID__)
 	std::string _p = getAndroidTempDir();
 #else
@@ -386,7 +381,7 @@ void setDataPath(const std::string &path) {
 
 static auto getVSTBundlePath() -> fs::path {
 #ifdef _WIN32
-	return std::filesystem::canonical(getCurrentDllPath() / ".." / ".." / "..");
+	return fs::canonical(getCurrentDllPath() / ".." / ".." / "..");
 #else
 	// FIXME: This needs to be implemented for other platforms
 	return "";
@@ -443,7 +438,6 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 //#ifdef UNIT_TEST
 bool isOverridingDocsPath	 = false;
 std::string docsPathOverride = "";
-
 void setDocsPath(const std::string &path) {
 	isOverridingDocsPath = true;
 	docsPathOverride	 = path;
@@ -795,7 +789,7 @@ void launchUrl(const std::string &url) {
 }
 
 std::string getAppVersionString() {
-	std::string version;
+	std::string version = "";
 #ifdef __APPLE__
 	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	if (str == nil) {
@@ -850,9 +844,8 @@ void saveFileDialog(const std::string &msg,
 	const auto defaultFileNameCopy	 = defaultFileName;
 	const auto allowedExtensionsCopy = allowedExtensions;
 	dispatch_async(dispatch_get_main_queue(), ^{
-	  // do work here
-	  NSModalResponse buttonClicked = -1;
-	  std::string filePath;
+	  NSInteger buttonClicked = -1;
+	  std::string filePath	  = "";
 	  @autoreleasepool {
 		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
 		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
@@ -994,7 +987,7 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData) 
 }
 
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data) {
-	fs::ofstream outfile(fs::u8path(path), std::ios::out | std::ios::binary);
+	std::ofstream outfile(fs::path {path}, std::ios::out | std::ios::binary);
 	if (outfile.fail()) return false;
 	outfile.write((const char *) data.data(), data.size());
 	if (outfile.fail()) return false;
@@ -1028,7 +1021,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 	return true;
 }
 bool readStringFromFile(const std::string &path, std::string &outStr) {
-	fs::ifstream t(fs::u8path(path));
+	std::ifstream t(fs::path {path});
 	if (t.fail()) {
 		Log::e() << "failed to open file at " << path;
 		return false;

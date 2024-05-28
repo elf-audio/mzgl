@@ -13,7 +13,7 @@
 #include "MacMenuBar.h"
 
 #include "NSEventDispatcher.h"
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 
 class LiveCodeApp : public App {
 public:

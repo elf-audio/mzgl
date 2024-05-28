@@ -1,0 +1,43 @@
+set (LINUX FALSE)
+set (IOS FALSE)
+
+set (BUILD_PLATFORM_IS_LINUX FALSE)
+set (BUILD_PLATFORM_IS_IOS FALSE)
+set (BUILD_PLATFORM_IS_MAC FALSE)
+set (BUILD_PLATFORM_IS_WINDOWS FALSE)
+set (BUILD_PLATFORM_IS_ANDROID FALSE)
+
+if (NOT ANDROID AND UNIX AND NOT APPLE)
+  set (LINUX TRUE)
+  set (BUILD_PLATFORM_IS_LINUX TRUE)
+endif ()
+
+if (CMAKE_SYSTEM_NAME MATCHES "iOS")
+  mzgl_print_in_green ("Detected \"iOS\" system name")
+  set (IOS TRUE)
+  set (BUILD_PLATFORM_IS_IOS TRUE)
+endif ()
+
+if (DEFINED ${PLATFORM})
+  mzgl_print_in_green ("Platform is defined and its set to ${PLATFORM}")
+
+  if (${PLATFORM} STREQUAL "OS64" OR ${PLATFORM} STREQUAL "OS64COMBINED")
+    set (IOS TRUE)
+    set (BUILD_PLATFORM_IS_IOS TRUE)
+  endif ()
+endif ()
+
+if (CMAKE_SYSTEM_NAME MATCHES "Android")
+  mzgl_print_in_green ("Detected \"Android\" system name")
+  set (BUILD_PLATFORM_IS_ANDROID TRUE)
+endif ()
+
+if (APPLE AND NOT IOS)
+  mzgl_print_in_green ("macOS and !iOS")
+  set (BUILD_PLATFORM_IS_MAC TRUE)
+endif ()
+
+if (WIN32)
+  mzgl_print_in_green ("Windows")
+  set (BUILD_PLATFORM_IS_WINDOWS TRUE)
+endif ()

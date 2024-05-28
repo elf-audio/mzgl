@@ -19,7 +19,10 @@
 #endif
 #include "mzAssert.h"
 
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
+#include <fstream>
+#include <string>
+#include <functional>
 #include "mainThread.h"
 
 namespace unit_test {
@@ -967,9 +970,9 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 
 	std::string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
-	fs::ifstream src(fs::u8path(path), std::ios::binary);
+	std::ifstream src(fs::path {path}, std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
-	fs::ofstream dst(fs::u8path(destPath), std::ios::binary);
+	std::ofstream dst(fs::path {destPath}, std::ios::binary);
 
 	dst << src.rdbuf();
 #endif

@@ -6,7 +6,7 @@
 #include "CDirEntry.h"
 #include "Timestamp.h"
 
-#include "filesystem.h"
+#include <fsystem/fsystem.h>
 #include <stdexcept>
 
 namespace zipper {

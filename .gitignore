@@ -17,4 +17,5 @@ lib/glfw/*
 opt/iPlug2
 examples/build/*
 examples/bin/*
+cmake-build-*
 .idea

@@ -24,7 +24,7 @@
 #include "FileWatcher.h"
 #include "Dylib.h"
 
-#include "filesystem.h"
+#include <filesystem>
 
 #include <sys/stat.h>
 #include "util.h"

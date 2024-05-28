@@ -7,6 +7,12 @@
 //
 
 #include "Midi.h"
+#ifdef __APPLE__
+#    include <TargetConditionals.h>
+#endif
+
+#if ! TARGET_OS_IOS
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData) {
 	((MidiIn *) userData)->callback(deltatime, message);
 }
+#endif

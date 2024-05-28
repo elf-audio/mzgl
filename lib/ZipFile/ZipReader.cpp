@@ -1,5 +1,8 @@
 #include "ZipReader.h"
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include <memory>
 
 struct ZipEndOfCD {
 	int32_t signature; // 0x50, 0x4b, 0x05, 0x06

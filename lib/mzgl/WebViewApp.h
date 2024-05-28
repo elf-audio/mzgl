@@ -9,7 +9,7 @@
 #pragma once
 
 #include "App.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 class WebViewApp : public App {
 public:

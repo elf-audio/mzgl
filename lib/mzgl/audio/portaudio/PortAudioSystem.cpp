@@ -11,7 +11,7 @@
 // #ifdef __APPLE__
 // #import <AVFoundation/AVFoundation.h>
 // #endif
-#include "portaudio.h"
+#include <portaudio.h>
 #ifdef __linux__
 #	include "pa_linux_alsa.h"
 #endif
