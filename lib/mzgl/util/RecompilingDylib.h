@@ -7,10 +7,6 @@
 /*
 
 
- for this to work, you need to put this in your Other C++ flags
- -DSRCROOT=\"${SRCROOT}\"
-
-
  found some good nuggets here
  https://glandium.org/blog/?p=2764
  about how to do precompiled headers.
@@ -28,15 +24,7 @@
 
 #include <sys/stat.h>
 #include "util.h"
-#ifndef SRCROOT
-#	define SRCROOT "BUMBO"
-#	pragma warning Must set SRCROOT if you want to do livecoding
-#endif
 
-#ifndef MZGL_LIBROOT
-#	define MZGL_LIBROOT "BUMBO"
-#	pragma error Must set LIBROOT if you want to do livecoding
-#endif
 template <class T>
 class RecompilingDylib {
 public:
@@ -52,9 +40,17 @@ public:
 	std::function<void(std::string)> failureCallback = [](std::string) {};
 	std::string srcRoot;
 
-	void setup(std::string path) {
+	std::string libRoot;
+
+	void setup(std::string path, std::string mzglRoot) {
+		libRoot	   = mzglRoot;
 		this->path = findFile(path);
-		srcRoot	   = fs::path(path).parent_path().string();
+
+		if (!fs::exists(path)) {
+			throw std::runtime_error("File doesn't exist: " + path);
+		}
+
+		srcRoot = fs::path(path).parent_path().string();
 		precompileHeaders();
 
 		watcher.watch(this->path);
@@ -69,10 +65,8 @@ public:
 	void update() { watcher.tick(); }
 
 	void precompileHeaders() {
-		auto libroot = MZGL_LIBROOT;
-
 		printf("pwd: %s\n", execute("pwd").c_str());
-		auto cmd = "g++ -std=c++20 -DDEBUG -stdlib=libc++ " + getAllIncludes(libroot, macExcludes) + " " + libroot
+		auto cmd = "g++ -std=c++20 -DDEBUG -stdlib=libc++ " + getAllIncludes(libRoot, macExcludes) + " " + libRoot
 				   + "/mzgl/App.h";
 		printf("Precompiling headers: %s\n", cmd.c_str());
 		execute(cmd);
@@ -113,10 +107,10 @@ private:
 		auto dylibPath	= "/tmp/" + objectName + ".dylib";
 		makeCppFile(cppFile, objectName);
 
-		std::string libroot = MZGL_LIBROOT;
-
-		auto includes = getAllIncludes(srcRoot) + " -include " + libroot + "/mzgl/App.h"
-						+ getAllIncludes(libroot, macExcludes) + "/mzgl/ ";
+		auto includes =
+			//			getAllIncludes(srcRoot)
+			"-I" + srcRoot + " " + " -include " + libRoot + "/mzgl/App.h" + getAllIncludes(libRoot, macExcludes)
+			+ "/mzgl/ ";
 		auto cmd = "g++ -std=c++20 -g -Wno-deprecated-declarations -stdlib=libc++ -c " + cppFile + " -o " + objFile
 				   + " " + includes;
 

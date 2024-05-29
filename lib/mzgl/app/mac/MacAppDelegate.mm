@@ -225,7 +225,9 @@ void handleTerminateSignal(int signal) {
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
 	string fn		   = [filename UTF8String];
 	auto evtDispatcher = eventDispatcher;
-	app->main.runOnMainThread(true, [evtDispatcher, fn]() { evtDispatcher->openUrl(ScopedUrl::create(fn)); });
+	app->main.runOnMainThread(true, [evtDispatcher, fn]() {
+		if (evtDispatcher) evtDispatcher->openUrl(ScopedUrl::create(fn));
+	});
 	return YES;
 }
 @end
