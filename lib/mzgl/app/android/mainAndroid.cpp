@@ -39,18 +39,6 @@ shared_ptr<App> androidGetApp() {
 	return app;
 }
 
-//EGLint __WIDTH = 0;
-//EGLint __HEIGHT = 0;
-
-//
-//void
-//MessageCallback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam )
-//{
-//    string t = GL_DEBUG_TYPE_ERROR?"** GL ERROR **": "";
-//Log::e() << "GL CALLBACK: "<<t<<", severity = "<<to_string(severity)<<" message = " << message;
-//
-//}
-
 void chooseConfig(struct engine *engine) {
 	EGLint numConfigs;
 
@@ -124,8 +112,6 @@ void createSurface(struct engine *engine) {
  * Initialize an EGL context for the current display.
  */
 static int engine_init_display(struct engine *engine) {
-	// initialize OpenGL ES and EGL
-	//    LOGE("engine_init_display");
 
 	engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
@@ -141,7 +127,6 @@ static int engine_init_display(struct engine *engine) {
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	/// now make the context
 
-	//    LOGI("About to set GLES version");
 	EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
 	engine->context = eglCreateContext(engine->display, engine->config, NULL, contextAttribs);
@@ -166,18 +151,6 @@ static int engine_init_display(struct engine *engine) {
 		LOGE("GL VERSION WAS NULL");
 	}
 
-	//    LOGI("Getting GL info");
-	//    // Check openGL on the system
-	//    auto opengl_info = {GL_VENDOR, GL_RENDERER, GL_VERSION, GL_EXTENSIONS};
-	//    for (auto name : opengl_info) {
-	//        auto info = glGetString(name);
-	//        LOGI("OpenGL Info: %s", info);
-	//    }
-
-	// During init, enable debug output
-	//    glEnable              ( GL_DEBUG_OUTPUT );
-	//    glDebugMessageCallback( MessageCallback, 0 );
-
 	return 0;
 }
 
@@ -193,7 +166,7 @@ bool checkGlError(const char *funcName) {
 static void engine_term_display(struct engine *engine);
 
 static bool prepareFrame(struct engine *engine) {
-	if (engine->display == NULL) {
+	if (engine->display == nullptr) {
 		// No display.
 		return false;
 	}
@@ -201,20 +174,15 @@ static bool prepareFrame(struct engine *engine) {
 	GLint err = glGetError();
 	if (err != GL_NO_ERROR) {
 		LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
-		if (engine->surface == NULL) {
+		if (engine->surface == nullptr) {
 			createSurface(engine);
 		}
 	}
 
 	EGLint outInt;
 	auto result = eglQueryContext(engine->display, engine->context, EGL_CONFIG_ID, &outInt);
-	if (result == EGL_FALSE) {
+	if (result != EGL_TRUE) {
 		Log::e() << "Got false";
-		return false;
-	} else if (result == EGL_TRUE) {
-		//        Log::d() << "Got true!";
-	} else {
-		Log::e() << "Got " << result;
 		return false;
 	}
 	return true;
