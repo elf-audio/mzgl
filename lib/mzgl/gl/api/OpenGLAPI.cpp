@@ -31,8 +31,6 @@ void OpenGLAPI::init() {
 		Log::d() << "OpenGL Version: " << openglVersion;
 #ifdef MZGL_GL2
 		Log::d() << "MZGL Compiled with MZGL_GL2==TRUE";
-#else
-		Log::d() << "MZGL Compiled with MZGL_GL2==FALSE";
 #endif
 	} else {
 		Log::d() << "OpenGL Version: null";

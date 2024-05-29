@@ -219,16 +219,7 @@ static bool prepareFrame(struct engine *engine) {
 	}
 	return true;
 }
-//
-//static void engine_draw_blankFrame(struct engine* engine) {
-//    if(!prepareFrame(engine)) {
-//        return;
-//    }
-//
-//    // just draw *something* whilst loading... - doesn't seem to work
-//    graphics.clear(1.0, 0.1, 0.1, 1);
-//    eglSwapBuffers(engine->display, engine->surface);
-//}
+
 /**
  * Just the current frame in the display.
  */
@@ -238,8 +229,6 @@ static void engine_draw_frame(struct engine *engine) {
 	}
 
 	if (!firstFrameAlreadyRendered) {
-		firstFrameAlreadyRendered = true;
-
 		graphics.width	= engine->width;
 		graphics.height = engine->height;
 		glViewport(0, 0, graphics.width, graphics.height);
@@ -250,6 +239,7 @@ static void engine_draw_frame(struct engine *engine) {
 		eglSwapBuffers(engine->display, engine->surface);
 
 		eventDispatcher->setup();
+		firstFrameAlreadyRendered = true;
 	}
 
 	{
@@ -504,18 +494,18 @@ bool clearedUpGLResources  = false;
 /**
  * Process the next main command.
  */
-static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
-	struct engine *engine = (struct engine *) app->userData;
+static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
+	struct engine *engine = (struct engine *) appPtr->userData;
 
 	switch (cmd) {
 		case APP_CMD_INIT_WINDOW:
 			Log::d() << "APP_CMD_INIT_WINDOW";
 			// The window is being shown, get it ready.
-			if (engine->app->window != NULL) {
+			if (engine->app->window != nullptr) {
 				engine_init_display(engine);
 				engineReady = true;
 
-				graphics.initGraphics();
+				initMZGL(app);
 				if (eventDispatcher != nullptr && prepareFrame(engine)) {
 					//                    engine_draw_blankFrame(engine);
 					graphics.width	= engine->width;
@@ -540,20 +530,7 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
 			engine_term_display(engine);
 			engineReady = false;
 			break;
-			/*
-        case APP_CMD_GAINED_FOCUS:
-            Log::d() << "APP_CMD_GAINED_FOCUS";
-            if(!ignoreNextGainedFocus) {
-                if (eventDispatcher && eventDispatcher->isReady()) {
-                    clearUpGLResources();
-                    Log::d() << "allocating GL resources";
-                    eventDispatcher->resized();
-                }
-            }
-            ignoreNextGainedFocus = false;
-            engineReady = true;
-            break;
-*/
+
 		case APP_CMD_LOST_FOCUS: Log::d() << "APP_CMD_LOST_FOCUS"; break;
 
 		case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
@@ -567,7 +544,9 @@ static void engine_handle_cmd(struct android_app *app, int32_t cmd) {
 			}
 			break;
 
-		case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
+		case APP_CMD_SAVE_STATE:
+			Log::d() << "APP_CMD_SAVE_STATE";
+			break;
 
 		case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
 
@@ -625,7 +604,6 @@ void android_main(struct android_app *state) {
 
 	app = instantiateApp(graphics);
 
-	initMZGL(app);
 
 	// loop waiting for stuff to do.
 	while (1) {

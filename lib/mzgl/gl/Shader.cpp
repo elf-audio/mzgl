@@ -379,25 +379,32 @@ GLuint Shader::compileShader(GLenum type, string src) {
 	glCompileShader(shader);
 	GetError();
 	//#if defined(DEBUG)
-	GLint logLength;
 
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-	GetError();
-	if (logLength > 1024 * 1024) {
-		Log::e() << "Shader log length is huge, may be a nokia phone going crazy";
-		logLength = 0;
-	}
-	if (logLength > 0) {
-		GLchar *log = (GLchar *) malloc((size_t) logLength);
-		glGetShaderInfoLog(shader, logLength, &logLength, log);
+	// Check compile status
+	GLint compileStatus;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+	if (compileStatus == GL_FALSE) {
+		GLint logLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 		GetError();
-		std::string lm = log;
-
-		// hide warning messages for now
-		if (lm.find("WARNING: 0:3: Overflow in implicit constant conversion") == -1 && lm.find("Success.") != 0) {
-			Log::e() << typeString << " shader compilation failed with error:\n" << log;
+		if (logLength > 1024 * 1024) {
+			Log::e() << "Shader log length is huge, may be a nokia phone going crazy";
+			logLength = 0;
 		}
-		free(log);
+		if (logLength > 0) {
+			GLchar *log = (GLchar *) malloc((size_t) logLength);
+			glGetShaderInfoLog(shader, logLength, &logLength, log);
+			GetError();
+			std::string lm = log;
+
+			// hide warning messages about implicit conversions or errors that aren't errors - some samsungs report an error of ' ' (just a space)
+			if (lm.find("WARNING: 0:3: Overflow in implicit constant conversion") == -1 && lm.find("Success.") != 0
+				&& lm != " ") {
+				Log::e() << typeString << " shader compilation failed with error:\n'" << log << "'";
+			}
+			free(log);
+		}
 	}
 	//#endif
 

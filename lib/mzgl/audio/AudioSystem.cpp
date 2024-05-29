@@ -28,22 +28,22 @@ void _AudioSystem::removeSampleRateChangeListener(SampleRateChangeListener *list
 }
 
 bool _AudioSystem::setInput(const AudioPort &audioInput) {
-	Log::e() << "AudioSystem::setInput() not implemented - you got to do it yourself";
+	Log::e() << "AudioSystem::setInput() not implemented";
 	return false;
 }
 
 bool _AudioSystem::setOutput(const AudioPort &audioOutput) {
-	Log::e() << "AudioSystem::setOutput() not implemented - you got to do it yourself";
+	Log::e() << "AudioSystem::setOutput() not implemented";
 	return false;
 }
 
 AudioPort _AudioSystem::getInput() {
-	Log::e() << "AudioSystem::getInput() not implemented - you got to do it yourself";
+	Log::e() << "AudioSystem::getInput() not implemented";
 	return AudioPort();
 }
 
 AudioPort _AudioSystem::getOutput() {
-	Log::e() << "AudioSystem::getOutput() not implemented - you got to do it yourself";
+	Log::e() << "AudioSystem::getOutput() not implemented";
 	return AudioPort();
 }
 
