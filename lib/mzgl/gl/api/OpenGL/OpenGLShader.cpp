@@ -301,40 +301,37 @@ GLuint OpenGLShader::compileShader(GLenum type, std::string src) {
 #endif
 	const GLchar *source = (GLchar *) src.c_str();
 
-	if (nullptr == source) {
-		// TODO: proper warning
-		Log::e() << "Failed to read shader text";
-		return 0;
-	}
 	shader = glCreateShader(type);
 	glShaderSource(shader, 1, &source, nullptr);
 	glCompileShader(shader);
 
-	GLint logLength;
+	GLint compileStatus;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+	if (compileStatus == false) {
+		GLint logLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
-	if (logLength > 1024 * 1024) {
-		Log::e() << "Shader log length is huge, may be a nokia phone going crazy";
-		logLength = 0;
-	}
-	if (logLength > 0) {
-		auto *log = (GLchar *) malloc((size_t) logLength);
-		glGetShaderInfoLog(shader, logLength, &logLength, log);
-
-		std::string lm = log;
-
-		if (lm.find("WARNING: 0:3: Overflow in implicit constant conversion") == -1 && lm.find("Success.") != 0) {
-			Log::e() << typeString << " shader compilation failed with error:\n" << log;
+		if (logLength > 1024 * 1024) {
+			Log::e() << "Shader log length is huge, may be a nokia phone going crazy";
+			logLength = 0;
 		}
-		free(log);
+		if (logLength > 0) {
+			GLchar *log = (GLchar *) malloc((size_t) logLength);
+			glGetShaderInfoLog(shader, logLength, &logLength, log);
+
+			std::string lm = log;
+
+			// hide warning messages about implicit conversions or errors that aren't errors - some samsungs report an error of ' ' (just a space)
+			if (lm.find("WARNING: 0:3: Overflow in implicit constant conversion") == -1 && lm.find("Success.") != 0
+				&& lm != " ") {
+				Log::e() << typeString << " shader compilation failed with error:\n'" << log << "'";
+			}
+			free(log);
+			glDeleteShader(shader);
+			Log::e() << typeString << "shader compilation failed for file";
+		}
 	}
 
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (0 == status) {
-		glDeleteShader(shader);
-		Log::e() << typeString << "shader compilation failed for file";
-	}
 	return shader;
 }
