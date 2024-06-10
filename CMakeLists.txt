@@ -72,6 +72,7 @@ set(MZGL_SOURCES
         lib/mzgl/midi/MidiMessageParser.cpp
         lib/mzgl/midi/MidiMessageParser.h
         lib/mzgl/midi/midiMessagePrinting.cpp
+        lib/mzgl/music/chords.cpp
         lib/mzgl/music/scales.cpp
         lib/mzgl/net/netUtil.cpp
         lib/mzgl/ui/widgets/ReorderableGrid.cpp
