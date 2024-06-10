@@ -41,10 +41,15 @@ public:
 	std::string srcRoot;
 
 	std::string libRoot;
-
-	void setup(std::string path, std::string mzglRoot) {
-		libRoot	   = mzglRoot;
-		this->path = findFile(path);
+	std::string hFileName;
+	std::vector<std::string> userIncludes;
+	void setup(const std::string &path,
+			   const std::string &mzglRoot,
+			   const std::vector<std::string> &includes = {}) {
+		this->userIncludes = includes;
+		hFileName		   = fs::path(path).filename().string();
+		libRoot			   = mzglRoot;
+		this->path		   = findFile(path);
 
 		if (!fs::exists(path)) {
 			throw std::runtime_error("File doesn't exist: " + path);
@@ -99,6 +104,15 @@ private:
 	std::vector<std::string> macExcludes = {"glfw", "MetalANGLE"};
 	std::string lastErrorStr;
 
+	std::string makeUserIncludes() {
+		if (userIncludes.empty()) return "";
+		std::string inc = "";
+		for (const auto &i: userIncludes) {
+			inc += " -I" + i;
+		}
+		inc += " ";
+		return inc;
+	}
 	std::string cc() {
 		// call our makefile
 		auto objectName = getObjectName(path);
@@ -107,23 +121,26 @@ private:
 		auto dylibPath	= "/tmp/" + objectName + ".dylib";
 		makeCppFile(cppFile, objectName);
 
-		auto includes =
-			//			getAllIncludes(srcRoot)
-			"-I" + srcRoot + " " + " -include " + libRoot + "/mzgl/App.h" + getAllIncludes(libRoot, macExcludes)
-			+ "/mzgl/ ";
+		auto includes = makeUserIncludes() +
+						//			getAllIncludes(srcRoot)
+						"-I" + srcRoot + " " + " -include " + libRoot + "/mzgl/App.h"
+						+ getAllIncludes(libRoot, macExcludes) + "/mzgl/ ";
+
 		auto cmd = "g++ -std=c++20 -g -Wno-deprecated-declarations -stdlib=libc++ -c " + cppFile + " -o " + objFile
 				   + " " + includes;
 
 		int exitCode = 0;
-		printf("%s\n", cmd.c_str());
+		printf("cc: %s\n", cmd.c_str());
 		auto res = execute(cmd, &exitCode);
 
 		if (exitCode != 0) {
 			printf("Error compiling %s\n", cppFile.c_str());
 			printf("%s\n", res.c_str());
 			lastErrorStr = res;
+			setWindowTitle(hFileName + " ☠\uFE0F❌☠\uFE0F");
 			return "";
 		}
+		setWindowTitle(hFileName + "OK"); //\uD83C\uDD97");
 		cmd = "g++ -dynamiclib -g -undefined dynamic_lookup -o " + dylibPath + " " + objFile;
 		execute(cmd);
 		return dylibPath;
