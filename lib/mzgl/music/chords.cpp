@@ -1,6 +1,5 @@
 #include "chords.h"
-//#include <stdio.h>
-//#include <algorithm>
+#include <algorithm>
 #include "scales.h"
 
 enum class MajorMinor { None, Major, Minor };
