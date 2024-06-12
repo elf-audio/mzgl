@@ -9,6 +9,7 @@
 #pragma once
 #include "NVG.h"
 #include "Tween.h"
+#include "maths.h"
 
 namespace NVGUI {
 
@@ -220,12 +221,11 @@ namespace NVGUI {
 			}
 		}
 
-		float smoothstep(float x) { return x * x * x * (x * (x * 6 - 15) + 10); }
 
 		virtual void draw() override {
 			if (amt < 0.001) return;
 			nvg.noStroke();
-			nvg.fill({0, 0, 0, smoothstep(amt) * 0.5});
+			nvg.fill({0, 0, 0, smootherstep(amt) * 0.5});
 			width  = g.width;
 			height = g.height;
 			nvg.drawRect(*this);

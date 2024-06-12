@@ -51,15 +51,15 @@ float rms2db(float inp) {
 }
 
 float db2rms(float db) {
-	return powf(10, db / 20.f);
+	return powf(10.f, db / 20.f);
 }
 
 float smoothstep(float x) {
-	return x * x * (3 - 2 * x);
+	return x * x * (3.f - 2.f * x);
 }
 
 float smootherstep(float x) {
-	return x * x * x * (x * (x * 6 - 15) + 10);
+	return x * x * x * (x * (x * 6.f - 15.f) + 10.f);
 }
 
 float nearestPow2(float v) {

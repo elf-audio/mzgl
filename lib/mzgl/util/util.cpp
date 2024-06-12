@@ -764,13 +764,13 @@ std::string execute(std::string cmd, int *outExitCode) {
 #endif
 }
 void initMZGL(std::shared_ptr<App> app) {
-	//	Log::d() << "initMZGL()";
 	if (!app->isHeadless()) {
-		//		Log::d() << "Initing graphics";
 		app->g.initGraphics();
-		//		Log::d() << "inited graphics";
 	}
 	Globals::startTime = std::chrono::system_clock::now();
+	app->g.frameDelta = 1.f/60.f;
+	app->g.currFrameTime = 0.f;
+
 }
 
 #if TARGET_OS_IOS
