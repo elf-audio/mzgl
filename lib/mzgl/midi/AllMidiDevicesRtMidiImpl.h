@@ -4,6 +4,13 @@
 
 #pragma once
 
+#include <vector>
+#include <memory>
+#include <atomic>
+#include <mzgl/midi/MidiMessage.h>
+#include <mzgl/midi/Midi.h>
+#include "AllMidiDevicesImpl.h"
+
 class AllMidiDevicesRtMidiImpl
 	: public MidiListener
 	, public AllMidiDevicesImpl {

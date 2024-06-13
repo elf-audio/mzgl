@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 // to 'precision' decimal places
 std::string to_string(float value, int precision);

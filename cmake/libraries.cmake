@@ -66,9 +66,13 @@ if (BUILD_PLATFORM_IS_LINUX)
   list (
     APPEND
     MZGL_LIBRARIES
-    atomic
     GLESv2
-    EGL)
+    EGL
+    atomic
+    glfw
+    glew
+    rtmidi
+    portaudio_static)
 endif ()
 
 if (BUILD_PLATFORM_IS_MAC)

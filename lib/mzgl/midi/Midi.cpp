@@ -11,7 +11,7 @@
 #	include <TargetConditionals.h>
 #endif
 
-#if TARGET_OS_MAC && !TARGET_OS_IOS
+#if (TARGET_OS_MAC && !TARGET_OS_IOS) || defined(__linux__)
 void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void *userData) {
 	((MidiIn *) userData)->callback(deltatime, message);
 }

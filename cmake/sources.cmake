@@ -132,10 +132,14 @@ if (NOT ANDROID)
     list (
       APPEND
       MZGL_SOURCES
+      lib/mzgl/audio/portaudio/PortAudioSystem.cpp
       lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Linux.cpp
       lib/mzgl/app/glfw/GLFWOS_Linux.cpp
       lib/mzgl/util/linuxUtil.cpp
-      lib/mzgl/app/glfw/mainGlfw.cpp)
+      lib/mzgl/app/glfw/mainGlfw.cpp
+      lib/speex/speex_resampler.cpp
+      lib/mzgl/audio/Resampler.cpp
+      lib/mzgl/audio/AudioFileAndroid.cpp)
   endif ()
 
   if (BUILD_PLATFORM_IS_WINDOWS)

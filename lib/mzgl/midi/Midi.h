@@ -58,8 +58,8 @@ public:
 #	include <TargetConditionals.h>
 #endif
 
-#if TARGET_OS_MAC && !TARGET_OS_IOS
-#include "RtMidi.h"
+#if (TARGET_OS_MAC && !TARGET_OS_IOS)  || defined(__linux__)
+#include <RtMidi.h>
 
 class MidiPort : public MidiDevice {
 public:

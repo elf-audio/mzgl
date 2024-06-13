@@ -20,9 +20,9 @@
 #	endif
 #elif defined(_WIN32)
 #	include <Windows.h>
-
-#	include "glew.h"
-#	include "glfw3native.h"
+#   include <glew/include/GL/glew.h>
+#   include <glfw/glfw3.h>
+#   include <GLFW/glfw3native.h>
 
 #else
 

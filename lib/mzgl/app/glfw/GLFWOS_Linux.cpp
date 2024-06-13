@@ -2,8 +2,10 @@
 #define GLFW_NATIVE_INCLUDE_NONE
 
 #include "GLFWOS.h"
-#include <glew.h>
-#include "glfw3.h"
+#include <glew/include/GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
 namespace os {

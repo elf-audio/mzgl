@@ -118,8 +118,27 @@ function (mzgl_add_audioshare)
 endfunction ()
 
 function (mzgl_add_portaudio)
-  if (NOT ANDROID AND NOT IOS)
-    mzgl_add_package ("gh:PortAudio/portaudio@19.7.0" DOWNLOAD_ONLY True)
+  if (BUILD_PLATFORM_IS_LINUX)
+    mzgl_print_in_yellow ("[CPM] -> Adding package gh:PortAudio/portaudio@19.7.0")
+    mzgl_save_cmake_log_level ()
+    set (PA_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+    set (PA_BUILD_STATIC ON CACHE BOOL "" FORCE)
+    cpmaddpackage (
+      NAME
+      portaudio
+      GIT_REPOSITORY
+      https://github.com/PortAudio/portaudio.git
+      GIT_TAG
+      v19.7.0
+      OPTIONS
+      "PA_BUILD_SHARED:BOOL=OFF"
+      "PA_BUILD_STATIC:BOOL=ON")
+    link_directories (${portaudio_BINARY_DIR})
+    mzgl_restore_cmake_log_level ()
+  else ()
+    if (NOT ANDROID AND NOT IOS)
+      mzgl_add_package ("gh:PortAudio/portaudio@19.7.0" DOWNLOAD_ONLY True)
+    endif ()
   endif ()
 endfunction ()
 
@@ -160,7 +179,7 @@ function (mzgl_add_packages)
 
   mzgl_install_yoga ()
 
-  if (BUILD_PLATFORM_IS_MAC)
+  if (BUILD_PLATFORM_IS_MAC OR BUILD_PLATFORM_IS_LINUX)
     mzgl_add_package ("gh:glfw/glfw#3.3.9")
   endif ()
 
