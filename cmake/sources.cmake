@@ -30,8 +30,8 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/Vbo.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/AllMidiDevices.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/Midi.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/midiMessageParser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/midiMessageParser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/MidiMessageParser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/MidiMessageParser.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/midiMessagePrinting.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/midi/midiMessagePrinting.h
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/music/scales.cpp
