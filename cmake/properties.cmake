@@ -1,5 +1,5 @@
 function (mzgl_set_target_properties TARGET)
-  set_target_properties (${TARGET} PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
+  set_target_properties (${TARGET} PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
 
   if (APPLE)
     target_compile_definitions (${TARGET} PUBLIC $<IF:$<CONFIG:Debug>,_DEBUG=1,_NDEBUG=1>
