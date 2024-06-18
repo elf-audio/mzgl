@@ -84,6 +84,8 @@ struct MidiMessage {
 	[[nodiscard]] bool isAllNotesOff() const {
 		return status == MIDI_CONTROL_CHANGE && control == MIDI_CC_ALL_NOTES_OFF;
 	}
+	[[nodiscard]] bool isPolyPressure() const { return status == MIDI_POLY_AFTERTOUCH; }
+	[[nodiscard]] bool isChannelPressure() const { return status == MIDI_AFTERTOUCH; }
 	[[nodiscard]] bool isSongPositionPointer() const { return status == MIDI_SONG_POS_POINTER; }
 
 	static MidiMessage noteOn(int channel, int pitch, int velocity) {
