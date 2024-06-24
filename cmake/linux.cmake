@@ -12,7 +12,6 @@ if (LINUX)
   find_package (PkgConfig)
   find_package (OpenGL REQUIRED)
   find_package (X11 REQUIRED)
-  find_package (glfw3 3.3 REQUIRED)
 
   pkg_check_modules (GLFW REQUIRED glfw3)
   pkg_check_modules (GTK REQUIRED gtk+-3.0)
