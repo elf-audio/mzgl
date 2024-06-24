@@ -35,15 +35,20 @@ if (LINUX)
 
   find_package (OpenGL REQUIRED)
   find_package (X11 REQUIRED)
-  find_package (glfw3 REQUIRED)
+  find_package (glfw3 3.3 REQUIRED)
 
   if (NOT glfw3_FOUND)
+    message (STATUS "GLFW not found, setting manually.")
     set (GLFW3_INCLUDE_DIR "/usr/include/GLFW")
     set (GLFW3_LIBRARY "/usr/lib/x86_64-linux-gnu/libglfw.so")
+    include_directories (${GLFW3_INCLUDE_DIR})
+    link_directories (${GLFW3_LIBRARY})
+  else ()
+    include_directories (${glfw3_INCLUDE_DIRS})
+    link_directories (${glfw3_LIBRARY_DIRS})
   endif ()
 
-  include_directories (${OPENGL_INCLUDE_DIR} ${X11_INCLUDE_DIR} ${GLFW3_INCLUDE_DIR})
-  link_directories ("/usr/lib/x86_64-linux-gnu/")
+  include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
 
   list (
     APPEND
