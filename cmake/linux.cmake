@@ -39,11 +39,15 @@ if (LINUX)
   include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
   include_directories (/usr/include /usr/include/GL /usr/include/GLFW)
 
+  find_package (glfw3 REQUIRED)
+  include_directories (${GLFW_INCLUDE_DIRS})
+
   list (
     APPEND
     MZGL_LIBRARIES
     ${GTK_LIBRARIES}
     ${ALSA_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${X11_LIBRARIES})
+    ${X11_LIBRARIES}
+    ${GLFW_LIBRARIES})
 endif ()
