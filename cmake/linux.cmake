@@ -37,17 +37,13 @@ if (LINUX)
   find_package (X11 REQUIRED)
   find_package (glfw3 REQUIRED)
 
-  set (GLFW3_DIR "/usr/include/GLFW")
-  set (GLFW3_LIB "/usr/lib")
+  if (NOT glfw3_FOUND)
+    set (GLFW3_INCLUDE_DIR "/usr/include/GLFW")
+    set (GLFW3_LIBRARY "/usr/lib/x86_64-linux-gnu/libglfw.so")
+  endif ()
 
-  find_path (GLFW_INCLUDE_DIR NAMES GLFW/glfw3.h PATHS ${GLFW3_DIR})
-  find_library (GLFW_LIBRARY NAMES glfw3 PATHS ${GLFW3_LIB})
-
-  include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
-  link_directories (${OPENGL_LIBRARY_DIRS} ${X11_LIBRARY_DIR} ${GLFW_LIBRARY_DIR})
-
-  # include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${GLFW_INCLUDE_DIRS}) include_directories
-  # (/usr/include /usr/include/GL /usr/include/GLFW)
+  include_directories (${OPENGL_INCLUDE_DIR} ${X11_INCLUDE_DIR} ${GLFW3_INCLUDE_DIR})
+  link_directories ("/usr/lib/x86_64-linux-gnu/")
 
   list (
     APPEND
@@ -56,5 +52,5 @@ if (LINUX)
     ${ALSA_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${X11_LIBRARIES}
-    ${GLFW_LIBRARIES})
+    ${GLFW3_LIBRARY})
 endif ()
