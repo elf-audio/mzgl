@@ -35,12 +35,19 @@ if (LINUX)
 
   find_package (OpenGL REQUIRED)
   find_package (X11 REQUIRED)
-
-  include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
-  include_directories (/usr/include /usr/include/GL /usr/include/GLFW)
-
   find_package (glfw3 REQUIRED)
-  include_directories (${GLFW_INCLUDE_DIRS})
+
+  set (GLFW3_DIR "/usr/include/GLFW")
+  set (GLFW3_LIB "/usr/lib")
+
+  find_path (GLFW_INCLUDE_DIR NAMES GLFW/glfw3.h PATHS ${GLFW3_DIR})
+  find_library (GLFW_LIBRARY NAMES glfw3 PATHS ${GLFW3_LIB})
+
+  include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
+  link_directories (${OPENGL_LIBRARY_DIRS} ${X11_LIBRARY_DIR} ${GLFW_LIBRARY_DIR})
+
+  # include_directories (${OPENGL_INCLUDE_DIRS} ${X11_INCLUDE_DIR} ${GLFW_INCLUDE_DIRS}) include_directories
+  # (/usr/include /usr/include/GL /usr/include/GLFW)
 
   list (
     APPEND
