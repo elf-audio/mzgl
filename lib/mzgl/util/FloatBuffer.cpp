@@ -258,6 +258,19 @@ void FloatBuffer::normalizeAudio() {
 	(*this) *= gain;
 }
 
+void FloatBuffer::normalizeAudioIfOver0dB() {
+	float inMin, inMax;
+	getMinMax(inMin, inMax);
+
+	float loudest = std::max(abs(inMin), abs(inMax));
+	if (loudest < 1.f) return;
+	if (loudest < 0.000001) {
+		loudest = 0.00001;
+	}
+	float gain = 1.f / loudest;
+	(*this) *= gain;
+}
+
 void FloatBuffer::append(const float *buff, int length) {
 	insert(end(), buff, buff + length);
 }

@@ -140,6 +140,7 @@ public:
 
 	// this is like normalize but it doesn't cause a DC offset
 	void normalizeAudio();
+	void normalizeAudioIfOver0dB();
 
 	void clamp(float min = -1, float max = 1);
 
