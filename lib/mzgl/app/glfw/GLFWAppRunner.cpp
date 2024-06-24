@@ -6,19 +6,22 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#ifdef _WIN32
+#ifdef _WIN32 ////////////////////////////////////////////////
+
+// This enables visual styles on Windows
 #	pragma comment(linker, "\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #	include <glew.h>
-#endif
+#endif // _WIN32 /////////////////////////////////////////////
 
-#ifdef __linux__
-#	include <GLFW / glfw3.h>
+#ifdef __linux__ /////////////////////////////////////////////
+#	include <gtk/gtk.h>
+#include <GLFW/glfw3.h>
 #else
-#	include <glfw / glfw3.h>
-#endif
+#include <glfw/glfw3.h>
+#endif // __linux__ //////////////////////////////////////////
 
 #include "GLFWAppRunner.h"
 #include <optional>
