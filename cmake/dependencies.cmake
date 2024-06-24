@@ -179,7 +179,7 @@ function (mzgl_add_packages)
 
   mzgl_install_yoga ()
 
-  if (BUILD_PLATFORM_IS_MAC OR BUILD_PLATFORM_IS_LINUX)
+  if (BUILD_PLATFORM_IS_MAC)
     mzgl_add_package ("gh:glfw/glfw#3.3.9")
   endif ()
 

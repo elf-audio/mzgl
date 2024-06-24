@@ -11,6 +11,7 @@ include (cmake/flags.cmake)
 include (cmake/libraries.cmake)
 include (cmake/policies.cmake)
 include (cmake/platforms.cmake)
+include (cmake/linux.cmake)
 include (cmake/properties.cmake)
 include (cmake/sources.cmake)
 
@@ -37,7 +38,6 @@ target_include_directories (mzgl-plugin PUBLIC lib lib/mzgl/audio lib/mzgl/app/a
 
 include (cmake/android.cmake)
 include (cmake/apple.cmake)
-include (cmake/linux.cmake)
 include (cmake/windows.cmake)
 
 target_link_libraries (mzgl PUBLIC ${MZGL_LIBRARIES})
