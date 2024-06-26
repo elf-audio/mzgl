@@ -88,6 +88,7 @@ set(MZGL_SOURCES
         lib/mzgl/util/DateTime.cpp
         lib/mzgl/util/UndoManager.cpp
         lib/mzgl/util/Dialogs.cpp
+        lib/mzgl/util/WebViewOverlay.cpp
         lib/mzgl/util/Dylib.cpp
         lib/mzgl/util/errors.cpp
         lib/mzgl/util/FileWatcher.cpp
@@ -246,6 +247,7 @@ if (APPLE)
     set_source_files_properties(
             lib/mzgl/App.cpp lib/mzgl/util/Dialogs.cpp lib/mzgl/util/util.cpp
             lib/mzgl/audio/AudioFileApple.cpp lib/mzgl/util/log.cpp
+            lib/mzgl/util/WebViewOverlay.cpp
             lib/mzgl/net/netUtil.cpp PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
 else ()
     list(APPEND MZGL_SOURCES lib/misc/speex_resampler.cpp)

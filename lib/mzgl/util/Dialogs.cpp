@@ -830,7 +830,8 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
 	  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
-	  NSView *containerView				  = [[NSView alloc] initWithFrame:rootView.bounds];
+	  NSView *containerView = [[NSView alloc] initWithFrame:rootView.bounds];
+	  // Make contentView background black
 	  containerView.wantsLayer			  = YES;
 	  containerView.layer.backgroundColor = [NSColor blackColor].CGColor;
 	  containerView.autoresizingMask	  = NSViewWidthSizable | NSViewHeightSizable;
@@ -841,20 +842,16 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	  NSRect wvRect =
 		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
 
-	  WKWebView *wv = [[WKWebView alloc] initWithFrame:wvRect];
+	  // Instantiate WKWebView on the main thread
+	  WKWebView *webView	   = [[WKWebView alloc] initWithFrame:wvRect];
+	  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
-	  //	  NSView *wv			   = [[NSView alloc] initWithFrame:wvRect];
-	  //	  wv.wantsLayer			   = YES;
-	  //	  wv.layer.backgroundColor = [NSColor greenColor].CGColor;
-
-	  wv.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-
+	  // Load content on the main thread but asynchronously to avoid blocking the UI
 	  NSURL *nsUrl			= [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 	  NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
-	  [wv loadRequest:request];
+	  [webView loadRequest:request];
 
 	  // Create and configure the close button
-
 	  NSBlockButton *closeButton =
 		  [[NSBlockButton alloc] initWithFrame:NSMakeRect(rootView.bounds.size.width - 30,
 														  rootView.bounds.size.height - buttonHeight - padding,
@@ -867,13 +864,8 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	  closeButton.bordered		   = NO;
 	  closeButton.autoresizingMask = NSViewMinXMargin | NSViewMinYMargin;
 
-	  __weak typeof(containerView) weakContainerView = containerView;
-	  __weak typeof(wv) weakWv						 = wv;
+	  __weak NSView *weakContainerView = containerView;
 	  [closeButton setActionBlock:^{
-		//		[weakWv setHidden:YES];
-		//		[weakWv removeFromSuperview];
-		//		[weakContainerView removeFromSuperview];
-		//		[weakContainerView setHidden:YES];
 		// Create slide-out animation
 		NSRect endFrame = weakContainerView.frame;
 		endFrame.origin.y -= weakContainerView.bounds.size.height;
@@ -884,11 +876,22 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 		}
 			completionHandler:^{ [weakContainerView removeFromSuperview]; }];
 	  }];
-
-	  // Add the web view to the view controller's view
-	  [containerView addSubview:wv];
+	  [containerView addSubview:webView];
 	  [containerView addSubview:closeButton];
-	  [win.contentView addSubview:containerView];
+	  [rootView addSubview:containerView];
+
+	  // Initial off-screen position for animation
+	  NSRect startFrame = containerView.frame;
+	  NSRect endFrame	= startFrame;
+	  startFrame.origin.y -= startFrame.size.height;
+
+	  containerView.frame = startFrame;
+
+	  // Animate the web view sliding in
+	  [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		context.duration				 = 0.5;
+		weakContainerView.animator.frame = endFrame;
+	  }];
 	});
 #	endif
 #else

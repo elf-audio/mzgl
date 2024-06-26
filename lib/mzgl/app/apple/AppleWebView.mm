@@ -23,7 +23,9 @@
 - (void)callJS:(NSString *)jsString {
 	[self evaluateJavaScript:jsString
 		   completionHandler:^(id _Nullable, NSError *_Nullable error) {
-			 NSLog(@"ERRORRRRRR: %@\n\nCall was:\n%@\n", error, jsString);
+			 if (error) {
+				 NSLog(@"ERRORRRRRR: %@\n\nCall was:\n%@\n", error, jsString);
+			 }
 		   }];
 }
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
@@ -40,22 +42,13 @@
 		 jsCallback:(std::function<void(const std::string &)>)jsCb
 	  closeCallback:(std::function<void()>)closeCb
 				url:(NSString *)url {
-	//- (id) initWithFrame:(CGRect)frame callback:(std::function<void(const std::string &)>) jsCb closeCallback:(std::function<void()>)clsCallback andUrl: (NSString*) url {
 	loadedCallback				   = loadedCb;
 	jsCallback					   = jsCb;
 	closeCallback				   = closeCb;
 	WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
 
-	//	[config.userContentController addScriptMessageHandler:self name:@"updateHandler"];
-	//	if(window.webkit) {
-	//		window.webkit.messageHandlers.updateHandler.postMessage({"key": key, "value": ""+value});
-	//	}
-
 	[config.userContentController addScriptMessageHandler:self name:@"closeWindow"];
 	[config.userContentController addScriptMessageHandler:self name:@"messages"];
-	//	if(window.webkit) {
-	//		window.webkit.messageHandlers.updateHandler.postMessage({"key": key, "value": ""+value});
-	//	}
 
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"fullScreenEnabled"];
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"DOMPasteAllowed"];
@@ -65,36 +58,25 @@
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"developerExtrasEnabled"];
 #endif
 
-	self				  = [super initWithFrame:frame configuration:config];
-	std::string customUrl = [url UTF8String];
+	self = [super initWithFrame:frame configuration:config];
+
 	if (self != nil) {
 #if !TARGET_OS_IOS
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
 #endif
 		self.UIDelegate			= self;
 		self.navigationDelegate = self;
-		if (customUrl != "" && customUrl.find("http") != -1) {
-			NSURL *url			  = [NSURL URLWithString:[NSString stringWithFormat:@"%s", customUrl.c_str()]];
-			NSURLRequest *request = [NSURLRequest requestWithURL:url];
+		if ([url rangeOfString:@"http"].location != NSNotFound) {
+			NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
 			[self loadRequest:request];
 		} else {
-			NSURL *baseURL = [[NSBundle mainBundle] resourceURL];
-			baseURL		   = [baseURL URLByAppendingPathComponent:@"www"];
-			NSURL *url	   = [baseURL URLByAppendingPathComponent:@"index.html"];
+			NSURL *nsUrl = [[[NSBundle mainBundle] resourceURL] URLByAppendingPathComponent:@"www/index.html"];
 
-			if (customUrl != "") {
-				NSLog(@"Got custom URL!!");
-				auto p = fs::path(customUrl);
-				if (!fs::exists(p)) {
-					NSLog(@"Path does not exist! %s", p.string().c_str());
-				}
-				baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:p.parent_path().string().c_str()]];
-				url		= [baseURL
-					URLByAppendingPathComponent:[NSString stringWithUTF8String:p.filename().string().c_str()]];
+			if ([url length] > 0) {
+				nsUrl = [NSURL fileURLWithPath:url];
 			}
-			NSLog(@"%@", url);
 
-			[self loadFileURL:url allowingReadAccessToURL:baseURL];
+			[self loadFileURL:nsUrl allowingReadAccessToURL:[nsUrl URLByDeletingLastPathComponent]];
 		}
 	}
 	return self;
@@ -114,20 +96,6 @@
 				  completionHandler:^(NSInteger result) { completionHandler(); }];
 #endif
 }
-//
-//- (void)windowDidResize:(NSNotification *)notification {
-//	Log::d() << "windowDidResize";
-//	NSWindow *window = notification.object;
-//
-//	auto w = window.contentLayoutRect.size.width;
-//	auto h = window.contentLayoutRect.size.height;
-//
-//	Log::d() << w << " " << h;
-//
-//	NSRect f = self.frame;
-//	f.size = CGSizeMake(w, h);;
-//	self.frame = f;
-//}
 
 - (BOOL)acceptsFirstResponder {
 	return YES;
@@ -144,6 +112,19 @@
 - (void)shutdown {
 	//	[super shutdown];
 	//	eventDispatcher->exit();
+}
+
+- (void)webView:(WKWebView *)webView
+	decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
+					decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+	NSLog(@"Navigation action: %@", navigationAction.request.URL);
+	NSURL *url = navigationAction.request.URL;
+
+	if ([url.scheme isEqualToString:@"file"]) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+	} else {
+		decisionHandler(WKNavigationActionPolicyCancel);
+	}
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController
