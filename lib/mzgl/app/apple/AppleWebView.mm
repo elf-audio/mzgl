@@ -24,7 +24,7 @@
 	[self evaluateJavaScript:jsString
 		   completionHandler:^(id _Nullable, NSError *_Nullable error) {
 			 if (error) {
-				 NSLog(@"ERRORRRRRR: %@\n\nCall was:\n%@\n", error, jsString);
+				 NSLog(@"ERROR: %@\n\nCall was:\n%@\n", error, jsString);
 			 }
 		   }];
 }
@@ -54,7 +54,6 @@
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"DOMPasteAllowed"];
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"javaScriptCanAccessClipboard"];
 #ifdef DEBUG
-	//    blah
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"developerExtrasEnabled"];
 #endif
 
