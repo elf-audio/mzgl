@@ -765,10 +765,14 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 			 });
 #endif
 }
-
-#if TARGET_OS_IOS
-#	include "UIBlockButton.h"
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+#		include "UIBlockButton.h"
+#	else
+#		include "NSBlockButton.h"
+#	endif
 #endif
+
 void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
@@ -822,7 +826,70 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 																	 animated:YES
 																   completion:nil];
 #	else // mac
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
+	  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
+	  NSView *containerView				  = [[NSView alloc] initWithFrame:rootView.bounds];
+	  containerView.wantsLayer			  = YES;
+	  containerView.layer.backgroundColor = [NSColor blackColor].CGColor;
+	  containerView.autoresizingMask	  = NSViewWidthSizable | NSViewHeightSizable;
+
+	  int buttonHeight = 20;
+	  int padding	   = 10;
+
+	  NSRect wvRect =
+		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
+
+	  WKWebView *wv = [[WKWebView alloc] initWithFrame:wvRect];
+
+	  //	  NSView *wv			   = [[NSView alloc] initWithFrame:wvRect];
+	  //	  wv.wantsLayer			   = YES;
+	  //	  wv.layer.backgroundColor = [NSColor greenColor].CGColor;
+
+	  wv.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+	  NSURL *nsUrl			= [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+	  NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
+	  [wv loadRequest:request];
+
+	  // Create and configure the close button
+
+	  NSBlockButton *closeButton =
+		  [[NSBlockButton alloc] initWithFrame:NSMakeRect(rootView.bounds.size.width - 30,
+														  rootView.bounds.size.height - buttonHeight - padding,
+														  buttonHeight,
+														  buttonHeight)];
+	  closeButton.title = @"✕";
+	  [closeButton setButtonType:NSButtonTypeMomentaryPushIn];
+	  [closeButton setBezelStyle:NSBezelStyleInline];
+	  closeButton.font			   = [NSFont systemFontOfSize:16];
+	  closeButton.bordered		   = NO;
+	  closeButton.autoresizingMask = NSViewMinXMargin | NSViewMinYMargin;
+
+	  __weak typeof(containerView) weakContainerView = containerView;
+	  __weak typeof(wv) weakWv						 = wv;
+	  [closeButton setActionBlock:^{
+		//		[weakWv setHidden:YES];
+		//		[weakWv removeFromSuperview];
+		//		[weakContainerView removeFromSuperview];
+		//		[weakContainerView setHidden:YES];
+		// Create slide-out animation
+		NSRect endFrame = weakContainerView.frame;
+		endFrame.origin.y -= weakContainerView.bounds.size.height;
+
+		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		  context.duration				   = 0.5;
+		  weakContainerView.animator.frame = endFrame;
+		}
+			completionHandler:^{ [weakContainerView removeFromSuperview]; }];
+	  }];
+
+	  // Add the web view to the view controller's view
+	  [containerView addSubview:wv];
+	  [containerView addSubview:closeButton];
+	  [win.contentView addSubview:containerView];
+	});
 #	endif
 #else
 	launchUrl(url);
