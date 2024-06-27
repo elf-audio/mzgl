@@ -9,6 +9,7 @@
 #include "Image.h"
 
 #include <mzgl/util/log.h>
+#include <algorithm>
 #include "stb_image.h"
 
 #include <algorithm>

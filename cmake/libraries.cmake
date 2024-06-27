@@ -59,7 +59,11 @@ if (BUILD_PLATFORM_IS_WINDOWS)
     dsound
     ole32
     Urlmon
-    Wininet)
+    Wininet
+    glfw
+    glew
+    rtmidi
+    portaudio_static)
 endif ()
 
 if (BUILD_PLATFORM_IS_LINUX)

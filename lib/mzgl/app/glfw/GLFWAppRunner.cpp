@@ -13,7 +13,7 @@
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#	include <glew.h>
+#include <glew/include/GL/glew.h>
 #endif // _WIN32 /////////////////////////////////////////////
 
 #ifdef __linux__ /////////////////////////////////////////////

@@ -383,7 +383,8 @@ void setDataPath(const std::string &path) {
 
 static auto getVSTBundlePath() -> fs::path {
 #ifdef _WIN32
-	return fs::canonical(getCurrentDllPath() / ".." / ".." / "..");
+	// FIXME: This needs to be implemented for other platforms
+	return "" ;//fs::canonical(getCurrentDllPath() / ".." / ".." / "..");
 #else
 	// FIXME: This needs to be implemented for other platforms
 	return "";
@@ -431,7 +432,11 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
-	return "../data/" + path;
+	fs::path path1 = "../data/" + path;
+	if (fs::is_directory(path1)) {
+		return path1.string();
+	}
+	return "../../data/" + path;
 #else
 	return "../data/" + path;
 #endif

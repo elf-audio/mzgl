@@ -146,11 +146,15 @@ if (NOT ANDROID)
     list (
       APPEND
       MZGL_SOURCES
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/audio/portaudio/PortAudioSystem.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/app/glfw/GLFWOS_Windows.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/util/winUtil.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/util/AlignedAllocator.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/app/glfw/mainGlfw.cpp)
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/app/glfw/mainGlfw.cpp
+      lib/speex/speex_resampler.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/audio/Resampler.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/audio/AudioFileAndroid.cpp)
   endif ()
 endif ()
 

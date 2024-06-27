@@ -4,3 +4,9 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set (CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set (CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -swift-version 5")
+
+ if (WIN32)
+ 
+  add_definitions(-DNOMINMAX)
+  add_definitions(-DM_PI=3.14159265358979323846)
+endif()

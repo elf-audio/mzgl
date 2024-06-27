@@ -17,7 +17,6 @@ function (mzgl_set_target_properties TARGET)
       PRIVATE $<IF:$<CONFIG:Debug>,/Od,/Ox>
               $<$<CONFIG:Release>:/O2>
               /W4
-              /WX
               /MP)
 
     target_link_options (${TARGET} PRIVATE $<$<CONFIG:Release>:/MAP> $<$<CONFIG:Release>:/DEBUG:FULL>)

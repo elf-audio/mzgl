@@ -24,7 +24,7 @@ add_subdirectory (lib/elfxml)
 add_subdirectory (lib/fsystem)
 add_subdirectory (lib/ZipFile)
 
-if (BUILD_PLATFORM_IS_MAC OR BUILD_PLATFORM_IS_LINUX)
+if (BUILD_PLATFORM_IS_MAC OR BUILD_PLATFORM_IS_LINUX OR BUILD_PLATFORM_IS_WINDOWS)
   add_subdirectory (lib/glew)
 endif ()
 

@@ -19,6 +19,19 @@ function (mzgl_restore_cmake_log_level)
   set (CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL} PARENT_SCOPE)
 endfunction ()
 
+function (mzgl_remove_cmath TARGET)
+  if (WIN32)
+    get_target_property(current_options ${TARGET} COMPILE_OPTIONS)
+    if(current_options)
+        list(REMOVE_ITEM current_options "/FIcmath")
+        set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${current_options}")
+    else()
+        set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "")
+    endif()
+  endif()
+endfunction ()
+
+
 function (mzgl_add_package PACKAGE_NAME)
   mzgl_print_in_yellow ("[CPM] -> Adding package ${PACKAGE_NAME}")
   mzgl_save_cmake_log_level ()
@@ -85,17 +98,58 @@ function (
   add_library (${TARGET} STATIC ${SOURCES})
 endfunction ()
 
+function (mzgl_add_zlib)
+  if (WIN32)
+    mzgl_print_in_yellow ("[CPM] -> Adding package gh:CristiFati/ZLib@1.2.12")
+    mzgl_save_cmake_log_level ()
+    cpmaddpackage (
+    NAME
+    zlib
+    URL
+    https://www.koalasampler.com/ci-resources/ZLib-1.2.12-Win-pc064.zip
+    DOWNLOAD_ONLY
+    True
+    URL_HASH
+    MD5=9847d1345d200b24c3f5558f0740dbb1)
+    
+    set(ZLIB_ROOT ${zlib_SOURCE_DIR}/ZLib/1.2.12)
+
+    add_library (zlib INTERFACE IMPORTED GLOBAL)
+    target_include_directories (zlib SYSTEM INTERFACE ${ZLIB_ROOT}/include)
+    target_link_libraries (
+    zlib
+    INTERFACE ${ZLIB_ROOT}/lib/zlib.lib
+              ${ZLIB_ROOT}/lib/zlibstatic.lib)
+
+    set(ZLIB_INCLUDE_DIR ${ZLIB_ROOT}/include)
+    set(ZLIB_LIBRARY ${ZLIB_ROOT}/lib/zlib.lib)
+
+    set(ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIR} CACHE PATH "Path to zlib include directory")
+    set(ZLIB_LIBRARY ${ZLIB_LIBRARY} CACHE FILEPATH "Path to zlib library")
+
+    find_package(ZLIB REQUIRED)
+    mzgl_restore_cmake_log_level ()
+  endif ()
+endfunction ()
+
 function (mzgl_add_zipper)
   set (BUILD_SHARED_VERSION FALSE CACHE BOOL "" FORCE)
 
   mzgl_add_package ("gh:sebastiandev/zipper#87b14a4")
 
+  mzgl_remove_cmath(staticZipper)
   set_target_properties (Zipper-static PROPERTIES DEBUG_POSTFIX "")
+
   unset (BUILD_SHARED_VERSION CACHE)
   unset (BUILD_SHARED_VERSION)
+
 endfunction ()
 
 function (mzgl_add_audioshare)
+  if (BUILD_PLATFORM_IS_WINDOWS)
+    return ()
+  endif ()
+
   mzgl_print_in_yellow ("[CPM] -> Adding package gh:lijon/AudioShareSDK#995a85b")
   mzgl_save_cmake_log_level ()
   cpmaddpackage (
@@ -138,12 +192,13 @@ function (mzgl_add_portaudio)
   else ()
     if (NOT ANDROID AND NOT IOS)
       mzgl_add_package ("gh:PortAudio/portaudio@19.7.0" DOWNLOAD_ONLY True)
+      mzgl_remove_cmath(portaudio)
     endif ()
   endif ()
 endfunction ()
 
 function (mzgl_add_rtmidi)
-  if (NOT ANDROID AND NOT IOS)
+  if (NOT ANDROID AND NOT IOS OR WANTS_RT_MIDI)
     mzgl_add_package ("gh:thestk/rtmidi#6ad594f" DOWNLOAD_ONLY True)
   endif ()
 endfunction ()
@@ -179,7 +234,7 @@ function (mzgl_add_packages)
 
   mzgl_install_yoga ()
 
-  if (BUILD_PLATFORM_IS_MAC)
+  if (BUILD_PLATFORM_IS_MAC OR BUILD_PLATFORM_IS_WINDOWS)
     mzgl_add_package ("gh:glfw/glfw#3.3.9")
   endif ()
 
@@ -208,6 +263,7 @@ function (mzgl_add_packages)
     "fast-poly2tri"
     "")
 
+  mzgl_add_zlib ()
   mzgl_add_zipper ()
   mzgl_add_audioshare ()
   mzgl_add_portaudio ()

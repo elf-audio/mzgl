@@ -1,3 +1,10 @@
 set (RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set (RTMIDI_TARGETNAME_UNINSTALL "rtmidi-uninstall" CACHE STRING "Name of 'uninstall' build target" FORCE)
 set (BUILD_TEST OFF CACHE BOOL "Build the tests for zipper" FORCE)
+
+if (WIN32)
+    set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+    set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(GLOBAL PROPERTY CXX_EXTENSIONS OFF)
+    add_compile_options(/std:c++20)
+endif()

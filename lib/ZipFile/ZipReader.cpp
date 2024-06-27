@@ -164,7 +164,7 @@ bool ZipReaderFile::seek(int offset, SeekOrigin origin) {
 
 size_t ZipReaderFile::read(int8_t *d, uint32_t sz) {
 	int pos = (int) zip.tellg() - fileStart;
-	if (fileSize - pos >= sz) {
+	if (fileSize - pos >= (int)sz) {
 		zip.read((char *) d, sz);
 	} else if (pos >= fileSize) {
 		return 0;
@@ -186,7 +186,7 @@ std::vector<int8_t> ZipReaderFile::read() {
 }
 
 size_t ZipReaderFile::readSome(std::vector<int8_t> &d) {
-	return read(d.data(), d.size());
+	return read(d.data(), (uint32_t)d.size());
 }
 
 void ZipReaderFile::extract(const std::string &path) {

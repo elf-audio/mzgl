@@ -11,3 +11,7 @@ add_library(zip-file STATIC
 mzgl_set_target_properties(zip-file)
 target_include_directories(zip-file PUBLIC ../)
 target_link_libraries(zip-file PUBLIC staticZipper fsystem ghcfilesystem)
+
+if (WIN32)
+target_link_libraries(zip-file PUBLIC zlib)
+endif()
