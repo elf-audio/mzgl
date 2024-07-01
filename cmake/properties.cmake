@@ -1,5 +1,5 @@
 function (mzgl_set_target_properties TARGET)
-  set_target_properties (${TARGET} PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
+  set_target_properties (${TARGET} PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
   if (APPLE)
     target_compile_definitions (${TARGET} PUBLIC $<IF:$<CONFIG:Debug>,_DEBUG=1,_NDEBUG=1>
@@ -12,12 +12,7 @@ function (mzgl_set_target_properties TARGET)
               $<IF:$<CONFIG:Debug>,-DDEBUG,-DNDEBUG> $<$<CONFIG:Release>:-DRELEASE>)
 
   elseif (MSVC)
-    target_compile_options (
-      ${TARGET}
-      PRIVATE $<IF:$<CONFIG:Debug>,/Od,/Ox>
-              $<$<CONFIG:Release>:/O2>
-              /W4
-              /MP)
+    target_compile_options (${TARGET} PRIVATE $<IF:$<CONFIG:Debug>,/Od,/Ox> $<$<CONFIG:Release>:/O2> /W4 /MP)
 
     target_link_options (${TARGET} PRIVATE $<$<CONFIG:Release>:/MAP> $<$<CONFIG:Release>:/DEBUG:FULL>)
   endif ()
