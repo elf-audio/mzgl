@@ -56,7 +56,7 @@ PortAudioSystem::~PortAudioSystem() {
 	checkPaError(err, "terminating");
 }
 
-double PortAudioSystem::getTimeAtBufferBegin() {
+double PortAudioSystem::getNanoSecondsAtBufferBegin()  {
 	return outputTime;
 }
 

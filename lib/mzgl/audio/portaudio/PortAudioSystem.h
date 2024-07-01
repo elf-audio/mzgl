@@ -35,7 +35,9 @@ public:
 
 	double getLatency();
 	double getOutputLatency() override;
-	double getTimeAtBufferBegin() override;
+	
+	[[nodiscard]] double getNanoSecondsAtBufferBegin() override;
+	
 	double getHostTime();
 
 	// The time when the first sample of the input buffer was captured at the ADC input
