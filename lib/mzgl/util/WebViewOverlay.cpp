@@ -14,7 +14,7 @@ public:
 	virtual void callJs(const std::string &jsString) = 0;
 
 protected:
-	std::string url;
+	const std::string url;
 	std::function<void(const std::string &)> jsCallback;
 	App &app;
 };
