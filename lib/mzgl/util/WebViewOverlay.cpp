@@ -29,26 +29,31 @@ protected:
 class iOSWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
 	AppleWebView *webView;
+	UIViewController *targetController;
+
 	iOSWebViewOverlayImpl(App &app,
 						  const std::string &urlToOpen,
 						  std::function<void(const std::string &)> theJsCallback)
 		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
-		dispatch_async(dispatch_get_main_queue(),
-					   ^ {
-						   //		  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
-						   //		  NSView *rootView = (__bridge NSView *) app.viewHandle;
-						   //
-						   //		  webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds
-						   //			   loadedCallback:[]() {}
-						   //			   jsCallback:jsCallback
-						   //			   closeCallback:[this]() { close(); }
-						   //			   url:[NSString stringWithUTF8String:url.c_str()]];
-						   //		  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-						   //
-						   //		  [rootView addSubview:webView];
-						   //
-						   //		  animateIn();
-					   });
+		targetController = [[UIViewController alloc] init];
+
+		webView					 = [[AppleWebView alloc] initWithFrame:targetController.view.bounds
+			 loadedCallback:[]() {}
+			 jsCallback:jsCallback
+			 closeCallback:[this]() { close(); }
+			 url:[NSString stringWithUTF8String:url.c_str()]];
+		webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
+		[targetController.view addSubview:webView];
+
+		targetController.modalPresentationStyle = UIModalPresentationFormSheet;
+		targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
+
+		targetController.view.backgroundColor = [UIColor whiteColor];
+
+		[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+																		 animated:YES
+																	   completion:nil];
 	}
 	void callJs(const std::string &jsString) override {
 		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
@@ -56,31 +61,7 @@ public:
 	~iOSWebViewOverlayImpl() = default;
 
 private:
-	//	void animateIn() {
-	//		// Initial off-screen position for animation
-	//		NSRect startFrame = webView.frame;
-	//		NSRect endFrame	  = startFrame;
-	//		startFrame.origin.y -= startFrame.size.height;
-	//
-	//		webView.frame = startFrame;
-	//
-	//		// Animate the web view sliding in
-	//		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-	//		  context.duration		 = 0.5;
-	//		  webView.animator.frame = endFrame;
-	//		}];
-	//	}
-	//	void close() {
-	//		// Create slide-out animation
-	//		NSRect endFrame = webView.frame;
-	//		endFrame.origin.y -= webView.bounds.size.height;
-	//
-	//		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-	//		  context.duration		 = 0.5;
-	//		  webView.animator.frame = endFrame;
-	//		}
-	//			completionHandler:^{ [webView removeFromSuperview]; }];
-	//	}
+	void close() { [targetController dismissViewControllerAnimated:true completion:nil]; }
 };
 
 #	else
@@ -103,7 +84,6 @@ public:
 		  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
 		  [rootView addSubview:webView];
-
 		  animateIn();
 		});
 	}
