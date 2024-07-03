@@ -21,10 +21,69 @@ protected:
 
 ///////////////////////////////////////////////////////////////////
 
-#include "NSBlockButton.h"
 #import <WebKit/WebKit.h>
 #include "AppleWebView.h"
+#ifdef __APPLE__
+#	include <TargetConditionals.h>
+#	if TARGET_OS_IOS
+class iOSWebViewOverlayImpl : public WebViewOverlayImpl {
+public:
+	AppleWebView *webView;
+	iOSWebViewOverlayImpl(App &app,
+						  const std::string &urlToOpen,
+						  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		dispatch_async(dispatch_get_main_queue(),
+					   ^ {
+						   //		  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
+						   //		  NSView *rootView = (__bridge NSView *) app.viewHandle;
+						   //
+						   //		  webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds
+						   //			   loadedCallback:[]() {}
+						   //			   jsCallback:jsCallback
+						   //			   closeCallback:[this]() { close(); }
+						   //			   url:[NSString stringWithUTF8String:url.c_str()]];
+						   //		  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+						   //
+						   //		  [rootView addSubview:webView];
+						   //
+						   //		  animateIn();
+					   });
+	}
+	void callJs(const std::string &jsString) override {
+		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
+	}
+	~iOSWebViewOverlayImpl() = default;
 
+private:
+	//	void animateIn() {
+	//		// Initial off-screen position for animation
+	//		NSRect startFrame = webView.frame;
+	//		NSRect endFrame	  = startFrame;
+	//		startFrame.origin.y -= startFrame.size.height;
+	//
+	//		webView.frame = startFrame;
+	//
+	//		// Animate the web view sliding in
+	//		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+	//		  context.duration		 = 0.5;
+	//		  webView.animator.frame = endFrame;
+	//		}];
+	//	}
+	//	void close() {
+	//		// Create slide-out animation
+	//		NSRect endFrame = webView.frame;
+	//		endFrame.origin.y -= webView.bounds.size.height;
+	//
+	//		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+	//		  context.duration		 = 0.5;
+	//		  webView.animator.frame = endFrame;
+	//		}
+	//			completionHandler:^{ [webView removeFromSuperview]; }];
+	//	}
+};
+
+#	else
 class MacWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
 	AppleWebView *webView;
@@ -80,13 +139,20 @@ private:
 			completionHandler:^{ [webView removeFromSuperview]; }];
 	}
 };
-
+#	endif
+#endif
 //////////////////////////////////////////////////////////////////
 
 WebViewOverlay::WebViewOverlay(App &app,
 							   const std::string &url,
 							   std::function<void(const std::string &)> jsCallback) {
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+	impl = std::make_shared<iOSWebViewOverlayImpl>(app, url, jsCallback);
+#	else
 	impl = std::make_shared<MacWebViewOverlayImpl>(app, url, jsCallback);
+#	endif
+#endif
 }
 void WebViewOverlay::callJs(const std::string &jsString) {
 	impl->callJs(jsString);
