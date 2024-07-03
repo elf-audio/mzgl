@@ -90,7 +90,7 @@ public:
 	void callJs(const std::string &jsString) override {
 		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
 	}
-	~MacWebViewOverlayImpl() = default;
+	~MacWebViewOverlayImpl() override = default;
 
 private:
 	void animateIn() {
