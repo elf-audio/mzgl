@@ -150,6 +150,7 @@ void handleTerminateSignal(int signal) {
 	app->viewController = (__bridge void *) window.windowController.contentViewController;
 #endif
 	app->windowHandle = (__bridge void *) window;
+	app->viewHandle	  = (__bridge void *) view;
 }
 
 - (void)about:(id)event {

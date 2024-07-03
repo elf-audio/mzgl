@@ -445,6 +445,16 @@
 		EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA3551B425CB201F003DF2FB /* MZGLView.mm */; };
 		EA3551BF25CB2028003DF2FB /* MZMGLKView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA3551BB25CB2028003DF2FB /* MZMGLKView.h */; };
 		EA4B48FC24588303000E79BF /* mainiOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C82432C18B00A5C3E8 /* mainiOS.mm */; };
+		EA5250E02C2C644800DE5DFC /* NSBlockButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */; };
+		EA5250E12C2C644800DE5DFC /* NSBlockButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */; };
+		EA5250E22C2C644800DE5DFC /* NSBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */; };
+		EA5250E32C2C644800DE5DFC /* NSBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */; };
+		EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */; };
+		EA5250E72C2C648F00DE5DFC /* WebViewOverlay.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */; };
+		EA5250E82C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
+		EA5250E92C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
+		EA5250EA2C2C64A900DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
+		EA5250EB2C2C64AA00DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
 		EA64AD7426A186D7001427AD /* MZGLWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA64AD7226A186D7001427AD /* MZGLWebView.mm */; };
 		EA64AD7626A186D7001427AD /* MZGLWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA64AD7226A186D7001427AD /* MZGLWebView.mm */; };
 		EA64AD8826A1C039001427AD /* MZGLWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA64AD7326A186D7001427AD /* MZGLWebView.h */; };
@@ -1062,6 +1072,10 @@
 		EA3551BC25CB2028003DF2FB /* MZMGLKViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZMGLKViewController.h; sourceTree = "<group>"; };
 		EA3551BD25CB2028003DF2FB /* MZMGLKView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKView.mm; sourceTree = "<group>"; };
 		EA3551BE25CB2028003DF2FB /* MZMGLKViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKViewController.mm; sourceTree = "<group>"; };
+		EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBlockButton.h; sourceTree = "<group>"; };
+		EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBlockButton.m; sourceTree = "<group>"; };
+		EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewOverlay.h; sourceTree = "<group>"; };
+		EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = WebViewOverlay.cpp; sourceTree = "<group>"; };
 		EA64AD6F26A182B3001427AD /* WebViewApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebViewApp.h; sourceTree = "<group>"; };
 		EA64AD7226A186D7001427AD /* MZGLWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLWebView.mm; sourceTree = "<group>"; };
 		EA64AD7326A186D7001427AD /* MZGLWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLWebView.h; sourceTree = "<group>"; };
@@ -1915,6 +1929,8 @@
 				EA1835D22432C18B00A5C3E8 /* MacAppDelegate.h */,
 				EA1835D72432C18B00A5C3E8 /* MacAppDelegate.mm */,
 				EA1835D32432C18B00A5C3E8 /* LayerExplorer.h */,
+				EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */,
+				EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */,
 				EA1835D42432C18B00A5C3E8 /* NSEventDispatcher.h */,
 				EA1835D52432C18B00A5C3E8 /* TextConsole.h */,
 				EA1835D62432C18B00A5C3E8 /* MacMenuBar.mm */,
@@ -1938,6 +1954,8 @@
 				EAF6737F289BC87E001F778D /* mainThread.cpp */,
 				EAF67380289BC87E001F778D /* mainThread.h */,
 				EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */,
+				EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */,
+				EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */,
 				EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */,
 				EAA44CD3267A2BE50014C203 /* Haptics.cpp */,
 				EAA44CD2267A2BCB0014C203 /* Haptics.h */,
@@ -3171,6 +3189,7 @@
 				EA71A76827E39E6C0081A5CB /* aes_via_ace.h in Headers */,
 				EA234B1524A611AF000F057B /* ylog.h in Headers */,
 				EAF67375289BC3DC001F778D /* mzAssert.h in Headers */,
+				EA5250E02C2C644800DE5DFC /* NSBlockButton.h in Headers */,
 				EA297C8025C954E600F890AE /* pa_cpuload.h in Headers */,
 				EA297C6A25C954E600F890AE /* pa_win_wasapi.h in Headers */,
 				EA297C6525C954E600F890AE /* pa_win_waveformat.h in Headers */,
@@ -3189,6 +3208,7 @@
 				EA71A7B827E39E6C0081A5CB /* ZipFile.h in Headers */,
 				EA183FA32432C18D00A5C3E8 /* AVFoundationVideoGrabber.h in Headers */,
 				EA234AE824A609CA000F057B /* Yoga-internal.h in Headers */,
+				EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73827E39E6C0081A5CB /* zip.h in Headers */,
 				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA183F852432C18D00A5C3E8 /* scales.h in Headers */,
@@ -3287,6 +3307,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA2B826424E7093600EA12BD /* Scroller.h in Headers */,
+				EA5250E72C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73127E39E6C0081A5CB /* ioapi_mem.h in Headers */,
 				EA15B281291D49E70051570A /* UndoManager.h in Headers */,
 				EA71A79127E39E6C0081A5CB /* zipper.h in Headers */,
@@ -3361,6 +3382,7 @@
 				EA2B868F24E7093600EA12BD /* experiments-inl.h in Headers */,
 				EA2B86A524E7093600EA12BD /* AVFoundationVideoGrabber.h in Headers */,
 				EA2B86AB24E7093600EA12BD /* Yoga-internal.h in Headers */,
+				EA5250E12C2C644800DE5DFC /* NSBlockButton.h in Headers */,
 				EA71A74127E39E6C0081A5CB /* ioapi.h in Headers */,
 				EA71A73927E39E6C0081A5CB /* zip.h in Headers */,
 				EA2B86C424E7093600EA12BD /* scales.h in Headers */,
@@ -3560,6 +3582,7 @@
 				EA77210C2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
+				EA5250E82C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
 				EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */,
 				EA234AEC24A609CA000F057B /* Utils.cpp in Sources */,
@@ -3653,6 +3676,7 @@
 				EA297C7225C954E600F890AE /* pa_stream.c in Sources */,
 				EAF67379289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA183FF52432C18D00A5C3E8 /* RoundedRect.cpp in Sources */,
+				EA5250E22C2C644800DE5DFC /* NSBlockButton.m in Sources */,
 				EA183FF42432C18D00A5C3E8 /* Rectf.cpp in Sources */,
 				EA71A74E27E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA924368274000E300311C98 /* AllMidiDevices.cpp in Sources */,
@@ -3716,6 +3740,7 @@
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
 				EAF67382289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA234B1424A611AF000F057B /* ylog.cpp in Sources */,
+				EA5250EA2C2C64A900DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA1841192432C4A500A5C3E8 /* SvgVbo.cpp in Sources */,
 				EAF67372289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
@@ -3830,6 +3855,7 @@
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
+				EA5250E92C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A75C27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA2B8AE324E7093600EA12BD /* Dylib.cpp in Sources */,
@@ -3869,6 +3895,7 @@
 				EA2B8B0624E7093600EA12BD /* scales.cpp in Sources */,
 				EA2B8B0724E7093600EA12BD /* Camera.cpp in Sources */,
 				EA71A78A27E39E6C0081A5CB /* entropy.c in Sources */,
+				EA5250E32C2C644800DE5DFC /* NSBlockButton.m in Sources */,
 				EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */,
 				EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */,
 				EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */,
@@ -3960,6 +3987,7 @@
 				EA68945B261C633500F76B91 /* Shader.cpp in Sources */,
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
 				EAF67384289BC87E001F778D /* mainThread.cpp in Sources */,
+				EA5250EB2C2C64AA00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA71A73F27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA68945D261C633500F76B91 /* Texture.cpp in Sources */,
 				EAF67374289BC3DC001F778D /* mzAssert.cpp in Sources */,

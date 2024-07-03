@@ -103,6 +103,8 @@ public:
 	void *viewController	 = nullptr;
 	void *windowHandle		 = nullptr;
 	void *nativeWindowHandle = nullptr;
+	void *viewHandle		 = nullptr;
+
 	MainThreadRunner main;
 
 	void updateInternal() {
