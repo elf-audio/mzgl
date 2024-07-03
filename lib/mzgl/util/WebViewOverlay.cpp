@@ -10,7 +10,7 @@ public:
 		: app(app)
 		, url(url)
 		, jsCallback(jsCallback) {}
-	virtual ~WebViewOverlayImpl() {}
+	virtual ~WebViewOverlayImpl() = default;
 	virtual void callJs(const std::string &jsString) = 0;
 
 protected:
