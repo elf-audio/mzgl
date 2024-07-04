@@ -22,9 +22,8 @@ protected:
 ///////////////////////////////////////////////////////////////////
 
 #ifdef __APPLE__
-#	import <WebKit/WebKit.h>
 #	include "AppleWebView.h"
-
+#	import <WebKit/WebKit.h>
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
 class iOSWebViewOverlayImpl : public WebViewOverlayImpl {
@@ -121,7 +120,40 @@ private:
 	}
 };
 #	endif
+#elif defined(__ANDROID__)
+#	include "androidUtil.h"
+#include <fstream>
+#include <filesystem.h>
+class AndroidWebViewOverlayImpl : public WebViewOverlayImpl {
+public:
+	AndroidWebViewOverlayImpl(App &app,
+							  const std::string &urlToOpen,
+							  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		readHtml(urlToOpen);
+	}
+
+	~AndroidWebViewOverlayImpl() override = default;
+
+	void callJs(const std::string &jsString) override {
+		//		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
+	}
+
+private:
+	void readHtml(const std::string &urlToOpen) {
+         auto url = fs::absolute(fs::path{urlToOpen}).string();
+		std::ifstream inputStream(urlToOpen);
+		if (!inputStream.is_open()) {
+			Log::e() << "Failed to open Html on path " << url;
+			return;
+		}
+		std::stringstream buffer;
+		buffer << inputStream.rdbuf();
+		androidDisplayHtml(urlToOpen);//buffer.str());
+	}
+};
 #endif
+
 //////////////////////////////////////////////////////////////////
 
 WebViewOverlay::WebViewOverlay(App &app,
@@ -133,6 +165,8 @@ WebViewOverlay::WebViewOverlay(App &app,
 #	else
 	impl = std::make_shared<MacWebViewOverlayImpl>(app, url, jsCallback);
 #	endif
+#elif defined(__ANDROID__)
+	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
 #endif
 }
 void WebViewOverlay::callJs(const std::string &jsString) {
