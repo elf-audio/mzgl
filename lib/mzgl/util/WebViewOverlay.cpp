@@ -10,7 +10,7 @@ public:
 		: app(app)
 		, url(url)
 		, jsCallback(jsCallback) {}
-	virtual ~WebViewOverlayImpl() = default;
+	virtual ~WebViewOverlayImpl()					 = default;
 	virtual void callJs(const std::string &jsString) = 0;
 
 protected:
@@ -21,9 +21,10 @@ protected:
 
 ///////////////////////////////////////////////////////////////////
 
-#import <WebKit/WebKit.h>
-#include "AppleWebView.h"
 #ifdef __APPLE__
+#	import <WebKit/WebKit.h>
+#	include "AppleWebView.h"
+
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
 class iOSWebViewOverlayImpl : public WebViewOverlayImpl {
