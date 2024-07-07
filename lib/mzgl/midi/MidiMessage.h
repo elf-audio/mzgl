@@ -88,7 +88,7 @@ struct MidiMessage {
 	[[nodiscard]] bool isChannelPressure() const { return status == MIDI_AFTERTOUCH; }
 	[[nodiscard]] bool isSongPositionPointer() const { return status == MIDI_SONG_POS_POINTER; }
 
-	static MidiMessage noteOn(int channel, int pitch, int velocity) {
+	[[nodiscard]] static MidiMessage noteOn(int channel, int pitch, int velocity) {
 		MidiMessage m;
 		m.status   = MIDI_NOTE_ON;
 		m.channel  = channel;
@@ -97,7 +97,7 @@ struct MidiMessage {
 		return m;
 	}
 
-	static MidiMessage noteOff(int channel, int pitch) {
+	[[nodiscard]] static MidiMessage noteOff(int channel, int pitch) {
 		MidiMessage m;
 		m.status   = MIDI_NOTE_OFF;
 		m.channel  = channel;
@@ -106,7 +106,7 @@ struct MidiMessage {
 		return m;
 	}
 
-	static MidiMessage cc(int channel, int control, int value) {
+	[[nodiscard]] static MidiMessage cc(int channel, int control, int value) {
 		MidiMessage m;
 		m.status  = MIDI_CONTROL_CHANGE;
 		m.channel = channel;
@@ -115,15 +115,15 @@ struct MidiMessage {
 		return m;
 	}
 
-	static MidiMessage songPositionPointer(int v) {
+	[[nodiscard]] static MidiMessage songPositionPointer(int v) {
 		MidiMessage m(MIDI_SONG_POS_POINTER);
 		m.value = v;
 		return m;
 	}
-	static MidiMessage allNotesOff() { return cc(0, MIDI_CC_ALL_NOTES_OFF, 0); }
-	static MidiMessage clock() { return MidiMessage(MIDI_TIME_CLOCK); }
-	static MidiMessage songStart() { return MidiMessage(MIDI_START); }
-	static MidiMessage songStop() { return MidiMessage(MIDI_STOP); }
+	[[nodiscard]] static MidiMessage allNotesOff() { return cc(0, MIDI_CC_ALL_NOTES_OFF, 0); }
+	[[nodiscard]] static MidiMessage clock() { return MidiMessage(MIDI_TIME_CLOCK); }
+	[[nodiscard]] static MidiMessage songStart() { return MidiMessage(MIDI_START); }
+	[[nodiscard]] static MidiMessage songStop() { return MidiMessage(MIDI_STOP); }
 
 	std::vector<uint8_t> getBytes() const {
 		if (status == MIDI_SYSEX) {
