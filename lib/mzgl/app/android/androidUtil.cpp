@@ -9,7 +9,7 @@
 #define PCM_OUT_BUFF_SIZE (32 * 1024)
 
 using namespace std;
-bool ScopedJniAttachmentBlocker::shouldBlock = false;
+//bool ScopedJniAttachmentBlocker::shouldBlock = false;
 
 struct android_statics {
 	std::function<void()> okPressed;
@@ -163,6 +163,42 @@ void androidLaunchUrl(const std::string &url) {
 
 void androidDisplayHtml(const std::string &html) {
 	callJNI("displayHtml", html);
+}
+
+void androidCallJs(const std::string js) {
+    callJNI("callJs", js);
+}
+
+void androidStopDisplayingHtml() {
+    callJNI("stopDisplayingHtml");
+}
+
+std::map<std::uintptr_t, std::function<void(const std::string &)>> webViews;
+void registerWebViewOverlay(std::uintptr_t identifier,
+							const std::function<void(const std::string &)> &jsCallback) {
+	auto iter = webViews.find(identifier);
+	if (iter != std::end(webViews)) {
+		mzAssert(false);
+		webViews.erase(iter);
+	}
+
+	webViews.insert({identifier, jsCallback});
+}
+
+void unregisterWebViewOverlay(std::uintptr_t identifier) {
+	auto iter = webViews.find(identifier);
+	if (iter == std::end(webViews)) {
+		mzAssert(false);
+		return;
+	}
+	webViews.erase(iter);
+}
+
+void notifyJSCallbacks(const std::string &jsValue) {
+	auto views = webViews;
+	for (auto &[id, callback]: views) {
+		callback(jsValue);
+	}
 }
 
 bool androidEncodeAAC(const std::string &pathToOutput,
@@ -568,6 +604,10 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLMidiManager_deviceRemoved(
 JNIEXPORT void JNICALL Java_com_elf_MZGLMidiReceiver_midiReceived(
 	JNIEnv *env, jobject thiz, jbyteArray bytes, jlong timestamp, jint deviceId, jint portId) {
 	androidParseMidiData(copyMidiBytes(env, bytes), timestamp, deviceId, portId);
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_onJavascript(JNIEnv *env, jobject thiz, jstring javascriptValue) {
+	notifyJSCallbacks(jstringToString(env, javascriptValue));
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_okPressed(JNIEnv *, jobject) {

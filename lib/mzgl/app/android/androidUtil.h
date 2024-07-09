@@ -73,13 +73,12 @@ void androidFileDialog(std::string copyToPath,
 
 void androidLaunchUrl(const std::string &url);
 
-//------------------------------------------------------------------------------------------------------------------------------
-///
-/// @brief Display html document in WebView for Android
-///
-/// @param html String containing HTML document to display.
-//------------------------------------------------------------------------------------------------------------------------------
 void androidDisplayHtml(const std::string &html);
+void androidStopDisplayingHtml();
+void androidCallJs(const std::string js);
+void registerWebViewOverlay(std::uintptr_t identifier, const std::function<void(const std::string &)> &jsCallback);
+void unregisterWebViewOverlay(std::uintptr_t identifier);
+void notifyJSCallbacks(const std::string &jsValue);
 
 bool androidEncodeAAC(const std::string &pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
@@ -151,60 +150,53 @@ void callJNI(const std::string &methodName, const std::string &arg1, int32_t arg
 std::string callJNIForString(const std::string &methodName);
 std::string callJNIForString(const std::string &methodName, const std::string &arg1);
 std::string jstringToString(JNIEnv *jni, jstring text);
-class ScopedJniAttachmentBlocker {
-public:
-	ScopedJniAttachmentBlocker() { shouldBlock = true; }
-	~ScopedJniAttachmentBlocker() { shouldBlock = false; }
-	static bool shouldBlock;
-};
-// these can be nested - if you have a nested scoped jni, only the outer one
-// does anything, and the inner ones are ignored - handy if you need to make
-// a block of Jni calls, so you don't keep having to Attach and DetatchCurrentThread
+
 class ScopedJni {
 public:
-	ScopedJni() {
-		//        Log::d() << "ScopedJni()";
-		mzAssert(jni == nullptr);
-		auto *appPtr = getAndroidAppPtr();
-		if (appPtr != nullptr) {
-			//            Log::d() << "attaching";
-			//   int getEnvStat = appPtr->activity->vm->GetEnv((void**)&jni, JNI_VERSION_1_6);
-			//     if(getEnvStat==JNI_EDETACHED) {
-			// if(!ScopedJniAttachmentBlocker::shouldBlock)
-			success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr) == JNI_OK;
-			//  } else if (getEnvStat == JNI_EVERSION) {
-			//      std::cout << "GetEnv: version not supported" << std::endl;
-			//  }
-		}
-	}
-	[[nodiscard]] JNIEnv *operator->() { return j(); }
-	JNIEnv *j() { return jni; }
-	jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
-		auto *cl = getClass();
-		if (cl == nullptr) return nullptr;
-		return jni->GetMethodID(cl, methodName.c_str(), signature.c_str());
-	}
+    ScopedJni() {
+        mzAssert(jni == nullptr);
+        if (auto *appPtr = getAndroidAppPtr()) {
+            if (appPtr->activity->vm->GetEnv(reinterpret_cast<void**>(&jni), JNI_VERSION_1_6) != JNI_OK) {
+                success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr) == JNI_OK;
+                attached = success;
+            } else {
+                success = true;
+                attached = false;
+            }
+        }
+    }
 
-	jclass getClass() {
-		if (!success) return nullptr;
-		auto *appPtr = getAndroidAppPtr();
-		if (appPtr != nullptr) {
-			jclass clazz = jni->GetObjectClass(appPtr->activity->clazz);
+    ~ScopedJni() {
+        if (success && attached) {
+            if (auto *appPtr = getAndroidAppPtr()) {
+                appPtr->activity->vm->DetachCurrentThread();
+            }
+            jni = nullptr;
+        }
+    }
 
-			return clazz;
-		}
-		return nullptr;
-	}
-	~ScopedJni() {
-		//        Log::d() << "~ScopedJni()";
-		if (success) { //} && !ScopedJniAttachmentBlocker::shouldBlock) {
-			//            Log::d() << "detaching";
-			getAndroidAppPtr()->activity->vm->DetachCurrentThread();
-			jni = nullptr;
-		}
-	}
+    [[nodiscard]] JNIEnv *operator->() { return j(); }
+    JNIEnv *j() { return jni; }
+
+    jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
+        if (auto *cl = getClass()) {
+            return jni->GetMethodID(cl, methodName.c_str(), signature.c_str());
+        }
+        return nullptr;
+    }
+
+    jclass getClass() {
+        if (!success) {
+            return nullptr;
+        }
+        if (auto *appPtr = getAndroidAppPtr()) {
+            return (jclass)jni->GetObjectClass(appPtr->activity->clazz);;
+        }
+        return nullptr;
+    }
 
 private:
-	bool success = false;
-	JNIEnv *jni	 = nullptr;
+    bool success = false;
+    bool attached = false;
+    JNIEnv *jni = nullptr;
 };

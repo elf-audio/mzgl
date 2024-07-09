@@ -552,6 +552,15 @@ android_app *getAndroidAppPtr() {
 EventDispatcher *getAndroidEventDispatcher() {
 	return eventDispatcher.get();
 }
+
+int android_loop_all(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
+    int result;
+    do {
+        result = ALooper_pollOnce(timeoutMillis, outFd, outEvents, outData);
+    } while (result == ALOOPER_POLL_CALLBACK);
+    return result;
+}
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
@@ -580,7 +589,7 @@ void android_main(struct android_app *state) {
 		int events;
 		struct android_poll_source *source;
 
-		while ((ident = ALooper_pollAll(engineReady ? 0 : -1, nullptr, &events, (void **) &source)) >= 0) {
+		while ((ident = android_loop_all(engineReady ? 0 : -1, nullptr, &events, (void **) &source)) >= 0) {
 			// Process this event.
 			if (source != nullptr) {
 				source->process(state, source);
