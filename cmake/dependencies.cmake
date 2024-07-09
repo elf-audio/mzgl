@@ -21,16 +21,15 @@ endfunction ()
 
 function (mzgl_remove_cmath TARGET)
   if (WIN32)
-    get_target_property(current_options ${TARGET} COMPILE_OPTIONS)
-    if(current_options)
-        list(REMOVE_ITEM current_options "/FIcmath")
-        set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${current_options}")
-    else()
-        set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "")
-    endif()
-  endif()
+    get_target_property (current_options ${TARGET} COMPILE_OPTIONS)
+    if (current_options)
+      list (REMOVE_ITEM current_options "/FIcmath")
+      set_target_properties (${TARGET} PROPERTIES COMPILE_OPTIONS "${current_options}")
+    else ()
+      set_target_properties (${TARGET} PROPERTIES COMPILE_OPTIONS "")
+    endif ()
+  endif ()
 endfunction ()
-
 
 function (mzgl_add_package PACKAGE_NAME)
   mzgl_print_in_yellow ("[CPM] -> Adding package ${PACKAGE_NAME}")
@@ -103,31 +102,28 @@ function (mzgl_add_zlib)
     mzgl_print_in_yellow ("[CPM] -> Adding package gh:CristiFati/ZLib@1.2.12")
     mzgl_save_cmake_log_level ()
     cpmaddpackage (
-    NAME
-    zlib
-    URL
-    https://www.koalasampler.com/ci-resources/ZLib-1.2.12-Win-pc064.zip
-    DOWNLOAD_ONLY
-    True
-    URL_HASH
-    MD5=9847d1345d200b24c3f5558f0740dbb1)
-    
-    set(ZLIB_ROOT ${zlib_SOURCE_DIR}/ZLib/1.2.12)
+      NAME
+      zlib
+      URL
+      https://drive.google.com/uc?export=download&id=1fXRpJEe5sb389C6rfbCCh69CymZaO4Gz
+      DOWNLOAD_ONLY
+      True
+      URL_HASH
+      MD5=9847d1345d200b24c3f5558f0740dbb1)
+
+    set (ZLIB_ROOT ${zlib_SOURCE_DIR}/ZLib/1.2.12)
 
     add_library (zlib INTERFACE IMPORTED GLOBAL)
     target_include_directories (zlib SYSTEM INTERFACE ${ZLIB_ROOT}/include)
-    target_link_libraries (
-    zlib
-    INTERFACE ${ZLIB_ROOT}/lib/zlib.lib
-              ${ZLIB_ROOT}/lib/zlibstatic.lib)
+    target_link_libraries (zlib INTERFACE ${ZLIB_ROOT}/lib/zlib.lib ${ZLIB_ROOT}/lib/zlibstatic.lib)
 
-    set(ZLIB_INCLUDE_DIR ${ZLIB_ROOT}/include)
-    set(ZLIB_LIBRARY ${ZLIB_ROOT}/lib/zlib.lib)
+    set (ZLIB_INCLUDE_DIR ${ZLIB_ROOT}/include)
+    set (ZLIB_LIBRARY ${ZLIB_ROOT}/lib/zlib.lib)
 
-    set(ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIR} CACHE PATH "Path to zlib include directory")
-    set(ZLIB_LIBRARY ${ZLIB_LIBRARY} CACHE FILEPATH "Path to zlib library")
+    set (ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIR} CACHE PATH "Path to zlib include directory")
+    set (ZLIB_LIBRARY ${ZLIB_LIBRARY} CACHE FILEPATH "Path to zlib library")
 
-    find_package(ZLIB REQUIRED)
+    find_package (ZLIB REQUIRED)
     mzgl_restore_cmake_log_level ()
   endif ()
 endfunction ()
@@ -137,7 +133,7 @@ function (mzgl_add_zipper)
 
   mzgl_add_package ("gh:sebastiandev/zipper#87b14a4")
 
-  mzgl_remove_cmath(staticZipper)
+  mzgl_remove_cmath (staticZipper)
   set_target_properties (Zipper-static PROPERTIES DEBUG_POSTFIX "")
 
   unset (BUILD_SHARED_VERSION CACHE)
@@ -192,7 +188,7 @@ function (mzgl_add_portaudio)
   else ()
     if (NOT ANDROID AND NOT IOS)
       mzgl_add_package ("gh:PortAudio/portaudio@19.7.0" DOWNLOAD_ONLY True)
-      mzgl_remove_cmath(portaudio)
+      mzgl_remove_cmath (portaudio)
     endif ()
   endif ()
 endfunction ()
