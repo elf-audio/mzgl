@@ -122,26 +122,28 @@ private:
 #	endif
 #elif defined(__ANDROID__)
 #	include "androidUtil.h"
-#include <fstream>
-#include <filesystem.h>
+#   include <fstream>
 class AndroidWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
 	AndroidWebViewOverlayImpl(App &app,
 							  const std::string &urlToOpen,
 							  std::function<void(const std::string &)> theJsCallback)
 		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+        registerWebViewOverlay(reinterpret_cast<std::uintptr_t>(this), theJsCallback);
 		readHtml(urlToOpen);
 	}
 
-	~AndroidWebViewOverlayImpl() override = default;
+	~AndroidWebViewOverlayImpl() override{
+        androidStopDisplayingHtml();
+        unregisterWebViewOverlay(reinterpret_cast<std::uintptr_t>(this));
+    }
 
 	void callJs(const std::string &jsString) override {
-		//		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
+		androidCallJs(jsString);
 	}
 
 private:
 	void readHtml(const std::string &urlToOpen) {
-         auto url = fs::absolute(fs::path{urlToOpen}).string();
 		std::ifstream inputStream(urlToOpen);
 		if (!inputStream.is_open()) {
 			Log::e() << "Failed to open Html on path " << url;
@@ -149,12 +151,10 @@ private:
 		}
 		std::stringstream buffer;
 		buffer << inputStream.rdbuf();
-		androidDisplayHtml(urlToOpen);//buffer.str());
+		androidDisplayHtml(urlToOpen);
 	}
 };
 #endif
-
-//////////////////////////////////////////////////////////////////
 
 WebViewOverlay::WebViewOverlay(App &app,
 							   const std::string &url,
