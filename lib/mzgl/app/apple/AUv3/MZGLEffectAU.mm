@@ -84,6 +84,10 @@ struct Blocks {
 	NSArray *carray = @[ @2, @2 ];
 	return carray;
 }
+
+- (NSArray<NSNumber *> *)supportedChannelCounts {
+    return @[@2, @2];
+}
 #endif
 // TODO: Ensure lifecycle of Effect is same as AudioUnit
 // TODO: Mono + Stereo support at least
@@ -572,6 +576,16 @@ struct Blocks {
 // Partially bridged to the v2 property kAudioUnitProperty_InPlaceProcessing, the v3 property is not settable.
 - (BOOL)canProcessInPlace {
 	return YES;
+}
+
+- (BOOL)shouldChangeToFormat:(AVAudioFormat *)format forBus:(AUAudioUnitBus*)bus {
+    if (bus) { // Output bus
+        // Example: supporting mono and stereo
+        if (format.channelCount == 1 || format.channelCount == 2) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 #pragma mark - AUAudioUnit (AUAudioUnitImplementation)

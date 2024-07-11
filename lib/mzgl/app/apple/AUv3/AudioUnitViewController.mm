@@ -189,7 +189,7 @@ using namespace std;
 	//		   andComponentDescription:(AudioComponentDescription)componentDescription
 	//						   options:(AudioComponentInstantiationOptions)options error:(NSError **)outError;
 	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:plugin andComponentDescription:desc error:error];
-	NSLog(@"MZGL: createAudioUnitWithComponentDescription");
+	NSLog(@"MZGL: createAudioUnitWithComponentDescription floopy ");
 
 	//    if([NSThread isMainThread]) {
 	//        NSLog(@"main thread");

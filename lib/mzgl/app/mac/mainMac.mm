@@ -14,6 +14,10 @@
 #include <mzgl/App.h>
 #include <mzgl/util/mzAssert.h>
 
+#if defined (__APPLE__)
+int main(int argc, const char *argv[]) __attribute__((used));
+#endif
+
 Graphics g;
 int main(int argc, const char *argv[]) {
 	[NSApplication sharedApplication];
