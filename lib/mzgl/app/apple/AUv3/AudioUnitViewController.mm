@@ -153,13 +153,9 @@ using namespace std;
                         change:(NSDictionary<NSKeyValueChangeKey,id> *)change
                        context:(void *)context {
     if ([keyPath isEqualToString:@"frame"] && object == self->glView) {
-        // Handle the change
-        NSLog(@"Old Frame: %@", change[NSKeyValueChangeOldKey]);
-        NSLog(@"New Frame: %@", change[NSKeyValueChangeNewKey]);
-        g.width     = self.view.frame.size.width * 2;
+        g.width  = self.view.frame.size.width * 2;
         g.height = self.view.frame.size.height * 2;
-        eventDispatcher->resized();
-        
+//        eventDispatcher->resized();
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }

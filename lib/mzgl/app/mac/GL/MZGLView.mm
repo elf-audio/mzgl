@@ -25,7 +25,10 @@
 	bool firstFrame;
 	bool drawing;
     bool delayCallToResize;
+    
     NSTimer *resizeTimer;
+    NSDate *lastResizeCall;
+    BOOL hasResizeStarted;
 }
 
 @synthesize view;
@@ -63,10 +66,12 @@
 		[self setWantsBestResolutionOpenGLSurface:YES];
 		[self createGLResources];
 		[self createDisplayLink];
-		drawing = true;
+		drawing           = true;
         delayCallToResize = false;
-        resizeTimer= nil;
-		firstFrame = true;
+        resizeTimer       = nil;
+        lastResizeCall    = nil;
+        hasResizeStarted  = NO;
+		firstFrame        = true;
 	}
 	return self;
 }
@@ -173,10 +178,17 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
     resizeTimer = nil;
 }
 
+- (void)handleResizeEvent {
+    auto evtDispatcher = eventDispatcher;
+    eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher]() {
+        evtDispatcher->resized();
+    });
+}
+
 - (void)handleDelayedResize {
     [self cancelResizeTimer];
-    auto evtDispatcher = eventDispatcher;
-    eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher]() { evtDispatcher->resized(); });
+    [self handleResizeEvent];
+    hasResizeStarted = NO;
 }
 
 - (void)startResizeTimer {
@@ -204,12 +216,33 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
     glViewport(0, 0, eventDispatcher->app->g.width, eventDispatcher->app->g.height);
 }
 
+- (void)startResize {
+    if (!hasResizeStarted) {
+        [self handleResizeEvent];
+        hasResizeStarted = YES;
+    }
+}
+
+- (void)sendResizeIfTimeExpired {
+    
+    static constexpr auto numberOfCallsPerSecond = 8.0;
+    static constexpr auto timeoutDuration = 1.0 / numberOfCallsPerSecond;
+    
+    NSDate *now = [NSDate date];
+    if (lastResizeCall == nil || [now timeIntervalSinceDate:lastResizeCall] >= timeoutDuration) {
+        [self handleResizeEvent];
+        lastResizeCall = now;
+    }
+}
+
 - (void)resizeWithOldSuperviewSize:(NSSize)oldSize {
     [super resizeWithOldSuperviewSize:oldSize];
     
+    [self startResize];
     [self updateGraphicsBounds];
     [self updateFrameSize];
     [self updateGLViewPortSize];
+    [self sendResizeIfTimeExpired];
     [self startResizeTimer];
 }
 
