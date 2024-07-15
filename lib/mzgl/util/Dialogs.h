@@ -155,6 +155,14 @@ public:
 	void displayHtmlInWebView(const std::string &html, std::function<void()> completionCallback = []() {}) const;
 
 	void chooseFolder(std::string msg, std::function<void(std::string, bool)> completionCallback) const;
+#ifdef __APPLE__
+	void textboxWithSegmented(
+		std::string title,
+		std::string msg,
+		std::string text,
+		std::vector<std::string> options,
+		std::function<void(std::string filePath, int segmentChosen, bool cancelled)> completionCallback) const;
+#endif
 };
 
 namespace unit_test {

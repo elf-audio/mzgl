@@ -1226,3 +1226,137 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), false, msg, completionCallback);
 #endif
 }
+
+#ifdef __APPLE__
+void Dialogs::textboxWithSegmented(std::string title,
+								   std::string msg,
+								   std::string text,
+								   std::vector<std::string> options,
+								   std::function<void(std::string, int, bool)> completionCallback) const {
+#	if TARGET_OS_IOS
+	UIAlertController *alert =
+		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
+											message:[NSString stringWithUTF8String:msg.c_str()]
+									 preferredStyle:UIAlertControllerStyleAlert];
+
+	// Add a text field to the alert
+	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+	  textField.text = [NSString stringWithUTF8String:text.c_str()];
+	  dispatch_async(dispatch_get_main_queue(), ^{ [textField selectAll:nil]; });
+	}];
+
+	// Create a segmented control with the given options
+	UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithFrame:CGRectMake(0, 0, 270, 30)];
+	for (int i = 0; i < options.size(); i++) {
+		[segmentedControl insertSegmentWithTitle:[NSString stringWithUTF8String:options[i].c_str()]
+										 atIndex:i
+										animated:NO];
+	}
+	segmentedControl.selectedSegmentIndex = 0; // Default selection
+
+	// Create a container view for the segmented control
+	UIView *containerView  = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 270, 30)];
+	segmentedControl.frame = CGRectMake(0, 0, 270, 30);
+	[containerView addSubview:segmentedControl];
+
+	// Add the container view to the alert as a custom view
+	[alert.view addSubview:containerView];
+
+	// Set constraints for the container view
+	[containerView setTranslatesAutoresizingMaskIntoConstraints:NO];
+	NSLayoutConstraint *leadingConstraint =
+		[containerView.leadingAnchor constraintEqualToAnchor:alert.view.leadingAnchor constant:15];
+	NSLayoutConstraint *trailingConstraint =
+		[containerView.trailingAnchor constraintEqualToAnchor:alert.view.trailingAnchor constant:-15];
+	NSLayoutConstraint *topConstraint =
+		[containerView.topAnchor constraintEqualToAnchor:alert.view.topAnchor constant:90];
+	NSLayoutConstraint *heightConstraint = [containerView.heightAnchor constraintEqualToConstant:30];
+	[NSLayoutConstraint
+		activateConstraints:@[ leadingConstraint, trailingConstraint, topConstraint, heightConstraint ]];
+
+	// Add actions to the alert
+	UIAlertAction *saveAction = [UIAlertAction actionWithTitle:@"Save"
+														 style:UIAlertActionStyleDefault
+													   handler:^(UIAlertAction *action) {
+														 UITextField *textField = alert.textFields.firstObject;
+														 NSString *filename		= textField.text;
+														 NSInteger selectedSegment =
+															 segmentedControl.selectedSegmentIndex;
+														 completionCallback([filename UTF8String], selectedSegment, true);
+													   }];
+
+	UIAlertAction *cancelAction =
+		[UIAlertAction actionWithTitle:@"Cancel"
+								 style:UIAlertActionStyleCancel
+							   handler:^(UIAlertAction *action) { completionCallback("", 0, false); }];
+
+	[alert addAction:saveAction];
+	[alert addAction:cancelAction];
+
+	// Present the alert
+	UIViewController *rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+
+	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+
+#	else
+
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  // Create an alert
+	  NSAlert *alert = [[NSAlert alloc] init];
+	  [alert setMessageText:[NSString stringWithCString:title.c_str() encoding:NSUTF8StringEncoding]];
+	  [alert setInformativeText:[NSString stringWithCString:msg.c_str() encoding:NSUTF8StringEncoding]];
+	  [alert addButtonWithTitle:@"OK"];
+	  [alert addButtonWithTitle:@"Cancel"];
+
+	  // Create a text field
+	  NSTextField *textField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 24)];
+	  [textField setPlaceholderString:@""];
+
+	  // Create a container view for the accessory view
+	  NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 60)];
+
+	  // Create a segmented control for choosing save location
+	  NSSegmentedControl *locationControl = [[NSSegmentedControl alloc] initWithFrame:NSMakeRect(50, 0, 200, 24)];
+	  [locationControl setSegmentCount:options.size()];
+
+	  for (int i = 0; i < options.size(); i++) {
+		  [locationControl setLabel:[NSString stringWithUTF8String:options[i].c_str()] forSegment:i];
+	  }
+	  [locationControl setSelectedSegment:0];
+
+	  // Add the text field and segmented control to the accessory view
+	  [accessoryView addSubview:locationControl];
+	  [accessoryView addSubview:textField];
+
+	  // Adjust the text field's position
+	  NSRect textFieldFrame	  = [textField frame];
+	  textFieldFrame.origin.y = locationControl.frame.size.height + 10;
+	  [textField setFrame:textFieldFrame];
+
+	  // Set the accessory view of the alert to the container view
+	  [alert setAccessoryView:accessoryView];
+
+	  std::function<void(NSInteger, NSTextField *, NSSegmentedControl *)> handleResult =
+		  [completionCallback, this](NSInteger returnCode, NSTextField *label, NSSegmentedControl *seg) {
+			  std::string txt			= "";
+			  NSInteger selectedSegment = [seg selectedSegment];
+
+			  if (returnCode == NSAlertFirstButtonReturn) {
+				  txt = [[label stringValue] UTF8String];
+			  }
+			  app.main.runOnMainThread(true, [txt, returnCode, selectedSegment, completionCallback]() {
+				  completionCallback(txt, selectedSegment, returnCode == NSAlertFirstButtonReturn);
+			  });
+		  };
+#		ifndef MZGLAU
+	  [alert beginSheetModalForWindow:[NSApp mainWindow]
+					completionHandler:^(NSInteger result) { handleResult(result, textField, locationControl); }];
+	  [textField becomeFirstResponder];
+#		else
+	  [label becomeFirstResponder];
+	  handleResult([alert runModal], label, locationControl);
+#		endif
+	});
+#	endif
+}
+#endif
