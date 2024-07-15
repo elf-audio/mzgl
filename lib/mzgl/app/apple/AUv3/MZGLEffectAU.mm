@@ -69,6 +69,7 @@ struct Blocks {
 	AudioStreamBasicDescription asbd;
 
 	bool isInstrument;
+    bool allocated;
 }
 //#if !TARGET_OS_IOS
 //@synthesize channelCapabilities = _channelCapabilities;
@@ -136,6 +137,7 @@ struct Blocks {
 - (void)setupWithPlugin:(std::shared_ptr<Plugin>)_plugin
 	andComponentDescription:(AudioComponentDescription)componentDescription {
 	inst		 = instanceNumber++;
+    allocated    = false;
 	plugin		 = _plugin; // instantiatePlugin();
 	isInstrument = !(componentDescription.componentType == 'aufx' || componentDescription.componentType == 'aumf');
 
@@ -497,11 +499,11 @@ struct Blocks {
 // Subclassers must override this property getter and should return the same object every time.
 // See sample code.
 - (AUAudioUnitBusArray *)inputBusses {
-	if (isInstrument) {
-		return [super inputBusses];
-	} else {
+//	if (isInstrument) {
+//		return [super inputBusses];
+//	} else {
 		return _inputBusArray;
-	}
+//	}
 }
 
 // An audio unit's audio output connection points.
@@ -517,6 +519,9 @@ struct Blocks {
 	if (![super allocateRenderResourcesAndReturnError:outError]) {
 		return NO;
 	}
+    
+    
+    allocated = false;
 
 	AUAudioUnitBus *firstOutputBus = [_outputBusArray objectAtIndexedSubscript:0];
 
@@ -553,6 +558,7 @@ struct Blocks {
 
 	plugin->setSampleRate(firstOutputBus.format.sampleRate);
 	plugin->init(asbd.mChannelsPerFrame, asbd.mChannelsPerFrame);
+    allocated = true;
 	return YES;
 }
 
@@ -563,7 +569,7 @@ struct Blocks {
 	blocks.musicalContext = nil;
 	blocks.transportState = nil;
 	_inputBus.deallocateRenderResources();
-
+    allocated = false;
 	[super deallocateRenderResources];
 }
 
@@ -579,13 +585,8 @@ struct Blocks {
 }
 
 - (BOOL)shouldChangeToFormat:(AVAudioFormat *)format forBus:(AUAudioUnitBus*)bus {
-    if (bus) { // Output bus
-        // Example: supporting mono and stereo
-        if (format.channelCount == 1 || format.channelCount == 2) {
-            return YES;
-        }
-    }
-    return NO;
+    
+    return (! allocated /*&& [bus busType] == AUAudioUnitBusTypeOutput*/ && (format.channelCount == 1 || format.channelCount == 2));
 }
 
 #pragma mark - AUAudioUnit (AUAudioUnitImplementation)
