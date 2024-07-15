@@ -327,7 +327,7 @@ struct Blocks {
 						change:(NSDictionary *)change
 					   context:(void *)context {
 	if (context == (__bridge void *_Nullable) (self)) {
-		if (keyPath == @"format" && [object isKindOfClass:[AUAudioUnitBus class]]) {
+        if ([keyPath  isEqual: @"format"] && [object isKindOfClass:[AUAudioUnitBus class]]) {
 			AUAudioUnitBus *bus = object;
 			plugin->setSampleRate(bus.format.sampleRate);
 		}
@@ -444,7 +444,7 @@ struct Blocks {
 	if (currentPreset == nil) {
 		AULog(@"setCurrentPreset called with nil");
 	} else {
-		AULog(@"setCurrentPreset called with num %d ('%@')", currentPreset.number, currentPreset.name);
+        AULog(@"setCurrentPreset called with num %ld ('%@')", (long)currentPreset.number, currentPreset.name);
 	}
 	if (nil == currentPreset) { /*AULog(@"nil passed to setCurrentPreset!");*/
 		return;

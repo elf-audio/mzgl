@@ -24,6 +24,8 @@
 	std::mutex evtMutex;
 	bool firstFrame;
 	bool drawing;
+    bool delayCallToResize;
+    NSTimer *resizeTimer;
 }
 
 @synthesize view;
@@ -62,7 +64,8 @@
 		[self createGLResources];
 		[self createDisplayLink];
 		drawing = true;
-
+        delayCallToResize = false;
+        resizeTimer= nil;
 		firstFrame = true;
 	}
 	return self;
@@ -87,6 +90,10 @@
 		CVDisplayLinkStop(displayLink);
 		displayLink = NULL;
 	}
+    
+    if (self->resizeTimer != nil){
+        [self->resizeTimer invalidate];
+    }
 	// can't do this apparently, but clang warns about it.
 	//	[super dealloc];
 }
@@ -157,6 +164,54 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 //	[[NSApplication sharedApplication] terminate:nil];
 //	//EventDispatcher::instance()->exit();
 //}
+
+
+- (void)cancelResizeTimer {
+    if (resizeTimer != nil){
+        [resizeTimer invalidate];
+    }
+    resizeTimer = nil;
+}
+
+- (void)handleDelayedResize {
+    [self cancelResizeTimer];
+    auto evtDispatcher = eventDispatcher;
+    eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher]() { evtDispatcher->resized(); });
+}
+
+- (void)startResizeTimer {
+    [self cancelResizeTimer];
+    resizeTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                         target:self
+                                                       selector:@selector(handleDelayedResize)
+                                                       userInfo:nil
+                                                        repeats:NO];
+}
+
+- (void)updateGraphicsBounds {
+    eventDispatcher->app->g.width  =  [self window].contentLayoutRect.size.width;
+    eventDispatcher->app->g.height =  [self window].contentLayoutRect.size.height;
+}
+
+- (void)updateFrameSize {
+    auto newFrame        = self.frame;
+    newFrame.size.width  = eventDispatcher->app->g.width;
+    newFrame.size.height = eventDispatcher->app->g.height;
+    self.frame           = newFrame;
+}
+
+- (void)updateGLViewPortSize {
+    glViewport(0, 0, eventDispatcher->app->g.width, eventDispatcher->app->g.height);
+}
+
+- (void)resizeWithOldSuperviewSize:(NSSize)oldSize {
+    [super resizeWithOldSuperviewSize:oldSize];
+    
+    [self updateGraphicsBounds];
+    [self updateFrameSize];
+    [self updateGLViewPortSize];
+    [self startResizeTimer];
+}
 
 - (void)windowResized:(NSNotification *)notification {
 	Log::d() << "windowDidResize";

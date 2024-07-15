@@ -134,11 +134,35 @@ using namespace std;
 - (void)viewWillAppear {
 	[self viewWillAppear:NO];
 }
+
 - (void)viewWillDisappear {
 	[self viewWillDisappear:NO];
 }
+
 - (void)viewDidAppear {
 	[self viewDidAppear:NO];
+}
+
+- (void)dealloc {
+    [self->glView removeObserver:self forKeyPath:@"frame"];
+    [super dealloc];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    if ([keyPath isEqualToString:@"frame"] && object == self->glView) {
+        // Handle the change
+        NSLog(@"Old Frame: %@", change[NSKeyValueChangeOldKey]);
+        NSLog(@"New Frame: %@", change[NSKeyValueChangeNewKey]);
+        g.width     = self.view.frame.size.width * 2;
+        g.height = self.view.frame.size.height * 2;
+        eventDispatcher->resized();
+        
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -153,12 +177,38 @@ using namespace std;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+        glView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+        [glView setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+        NSLayoutConstraint *width = [NSLayoutConstraint
+            constraintWithItem:glView
+            attribute:NSLayoutAttributeWidth
+            relatedBy:NSLayoutRelationEqual
+            toItem:glView.superview
+            attribute:NSLayoutAttributeWidth
+            multiplier:1.0
+            constant:0];
+        NSLayoutConstraint *height = [NSLayoutConstraint
+            constraintWithItem:glView
+            attribute:NSLayoutAttributeHeight
+            relatedBy:NSLayoutRelationEqual
+            toItem:glView.superview
+            attribute:NSLayoutAttributeHeight
+            multiplier:1.0
+            constant:0];
+
+        [glView.superview addConstraints:@[width, height]];
 #endif
 		glView.frame = self.view.frame;
 #if !TARGET_OS_IOS
-		g.width	 = self.view.frame.size.width * 2;
-		g.height = self.view.frame.size.height * 2;
+        g.width	 = self.view.frame.size.width * 2;
+        g.height = self.view.frame.size.height * 2;
 		eventDispatcher->resized();
+        
+        [glView addObserver:self
+                      forKeyPath:@"frame"
+                         options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew)
+                         context:NULL];
 #endif
 		[self addGLView];
 	}
@@ -172,7 +222,7 @@ using namespace std;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id)coordinator {
-	NSLog(@"MZGL: Size change whaaa");
+    //self->glView.frame = CGRectMake(0, 0, size.width, size.height);
 }
 
 - (std::shared_ptr<Plugin>)getPlugin {
