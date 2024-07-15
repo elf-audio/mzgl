@@ -45,14 +45,23 @@ public:
 	void setFromCentre(float cx, float cy, float w, float h);
 	void setFromCentre(glm::vec2 c, float w, float h) { setFromCentre(c.x, c.y, w, h); }
 
+	void setFromCentre(glm::vec2 c, glm::vec2 dims) { setFromCentre(c.x, c.y, dims.x, dims.y); }
+
 	static Rectf fromCentre(float cx, float cy, float w, float h) {
 		Rectf r;
 		r.setFromCentre(cx, cy, w, h);
 		return r;
 	}
+
 	static Rectf fromCentre(glm::vec2 c, float w, float h) {
 		Rectf r;
 		r.setFromCentre(c, w, h);
+		return r;
+	}
+
+	static Rectf fromCentre(glm::vec2 c, glm::vec2 dims) {
+		Rectf r;
+		r.setFromCentre(c, dims);
 		return r;
 	}
 	glm::vec2 tl() const { return glm::vec2(x, y); }

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <cstring>
 using namespace std;
+#include "stringUtil.h"
 
 //#ifndef _WIN32
 DateTime::DateTime(int year, int month, int day, int hour, int min, int sec) {
@@ -33,8 +34,8 @@ DateTime::DateTime() {
 	this->sec	= timePtr->tm_sec;
 }
 string DateTime::timestampString() {
-	return toYear(this->year) + "-" + pad2(month) + "-" + pad2(day) + "--" + pad2(hour) + "." + pad2(min) + "."
-		   + pad2(sec);
+	return toYear(this->year) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + "--" + zeroPad2(hour) + "."
+		   + zeroPad2(min) + "." + zeroPad2(sec);
 }
 void DateTime::fromSql(string sql) {
 	this->year	= stoi(sql.substr(0, 4));
@@ -44,24 +45,10 @@ void DateTime::fromSql(string sql) {
 	this->min	= stoi(sql.substr(14, 2));
 	this->sec	= stoi(sql.substr(17, 2));
 }
-string DateTime::pad2(int i) {
-	if (i > 9) return to_string(i);
-	else return "0" + to_string(i);
-}
-string DateTime::toSql() {
-	string d = toYear(this->year);
 
-	d += "-";
-	d += pad2(month);
-	d += "-";
-	d += pad2(day);
-	d += " ";
-	d += pad2(hour);
-	d += ":";
-	d += pad2(min);
-	d += ":";
-	d += pad2(sec);
-	return d;
+string DateTime::toSql() {
+	return toYear(this->year) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + " " + zeroPad2(hour) + ":"
+		   + zeroPad2(min) + ":" + zeroPad2(sec);
 }
 
 int DateTime::getDayOfWeek() {

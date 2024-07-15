@@ -45,6 +45,5 @@ public:
 	std::string timestampString();
 
 private:
-	std::string pad2(int i);
 	std::string toYear(int yr);
 };

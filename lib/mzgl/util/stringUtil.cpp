@@ -12,6 +12,17 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
+
+std::string zeroPad2(int number) {
+	return zeroPad(number, 2);
+}
+
+std::string zeroPad(int number, int width) {
+	std::ostringstream oss;
+	oss << std::setw(width) << std::setfill('0') << number;
+	return oss.str();
+}
+
 std::string to_string(float value, int precision) {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(precision) << value;

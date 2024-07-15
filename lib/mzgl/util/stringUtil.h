@@ -34,3 +34,5 @@ std::string trimBack(const std::string &src);
 
 template <typename T>
 std::string to_string(const T a_value, const int n);
+std::string zeroPad(int number, int width);
+std::string zeroPad2(int number);
