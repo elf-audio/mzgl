@@ -537,7 +537,9 @@ void Graphics::saveScreen(std::string pngPath) {
 }
 
 void Graphics::clear(vec4 bgColor) {
-	api->clear(bgColor);
+    if (api != nullptr) {
+        api->clear(bgColor);
+    }
 }
 
 void Graphics::clear(vec3 bgColor) {

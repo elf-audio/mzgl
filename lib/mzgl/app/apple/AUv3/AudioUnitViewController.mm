@@ -65,7 +65,7 @@ using namespace std;
 	////        [self addGLView];
 	////        [self connectViewToAU];
 	//#else
-	[self setPreferredContentSize:CGSizeMake(500, 800)];
+	[self setPreferredContentSize:CGSizeMake(1100, 650)];
 	//#endif
 }
 #if !TARGET_OS_IOS

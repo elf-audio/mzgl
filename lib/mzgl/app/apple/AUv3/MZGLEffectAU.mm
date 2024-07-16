@@ -626,12 +626,14 @@ struct Blocks {
 
 	  // only do all this on the first render block
 	  if (outputBusNumber == 0) {
+          bool transportStateChanged = false;
 		  if (blks->transportState) {
 			  AUHostTransportStateFlags transportStateFlags = 0;
 			  if (blks->transportState(&transportStateFlags, nullptr, nullptr, nullptr)) {
 				  bool isPlaying = transportStateFlags & AUHostTransportStateMoving;
 				  if (eff->getHostIsPlaying() != isPlaying) {
 					  eff->setHostIsPlaying(isPlaying);
+                      transportStateChanged = true;
 				  }
 			  }
 		  }
@@ -639,7 +641,17 @@ struct Blocks {
 		  if (blks->musicalContext) {
 			  double bpm		  = 0;
 			  double beatPosition = 0;
-			  if (blks->musicalContext(&bpm, nullptr, nullptr, &beatPosition, nullptr, nullptr)) {
+              double timeSignatureNumerator = 4;
+              NSInteger timeSignatureDenominator = 4;
+              NSInteger sampleOffsetToNextBeat = 0;
+              double currentMeasureDownbeatPosition = 0;
+
+			  if (blks->musicalContext(&bpm,
+                                       &timeSignatureNumerator,
+                                       &timeSignatureDenominator,
+                                       &beatPosition,
+                                       &sampleOffsetToNextBeat,
+                                       &currentMeasureDownbeatPosition)) {
 				  eff->bpm			= bpm;
 				  eff->beatPosition = beatPosition;
 			  }
