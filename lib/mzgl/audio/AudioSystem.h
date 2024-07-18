@@ -92,6 +92,7 @@ public:
 
 	virtual float getSampleRate() const { return sampleRate; }
 	virtual int getBufferSize() const { return bufferSize; }
+	virtual uint32_t getMaxBufferSize() const { return getBufferSize(); /* Override if you have calculated a different value here */ }
 	void bufferSizeChangedBySystem(int size);
 
 	void addSampleRateChangeListener(SampleRateChangeListener *listener);

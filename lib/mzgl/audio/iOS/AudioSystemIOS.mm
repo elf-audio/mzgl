@@ -151,6 +151,8 @@ void AudioSystemIOS::configureAudioSession() {
 		NSLog(@"configureAudioSession Error: %@", [err localizedDescription]);
 		err = nil;
 	}
+	
+	maxBufferSize = static_cast<int>([audioSession IOBufferDuration] * sampleRate);
 }
 
 void AudioSystemIOS::setup(int numInputChannels, int numOutputChannels) {
@@ -413,4 +415,8 @@ vector<AudioPort> AudioSystemIOS::getOutputs() {
 	}
 
 	return ports;
+}
+
+uint32_t AudioSystemIOS::getMaxBufferSize() const {
+	return maxBufferSize;
 }

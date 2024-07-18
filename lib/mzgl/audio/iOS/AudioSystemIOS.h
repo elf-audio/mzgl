@@ -21,12 +21,15 @@ public:
 
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
+	
+	[[nodiscard]] uint32_t getMaxBufferSize() const override;
 
 	AudioUnit audioUnit;
 	void handleRouteChange();
 
 private:
 	bool running = false;
+	uint32_t maxBufferSize = bufferSize;
 
 	// iOS specific, should move to specific implementaiton
 	void configureAudioSession();

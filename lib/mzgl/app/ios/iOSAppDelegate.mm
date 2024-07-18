@@ -170,4 +170,9 @@ public:
 	plugin = nullptr;
 }
 
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+	auto eventDispatcher = [mzViewController getEventDispatcher];
+	eventDispatcher->memoryWarning();
+}
+
 @end
