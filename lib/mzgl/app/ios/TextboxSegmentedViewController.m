@@ -11,16 +11,18 @@
 @property (nonatomic, strong) NSArray<NSString *> *options;
 @property (nonatomic, copy) NSString *alertTitle;
 @property (nonatomic, copy) NSString *alertMessage;
+@property (nonatomic, assign) NSInteger selectedItem;
 @end
 
 @implementation TextboxSegmentedViewController
 
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message options:(NSArray<NSString *> *)options {
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message options:(NSArray<NSString *> *)options selected:(NSInteger)selected {
 	self = [super init];
 	if (self) {
 		self.alertTitle = title;
 		self.alertMessage = message;
 		self.options = options;
+		self.selectedItem = selected;
 	}
 	return self;
 }
@@ -89,7 +91,7 @@
 	
 	
 	self.segmentedControl = [[UISegmentedControl alloc] initWithItems:self.options];
-	self.segmentedControl.selectedSegmentIndex = 0;
+	self.segmentedControl.selectedSegmentIndex = self.selectedItem;
 	self.segmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
 	[alertView addSubview:self.segmentedControl];
 	
