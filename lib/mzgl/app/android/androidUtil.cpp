@@ -195,6 +195,9 @@ void unregisterWebViewOverlay(std::uintptr_t identifier) {
 }
 
 void notifyJSCallbacks(const std::string &jsValue) {
+    if (webViews.empty() && jsValue == "close") {
+        androidStopDisplayingHtml();
+    }
 	auto views = webViews;
 	for (auto &[id, callback]: views) {
 		callback(jsValue);
