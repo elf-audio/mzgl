@@ -165,6 +165,10 @@ void androidDisplayHtml(const std::string &html) {
 	callJNI("displayHtml", html);
 }
 
+void androidDisplayHtmlFile(const std::string &htmlFilePath) {
+	callJNI("displayHtmlFile", htmlFilePath);
+}
+
 void androidCallJs(const std::string js) {
     callJNI("callJs", js);
 }

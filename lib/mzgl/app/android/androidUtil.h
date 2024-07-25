@@ -74,6 +74,7 @@ void androidFileDialog(std::string copyToPath,
 void androidLaunchUrl(const std::string &url);
 
 void androidDisplayHtml(const std::string &html);
+void androidDisplayHtmlFile(const std::string &htmlFilePath);
 void androidStopDisplayingHtml();
 void androidCallJs(const std::string js);
 void registerWebViewOverlay(std::uintptr_t identifier, const std::function<void(const std::string &)> &jsCallback);
