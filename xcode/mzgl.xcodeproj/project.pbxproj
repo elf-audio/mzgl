@@ -732,6 +732,8 @@
 		EABBA6DD2B4715E100B483CB /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
 		EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
 		EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */ = {isa = PBXBuildFile; fileRef = EACA2606275F4F4D00B3DE68 /* FlatSet.h */; };
+		EACD2CF02C468D65003C1827 /* TextboxSegmentedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EACD2CEE2C468D64003C1827 /* TextboxSegmentedViewController.m */; };
+		EACD2CF12C468D65003C1827 /* TextboxSegmentedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EACD2CEE2C468D64003C1827 /* TextboxSegmentedViewController.m */; };
 		EACEB2E924DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EACEB2E824DC28DD00BF4D1A /* Image.cpp */; };
 		EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
@@ -1633,6 +1635,8 @@
 		EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = midiMessagePrinting.cpp; sourceTree = "<group>"; };
 		EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = midiMessagePrinting.h; sourceTree = "<group>"; };
 		EACA2606275F4F4D00B3DE68 /* FlatSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatSet.h; sourceTree = "<group>"; };
+		EACD2CEE2C468D64003C1827 /* TextboxSegmentedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextboxSegmentedViewController.m; sourceTree = "<group>"; };
+		EACD2CEF2C468D65003C1827 /* TextboxSegmentedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextboxSegmentedViewController.h; sourceTree = "<group>"; };
 		EACEB2E324DB81A400BF4D1A /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		EACEB2E824DC28DD00BF4D1A /* Image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Image.cpp; sourceTree = "<group>"; };
 		EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MacFilePickerDelegate.mm; sourceTree = "<group>"; };
@@ -1903,6 +1907,8 @@
 		EA1835C52432C18B00A5C3E8 /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				EACD2CEF2C468D65003C1827 /* TextboxSegmentedViewController.h */,
+				EACD2CEE2C468D64003C1827 /* TextboxSegmentedViewController.m */,
 				EA1835C82432C18B00A5C3E8 /* mainiOS.mm */,
 				EAE94825274C0BF300718B53 /* UIBlockButton.h */,
 				EAE94826274C0BF300718B53 /* UIBlockButton.m */,
@@ -3749,6 +3755,7 @@
 				EABBA6D92B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA1841172432C4A500A5C3E8 /* Texture.cpp in Sources */,
 				EA1841352432C51E00A5C3E8 /* ScrollingList.cpp in Sources */,
+				EACD2CF02C468D65003C1827 /* TextboxSegmentedViewController.m in Sources */,
 				EA1841242432C4D200A5C3E8 /* AudioSystem.cpp in Sources */,
 				EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */,
 				EA18412F2432C4FF00A5C3E8 /* DateTime.cpp in Sources */,
@@ -3996,6 +4003,7 @@
 				EABBA6DB2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA689462261C633500F76B91 /* AudioSystem.cpp in Sources */,
 				EA71A73527E39E6C0081A5CB /* ioapi_buf.c in Sources */,
+				EACD2CF12C468D65003C1827 /* TextboxSegmentedViewController.m in Sources */,
 				EA689463261C633500F76B91 /* Image.cpp in Sources */,
 				EAA59298281065D10068FD7B /* MZGLEffectAU.mm in Sources */,
 				EA689464261C633500F76B91 /* DateTime.cpp in Sources */,

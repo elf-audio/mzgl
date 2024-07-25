@@ -1226,3 +1226,97 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), false, msg, completionCallback);
 #endif
 }
+
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+#		include "TextboxSegmentedViewController.h"
+void Dialogs::textboxWithSegmented(std::string title,
+								   std::string msg,
+								   std::string text,
+								   std::vector<std::string> options,
+								   int defaultOption,
+								   std::function<void(std::string, int, bool)> completionCallback) const {
+	TextboxSegmentedViewController *alertVC =
+		[[TextboxSegmentedViewController alloc] initWithTitle:[NSString stringWithUTF8String:title.c_str()]
+													  message:[NSString stringWithUTF8String:msg.c_str()]
+													  options:@[ @"Computer", @"iCloud" ]
+													 selected:defaultOption];
+	alertVC.completionHandler = ^(NSString *filename, NSInteger selectedSegment) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			completionCallback([filename UTF8String], static_cast<int>(selectedSegment), true);
+		});
+	};
+
+	alertVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
+	alertVC.modalTransitionStyle   = UIModalTransitionStyleCrossDissolve;
+
+	[((__bridge UIViewController *) app.viewController) presentViewController:alertVC animated:YES completion:nil];
+}
+
+#	else
+void Dialogs::textboxWithSegmented(std::string title,
+								   std::string msg,
+								   std::string text,
+								   std::vector<std::string> options,
+								   int defaultOption,
+								   std::function<void(std::string, int, bool)> completionCallback) const {
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  // Create an alert
+	  NSAlert *alert = [[NSAlert alloc] init];
+	  [alert setMessageText:[NSString stringWithCString:title.c_str() encoding:NSUTF8StringEncoding]];
+	  [alert setInformativeText:[NSString stringWithCString:msg.c_str() encoding:NSUTF8StringEncoding]];
+	  [alert addButtonWithTitle:@"OK"];
+	  [alert addButtonWithTitle:@"Cancel"];
+
+	  // Create a text field
+	  NSTextField *textField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 24)];
+	  [textField setPlaceholderString:@""];
+
+	  // Create a container view for the accessory view
+	  NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 60)];
+
+	  // Create a segmented control for choosing save location
+	  NSSegmentedControl *locationControl = [[NSSegmentedControl alloc] initWithFrame:NSMakeRect(50, 0, 200, 24)];
+	  [locationControl setSegmentCount:options.size()];
+
+	  for (int i = 0; i < options.size(); i++) {
+		  [locationControl setLabel:[NSString stringWithUTF8String:options[i].c_str()] forSegment:i];
+	  }
+	  [locationControl setSelectedSegment:defaultOption];
+
+	  // Add the text field and segmented control to the accessory view
+	  [accessoryView addSubview:locationControl];
+	  [accessoryView addSubview:textField];
+
+	  // Adjust the text field's position
+	  NSRect textFieldFrame	  = [textField frame];
+	  textFieldFrame.origin.y = locationControl.frame.size.height + 10;
+	  [textField setFrame:textFieldFrame];
+
+	  // Set the accessory view of the alert to the container view
+	  [alert setAccessoryView:accessoryView];
+
+	  std::function<void(NSInteger, NSTextField *, NSSegmentedControl *)> handleResult =
+		  [completionCallback, this](NSInteger returnCode, NSTextField *label, NSSegmentedControl *seg) {
+			  std::string txt			= "";
+			  NSInteger selectedSegment = [seg selectedSegment];
+
+			  if (returnCode == NSAlertFirstButtonReturn) {
+				  txt = [[label stringValue] UTF8String];
+			  }
+			  app.main.runOnMainThread(true, [txt, returnCode, selectedSegment, completionCallback]() {
+				  completionCallback(txt, selectedSegment, returnCode == NSAlertFirstButtonReturn);
+			  });
+		  };
+#		ifndef MZGLAU
+	  [alert beginSheetModalForWindow:[NSApp mainWindow]
+					completionHandler:^(NSInteger result) { handleResult(result, textField, locationControl); }];
+	  [textField becomeFirstResponder];
+#		else
+			[label becomeFirstResponder];
+			handleResult([alert runModal], label, locationControl);
+#		endif
+	});
+}
+#	endif
+#endif
