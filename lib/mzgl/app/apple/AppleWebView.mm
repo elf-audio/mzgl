@@ -119,11 +119,11 @@
 	NSLog(@"Navigation action: %@", navigationAction.request.URL);
 	NSURL *url = navigationAction.request.URL;
 
-	if ([url.scheme isEqualToString:@"file"]) {
+//	if ([url.scheme isEqualToString:@"file"]) {
 		decisionHandler(WKNavigationActionPolicyAllow);
-	} else {
-		decisionHandler(WKNavigationActionPolicyCancel);
-	}
+//	} else {
+//		decisionHandler(WKNavigationActionPolicyCancel);
+//	}
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController

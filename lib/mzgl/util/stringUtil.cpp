@@ -218,3 +218,24 @@ std::string trimBack(const std::string &src) {
 std::string trim(const std::string &src) {
 	return trimFront(trimBack(src));
 }
+
+std::string time_point_to_string(const std::chrono::system_clock::time_point &tp) {
+	// Convert time_point to time_t
+	std::time_t time_t_format = std::chrono::system_clock::to_time_t(tp);
+
+	// Convert time_t to tm for local time
+	std::tm tm_format = *std::localtime(&time_t_format);
+
+	// Create a string stream to format the date and time
+	std::ostringstream oss;
+	oss << std::put_time(&tm_format, "%Y-%m-%d %H:%M:%S");
+
+	return oss.str();
+}
+
+std::chrono::system_clock::time_point string_to_time_point(const std::string &s) {
+	std::tm tm = {};
+	std::istringstream ss(s);
+	ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+}

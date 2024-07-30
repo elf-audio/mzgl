@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
 
 // to 'precision' decimal places
 std::string to_string(float value, int precision);
@@ -36,3 +37,6 @@ template <typename T>
 std::string to_string(const T a_value, const int n);
 std::string zeroPad(int number, int width);
 std::string zeroPad2(int number);
+
+std::string time_point_to_string(const std::chrono::system_clock::time_point &tp);
+std::chrono::system_clock::time_point string_to_time_point(const std::string &s);
