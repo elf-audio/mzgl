@@ -1,15 +1,16 @@
-
+#pragma once
 #ifdef __APPLE__
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
-#		define __IOS
+#		define MZGL_IOS
 #	else
-#		define __MAC
+#		define MZGL_MAC
 #	endif
+#elif defined(_WIN32)
 #elif !defined(__ANDROID__) && !defined(__arm__)
-#	define __WIN
+#	define MZGL_WIN
 #elif defined(__ANDROID__)
-#	define __ANDROID
+#	define MZGL_ANDROID
 #else
-#	define __RPI
+#	define MZGL_RPI
 #endif
