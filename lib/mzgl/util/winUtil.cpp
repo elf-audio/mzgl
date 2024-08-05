@@ -321,10 +321,7 @@ namespace { ////////////////////////////////////////////////////////////////////
 
 	void ensureThatFileDirectoryExists(std::wstring filePath) {
 		fs::path path {filePath};
-		const auto parentPath {path.parent_path()};
-		if (!fs::exists(parentPath)) {
-			fs::create_directories(parentPath);
-		}
+		fs::create_directories(path.parent_path());
 	}
 
 } // namespace
@@ -460,7 +457,7 @@ struct DownloadBSCallback : public IBindStatusCallback {
 
 private:
 	STDMETHODIMP
-		OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
+	OnProgress(ULONG ulProgress, ULONG ulProgressMax, ULONG ulStatusCode, LPCWSTR szStatusText) override {
 		if (ulProgressMax == 0) {
 			return S_OK;
 		}

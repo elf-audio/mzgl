@@ -607,9 +607,8 @@ std::string docsPath(const std::string &path) {
 	return "/home/pi/Documents/koala/" + path;
 #	else
 	std::string docsPath = "../Documents/Koala";
-	if (!fs::exists(docsPath)) {
-		fs::create_directories(docsPath);
-	}
+	fs::create_directories(docsPath);
+
 	return docsPath + "/" + path;
 #	endif
 #else
@@ -767,10 +766,9 @@ void initMZGL(std::shared_ptr<App> app) {
 	if (!app->isHeadless()) {
 		app->g.initGraphics();
 	}
-	Globals::startTime = std::chrono::system_clock::now();
-	app->g.frameDelta = 1.f/60.f;
+	Globals::startTime	 = std::chrono::system_clock::now();
+	app->g.frameDelta	 = 1.f / 60.f;
 	app->g.currFrameTime = 0.f;
-
 }
 
 #if TARGET_OS_IOS

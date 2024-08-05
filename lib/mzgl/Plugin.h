@@ -121,12 +121,7 @@ public:
 
 	std::string getUserPresetDir() { return docsPath(plugin->getIdentifier() + "/presets"); }
 
-	void createUserPresetDirIfNotExist() {
-		std::string path = getUserPresetDir();
-		if (!fs::exists(path)) {
-			fs::create_directories(path);
-		}
-	}
+	void createUserPresetDirIfNotExist() { fs::create_directories(getUserPresetDir()); }
 
 	void deleteUserPreset(int which) {
 		std::string presetToDelete = getUserPresetDir() + "/" + getUserPresetNames()[which] + getExt();
