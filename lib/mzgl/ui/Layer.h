@@ -113,6 +113,7 @@ public:
 	// attempt to pass focus from this layer to another
 
 	void transferFocus(Layer *otherLayer, int touchId);
+	void transferFocus(Layer *fromLayer, Layer *toLayer);
 	bool hasFocus() const;
 	void removeFocus();
 

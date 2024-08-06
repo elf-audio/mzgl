@@ -448,6 +448,15 @@ void Layer::transferFocus(Layer *otherLayer, int touchId) {
 	}
 }
 
+void Layer::transferFocus(Layer *fromLayer, Layer *toLayer) {
+	for (auto &l: g.focusedLayers) {
+		if (l.second == fromLayer) {
+			l.second = toLayer;
+			return;
+		}
+	}
+}
+
 void Layer::clear() {
 	for (auto *ch: children) {
 		for (auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
