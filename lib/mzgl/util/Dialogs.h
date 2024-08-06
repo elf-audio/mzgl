@@ -156,7 +156,6 @@ public:
 
 	void chooseFolder(std::string msg, std::function<void(std::string, bool)> completionCallback) const;
 
-#ifdef __APPLE__
 	void textboxWithSegmented(
 		std::string title,
 		std::string msg,
@@ -164,7 +163,6 @@ public:
 		std::vector<std::string> options,
 		int defaultOption,
 		std::function<void(std::string filePath, int segmentChosen, bool cancelled)> completionCallback) const;
-#endif
 };
 
 namespace unit_test {

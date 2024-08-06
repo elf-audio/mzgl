@@ -1227,39 +1227,36 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 #endif
 }
 
-#ifdef __APPLE__
-#	if TARGET_OS_IOS
-#		include "TextboxSegmentedViewController.h"
+#if defined(__APPLE__) && TARGET_OS_IOS
+#	include "TextboxSegmentedViewController.h"
+#endif
+
 void Dialogs::textboxWithSegmented(std::string title,
 								   std::string msg,
 								   std::string text,
 								   std::vector<std::string> options,
 								   int defaultOption,
 								   std::function<void(std::string, int, bool)> completionCallback) const {
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+
 	TextboxSegmentedViewController *alertVC =
 		[[TextboxSegmentedViewController alloc] initWithTitle:[NSString stringWithUTF8String:title.c_str()]
 													  message:[NSString stringWithUTF8String:msg.c_str()]
 													  options:@[ @"Computer", @"iCloud" ]
 													 selected:defaultOption];
 	alertVC.completionHandler = ^(NSString *filename, NSInteger selectedSegment) {
-		dispatch_async(dispatch_get_main_queue(), ^{
-			completionCallback([filename UTF8String], static_cast<int>(selectedSegment), true);
-		});
+	  dispatch_async(dispatch_get_main_queue(),
+					 ^{ completionCallback([filename UTF8String], static_cast<int>(selectedSegment), true); });
 	};
 
 	alertVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
 	alertVC.modalTransitionStyle   = UIModalTransitionStyleCrossDissolve;
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alertVC animated:YES completion:nil];
-}
+
 
 #	else
-void Dialogs::textboxWithSegmented(std::string title,
-								   std::string msg,
-								   std::string text,
-								   std::vector<std::string> options,
-								   int defaultOption,
-								   std::function<void(std::string, int, bool)> completionCallback) const {
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  // Create an alert
 	  NSAlert *alert = [[NSAlert alloc] init];
@@ -1317,6 +1314,8 @@ void Dialogs::textboxWithSegmented(std::string title,
 			handleResult([alert runModal], label, locationControl);
 #		endif
 	});
-}
 #	endif
+#else
+	alert("Not implemented", "Not implemented on this platform");
 #endif
+}
