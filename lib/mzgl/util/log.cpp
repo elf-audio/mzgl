@@ -7,6 +7,7 @@
 //
 
 #include "log.h"
+#include "util.h"
 #include <fstream>
 #include <vector>
 std::string Log::Logger::logFile;
@@ -52,8 +53,13 @@ void Log::Logger::removeListener(LogListener *listener) {
 
 std::vector<LogListener *> Log::Logger::listeners;
 
+bool logIsDisabled() {
+	const static bool disableLogPrintf = hasCommandLineFlag("--disable-log-printf");
+	return disableLogPrintf;
+}
+
 Log::Logger::~Logger() {
-	if (level >= userLogLevel) {
+	if (level >= userLogLevel && !logIsDisabled()) {
 		msg << std::endl;
 #ifdef __ANDROID__
 		if (level == 4) {
