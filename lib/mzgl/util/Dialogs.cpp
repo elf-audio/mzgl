@@ -22,7 +22,7 @@
 #include "filesystem.h"
 #include "mainThread.h"
 
-namespace unit_test {
+namespace unit_test::dialogs {
 
 	[[nodiscard]] bool dialogSpoofingIsEnabled() {
 		const static bool spoof = hasCommandLineFlag("--enable-dialog-spoofing");
@@ -59,7 +59,7 @@ namespace unit_test {
 	void pressButtonThree() {
 		dialogButtonThreePressed();
 	}
-} // namespace unit_test
+} // namespace unit_test::dialogs
 
 void Dialogs::textbox(std::string title,
 					  std::string msg,
@@ -143,10 +143,10 @@ void Dialogs::confirm(std::string title,
 	return;
 #endif
 
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogOkPressed	   = okPressed;
-		unit_test::dialogCancelPressed = cancelPressed;
-		unit_test::dialogOpen		   = true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogOkPressed		= okPressed;
+		unit_test::dialogs::dialogCancelPressed = cancelPressed;
+		unit_test::dialogs::dialogOpen			= true;
 		return;
 	}
 
@@ -208,8 +208,8 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	return;
 #endif
 
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogOpen = true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogOpen = true;
 		return;
 	}
 
@@ -272,11 +272,11 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 									std::string buttonTwoText,
 									std::function<void()> buttonTwoPressed,
 									std::function<void()> cancelPressed) const {
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogButtonOnePressed = buttonOnePressed;
-		unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-		unit_test::dialogCancelPressed	  = cancelPressed;
-		unit_test::dialogOpen			  = true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogButtonOnePressed = buttonOnePressed;
+		unit_test::dialogs::dialogButtonTwoPressed = buttonTwoPressed;
+		unit_test::dialogs::dialogCancelPressed	   = cancelPressed;
+		unit_test::dialogs::dialogOpen			   = true;
 		return;
 	}
 
@@ -366,10 +366,10 @@ void Dialogs::twoOptionDialog(std::string title,
 							  std::function<void()> buttonOnePressed,
 							  std::string buttonTwoText,
 							  std::function<void()> buttonTwoPressed) const {
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogButtonOnePressed = buttonOnePressed;
-		unit_test::dialogButtonTwoPressed = buttonTwoPressed;
-		unit_test::dialogOpen			  = true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogButtonOnePressed = buttonOnePressed;
+		unit_test::dialogs::dialogButtonTwoPressed = buttonTwoPressed;
+		unit_test::dialogs::dialogOpen			   = true;
 		return;
 	}
 
@@ -451,12 +451,12 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 									  std::string buttonThreeText,
 									  std::function<void()> buttonThreePressed,
 									  std::function<void()> cancelPressed) const {
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogButtonOnePressed	= buttonOnePressed;
-		unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
-		unit_test::dialogButtonThreePressed = buttonThreePressed;
-		unit_test::dialogCancelPressed		= cancelPressed;
-		unit_test::dialogOpen				= true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogButtonOnePressed	 = buttonOnePressed;
+		unit_test::dialogs::dialogButtonTwoPressed	 = buttonTwoPressed;
+		unit_test::dialogs::dialogButtonThreePressed = buttonThreePressed;
+		unit_test::dialogs::dialogCancelPressed		 = cancelPressed;
+		unit_test::dialogs::dialogOpen				 = true;
 		return;
 	}
 
@@ -573,11 +573,11 @@ void Dialogs::threeOptionDialog(std::string title,
 								std::function<void()> buttonTwoPressed,
 								std::string buttonThreeText,
 								std::function<void()> buttonThreePressed) const {
-	if (unit_test::dialogSpoofingIsEnabled()) {
-		unit_test::dialogButtonOnePressed	= buttonOnePressed;
-		unit_test::dialogButtonTwoPressed	= buttonTwoPressed;
-		unit_test::dialogButtonThreePressed = buttonThreePressed;
-		unit_test::dialogOpen				= true;
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogButtonOnePressed	 = buttonOnePressed;
+		unit_test::dialogs::dialogButtonTwoPressed	 = buttonTwoPressed;
+		unit_test::dialogs::dialogButtonThreePressed = buttonThreePressed;
+		unit_test::dialogs::dialogOpen				 = true;
 		return;
 	}
 
@@ -1254,7 +1254,6 @@ void Dialogs::textboxWithSegmented(std::string title,
 	alertVC.modalTransitionStyle   = UIModalTransitionStyleCrossDissolve;
 
 	[((__bridge UIViewController *) app.viewController) presentViewController:alertVC animated:YES completion:nil];
-
 
 #	else
 	dispatch_async(dispatch_get_main_queue(), ^{

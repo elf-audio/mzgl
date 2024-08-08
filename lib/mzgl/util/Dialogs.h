@@ -165,7 +165,7 @@ public:
 		std::function<void(std::string filePath, int segmentChosen, bool cancelled)> completionCallback) const;
 };
 
-namespace unit_test {
+namespace unit_test::dialogs {
 	bool isDialogOpen();
 	void dismissAlert();
 	void pressOk();
@@ -173,4 +173,4 @@ namespace unit_test {
 	void pressButtonOne();
 	void pressButtonTwo();
 	void pressButtonThree();
-} // namespace unit_test
+} // namespace unit_test::dialogs
