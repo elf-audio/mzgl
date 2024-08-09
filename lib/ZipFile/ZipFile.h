@@ -23,7 +23,10 @@ public:
 					Compression compression = Compression::SMALLER);
 	static bool unzip(const std::vector<unsigned char> &inZipData, const fs::path &outDir);
 	static bool unzip(const fs::path &zipFile, const fs::path &outDir);
-	static void listZip(const fs::path &pathToZip, std::vector<std::string> &fileList);
+	
+	static std::vector<std::string> listZip(const std::vector<uint8_t> &inZipData);
+	static std::vector<std::string> listZip(const fs::path &pathToZip);
+	
 
 	static bool getTextFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::string &outData);
 	static bool getBinaryFileFromZip(const fs::path &pathToZip,

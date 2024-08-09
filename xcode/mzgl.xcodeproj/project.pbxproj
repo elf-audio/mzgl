@@ -34,7 +34,6 @@
 		EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; };
 		EA183F852432C18D00A5C3E8 /* scales.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18359D2432C18B00A5C3E8 /* scales.h */; };
 		EA183F862432C18D00A5C3E8 /* scales.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18359E2432C18B00A5C3E8 /* scales.cpp */; };
-		EA183F882432C18D00A5C3E8 /* Note.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A02432C18B00A5C3E8 /* Note.h */; };
 		EA183F892432C18D00A5C3E8 /* ScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A22432C18B00A5C3E8 /* ScrollingList.h */; };
 		EA183F8A2432C18D00A5C3E8 /* AlphaButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A32432C18B00A5C3E8 /* AlphaButton.h */; };
 		EA183F8B2432C18D00A5C3E8 /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
@@ -312,7 +311,6 @@
 		EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */; };
 		EA2B854824E7093600EA12BD /* MacAppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D22432C18B00A5C3E8 /* MacAppDelegate.h */; };
 		EA2B855624E7093600EA12BD /* mzgl.pch in Headers */ = {isa = PBXBuildFile; fileRef = EA18360B2432C18B00A5C3E8 /* mzgl.pch */; };
-		EA2B855924E7093600EA12BD /* Note.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A02432C18B00A5C3E8 /* Note.h */; };
 		EA2B858D24E7093600EA12BD /* Triangulator.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836202432C18B00A5C3E8 /* Triangulator.h */; };
 		EA2B859124E7093600EA12BD /* ylog.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234B1224A611AE000F057B /* ylog.h */; };
 		EA2B861D24E7093600EA12BD /* Slider.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AF2432C18B00A5C3E8 /* Slider.h */; };
@@ -853,7 +851,6 @@
 		EA182DCA2432C18800A5C3E8 /* RtMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtMidi.h; sourceTree = "<group>"; };
 		EA18359D2432C18B00A5C3E8 /* scales.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scales.h; sourceTree = "<group>"; };
 		EA18359E2432C18B00A5C3E8 /* scales.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scales.cpp; sourceTree = "<group>"; };
-		EA1835A02432C18B00A5C3E8 /* Note.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Note.h; sourceTree = "<group>"; };
 		EA1835A22432C18B00A5C3E8 /* ScrollingList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScrollingList.h; sourceTree = "<group>"; };
 		EA1835A32432C18B00A5C3E8 /* AlphaButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlphaButton.h; sourceTree = "<group>"; };
 		EA1835A42432C18B00A5C3E8 /* DropDown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropDown.h; sourceTree = "<group>"; };
@@ -1817,7 +1814,6 @@
 			children = (
 				EA18359D2432C18B00A5C3E8 /* scales.h */,
 				EA18359E2432C18B00A5C3E8 /* scales.cpp */,
-				EA1835A02432C18B00A5C3E8 /* Note.h */,
 			);
 			path = music;
 			sourceTree = "<group>";
@@ -3189,7 +3185,6 @@
 				EA1840492432C18D00A5C3E8 /* gl3corefontstash.h in Headers */,
 				EA183FB22432C18D00A5C3E8 /* MacAppDelegate.h in Headers */,
 				EA183FE12432C18D00A5C3E8 /* mzgl.pch in Headers */,
-				EA183F882432C18D00A5C3E8 /* Note.h in Headers */,
 				EA297CEF25C95E2500F890AE /* pa_unix_util.h in Headers */,
 				EA183FF12432C18D00A5C3E8 /* Triangulator.h in Headers */,
 				EA71A76827E39E6C0081A5CB /* aes_via_ace.h in Headers */,
@@ -3370,7 +3365,6 @@
 				EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */,
 				EA2B854824E7093600EA12BD /* MacAppDelegate.h in Headers */,
 				EA2B855624E7093600EA12BD /* mzgl.pch in Headers */,
-				EA2B855924E7093600EA12BD /* Note.h in Headers */,
 				EA71A75727E39E6C0081A5CB /* aestab.h in Headers */,
 				EA2B858D24E7093600EA12BD /* Triangulator.h in Headers */,
 				EA2B859124E7093600EA12BD /* ylog.h in Headers */,

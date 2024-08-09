@@ -10,7 +10,9 @@
 #include <fstream>
 #include <vector>
 std::string Log::Logger::logFile;
-
+#ifdef __APPLE__
+#	include <os/log.h>
+#endif
 namespace Log {
 	std::ofstream logStream;
 	bool isLoggingToFile = false;
@@ -37,10 +39,9 @@ bool Log::Logger::isSavingToFile() {
 }
 
 void Log::Logger::addListener(LogListener *listener) {
-	//#ifdef DEBUG
 	listeners.push_back(listener);
-	//#endif
 }
+
 void Log::Logger::removeListener(LogListener *listener) {
 	for (int i = 0; i < listeners.size(); i++) {
 		if (listeners[i] == listener) {
@@ -65,6 +66,18 @@ Log::Logger::~Logger() {
 		}
 #else
 
+#	ifdef __APPLE__
+		os_log_type_t osLevel = OS_LOG_TYPE_DEFAULT;
+		switch (level) {
+			case 1: break;
+			case 4:
+			case 2: osLevel = OS_LOG_TYPE_DEBUG; break;
+			case 3: osLevel = OS_LOG_TYPE_INFO; break;
+			case 5: osLevel = OS_LOG_TYPE_ERROR; break;
+		}
+
+		os_log_with_type(OS_LOG_DEFAULT, osLevel, "[%{public}s] %{public}s", levelName.c_str(), msg.str().c_str());
+#	else
 		if (level >= 5) {
 			fprintf(stderr, "[%s] %s", levelName.c_str(), msg.str().c_str());
 			fflush(stderr);
@@ -73,19 +86,18 @@ Log::Logger::~Logger() {
 			fflush(stdout);
 		}
 
+#	endif
 #endif
 		if (isLoggingToFile) {
 			logStream << std::string("[") << levelName << "] " << msg.str();
 		}
 
-		//#ifdef DEBUG // should probs put this back
 		if (listeners.size() > 0) {
 			std::string m = "[" + levelName + "] " + msg.str();
 			for (auto *l: listeners) {
 				l->stringLogged(m);
 			}
 		}
-		//#endif
 	}
 }
 

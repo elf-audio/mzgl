@@ -53,14 +53,27 @@ bool ZipFile::unzip(const std::vector<uint8_t> &inZipData, const fs::path &outDi
 	return unzipper.extract(outDir.string());
 }
 
-void ZipFile::listZip(const fs::path &pathToZip, std::vector<std::string> &fileList) {
+
+std::vector<std::string> ZipFile::listZip(const std::vector<uint8_t> &inZipData) {
+	std::vector<std::string> fileList;
+	Unzipper unzipper((std::vector<unsigned char> &) inZipData);
+	auto entries = unzipper.entries();
+	fileList.clear();
+	for (const auto &e: entries) {
+		fileList.emplace_back(e.name);
+	}
+	return fileList;
+}
+
+std::vector<std::string> ZipFile::listZip(const fs::path &pathToZip) {
+	std::vector<std::string> fileList;
 	Unzipper unzipper(pathToZip.string());
 	auto entries = unzipper.entries();
 	fileList.clear();
 	for (const auto &e: entries) {
-		//		printf("%s\n", e.name.c_str());
 		fileList.emplace_back(e.name);
 	}
+	return fileList;
 }
 // throws a runtime error if there was a problem
 bool ZipFile::getTextFileFromZip(const fs::path &pathToZip, const fs::path &filePath, std::string &outData) {
