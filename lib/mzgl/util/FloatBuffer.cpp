@@ -2,6 +2,7 @@
 #include "FloatBuffer.h"
 #include <assert.h>
 //#include "util.h"
+#include "log.h"
 #include "maths.h"
 #include <fstream>
 #include <limits> // std::numeric_limits
@@ -440,11 +441,8 @@ void FloatBuffer::fadeOut(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf(
-			"ERROR: FloatBuffer::fadeOut() - trying to fadeOut(%d, %d) on a sample that is only %lu samples long\n",
-			length,
-			numChans,
-			size());
+		Log::e() << "ERROR: FloatBuffer::fadeOut() - trying to fadeOut(" << length << ", " << numChans
+				 << ") on a sample that is only " << size() << " samples long";
 	}
 }
 

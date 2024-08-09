@@ -6,6 +6,27 @@
 #include <iostream>
 #include <sstream>
 
+class StderrScope {
+public:
+	StderrScope() { redirect(); }
+	~StderrScope() { restore(); }
+
+private:
+	void redirect() {
+		old			 = dup(STDERR_FILENO);
+		auto devNull = open("/dev/null", O_WRONLY);
+		dup2(devNull, STDERR_FILENO);
+		close(devNull);
+	}
+
+	void restore() {
+		dup2(old, STDERR_FILENO);
+		close(old);
+	}
+
+	int old {0};
+};
+
 std::vector<std::string> split(const std::string &str, char delimiter) {
 	std::vector<std::string> tokens;
 	std::string token;
@@ -154,6 +175,7 @@ public:
 
 SCENARIO("Valid files can be loaded", "[audio-file]") {
 	GIVEN("A list of test files") {
+		StderrScope scope;
 		ValidFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string() + " is loaded") {
@@ -168,6 +190,7 @@ SCENARIO("Valid files can be loaded", "[audio-file]") {
 
 SCENARIO("Valid files can be loaded and resampled", "[audio-file]") {
 	GIVEN("A list of test files") {
+		StderrScope scope;
 		ValidFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string() + " is loaded and resampled") {
@@ -182,6 +205,7 @@ SCENARIO("Valid files can be loaded and resampled", "[audio-file]") {
 
 SCENARIO("Invalid files are not loaded", "[audio-file]") {
 	GIVEN("A list of invalid files") {
+		StderrScope scope;
 		InvalidFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string() + " is loaded it should fail and not throw") {
@@ -193,6 +217,7 @@ SCENARIO("Invalid files are not loaded", "[audio-file]") {
 
 SCENARIO("Invalid files are not loaded during resampling", "[audio-file]") {
 	GIVEN("A list of invalid files") {
+		StderrScope scope;
 		InvalidFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string()
@@ -205,6 +230,7 @@ SCENARIO("Invalid files are not loaded during resampling", "[audio-file]") {
 
 SCENARIO("Corrupted files are not loaded", "[audio-file]") {
 	GIVEN("A list of corrupted files") {
+		StderrScope scope;
 		CorruptFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string() + " is loaded it should fail and not throw") {
@@ -216,6 +242,7 @@ SCENARIO("Corrupted files are not loaded", "[audio-file]") {
 
 SCENARIO("Corrupted files are not loaded during resampling", "[audio-file]") {
 	GIVEN("A list of corrupted files") {
+		StderrScope scope;
 		CorruptFileScanner scanner;
 		for (auto testFile: scanner.testFiles) {
 			WHEN("File at " + testFile.filePath.string()
@@ -228,6 +255,7 @@ SCENARIO("Corrupted files are not loaded during resampling", "[audio-file]") {
 
 SCENARIO("Non existent files dont load", "[audio-file]") {
 	GIVEN("A file that doesnt exist") {
+		StderrScope scope;
 		fs::path doesntExist {"/foo/bar/baz/qux/garfield.wav"};
 		FloatBuffer buffer;
 		int channels;
@@ -263,6 +291,7 @@ void removeFile(const fs::path &filePath) {
 
 SCENARIO("Files that cant be read fail to load", "[audio-file]") {
 	GIVEN("A file that has the wrong permissions") {
+		StderrScope scope;
 		auto filePath = fs::current_path() / "write-only.wav";
 		FloatBuffer buffer;
 		int channels;
@@ -280,6 +309,7 @@ SCENARIO("Files that cant be read fail to load", "[audio-file]") {
 
 SCENARIO("Files that cant be read fail to load and resample", "[audio-file]") {
 	GIVEN("A file that has the wrong permissions") {
+		StderrScope scope;
 		auto filePath = fs::current_path() / "write-only.wav";
 		FloatBuffer buffer;
 		int channels;
@@ -297,6 +327,7 @@ SCENARIO("Files that cant be read fail to load and resample", "[audio-file]") {
 
 SCENARIO("Blank files should load but not crash", "[audio-file]") {
 	GIVEN("A blank audio file") {
+		StderrScope scope;
 		auto path = fs::current_path() / "test-files" / "curiosities" / "blank.wav";
 		FloatBuffer buffer;
 		int outNumChannels = 0;

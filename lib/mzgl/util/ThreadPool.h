@@ -14,13 +14,15 @@
 #include <stdexcept>
 #include "util.h"
 
-
 class ThreadPool {
 public:
 	ThreadPool(size_t);
+	~ThreadPool();
+
 	template <class F, class... Args>
 	auto enqueue(F &&f, Args &&...args) -> std::future<typename std::invoke_result<F, Args...>::type>;
-	~ThreadPool();
+
+	void stop();
 
 private:
 	// need to keep track of threads so we can join them
@@ -31,15 +33,12 @@ private:
 	// synchronization
 	std::mutex queue_mutex;
 	std::condition_variable condition;
-	bool stop;
+	std::atomic<bool> stopped {false};
 };
 
-// the constructor just launches some amount of workers
-inline ThreadPool::ThreadPool(size_t threads)
-	: stop(false) {
+inline ThreadPool::ThreadPool(size_t threads) {
 	for (size_t i = 0; i < threads; ++i)
 		workers.emplace_back([this, i] {
-
 			setThreadName("ThreadPool worker " + std::to_string(i));
 
 			for (;;) {
@@ -47,10 +46,10 @@ inline ThreadPool::ThreadPool(size_t threads)
 
 				{
 					std::unique_lock<std::mutex> lock(this->queue_mutex);
-					this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-					if (this->stop && this->tasks.empty()) return;
-					task = std::move(this->tasks.front());
-					this->tasks.pop();
+					condition.wait(lock, [this] { return stopped.load() || !this->tasks.empty(); });
+					if (stopped && tasks.empty()) return;
+					task = std::move(tasks.front());
+					tasks.pop();
 				}
 
 				task();
@@ -60,10 +59,7 @@ inline ThreadPool::ThreadPool(size_t threads)
 
 // add new work item to the pool
 template <class F, class... Args>
-auto ThreadPool::enqueue(F &&f, Args &&...args)
-	//	-> std::future<typename std::result_of<F(Args...)>::type>
-	-> std::future<typename std::invoke_result<F, Args...>::type> {
-	//	using return_type = typename std::result_of<F(Args...)>::type;
+auto ThreadPool::enqueue(F &&f, Args &&...args) -> std::future<typename std::invoke_result<F, Args...>::type> {
 	using return_type = typename std::invoke_result<F, Args...>::type;
 	auto task		  = std::make_shared<std::packaged_task<return_type()>>(
 		std::bind(std::forward<F>(f), std::forward<Args>(args)...));
@@ -73,7 +69,9 @@ auto ThreadPool::enqueue(F &&f, Args &&...args)
 		std::unique_lock<std::mutex> lock(queue_mutex);
 
 		// don't allow enqueueing after stopping the pool
-		if (stop) throw std::runtime_error("enqueue on stopped ThreadPool");
+		if (stopped.load()) {
+			throw std::runtime_error("enqueue on stopped ThreadPool");
+		}
 
 		tasks.emplace([task]() { (*task)(); });
 	}
@@ -81,15 +79,23 @@ auto ThreadPool::enqueue(F &&f, Args &&...args)
 	return res;
 }
 
-// the destructor joins all threads
 inline ThreadPool::~ThreadPool() {
-	{
-		std::unique_lock<std::mutex> lock(queue_mutex);
-		stop = true;
+	stop();
+}
+
+inline void ThreadPool::stop() {
+	if (stopped.load()) {
+		return;
 	}
+
+	stopped.store(true);
 	condition.notify_all();
-	for (std::thread &worker: workers)
-		worker.join();
+
+	for (std::thread &worker: workers) {
+		if (worker.joinable()) {
+			worker.join();
+		}
+	}
 }
 
 #endif
