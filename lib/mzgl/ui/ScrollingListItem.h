@@ -8,8 +8,9 @@ class ScrollingListItem {
 public:
 	std::string name;
 	bool selected = false;
-	ScrollingListItem(std::string name)
+	explicit ScrollingListItem(std::string name)
 		: name(name) {}
+	virtual ~ScrollingListItem() = default;
 };
 
 // subclass this view to make your own item view

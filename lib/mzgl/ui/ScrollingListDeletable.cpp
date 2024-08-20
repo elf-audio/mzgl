@@ -208,7 +208,6 @@ void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 					horizontalScrollTarget = 0;
 				}
 			} else {
-				printf("open\n");
 				selectedSelf();
 			}
 		}
