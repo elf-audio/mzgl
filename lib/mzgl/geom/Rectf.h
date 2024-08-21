@@ -9,6 +9,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <utility>
 
 // some of this is taken from openframeworks:
 // https://github.com/darrenmothersele/openFrameworks/blob/master/types/ofRectangle.cpp
@@ -37,6 +38,9 @@ public:
 		x += tx;
 		y += ty;
 	}
+
+	[[nodiscard]] std::pair<Rectf, Rectf> splitVertical(float division) const;
+	[[nodiscard]] std::pair<Rectf, Rectf> splitHorizontal(float division) const;
 
 	bool inside(float x, float y) const;
 	bool inside(glm::vec2 p) const;

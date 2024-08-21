@@ -9,26 +9,28 @@
 #pragma once
 
 #include "Layer.h"
+#include <string>
+
 class Knob : public Layer {
 public:
-	string name;
+	std::string name;
 	float &value;
 	float min;
 	float max;
 	bool enabled = true;
 	bool down	 = false;
 
-	string niceToString(float val) {
+	std::string niceToString(float val) {
 		if (val < 2) {
 			return to_string(val, 2);
 		} else if (val < 50) {
 			return to_string(val, 1);
 		} else {
-			return to_string((int) val);
+			return std::to_string((int) val);
 		}
 	}
 
-	Knob(Graphics &g, string name, float &value, float min = 0, float max = 1)
+	Knob(Graphics &g, std::string name, float &value, float min = 0, float max = 1)
 		: Layer(g)
 		, name(name)
 		, value(value)

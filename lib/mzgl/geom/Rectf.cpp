@@ -65,6 +65,14 @@ void Rectf::alignToPixels() {
 	height = (int) height;
 }
 
+std::pair<Rectf, Rectf> Rectf::splitVertical(float division) const {
+	return std::make_pair(Rectf {x, y, width, division}, Rectf {x, y + division, width, height - division});
+}
+
+std::pair<Rectf, Rectf> Rectf::splitHorizontal(float division) const {
+	return std::make_pair(Rectf {x, y, division, height}, Rectf {x + division, y, width - division, height});
+}
+
 bool Rectf::inside(float x, float y) const {
 	//	bool insideX = width>0 ? x >= this->x &&
 	//	x <= right() : x <= this->x && x >= this->x + this->width;
