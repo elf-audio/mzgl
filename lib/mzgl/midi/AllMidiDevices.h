@@ -14,6 +14,7 @@
 
 class MidiConnectionListener {
 public:
+	virtual ~MidiConnectionListener() = default;
 	virtual void midiDeviceConnected(const std::shared_ptr<MidiDevice> &dev) {}
 	virtual void midiDeviceDisconnected(const std::shared_ptr<MidiDevice> &dev) {}
 };
