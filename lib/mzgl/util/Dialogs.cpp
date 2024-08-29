@@ -1192,6 +1192,7 @@ void Dialogs::loadFile(std::string msg,
 			  }
 			  NSArray *exts = [NSArray arrayWithObjects:&nsExts[0] count:nsExts.size()];
 			  [impikD setAllowedExtensions:exts];
+			  [impikD enableFoldersOnly:NO];
 			  loadDialog.delegate = impikD;
 		  }
 
