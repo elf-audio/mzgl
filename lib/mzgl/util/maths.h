@@ -39,3 +39,6 @@ float db2rms(float db);
 
 float smoothstep(float x);
 float smootherstep(float x);
+
+double deg2rad(double deg);
+double rad2deg(double rad);
