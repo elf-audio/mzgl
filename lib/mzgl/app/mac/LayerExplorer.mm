@@ -92,7 +92,7 @@ void printLayer(Layer *l, int indent = 0) {
 	self = [super initWithFrame:frameRect];
 	[self setAutoresizingMask:NSViewWidthSizable];
 	NSImageView *iv = [[NSImageView alloc] initWithFrame:NSMakeRect(0, 6, 16, 16)];
-	NSTextField *tf = [[NSTextField alloc] initWithFrame:NSMakeRect(21, 6, 200, 14)];
+	NSTextField *tf = [[NSTextField alloc] initWithFrame:NSMakeRect(21, 6, 200, 16)];
 	//  NSButton* btn = [[NSButton alloc] initWithFrame:NSMakeRect(0, 3, 16, 16)];
 	[iv setImageScaling:NSImageScaleProportionallyUpOrDown];
 	[iv setImageAlignment:NSImageAlignCenter];
