@@ -89,7 +89,9 @@ ScopedAlphaBlend::~ScopedAlphaBlend() {
 ScopedNoFill::ScopedNoFill(Graphics &_graphics)
 	: graphics {_graphics}
 	, isFilling {graphics.isFilling()} {
+if(isFilling) {
 	graphics.noFill();
+}
 }
 
 ScopedNoFill::~ScopedNoFill() {
