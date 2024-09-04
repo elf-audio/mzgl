@@ -49,6 +49,7 @@ glm::vec4 hexColor(int hex, float a = 1);
 glm::vec4 hexColor(std::string s);
 
 class ScopedAlphaBlend;
+class ScopedNoFill;
 struct ScopedTranslate;
 struct ScopedTransform;
 class GraphicsAPI;
@@ -239,6 +240,26 @@ public:
 
 private:
 	bool originalBlendState;
+};
+
+class ScopedFill {
+public:
+	ScopedFill(Graphics &_graphics);
+	~ScopedFill();
+
+private:
+	Graphics &graphics;
+	const bool isFilling;
+};
+
+class ScopedNoFill {
+public:
+	ScopedNoFill(Graphics &_graphics);
+	~ScopedNoFill();
+
+private:
+	Graphics &graphics;
+	const bool isFilling;
 };
 
 struct ScopedTranslate {

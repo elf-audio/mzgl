@@ -26,7 +26,6 @@
 #include <array>
 #include <utility>
 
-
 Graphics::~Graphics() = default;
 glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
@@ -85,6 +84,34 @@ ScopedAlphaBlend::ScopedAlphaBlend(Graphics &g, bool shouldBlend)
 
 ScopedAlphaBlend::~ScopedAlphaBlend() {
 	g.setBlending(originalBlendState);
+}
+
+ScopedNoFill::ScopedNoFill(Graphics &_graphics)
+	: graphics {_graphics}
+	, isFilling {graphics.isFilling()} {
+if(isFilling) {
+	graphics.noFill();
+}
+}
+
+ScopedNoFill::~ScopedNoFill() {
+	if (isFilling) {
+		graphics.fill();
+	}
+}
+
+ScopedFill::ScopedFill(Graphics &_graphics)
+	: graphics {_graphics}
+	, isFilling {graphics.isFilling()} {
+if(!isFilling) {
+	graphics.fill();
+}
+}
+
+ScopedFill::~ScopedFill() {
+	if (!isFilling) {
+		graphics.noFill();
+	}
 }
 
 bool Graphics::isBlending() {
@@ -322,14 +349,14 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 	drawCircle(c.x, c.y, r);
 }
 void Graphics::drawCircle(float x, float y, float r) {
-	static constexpr auto circleResolution										  = 100;
-	auto circleResolationFun = [] {
-		std::array<std::pair<float, float>, circleResolution + 1> values {};
-		for (int i = 0; i <= circleResolution; ++i) {
-			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
-			values[i] = {std::cos(phi), std::sin(phi)};
-		}
-		return values;
+	static constexpr auto circleResolution = 100;
+	auto circleResolationFun			   = [] {
+		  std::array<std::pair<float, float>, circleResolution + 1> values {};
+		  for (int i = 0; i <= circleResolution; ++i) {
+			  float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			  values[i] = {std::cos(phi), std::sin(phi)};
+		  }
+		  return values;
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
