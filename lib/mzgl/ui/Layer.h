@@ -21,10 +21,11 @@ public:
 	bool interactive = false;
 	bool visible	 = true;
 
-	Layer(Graphics &g, std::string name = "");
-	virtual ~Layer();
+	Layer(Graphics &g, const std::string &name = "");
+	Layer(Graphics &g, const std::vector<Layer *> &children);
+	Layer(Graphics &g, const std::string &name, const std::vector<Layer *> &children);
 
-	Layer(Graphics &g, std::string name, float x, float y, float w, float h);
+	virtual ~Layer();
 
 	virtual void draw() {}
 
@@ -35,14 +36,14 @@ public:
 
 	virtual void clear();
 
-	std::string toString() const;
+	[[nodiscard]] std::string toString() const;
 
 	bool clipToBounds = false;
 
 	// reorder layers - if the parameter is null, it's referring to this
 	// layer.
-	void sendToFront(Layer *child = NULL);
-	void sendToBack(Layer *child = NULL);
+	void sendToFront(Layer *child = nullptr);
+	void sendToBack(Layer *child = nullptr);
 
 	// override for when ui needs to be rebuilt
 	virtual void doLayout() {}
@@ -62,7 +63,7 @@ public:
 	// override to have something to do before the draw
 	virtual void update() {}
 
-	int getNumChildren() const;
+	[[nodiscard]] int getNumChildren() const;
 	Layer *getChild(int index);
 	Layer *getFirstChild();
 	Layer *getLastChild();
@@ -114,7 +115,7 @@ public:
 
 	void transferFocus(Layer *otherLayer, int touchId);
 	void transferFocus(Layer *fromLayer, Layer *toLayer);
-	bool hasFocus() const;
+	[[nodiscard]] bool hasFocus() const;
 	void removeFocus();
 
 	void positionAbove(Layer *l, float padding = 0);

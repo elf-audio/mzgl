@@ -8,27 +8,27 @@
 #include "Graphics.h"
 #include "util.h"
 #include "stringUtil.h"
-#include <iostream>
 #include "log.h"
 
-using namespace std;
-
-Layer::Layer(Graphics &g, string name)
+Layer::Layer(Graphics &g, const std::string &name)
 	: g(g)
 	, name(name) {
 }
 
-Layer::Layer(Graphics &g, string name, float x, float y, float w, float h)
-	: Rectf(x, y, w, h)
-	, g(g)
-	, name(name) {
+Layer::Layer(Graphics &g, const std::vector<Layer *> &children)
+	: Layer(g) {
+	addChildren(children);
+}
+Layer::Layer(Graphics &g, const std::string &name, const std::vector<Layer *> &children)
+	: Layer(g, name) {
+	addChildren(children);
 }
 
 Layer::~Layer() {
 	clear();
 }
 
-string Layer::toString() const {
+std::string Layer::toString() const {
 	return "name: " + name + " (xy: " + to_string(x, 0) + "," + to_string(y, 0) + " " + to_string(width, 0)
 		   + "  x " + to_string(height, 0) + ")";
 }
@@ -142,7 +142,7 @@ bool Layer::removeChild(Layer *layer) {
 	return false;
 }
 
-void Layer::addChildren(vector<Layer *> layers) {
+void Layer::addChildren(std::vector<Layer *> layers) {
 	for (auto *l: layers) {
 		addChild(l);
 	}
@@ -313,7 +313,7 @@ void Layer::sendToBack(Layer *child) {
 				return;
 			}
 		}
-		cout << "Couldn't find child in sendLayerToBack " << child->name << endl;
+		Log::e() << "Couldn't find child in sendLayerToBack " << child->name;
 	}
 }
 
@@ -333,7 +333,7 @@ void Layer::sendToFront(Layer *child) {
 				return;
 			}
 		}
-		std::cout << "Couldn't find child in sendLayerToFront " << child->name << endl;
+		Log::e() << "Couldn't find child in sendLayerToFront " << child->name;
 	}
 }
 
@@ -444,7 +444,7 @@ void Layer::transferFocus(Layer *otherLayer, int touchId) {
 	if (g.focusedLayers.find(touchId) != g.focusedLayers.end() && g.focusedLayers[touchId] == this) {
 		g.focusedLayers[touchId] = otherLayer;
 	} else {
-		cout << "Couldn't find the other layer to focus on" << endl;
+		Log::e() << "Couldn't find the other layer to focus on";
 	}
 }
 
