@@ -101,7 +101,9 @@ ScopedNoFill::~ScopedNoFill() {
 ScopedFill::ScopedFill(Graphics &_graphics)
 	: graphics {_graphics}
 	, isFilling {graphics.isFilling()} {
+if(!isFilling) {
 	graphics.fill();
+}
 }
 
 ScopedFill::~ScopedFill() {
