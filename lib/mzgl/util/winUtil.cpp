@@ -94,9 +94,9 @@ namespace { ////////////////////////////////////////////////////////////////////
 				textEditor_				 = TextEditor {};
 				textEditor_->id			 = id++;
 				textEditor_->defaultText = setup.textEditor->defaultText;
-				textEditor_->rect.setLeftEdge(PADDING);
-				textEditor_->rect.setRightEdge(rect_.width - PADDING);
-				textEditor_->rect.setTopEdge(y);
+				textEditor_->rect.moveLeftEdge(PADDING);
+				textEditor_->rect.moveRightEdge(rect_.width - PADDING);
+				textEditor_->rect.moveTopEdge(y);
 				textEditor_->rect.height = TEXT_EDITOR_HEIGHT;
 				y -= PADDING;
 			}
@@ -105,10 +105,10 @@ namespace { ////////////////////////////////////////////////////////////////////
 				text_		= Text {};
 				text_->id	= id++;
 				text_->text = setup.text;
-				text_->rect.setLeftEdge(PADDING);
-				text_->rect.setRightEdge(rect_.width - PADDING);
-				text_->rect.setTopEdge(PADDING);
-				text_->rect.setBottomEdge(y);
+				text_->rect.moveLeftEdge(PADDING);
+				text_->rect.moveRightEdge(rect_.width - PADDING);
+				text_->rect.moveTopEdge(PADDING);
+				text_->rect.moveBottomEdge(y);
 			}
 		}
 

@@ -135,16 +135,33 @@ public:
 	void setBottom(float bottom) { y = bottom - height; }
 
 	// sets left/right without moving the other edge (grows or shrinks the box)
-	void setLeftEdge(float left) {
+	void moveLeftEdge(float left) {
 		width += x - left;
 		x = left;
 	}
-	void setRightEdge(float right) { width = right - x; }
-	void setTopEdge(float top) {
+	void moveRightEdge(float right) { width = right - x; }
+	void moveTopEdge(float top) {
 		height += y - top;
 		y = top;
 	}
-	void setBottomEdge(float bottom) { height = bottom - y; }
+	void moveBottomEdge(float bottom) { height = bottom - y; }
+
+	void moveTopLeft(glm::vec2 p) {
+		moveLeftEdge(p.x);
+		moveTopEdge(p.y);
+	}
+	void moveTopRight(glm::vec2 p) {
+		moveRightEdge(p.x);
+		moveTopEdge(p.y);
+	}
+	void moveBottomRight(glm::vec2 p) {
+		moveRightEdge(p.x);
+		moveBottomEdge(p.y);
+	}
+	void moveBottomLeft(glm::vec2 p) {
+		moveLeftEdge(p.x);
+		moveBottomEdge(p.y);
+	}
 
 	void setTopLeft(float x, float y) { position(x, y); }
 	void setTopLeft(glm::vec2 p) { position(p); }
