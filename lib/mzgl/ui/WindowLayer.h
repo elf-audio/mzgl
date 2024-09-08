@@ -39,7 +39,8 @@ public:
 		return true;
 	}
 	void touchMoved(float x, float y, int id) override {
-		Rectf originalRect = *this;
+		Rectf originalRect			 = *this;
+		static constexpr int minSize = 40;
 		switch (currDragType) {
 			case DragType::TopLeft: moveTopLeft(startRect.tl() + vec2(x, y) - startTouch); break;
 			case DragType::TopRight: moveTopRight(startRect.tr() + vec2(x, y) - startTouch); break;
@@ -51,6 +52,9 @@ public:
 			case DragType::Left: moveLeftEdge(startRect.x + x - startTouch.x); break;
 			case DragType::Inside: position(startRect.tl() + vec2(x, y) - startTouch); break;
 			case DragType::None: break;
+		}
+		if (width < minSize || height < minSize) {
+			set(originalRect);
 		}
 		if (*this != originalRect) {
 			resized();
