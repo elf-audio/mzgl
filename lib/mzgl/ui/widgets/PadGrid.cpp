@@ -60,7 +60,8 @@ private:
 };
 
 PadGrid::PadGrid(Graphics &g, string name, float x, float y, float w, float h, float padding)
-	: Layer(g, name, x, y, w, h) {
+	: Layer(g, name) {
+		set(x, y, w, h);
 	interactive	  = true;
 	originalDims  = glm::vec2(w, h);
 	color		  = {0, 0, 0, 0};
