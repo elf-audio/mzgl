@@ -48,9 +48,9 @@ public:
 			case DragType::BottomLeft: moveBottomLeft(startRect.bl() + vec2(x, y) - startTouch); break;
 
 			case DragType::Top: moveTopEdge(startRect.y + y - startTouch.y); break;
-			case DragType::Bottom: moveBottomEdge(startRect.y + bottom() - startTouch.y); break;
+			case DragType::Bottom: moveBottomEdge(startRect.bottom() + y - startTouch.y); break;
 			case DragType::Left: moveLeftEdge(startRect.x + x - startTouch.x); break;
-			case DragType::Inside: position(startRect.tl() + vec2(x, y) - startTouch); break;
+			case DragType::Right: moveRightEdge(startRect.right() + x - startTouch.x); break;
 			case DragType::None: break;
 		}
 		if (width < minSize || height < minSize) {
