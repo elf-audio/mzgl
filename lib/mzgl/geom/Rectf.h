@@ -114,7 +114,7 @@ public:
 	void setCentre(const glm::vec2 &c) { setCentre(c.x, c.y); }
 
 	void setCentreX(float cx) { x = cx - width * 0.5f; }
-	void setCentreY(float cy) { x = cy - height * 0.5f; }
+	void setCentreY(float cy) { y = cy - height * 0.5f; }
 	void setBottomCentre(float x, float y) {
 		set(x - this->width / 2, y - this->height, this->width, this->height);
 	}
