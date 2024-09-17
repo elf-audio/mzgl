@@ -129,6 +129,26 @@ public:
 	// used for hacky things, don't use
 	Graphics &getGraphics() { return g; }
 
+	auto begin() { return std::begin(children); }
+	auto begin() const { return std::begin(children); }
+	auto end() { return std::end(children); }
+	auto end() const { return std::end(children); }
+
+	template <class T>
+	std::vector<T *> collectChildrenOfType(bool recursive = false) {
+		std::vector<T *> childrenOfType;
+		for (auto child: children) {
+			if (auto typedChild = dynamic_cast<T *>(child)) {
+				childrenOfType.push_back(typedChild);
+			}
+			if (recursive) {
+				auto subChildren = child->collectChildrenOfType<T>(recursive);
+				childrenOfType.insert(std::end(childrenOfType), std::begin(subChildren), std::end(subChildren));
+			}
+		}
+		return childrenOfType;
+	}
+
 protected:
 	void transformMouse(float &x, float &y);
 
