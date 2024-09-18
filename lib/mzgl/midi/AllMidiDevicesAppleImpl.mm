@@ -13,6 +13,7 @@
 #include "mainThread.h"
 #include "util.h"
 #include <memory.h>
+#include "mzAssert.h"
 
 static void NSLogError(OSStatus c, const std::string &str) {
 	if (c != noErr) {
@@ -380,7 +381,7 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 										const MidiMessage &midiMessage) {
 	const auto bytes = midiMessage.getBytes();
 
-	assert(bytes.size() < 65536);
+	mzAssert(bytes.size() < 65536);
 
 	static constexpr auto packetExtraSpace = 100;
 	Byte packetBuffer[bytes.size() + packetExtraSpace];

@@ -179,6 +179,15 @@ public:
 	void sendMidiMessage(int outputNo, const MidiMessage &m, int delay) {
 		midiOutMessages.emplace_back(outputNo, m, delay);
 	};
+	
+#if TARGET_OS_IOS
+	std::function<void(const MidiMessage &)> onSendMidiToAudioUnitHost;
+	void sendMidiToAudioUnitHost(const MidiMessage &m) {
+		if (onSendMidiToAudioUnitHost != nullptr) {
+			onSendMidiToAudioUnitHost(m);
+		}
+	};
+#endif
 
 	// midi events will come in on audio thread
 	virtual void midiReceivedAtTime(const MidiMessage &m, uint32_t delay) {}
