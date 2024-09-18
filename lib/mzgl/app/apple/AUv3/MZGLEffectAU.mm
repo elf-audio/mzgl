@@ -149,37 +149,36 @@ struct Blocks {
 	__weak __typeof__(self) weakSelf = self;
 	auto *plug						 = plugin.get();
 
+#if TARGET_OS_IOS
 	plugin->onSendMidiToAudioUnitHost = [weakSelf](const MidiMessage &midiMessage) {
-		static constexpr uint8_t cable = 0;
+		static constexpr uint8_t cable			   = 0;
 		static constexpr AUEventSampleTime sendNow = 0;
 		if (midiMessage.getBytes().empty()) {
 			return;
 		}
 
-		if (midiMessage.isSysex()) {
-			//sendSysex(device, midiMessage);
-		} else {
-			auto data = midiMessage.getBytes();
+		if (!midiMessage.isSysex()) {
+			auto data						 = midiMessage.getBytes();
 			__strong __typeof__(self) strong = weakSelf;
 			if (strong->blocks.midiOut) {
 				strong->blocks.midiOut(sendNow, cable, data.size(), data.data());
 			}
 		}
-		
 	};
-	
-	plugin->isRunning				 = [weakSelf, plug]() -> bool {
-		   if ([weakSelf respondsToSelector:@selector(isRunning)]) {
-			   if (@available(iOS 11.0, *)) {
-				   return [weakSelf isRunning];
-			   } else {
-				   NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
-				   return plug->hasStarted;
-			   }
-		   } else {
-			   NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
-			   return plug->hasStarted;
-		   }
+#endif
+
+	plugin->isRunning = [weakSelf, plug]() -> bool {
+		if ([weakSelf respondsToSelector:@selector(isRunning)]) {
+			if (@available(iOS 11.0, *)) {
+				return [weakSelf isRunning];
+			} else {
+				NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
+				return plug->hasStarted;
+			}
+		} else {
+			NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
+			return plug->hasStarted;
+		}
 	};
 
 	inputBus.reserve(8192);
@@ -309,11 +308,12 @@ struct Blocks {
 
 	// Create the input and output bus arrays (AUAudioUnitBusArray).
 	// @invalidname
-	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-															busType:AUAudioUnitBusTypeInput
-															 busses:@[ _inputBus.bus ]];
-	_outputBusArray =
-		[[AUAudioUnitBusArray alloc] initWithAudioUnit:self busType:AUAudioUnitBusTypeOutput busses:outBusses];
+	_inputBusArray	= [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
+															 busType:AUAudioUnitBusTypeInput
+															  busses:@[ _inputBus.bus ]];
+	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
+															 busType:AUAudioUnitBusTypeOutput
+															  busses:outBusses];
 
 	[_outputBusArray addObserverToAllBusses:self
 								 forKeyPath:@"format"
