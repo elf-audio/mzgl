@@ -106,6 +106,7 @@ set(MZGL_SOURCES
     lib/mzgl/audio/AudioFileApple.cpp
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
+    lib/mzgl/midi/MidiMessage.cpp
     lib/mzgl/app/mac/MacAppDelegate.mm
     lib/mzgl/app/mac/MacMenuBar.mm
     lib/mzgl/app/mac/EventsView.mm
