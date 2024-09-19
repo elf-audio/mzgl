@@ -8,6 +8,7 @@
 
 #include "AllMidiDevicesAppleImpl.h"
 #include <Foundation/Foundation.h>
+#include <mach/mach_time.h>
 
 #include "appleMidiUtils.h"
 #include "mainThread.h"
@@ -378,7 +379,8 @@ std::vector<std::shared_ptr<MidiDevice>> AllMidiDevicesAppleImpl::getConnectedMi
 }
 
 void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &device,
-										const MidiMessage &midiMessage) {
+										const MidiMessage &midiMessage,
+										std::optional<uint64_t> timeStampInNanoSeconds) {
 	const auto bytes = midiMessage.getBytes();
 
 	mzAssert(bytes.size() < 65536);
@@ -389,7 +391,14 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	auto *packetList   = (MIDIPacketList *) packetBuffer;
 	MIDIPacket *packet = MIDIPacketListInit(packetList);
 
-	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, bytes.size(), bytes.data());
+	uint64_t timestamp = 0;
+	if (timeStampInNanoSeconds.has_value()) {
+		auto currentHostTime  = mach_absolute_time();
+		auto delayInHostTicks = hostTicksToNanoSeconds(*timeStampInNanoSeconds);
+		timestamp			  = currentHostTime + delayInHostTicks;
+	}
+
+	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, timestamp, bytes.size(), bytes.data());
 
 	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
 		auto result = MIDISend(outputPort, *endpoint, packetList);
@@ -447,7 +456,8 @@ void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &midiMessage) {
 }
 
 void AllMidiDevicesAppleImpl::sendMessage(const std::shared_ptr<MidiDevice> &device,
-										  const MidiMessage &midiMessage) {
+										  const MidiMessage &midiMessage,
+										  std::optional<uint64_t> timeStampInNanoSeconds) {
 	if (!midiMessageHasValidBytes(midiMessage)) {
 		return;
 	}
@@ -455,6 +465,6 @@ void AllMidiDevicesAppleImpl::sendMessage(const std::shared_ptr<MidiDevice> &dev
 	if (midiMessage.isSysex()) {
 		sendSysex(device, midiMessage);
 	} else {
-		sendBytes(device, midiMessage);
+		sendBytes(device, midiMessage, timeStampInNanoSeconds);
 	}
 }

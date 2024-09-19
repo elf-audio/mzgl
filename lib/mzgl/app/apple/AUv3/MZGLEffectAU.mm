@@ -150,7 +150,8 @@ struct Blocks {
 	auto *plug						 = plugin.get();
 
 #if TARGET_OS_IOS
-	plugin->onSendMidiToAudioUnitHost = [weakSelf](const MidiMessage &midiMessage) {
+	plugin->onSendMidiToAudioUnitHost = [weakSelf](const MidiMessage &midiMessage,
+												   std::optional<uint64_t> timestampInNanoSeconds) {
 		static constexpr uint8_t cable			   = 0;
 		static constexpr AUEventSampleTime sendNow = 0;
 		if (midiMessage.getBytes().empty()) {
@@ -161,7 +162,13 @@ struct Blocks {
 			auto data						 = midiMessage.getBytes();
 			__strong __typeof__(self) strong = weakSelf;
 			if (strong->blocks.midiOut) {
-				strong->blocks.midiOut(sendNow, cable, data.size(), data.data());
+				AUEventSampleTime timestamp = sendNow;
+				if (timestampInNanoSeconds.has_value()) {
+					timestamp = static_cast<AUEventSampleTime>((static_cast<double>(*timestampInNanoSeconds) / 1.0e9)
+															   * strong->plugin->getSampleRate());
+				}
+
+				strong->blocks.midiOut(timestamp, cable, data.size(), data.data());
 			}
 		}
 	};

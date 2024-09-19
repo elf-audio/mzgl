@@ -42,7 +42,9 @@ public:
 
 	// sends to all connected midi devices that have an input
 	void sendMessage(const MidiMessage &m);
-	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m);
+	void sendMessage(const std::shared_ptr<MidiDevice> &device,
+					 const MidiMessage &m,
+					 std::optional<uint64_t> delayInNanoSeconds = std::nullopt);
 
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const;
 

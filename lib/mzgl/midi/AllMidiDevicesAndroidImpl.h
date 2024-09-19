@@ -16,17 +16,15 @@ public:
 		, deviceIdentifier(device)
 		, devicePort(port) {}
 
-	AndroidMidiDevice (const AndroidMidiDevice &other) {
-		*this = other;
-	}
+	AndroidMidiDevice(const AndroidMidiDevice &other) { *this = other; }
 
-	AndroidMidiDevice & operator=(const AndroidMidiDevice &other) {
-		if (this  != &other){
-			name = other.name;
-			isOutput = other.isOutput;
+	AndroidMidiDevice &operator=(const AndroidMidiDevice &other) {
+		if (this != &other) {
+			name			 = other.name;
+			isOutput		 = other.isOutput;
 			deviceIdentifier = other.deviceIdentifier;
-			devicePort = other.devicePort;
-			id = other.id;
+			devicePort		 = other.devicePort;
+			id				 = other.id;
 		}
 		return *this;
 	}
@@ -34,28 +32,20 @@ public:
 	~AndroidMidiDevice() override = default;
 
 	[[nodiscard]] bool operator==(const AndroidMidiDevice &other) const {
-		return std::tie(deviceIdentifier,
-						devicePort,
-						isOutput) ==
-			   std::tie(other.deviceIdentifier,
-						other.devicePort,
-						other.isOutput);
+		return std::tie(deviceIdentifier, devicePort, isOutput)
+			   == std::tie(other.deviceIdentifier, other.devicePort, other.isOutput);
 	}
 
 	[[nodiscard]] bool operator==(const MidiDevice &other) const override {
-		if (auto android = dynamic_cast<const AndroidMidiDevice*>(&other)) {
+		if (auto android = dynamic_cast<const AndroidMidiDevice *>(&other)) {
 			return *this == *android;
 		}
 		return MidiDevice::operator==(other);
 	}
 
-	[[nodiscard]] bool operator!=(const AndroidMidiDevice &other) const {
-		return !(*this == other);
-	}
+	[[nodiscard]] bool operator!=(const AndroidMidiDevice &other) const { return !(*this == other); }
 
-	[[nodiscard]] bool operator!=(const MidiDevice &other) const override {
-		return !(*this == other);
-	}
+	[[nodiscard]] bool operator!=(const MidiDevice &other) const override { return !(*this == other); }
 
 	AndroidMidiIdentifier deviceIdentifier;
 	AndroidMidiIdentifier devicePort;
@@ -76,7 +66,9 @@ public:
 	void messageReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
-	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) override;
+	void sendMessage(const std::shared_ptr<MidiDevice> &device,
+					 const MidiMessage &m,
+					 std::optional<uint64_t> timeStampInNanoSeconds = std::nullopt) override;
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
 
 private:
