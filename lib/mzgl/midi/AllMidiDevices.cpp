@@ -80,9 +80,11 @@ std::vector<std::shared_ptr<MidiDevice>> AllMidiDevices::getConnectedMidiDevices
 	return {};
 }
 
-void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) {
+void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device,
+								 const MidiMessage &m,
+								 std::optional<uint64_t> delayInNanoSeconds) {
 	if (online) {
-		impl->sendMessage(device, m);
+		impl->sendMessage(device, m, delayInNanoSeconds);
 	}
 }
 void AllMidiDevices::removeListener(MidiListener *listener) {

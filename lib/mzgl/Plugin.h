@@ -179,12 +179,13 @@ public:
 	void sendMidiMessage(int outputNo, const MidiMessage &m, int delay) {
 		midiOutMessages.emplace_back(outputNo, m, delay);
 	};
-	
+
 #if TARGET_OS_IOS
-	std::function<void(const MidiMessage &)> onSendMidiToAudioUnitHost;
-	void sendMidiToAudioUnitHost(const MidiMessage &m) {
+	std::function<void(const MidiMessage &, std::optional<uint64_t> timestampInNanoSeconds)>
+		onSendMidiToAudioUnitHost;
+	void sendMidiToAudioUnitHost(const MidiMessage &m, std::optional<uint64_t> timestampInNanoSeconds) {
 		if (onSendMidiToAudioUnitHost != nullptr) {
-			onSendMidiToAudioUnitHost(m);
+			onSendMidiToAudioUnitHost(m, timestampInNanoSeconds);
 		}
 	};
 #endif

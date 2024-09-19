@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9C5EF32E2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
+		9C5EF32F2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
+		9C5EF3302C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
+		9C5EF3312C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -836,6 +840,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
 		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
@@ -1995,6 +2000,7 @@
 		EA1835F72432C18B00A5C3E8 /* midi */ = {
 			isa = PBXGroup;
 			children = (
+				9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */,
 				EA1835F82432C18B00A5C3E8 /* Midi.cpp */,
 				EA1835F92432C18B00A5C3E8 /* Midi.h */,
 				EAF18F8E273BE69A00E1589E /* MidiMessage.h */,
@@ -3647,6 +3653,7 @@
 				EA71A7B427E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA1840042432C18D00A5C3E8 /* error.cpp in Sources */,
 				EA234AF424A609CA000F057B /* Yoga.cpp in Sources */,
+				9C5EF32E2C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
 				EA297C6D25C954E600F890AE /* pa_dither.c in Sources */,
 				EAD03B9C297FD49700D0C04A /* MZWebView.cpp in Sources */,
 				EA297C7025C954E600F890AE /* pa_process.c in Sources */,
@@ -3817,6 +3824,7 @@
 				EAF9A15226F8B42200698263 /* log.cpp in Sources */,
 				EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */,
 				EA71A78927E39E6C0081A5CB /* entropy.c in Sources */,
+				9C5EF32F2C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3911,6 +3919,7 @@
 				EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */,
 				EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */,
 				EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */,
+				9C5EF3302C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
 				EAF6737B289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */,
 				EA71A7A227E39E6C0081A5CB /* tools.cpp in Sources */,
@@ -4065,6 +4074,7 @@
 				EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */,
 				EAF9A15426F8B42200698263 /* log.cpp in Sources */,
 				EA68949B261C633500F76B91 /* FloatBuffer.cpp in Sources */,
+				9C5EF3312C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

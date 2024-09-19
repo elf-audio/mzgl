@@ -69,7 +69,9 @@ public:
 	void midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
-	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) override;
+	void sendMessage(const std::shared_ptr<MidiDevice> &device,
+					 const MidiMessage &m,
+					 std::optional<uint64_t> timeStampInNanoSeconds = std::nullopt) override;
 	~AllMidiDevicesAppleImpl() override;
 
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
@@ -99,6 +101,8 @@ private:
 	void midiNotifyAdd(const MIDIObjectAddRemoveNotification *notification);
 	void midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification);
 
-	void sendBytes(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
+	void sendBytes(const std::shared_ptr<MidiDevice> &device,
+				   const MidiMessage &midiMessage,
+				   std::optional<uint64_t> timeStampInNanoSeconds);
 	void sendSysex(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
 };
