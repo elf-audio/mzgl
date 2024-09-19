@@ -102,7 +102,7 @@ SCENARIO("Midi messages for aftertouch are valid with channels", "[midi-parser]"
 			WHEN("Channel " + std::to_string(channel) + " is processed ") {
 				MidiMessage message {{static_cast<unsigned char>(0xD0 + channel), 0x3C}};
 				REQUIRE(message.getBytes().size() == 2);
-				REQUIRE(message.channel == channel + 1);
+				REQUIRE(message.getChannel() == channel + 1);
 				REQUIRE(message.getBytes()[0] == 0xD0 + channel);
 				REQUIRE(message.getBytes()[1] == 0x3C);
 				REQUIRE(message.isChannelPressure());
@@ -116,7 +116,7 @@ SCENARIO("Midi messages for polypressure are valid with channels", "[midi-parser
 		for (int channel = 0; channel < 15; ++channel) {
 			WHEN("Channel " + std::to_string(channel) + " is processed ") {
 				MidiMessage message {{static_cast<unsigned char>(0xA0 + channel), 0x3C, 0x64}};
-				REQUIRE(message.channel == channel + 1);
+				REQUIRE(message.getChannel() == channel + 1);
 				REQUIRE(message.getBytes().size() == 3);
 				REQUIRE(message.getBytes()[0] == 0xA0 + channel);
 				REQUIRE(message.getBytes()[1] == 0x3C);

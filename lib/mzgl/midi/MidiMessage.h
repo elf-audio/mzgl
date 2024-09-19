@@ -7,10 +7,12 @@
 //
 
 #pragma once
-#include <stdint.h>
-#include <string.h> // for memcpy()
+
+#include <cstdint>
+#include <cstring>
 #include <vector>
 #include <algorithm>
+#include <optional>
 
 #define MIDI_UNKNOWN 0x00
 
@@ -42,196 +44,61 @@
 #define MIDI_CC_SUSTAIN_PEDAL 64
 
 struct MidiMessage {
-	int status	= 0;
-	int channel = 0;
-
-	union {
-		int pitch;
-		int control;
-	};
-
-	union {
-		int velocity;
-		int value;
-	};
-
-	MidiMessage() {}
-	MidiMessage(int status)
-		: status(status) {}
-	MidiMessage(const uint8_t *bytes, int length) { setFromBytes(bytes, length); }
-
-	MidiMessage(const std::vector<uint8_t> &bytes) { setFromBytes(bytes.data(), (int) bytes.size()); }
-
+	MidiMessage() = default;
+	explicit MidiMessage(uint8_t byte1);
+	MidiMessage(uint8_t byte1, uint8_t byte2);
+	MidiMessage(uint8_t byte1, uint8_t byte2, uint8_t byte3);
+	MidiMessage(const uint8_t *bytes, size_t length);
+	explicit MidiMessage(const std::vector<uint8_t> &bytes);
+	explicit MidiMessage(const std::initializer_list<uint8_t> &bytes);
+	MidiMessage(const MidiMessage &other);
 	~MidiMessage() = default;
-	MidiMessage(const MidiMessage &other) { *this = other; }
-	MidiMessage &operator=(const MidiMessage &other) {
-		if (this != &other) {
-			auto data = other.getBytes();
-			setFromBytes(data.data(), data.size());
-		}
-		return *this;
-	}
 
-	[[nodiscard]] bool isNoteOn() const { return status == MIDI_NOTE_ON && velocity > 0; }
-	[[nodiscard]] bool isNoteOff() const {
-		return status == MIDI_NOTE_OFF || (status == MIDI_NOTE_ON && velocity == 0);
-	}
-	[[nodiscard]] bool isPitchBend() const { return status == MIDI_PITCH_BEND; }
-	[[nodiscard]] bool isModWheel() const { return status == MIDI_CONTROL_CHANGE && control == 1; }
-	[[nodiscard]] bool isCC() const { return status == MIDI_CONTROL_CHANGE; }
-	[[nodiscard]] bool isPC() const { return status == MIDI_PROGRAM_CHANGE; }
-	[[nodiscard]] bool isSysex() const { return status == MIDI_SYSEX; }
-	[[nodiscard]] bool isAllNotesOff() const {
-		return status == MIDI_CONTROL_CHANGE && control == MIDI_CC_ALL_NOTES_OFF;
-	}
-	[[nodiscard]] bool isPolyPressure() const { return status == MIDI_POLY_AFTERTOUCH; }
-	[[nodiscard]] bool isChannelPressure() const { return status == MIDI_AFTERTOUCH; }
-	[[nodiscard]] bool isSongPositionPointer() const { return status == MIDI_SONG_POS_POINTER; }
+	[[maybe_unused]] MidiMessage &operator=(const MidiMessage &other);
+	[[nodiscard]] bool operator==(const MidiMessage &other) const;
 
-	[[nodiscard]] static MidiMessage noteOn(int channel, int pitch, int velocity) {
-		MidiMessage m;
-		m.status   = MIDI_NOTE_ON;
-		m.channel  = channel;
-		m.velocity = velocity;
-		m.pitch	   = pitch;
-		return m;
-	}
+	[[nodiscard]] bool isNoteOn() const;
+	[[nodiscard]] bool isNoteOff() const;
+	[[nodiscard]] bool isPitchBend() const;
+	[[nodiscard]] bool isModWheel() const;
+	[[nodiscard]] bool isCC() const;
+	[[nodiscard]] bool isProgramChange() const;
+	[[nodiscard]] bool isSysex() const;
+	[[nodiscard]] bool isAllNotesOff() const;
+	[[nodiscard]] bool isPolyPressure() const;
+	[[nodiscard]] bool isChannelPressure() const;
+	[[nodiscard]] bool isSongPositionPointer() const;
+	[[nodiscard]] bool isStart() const;
+	[[nodiscard]] bool isContinue() const;
+	[[nodiscard]] bool isStop() const;
 
-	[[nodiscard]] static MidiMessage noteOff(int channel, int pitch) {
-		MidiMessage m;
-		m.status   = MIDI_NOTE_OFF;
-		m.channel  = channel;
-		m.velocity = 0;
-		m.pitch	   = pitch;
-		return m;
-	}
+	static MidiMessage noteOn(int channel, int pitch, int velocity);
+	static MidiMessage noteOff(int channel, int pitch);
+	static MidiMessage cc(int channel, int control, int value);
 
-	[[nodiscard]] static MidiMessage cc(int channel, int control, int value) {
-		MidiMessage m;
-		m.status  = MIDI_CONTROL_CHANGE;
-		m.channel = channel;
-		m.control = control;
-		m.value	  = value;
-		return m;
-	}
+	static MidiMessage songPositionPointer(int v);
+	static MidiMessage allNotesOff();
+	static MidiMessage clock();
+	static MidiMessage songStart();
+	static MidiMessage songStop();
 
-	[[nodiscard]] static MidiMessage songPositionPointer(int v) {
-		MidiMessage m(MIDI_SONG_POS_POINTER);
-		m.value = v;
-		return m;
-	}
-	[[nodiscard]] static MidiMessage allNotesOff() { return cc(0, MIDI_CC_ALL_NOTES_OFF, 0); }
-	[[nodiscard]] static MidiMessage clock() { return MidiMessage(MIDI_TIME_CLOCK); }
-	[[nodiscard]] static MidiMessage songStart() { return MidiMessage(MIDI_START); }
-	[[nodiscard]] static MidiMessage songStop() { return MidiMessage(MIDI_STOP); }
-
-	std::vector<uint8_t> getBytes() const {
-		if (status == MIDI_SYSEX) {
-			return sysexData;
-		}
-
-		static const std::vector<uint8_t> singleByteMessages {
-			MIDI_TIME_CLOCK, MIDI_START, MIDI_CONTINUE, MIDI_STOP, MIDI_ACTIVE_SENSING, MIDI_SYSTEM_RESET};
-
-		if (std::find(std::begin(singleByteMessages), std::end(singleByteMessages), status)
-			!= std::end(singleByteMessages)) {
-			return {static_cast<uint8_t>(status)};
-		}
-
-		std::vector<uint8_t> bytes;
-
-		bytes.push_back(status + (channel - 1));
-		switch (status) {
-			case MIDI_NOTE_ON:
-			case MIDI_NOTE_OFF:
-				bytes.push_back(pitch);
-				bytes.push_back(velocity);
-				break;
-			case MIDI_CONTROL_CHANGE:
-				bytes.push_back(control);
-				bytes.push_back(value);
-				break;
-			case MIDI_PROGRAM_CHANGE:
-			case MIDI_AFTERTOUCH: bytes.push_back(value); break;
-			case MIDI_PITCH_BEND:
-				bytes.push_back(value & 0x7F); // lsb 7bit
-				bytes.push_back((value >> 7) & 0x7F); // msb 7bit
-				break;
-			case MIDI_POLY_AFTERTOUCH:
-				bytes.push_back(pitch);
-				bytes.push_back(value);
-				break;
-			case MIDI_SONG_POS_POINTER:
-				bytes.push_back(value & 0x7F); // lsb 7bit
-				bytes.push_back((value >> 7) & 0x7F); // msb 7bit
-				break;
-
-			default:
-				//printf("Unknown message type : %d\n", status);
-				break;
-		}
-		return bytes;
-	}
-
-	float getPitchBend() const {
-		if (value > 8192) {
-			return (value - 8191) / 8192.f;
-		} else {
-			return (value - 8192) / 8192.f;
-		}
-	}
-
-	double getSongPosition() const {
-		if (!isSongPositionPointer()) {
-			return -1.0;
-		}
-
-		return static_cast<double>((((value >> 7) & 0x7F) << 7) | (value & 0x7F)) / 24.0;
-	}
+	[[nodiscard]] uint8_t getChannel() const;
+	[[nodiscard]] uint8_t getPitch() const;
+	[[nodiscard]] uint8_t getVelocity() const;
+	[[nodiscard]] uint8_t getCC() const;
+	[[nodiscard]] uint8_t getValue() const;
+	[[nodiscard]] uint8_t getStatus() const;
+	[[nodiscard]] std::vector<uint8_t> getBytes() const;
+	[[nodiscard]] float getPitchBend() const;
+	[[nodiscard]] int getSongPositionInMidiBeats() const;
+	[[nodiscard]] double getSongPositionInQuarterNotes() const;
+	[[nodiscard]] double getSongPosition() const;
 
 private:
+	void setFromBytes(const uint8_t *bytes, size_t length);
+	[[nodiscard]] uint8_t getMaskedStatus() const;
+	static uint8_t getChannelStatus(uint8_t message, uint8_t channel);
+
+	std::array<std::optional<uint8_t>, 3> midiBytes {std::nullopt, std::nullopt, std::nullopt};
 	std::vector<uint8_t> sysexData;
-	void setFromBytes(const uint8_t *bytes, int length) {
-		if (bytes[0] > MIDI_SYSEX) {
-			status	= bytes[0];
-			channel = 0;
-		} else if (bytes[0] == MIDI_SYSEX) {
-			status	= MIDI_SYSEX;
-			channel = 0;
-			sysexData.resize(length);
-			memcpy(sysexData.data(), bytes, length);
-
-		} else {
-			status	= (bytes[0] & 0xF0);
-			channel = (int) (bytes[0] & 0x0F) + 1;
-		}
-
-		switch (status) {
-			case MIDI_NOTE_ON:
-			case MIDI_NOTE_OFF:
-				pitch	 = (int) bytes[1];
-				velocity = (int) bytes[2];
-
-				break;
-			case MIDI_CONTROL_CHANGE:
-				control = (int) bytes[1];
-				value	= (int) bytes[2];
-				break;
-			case MIDI_PROGRAM_CHANGE:
-			case MIDI_AFTERTOUCH: value = (int) bytes[1]; break;
-			case MIDI_PITCH_BEND:
-				value = (int) (bytes[2] << 7) + (int) bytes[1]; // msb + lsb
-				break;
-			case MIDI_POLY_AFTERTOUCH:
-				pitch = (int) bytes[1];
-				value = (int) bytes[2];
-				break;
-			case MIDI_SONG_POS_POINTER:
-				value = (int) (bytes[2] << 7) + (int) bytes[1]; // msb + lsb
-				break;
-			default:
-				//printf("Unknown message type : %d\n", status);
-				break;
-		}
-	}
 };
