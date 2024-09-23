@@ -14,36 +14,35 @@
 #include <algorithm>
 #include <optional>
 
-#define MIDI_UNKNOWN 0x00
+struct MidiMessageConstants {
+	static constexpr auto MIDI_UNKNOWN			= 0x00;
+	static constexpr auto MIDI_NOTE_OFF			= 0x80;
+	static constexpr auto MIDI_NOTE_ON			= 0x90;
+	static constexpr auto MIDI_CONTROL_CHANGE	= 0xB0;
+	static constexpr auto MIDI_PROGRAM_CHANGE	= 0xC0;
+	static constexpr auto MIDI_PITCH_BEND		= 0xE0;
+	static constexpr auto MIDI_AFTERTOUCH		= 0xD0;
+	static constexpr auto MIDI_POLY_AFTERTOUCH	= 0xA0;
+	static constexpr auto MIDI_SYSEX			= 0xF0;
+	static constexpr auto MIDI_TIME_CODE		= 0xF1;
+	static constexpr auto MIDI_SONG_POS_POINTER = 0xF2;
+	static constexpr auto MIDI_SONG_SELECT		= 0xF3;
+	static constexpr auto MIDI_TUNE_REQUEST		= 0xF6;
+	static constexpr auto MIDI_SYSEX_END		= 0xF7;
+	static constexpr auto MIDI_TIME_CLOCK		= 0xF8;
+	static constexpr auto MIDI_START			= 0xFA;
+	static constexpr auto MIDI_CONTINUE			= 0xFB;
+	static constexpr auto MIDI_STOP				= 0xFC;
+	static constexpr auto MIDI_ACTIVE_SENSING	= 0xFE;
+	static constexpr auto MIDI_SYSTEM_RESET		= 0xFF;
+	static constexpr auto MIDI_CC_ALL_NOTES_OFF = 0x7B;
+	static constexpr auto MIDI_CC_SUSTAIN_PEDAL = 0x40;
 
-// channel voice messages
-#define MIDI_NOTE_OFF		 0x80
-#define MIDI_NOTE_ON		 0x90
-#define MIDI_CONTROL_CHANGE	 0xB0
-#define MIDI_PROGRAM_CHANGE	 0xC0
-#define MIDI_PITCH_BEND		 0xE0
-#define MIDI_AFTERTOUCH		 0xD0
-#define MIDI_POLY_AFTERTOUCH 0xA0
+	static constexpr auto NoMidiTimingApplied = std::nullopt;
+};
 
-// system messages
-#define MIDI_SYSEX			  0xF0 // 240
-#define MIDI_TIME_CODE		  0xF1
-#define MIDI_SONG_POS_POINTER 0xF2
-#define MIDI_SONG_SELECT	  0xF3
-#define MIDI_TUNE_REQUEST	  0xF6
-#define MIDI_SYSEX_END		  0xF7
-#define MIDI_TIME_CLOCK		  0xF8 // AKA midi *BEAT* clock
-#define MIDI_START			  0xFA // 250 in decimal
-#define MIDI_CONTINUE		  0xFB
-#define MIDI_STOP			  0xFC
-#define MIDI_ACTIVE_SENSING	  0xFE
-#define MIDI_SYSTEM_RESET	  0xFF
-
-// just a note for me, a CC at 123 is all notes off
-#define MIDI_CC_ALL_NOTES_OFF 123
-#define MIDI_CC_SUSTAIN_PEDAL 64
-
-struct MidiMessage {
+class MidiMessage {
+public:
 	MidiMessage() = default;
 	explicit MidiMessage(uint8_t byte1);
 	MidiMessage(uint8_t byte1, uint8_t byte2);

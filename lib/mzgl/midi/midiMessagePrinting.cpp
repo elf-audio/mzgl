@@ -27,28 +27,30 @@ std::ostream &operator<<(std::ostream &os, const MidiMessage &midiMsg) {
 	uint8_t channel		= statusByte & 0x0F;
 
 	switch (messageType) {
-		case MIDI_NOTE_OFF: os << "note off, ch: " << +channel; break;
-		case MIDI_NOTE_ON: os << "note on, ch: " << +channel; break;
-		case MIDI_POLY_AFTERTOUCH: os << "Polyphonic Key Pressure (Aftertouch), ch: " << +channel; break;
-		case MIDI_CONTROL_CHANGE: os << "CC, ch: " << +channel; break;
-		case MIDI_PROGRAM_CHANGE: os << "PC, ch: " << +channel; break;
-		case MIDI_AFTERTOUCH: os << "Channel Pressure (Aftertouch), ch: " << +channel; break;
-		case MIDI_PITCH_BEND: os << "pitchbend, ch: " << +channel; break;
-		case MIDI_SYSEX:
+		case MidiMessageConstants::MIDI_NOTE_OFF: os << "note off, ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_NOTE_ON: os << "note on, ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_POLY_AFTERTOUCH:
+			os << "Polyphonic Key Pressure (Aftertouch), ch: " << +channel;
+			break;
+		case MidiMessageConstants::MIDI_CONTROL_CHANGE: os << "CC, ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_PROGRAM_CHANGE: os << "PC, ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_AFTERTOUCH: os << "Channel Pressure (Aftertouch), ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_PITCH_BEND: os << "pitchbend, ch: " << +channel; break;
+		case MidiMessageConstants::MIDI_SYSEX:
 			os << "SysEx: " << bytesToHex(msg) << "]";
 			return os; // Early return for SysEx messages
 		// Additional System Messages
-		case MIDI_TIME_CODE:
-		case MIDI_SONG_POS_POINTER:
-		case MIDI_SONG_SELECT:
-		case MIDI_TUNE_REQUEST:
-		case MIDI_SYSEX_END:
-		case MIDI_TIME_CLOCK:
-		case MIDI_START:
-		case MIDI_CONTINUE:
-		case MIDI_STOP:
-		case MIDI_ACTIVE_SENSING:
-		case MIDI_SYSTEM_RESET:
+		case MidiMessageConstants::MIDI_TIME_CODE:
+		case MidiMessageConstants::MIDI_SONG_POS_POINTER:
+		case MidiMessageConstants::MIDI_SONG_SELECT:
+		case MidiMessageConstants::MIDI_TUNE_REQUEST:
+		case MidiMessageConstants::MIDI_SYSEX_END:
+		case MidiMessageConstants::MIDI_TIME_CLOCK:
+		case MidiMessageConstants::MIDI_START:
+		case MidiMessageConstants::MIDI_CONTINUE:
+		case MidiMessageConstants::MIDI_STOP:
+		case MidiMessageConstants::MIDI_ACTIVE_SENSING:
+		case MidiMessageConstants::MIDI_SYSTEM_RESET:
 			// You can add specific handling for each of these cases if needed
 			os << "System Message: 0x" << std::hex << static_cast<int>(statusByte);
 			break;

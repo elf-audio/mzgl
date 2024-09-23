@@ -312,17 +312,17 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 					int status		= pendingMsg[0] & 0xF0;
 					bool shouldEmit = false;
 					switch (status) {
-						case MIDI_NOTE_OFF:
-						case MIDI_NOTE_ON:
-						case MIDI_PITCH_BEND:
-						case MIDI_POLY_AFTERTOUCH:
-						case MIDI_SONG_POS_POINTER:
-						case MIDI_CONTROL_CHANGE:
+						case MidiMessageConstants::MIDI_NOTE_OFF:
+						case MidiMessageConstants::MIDI_NOTE_ON:
+						case MidiMessageConstants::MIDI_PITCH_BEND:
+						case MidiMessageConstants::MIDI_POLY_AFTERTOUCH:
+						case MidiMessageConstants::MIDI_SONG_POS_POINTER:
+						case MidiMessageConstants::MIDI_CONTROL_CHANGE:
 							if (pendingMsg.size() == 3) shouldEmit = true;
 							break;
-						case MIDI_PROGRAM_CHANGE:
-						case MIDI_AFTERTOUCH:
-						case MIDI_SONG_SELECT:
+						case MidiMessageConstants::MIDI_PROGRAM_CHANGE:
+						case MidiMessageConstants::MIDI_AFTERTOUCH:
+						case MidiMessageConstants::MIDI_SONG_SELECT:
 							if (pendingMsg.size() == 2) shouldEmit = true;
 							break;
 						default: // status unknown, don't send, next message will push this through
@@ -451,7 +451,7 @@ void AllMidiDevicesAppleImpl::sendMessage(const MidiMessage &midiMessage) {
 	}
 
 	for (const auto &output: midiOuts) {
-		sendMessage(output, midiMessage);
+		sendMessage(output, midiMessage, MidiMessageConstants::NoMidiTimingApplied);
 	}
 }
 

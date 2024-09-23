@@ -23,7 +23,7 @@ public:
 	// send message to a specific device
 	virtual void sendMessage(const std::shared_ptr<MidiDevice> &device,
 							 const MidiMessage &m,
-							 std::optional<uint64_t> delayInNanoSeconds = std::nullopt) = 0;
+							 std::optional<uint64_t> delayInNanoSeconds) = 0;
 
 	void addConnectionListener(MidiConnectionListener *listener) { connectionListeners.push_back(listener); }
 	void removeConnectionListener(MidiConnectionListener *listener) {

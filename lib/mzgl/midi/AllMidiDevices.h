@@ -44,7 +44,7 @@ public:
 	void sendMessage(const MidiMessage &m);
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
-					 std::optional<uint64_t> delayInNanoSeconds = std::nullopt);
+					 std::optional<uint64_t> delayInNanoSeconds);
 
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const;
 
