@@ -8,20 +8,6 @@
 
 #include "maths.h"
 #include <stdlib.h>
-#include <math.h>
-
-double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp) {
-	double norm = (inp - inMin) / (inMax - inMin);
-	double f	= outMin + (outMax - outMin) * norm;
-	if (clamp) {
-		if (outMax > outMin) {
-			return std::clamp(f, outMin, outMax);
-		} else {
-			return std::clamp(f, outMax, outMin);
-		}
-	}
-	return f;
-}
 
 float randuf() {
 	return rand() / (float) RAND_MAX;
@@ -46,6 +32,7 @@ int randi(int from, int to) {
 bool randb() {
 	return rand() % 2;
 }
+
 float rms2db(float inp) {
 	return 20 * log10(inp);
 }
@@ -53,15 +40,6 @@ float rms2db(float inp) {
 float db2rms(float db) {
 	return powf(10.f, db / 20.f);
 }
-
-float smoothstep(float x) {
-	return x * x * (3.f - 2.f * x);
-}
-
-float smootherstep(float x) {
-	return x * x * x * (x * (x * 6.f - 15.f) + 10.f);
-}
-
 float nearestPow2(float v) {
 	float lo = floor(log2(v));
 	float hi = ceil(log2(v));
@@ -73,11 +51,4 @@ float nearestPow2(float v) {
 	} else {
 		return hi;
 	}
-}
-
-double deg2rad(double deg) {
-	return deg * M_PI / 180.0;
-}
-double rad2deg(double rad) {
-	return rad * 180.0 / M_PI;
 }

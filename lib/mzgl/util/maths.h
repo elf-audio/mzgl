@@ -7,7 +7,10 @@
 //
 
 #pragma once
+
 #include <algorithm>
+#include <cmath>
+
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
 	const float f = outMin + (outMax - outMin) * (inp - inMin) / (inMax - inMin);
 	if (clamp) {
@@ -20,9 +23,18 @@ constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, f
 	return f;
 }
 
-double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp = false);
-
-float nearestPow2(float v);
+constexpr double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp = false) {
+	double norm = (inp - inMin) / (inMax - inMin);
+	double f	= outMin + (outMax - outMin) * norm;
+	if (clamp) {
+		if (outMax > outMin) {
+			return std::clamp(f, outMin, outMax);
+		} else {
+			return std::clamp(f, outMax, outMin);
+		}
+	}
+	return f;
+}
 
 // random [0,1]
 float randuf();
@@ -34,14 +46,26 @@ float randf(float from, float to);
 int randi(int to);
 int randi(int from, int to);
 bool randb();
+
 float rms2db(float inp);
 float db2rms(float db);
 
-float smoothstep(float x);
-float smootherstep(float x);
+constexpr float smoothstep(float x) {
+	return x * x * (3.f - 2.f * x);
+}
 
-double deg2rad(double deg);
-double rad2deg(double rad);
+constexpr float smootherstep(float x) {
+	return x * x * x * (x * (x * 6.f - 15.f) + 10.f);
+}
+
+float nearestPow2(float v);
+
+constexpr double deg2rad(double deg) {
+	return deg * M_PI / 180.0;
+}
+constexpr double rad2deg(double rad) {
+	return rad * 180.0 / M_PI;
+}
 
 template <typename Precision = float>
 struct Constants {
