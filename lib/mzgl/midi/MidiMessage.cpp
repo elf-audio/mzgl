@@ -42,14 +42,15 @@ bool MidiMessage::operator==(const MidiMessage &other) const {
 }
 
 bool MidiMessage::isNoteOn() const {
-	return getMaskedStatus() == MIDI_NOTE_ON && getVelocity() > 0;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_NOTE_ON && getVelocity() > 0;
 }
 
 bool MidiMessage::isNoteOff() const {
-	return getMaskedStatus() == MIDI_NOTE_OFF || (getMaskedStatus() == MIDI_NOTE_ON && getVelocity() == 0);
+	return getMaskedStatus() == MidiMessageConstants::MIDI_NOTE_OFF
+		   || (getMaskedStatus() == MidiMessageConstants::MIDI_NOTE_ON && getVelocity() == 0);
 }
 bool MidiMessage::isPitchBend() const {
-	return getMaskedStatus() == MIDI_PITCH_BEND;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_PITCH_BEND;
 }
 
 bool MidiMessage::isModWheel() const {
@@ -57,43 +58,44 @@ bool MidiMessage::isModWheel() const {
 }
 
 bool MidiMessage::isCC() const {
-	return getMaskedStatus() == MIDI_CONTROL_CHANGE;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_CONTROL_CHANGE;
 }
 
 bool MidiMessage::isProgramChange() const {
-	return getMaskedStatus() == MIDI_PROGRAM_CHANGE;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_PROGRAM_CHANGE;
 }
 
 bool MidiMessage::isSysex() const {
-	return getMaskedStatus() == MIDI_SYSEX;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_SYSEX;
 }
 
 bool MidiMessage::isAllNotesOff() const {
-	return getMaskedStatus() == MIDI_CONTROL_CHANGE && getCC() == MIDI_CC_ALL_NOTES_OFF;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_CONTROL_CHANGE
+		   && getCC() == MidiMessageConstants::MIDI_CC_ALL_NOTES_OFF;
 }
 
 bool MidiMessage::isPolyPressure() const {
-	return getMaskedStatus() == MIDI_POLY_AFTERTOUCH;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_POLY_AFTERTOUCH;
 }
 
 bool MidiMessage::isChannelPressure() const {
-	return getMaskedStatus() == MIDI_AFTERTOUCH;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_AFTERTOUCH;
 }
 
 bool MidiMessage::isSongPositionPointer() const {
-	return getMaskedStatus() == MIDI_SONG_POS_POINTER;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_SONG_POS_POINTER;
 }
 
 bool MidiMessage::isStart() const {
-	return getMaskedStatus() == MIDI_START;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_START;
 }
 
 bool MidiMessage::isContinue() const {
-	return getMaskedStatus() == MIDI_CONTINUE;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_CONTINUE;
 }
 
 bool MidiMessage::isStop() const {
-	return getMaskedStatus() == MIDI_STOP;
+	return getMaskedStatus() == MidiMessageConstants::MIDI_STOP;
 }
 
 uint8_t MidiMessage::getChannelStatus(uint8_t message, uint8_t channel) {
@@ -101,41 +103,42 @@ uint8_t MidiMessage::getChannelStatus(uint8_t message, uint8_t channel) {
 }
 
 MidiMessage MidiMessage::noteOn(int channel, int pitch, int velocity) {
-	return MidiMessage {getChannelStatus(MIDI_NOTE_ON, channel),
+	return MidiMessage {getChannelStatus(MidiMessageConstants::MIDI_NOTE_ON, channel),
 						static_cast<uint8_t>(pitch & 127),
 						static_cast<uint8_t>(velocity & 127)};
 }
 
 MidiMessage MidiMessage::noteOff(int channel, int pitch) {
-	return MidiMessage {getChannelStatus(MIDI_NOTE_OFF, channel), static_cast<uint8_t>(pitch & 127), 0};
+	return MidiMessage {
+		getChannelStatus(MidiMessageConstants::MIDI_NOTE_OFF, channel), static_cast<uint8_t>(pitch & 127), 0};
 }
 
 MidiMessage MidiMessage::cc(int channel, int control, int value) {
-	return MidiMessage {getChannelStatus(MIDI_CONTROL_CHANGE, channel),
+	return MidiMessage {getChannelStatus(MidiMessageConstants::MIDI_CONTROL_CHANGE, channel),
 						static_cast<uint8_t>(control & 127),
 						static_cast<uint8_t>(value & 127)};
 }
 
 MidiMessage MidiMessage::songPositionPointer(int position) {
-	return MidiMessage {MIDI_SONG_POS_POINTER,
+	return MidiMessage {MidiMessageConstants::MIDI_SONG_POS_POINTER,
 						static_cast<uint8_t>((position & 0x3FFF) & 0x7F),
 						static_cast<uint8_t>(((position & 0x3FFF) >> 7) & 0x7F)};
 }
 
 MidiMessage MidiMessage::allNotesOff() {
-	return cc(0, MIDI_CC_ALL_NOTES_OFF, 0);
+	return cc(0, MidiMessageConstants::MIDI_CC_ALL_NOTES_OFF, 0);
 }
 
 MidiMessage MidiMessage::clock() {
-	return MidiMessage {MIDI_TIME_CLOCK};
+	return MidiMessage {MidiMessageConstants::MIDI_TIME_CLOCK};
 }
 
 MidiMessage MidiMessage::songStart() {
-	return MidiMessage {MIDI_START};
+	return MidiMessage {MidiMessageConstants::MIDI_START};
 }
 
 MidiMessage MidiMessage::songStop() {
-	return MidiMessage {MIDI_STOP};
+	return MidiMessage {MidiMessageConstants::MIDI_STOP};
 }
 
 uint8_t MidiMessage::getStatus() const {
@@ -148,7 +151,7 @@ uint8_t MidiMessage::getStatus() const {
 
 uint8_t MidiMessage::getMaskedStatus() const {
 	auto status = getStatus();
-	return (status >= MIDI_SYSEX) ? status : status & MIDI_SYSEX;
+	return (status >= MidiMessageConstants::MIDI_SYSEX) ? status : status & MidiMessageConstants::MIDI_SYSEX;
 }
 
 uint8_t MidiMessage::getChannel() const {
@@ -172,7 +175,7 @@ uint8_t MidiMessage::getValue() const {
 }
 
 std::vector<uint8_t> MidiMessage::getBytes() const {
-	if (getStatus() == MIDI_SYSEX) {
+	if (getStatus() == MidiMessageConstants::MIDI_SYSEX) {
 		return sysexData;
 	}
 
@@ -238,8 +241,8 @@ void MidiMessage::setFromBytes(const uint8_t *bytes, size_t length) {
 
 	std::fill(std::begin(midiBytes), std::end(midiBytes), std::nullopt);
 
-	if (bytes[0] == MIDI_SYSEX) {
-		midiBytes[0] = MIDI_SYSEX;
+	if (bytes[0] == MidiMessageConstants::MIDI_SYSEX) {
+		midiBytes[0] = MidiMessageConstants::MIDI_SYSEX;
 		sysexData.clear();
 		sysexData.insert(std::end(sysexData), bytes, bytes + length);
 	} else {

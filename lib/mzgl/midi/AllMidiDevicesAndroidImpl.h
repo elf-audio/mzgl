@@ -68,7 +68,7 @@ public:
 	void sendMessage(const MidiMessage &m) override;
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
-					 std::optional<uint64_t> timeStampInNanoSeconds = std::nullopt) override;
+					 std::optional<uint64_t> timeStampInNanoSeconds) override;
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
 
 private:
