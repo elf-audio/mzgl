@@ -31,16 +31,34 @@ bool isNumeric(int c) {
 }
 
 glm::vec4 parseColor(const string &hex) {
-	if (hex[0] != '#') {
-		if (hex == "none") {
-			return {0, 0, 0, 0};
-		} else {
-			Log::e() << "ERROR: color does not have a # '" << hex << "'";
-		}
+	if (hex.empty()) return {0.f, 0.f, 0.f, 1.f};
+
+	if (hex[0] == '#') {
+		string s = hex.substr(1);
+		int c	 = (int) strtol(s.c_str(), nullptr, 16);
+		return hexColor(c);
 	}
-	string s = hex.substr(1);
-	int c	 = (int) strtol(s.c_str(), NULL, 16);
-	return hexColor(c);
+
+	if (hex == "none" || hex == "transparent") return {0, 0, 0, 0};
+	if (hex == "black") return hexColor(0);
+	if (hex == "silver") return hexColor(0xC0C0C0);
+	if (hex == "gray") return hexColor(0x808080);
+	if (hex == "white") return hexColor(0xFFFFFF);
+	if (hex == "maroon") return hexColor(0x800000);
+	if (hex == "red") return hexColor(0xFF0000);
+	if (hex == "purple") return hexColor(0x800080);
+	if (hex == "fuchsia") return hexColor(0xFF00FF);
+	if (hex == "green") return hexColor(0x008000);
+	if (hex == "lime") return hexColor(0x00FF00);
+	if (hex == "olive") return hexColor(0x808000);
+	if (hex == "yellow") return hexColor(0xFFFF00);
+	if (hex == "navy") return hexColor(0x000080);
+	if (hex == "blue") return hexColor(0x0000FF);
+	if (hex == "teal") return hexColor(0x008080);
+	if (hex == "aqua") return hexColor(0x00FFFF);
+
+	Log::e() << "ERROR: color string does not represent a color -  '" << hex << "'";
+	return {0, 0, 0, 0};
 }
 
 // TODO: replace with glm version
