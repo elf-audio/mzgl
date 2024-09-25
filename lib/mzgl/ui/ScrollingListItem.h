@@ -40,7 +40,7 @@ public:
 
 	// override draw() to draw anything that can't be drawn with draw(Drawer&)
 	virtual void draw() override {}
-	virtual void draw(Drawer &d) {}
+	virtual void draw(Drawer &d);
 
 	// can select yourself - not totally happy with this
 	std::function<void()> selectedSelf;
@@ -58,5 +58,4 @@ public:
 	ScrollingListStringView(Graphics &g, std::shared_ptr<ScrollingListItem> item)
 		: ScrollingListItemView(g, item) {}
 	void draw() override;
-	virtual void draw(Drawer &d) override;
 };

@@ -6,7 +6,7 @@ void ScrollingListStringView::draw() {
 	g.drawTextVerticallyCentred(item->name, glm::vec2(x + 20 * g.pixelScale, y + height / 2));
 }
 
-void ScrollingListStringView::draw(Drawer &d) {
+void ScrollingListItemView::draw(Drawer &d) {
 	if (hasBG) {
 		if (item->selected) {
 			d.setColor(selectedColor);

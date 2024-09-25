@@ -17,15 +17,6 @@ public:
 	HierarchicalScrollingList(Graphics &g, float defaultHeight)
 		: ScrollingList(g, defaultHeight) {}
 
-	std::vector<Layer *> layersToRemove;
-
-	class ScrollInfo {
-	public:
-		float scrollOffset = 0;
-		int selectedIndex  = -1;
-	};
-
-	std::list<ScrollInfo> scrollOffsets;
 	std::function<void()> backPressed = []() {};
 
 	virtual bool keyDown(int key) override {
@@ -64,7 +55,6 @@ public:
 		content->sendToFront();
 	}
 
-	float animationAmt = 0;
 	void pop(const std::vector<std::shared_ptr<ScrollingListItem>> &items) {
 		if (isAnimating()) {
 			Log::e() << "Error: can't call pop whilst animating";
@@ -98,12 +88,6 @@ public:
 		}
 	}
 
-	bool isAnimating() { return isPushing || isPopping; }
-
-	bool isPushing	   = false;
-	bool isPopping	   = false;
-	VboRef toRemoveVbo = nullptr;
-
 	void _draw() override {
 		canSelect = !isAnimating();
 		// you only want to draw the temp layers over the content if you're popping
@@ -117,6 +101,32 @@ public:
 		if (!isPopping) ScrollingList::_draw();
 	}
 
+	void update() override {
+		ScrollingList::update();
+		if (isPushing || isPopping) {
+			animationAmt += 0.05;
+
+			if (isPushing) {
+				content->x = (1 - easeOutCubic(animationAmt)) * width;
+			} else if (isPopping) {
+				content->x = -(1 - easeOutCubic(animationAmt)) * width * 0.25f;
+			}
+			if (animationAmt >= 1) {
+				isPushing = false;
+				isPopping = false;
+				// switcheroo
+				content->x = 0;
+				for (auto *l: layersToRemove) {
+					l->removeFromParent();
+					delete l;
+				}
+				layersToRemove.clear();
+			}
+		}
+	}
+	bool isAnimating() { return isPushing || isPopping; }
+
+private:
 	void drawTempLayers() {
 		maskOn();
 		if (layersToRemove.size() > 0) {
@@ -149,27 +159,19 @@ public:
 		maskOff();
 	}
 
-	void update() override {
-		ScrollingList::update();
-		if (isPushing || isPopping) {
-			animationAmt += 0.05;
+	float animationAmt = 0;
 
-			if (isPushing) {
-				content->x = (1 - easeOutCubic(animationAmt)) * width;
-			} else if (isPopping) {
-				content->x = -(1 - easeOutCubic(animationAmt)) * width * 0.25f;
-			}
-			if (animationAmt >= 1) {
-				isPushing = false;
-				isPopping = false;
-				// switcheroo
-				content->x = 0;
-				for (auto *l: layersToRemove) {
-					l->removeFromParent();
-					delete l;
-				}
-				layersToRemove.clear();
-			}
-		}
-	}
+	bool isPushing	   = false;
+	bool isPopping	   = false;
+	VboRef toRemoveVbo = nullptr;
+
+	std::vector<Layer *> layersToRemove;
+
+	class ScrollInfo {
+	public:
+		float scrollOffset = 0;
+		int selectedIndex  = -1;
+	};
+
+	std::list<ScrollInfo> scrollOffsets;
 };
