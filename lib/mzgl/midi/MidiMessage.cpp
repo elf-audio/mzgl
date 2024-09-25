@@ -256,3 +256,27 @@ void MidiMessage::setFromBytes(const uint8_t *bytes, size_t length) {
 		}
 	}
 }
+
+std::optional<size_t> MidiMessage::getExpectedMessageLength(uint8_t statusByte) {
+	if (statusByte >= 0xF0 && statusByte < 0xF8) {
+		switch (statusByte) {
+			case MidiMessageConstants::MIDI_TIME_CODE:
+			case MidiMessageConstants::MIDI_SONG_SELECT: return 2;
+			case MidiMessageConstants::MIDI_SONG_POS_POINTER: return 3;
+			case MidiMessageConstants::MIDI_TUNE_REQUEST:
+			case MidiMessageConstants::MIDI_SYSEX_END: return 1;
+			default: return std::nullopt;
+		}
+	}
+
+	switch (statusByte & 0xF0) {
+		case MidiMessageConstants::MIDI_NOTE_OFF:
+		case MidiMessageConstants::MIDI_NOTE_ON:
+		case MidiMessageConstants::MIDI_POLY_AFTERTOUCH:
+		case MidiMessageConstants::MIDI_CONTROL_CHANGE:
+		case MidiMessageConstants::MIDI_PITCH_BEND: return 3;
+		case MidiMessageConstants::MIDI_PROGRAM_CHANGE:
+		case MidiMessageConstants::MIDI_AFTERTOUCH: return 2;
+		default: return std::nullopt;
+	}
+}

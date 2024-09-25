@@ -80,9 +80,13 @@ public:
 	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
 	void midiNotify(const MIDINotification *notification);
 
+	void removeSysexData(MIDISysexSendRequest *request);
+
 private:
 	std::vector<CoreMidiInRef> midiIns;
 	std::vector<CoreMidiOutRef> midiOuts;
+
+	std::vector<std::pair<MIDISysexSendRequest *, std::vector<uint8_t>>> sysexData;
 
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;

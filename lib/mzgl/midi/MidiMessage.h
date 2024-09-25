@@ -93,6 +93,8 @@ public:
 	[[nodiscard]] double getSongPositionInQuarterNotes() const;
 	[[nodiscard]] double getSongPosition() const;
 
+	static std::optional<size_t> getExpectedMessageLength(uint8_t status);
+
 private:
 	void setFromBytes(const uint8_t *bytes, size_t length);
 	[[nodiscard]] uint8_t getMaskedStatus() const;

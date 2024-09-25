@@ -278,60 +278,39 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 		return;
 	}
 
+	auto sendPending = [this, theDevice](MIDITimeStamp timestamp) {
+		if (pendingMsg.empty()) {
+			mzAssert(false);
+			return;
+		}
+		midiReceived(theDevice, MidiMessage(pendingMsg), timestamp);
+		pendingMsg.clear();
+	};
+
+	auto isSingleByteMessage = [](uint8_t data) { return data >= 0xF8; };
+	auto isStatusByte		 = [](uint8_t data) { return data & 0x80; };
+
 	const MIDIPacket *packet = &packetList->packet[0];
 	for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
 		for (int i = 0; i < packet->length; i++) {
-			auto *d = packet->data;
-
-			if (d[i] & 0x80) {
-				// this is a status byte, send any previous messages
-				if (!pendingMsg.empty()) {
-					midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
-					pendingMsg.clear();
-				}
-
-				pendingMsg.push_back(d[i]);
-
-				// if this status byte is for a 1 byte message send it straight away
-				// all status 0xF6 and above are all the 1 byte messages.
-				if (pendingMsg.size() == 1 && pendingMsg[0] >= 0xF6) {
-					midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
-					pendingMsg.clear();
-				}
+			if (packet->data[i] == MidiMessageConstants::MIDI_SYSEX) {
+				pendingMsg.clear();
+				pendingMsg.push_back(packet->data[i]);
+			} else if (packet->data[i] == MidiMessageConstants::MIDI_SYSEX_END) {
+				pendingMsg.push_back(packet->data[i]);
+				sendPending(packet->timeStamp);
+			} else if (isSingleByteMessage(packet->data[i])) {
+				pendingMsg.clear();
+				pendingMsg.push_back(packet->data[i]);
+				sendPending(packet->timeStamp);
+			} else if (isStatusByte(packet->data[i])) {
+				sendPending(packet->timeStamp);
+				pendingMsg.push_back(packet->data[i]);
 			} else {
-				// a data byte
-
-				// first check we have a status in the gun, otherwise can this message
-				if (pendingMsg.empty() || (pendingMsg[0] & 0x80) == 0) {
-					pendingMsg.clear();
-				} else {
-					pendingMsg.push_back(d[i]);
-					// now check to see if the message is finished
-					// by seeing which status we have and looking it
-					// up in known statuses/lengths
-					int status		= pendingMsg[0] & 0xF0;
-					bool shouldEmit = false;
-					switch (status) {
-						case MidiMessageConstants::MIDI_NOTE_OFF:
-						case MidiMessageConstants::MIDI_NOTE_ON:
-						case MidiMessageConstants::MIDI_PITCH_BEND:
-						case MidiMessageConstants::MIDI_POLY_AFTERTOUCH:
-						case MidiMessageConstants::MIDI_SONG_POS_POINTER:
-						case MidiMessageConstants::MIDI_CONTROL_CHANGE:
-							if (pendingMsg.size() == 3) shouldEmit = true;
-							break;
-						case MidiMessageConstants::MIDI_PROGRAM_CHANGE:
-						case MidiMessageConstants::MIDI_AFTERTOUCH:
-						case MidiMessageConstants::MIDI_SONG_SELECT:
-							if (pendingMsg.size() == 2) shouldEmit = true;
-							break;
-						default: // status unknown, don't send, next message will push this through
-							break;
-					}
-					if (shouldEmit) {
-						midiReceived(theDevice, MidiMessage(pendingMsg), packet->timeStamp);
-						pendingMsg.clear();
-					}
+				pendingMsg.push_back(packet->data[i]);
+				auto expectedLength = MidiMessage::getExpectedMessageLength(pendingMsg[0]);
+				if (expectedLength.has_value() && expectedLength > 0 && pendingMsg.size() >= expectedLength) {
+					sendPending(packet->timeStamp);
 				}
 			}
 		}
@@ -408,7 +387,17 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	}
 }
 
+void AllMidiDevicesAppleImpl::removeSysexData(MIDISysexSendRequest *request) {
+	sysexData.erase(std::remove_if(std::begin(sysexData),
+								   std::end(sysexData),
+								   [request](auto &&element) { return element.first == request; }),
+					std::end(sysexData));
+}
+
 static void cleanupSysex(MIDISysexSendRequest *request) {
+	if (AllMidiDevicesAppleImpl *handler = static_cast<AllMidiDevicesAppleImpl *>(request->completionRefCon)) {
+		handler->removeSysexData(request);
+	}
 	delete request;
 }
 
@@ -416,18 +405,19 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 										const MidiMessage &midiMessage) {
 	auto bytes = midiMessage.getBytes();
 
-	assert(bytes.size() < 65536);
+	mzAssert(bytes.size() < 65536);
 
 	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
-		auto request	= new MIDISysexSendRequest;
-		const auto size = midiMessage.getBytes().size();
+		auto request = new MIDISysexSendRequest;
 
-		request->data = new Byte[bytes.size()];
+		sysexData.push_back(std::pair(request, std::vector<uint8_t>(bytes.size())));
+
+		request->data = sysexData.back().second.data();
 		memcpy((void *) request->data, (void *) bytes.data(), bytes.size());
 
-		request->bytesToSend	  = size;
+		request->bytesToSend	  = bytes.size();
 		request->completionProc	  = &cleanupSysex;
-		request->completionRefCon = request;
+		request->completionRefCon = this;
 		request->complete		  = false;
 		request->destination	  = *endpoint;
 
