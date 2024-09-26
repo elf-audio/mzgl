@@ -97,7 +97,9 @@ public:
 			float xx = easeOutCubic(animationAmt) * width;
 			g.setColor(bgColor);
 			{
-				ScopedMask m {g, *this};
+				Rectf r	 = *content;
+				r.height = std::max(r.height, height);
+				ScopedMask m {g, r};
 				g.drawRect(xx, y, width, height);
 			}
 		}
@@ -108,7 +110,7 @@ public:
 	void update() override {
 		ScrollingList::update();
 		if (isPushing || isPopping) {
-			animationAmt += 0.05;
+			animationAmt += 0.005;
 
 			if (isPushing) {
 				content->x = (1 - easeOutCubic(animationAmt)) * width;
