@@ -29,6 +29,7 @@ public:
 		std::string warningDeleteMessage = "are you sure you want to delete this item?";
 		Font *font						 = nullptr;
 		const Dialogs &dialogs;
+		bool momentary = true;
 	};
 
 	ScrollingListDeletableView(Graphics &g, Settings &settings, std::shared_ptr<ScrollingListItem> item)

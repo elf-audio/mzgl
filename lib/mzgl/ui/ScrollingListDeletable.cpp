@@ -53,11 +53,12 @@ void ScrollingListDeletableView::draw(Drawer &d) {
 	//	if(down && length(totalMovement)<10) {
 	//		selected = true;
 	//	}
-	if (down && length(totalMovement) < 10 && downCount >= 3) {
+
+	if (settings.momentary && down && length(totalMovement) < 10 && downCount >= 3) {
 		float amt = mapf(downCount, 3, 12, 0.25, 1, true);
 		d.setColor(unselectedColor * (1.f - amt) + selectedColor * amt);
 	} else {
-		d.setColor(unselectedColor);
+		d.setColor((item->selected && !settings.momentary) ? selectedColor : unselectedColor);
 	}
 
 	if (down) {
