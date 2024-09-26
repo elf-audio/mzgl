@@ -663,10 +663,6 @@
 		EA73F06228E4670900395945 /* geomutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA73F05D28E4670900395945 /* geomutils.cpp */; };
 		EA73F06328E4670900395945 /* geomutils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA73F05E28E4670900395945 /* geomutils.h */; };
 		EA73F06428E4670900395945 /* geomutils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA73F05E28E4670900395945 /* geomutils.h */; };
-		EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
-		EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
-		EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
-		EA759B3E2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */; };
 		EA759B3F2715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
 		EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
 		EA7721082BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
@@ -1174,7 +1170,6 @@
 		EA71FEE627F33B310005C47A /* ZipReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZipReader.cpp; sourceTree = "<group>"; };
 		EA73F05D28E4670900395945 /* geomutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = geomutils.cpp; sourceTree = "<group>"; };
 		EA73F05E28E4670900395945 /* geomutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geomutils.h; sourceTree = "<group>"; };
-		EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HierarchicalScrollingList.cpp; sourceTree = "<group>"; };
 		EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HierarchicalScrollingList.h; sourceTree = "<group>"; };
 		EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLDefaultShaders.h; sourceTree = "<group>"; };
 		EA7721052BF74F5B003607EB /* GraphicsAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsAPI.h; sourceTree = "<group>"; };
@@ -1857,7 +1852,6 @@
 				EA1835B42432C18B00A5C3E8 /* DrawingCanvas.h */,
 				EA1835B52432C18B00A5C3E8 /* widgets */,
 				EA1835BB2432C18B00A5C3E8 /* RootLayer.h */,
-				EA759B392715A4DC0065B4D9 /* HierarchicalScrollingList.cpp */,
 				EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */,
 			);
 			path = ui;
@@ -3618,7 +3612,6 @@
 				EA183FAE2432C18D00A5C3E8 /* TextConsole.mm in Sources */,
 				EAD03BA5297FD9A200D0C04A /* MacWebView.mm in Sources */,
 				EA71A79427E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
-				EA759B3B2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EAF9A15126F8B42200698263 /* log.cpp in Sources */,
 				EAF67381289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA183FFB2432C18D00A5C3E8 /* MitredLine.cpp in Sources */,
@@ -3720,7 +3713,6 @@
 				EA73F06028E4670900395945 /* geomutils.cpp in Sources */,
 				EA1841282432C4F300A5C3E8 /* Midi.cpp in Sources */,
 				EA71A7B527E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
-				EA759B3C2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EA71FEEA27F33B310005C47A /* ZipReader.cpp in Sources */,
 				EA3120BD274143F900370205 /* appleMidiUtils.cpp in Sources */,
 				EA1841362432C51E00A5C3E8 /* Slider.cpp in Sources */,
@@ -3862,7 +3854,6 @@
 				EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
-				EA759B3D2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA5250E92C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
@@ -3969,7 +3960,6 @@
 				EA689440261C633500F76B91 /* errors.cpp in Sources */,
 				EA73F06228E4670900395945 /* geomutils.cpp in Sources */,
 				EA689441261C633500F76B91 /* Midi.cpp in Sources */,
-				EA759B3E2715A4DC0065B4D9 /* HierarchicalScrollingList.cpp in Sources */,
 				EA3120BF274143F900370205 /* appleMidiUtils.cpp in Sources */,
 				EA689445261C633500F76B91 /* Slider.cpp in Sources */,
 				EAF99AB8267A415200157A7C /* ScrollingListItem.cpp in Sources */,
