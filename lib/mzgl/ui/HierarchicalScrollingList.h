@@ -30,7 +30,7 @@ public:
 	void push(const std::vector<std::shared_ptr<ScrollingListItem>> &items) {
 		if (isAnimating()) {
 			Log::e() << "Error: can't call push whilst animating";
-			mzAssert(false);
+			//	mzAssert(false);
 		}
 
 		// remove items from content temporarily and put them directly into this layer
@@ -58,8 +58,7 @@ public:
 	void pop(const std::vector<std::shared_ptr<ScrollingListItem>> &items) {
 		if (isAnimating()) {
 			Log::e() << "Error: can't call pop whilst animating";
-			mzAssert(false);
-			return;
+			//mzAssert(false);
 		}
 
 		// remove items from content temporarily and put them directly into this layer
@@ -73,7 +72,7 @@ public:
 			addChild(l);
 		}
 
-		content->x	 = width * 0.25;
+		content->x	 = width * 0.25f;
 		animationAmt = 0;
 		isPopping	 = true;
 
@@ -96,12 +95,10 @@ public:
 			ScrollingList::_draw();
 			float xx = easeOutCubic(animationAmt) * width;
 			g.setColor(bgColor);
-			{
-				Rectf r	 = *content;
-				r.height = std::max(r.height, height);
-				ScopedMask m {g, r};
-				g.drawRect(xx, y, width, height);
-			}
+
+			Rectf r {xx, y, width, height};
+			r.moveRightEdge(right());
+			g.drawRect(r);
 		}
 		drawTempLayers();
 		if (!isPopping) ScrollingList::_draw();
@@ -110,7 +107,7 @@ public:
 	void update() override {
 		ScrollingList::update();
 		if (isPushing || isPopping) {
-			animationAmt += 0.005;
+			animationAmt += 0.05;
 
 			if (isPushing) {
 				content->x = (1 - easeOutCubic(animationAmt)) * width;
