@@ -59,6 +59,7 @@ public:
 		if (isAnimating()) {
 			Log::e() << "Error: can't call pop whilst animating";
 			mzAssert(false);
+			return;
 		}
 
 		// remove items from content temporarily and put them directly into this layer
@@ -95,7 +96,10 @@ public:
 			ScrollingList::_draw();
 			float xx = easeOutCubic(animationAmt) * width;
 			g.setColor(bgColor);
-			g.drawRect(xx, y, width, height);
+			{
+				ScopedMask m {g, *this};
+				g.drawRect(xx, y, width, height);
+			}
 		}
 		drawTempLayers();
 		if (!isPopping) ScrollingList::_draw();
