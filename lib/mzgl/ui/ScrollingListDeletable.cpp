@@ -116,57 +116,58 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 	vec2 currTouch = vec2(x, y);
 	vec2 delta	   = currTouch - start;
 
-	if (horizontallyScrolling) {
-		// if the scroll is more than halfway left, do a full delete swipe
-		if (deleting) {
-			horizontalScrollTarget = delta.x;
+	if (canDelete) {
+		if (horizontallyScrolling) {
+			// if the scroll is more than halfway left, do a full delete swipe
+			if (deleting) {
+				horizontalScrollTarget = delta.x;
 
-			if (x < decidePoint - width * 0.02 && !shouldDelete) {
-				shouldDelete = true;
+				if (x < decidePoint - width * 0.02 && !shouldDelete) {
+					shouldDelete = true;
+					haptics->lightTap();
+				} else if (x > decidePoint + width * 0.02 && shouldDelete) {
+					shouldDelete = false;
+					haptics->lightTap();
+				}
+			} else if (delta.x < -width * 0.5) {
 				haptics->lightTap();
-			} else if (x > decidePoint + width * 0.02 && shouldDelete) {
-				shouldDelete = false;
-				haptics->lightTap();
-			}
-		} else if (delta.x < -width * 0.5) {
-			haptics->lightTap();
-			horizontalScrollTarget = -width;
-			deleting			   = true;
-			shouldDelete		   = true;
-			start.x				   = width + x;
-			decidePoint			   = x + width * 0.05;
-			//		} else if(horizontalScrollTarget>deleteButtonWidth) {
-			//			horizontalScrollTarget = deleteButtonWidth;
-		} else {
-			horizontalScrollTarget = delta.x + initialScrollTarget;
-			if (settings.hasActionButton) {
-				if (horizontalScrollTarget > settings.actionButtonWidth) {
-					horizontalScrollTarget = settings.actionButtonWidth;
+				horizontalScrollTarget = -width;
+				deleting			   = true;
+				shouldDelete		   = true;
+				start.x				   = width + x;
+				decidePoint			   = x + width * 0.05;
+				//		} else if(horizontalScrollTarget>deleteButtonWidth) {
+				//			horizontalScrollTarget = deleteButtonWidth;
+			} else {
+				horizontalScrollTarget = delta.x + initialScrollTarget;
+				if (settings.hasActionButton) {
+					if (horizontalScrollTarget > settings.actionButtonWidth) {
+						horizontalScrollTarget = settings.actionButtonWidth;
+					}
 				}
 			}
-		}
-	} else {
-		if (abs(delta.x) > 20 && abs(delta.y) < 20) {
-			horizontallyScrolling = true;
+		} else {
+			if (abs(delta.x) > 20 && abs(delta.y) < 20) {
+				horizontallyScrolling = true;
 
-		} else if (abs(delta.y) > 20) {
-			down = false;
-			localToAbsoluteCoords(x, y);
+			} else if (abs(delta.y) > 20) {
+				down = false;
+				localToAbsoluteCoords(x, y);
 
-			Layer *scrollingList = getParent()->getParent();
-			haptics				 = nullptr;
-			transferFocus(scrollingList, id);
-			scrollingList->absoluteToLocalCoords(x, y);
-			scrollingList->touchDown(x, y, id);
+				Layer *scrollingList = getParent()->getParent();
+				haptics				 = nullptr;
+				transferFocus(scrollingList, id);
+				scrollingList->absoluteToLocalCoords(x, y);
+				scrollingList->touchDown(x, y, id);
+			}
 		}
 	}
-
 	totalMovement += (currTouch - prevTouch);
 	prevTouch = currTouch;
 }
 
 void ScrollingListDeletableView::touchUp(float x, float y, int id) {
-	if (horizontallyScrolling) {
+	if (canDelete && horizontallyScrolling) {
 		if (deleting) {
 			if (shouldDelete) {
 				horizontalScrollTarget = -width;

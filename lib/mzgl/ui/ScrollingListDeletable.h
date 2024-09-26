@@ -37,6 +37,7 @@ public:
 
 	// you use this to offset your content
 	float horizontalScroll = 0.f;
+	bool canDelete		   = true;
 
 	virtual void draw() override;
 	virtual void draw(Drawer &d) override;
