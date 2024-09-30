@@ -119,7 +119,9 @@ public:
 	void removeFocus();
 
 	void positionAbove(Layer *l, float padding = 0);
+	void positionAboveCentred(Layer *l, float padding = 0);
 	void positionUnder(Layer *l, float padding = 0);
+	void positionUnderCentred(Layer *l, float padding = 0);
 	void positionLeftOf(Layer *l, float padding = 0);
 	void positionRightOf(Layer *l, float padding = 0);
 	void layoutChildrenAsGrid(int cols, int rows, float padding = 0);

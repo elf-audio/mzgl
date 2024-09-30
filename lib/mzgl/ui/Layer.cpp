@@ -479,8 +479,18 @@ void Layer::positionAbove(Layer *l, float padding) {
 	x = l->x;
 	setBottom(l->y - padding);
 }
+
+void Layer::positionAboveCentred(Layer *l, float padding) {
+	setCentreX(l->centreX());
+	setBottom(l->y - padding);
+}
 void Layer::positionUnder(Layer *l, float padding) {
 	x = l->x;
+	y = l->bottom() + padding;
+}
+
+void Layer::positionUnderCentred(Layer *l, float padding) {
+	setCentreX(l->centreX());
 	y = l->bottom() + padding;
 }
 void Layer::positionLeftOf(Layer *l, float padding) {
