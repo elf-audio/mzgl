@@ -47,6 +47,7 @@ public:
 	void doLayout() override;
 
 	void select(int itemIndex);
+	void select(std::shared_ptr<ScrollingListItem> item);
 	int getNumItems() const { return items.size(); }
 	int getSelectedIndex() const { return selectedIndex; }
 	float getContentHeight() { return content->height; }
@@ -56,6 +57,9 @@ public:
 	bool empty() const { return items.empty(); }
 
 	virtual bool keyDown(int key) override;
+
+	auto begin() { return items.begin(); }
+	auto end() { return items.end(); }
 
 protected:
 	int selectedIndex = -1;

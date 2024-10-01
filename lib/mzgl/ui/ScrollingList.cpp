@@ -303,6 +303,19 @@ void ScrollingList::select(int itemIndex) {
 	itemSelected(selectedIndex);
 }
 
+void ScrollingList::select(std::shared_ptr<ScrollingListItem> item) {
+	int foundIndex	 = -1;
+	int currentIndex = 0;
+	for (auto otherItem: *this) {
+		otherItem->selected = item.get() == otherItem.get();
+		if (otherItem->selected) {
+			foundIndex = currentIndex;
+		}
+		++currentIndex;
+	}
+	itemSelected(foundIndex);
+}
+
 void ScrollingList::unselect() {
 	bool mustCallback = selectedIndex != -1;
 	if (selectedIndex != -1) {
