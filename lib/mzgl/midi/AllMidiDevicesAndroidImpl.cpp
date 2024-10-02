@@ -60,18 +60,17 @@ void AllMidiDevicesAndroidImpl::outputDeviceDisconnected(const std::shared_ptr<A
 
 void AllMidiDevicesAndroidImpl::sendMessage(const MidiMessage &message) {
 	for (auto &output: midiOutputs) {
-		sendMessage(output, message);
+		sendMessage(output, message, std::nullopt);
 	}
 }
 
 void AllMidiDevicesAndroidImpl::sendMessage(const std::shared_ptr<MidiDevice> &device,
 											const MidiMessage &message,
 											std::optional<uint64_t> timeStampInNanoSeconds) {
-	// TODO: Timestamp
 	if (auto theDevice = dynamic_cast<AndroidMidiDevice *>(device.get())) {
 		for (auto output: midiOutputs) {
 			if (*output == *theDevice) {
-				androidSendMidi(message.getBytes(), theDevice->deviceIdentifier, theDevice->devicePort);
+				androidSendMidi(message.getBytes(), theDevice->deviceIdentifier, theDevice->devicePort, timeStampInNanoSeconds);
 			}
 		}
 	}

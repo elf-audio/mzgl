@@ -438,6 +438,7 @@ public:
 		std::vector<uint8_t> bytes;
 		int deviceId;
 		int portId;
+		std::optional<uint64_t> timestampInNanoSeconds;
 	};
 
 	void send(const MidiByteMessage &message) { messages.enqueue(message); }
@@ -459,6 +460,7 @@ private:
 		thread = std::thread([this]() {
 			jni			  = std::make_unique<ScopedJni>();
 			auto methodID = jni->getMethodID("sendMidiData", "([BII)V");
+			auto timestampMethodID = jni->getMethodID("sendMidiDataWithTimestamp", "([BIIJ)V");
 			auto clazz	  = getAndroidAppPtr()->activity->clazz;
 			Bytes bytes;
 			bytes.jni = jni->j();
@@ -467,8 +469,20 @@ private:
 				MidiByteMessage message;
 				while (messages.try_dequeue(message)) {
 					if (convert(message, bytes)) {
-						jni->j()->CallVoidMethod(
-							clazz, methodID, bytes.kotlinMidiBytes, message.deviceId, message.portId);
+						if (message.timestampInNanoSeconds.has_value()) {
+							jni->j()->CallVoidMethod(
+									clazz,
+									timestampMethodID,
+									bytes.kotlinMidiBytes,
+									message.deviceId,
+									message.portId,
+									*message.timestampInNanoSeconds);
+						}
+						else {
+							jni->j()->CallVoidMethod(
+									clazz, methodID, bytes.kotlinMidiBytes, message.deviceId, message.portId);
+						}
+
 						bytes.cleanup();
 					}
 				}
@@ -508,10 +522,10 @@ private:
 	moodycamel::ConcurrentQueue<MidiByteMessage> messages;
 };
 
-void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId) {
+void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId, std::optional<uint64_t> timestampInNanoSeconds) {
 	static AndroidMidiThread androidMidiThread;
 
-	androidMidiThread.send({midiData, deviceId, portId});
+	androidMidiThread.send({midiData, deviceId, portId, timestampInNanoSeconds});
 }
 
 void androidOnMidiInputDeviceConnected(int32_t deviceId,
@@ -564,7 +578,7 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 							return false;
 						});
 					if (deviceIter != std::end(devices)) {
-						impl->messageReceived(*deviceIter, {data.data}, data.timestamp);
+						impl->messageReceived(*deviceIter, MidiMessage{data.data}, data.timestamp);
 					} else {
 						Log::e() << "Didnt find device " << std::to_string(deviceId) << " and port "
 								 << std::to_string(portId);
