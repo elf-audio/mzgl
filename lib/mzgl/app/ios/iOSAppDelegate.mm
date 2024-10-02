@@ -47,25 +47,36 @@ void quitApplication() {
 	bool isLocalFilePath = urlStr.size() > 0 && urlStr[0] == '/';
 
 	if ([url.scheme containsString:@"audioshare"]) {
-		if ([[AudioShare sharedInstance]
-				checkPendingImport:url
-						 withBlock:^(NSString *path) {
-						   // move file to docs dir
-						   // if it didn't fail, send to eventDispatcher, then delete it
-
-						   fs::path source([path UTF8String]);
-						   fs::path destination = docsPath() / source.filename();
-
-						   try {
-							   fs::rename(source, destination);
-						   } catch (fs::filesystem_error &e) {
-							   Log::e() << "Couldn't copy file: " << e.what();
-							   return;
-						   }
-						   eventDispatcher->openUrl(ScopedUrl::createWithDeleter(destination));
-						 }]) {
-			return YES;
-		} else {
+		@try {
+			
+			if ([[AudioShare sharedInstance]
+				 checkPendingImport:url
+				 withBlock:^(NSString *path) {
+				// move file to docs dir
+				// if it didn't fail, send to eventDispatcher, then delete it
+				
+				fs::path source([path UTF8String]);
+				fs::path destination = docsPath() / source.filename();
+				
+				try {
+					fs::rename(source, destination);
+				} catch (fs::filesystem_error &e) {
+					Log::e() << "Couldn't copy file: " << e.what();
+					return;
+				}
+				eventDispatcher->openUrl(ScopedUrl::createWithDeleter(destination));
+			}]) {
+				return YES;
+			} else {
+				return NO;
+			}
+		}
+		@catch (NSException *exception) {
+			NSLog(@"AudioShare Exception occurred: %@, %@", exception.name, exception.reason);
+			// You can also handle the exception as needed
+			NSString *errorString = [NSString stringWithFormat:@"Error: %@, Reason: %@", exception.name, exception.reason];
+			std::string errorCStr = [errorString UTF8String];
+			eventDispatcher->app->dialogs.alert("AudioShare Error", errorCStr);
 			return NO;
 		}
 	} else if ([url.scheme containsString:@"audiobus"]) {
