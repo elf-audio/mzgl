@@ -95,7 +95,7 @@ class AllMidiDevicesAndroidImpl;
 
 void androidSetMainThreadRunner(MainThreadRunner *runner);
 void androidSetupMidiManager(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
-void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId);
+void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId, std::optional<uint64_t> timestampInNanoSeconds);
 
 [[nodiscard]] std::vector<AudioPort> getAudioInputPorts();
 [[nodiscard]] std::vector<AudioPort> getBuiltInAudioInputPorts();

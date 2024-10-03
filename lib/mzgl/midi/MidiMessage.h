@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <optional>
+#include <array>
 
 struct MidiMessageConstants {
 	static constexpr auto MIDI_UNKNOWN			= 0x00;
