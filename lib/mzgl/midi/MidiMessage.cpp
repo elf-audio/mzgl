@@ -229,7 +229,11 @@ double MidiMessage::getSongPositionInQuarterNotes() const {
 }
 
 double MidiMessage::getSongPosition() const {
-	return getSongPositionInQuarterNotes();
+	auto lsb = midiBytes[1];
+	auto msb = midiBytes[2];
+
+	auto value = (int) (*msb << 7) + (int) *lsb;
+	return static_cast<double>((((value >> 7) & 0x7F) << 7) | (value & 0x7F)) / 24.0;
 }
 
 void MidiMessage::setFromBytes(const uint8_t *bytes, size_t length) {
