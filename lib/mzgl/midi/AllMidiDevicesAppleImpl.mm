@@ -372,9 +372,10 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 
 	uint64_t timestamp = 0;
 	if (timeStampInNanoSeconds.has_value()) {
-		auto currentHostTime  = mach_absolute_time();
-		auto delayInHostTicks = hostTicksToNanoSeconds(*timeStampInNanoSeconds);
-		timestamp			  = currentHostTime + delayInHostTicks;
+		mach_timebase_info_data_t timebaseInfo;
+		mach_timebase_info(&timebaseInfo);
+		uint64_t delayInHostTicks = *timeStampInNanoSeconds * timebaseInfo.denom / timebaseInfo.numer;
+		timestamp			      = mach_absolute_time() + delayInHostTicks;
 	}
 
 	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, timestamp, bytes.size(), bytes.data());
