@@ -69,6 +69,7 @@ set(MZGL_SOURCES
     lib/mzgl/gl/drawing/MitredLine.cpp
     lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
+    lib/mzgl/midi/MidiMessage.cpp
     lib/mzgl/midi/MidiMessageParser.cpp
     lib/mzgl/midi/MidiMessageParser.h
     lib/mzgl/midi/midiMessagePrinting.cpp
@@ -106,7 +107,6 @@ set(MZGL_SOURCES
     lib/mzgl/audio/AudioFileApple.cpp
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
-    lib/mzgl/midi/MidiMessage.cpp
     lib/mzgl/app/mac/MacAppDelegate.mm
     lib/mzgl/app/mac/MacMenuBar.mm
     lib/mzgl/app/mac/EventsView.mm
