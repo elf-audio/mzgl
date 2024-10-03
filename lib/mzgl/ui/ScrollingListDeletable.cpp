@@ -110,6 +110,9 @@ bool ScrollingListDeletableView::touchDown(float x, float y, int id) {
 	totalMovement		  = {0.f, 0.f};
 	initialScrollTarget	  = horizontalScrollTarget;
 	haptics				  = std::make_shared<Haptics>();
+	if (settings.selectionBehaviour == Settings::SelectionBehaviour::OnMouseDown) {
+		selectedSelf();
+	}
 	return true;
 }
 
@@ -210,7 +213,9 @@ void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 					horizontalScrollTarget = 0;
 				}
 			} else {
-				selectedSelf();
+				if (settings.selectionBehaviour == Settings::SelectionBehaviour::OnMouseUp) {
+					selectedSelf();
+				}
 			}
 		}
 	}

@@ -30,6 +30,13 @@ public:
 		Font *font						 = nullptr;
 		const Dialogs &dialogs;
 		bool momentary = true;
+
+		enum class SelectionBehaviour {
+			OnMouseDown,
+			OnMouseUp,
+		};
+
+		SelectionBehaviour selectionBehaviour {SelectionBehaviour::OnMouseUp};
 	};
 
 	ScrollingListDeletableView(Graphics &g, Settings &settings, std::shared_ptr<ScrollingListItem> item)
