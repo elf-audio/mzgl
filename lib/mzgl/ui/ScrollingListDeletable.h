@@ -58,6 +58,7 @@ public:
 
 protected:
 	Settings &settings;
+	bool down = false;
 
 private:
 	int downCount = 0;
@@ -71,7 +72,6 @@ private:
 	float deleteDecidey			 = 0.f;
 	vec2 totalMovement {0.f, 0.f};
 	vec2 prevTouch {0.f, 0.f};
-	bool down = false;
 
 	std::shared_ptr<Haptics> haptics;
 };
