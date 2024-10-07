@@ -96,17 +96,20 @@ public:
 
 	void addSampleRateChangeListener(SampleRateChangeListener *listener);
 	void removeSampleRateChangeListener(SampleRateChangeListener *listener);
-	void notifySampleRateChanged();
+	
 
 	[[nodiscard]] virtual double getNanoSecondsAtBufferBegin() { return 0; }
 
 	StreamConfigurationStatus getStreamConfigurationStatus() { return streamConfigStatus_; }
 
 protected:
-	std::vector<SampleRateChangeListener *> listeners;
+	void notifySampleRateChanged();
+
 	uint32_t bufferSize							  = 256;
-	float sampleRate							  = 0;
+	double sampleRate							  = 48'000;
 	StreamConfigurationStatus streamConfigStatus_ = StreamConfigurationStatus::OK;
+private:
+	std::vector<SampleRateChangeListener *> sampleRateChangeListeners;
 };
 
 class DummyAudioSystem : public _AudioSystem {

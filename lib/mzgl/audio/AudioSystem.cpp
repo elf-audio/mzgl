@@ -15,16 +15,22 @@ void _AudioSystem::bindToApp(AudioIO *app) {
 }
 
 void _AudioSystem::addSampleRateChangeListener(SampleRateChangeListener *listener) {
-	listeners.push_back(listener);
+	sampleRateChangeListeners.push_back(listener);
 }
 void _AudioSystem::removeSampleRateChangeListener(SampleRateChangeListener *listener) {
-	for (int i = 0; i < listeners.size(); i++) {
-		if (listeners[i] == listener) {
-			listeners.erase(listeners.begin() + i);
+	for (int i = 0; i < sampleRateChangeListeners.size(); i++) {
+		if (sampleRateChangeListeners[i] == listener) {
+			sampleRateChangeListeners.erase(sampleRateChangeListeners.begin() + i);
 			return;
 		}
 	}
 	//	Log::e() << "Error - couldn't find sample rate listener to erase";
+}
+
+void _AudioSystem::notifySampleRateChanged() {
+	for (auto *l: sampleRateChangeListeners) {
+		l->sampleRateChanged(sampleRate);
+	}
 }
 
 bool _AudioSystem::setInput(const AudioPort &audioInput) {
@@ -47,11 +53,7 @@ AudioPort _AudioSystem::getOutput() {
 	return AudioPort();
 }
 
-void _AudioSystem::notifySampleRateChanged() {
-	for (auto *l: listeners) {
-		l->sampleRateChanged(sampleRate);
-	}
-}
+
 
 void _AudioSystem::setSampleRate(float sampleRate) {
 	bool wasRunning = isRunning();
