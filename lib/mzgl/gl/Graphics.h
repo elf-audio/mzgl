@@ -49,9 +49,10 @@ glm::vec4 hexColor(int hex, float a = 1);
 glm::vec4 hexColor(std::string s);
 
 class ScopedAlphaBlend;
+class ScopedAdditiveBlendMode;
 class ScopedNoFill;
-struct ScopedTranslate;
-struct ScopedTransform;
+class ScopedTranslate;
+class ScopedTransform;
 class GraphicsAPI;
 class OpenGLAPI;
 class Graphics {
@@ -84,6 +85,7 @@ public:
 
 	void setBlending(bool shouldBlend);
 	void setBlendMode(BlendMode blendMode);
+	BlendMode getBlendMode() const;
 	bool isBlending();
 	glm::vec4 getColor();
 
@@ -213,8 +215,8 @@ public:
 	int32_t getDefaultFrameBufferId();
 
 private:
-	float strokeWeight = 1;
-
+	float strokeWeight	 = 1;
+	BlendMode blendMode	 = BlendMode::Alpha;
 	bool blendingEnabled = false;
 	bool filling		 = true;
 	glm::vec4 color;
@@ -225,7 +227,9 @@ private:
 	// this is cached version of the above multiplied
 	glm::mat4 viewProjectionMatrix;
 	friend class ScopedAlphaBlend;
-	friend struct ScopedTranslate;
+	friend class ScopedAdditiveBlendMode;
+	friend class ScopedTranslate;
+
 	std::unique_ptr<GraphicsAPI> api;
 
 	// was in Globals
@@ -240,6 +244,17 @@ public:
 
 private:
 	bool originalBlendState;
+};
+
+class ScopedAdditiveBlendMode {
+public:
+	Graphics &g;
+	ScopedAdditiveBlendMode(Graphics &g);
+	virtual ~ScopedAdditiveBlendMode();
+
+private:
+	bool originalBlendState;
+	Graphics::BlendMode originalBlendMode;
 };
 
 class ScopedFill {
@@ -262,7 +277,8 @@ private:
 	const bool isFilling;
 };
 
-struct ScopedTranslate {
+class ScopedTranslate {
+public:
 	Graphics &g;
 	ScopedTranslate(Graphics &g, glm::vec2 p)
 		: g(g) {
@@ -276,7 +292,8 @@ struct ScopedTranslate {
 	}
 	virtual ~ScopedTranslate() { g.popMatrix(); }
 };
-struct ScopedTransform {
+class ScopedTransform {
+public:
 	Graphics &g;
 	ScopedTransform(Graphics &g)
 		: g(g) {
@@ -285,7 +302,8 @@ struct ScopedTransform {
 	virtual ~ScopedTransform() { g.popMatrix(); }
 };
 
-struct ScopedShaderEnable {
+class ScopedShaderEnable {
+public:
 	ShaderRef sh;
 	ScopedShaderEnable(ShaderRef shader)
 		: sh(shader) {

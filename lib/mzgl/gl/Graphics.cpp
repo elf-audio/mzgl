@@ -86,12 +86,30 @@ ScopedAlphaBlend::~ScopedAlphaBlend() {
 	g.setBlending(originalBlendState);
 }
 
+ScopedAdditiveBlendMode::ScopedAdditiveBlendMode(Graphics &g)
+	: g(g) {
+	originalBlendState = g.blendingEnabled;
+	originalBlendMode  = g.blendMode;
+	g.setBlending(true);
+	if (originalBlendMode != Graphics::BlendMode::Additive) {
+		g.setBlendMode(Graphics::BlendMode::Additive);
+	}
+}
+ScopedAdditiveBlendMode::~ScopedAdditiveBlendMode() {
+	if (!originalBlendState) {
+		g.setBlending(originalBlendState);
+	}
+	if (originalBlendMode != Graphics::BlendMode::Additive) {
+		g.setBlendMode(originalBlendMode);
+	}
+}
+
 ScopedNoFill::ScopedNoFill(Graphics &_graphics)
 	: graphics {_graphics}
 	, isFilling {graphics.isFilling()} {
-if(isFilling) {
-	graphics.noFill();
-}
+	if (isFilling) {
+		graphics.noFill();
+	}
 }
 
 ScopedNoFill::~ScopedNoFill() {
@@ -103,9 +121,9 @@ ScopedNoFill::~ScopedNoFill() {
 ScopedFill::ScopedFill(Graphics &_graphics)
 	: graphics {_graphics}
 	, isFilling {graphics.isFilling()} {
-if(!isFilling) {
-	graphics.fill();
-}
+	if (!isFilling) {
+		graphics.fill();
+	}
 }
 
 ScopedFill::~ScopedFill() {
@@ -402,6 +420,7 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 }
 
 void Graphics::setBlendMode(BlendMode blendMode) {
+	this->blendMode = blendMode;
 	api->setBlendMode(blendMode);
 }
 
