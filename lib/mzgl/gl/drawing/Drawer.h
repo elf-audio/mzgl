@@ -45,7 +45,8 @@ public:
 	void drawLine(float ax, float ay, float bx, float by);
 	void drawLineStrip(const std::vector<vec2> &strip);
 	void drawLineStrip(const std::vector<vec2> &strip, const std::vector<vec4> &cols);
-	void drawBevelledLineStrip(const std::vector<vec2> &strip);
+	void drawBevelledLineStrip(const std::vector<vec2> &strip,
+							   MitredLine::EndCap endCap = MitredLine::EndCap::None);
 
 	void drawTriangleStrip(const std::vector<vec2> &strip);
 	void drawTriangleFan(const std::vector<vec2> &fan);

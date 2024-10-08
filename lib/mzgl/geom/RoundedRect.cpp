@@ -39,7 +39,7 @@ void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid, floa
 		vector<vec2> vs;
 		vector<uint32_t> indices;
 
-		lineDrawer.getVerts(verts, vs, indices, true);
+		lineDrawer.getVerts(verts, vs, indices, MitredLine::OpenOrClosed::Closed);
 
 		m->setVertices(vs);
 		m->setIndices(indices);

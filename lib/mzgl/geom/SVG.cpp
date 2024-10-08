@@ -171,7 +171,11 @@ public:
 			MitredLine ml;
 			ml.thickness = strokeWeight;
 			for (auto &v: verts) {
-				int numVerts = ml.getVerts(v, outVerts, indices, closed);
+				int numVerts =
+					ml.getVerts(v,
+								outVerts,
+								indices,
+								closed ? MitredLine::OpenOrClosed::Closed : MitredLine::OpenOrClosed::Open);
 				outCols.insert(outCols.end(), numVerts, strokeColor);
 			}
 		}

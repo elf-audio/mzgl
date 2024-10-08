@@ -172,10 +172,11 @@ void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) 
 	geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
 }
 
-void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip) {
+void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip, MitredLine::EndCap endCap) {
 	if (strip.size() == 0) return;
 	lineDrawer.thickness = strokeWeight;
-	int numVerts		 = lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices);
+	int numVerts =
+		lineDrawer.getVertsBevelled(strip, geom.verts, geom.indices, MitredLine::OpenOrClosed::Open, endCap);
 	geom.cols.insert(geom.cols.end(), numVerts, color);
 }
 
@@ -254,7 +255,7 @@ void Drawer::drawRect(const Rectf &r) {
 		}
 	} else {
 		lineDrawer.thickness = strokeWeight;
-		int numVerts		 = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+		int numVerts		 = lineDrawer.getVerts(v, geom.verts, geom.indices, MitredLine::OpenOrClosed::Closed);
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
 }
@@ -380,7 +381,7 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 	} else {
 		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts		 = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
+		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, MitredLine::OpenOrClosed::Closed);
 
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}
@@ -395,7 +396,7 @@ void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 	lineDrawer.outside	 = true;
 	lineDrawer.thickness = shadow;
 
-	int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
+	int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, MitredLine::OpenOrClosed::Closed);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 
 	auto c = color;
@@ -488,7 +489,7 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, boo
 	} else {
 		rrv.pop_back();
 		lineDrawer.thickness = strokeWeight;
-		int numVerts		 = lineDrawer.getVerts(rrv, geom.verts, geom.indices, true);
+		int numVerts = lineDrawer.getVerts(rrv, geom.verts, geom.indices, MitredLine::OpenOrClosed::Closed);
 
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 	}

@@ -483,7 +483,7 @@ void Graphics::drawRoundedRectShadow(Rectf r, float radius, float shadow) {
 	lineDrawer.outside	 = true;
 	lineDrawer.thickness = shadow;
 	Geometry geom;
-	int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, true);
+	int numVerts = lineDrawer.getVerts(v, geom.verts, geom.indices, MitredLine::OpenOrClosed::Closed);
 	geom.cols.reserve(geom.cols.size() + numVerts);
 
 	auto c = color;

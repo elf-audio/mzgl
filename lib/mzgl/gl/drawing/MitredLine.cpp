@@ -8,7 +8,7 @@
 
 #include "MitredLine.h"
 using namespace std;
-
+#include "maths.h"
 void MitredLine::getStripCoord(
 	const glm::vec2 &before, const glm::vec2 &curr, const glm::vec2 &after, glm::vec2 &a, glm::vec2 &b) {
 	glm::vec2 n1 = getNormal(curr - before);
@@ -40,19 +40,23 @@ void MitredLine::getStripCoord(
 		a = top1.getIntersection(top2);
 		b = bottom1.getIntersection(bottom2);
 	}
-	//	return true;
+}
+
+static float calculateAngle(glm::vec2 v) {
+	return atan2(v.y, v.x);
 }
 
 int MitredLine::getVerts(const vector<glm::vec2> &p,
 						 vector<glm::vec2> &outVerts,
 						 vector<unsigned int> &indices,
-						 bool close,
-						 bool bevelled) {
+						 OpenOrClosed openClosed,
+						 bool bevelled,
+						 EndCap endCap) {
 	int originalVertCount = (int) outVerts.size();
 
 	if (p.size() < 2) return 0;
 	vector<glm::vec2> strip;
-	if (close) {
+	if (openClosed == OpenOrClosed::Closed) {
 		glm::vec2 a;
 		glm::vec2 b;
 		getStripCoord(p.back(), p[0], p[1], a, b);
@@ -60,7 +64,7 @@ int MitredLine::getVerts(const vector<glm::vec2> &p,
 		strip.push_back(b);
 	} else {
 		glm::vec2 n = getNormal(p[1] - p[0]);
-		if (squareCap) {
+		if (endCap == EndCap::Square) {
 			glm::vec2 cap(n.y, -n.x);
 			strip.push_back(p[0] - n - cap);
 			strip.push_back(p[0] + n - cap);
@@ -101,7 +105,7 @@ int MitredLine::getVerts(const vector<glm::vec2> &p,
 		}
 	}
 
-	if (close) {
+	if (openClosed == OpenOrClosed::Closed) {
 		glm::vec2 a;
 		glm::vec2 b;
 		getStripCoord(p[p.size() - 2], p.back(), p[0], a, b);
@@ -113,7 +117,7 @@ int MitredLine::getVerts(const vector<glm::vec2> &p,
 
 	} else {
 		glm::vec2 n = getNormal(p[p.size() - 1] - p[p.size() - 2]);
-		if (squareCap) {
+		if (endCap == EndCap::Square) {
 			glm::vec2 cap(n.y, -n.x);
 			strip.push_back(p[p.size() - 1] - n + cap);
 			strip.push_back(p[p.size() - 1] + n + cap);
@@ -136,12 +140,44 @@ int MitredLine::getVerts(const vector<glm::vec2> &p,
 		indices.push_back(startIndex + i - 2);
 	}
 
+	if (endCap == EndCap::Round) {
+		doRoundCap(p[0], p[1], outVerts, indices);
+		doRoundCap(p[p.size() - 1], p[p.size() - 2], outVerts, indices);
+	}
+
 	return (int) outVerts.size() - originalVertCount;
+}
+
+void MitredLine::doRoundCap(glm::vec2 p0,
+							glm::vec2 p1,
+							vector<glm::vec2> &outVerts,
+							vector<unsigned int> &indices) {
+	// add a circle at the start
+	glm::vec2 center = p0;
+	outVerts.push_back(center);
+	int centerIndex = (int) outVerts.size() - 1;
+
+	const int numSteps		= thickness / 4;
+	const float radius		= thickness * 0.5f;
+	const float startAngle	= 0;
+	const float endAngle	= M_PI;
+	const float angleOffset = calculateAngle(p1 - p0) + M_PI / 2.f;
+	for (int i = 0; i < numSteps; i++) {
+		float angle = mapf(i, 0, numSteps - 1, startAngle, endAngle) + angleOffset;
+		outVerts.push_back(center + glm::vec2(radius * cos(angle), radius * sin(angle)));
+	}
+
+	for (int i = 0; i < numSteps - 1; i++) {
+		indices.push_back(centerIndex);
+		indices.push_back(centerIndex + i + 1);
+		indices.push_back(centerIndex + i + 2);
+	}
 }
 
 int MitredLine::getVertsBevelled(const std::vector<glm::vec2> &p,
 								 std::vector<glm::vec2> &outVerts,
 								 std::vector<unsigned int> &indices,
-								 bool close) {
-	return getVerts(p, outVerts, indices, close, true);
+								 OpenOrClosed openClosed,
+								 EndCap endCap) {
+	return getVerts(p, outVerts, indices, openClosed, true, endCap);
 }
