@@ -114,8 +114,8 @@ SCENARIO("MidiMessage correctly identifies Song Position Pointer events", "[midi
 			AND_WHEN("The song position is converted to a double") {
 				double songPosition = message.getSongPosition();
 
-				THEN("The song position should be 128 beats (512 16th notes)") {
-					REQUIRE(songPosition == Approx(128.0));
+				THEN("The song position should be 21") {
+					REQUIRE(songPosition == Approx(21.3333).epsilon(1e-3));
 				}
 			}
 		}

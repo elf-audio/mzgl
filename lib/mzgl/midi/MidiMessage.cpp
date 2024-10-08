@@ -229,6 +229,10 @@ double MidiMessage::getSongPositionInQuarterNotes() const {
 }
 
 double MidiMessage::getSongPosition() const {
+	if (!isSongPositionPointer()) {
+		return -1;
+	}
+	
 	auto lsb = midiBytes[1];
 	auto msb = midiBytes[2];
 
