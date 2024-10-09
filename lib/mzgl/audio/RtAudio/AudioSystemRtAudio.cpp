@@ -40,6 +40,14 @@ AudioSystemRtAudio::~AudioSystemRtAudio() {
 //	}
 //}
 
+void AudioSystemRtAudio::startAudioCallback() {
+	inProcess.store(true);
+}
+
+void AudioSystemRtAudio::finishedAudioCallback() {
+	inProcess.store(false);
+}
+
 int AudioSystemRtAudio_callback(void *outputBuffer,
 								void *inputBuffer,
 								unsigned int nBufferFrames,
@@ -50,12 +58,14 @@ int AudioSystemRtAudio_callback(void *outputBuffer,
 	// a simple buffer copy operation here.
 	if (status) std::cout << "Stream over/underflow detected." << std::endl;
 	AudioSystemRtAudio *audio = (AudioSystemRtAudio *) data;
+	audio->startProcessCall();
 	if (inputBuffer != nullptr) {
 		audio->inputCallback((float *) inputBuffer, nBufferFrames, audio->numInChannels);
 	}
 	if (outputBuffer != nullptr) {
 		audio->outputCallback((float *) outputBuffer, nBufferFrames, audio->numOutChannels);
 	}
+	audio->finishedProcessCall();
 	return 0;
 }
 
@@ -148,23 +158,6 @@ void AudioSystemRtAudio::setup(int numInChannels, int numOutChannels) {
 			Log::d() << "Setting to preferred sample rate " << this->sampleRate;
 			this->sampleRate = oDevInfo.preferredSampleRate;
 		}
-
-//		if(this->sampleRate!=0) {
-//		    bool found = false;
-//		    for(int i =0 ; i < oDevInfo.sampleRates.size(); i++) {
-//		        if(this->sampleRate==oDevInfo.sampleRates[i]) {
-//
-//                        Log::d() << "Found matching sample rate";
-//                    found = true;
-//                    break;
-//                } else {
-//		            Log::d() << "SR not "<< oDevInfo.sampleRates[i];
-//		        }
-//		    }
-//		    if(!found) {
-//		        this->sampleRate = oDevInfo.preferredSampleRate;
-//		    }
-//		}
 #ifdef _WIN32
 		sampleRate = 44100;
 #endif
@@ -190,7 +183,7 @@ void AudioSystemRtAudio::setup(int numInChannels, int numOutChannels) {
 void AudioSystemRtAudio::start() {
 	try {
 		audio->startStream();
-		running = true;
+		running.store(true);
 	} catch (RtAudioError &e) {
 		e.printMessage();
 	}
@@ -199,14 +192,18 @@ void AudioSystemRtAudio::start() {
 void AudioSystemRtAudio::stop() {
 	try {
 		audio->stopStream();
-		running = false;
+		running.store(false);
 	} catch (RtAudioError &e) {
 		e.printMessage();
 	}
 }
 
 bool AudioSystemRtAudio::isRunning() {
-	return running;
+	return running.load();
+}
+
+bool AudioSystemRtAudio::isInsideAudioCallback() {
+	return inProcess.load();
 }
 
 AudioPort createAudioPortFromRTAudio(const RtAudio::DeviceInfo &info, int devId) {

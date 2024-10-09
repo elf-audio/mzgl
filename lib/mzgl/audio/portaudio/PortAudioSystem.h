@@ -19,7 +19,11 @@ public:
 	void setup(int numInChannels, int numOutChannels) override;
 	void start() override;
 	void stop() override;
-	bool isRunning() override;
+	[[nodiscard]] bool isRunning() override;
+	[[nodiscard]] bool isInsideAudioCallback() override;
+
+	void startAudioCallback();
+	void finishedAudioCallback();
 
 	void setVerbose(bool verbose) override { this->verbose = verbose; }
 	std::vector<AudioPort> getInputs() override;
@@ -35,9 +39,9 @@ public:
 
 	double getLatency();
 	double getOutputLatency() override;
-	
+
 	[[nodiscard]] double getNanoSecondsAtBufferBegin() override;
-	
+
 	double getHostTime();
 
 	// The time when the first sample of the input buffer was captured at the ADC input
@@ -50,6 +54,7 @@ private:
 	uint64_t hostTime = 0;
 
 	bool setupFinished = false;
+	std::atomic<bool> inProcess {false};
 
 	AudioPort inPort;
 	AudioPort outPort;
@@ -60,7 +65,6 @@ private:
 	bool setIOPort(const AudioPort &audioPort, bool isOutput);
 
 	bool verbose = false;
-	bool running = false;
 	bool checkPaError(PaError err, std::string msg);
 	//	void printDevices();
 	PaStream *stream = nullptr;
