@@ -17,13 +17,18 @@ public:
 	void setup(int numInChannels, int numOutChannels) override;
 	void start() override;
 	void stop() override;
-	bool isRunning() override;
+	[[nodiscard]] bool isRunning() override;
+	[[nodiscard]] bool audioThreadIsStopped() override;
 
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
 
+	void startAudioCallback();
+	void finishedAudioCallback();
+
 private:
-	bool running = false;
+	std::atomic<bool> running {false};
+	std::atomic<bool> inProcess {false};
 	std::shared_ptr<RtAudio> audio;
 };
 

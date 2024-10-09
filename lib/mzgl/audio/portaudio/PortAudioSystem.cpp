@@ -56,8 +56,16 @@ PortAudioSystem::~PortAudioSystem() {
 	checkPaError(err, "terminating");
 }
 
-double PortAudioSystem::getNanoSecondsAtBufferBegin()  {
+double PortAudioSystem::getNanoSecondsAtBufferBegin() {
 	return outputTime;
+}
+
+void PortAudioSystem::startAudioCallback() {
+	inProcess.store(true);
+}
+
+void PortAudioSystem::finishedAudioCallback() {
+	inProcess.store(false);
 }
 
 static int PortAudioSystem_callback(const void *inputBuffer,
@@ -67,6 +75,7 @@ static int PortAudioSystem_callback(const void *inputBuffer,
 									PaStreamCallbackFlags statusFlags,
 									void *userData) {
 	PortAudioSystem *as = (PortAudioSystem *) userData;
+	as->startAudioCallback();
 
 	as->inputTime =
 		timeInfo
@@ -81,6 +90,7 @@ static int PortAudioSystem_callback(const void *inputBuffer,
 		as->outputCallback((float *) outputBuffer, (int) framesPerBuffer, as->numOutChannels);
 	}
 
+	as->finishedAudioCallback();
 	return paContinue;
 }
 
@@ -357,6 +367,10 @@ bool PortAudioSystem::isRunning() {
 		Log::d() << "PortAudioSystem::isRunning()" << Pa_IsStreamActive(stream);
 	}
 	return Pa_IsStreamActive(stream) == 1;
+}
+
+bool PortAudioSystem::audioThreadIsStopped() {
+	return !isRunning() && !inProcess.load();
 }
 
 vector<AudioPort> PortAudioSystem::getOutputs() {

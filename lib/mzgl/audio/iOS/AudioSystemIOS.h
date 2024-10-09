@@ -18,6 +18,7 @@ public:
 	void stop() override;
 
 	bool isRunning() override { return running; }
+	[[nodiscard]] bool audioThreadIsStopped() override { return !isRunning(); }
 
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;

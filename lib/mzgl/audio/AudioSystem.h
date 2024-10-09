@@ -61,7 +61,8 @@ public:
 	virtual void setup(int numInChannels, int numOutChannels) = 0;
 	virtual void start()									  = 0;
 	virtual void stop()										  = 0;
-	virtual bool isRunning()								  = 0;
+	[[nodiscard]] virtual bool isRunning()					  = 0;
+	[[nodiscard]] virtual bool audioThreadIsStopped()		  = 0;
 
 	int numInChannels  = 2;
 	int numOutChannels = 2;
@@ -122,7 +123,8 @@ public:
 	void setup(int numInChannels, int numOutChannels) override {}
 	void start() override {}
 	void stop() override {}
-	bool isRunning() override { return false; }
+	[[nodiscard]] bool isRunning() override { return false; }
+	[[nodiscard]] bool audioThreadIsStopped() override { return true; }
 
 	void setVerbose(bool v) override {}
 
