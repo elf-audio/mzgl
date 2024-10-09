@@ -20,7 +20,7 @@ public:
 	void start() override;
 	void stop() override;
 	[[nodiscard]] bool isRunning() override;
-	[[nodiscard]] bool audioThreadIsStopped() override;
+	[[nodiscard]] bool isInsideAudioCallback() override;
 
 	void startAudioCallback();
 	void finishedAudioCallback();

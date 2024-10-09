@@ -369,8 +369,8 @@ bool PortAudioSystem::isRunning() {
 	return Pa_IsStreamActive(stream) == 1;
 }
 
-bool PortAudioSystem::audioThreadIsStopped() {
-	return !isRunning() && !inProcess.load();
+bool PortAudioSystem::isInsideAudioCallback() {
+	return inProcess.load();
 }
 
 vector<AudioPort> PortAudioSystem::getOutputs() {

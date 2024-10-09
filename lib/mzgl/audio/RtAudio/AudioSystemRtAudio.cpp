@@ -202,8 +202,8 @@ bool AudioSystemRtAudio::isRunning() {
 	return running.load();
 }
 
-bool AudioSystemRtAudio::audioThreadIsStopped() {
-	return !isRunning() && !inProcess.load();
+bool AudioSystemRtAudio::isInsideAudioCallback() {
+	return inProcess.load();
 }
 
 AudioPort createAudioPortFromRTAudio(const RtAudio::DeviceInfo &info, int devId) {

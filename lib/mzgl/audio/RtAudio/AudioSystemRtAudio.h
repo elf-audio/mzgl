@@ -18,7 +18,7 @@ public:
 	void start() override;
 	void stop() override;
 	[[nodiscard]] bool isRunning() override;
-	[[nodiscard]] bool audioThreadIsStopped() override;
+	[[nodiscard]] bool isInsideAudioCallback() override;
 
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;

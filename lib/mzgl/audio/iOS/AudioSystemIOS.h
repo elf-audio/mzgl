@@ -18,7 +18,7 @@ public:
 	void stop() override;
 
 	bool isRunning() override { return running; }
-	[[nodiscard]] bool audioThreadIsStopped() override { return !isRunning(); }
+	[[nodiscard]] bool isInsideAudioCallback() override { return isRunning(); }
 
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
@@ -27,7 +27,7 @@ public:
 	void handleRouteChange();
 
 private:
-	bool running = false;
+	std::atomic<bool> running {false};
 
 	// iOS specific, should move to specific implementaiton
 	void configureAudioSession();

@@ -62,7 +62,7 @@ public:
 	virtual void start()									  = 0;
 	virtual void stop()										  = 0;
 	[[nodiscard]] virtual bool isRunning()					  = 0;
-	[[nodiscard]] virtual bool audioThreadIsStopped()		  = 0;
+	[[nodiscard]] virtual bool isInsideAudioCallback()		  = 0;
 
 	int numInChannels  = 2;
 	int numOutChannels = 2;
@@ -97,7 +97,6 @@ public:
 
 	void addSampleRateChangeListener(SampleRateChangeListener *listener);
 	void removeSampleRateChangeListener(SampleRateChangeListener *listener);
-	
 
 	[[nodiscard]] virtual double getNanoSecondsAtBufferBegin() { return 0; }
 
@@ -109,6 +108,7 @@ protected:
 	uint32_t bufferSize							  = 256;
 	double sampleRate							  = 48'000;
 	StreamConfigurationStatus streamConfigStatus_ = StreamConfigurationStatus::OK;
+
 private:
 	std::vector<SampleRateChangeListener *> sampleRateChangeListeners;
 };
@@ -124,7 +124,7 @@ public:
 	void start() override {}
 	void stop() override {}
 	[[nodiscard]] bool isRunning() override { return false; }
-	[[nodiscard]] bool audioThreadIsStopped() override { return true; }
+	[[nodiscard]] bool isInsideAudioCallback() override { return false; }
 
 	void setVerbose(bool v) override {}
 
