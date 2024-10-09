@@ -48,33 +48,32 @@ void quitApplication() {
 
 	if ([url.scheme containsString:@"audioshare"]) {
 		@try {
-			
 			if ([[AudioShare sharedInstance]
-				 checkPendingImport:url
-				 withBlock:^(NSString *path) {
-				// move file to docs dir
-				// if it didn't fail, send to eventDispatcher, then delete it
-				
-				fs::path source([path UTF8String]);
-				fs::path destination = docsPath() / source.filename();
-				
-				try {
-					fs::rename(source, destination);
-				} catch (fs::filesystem_error &e) {
-					Log::e() << "Couldn't copy file: " << e.what();
-					return;
-				}
-				eventDispatcher->openUrl(ScopedUrl::createWithDeleter(destination));
-			}]) {
+					checkPendingImport:url
+							 withBlock:^(NSString *path) {
+							   // move file to docs dir
+							   // if it didn't fail, send to eventDispatcher, then delete it
+
+							   fs::path source([path UTF8String]);
+							   fs::path destination = docsPath() / source.filename();
+
+							   try {
+								   fs::rename(source, destination);
+							   } catch (fs::filesystem_error &e) {
+								   Log::e() << "Couldn't copy file: " << e.what();
+								   return;
+							   }
+							   eventDispatcher->openUrl(ScopedUrl::createWithDeleter(destination));
+							 }]) {
 				return YES;
 			} else {
 				return NO;
 			}
-		}
-		@catch (NSException *exception) {
+		} @catch (NSException *exception) {
 			NSLog(@"AudioShare Exception occurred: %@, %@", exception.name, exception.reason);
 			// You can also handle the exception as needed
-			NSString *errorString = [NSString stringWithFormat:@"Error: %@, Reason: %@", exception.name, exception.reason];
+			NSString *errorString =
+				[NSString stringWithFormat:@"Error: %@, Reason: %@", exception.name, exception.reason];
 			std::string errorCStr = [errorString UTF8String];
 			eventDispatcher->app->dialogs.alert("AudioShare Error", errorCStr);
 			return NO;
@@ -99,7 +98,20 @@ public:
 	void draw() override {
 		g.clear(0);
 		g.setColor(1);
-		g.drawTextCentred(msg, vec2(g.width / 2.f, g.height / 2.f));
+
+		float textWidth	 = g.width / 2;
+		auto lines		 = g.getFont().wrapText(msg, textWidth);
+		float lineHeight = g.getFont().getVerticalMetrics().lineHeight;
+		float textHeight = lines.size() * lineHeight;
+
+		float topLineY = g.height / 2 - textHeight / 2;
+		g.drawTextHorizontallyCentred(
+			"koala crashed with an unrecoverable error - pls take a screenshot and email to koala.helpdesk@gmail.com",
+			{g.width / 2, topLineY - lineHeight * 2});
+
+		for (int i = 0; i < lines.size(); i++) {
+			g.drawText(lines[i], g.width / 2 - textWidth / 2, topLineY + i * lineHeight);
+		}
 	}
 };
 
