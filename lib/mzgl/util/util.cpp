@@ -977,7 +977,7 @@ void hideMouse() {
 bool readFile(const std::string &filename, std::vector<unsigned char> &outData) {
 	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);
 	if (!strm) {
-		printf("cannot open file\n");
+		printf("cannot open file with path '%s'\n", filename.c_str());
 		return false;
 	}
 
@@ -985,7 +985,7 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData) 
 	std::istream_iterator<unsigned char> isi(strm), isiEOF;
 	outData.assign(isi, isiEOF);
 	if (!strm.eof()) {
-		printf("read error\n");
+		printf("read error with file '%s'\n", filename.c_str());
 		return false;
 	}
 	return true;
