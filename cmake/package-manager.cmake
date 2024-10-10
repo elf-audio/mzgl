@@ -11,11 +11,46 @@ function(mzgl_add_search_paths ROOTPATH)
     LIST_DIRECTORIES true
     "${ROOTPATH}/*")
 
+  set(EXCLUDED_DIRS
+      "tests"
+      "benchmarks"
+      "README"
+      "LICENSE"
+      "VERSION"
+      "makefile"
+      "LICENSES"
+      "cmake"
+      "docs"
+      "build"
+      "c_api")
+
   foreach(ITEM IN LISTS SUBDIRS)
     if(IS_DIRECTORY ${ITEM})
+      # Get the base name of the directory
       get_filename_component(DIRECTORY_NAME ${ITEM} NAME)
-      if(NOT DIRECTORY_NAME MATCHES "^\\.")
-        list(APPEND INCLUDE_DIRECTORIES_LIST ${ITEM})
+
+      # Filter out directories starting with '.' (both at the root and within
+      # subdirectories)
+      if(NOT DIRECTORY_NAME MATCHES "^\\."
+         AND NOT ITEM MATCHES "/\\.[^/]+/"
+         AND NOT DIRECTORY_NAME IN_LIST EXCLUDED_DIRS)
+
+        # Check if the current directory is a subdirectory of an excluded
+        # directory
+        set(SKIP_DIR FALSE)
+        foreach(EXCLUDED_DIR IN LISTS EXCLUDED_DIRS)
+          if(ITEM MATCHES "/${EXCLUDED_DIR}/") # Skip subdirectories of excluded
+                                               # directories
+            set(SKIP_DIR TRUE)
+            break()
+          endif()
+        endforeach()
+
+        # If the directory is not part of an excluded directory's substructure,
+        # add it
+        if(NOT SKIP_DIR)
+          list(APPEND INCLUDE_DIRECTORIES_LIST ${ITEM})
+        endif()
       endif()
     endif()
   endforeach()
