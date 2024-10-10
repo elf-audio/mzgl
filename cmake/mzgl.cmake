@@ -3,3 +3,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/log-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/warning-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/package-manager.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cpm.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
+
+mzgl_download_cpm()
+mzgl_add_packages()
