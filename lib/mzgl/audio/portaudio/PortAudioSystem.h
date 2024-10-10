@@ -8,7 +8,7 @@
 
 #pragma once
 #include "AudioSystem.h"
-
+#include <atomic>
 typedef void PaStream;
 typedef int PaError;
 
