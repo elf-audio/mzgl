@@ -5,14 +5,22 @@
 #
 # @param ROOTPATH The source path to start at
 function(mzgl_add_search_paths ROOTPATH)
+  set(INCLUDE_DIRECTORIES_LIST)
+  file(
+    GLOB_RECURSE SUBDIRS
+    LIST_DIRECTORIES true
+    "${ROOTPATH}/*")
 
-  file(GLOB_RECURSE INCLUDE_DIRECTORIES "${ROOTPATH}/*.h" "${ROOTPATH}/*.hpp")
-
-  foreach(file_path IN LISTS INCLUDE_DIRECTORIES)
-    get_filename_component(dir_path "${file_path}" DIRECTORY)
-    list(APPEND INCLUDE_DIRECTORIES_LIST "${dir_path}")
+  foreach(ITEM IN LISTS SUBDIRS)
+    if(IS_DIRECTORY ${ITEM})
+      get_filename_component(DIRECTORY_NAME ${ITEM} NAME)
+      if(NOT DIRECTORY_NAME MATCHES "^\\.")
+        list(APPEND INCLUDE_DIRECTORIES_LIST ${ITEM})
+      endif()
+    endif()
   endforeach()
 
+  list(APPEND INCLUDE_DIRECTORIES_LIST "${ROOTPATH}")
   list(REMOVE_DUPLICATES INCLUDE_DIRECTORIES_LIST)
 
   include_directories(${INCLUDE_DIRECTORIES_LIST})
