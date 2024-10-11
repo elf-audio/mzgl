@@ -1,6 +1,6 @@
 #include "MidiMessage.h"
 #include "mzAssert.h"
-
+#include <tuple>
 MidiMessage::MidiMessage(uint8_t byte1)
 	: midiBytes {byte1, std::nullopt, std::nullopt} {
 }
@@ -232,7 +232,7 @@ double MidiMessage::getSongPosition() const {
 	if (!isSongPositionPointer()) {
 		return -1;
 	}
-	
+
 	auto lsb = midiBytes[1];
 	auto msb = midiBytes[2];
 
