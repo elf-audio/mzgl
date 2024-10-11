@@ -14,7 +14,9 @@ public:
 	void sendMessage(const MidiMessage &m) override { Log::e() << "Unimplemented"; }
 
 	// send message to a specific device
-	void sendMessage(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m) override {
+	void sendMessage(const std::shared_ptr<MidiDevice> &device,
+					 const MidiMessage &m,
+					 std::optional<uint64_t> delayInNanoSeconds) override {
 		Log::e() << "Unimplemented";
 	}
 
