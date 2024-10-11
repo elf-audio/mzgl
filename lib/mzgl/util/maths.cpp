@@ -38,7 +38,7 @@ float rms2db(float inp) {
 }
 
 float db2rms(float db) {
-	return powf(10.f, db / 20.f);
+	return std::pow(10.f, db / 20.f);
 }
 float nearestPow2(float v) {
 	float lo = floor(log2(v));

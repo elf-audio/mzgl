@@ -41,7 +41,7 @@ void Slider::draw() {
 	g.setColor(handleColor);
 	float handleWidth = height;
 	float normVal	  = mapf(*value, min, max, 0, 1, true);
-	float val		  = powf(normVal, 1.0f / curve) * (width - height) + height / 2;
+	float val		  = std::pow(normVal, 1.0f / curve) * (width - height) + height / 2;
 	g.drawRect(x + val - handleWidth / 2, y, handleWidth, height);
 	if (!name.empty()) {
 		g.setColor(0);
@@ -51,7 +51,7 @@ void Slider::draw() {
 void Slider::drag(float x) {
 	float handleWidth = height;
 	float normVal	  = mapf(x, handleWidth / 2, width - handleWidth / 2, 0, 1, true);
-	float val		  = powf(normVal, curve) * (max - min) + min;
+	float val		  = std::pow(normVal, curve) * (max - min) + min;
 
 	if (value != nullptr) {
 		*value = val;
