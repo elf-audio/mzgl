@@ -46,7 +46,7 @@ HEADERS_COMMON = 									\
 		lib/opt/libflac/include						\
 		lib/LibTorch-Lite/install/include
 
-HEADER_SEARCH_PATHS = $(HEADERS_COMMON)
+HEADER_SEARCH_PATHS = $(inherited) $(HEADERS_COMMON)
 
 
 // LINKER
