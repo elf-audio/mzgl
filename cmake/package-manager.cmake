@@ -1,3 +1,38 @@
+set(GLOBAL_HEADER_SEARCH_PATHS
+    ""
+    CACHE STRING "Global header search paths" FORCE)
+
+# @brief Append the cached header search paths
+#
+# Writes a xcode compatible file to include from
+#
+# @param PATH the path write
+function(mzgl_add_xcode_header_search_path PATH)
+  set(CURRENT_LIST "${GLOBAL_HEADER_SEARCH_PATHS}")
+  list(APPEND CURRENT_LIST "${PATH}")
+  set(GLOBAL_HEADER_SEARCH_PATHS
+      "${CURRENT_LIST}"
+      CACHE STRING "Global header search paths" FORCE)
+  message(
+    STATUS "ADD Global header search paths: ${GLOBAL_HEADER_SEARCH_PATHS}")
+endfunction()
+
+# @brief Write the include paths to a file in cpm-source-cache
+#
+# Writes a xcode compatible file to include from
+#
+# @param PATH the path write
+function(mzgl_write_header_search_paths)
+  set(CURRENT_LIST "${GLOBAL_HEADER_SEARCH_PATHS}")
+  list(REMOVE_DUPLICATES CURRENT_LIST)
+  file(WRITE "${XCODE_HEADER_PATH_FILE}" "")
+  message(STATUS "WRITE Global header search paths: ${CURRENT_LIST}")
+  foreach(HEADER_SEARCH_PATH IN LISTS CURRENT_LIST)
+    file(APPEND "${XCODE_HEADER_PATH_FILE}"
+         "HEADER_SEARCH_PATHS = $(inherited) ${HEADER_SEARCH_PATH}\n")
+  endforeach()
+endfunction()
+
 # @brief Recursively add to the search paths
 #
 # Find all sub dirs of the passed path, and then add its paths to the search
@@ -52,8 +87,9 @@ function(mzgl_add_search_paths ROOTPATH)
 
   include_directories(${INCLUDE_DIRECTORIES_LIST})
 
-  foreach(dir IN LISTS INCLUDE_DIRECTORIES_LIST)
-    mzgl_print_verbose_in_magenta("            -> ${dir}")
+  foreach(DIR IN LISTS INCLUDE_DIRECTORIES_LIST)
+    mzgl_print_verbose_in_magenta("            -> ${DIR}")
+    mzgl_add_xcode_header_search_path(${DIR})
   endforeach()
 endfunction()
 
