@@ -836,6 +836,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9C15AA912CBD64A800388A51 /* search_paths.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = search_paths.xcconfig; path = "../../../cpm-source-cache/iOS/search_paths.xcconfig"; sourceTree = "<group>"; };
 		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
@@ -1720,6 +1721,7 @@
 		EA182D302432C15000A5C3E8 = {
 			isa = PBXGroup;
 			children = (
+				9C15AA912CBD64A800388A51 /* search_paths.xcconfig */,
 				EA1842132433497300A5C3E8 /* project.xcconfig */,
 				EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */,
 				EA182D402432C18800A5C3E8 /* lib */,
