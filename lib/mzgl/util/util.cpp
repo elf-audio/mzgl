@@ -779,8 +779,14 @@ void initMZGL(std::shared_ptr<App> app) {
 void launchUrl(const std::string &url) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	NSString *urlStr = [NSString stringWithUTF8String:url.c_str()];
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlStr]];
+	
+	NSURL *nsUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+
+	if ([[UIApplication sharedApplication] canOpenURL:nsUrl]) {
+		[[UIApplication sharedApplication] openURL:nsUrl
+										   options:@{}
+								 completionHandler:nil];
+	}
 #	else
 	NSString *urlStr = [NSString stringWithUTF8String:url.c_str()];
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlStr]];
