@@ -13,15 +13,23 @@ public:
 
 private:
 	void redirect() {
+#ifndef _WIN32
 		old			 = dup(STDERR_FILENO);
 		auto devNull = open("/dev/null", O_WRONLY);
 		dup2(devNull, STDERR_FILENO);
 		close(devNull);
+#else
+		mzAssert(false, "StderrScope not implemented for Windows");
+#endif
 	}
 
 	void restore() {
+#ifndef _WIN32
 		dup2(old, STDERR_FILENO);
 		close(old);
+#else
+		mzAssert(false, "StderrScope not implemented for Windows");
+#endif
 	}
 
 	int old {0};
