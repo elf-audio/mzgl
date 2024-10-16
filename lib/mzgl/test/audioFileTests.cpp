@@ -5,6 +5,7 @@
 #include <optional>
 #include <iostream>
 #include <sstream>
+#include "mzAssert.h"
 
 class StderrScope {
 public:
