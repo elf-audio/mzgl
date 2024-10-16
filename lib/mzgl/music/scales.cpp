@@ -31,6 +31,33 @@ std::string midiNoteNumToString(int note) {
 	return noteNumToName(index) + std::to_string(octave);
 }
 
+int stringToMidiNoteNum(const std::string &noteName) {
+	if (noteName.empty()) return -1;
+
+	// Find the position where the octave number starts
+	size_t pos = 0;
+	while (pos < noteName.size() && !(noteName[pos] == '-' || isdigit(noteName[pos]))) {
+		pos++;
+	}
+
+	if (pos == noteName.size()) {
+		// No octave number found
+		return -1;
+	}
+
+	std::string name	  = noteName.substr(0, pos);
+	std::string octaveStr = noteName.substr(pos);
+
+	try {
+		int octave		= std::stoi(octaveStr);
+		int intervalNum = noteNameToNum(name);
+		if (intervalNum == -1) return -1;
+		return intervalNum + (octave + 2) * 12;
+	} catch (...) {
+		return -1;
+	}
+}
+
 float mtof(float f) {
 	return (8.17579891564 * exp(.0577622650 * f));
 }

@@ -38,6 +38,6 @@ std::string noteNumToName(int note);
 int noteNameToNum(const std::string &noteName);
 // includes the octave too
 std::string midiNoteNumToString(int note);
-
+int stringToMidiNoteNum(const std::string &noteName);
 bool isSharp(int i);
 int qwertyToMidi(int k);
