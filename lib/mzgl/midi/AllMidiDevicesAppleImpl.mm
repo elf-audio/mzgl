@@ -280,7 +280,6 @@ void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, c
 
 	auto sendPending = [this, theDevice](MIDITimeStamp timestamp) {
 		if (pendingMsg.empty()) {
-			mzAssert(false);
 			return;
 		}
 		midiReceived(theDevice, MidiMessage(pendingMsg), timestamp);
