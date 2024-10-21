@@ -440,6 +440,11 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #endif
 }
 
+std::string makeUpperCase(std::string str) {
+	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
+	return str;
+}
+
 //#ifdef UNIT_TEST
 bool isOverridingDocsPath	 = false;
 std::string docsPathOverride = "";
@@ -779,13 +784,11 @@ void initMZGL(std::shared_ptr<App> app) {
 void launchUrl(const std::string &url) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	
+
 	NSURL *nsUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 
 	if ([[UIApplication sharedApplication] canOpenURL:nsUrl]) {
-		[[UIApplication sharedApplication] openURL:nsUrl
-										   options:@{}
-								 completionHandler:nil];
+		[[UIApplication sharedApplication] openURL:nsUrl options:@{} completionHandler:nil];
 	}
 #	else
 	NSString *urlStr = [NSString stringWithUTF8String:url.c_str()];
