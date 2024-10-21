@@ -28,12 +28,12 @@ public:
 	// so we can trigger animations.
 
 	std::shared_ptr<ScrollingListItem> item;
-	ScrollingListItemView(Graphics &g, std::shared_ptr<ScrollingListItem> item)
+	ScrollingListItemView(Graphics &g, std::shared_ptr<ScrollingListItem> _item)
 		: Layer(g)
-		, item(item) {
+		, item(_item) {
 		interactive = true;
 	}
-	virtual ~ScrollingListItemView() {}
+	~ScrollingListItemView() override = default;
 
 	virtual bool hasCustomHeight() { return false; }
 	virtual int getCustomHeight() { return 0; }
