@@ -779,10 +779,19 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 #endif
 
 #ifdef __APPLE__
+	NSURL * (^createURLFromString)(const std::string &) = ^NSURL *(const std::string &urlString) {
+	  NSString *nsUrlString = [NSString stringWithUTF8String:urlString.c_str()];
+	  NSURL *url			= [NSURL URLWithString:nsUrlString];
+	  if ((url && url.scheme && ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"])
+		   && url.host != nil)) {
+		  return url;
+	  }
+	  return [NSURL fileURLWithPath:nsUrlString];
+	};
 
 #	if TARGET_OS_IOS
 	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-	NSURL *URL		  = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:url.c_str()]];
+	NSURL *URL		  = createURLFromString(url);
 	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -847,7 +856,7 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
 	  // Load content on the main thread but asynchronously to avoid blocking the UI
-	  NSURL *nsUrl			= [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+	  NSURL *nsUrl			= createURLFromString(url);
 	  NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
 	  [webView loadRequest:request];
 
