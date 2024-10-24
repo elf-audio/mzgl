@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CPM.cmake)
+include(cmake/mzgl.cmake)
 
 # CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
 
