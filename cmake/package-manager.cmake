@@ -13,8 +13,6 @@ function(mzgl_add_xcode_header_search_path PATH)
   set(GLOBAL_HEADER_SEARCH_PATHS
       "${CURRENT_LIST}"
       CACHE STRING "Global header search paths" FORCE)
-  message(
-    STATUS "ADD Global header search paths: ${GLOBAL_HEADER_SEARCH_PATHS}")
 endfunction()
 
 # @brief Write the include paths to a file in cpm-source-cache
@@ -26,7 +24,6 @@ function(mzgl_write_header_search_paths)
   set(CURRENT_LIST "${GLOBAL_HEADER_SEARCH_PATHS}")
   list(REMOVE_DUPLICATES CURRENT_LIST)
   file(WRITE "${XCODE_HEADER_PATH_FILE}" "")
-  message(STATUS "WRITE Global header search paths: ${CURRENT_LIST}")
   foreach(HEADER_SEARCH_PATH IN LISTS CURRENT_LIST)
     file(APPEND "${XCODE_HEADER_PATH_FILE}"
          "HEADER_SEARCH_PATHS = $(inherited) ${HEADER_SEARCH_PATH}\n")

@@ -1,9 +1,14 @@
 include(${CMAKE_CURRENT_LIST_DIR}/print.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/paths.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cpm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/log-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/warning-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/package-manager.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cpm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
 
+mzgl_detect_cpm_root_dir()
+mzgl_detect_cpm_sub_dir()
 mzgl_download_cpm()
+
+include(${CPM_DOWNLOAD_LOCATION})
 mzgl_add_packages()
