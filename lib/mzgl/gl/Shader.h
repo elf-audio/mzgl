@@ -71,10 +71,6 @@ public:
 	void load(std::string vertex_file_path, std::string fragment_file_path);
 	static std::string getVersionForPlatform(bool isVertShader);
 
-#ifdef MZGL_GL2
-	void setInstanceUniforms(int whichInstance);
-#endif
-
 #ifdef __ANDROID__
 	static std::vector<Shader *> shaders;
 #endif
@@ -89,20 +85,4 @@ private:
 	void linkProgram(uint32_t program);
 
 	void validateProgram(uint32_t program);
-
-	// this is supposed to be for GL2 simulating instancing
-
-#ifdef MZGL_GL2
-
-	struct InstanceUniform {
-		int dimensions = 0;
-		std::vector<float> data;
-		std::string name;
-		InstanceUniform(std::string name, float *data, int numItems, int dimensions)
-			: name(name)
-			, dimensions(dimensions)
-			, data(data, data + numItems * dimensions) {}
-	};
-	std::vector<std::shared_ptr<InstanceUniform>> instanceUniforms;
-#endif
 };

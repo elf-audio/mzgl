@@ -34,11 +34,8 @@
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] = {
 
 		NSOpenGLPFAOpenGLProfile,
-#ifdef MZGL_GL2
-		NSOpenGLProfileVersionLegacy,
-#else
-		NSOpenGLProfileVersion4_1Core,
-#endif
+
+		NSOpenGLProfileVersion3_2Core,
 
 		NSOpenGLPFAColorSize,
 		24,

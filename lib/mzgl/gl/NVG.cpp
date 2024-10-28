@@ -10,19 +10,11 @@
 #include "NVG.h"
 
 #include "nanovg.h"
-//#ifdef MZGL_GL2
-//#include <OpenGL/gl.h>
-//#else
-//#include <OpenGL/gl3.h>
-//#endif
 
 #include "mzOpenGL.h"
 
-#ifdef MZGL_GL2
-#	define NANOVG_GL2_IMPLEMENTATION
-#else
-#	define NANOVG_GL3_IMPLEMENTATION
-#endif
+#define NANOVG_GL3_IMPLEMENTATION
+
 #include "nanovg_gl.h"
 
 #include <glm/gtc/type_ptr.hpp>

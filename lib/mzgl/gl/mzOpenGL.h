@@ -8,14 +8,7 @@
 #		if TARGET_OS_IOS
 #			include <OpenGLES/ES3/gl.h>
 #		else
-#			ifdef MZGL_GL2
-#				include <OpenGL/gl.h>
-#				define glGenVertexArrays	 glGenVertexArraysAPPLE
-#				define glBindVertexArray	 glBindVertexArrayAPPLE
-#				define glDeleteVertexArrays glDeleteVertexArraysAPPLE
-#			else
-#				include <OpenGL/gl3.h>
-#			endif
+#			include <OpenGL/gl3.h>
 #		endif
 #	endif
 #elif defined(_WIN32)

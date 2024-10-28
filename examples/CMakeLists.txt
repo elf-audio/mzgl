@@ -12,7 +12,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment ver
 project("examples")
 
 
-add_compile_definitions(GL_SILENCE_DEPRECATION MZGL_GL2 MZGL_MAC_GLFW __MACOSX_CORE__)
+add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
 
 
 add_subdirectory(".." "mzgl-build")

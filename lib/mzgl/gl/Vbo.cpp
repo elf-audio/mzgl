@@ -51,9 +51,7 @@ void Vbo::printVbos() {
 #endif
 
 Vbo::Vbo() {
-#ifndef MZGL_GL2
 	glGenVertexArrays(1, &vertexArrayObject);
-#endif
 
 #ifdef __ANDROID__
 	vbos.push_back(this);
@@ -78,30 +76,23 @@ void Vbo::deallocateResources() {
 	texCoordBuffer.deallocate();
 	normalBuffer.deallocate();
 	indexBuffer.deallocate();
-#ifndef MZGL_GL2
 	if (vertexArrayObject != 0) glDeleteVertexArrays(1, &vertexArrayObject);
-#endif
-
-#ifndef MZGL_GL2
 	vertexArrayObject = 0;
-#endif
+
 	mode = PrimitiveType::None;
 }
 
 void Vbo::clear() {
 	deallocateResources();
-#ifndef MZGL_GL2
 	glGenVertexArrays(1, &vertexArrayObject);
-#endif
 }
 
 template <class T>
 static void setBuffer(Vbo &vbo, Vbo::Buffer &buff, const std::vector<T> &v) {
 	if (buff.id != 0) glDeleteBuffers(1, &buff.id);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(vbo.vertexArrayObject);
-#endif
+
 	buff.dimensions = sizeof(T) / 4;
 	buff.size		= v.size();
 	glGenBuffers(1, &buff.id);
@@ -111,9 +102,7 @@ static void setBuffer(Vbo &vbo, Vbo::Buffer &buff, const std::vector<T> &v) {
 
 template <class T>
 static void updateVertBuffer(const uint32_t &vao, Vbo::Buffer &buff, const std::vector<T> &data) {
-#ifndef MZGL_GL2
 	glBindVertexArray(vao);
-#endif
 	glBindBuffer(GL_ARRAY_BUFFER, buff.id);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, buff.size * sizeof(float) * buff.dimensions, data.data());
 }
@@ -161,9 +150,7 @@ Vbo &Vbo::setNormals(const std::vector<vec3> &norms) {
 Vbo &Vbo::setIndices(const std::vector<unsigned int> &indices) {
 	if (indexBuffer.id != 0) glDeleteBuffers(1, &indexBuffer.id);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(vertexArrayObject);
-#endif
 	indexBuffer.size = indices.size();
 
 	glGenBuffers(1, &indexBuffer.id);
@@ -244,11 +231,9 @@ void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
 		return;
 	}
 
-#ifndef MZGL_GL2
 	if (vertexArrayObject == 0) {
 		return;
 	}
-#endif
 
 #ifdef DO_DRAW_STATS
 	_numDrawnVerts += vertexBuffer.size;
@@ -264,9 +249,7 @@ void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
 
 	chooseShaderAndSetDefaults(g);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(vertexArrayObject);
-#endif
 
 	bindBuffer(vertexBuffer, g.currShader->positionAttribute);
 
@@ -281,25 +264,9 @@ void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
 	auto glMode = primitiveTypeToGLMode(_mode);
 	if (instances > 1) {
 		if (indexBuffer.id) {
-#ifdef MZGL_GL2
-			// simulate instancing in gl2
-			for (int i = 0; i < instances; i++) {
-				g.currShader->setInstanceUniforms(i);
-				glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr);
-			}
-#else
 			glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, instances);
-#endif
 		} else {
-#ifdef MZGL_GL2
-			// simulate instancing in gl2
-			for (int i = 0; i < instances; i++) {
-				g.currShader->setInstanceUniforms(i);
-				glDrawArrays(glMode, 0, (GLsizei) indexBuffer.size);
-			}
-#else
 			glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, instances);
-#endif
 		}
 	} else {
 		if (indexBuffer.id) {
@@ -311,9 +278,7 @@ void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(0);
-#endif
 
 	glDisableVertexAttribArray(g.currShader->positionAttribute);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

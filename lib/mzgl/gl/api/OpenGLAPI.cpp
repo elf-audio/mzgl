@@ -29,22 +29,17 @@ void OpenGLAPI::init() {
 	const unsigned char *openglVersion = glGetString(GL_VERSION);
 	if (openglVersion != nullptr) {
 		Log::d() << "OpenGL Version: " << openglVersion;
-#ifdef MZGL_GL2
-		Log::d() << "MZGL Compiled with MZGL_GL2==TRUE";
-#endif
 	} else {
 		Log::d() << "OpenGL Version: null";
 	}
 	loadDefaultShaders();
 
-#ifndef MZGL_GL2
 	if (immediateVertexArray != 0) {
 		Log::e() << "Immediate vertex array recreated - is this bad? if on android, probs should clean this up";
 	}
 	glGenVertexArrays(1, &immediateVertexArray);
 	glBindVertexArray(immediateVertexArray);
 
-#endif
 	if (immediateVertexBuffer != 0) {
 		Log::e() << "Immediate vertex buffer recreated - is this bad?";
 	}
@@ -94,10 +89,8 @@ void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveTyp
 		g.currShader->uniform("color", g.getColor());
 	}
 
-#ifndef MZGL_GL2
 	if (immediateVertexArray == 0) return;
 	glBindVertexArray(immediateVertexArray);
-#endif
 
 	glEnableVertexAttribArray(g.currShader->positionAttribute);
 	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
@@ -110,9 +103,7 @@ void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveTyp
 
 	glDisableVertexAttribArray(g.currShader->positionAttribute);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(0);
-#endif
 }
 
 void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts,
@@ -125,10 +116,8 @@ void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts,
 		g.currShader->uniform("color", g.getColor());
 	}
 
-#ifndef MZGL_GL2
 	if (immediateVertexArray == 0) return;
 	glBindVertexArray(immediateVertexArray);
-#endif
 
 	glEnableVertexAttribArray(g.currShader->positionAttribute);
 	glBindBuffer(GL_ARRAY_BUFFER, immediateVertexBuffer);
@@ -145,9 +134,7 @@ void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts,
 	glDisableVertexAttribArray(g.currShader->positionAttribute);
 	glDisableVertexAttribArray(g.currShader->colorAttribute);
 
-#ifndef MZGL_GL2
 	glBindVertexArray(0);
-#endif
 }
 
 void OpenGLAPI::maskOn(const Rectf &r) {
