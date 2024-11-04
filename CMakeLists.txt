@@ -70,6 +70,11 @@ set(MZGL_SOURCES
     lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/midi/MidiMessage.cpp
+    lib/mzgl/midi/MidiMessage.h
+    lib/mzgl/midi/MidiCCModeDetector.cpp
+    lib/mzgl/midi/MidiCCModeDetector.h
+    lib/mzgl/midi/MidiCCMessageParser.cpp
+    lib/mzgl/midi/MidiCCMessageParser.h
     lib/mzgl/midi/MidiMessageParser.cpp
     lib/mzgl/midi/MidiMessageParser.h
     lib/mzgl/midi/midiMessagePrinting.cpp
