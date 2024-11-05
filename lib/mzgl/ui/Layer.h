@@ -151,6 +151,13 @@ public:
 		return childrenOfType;
 	}
 
+	template <class T>
+	void performOnAllChildrenOfType(const std::function<void(T *)> &perLayerFunction, bool recursive = false) {
+		for (auto control: collectChildrenOfType<T>(recursive)) {
+			perLayerFunction(control);
+		}
+	}
+
 	[[nodiscard]] Rectf thisAsRect() const;
 
 protected:
