@@ -151,6 +151,8 @@ public:
 		return childrenOfType;
 	}
 
+	[[nodiscard]] Rectf thisAsRect() const;
+
 protected:
 	void transformMouse(float &x, float &y);
 

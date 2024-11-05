@@ -545,9 +545,9 @@ void Layer::alignChildrenToPixels() {
 	}
 }
 
-Layer *Layer::getChild(const std::string &name) {
+Layer *Layer::getChild(const std::string &_name) {
 	for (auto *ch: children) {
-		if (ch->name == name) return ch;
+		if (ch->name == _name) return ch;
 	}
 	return nullptr;
 }
@@ -575,4 +575,8 @@ bool Layer::_keyUp(int key) {
 		return true;
 	}
 	return false;
+}
+
+Rectf Layer::thisAsRect() const {
+	return Rectf {static_cast<const Rectf &>(*this)};
 }
