@@ -73,7 +73,7 @@ private:
 	vec2 totalMovement {0.f, 0.f};
 	vec2 prevTouch {0.f, 0.f};
 
-	std::shared_ptr<Haptics> haptics;
+	Haptics haptics;
 };
 
 class ScrollingListDeletableStringView : public ScrollingListDeletableView {

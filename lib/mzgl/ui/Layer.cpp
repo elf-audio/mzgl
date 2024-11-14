@@ -201,7 +201,7 @@ void Layer::_touchUp(float x, float y, int id) {
 	float yy = y;
 	transformMouse(xx, yy);
 
-	if (parent == NULL && g.focusedLayers.find(id) != g.focusedLayers.end()) {
+	if (parent == nullptr && g.focusedLayers.find(id) != g.focusedLayers.end()) {
 		float xxx = x;
 		float yyy = y;
 

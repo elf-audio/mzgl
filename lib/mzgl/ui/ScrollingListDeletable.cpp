@@ -1,16 +1,7 @@
-//
-//  ScrollingListDeletable.cpp
-//  mzgl
-//
-//  Created by Marek Bereza on 16/06/2021.
-//  Copyright © 2021 Marek Bereza. All rights reserved.
-//
-
 #include "ScrollingListDeletable.h"
 #include "maths.h"
 #include "animation.h"
 #include "Drawer.h"
-#include "util.h"
 #include "Dialogs.h"
 #include <algorithm>
 
@@ -109,7 +100,6 @@ bool ScrollingListDeletableView::touchDown(float x, float y, int id) {
 	deleteDecidey		  = 0.f;
 	totalMovement		  = {0.f, 0.f};
 	initialScrollTarget	  = horizontalScrollTarget;
-	haptics				  = std::make_shared<Haptics>();
 	if (settings.selectionBehaviour == Settings::SelectionBehaviour::OnMouseDown) {
 		selectedSelf();
 	}
@@ -128,13 +118,13 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 
 				if (x < decidePoint - width * 0.02 && !shouldDelete) {
 					shouldDelete = true;
-					haptics->lightTap();
+					haptics.lightTap();
 				} else if (x > decidePoint + width * 0.02 && shouldDelete) {
 					shouldDelete = false;
-					haptics->lightTap();
+					haptics.lightTap();
 				}
 			} else if (delta.x < -width * 0.5) {
-				haptics->lightTap();
+				haptics.lightTap();
 				horizontalScrollTarget = -width;
 				deleting			   = true;
 				shouldDelete		   = true;
@@ -159,7 +149,6 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 				localToAbsoluteCoords(x, y);
 
 				Layer *scrollingList = getParent()->getParent();
-				haptics				 = nullptr;
 				transferFocus(scrollingList, id);
 				scrollingList->absoluteToLocalCoords(x, y);
 				scrollingList->touchDown(x, y, id);
@@ -219,6 +208,5 @@ void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 			}
 		}
 	}
-	down	= false;
-	haptics = nullptr;
+	down = false;
 }
