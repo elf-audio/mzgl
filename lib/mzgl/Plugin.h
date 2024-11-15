@@ -159,7 +159,7 @@ class Plugin : public Serializable {
 public:
 	Plugin() { midiOutMessages.reserve(100); }
 
-	virtual ~Plugin() {}
+	virtual ~Plugin() = default;
 
 	friend class PluginEditor;
 

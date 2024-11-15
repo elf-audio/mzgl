@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include <assert.h>
 
 class PluginParameter {
 public:
