@@ -518,6 +518,10 @@ void androidSendMidi(const std::vector<uint8_t> &midiData,
 	androidMidiThread.send({midiData, deviceId, portId, timestampInNanoSeconds});
 }
 
+void androidDisplayMidiBLEPanel() {
+	callJNI("displayMidiBLEPanel");
+}
+
 void androidOnMidiInputDeviceConnected(int32_t deviceId,
 									   int32_t portId,
 									   bool isInput,
