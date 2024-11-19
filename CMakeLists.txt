@@ -258,6 +258,7 @@ if(APPLE)
     lib/mzgl/util/log.cpp
     lib/mzgl/util/WebViewOverlay.cpp
     lib/mzgl/net/netUtil.cpp
+    lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
 else()
   list(APPEND MZGL_SOURCES lib/misc/speex_resampler.cpp)

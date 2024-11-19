@@ -78,10 +78,21 @@ public:
 	void lightTap() override { [happer lightTap]; }
 };
 #endif
+#if TARGET_OS_MAC
+#	include <AppKit/AppKit.h>
 
+class HapticsMac : public HapticsImpl {
+	void lightTap() {
+		[[NSHapticFeedbackManager defaultPerformer] performFeedbackPattern:NSHapticFeedbackPatternAlignment
+														   performanceTime:NSHapticFeedbackPerformanceTimeNow];
+	}
+};
+#endif
 Haptics::Haptics() {
 #if TARGET_OS_IOS
 	impl = std::make_shared<HapticsIOS>();
+#elif TARGET_OS_MAC
+	impl = std::make_shared<HapticsMac>();
 #else
 	impl = make_shared<HapticsImpl>();
 #endif
