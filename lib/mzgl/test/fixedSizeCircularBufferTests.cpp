@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "FixedSizeCircularBuffer.h"
 
+#include <numeric>
 TEST_CASE("FixedSizeCircularBuffer functionality", "[fixedsizecircularbuffer]") {
 	GIVEN("An empty FixedSizeCircularBuffer of size 5") {
 		FixedSizeCircularBuffer<int, 5> buffer;
