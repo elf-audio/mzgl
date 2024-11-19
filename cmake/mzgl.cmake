@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/log-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/warning-saver.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/package-manager.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/warnings.cmake)
 
 mzgl_detect_cpm_root_dir()
 mzgl_detect_cpm_sub_dir()

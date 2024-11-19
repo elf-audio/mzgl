@@ -472,3 +472,5 @@ endif()
 if(NOT WIN32)
   add_compile_options(-fdiagnostics-color=always)
 endif()
+
+mzgl_supress_warnings()
