@@ -20,7 +20,7 @@ public:
 
 	void setStrokeWeight(float strokeWeight) { this->strokeWeight = strokeWeight; }
 	Geometry geom;
-
+	void append(const Drawer &d) { geom.append(d.geom); }
 	MitredLine lineDrawer;
 	void fill();
 	void noFill();
