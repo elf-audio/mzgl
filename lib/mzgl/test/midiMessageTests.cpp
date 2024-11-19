@@ -60,7 +60,7 @@ SCENARIO("MidiMessage correctly identifies Pitch Bend events", "[midimessage]") 
 				float pitchBendValue = message.getPitchBend();
 
 				THEN("The pitch bend value should be 0.0, as it is in the center position") {
-					REQUIRE(pitchBendValue == Approx(0.0f));
+					REQUIRE(pitchBendValue == Catch::Approx(0.0f));
 				}
 			}
 		}
@@ -115,7 +115,7 @@ SCENARIO("MidiMessage correctly identifies Song Position Pointer events", "[midi
 				double songPosition = message.getSongPosition();
 
 				THEN("The song position should be 21") {
-					REQUIRE(songPosition == Approx(21.3333).epsilon(1e-3));
+					REQUIRE(songPosition == Catch::Approx(21.3333).epsilon(1e-3));
 				}
 			}
 		}
