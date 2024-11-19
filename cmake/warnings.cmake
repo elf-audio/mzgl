@@ -1,0 +1,22 @@
+function(mzgl_supress_target_warnings TARGET)
+  mzgl_print_in_green("Supressing warnings in ${TARGET}")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+    target_compile_options("${TARGET}" PRIVATE -w)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options("${TARGET}" PRIVATE -w)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options("${TARGET}" PRIVATE /w)
+  else()
+    message(WARNING "Unknown compiler. Warnings suppression not applied.")
+  endif()
+endfunction(mzgl_supress_target_warnings)
+
+function(mzgl_supress_warnings)
+  mzgl_supress_target_warnings(ZipFile)
+  mzgl_supress_target_warnings(staticZipper)
+  if(NOT ANDROID
+     AND NOT WIN32
+     AND NOT IOS)
+    mzgl_supress_target_warnings(PortAudio)
+  endif()
+endfunction()
