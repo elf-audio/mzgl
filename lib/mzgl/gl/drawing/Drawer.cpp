@@ -6,6 +6,24 @@
 #include "mzAssert.h"
 #include "log.h"
 using namespace std;
+namespace Maths {
+	constexpr float PI	   = 3.14159265358979323846f; // Single precision
+	constexpr float TWO_PI = 2.0f * PI; // Two times PI
+} // namespace Maths
+
+float calcAngleStep(float radius) {
+	static const float maxArcLength		 = 3.f;
+	static constexpr int maxSteps		 = 100;
+	static constexpr float maxStepsAngle = Maths::TWO_PI / (float) maxSteps; // Step angle based on maxSteps
+
+	float arcBasedAngle = maxArcLength / radius; // Step angle based on maxArcLength
+	//	{
+	//		auto numStepsMax	= Maths::TWO_PI / (float) maxStepsAngle;
+	//		auto calcedNumSteps = Maths::TWO_PI / arcBasedAngle;
+	//		printf("numStepsMax %f calcedNumSteps %f\n", numStepsMax, calcedNumSteps);
+	//	}
+	return std::max(arcBasedAngle, maxStepsAngle); // Choose the larger of the two
+}
 
 void Drawer::setColor(const glm::vec4 &c) {
 	this->color		= c;
@@ -194,15 +212,18 @@ void Drawer::drawTriangles(const std::vector<vec2> &verts, const std::vector<uin
 	geom.cols.insert(geom.cols.end(), verts.size(), color);
 }
 
-void Drawer::drawTriangleStrip(const vector<vec2> &strip) {
+void Drawer::drawTriangleStrip(const vector<vec2> &strip, const std::vector<vec4> &cols) {
 	// size must be even and at least 4 verts
 	mzAssert(strip.size() >= 4 && strip.size() % 2 == 0);
 	// new way
 	auto startPos = geom.verts.size();
 
-	//	geom.verts.reserve(geom.verts.size() + strip.size());
 	geom.verts.insert(geom.verts.end(), strip.begin(), strip.end());
-	geom.cols.insert(geom.cols.end(), strip.size(), color);
+	if (cols.size() > 0) {
+		geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
+	} else {
+		geom.cols.insert(geom.cols.end(), strip.size(), color);
+	}
 
 	auto numParts = strip.size() / 2;
 	for (uint32_t i = 1; i < numParts; i++) {
@@ -314,8 +335,9 @@ void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
 
 void Drawer::drawCircle(glm::vec2 c, float r) {
 	auto startIndex = geom.verts.size();
+	float angleStep = calcAngleStep(r);
 	if (filled) {
-		for (float th = 0; th < M_PI * 2; th += M_PI * 0.02) {
+		for (float th = 0; th < Maths::TWO_PI; th += angleStep) {
 			geom.verts.push_back({c.x + cos(th) * r, c.y + sin(th) * r});
 		}
 
@@ -330,7 +352,7 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 		float sw	= strokeWeight * 0.5;
 		float inner = r - sw;
 		float outer = r + sw;
-		for (float th = 0; th < M_PI * 2; th += M_PI * 0.02) {
+		for (float th = 0; th < Maths::TWO_PI; th += angleStep) {
 			float x = cos(th);
 			float y = sin(th);
 			geom.verts.push_back({c.x + x * outer, c.y + y * outer});
@@ -387,6 +409,26 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 	}
 }
 
+void Drawer::drawCircleShadow(const vec2 &c, float r, float shadowRadius) {
+	std::vector<vec2> verts;
+	std::vector<vec4> cols;
+	float outerRadius = r + shadowRadius;
+	vec4 zeroAlpha	  = color;
+	zeroAlpha.a		  = 0;
+	float angleStep	  = calcAngleStep(r);
+	for (float th = 0; th <= Maths::TWO_PI; th += angleStep) {
+		vec2 angs {cos(th), sin(th)};
+		verts.push_back(c + angs * r);
+		verts.push_back(c + angs * outerRadius);
+		cols.push_back(color);
+		cols.push_back(zeroAlpha);
+	}
+	verts.push_back(verts[0]);
+	verts.push_back(verts[1]);
+	cols.push_back(color);
+	cols.push_back(zeroAlpha);
+	drawTriangleStrip(verts, cols);
+}
 void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 	if (radius < 4.1f) radius = 4.1f;
 	rrv.clear();
@@ -459,7 +501,7 @@ void Drawer::getPerfectRoundedRectVerts(
 		return;
 	}
 	float step	   = asin(pixelsPerStep / 2.f / radius) / 2.f;
-	float numSteps = M_PI * 2.f / step;
+	float numSteps = Maths::TWO_PI / step;
 
 	createRoundedRectCache(cache, numSteps);
 	roundedRectVerts(r, radius, outVerts, cache, tl, tr, br, bl);
@@ -552,7 +594,7 @@ void Drawer::roundedRectVerts(const Rectf &r,
 void Drawer::createRoundedRectCache(vector<glm::vec2> &cache, int numSteps) {
 	cache.resize(numSteps); //20
 	for (int i = 0; i < cache.size(); i++) {
-		float phi = mapf(i, 0, cache.size(), M_PI, M_PI + M_PI / 2.0);
+		float phi = mapf(i, 0, cache.size(), Maths::PI, Maths::PI + Maths::PI / 2.0);
 		cache[i]  = glm::vec2(1.f + (float) cos(phi), 1.f + (float) sin(phi));
 	}
 }

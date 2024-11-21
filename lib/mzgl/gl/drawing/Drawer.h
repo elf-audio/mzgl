@@ -48,14 +48,14 @@ public:
 	void drawBevelledLineStrip(const std::vector<vec2> &strip,
 							   MitredLine::EndCap endCap = MitredLine::EndCap::None);
 
-	void drawTriangleStrip(const std::vector<vec2> &strip);
+	void drawTriangleStrip(const std::vector<vec2> &strip, const std::vector<vec4> &cols = {});
 	void drawTriangleFan(const std::vector<vec2> &fan);
 	void drawTriangles(const std::vector<vec2> &verts, const std::vector<uint32_t> &indices);
 	void drawRect(const Rectf &r);
 	void drawRect(float x, float y, float width, float height);
 
 	void drawCircle(glm::vec2 c, float r);
-
+	void drawCircleShadow(const vec2 &c, float radius, float shadowRadius);
 	void drawArc(glm::vec2 c, float r, float startAngle, float endAngle);
 
 	void drawRoundedRect(const Rectf &r, float radius);
