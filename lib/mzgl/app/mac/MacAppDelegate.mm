@@ -136,12 +136,15 @@ void handleTerminateSignal(int signal) {
 	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 	view	   = controller.view;
 #else
-	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
+	view				   = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
+	EventsView *aView	   = (EventsView *) view;
+	aView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 #endif
 
 	window.delegate = view;
 	[[window contentView] addSubview:view];
 	[window makeKeyAndOrderFront:nil];
+	[window center];
 	[window makeMainWindow];
 #ifdef USE_METALANGLE
 	app->viewController = controller;

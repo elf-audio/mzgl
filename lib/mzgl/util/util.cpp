@@ -314,14 +314,7 @@ void setWindowSize(int w, int h) {
 #	if TARGET_OS_IOS
 	// do nothing. iPhones have fixed window size
 #	else
-	NSWindow *win = [NSApp mainWindow];
-	//	win.frame.size = CGSizeMake(2000, 2000);
-
-	// these lines were commented out because we don't have SCALE_FACTOR any more.
-	// it's now g.pixelScale
-	//	w /= g.pixelScale;
-	//	h /= g.pixelScale;
-
+	NSWindow *win  = [NSApp mainWindow];
 	NSRect frame   = win.frame;
 	NSSize newSize = CGSizeMake(w, h);
 
@@ -330,16 +323,21 @@ void setWindowSize(int w, int h) {
 	frame.size = newSize;
 	dispatch_async(dispatch_get_main_queue(), ^(void) {
 	  [win setFrame:frame display:YES animate:NO];
-	  //		// get window delegate which is events view
 	  EventsView *delegate = (EventsView *) win.delegate;
-	  if (delegate == nullptr) return;
-	  auto evts			  = [delegate getEventDispatcher];
-	  evts->app->g.width  = w;
-	  evts->app->g.height = h;
-	  evts->resized();
-	  //		// then call windowDidEndLiveResize:(NSNotification *)notification
-	  //		NSNotification *notif = [[NSNotification alloc] initWithName:@"" object:win userInfo:nil];
-	  //		[delegate windowDidEndLiveResize:notif];
+	  if (delegate == nullptr) {
+		  return;
+	  }
+	  auto dispatcher			= [delegate getEventDispatcher];
+	  dispatcher->app->g.width	= w;
+	  dispatcher->app->g.height = h;
+	  dispatcher->resized();
+
+	  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (USEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		MZGLView *view = (MZGLView *) win.delegate;
+		[view windowResized:[[NSNotification alloc] initWithName:@"" object:win userInfo:nil]];
+		[win display];
+		[win center];
+	  });
 	});
 
 #	endif

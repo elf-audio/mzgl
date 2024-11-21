@@ -124,36 +124,12 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	frame.origin.y += newSize.height;
 	frame.size = newSize;
 	[self.window setFrame:frame display:YES animate:NO];
-	//	eventDispatcher->resized();
 }
 
 - (void)createGLResources {
 	[[self openGLContext] makeCurrentContext];
 	Graphics &g = eventDispatcher->app->g;
-	//	glViewport(0, 0, g.width/g.pixelScale, g.height/g.pixelScale);
 }
-
-//- (BOOL)windowShouldClose:(NSWindow *)sender {
-//	Log::d() << "windowShouldClose";
-//	return YES;
-//}
-//
-//
-//- (void)windowDidBecomeKey:(NSNotification *)notification {
-//	NSWindow *window = notification.object;
-//	Graphics &g = eventDispatcher->app->g;
-//
-//	g.pixelScale = [window backingScaleFactor];
-//}
-//
-//
-//
-//- (void)windowWillClose:(NSNotification *)notification {
-//	//[self shutdown];
-//	Log::d() << "windowWillClose";
-//	[[NSApplication sharedApplication] terminate:nil];
-//	//EventDispatcher::instance()->exit();
-//}
 
 - (void)windowResized:(NSNotification *)notification {
 	Log::d() << "windowDidResize";
@@ -163,20 +139,18 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	Graphics &g	  = eventDispatcher->app->g;
 	g.width		  = window.contentLayoutRect.size.width;
 	g.height	  = window.contentLayoutRect.size.height;
-	g.pixelScale  = [window backingScaleFactor];
+
 	auto f		  = self.frame;
 	f.size.width  = g.width;
 	f.size.height = g.height;
-
-	//	evtMutex.lock();
 	self.frame = f;
-	glViewport(0, 0, g.width, g.height);
+
+	glViewport(0, 0, g.width*g.pixelScale, g.height*g.pixelScale);
+
 	g.width *= g.pixelScale;
 	g.height *= g.pixelScale;
 
-	auto evtDispatcher = eventDispatcher;
-	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher, &g]() { evtDispatcher->resized(); });
-	//	evtMutex.unlock();
+	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });
 }
 
 - (void)renderForTime:(CVTimeStamp)time {
