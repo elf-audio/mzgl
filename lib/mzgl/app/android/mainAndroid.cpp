@@ -299,7 +299,8 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 													  {AKEYCODE_PERIOD, '.'},
 													  {AKEYCODE_SPACE, ' '},
 													  {AKEYCODE_ENTER, '\n'},
-													  {AKEYCODE_DEL, 8},
+													  {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
+													  {AKEYCODE_DEL, MZ_KEY_DELETE},
 													  {AKEYCODE_GRAVE, '`'},
 													  {AKEYCODE_MINUS, '-'},
 													  {AKEYCODE_EQUALS, '='},
@@ -331,7 +332,11 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 													  {AKEYCODE_NUMPAD_EQUALS, '='},
 													  {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
 													  {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
-													  {AKEYCODE_TAB, MZ_KEY_TAB}};
+													  {AKEYCODE_TAB, MZ_KEY_TAB},
+													  {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
+													  {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
+													  {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
+													  {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
 
 	const static std::map<int32_t, char> shiftKeyboardMap {{AKEYCODE_0, '!'},
 														   {AKEYCODE_1, '@'},
@@ -375,7 +380,8 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 														   {AKEYCODE_PERIOD, '>'},
 														   {AKEYCODE_SPACE, ' '},
 														   {AKEYCODE_ENTER, '\n'},
-														   {AKEYCODE_DEL, 8},
+														   {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
+														   {AKEYCODE_DEL, MZ_KEY_DELETE},
 														   {AKEYCODE_GRAVE, '~'},
 														   {AKEYCODE_MINUS, '_'},
 														   {AKEYCODE_EQUALS, '+'},
@@ -407,7 +413,11 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 														   {AKEYCODE_NUMPAD_EQUALS, '='},
 														   {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
 														   {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
-														   {AKEYCODE_TAB, MZ_KEY_SHIFT_TAB}};
+														   {AKEYCODE_TAB, MZ_KEY_SHIFT_TAB},
+														   {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
+														   {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
+														   {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
+														   {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
 
 	auto &keymap = (shiftIsDown) ? shiftKeyboardMap : keyboardMap;
 	auto iter	 = keymap.find(k);
