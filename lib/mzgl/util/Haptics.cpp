@@ -77,8 +77,7 @@ public:
 
 	void lightTap() override { [happer lightTap]; }
 };
-#endif
-#if TARGET_OS_MAC
+#elif TARGET_OS_MAC==1
 #	include <AppKit/AppKit.h>
 
 class HapticsMac : public HapticsImpl {
