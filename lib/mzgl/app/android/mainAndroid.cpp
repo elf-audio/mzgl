@@ -257,7 +257,7 @@ static void engine_term_display(struct engine *engine) {
 //#include "Global.h"
 
 int keycodeToKey(int32_t k, bool shiftIsDown) {
-	const static std::map<int32_t, char> keyboardMap {{AKEYCODE_0, '0'},
+	const static std::map<int32_t, int> keyboardMap {{AKEYCODE_0, '0'},
 													  {AKEYCODE_1, '1'},
 													  {AKEYCODE_2, '2'},
 													  {AKEYCODE_3, '3'},
@@ -338,7 +338,7 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 													  {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
 													  {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
 
-	const static std::map<int32_t, char> shiftKeyboardMap {{AKEYCODE_0, '!'},
+	const static std::map<int32_t, int> shiftKeyboardMap {{AKEYCODE_0, '!'},
 														   {AKEYCODE_1, '@'},
 														   {AKEYCODE_2, '2'},
 														   {AKEYCODE_3, '$'},
@@ -499,7 +499,6 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 	} else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
 		int32_t keyAction = AKeyEvent_getAction(event);
 		bool shiftIsHeld  = AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON;
-		Log::d() << "Key action = " << keyAction;
 		if (keyAction == AKEY_EVENT_ACTION_DOWN) {
 			auto key = keycodeToKey(AKeyEvent_getKeyCode(event), shiftIsHeld);
 			if (key != 0) {
