@@ -14,6 +14,7 @@
 using namespace std;
 
 bool engineReady = false;
+
 /**
  * Shared state for our app.
  */
@@ -112,7 +113,6 @@ void createSurface(struct engine *engine) {
  * Initialize an EGL context for the current display.
  */
 static int engine_init_display(struct engine *engine) {
-
 	engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 	EGLint major;
@@ -256,87 +256,177 @@ static void engine_term_display(struct engine *engine) {
 // get rid of this include, it's for fixing some touch problem in android koala
 //#include "Global.h"
 
-int keycodeToKey(int32_t k) {
-	switch (k) {
-		case AKEYCODE_0: return '0';
-		case AKEYCODE_1: return '1';
-		case AKEYCODE_2: return '2';
-		case AKEYCODE_3: return '3';
-		case AKEYCODE_4: return '4';
-		case AKEYCODE_5: return '5';
-		case AKEYCODE_6: return '6';
-		case AKEYCODE_7: return '7';
-		case AKEYCODE_8: return '8';
-		case AKEYCODE_9: return '9';
-		case AKEYCODE_STAR: return '*';
+int keycodeToKey(int32_t k, bool shiftIsDown) {
+	const static std::map<int32_t, int> keyboardMap {{AKEYCODE_0, '0'},
+													  {AKEYCODE_1, '1'},
+													  {AKEYCODE_2, '2'},
+													  {AKEYCODE_3, '3'},
+													  {AKEYCODE_4, '4'},
+													  {AKEYCODE_5, '5'},
+													  {AKEYCODE_6, '6'},
+													  {AKEYCODE_7, '7'},
+													  {AKEYCODE_8, '8'},
+													  {AKEYCODE_9, '9'},
+													  {AKEYCODE_STAR, '*'},
+													  {AKEYCODE_POUND, '#'},
+													  {AKEYCODE_A, 'a'},
+													  {AKEYCODE_B, 'b'},
+													  {AKEYCODE_C, 'c'},
+													  {AKEYCODE_D, 'd'},
+													  {AKEYCODE_E, 'e'},
+													  {AKEYCODE_F, 'f'},
+													  {AKEYCODE_G, 'g'},
+													  {AKEYCODE_H, 'h'},
+													  {AKEYCODE_I, 'i'},
+													  {AKEYCODE_J, 'j'},
+													  {AKEYCODE_K, 'k'},
+													  {AKEYCODE_L, 'l'},
+													  {AKEYCODE_M, 'm'},
+													  {AKEYCODE_N, 'n'},
+													  {AKEYCODE_O, 'o'},
+													  {AKEYCODE_P, 'p'},
+													  {AKEYCODE_Q, 'q'},
+													  {AKEYCODE_R, 'r'},
+													  {AKEYCODE_S, 's'},
+													  {AKEYCODE_T, 't'},
+													  {AKEYCODE_U, 'u'},
+													  {AKEYCODE_V, 'v'},
+													  {AKEYCODE_W, 'w'},
+													  {AKEYCODE_X, 'x'},
+													  {AKEYCODE_Y, 'y'},
+													  {AKEYCODE_Z, 'z'},
+													  {AKEYCODE_COMMA, ','},
+													  {AKEYCODE_PERIOD, '.'},
+													  {AKEYCODE_SPACE, ' '},
+													  {AKEYCODE_ENTER, '\n'},
+													  {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
+													  {AKEYCODE_DEL, MZ_KEY_DELETE},
+													  {AKEYCODE_GRAVE, '`'},
+													  {AKEYCODE_MINUS, '-'},
+													  {AKEYCODE_EQUALS, '='},
+													  {AKEYCODE_LEFT_BRACKET, '['},
+													  {AKEYCODE_RIGHT_BRACKET, ']'},
+													  {AKEYCODE_BACKSLASH, '\\'},
+													  {AKEYCODE_SEMICOLON, ';'},
+													  {AKEYCODE_APOSTROPHE, '\''},
+													  {AKEYCODE_SLASH, '/'},
+													  {AKEYCODE_AT, '@'},
+													  {AKEYCODE_PLUS, '+'},
+													  {AKEYCODE_NUMPAD_0, '0'},
+													  {AKEYCODE_NUMPAD_1, '1'},
+													  {AKEYCODE_NUMPAD_2, '2'},
+													  {AKEYCODE_NUMPAD_3, '3'},
+													  {AKEYCODE_NUMPAD_4, '4'},
+													  {AKEYCODE_NUMPAD_5, '5'},
+													  {AKEYCODE_NUMPAD_6, '6'},
+													  {AKEYCODE_NUMPAD_7, '7'},
+													  {AKEYCODE_NUMPAD_8, '8'},
+													  {AKEYCODE_NUMPAD_9, '9'},
+													  {AKEYCODE_NUMPAD_DIVIDE, '/'},
+													  {AKEYCODE_NUMPAD_MULTIPLY, '*'},
+													  {AKEYCODE_NUMPAD_SUBTRACT, '-'},
+													  {AKEYCODE_NUMPAD_ADD, '+'},
+													  {AKEYCODE_NUMPAD_DOT, '.'},
+													  {AKEYCODE_NUMPAD_COMMA, ','},
+													  {AKEYCODE_NUMPAD_ENTER, '\n'},
+													  {AKEYCODE_NUMPAD_EQUALS, '='},
+													  {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
+													  {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
+													  {AKEYCODE_TAB, MZ_KEY_TAB},
+													  {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
+													  {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
+													  {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
+													  {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
 
-		case AKEYCODE_POUND: return '#';
-		case AKEYCODE_A: return 'a';
-		case AKEYCODE_B: return 'b';
-		case AKEYCODE_C: return 'c';
-		case AKEYCODE_D: return 'd';
-		case AKEYCODE_E: return 'e';
-		case AKEYCODE_F: return 'f';
-		case AKEYCODE_G: return 'g';
-		case AKEYCODE_H: return 'h';
-		case AKEYCODE_I: return 'i';
-		case AKEYCODE_J: return 'j';
-		case AKEYCODE_K: return 'k';
-		case AKEYCODE_L: return 'l';
-		case AKEYCODE_M: return 'm';
-		case AKEYCODE_N: return 'n';
-		case AKEYCODE_O: return 'o';
-		case AKEYCODE_P: return 'p';
-		case AKEYCODE_Q: return 'q';
-		case AKEYCODE_R: return 'r';
-		case AKEYCODE_S: return 's';
-		case AKEYCODE_T: return 't';
-		case AKEYCODE_U: return 'u';
-		case AKEYCODE_V: return 'v';
-		case AKEYCODE_W: return 'w';
-		case AKEYCODE_X: return 'x';
-		case AKEYCODE_Y: return 'y';
-		case AKEYCODE_Z: return 'z';
-		case AKEYCODE_COMMA: return ',';
-		case AKEYCODE_PERIOD: return '.';
-		case AKEYCODE_TAB: return '\t';
-		case AKEYCODE_SPACE: return ' ';
-		case AKEYCODE_ENTER: return '\n';
-		case AKEYCODE_DEL: return 8;
-		case AKEYCODE_GRAVE: return '`';
-		case AKEYCODE_MINUS: return '-';
-		case AKEYCODE_EQUALS: return '=';
-		case AKEYCODE_LEFT_BRACKET: return '[';
-		case AKEYCODE_RIGHT_BRACKET: return ']';
-		case AKEYCODE_BACKSLASH: return '\\';
+	const static std::map<int32_t, int> shiftKeyboardMap {{AKEYCODE_0, '!'},
+														   {AKEYCODE_1, '@'},
+														   {AKEYCODE_2, '2'},
+														   {AKEYCODE_3, '$'},
+														   {AKEYCODE_4, '$'},
+														   {AKEYCODE_5, '%'},
+														   {AKEYCODE_6, '^'},
+														   {AKEYCODE_7, '&'},
+														   {AKEYCODE_8, '*'},
+														   {AKEYCODE_9, '('},
+														   {AKEYCODE_STAR, '*'},
+														   {AKEYCODE_POUND, '#'},
+														   {AKEYCODE_A, 'A'},
+														   {AKEYCODE_B, 'B'},
+														   {AKEYCODE_C, 'C'},
+														   {AKEYCODE_D, 'D'},
+														   {AKEYCODE_E, 'E'},
+														   {AKEYCODE_F, 'F'},
+														   {AKEYCODE_G, 'G'},
+														   {AKEYCODE_H, 'H'},
+														   {AKEYCODE_I, 'I'},
+														   {AKEYCODE_J, 'J'},
+														   {AKEYCODE_K, 'K'},
+														   {AKEYCODE_L, 'L'},
+														   {AKEYCODE_M, 'M'},
+														   {AKEYCODE_N, 'N'},
+														   {AKEYCODE_O, 'O'},
+														   {AKEYCODE_P, 'P'},
+														   {AKEYCODE_Q, 'Q'},
+														   {AKEYCODE_R, 'R'},
+														   {AKEYCODE_S, 'S'},
+														   {AKEYCODE_T, 'T'},
+														   {AKEYCODE_U, 'U'},
+														   {AKEYCODE_V, 'V'},
+														   {AKEYCODE_W, 'W'},
+														   {AKEYCODE_X, 'X'},
+														   {AKEYCODE_Y, 'Y'},
+														   {AKEYCODE_Z, 'Z'},
+														   {AKEYCODE_COMMA, '<'},
+														   {AKEYCODE_PERIOD, '>'},
+														   {AKEYCODE_SPACE, ' '},
+														   {AKEYCODE_ENTER, '\n'},
+														   {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
+														   {AKEYCODE_DEL, MZ_KEY_DELETE},
+														   {AKEYCODE_GRAVE, '~'},
+														   {AKEYCODE_MINUS, '_'},
+														   {AKEYCODE_EQUALS, '+'},
+														   {AKEYCODE_LEFT_BRACKET, '{'},
+														   {AKEYCODE_RIGHT_BRACKET, '}'},
+														   {AKEYCODE_BACKSLASH, '|'},
+														   {AKEYCODE_SEMICOLON, ':'},
+														   {AKEYCODE_APOSTROPHE, '\"'},
+														   {AKEYCODE_SLASH, '?'},
+														   {AKEYCODE_AT, '@'},
+														   {AKEYCODE_PLUS, '+'},
+														   {AKEYCODE_NUMPAD_0, '0'},
+														   {AKEYCODE_NUMPAD_1, '1'},
+														   {AKEYCODE_NUMPAD_2, '2'},
+														   {AKEYCODE_NUMPAD_3, '3'},
+														   {AKEYCODE_NUMPAD_4, '4'},
+														   {AKEYCODE_NUMPAD_5, '5'},
+														   {AKEYCODE_NUMPAD_6, '6'},
+														   {AKEYCODE_NUMPAD_7, '7'},
+														   {AKEYCODE_NUMPAD_8, '8'},
+														   {AKEYCODE_NUMPAD_9, '9'},
+														   {AKEYCODE_NUMPAD_DIVIDE, '/'},
+														   {AKEYCODE_NUMPAD_MULTIPLY, '*'},
+														   {AKEYCODE_NUMPAD_SUBTRACT, '-'},
+														   {AKEYCODE_NUMPAD_ADD, '+'},
+														   {AKEYCODE_NUMPAD_DOT, '.'},
+														   {AKEYCODE_NUMPAD_COMMA, ','},
+														   {AKEYCODE_NUMPAD_ENTER, '\n'},
+														   {AKEYCODE_NUMPAD_EQUALS, '='},
+														   {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
+														   {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
+														   {AKEYCODE_TAB, MZ_KEY_SHIFT_TAB},
+														   {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
+														   {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
+														   {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
+														   {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
 
-		case AKEYCODE_SEMICOLON: return ';';
-		case AKEYCODE_APOSTROPHE: return '\'';
-		case AKEYCODE_SLASH: return '/';
-		case AKEYCODE_AT: return '@';
-		case AKEYCODE_PLUS: return '+';
-		case AKEYCODE_NUMPAD_0: return '0';
-		case AKEYCODE_NUMPAD_1: return '1';
-		case AKEYCODE_NUMPAD_2: return '2';
-		case AKEYCODE_NUMPAD_3: return '3';
-		case AKEYCODE_NUMPAD_4: return '4';
-		case AKEYCODE_NUMPAD_5: return '5';
-		case AKEYCODE_NUMPAD_6: return '6';
-		case AKEYCODE_NUMPAD_7: return '7';
-		case AKEYCODE_NUMPAD_8: return '8';
-		case AKEYCODE_NUMPAD_9: return '9';
-		case AKEYCODE_NUMPAD_DIVIDE: return '/';
-		case AKEYCODE_NUMPAD_MULTIPLY: return '*';
-		case AKEYCODE_NUMPAD_SUBTRACT: return '-';
-		case AKEYCODE_NUMPAD_ADD: return '+';
-		case AKEYCODE_NUMPAD_DOT: return '.';
-		case AKEYCODE_NUMPAD_COMMA: return ',';
-		case AKEYCODE_NUMPAD_ENTER: return '\n';
-		case AKEYCODE_NUMPAD_EQUALS: return '=';
-		case AKEYCODE_NUMPAD_LEFT_PAREN: return '(';
-		case AKEYCODE_NUMPAD_RIGHT_PAREN: return ')';
-		default: return 0;
+	auto &keymap = (shiftIsDown) ? shiftKeyboardMap : keyboardMap;
+	auto iter	 = keymap.find(k);
+	if (iter != keymap.end()) {
+		return static_cast<int>(iter->second);
 	}
+
+	Log::e() << "Unhandled key found \'" << k << "\'";
+	return 0;
 }
 /**
  * Process the next input event.
@@ -345,6 +435,7 @@ int keycodeToKey(int32_t k) {
 static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
 	//struct engine* engine = (struct engine*)app->userData;
 	// converted from Java in openframeworks android
+	Log::d() << "Type = " << AInputEvent_getType(event);
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t action = AMotionEvent_getAction(event);
 		int32_t pointerIndex =
@@ -407,19 +498,18 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 		return 1; // event handled
 	} else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
 		int32_t keyAction = AKeyEvent_getAction(event);
+		bool shiftIsHeld  = AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON;
 		if (keyAction == AKEY_EVENT_ACTION_DOWN) {
-			int32_t k = AKeyEvent_getKeyCode(event);
-			int key	  = keycodeToKey(k);
+			auto key = keycodeToKey(AKeyEvent_getKeyCode(event), shiftIsHeld);
 			if (key != 0) {
 				eventDispatcher->keyDown(key);
 				return 1;
 			}
-			// if we don't recognize the key, return 0 for 'not handled'
+			// if we don't  recognize the key, return 0 for 'not handled'
 			// it may be the volume controls and we want the OS to deal with that.
 			return 0;
 		} else if (keyAction == AKEY_EVENT_ACTION_UP) {
-			int32_t k = AKeyEvent_getKeyCode(event);
-			int key	  = keycodeToKey(k);
+            auto key = keycodeToKey(AKeyEvent_getKeyCode(event), shiftIsHeld);
 			if (key != 0) {
 				eventDispatcher->keyUp(key);
 				return 1;
@@ -512,9 +602,7 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 			}
 			break;
 
-		case APP_CMD_SAVE_STATE:
-			Log::d() << "APP_CMD_SAVE_STATE";
-			break;
+		case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
 
 		case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
 
@@ -553,12 +641,12 @@ EventDispatcher *getAndroidEventDispatcher() {
 	return eventDispatcher.get();
 }
 
-int android_loop_all(int timeoutMillis, int* outFd, int* outEvents, void** outData) {
-    int result;
-    do {
-        result = ALooper_pollOnce(timeoutMillis, outFd, outEvents, outData);
-    } while (result == ALOOPER_POLL_CALLBACK);
-    return result;
+int android_loop_all(int timeoutMillis, int *outFd, int *outEvents, void **outData) {
+	int result;
+	do {
+		result = ALooper_pollOnce(timeoutMillis, outFd, outEvents, outData);
+	} while (result == ALOOPER_POLL_CALLBACK);
+	return result;
 }
 
 /**
@@ -580,7 +668,6 @@ void android_main(struct android_app *state) {
 	engine.app			= state;
 
 	app = instantiateApp(graphics);
-
 
 	// loop waiting for stuff to do.
 	while (1) {
