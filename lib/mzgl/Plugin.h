@@ -234,7 +234,7 @@ public:
 		pluginSampleRateChanged(sampleRate);
 	}
 	[[nodiscard]] double getSampleRate() const { return sampleRate; }
-	virtual void pluginSampleRateChanged(double newSampleRate) {}
+	virtual void hostSampleRateChanged(double newSampleRate) {}
 
 	double bpm			= 120.0;
 	double beatPosition = 0.0;
