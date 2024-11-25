@@ -86,6 +86,7 @@ public:
 	[[nodiscard]] uint8_t getPitch() const;
 	[[nodiscard]] uint8_t getVelocity() const;
 	[[nodiscard]] uint8_t getCC() const;
+	[[nodiscard]] uint8_t getProgramChangeIndex() const;
 	[[nodiscard]] uint8_t getValue() const;
 	[[nodiscard]] uint8_t getStatus() const;
 	[[nodiscard]] std::vector<uint8_t> getBytes() const;
