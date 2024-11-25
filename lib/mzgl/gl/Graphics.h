@@ -192,7 +192,8 @@ public:
 	// as on iOS, the default framebuffer is not always 0
 
 	Font &getFont();
-	void unloadFont();
+	void deallocateFont();
+	void reloadFont();
 	Font *font = nullptr;
 	std::vector<unsigned char> getDefaultFontTTFData();
 

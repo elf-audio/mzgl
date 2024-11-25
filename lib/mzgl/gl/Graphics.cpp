@@ -511,11 +511,18 @@ Font &Graphics::getFont() {
 	return *font;
 }
 
-void Graphics::unloadFont() {
+void Graphics::deallocateFont() {
 	if (font != nullptr) {
 		delete font;
 		font = nullptr;
 	}
+}
+void Graphics::reloadFont() {
+	if (font == nullptr) {
+		getFont();
+		return;
+	}
+	font->load(getDefaultFontData(), 42);
 }
 
 void Graphics::warpMaskForScissor(Rectf &a) {
