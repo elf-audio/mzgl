@@ -174,6 +174,10 @@ uint8_t MidiMessage::getValue() const {
 	return midiBytes[2].has_value() ? *midiBytes[2] : 0;
 }
 
+uint8_t MidiMessage::getProgramChangeIndex() const {
+	return midiBytes[1].has_value() ? *midiBytes[1] : 0;
+}
+
 std::vector<uint8_t> MidiMessage::getBytes() const {
 	if (getStatus() == MidiMessageConstants::MIDI_SYSEX) {
 		return sysexData;
