@@ -227,7 +227,7 @@ public:
 	}
 
 	void setSampleRate(double _sampleRate) {
-		if (fabs(sampleRate - _sampleRate) < 1e-3) {
+		if (std::abs(sampleRate - _sampleRate) < 1e-3) {
 			return;
 		}
 		sampleRate = _sampleRate;
