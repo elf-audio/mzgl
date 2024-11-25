@@ -235,9 +235,6 @@ add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
 add_subdirectory(lib/ZipFile EXCLUDE_FROM_ALL)
 # add_dependencies(libmzgl pugixml)
 
-# set(OPENSSL_BRANCH OpenSSL_1_1_1m) set(BUILD_OPENSSL ON)
-# set(OPENSSL_BUILD_VERSION 1.1.1m) add_subdirectory(lib/openssl-cmake)
-
 # Apple platforms have a special audio file reader
 if(APPLE)
 
