@@ -226,15 +226,15 @@ public:
 		return presetManager;
 	}
 
-	void setSampleRate(double sampleRate) {
-		if (this->sampleRate != sampleRate) {
-			this->sampleRate = sampleRate;
-			sampleRateChanged();
+	void setSampleRate(double _sampleRate) {
+		if (fabs(sampleRate - _sampleRate) < 1e-3) {
+			return;
 		}
+		sampleRate = _sampleRate;
+		sampleRateChanged(sampleRate);
 	}
-	double getSampleRate() { return sampleRate; }
-
-	virtual void sampleRateChanged() {}
+	[[nodiscard]] double getSampleRate() const { return sampleRate; }
+	virtual void sampleRateChanged(double newSampleRate) {}
 
 	double bpm			= 120.0;
 	double beatPosition = 0.0;

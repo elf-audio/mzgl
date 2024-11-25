@@ -30,6 +30,7 @@ public:
 
 	void setReordering(bool reordering);
 
+	using Layer::doLayout;
 	void doLayout(int numCols);
 	void doLayoutWithPositions(const std::vector<Rectf> &newSlots);
 
