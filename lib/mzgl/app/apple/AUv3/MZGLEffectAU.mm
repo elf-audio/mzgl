@@ -164,8 +164,8 @@ struct Blocks {
 			if (strong->blocks.midiOut) {
 				AUEventSampleTime timestamp = sendNow;
 				if (timestampInNanoSeconds.has_value()) {
-					timestamp = static_cast<AUEventSampleTime>((static_cast<double>(*timestampInNanoSeconds) / 1.0e9)
-															   * strong->plugin->getSampleRate());
+					timestamp = static_cast<AUEventSampleTime>(
+						(static_cast<double>(*timestampInNanoSeconds) / 1.0e9) * strong->plugin->getSampleRate());
 				}
 
 				strong->blocks.midiOut(timestamp, cable, data.size(), data.data());
@@ -351,7 +351,7 @@ struct Blocks {
 						change:(NSDictionary *)change
 					   context:(void *)context {
 	if (context == (__bridge void *_Nullable) (self)) {
-		if (keyPath == @"format" && [object isKindOfClass:[AUAudioUnitBus class]]) {
+		if ([keyPath isEqualToString:@"format"] && [object isKindOfClass:[AUAudioUnitBus class]]) {
 			AUAudioUnitBus *bus = object;
 			plugin->setSampleRate(bus.format.sampleRate);
 		}
@@ -468,7 +468,7 @@ struct Blocks {
 	if (currentPreset == nil) {
 		AULog(@"setCurrentPreset called with nil");
 	} else {
-		AULog(@"setCurrentPreset called with num %d ('%@')", currentPreset.number, currentPreset.name);
+		AULog(@"setCurrentPreset called with num %i ('%@')", currentPreset.number, currentPreset.name);
 	}
 	if (nil == currentPreset) { /*AULog(@"nil passed to setCurrentPreset!");*/
 		return;

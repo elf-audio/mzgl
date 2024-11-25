@@ -22,6 +22,7 @@ public:
 		index	   = slot;
 	}
 
+	using Layer::draw;
 	virtual void draw(Graphics &g, bool isReordering) {}
 
 	void startDragging(vec2 start, int touchId) {
