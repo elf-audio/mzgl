@@ -16,10 +16,11 @@
 #include "log.h"
 #include "RoundedRect.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "choc/platform/choc_DisableAllWarnings.h"
+#include "DisableAllWarnings.h"
+DISABLE_WARNINGS
 #include "pu_gixml.hpp"
 #include "filesystem.h"
-#include "choc/platform/choc_ReenableAllWarnings.h"
+RESTORE_WARNINGS
 
 // TODO: optimization - only transform verts if there's a transformation
 using namespace std;
