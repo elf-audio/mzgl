@@ -231,7 +231,7 @@ public:
 			return;
 		}
 		sampleRate = _sampleRate;
-		pluginSampleRateChanged(sampleRate);
+		hostSampleRateChanged(sampleRate);
 	}
 	[[nodiscard]] double getSampleRate() const { return sampleRate; }
 	virtual void hostSampleRateChanged(double newSampleRate) {}
