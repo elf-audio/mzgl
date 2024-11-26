@@ -12,15 +12,8 @@
 ///////////////////////////////////////////////////////
 
 
-//OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__
-// this MUST match the setting in mzgl.xcproj
-GL_VERSION[sdk=macosx*] = MZGL_GL2
-//USE_METALANGLE
-GCC_PREPROCESSOR_DEFINITIONS[config=Debug]=$(GL_VERSION) DEBUG=1
-//AUTO_TEST
-//USE_METALANGLE
-GCC_PREPROCESSOR_DEFINITIONS[config=Release]=$(GL_VERSION)
-//AUTO_TEST
+GCC_PREPROCESSOR_DEFINITIONS[config=Debug]=DEBUG=1
+
 
 // HEADERS
 HEADERS_COMMON = 									\
