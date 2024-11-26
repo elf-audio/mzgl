@@ -10,9 +10,6 @@
 [submodule "lib/rtmidi"]
 	path = lib/rtmidi
 	url = https://github.com/thestk/rtmidi.git
-[submodule "lib/openssl"]
-	path = lib/openssl-cmake
-	url = https://github.com/viaduck/openssl-cmake.git
 [submodule "lib/ghc-filesystem"]
 	path = lib/ghc-filesystem
 	url = https://github.com/gulrak/filesystem.git
