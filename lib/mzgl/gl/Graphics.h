@@ -62,15 +62,15 @@ public:
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;
-	double frameDelta	 = 1.f / 60.f;
-	double currFrameTime = 0.f;
+	double frameDelta	 = 1.0 / 60.0;
+	double currFrameTime = 0.0;
 
-	void setColor(float r, float g, float b, float a = 1);
+	void setColor(float r, float g, float b, float a = 1.f);
 	void setColor(glm::vec3 c);
 	void setColor(glm::vec4 c);
 	void setColor(glm::vec4 c, float alpha);
 	void setColor(float bri);
-	void setHexColor(int hex, float a = 1);
+	void setHexColor(int hex, float a = 1.f);
 	void saveScreen(std::string pngPath);
 
 	std::function<void(bool)> setAntialiasing = [](bool) {};
@@ -85,12 +85,12 @@ public:
 
 	void setBlending(bool shouldBlend);
 	void setBlendMode(BlendMode blendMode);
-	BlendMode getBlendMode() const;
-	bool isBlending();
-	glm::vec4 getColor();
+	[[nodiscard]] BlendMode getBlendMode() const;
+	[[nodiscard]] bool isBlending() const;
+	[[nodiscard]] glm::vec4 getColor() const;
 
 	void clear(float c);
-	void clear(float r, float g, float b, float a = 1);
+	void clear(float r, float g, float b, float a = 1.f);
 	void clear(glm::vec4 c);
 	void clear(glm::vec3 c);
 

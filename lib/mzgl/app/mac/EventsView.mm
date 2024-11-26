@@ -129,59 +129,50 @@ int nsEventToKey(NSEvent *evt) {
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyUp(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
-
-- (void)mouseMoved:(NSEvent *)event {
+- (vec2)transformMouse:(NSEvent *)event {
 	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= eventDispatcher->app->g.pixelScale;
+	float pixelScale	= 2; //eventDispatcher->app->g.pixelScale;
 	float x				= event.locationInWindow.x * pixelScale;
 	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() { eventDispatcher->touchOver(x, y); });
+	return vec2(x, y);
+}
+- (void)mouseMoved:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [self, mouse]() { eventDispatcher->touchOver(mouse.x, mouse.y); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)mouseDown:(NSEvent *)event {
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= eventDispatcher->app->g.pixelScale;
-
-	float x = event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id	= (int) [event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, id]() { eventDispatcher->touchDown(x, y, id); });
+	auto mouse = [self transformMouse:event];
+	int id	   = (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse, id]() { eventDispatcher->touchDown(mouse.x, mouse.y, id); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
 - (void)mouseUp:(NSEvent *)event {
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= eventDispatcher->app->g.pixelScale;
-
-	float x = event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id	= (int) [event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y, id]() { eventDispatcher->touchUp(x, y, id); });
+	auto mouse = [self transformMouse:event];
+	int id	   = (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse, id]() { eventDispatcher->touchUp(mouse.x, mouse.y, id); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
 - (void)mouseDragged:(NSEvent *)event { // Mouse click-and-drag
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= eventDispatcher->app->g.pixelScale;
-
-	float x = event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	int id	= (int) [event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true,
-											   [self, x, y, id]() { eventDispatcher->touchMoved(x, y, id); });
+	auto mouse = [self transformMouse:event];
+	int id	   = (int) [event buttonNumber];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse, id]() { eventDispatcher->touchMoved(mouse.x, mouse.y, id); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
 - (void)scrollWheel:(NSEvent *)event { // Mouse scroll wheel movement
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= eventDispatcher->app->g.pixelScale;
-
-	float x	 = event.locationInWindow.x * pixelScale;
-	float y	 = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
-	float dx = event.deltaX;
-	float dy = event.deltaY;
+	auto mouse = [self transformMouse:event];
+	float dx   = event.deltaX;
+	float dy   = event.deltaY;
 	eventDispatcher->app->main.runOnMainThread(
-		true, [self, x, y, dx, dy]() { eventDispatcher->mouseScrolled(x, y, dx, dy); });
+		true, [self, mouse, dx, dy]() { eventDispatcher->mouseScrolled(mouse.x, mouse.y, dx, dy); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 

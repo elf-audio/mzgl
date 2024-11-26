@@ -132,7 +132,7 @@ ScopedFill::~ScopedFill() {
 	}
 }
 
-bool Graphics::isBlending() {
+bool Graphics::isBlending() const {
 	return blendingEnabled;
 }
 
@@ -298,7 +298,7 @@ void Graphics::setColor(glm::vec4 c, float alpha) {
 	color.a = alpha;
 }
 
-glm::vec4 Graphics::getColor() {
+glm::vec4 Graphics::getColor() const {
 	return color;
 }
 

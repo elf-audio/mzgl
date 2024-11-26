@@ -128,7 +128,6 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 
 - (void)createGLResources {
 	[[self openGLContext] makeCurrentContext];
-	Graphics &g = eventDispatcher->app->g;
 }
 
 - (void)windowResized:(NSNotification *)notification {
@@ -136,39 +135,35 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 
 	NSWindow *window = notification.object;
 
-	Graphics &g	  = eventDispatcher->app->g;
-	g.width		  = window.contentLayoutRect.size.width;
-	g.height	  = window.contentLayoutRect.size.height;
+	Graphics &g	 = eventDispatcher->app->g;
+	g.width		 = window.contentLayoutRect.size.width;
+	g.height	 = window.contentLayoutRect.size.height;
+	g.pixelScale = [window backingScaleFactor];
 
 	auto f		  = self.frame;
 	f.size.width  = g.width;
 	f.size.height = g.height;
+
 	self.frame = f;
+	
+	glViewport(0, 0, g.width, g.height);
 
-	glViewport(0, 0, g.width*g.pixelScale, g.height*g.pixelScale);
+	g.width *= 2;
+	g.height *= 2;
 
-	g.width *= g.pixelScale;
-	g.height *= g.pixelScale;
-
-	eventDispatcher->app->main.runOnMainThread(true, [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });
 }
 
 - (void)renderForTime:(CVTimeStamp)time {
 	[[self openGLContext] makeCurrentContext];
 	[self lock];
 
-	//	drawFrame(eventDispatcher->app->g, eventDispatcher);
 	if (eventDispatcher->app->g.firstFrame) {
 		initMZGL(eventDispatcher->app);
 		eventDispatcher->setup();
 		eventDispatcher->app->g.firstFrame = false;
 	}
-	//	if(self.window!=nil && (eventDispatcher->app->g.width!=self.frame.size.width ||
-	//	   eventDispatcher->app->g.height!=self.frame.size.height)
-	//	   ) {
-	//		NSNotification *notif = [NSNotification notificationWithName:@"resized" object:self.window];
-	//		[self windowResized: notif];
-	//	}
 
 	eventDispatcher->runFrame();
 	[self unlock];
