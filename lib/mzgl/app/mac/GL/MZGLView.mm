@@ -145,8 +145,8 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	f.size.height = g.height;
 
 	self.frame = f;
-	
-	glViewport(0, 0, g.width, g.height);
+
+	glViewport(0, 0, g.width * g.pixelScale, g.height * g.pixelScale);
 
 	g.width *= 2;
 	g.height *= 2;
