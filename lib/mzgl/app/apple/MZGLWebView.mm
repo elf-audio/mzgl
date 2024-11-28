@@ -9,9 +9,13 @@
 #import "MZGLWebView.h"
 
 #include <string>
+#include <memory>
+
 #include "EventDispatcher.h"
 #include "log.h"
 #include "filesystem.h"
+#include "WebViewApp.h"
+
 @implementation MZGLWebView {
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 }
@@ -20,7 +24,7 @@
 			 andUrl:(NSString *)url {
 	eventDispatcher = evtDispatcher;
 
-	dynamic_pointer_cast<WebViewApp>(eventDispatcher->app)->callJS = [self](const std::string &s) {
+	std::dynamic_pointer_cast<WebViewApp>(eventDispatcher->app)->callJS = [self](const std::string &s) {
 		printf("callJS(%s)\n", s.c_str());
 		[self evaluateJavaScript:[NSString stringWithUTF8String:s.c_str()] completionHandler:nil];
 	};

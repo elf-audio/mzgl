@@ -17,7 +17,7 @@ struct Geometry {
 	std::vector<vec2> texCoords;
 
 	void append(const Geometry &geom) {
-		const int startVertIndex = verts.size();
+		const auto startVertIndex = static_cast<int>(verts.size());
 		verts.insert(verts.end(), geom.verts.begin(), geom.verts.end());
 		cols.insert(cols.end(), geom.cols.begin(), geom.cols.end());
 		texCoords.insert(texCoords.end(), geom.texCoords.begin(), geom.texCoords.end());

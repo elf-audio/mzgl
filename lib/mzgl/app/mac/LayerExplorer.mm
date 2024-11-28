@@ -254,7 +254,7 @@ void LayerExplorer::show() {
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  NSRect windowRect = NSMakeRect(0, 0, 500, 200);
 	  window			= [[NSWindow alloc] initWithContentRect:windowRect
-											  styleMask:NSTitledWindowMask | NSWindowStyleMaskResizable
+											  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable
 												backing:NSBackingStoreBuffered
 												  defer:NO];
 

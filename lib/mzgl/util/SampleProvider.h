@@ -35,7 +35,7 @@ public:
 		if (size() != other.size()) return false;
 
 		for (size_t index = 0; index < size(); ++index) {
-			if (std::abs((*this)[index] - other[index]) > 1e-4) {
+			if (std::abs((*this)[static_cast<int>(index)] - other[static_cast<int>(index)]) > 1e-4) {
 				return false;
 			}
 		}

@@ -74,42 +74,42 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)flagsChanged:(NSEvent *)event {
-	if ((event.modifierFlags & NSShiftKeyMask) && !lastShiftState) {
+	if ((event.modifierFlags & NSEventModifierFlagShift) && !lastShiftState) {
 		lastShiftState = true;
 
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_SHIFT); });
-	} else if (!(event.modifierFlags & NSShiftKeyMask) && lastShiftState) {
+	} else if (!(event.modifierFlags & NSEventModifierFlagShift) && lastShiftState) {
 		lastShiftState = false;
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_SHIFT); });
-	} else if ((event.modifierFlags & NSFunctionKeyMask) && !lastFnState) {
+	} else if ((event.modifierFlags & NSEventModifierFlagFunction) && !lastFnState) {
 		lastFnState = true;
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_FN); });
 
-	} else if (!(event.modifierFlags & NSFunctionKeyMask) && lastFnState) {
+	} else if (!(event.modifierFlags & NSEventModifierFlagFunction) && lastFnState) {
 		lastFnState = false;
 		//Fn released - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_FN); });
-	} else if ((event.modifierFlags & NSControlKeyMask) && !lastControlState) {
+	} else if ((event.modifierFlags & NSEventModifierFlagControl) && !lastControlState) {
 		lastControlState = true;
 		//Control pressed - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_CTRL); });
-	} else if (!(event.modifierFlags & NSControlKeyMask) && lastControlState) {
+	} else if (!(event.modifierFlags & NSEventModifierFlagControl) && lastControlState) {
 		lastControlState = false;
 		//Control released - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_CTRL); });
-	} else if ((event.modifierFlags & NSAlternateKeyMask) && !lastOptionState) {
+	} else if ((event.modifierFlags & NSEventModifierFlagOption) && !lastOptionState) {
 		lastOptionState = true;
 		//Option pressed - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_ALT); });
-	} else if (!(event.modifierFlags & NSAlternateKeyMask) && lastOptionState) {
+	} else if (!(event.modifierFlags & NSEventModifierFlagOption) && lastOptionState) {
 		lastOptionState = false;
 		//Option released - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_ALT); });
-	} else if ((event.modifierFlags & NSCommandKeyMask) && !lastCommandState) {
+	} else if ((event.modifierFlags & NSEventModifierFlagCommand) && !lastCommandState) {
 		lastCommandState = true;
 		//Command pressed - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyDown(MZ_KEY_CMD); });
-	} else if (!(event.modifierFlags & NSCommandKeyMask) && lastCommandState) {
+	} else if (!(event.modifierFlags & NSEventModifierFlagCommand) && lastCommandState) {
 		lastCommandState = false;
 		//Command released - do something
 		eventDispatcher->app->main.runOnMainThread(true, [self]() { eventDispatcher->keyUp(MZ_KEY_CMD); });
