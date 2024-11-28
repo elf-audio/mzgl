@@ -18,6 +18,11 @@
 #include "FloatBuffer.h"
 #include "PluginParameter.h"
 #include "Midi.h"
+#include "filesystem.h"
+
+#if TARGET_OS_IOS || defined (MZGL_PLUGIN)
+#define PLUGIN_CAN_SEND_MIDI_TO_HOST
+#endif
 
 class MidiMessage;
 
@@ -51,7 +56,6 @@ public:
 		: name(name) {}
 };
 
-#include "filesystem.h"
 
 // presets are always files, their names are the file name
 class PresetManager {
@@ -182,7 +186,7 @@ public:
 		midiOutMessages.emplace_back(outputNo, m, delay);
 	};
 
-#if TARGET_OS_IOS
+#ifdef PLUGIN_CAN_SEND_MIDI_TO_HOST
 	std::function<void(const MidiMessage &, std::optional<uint64_t> timestampInNanoSeconds)>
 		onSendMidiToAudioUnitHost;
 	void sendMidiToAudioUnitHost(const MidiMessage &m, std::optional<uint64_t> timestampInNanoSeconds) {
@@ -222,10 +226,7 @@ public:
 
 	std::function<bool()> isRunning = []() { return true; };
 	std::shared_ptr<PresetManager> getPresetManager() {
-		if (presetManager == nullptr) {
-			presetManager = std::make_shared<PresetManager>(this);
-		}
-		return presetManager;
+		return this->presetManager;
 	}
 
 	void setSampleRate(double _sampleRate) {
@@ -261,7 +262,7 @@ public:
 
 protected:
 	bool hostIsPlaying = false;
-	std::shared_ptr<PresetManager> presetManager;
+	std::shared_ptr<PresetManager> presetManager{std::make_shared<PresetManager>(this)};
 
 	// generic float slider
 	void addFloatParameter(
