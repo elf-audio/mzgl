@@ -17,7 +17,7 @@ void TextConsole::show() {
 	NSRect windowRect = NSMakeRect(0, 0, 500, 200);
 	NSWindow *window  = [[NSWindow alloc]
 		 initWithContentRect:windowRect
-				   styleMask:NSWindowStyleMaskResizable | NSTitledWindowMask | NSWindowStyleMaskUtilityWindow
+				   styleMask:NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskUtilityWindow
 
 					 backing:NSBackingStoreBuffered
 					   defer:NO];

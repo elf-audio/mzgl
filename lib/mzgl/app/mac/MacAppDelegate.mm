@@ -87,7 +87,7 @@ void handleTerminateSignal(int signal) {
 - (NSRect)setupWindow {
 	{
 		NSWindow *___ = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
-													styleMask:NSTitledWindowMask
+													styleMask:NSWindowStyleMaskTitled
 													  backing:NSBackingStoreBuffered
 														defer:YES
 													   screen:nil];
@@ -112,7 +112,7 @@ void handleTerminateSignal(int signal) {
 
 	window						   = [[NSWindow alloc]
 		initWithContentRect:windowRect
-				  styleMask:NSTitledWindowMask | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable
+				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable
 					backing:NSBackingStoreBuffered
 					  defer:NO];
 	window.acceptsMouseMovedEvents = YES;
