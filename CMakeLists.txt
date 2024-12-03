@@ -91,6 +91,8 @@ set(MZGL_SOURCES
     lib/mzgl/ui/ScrollingListItem.cpp
     lib/mzgl/ui/Slider.cpp
     lib/mzgl/ui/FlexboxLayout.cpp
+    lib/mzgl/util/Base64.cpp
+    lib/mzgl/util/Base64.h
     lib/mzgl/util/DateTime.cpp
     lib/mzgl/util/UndoManager.cpp
     lib/mzgl/util/Dialogs.cpp
