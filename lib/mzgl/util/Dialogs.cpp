@@ -1,6 +1,6 @@
 #include "Dialogs.h"
-#include "log.h"
 #include "App.h"
+#include "log.h"
 
 #ifdef __APPLE__
 #	include <TargetConditionals.h>
@@ -1234,6 +1234,22 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 
 #elif (WIN32)
 	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), false, msg, completionCallback);
+#elif defined(__APPLE__)
+#	if TARGET_OS_IOS
+
+#	else
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  @autoreleasepool {
+		  NSOpenPanel *loadDialog		  = [NSOpenPanel openPanel];
+		  loadDialog.canChooseFiles		  = NO;
+		  loadDialog.canChooseDirectories = YES;
+		  loadDialog.message			  = [NSString stringWithUTF8String:msg.c_str()];
+		  NSInteger buttonClicked		  = [loadDialog runModal];
+		  completionCallback([[[loadDialog URL] path] cStringUsingEncoding:NSUTF8StringEncoding],
+							 buttonClicked == NSModalResponseOK);
+	  }
+	});
+#	endif
 #endif
 }
 
