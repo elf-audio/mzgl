@@ -43,6 +43,18 @@ int getCommandLineSetting(const std::string &setting, int defaultValue = -1);
 std::string utf8decomposedToPrecomposed(const std::string &str);
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+std::vector<T> concatenate(const std::vector<T> &source, const std::vector<T> &append) {
+	std::vector<T> result = source;
+	result.insert(result.end(), append.begin(), append.end());
+	return result;
+}
+
+template <typename T>
+void append(std::vector<T> &source, const std::vector<T> &append) {
+	source.insert(source.end(), append.begin(), append.end());
+}
+
 /**
  * creates a new vector with elements of old vector that satisfy predicate.
  * e.g.
