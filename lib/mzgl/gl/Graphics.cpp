@@ -201,6 +201,10 @@ bool Graphics::isBlending() const {
 	return blendingEnabled;
 }
 
+Graphics::BlendMode Graphics::getBlendMode() const {
+	return blendMode;
+}
+
 glm::mat4 Graphics::getMVP() {
 	return viewProjectionMatrix * modelMatrixStack.getMatrix();
 }
