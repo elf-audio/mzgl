@@ -48,8 +48,9 @@ class App;
 glm::vec4 hexColor(int hex, float a = 1);
 glm::vec4 hexColor(std::string s);
 
+glm::vec3 rgb2hsv(glm::vec4 rgb);
+glm::vec4 hsv2rgb(glm::vec3 hsv);
 class ScopedAlphaBlend;
-class ScopedAdditiveBlendMode;
 class ScopedNoFill;
 class ScopedTranslate;
 class ScopedTransform;
@@ -228,7 +229,6 @@ private:
 	// this is cached version of the above multiplied
 	glm::mat4 viewProjectionMatrix;
 	friend class ScopedAlphaBlend;
-	friend class ScopedAdditiveBlendMode;
 	friend class ScopedTranslate;
 
 	std::unique_ptr<GraphicsAPI> api;
@@ -236,6 +236,36 @@ private:
 	// was in Globals
 	unsigned int frameNum = 0;
 };
+
+template <Graphics::BlendMode newBlendMode>
+class ScopedBlend {
+public:
+	Graphics &g;
+	ScopedBlend(Graphics &g)
+		: g(g) {
+		originalBlendState = g.isBlending();
+		originalBlendMode  = g.getBlendMode();
+		g.setBlending(true);
+		if (originalBlendMode != newBlendMode) {
+			g.setBlendMode(newBlendMode);
+		}
+	}
+
+	virtual ~ScopedBlend() {
+		if (!originalBlendState) {
+			g.setBlending(originalBlendState);
+		}
+		if (originalBlendMode != newBlendMode) {
+			g.setBlendMode(originalBlendMode);
+		}
+	}
+
+private:
+	bool originalBlendState;
+	Graphics::BlendMode originalBlendMode;
+};
+
+using ScopedAdditiveBlend = ScopedBlend<Graphics::BlendMode::Additive>;
 
 class ScopedAlphaBlend {
 public:
@@ -245,17 +275,6 @@ public:
 
 private:
 	bool originalBlendState;
-};
-
-class ScopedAdditiveBlendMode {
-public:
-	Graphics &g;
-	ScopedAdditiveBlendMode(Graphics &g);
-	virtual ~ScopedAdditiveBlendMode();
-
-private:
-	bool originalBlendState;
-	Graphics::BlendMode originalBlendMode;
 };
 
 class ScopedFill {

@@ -36,6 +36,89 @@ glm::vec4 hexColor(int hex, float a) {
 	return c;
 }
 
+vec3 rgb2hsv(vec4 rgb) {
+	float r = rgb.x;
+	float g = rgb.y;
+	float b = rgb.z;
+
+	float maxVal = std::max({r, g, b});
+	float minVal = std::min({r, g, b});
+	float delta	 = maxVal - minVal;
+
+	float h, s, v;
+	v = maxVal;
+
+	if (delta == 0) {
+		h = 0;
+		s = 0;
+	} else {
+		s = delta / maxVal;
+
+		if (r == maxVal) {
+			h = (g - b) / delta;
+		} else if (g == maxVal) {
+			h = 2 + (b - r) / delta;
+		} else {
+			h = 4 + (r - g) / delta;
+		}
+
+		h *= 60;
+		if (h < 0) h += 360;
+	}
+
+	h = h / 360.0f; // Normalize to [0, 1]
+	return {h, s, v};
+}
+
+vec4 hsv2rgb(vec3 hsv) {
+	float h = hsv.x * 360.0f; // Convert back to 360 range
+	float s = hsv.y;
+	float v = hsv.z;
+
+	int i	= int(std::floor(h / 60.0)) % 6;
+	float f = h / 60.f - i;
+	float p = v * (1 - s);
+	float q = v * (1 - f * s);
+	float t = v * (1 - (1 - f) * s);
+
+	float r = 0.f, g = 0.f, b = 0.f;
+
+	switch (i) {
+		case 0:
+			r = v;
+			g = t;
+			b = p;
+			break;
+		case 1:
+			r = q;
+			g = v;
+			b = p;
+			break;
+		case 2:
+			r = p;
+			g = v;
+			b = t;
+			break;
+		case 3:
+			r = p;
+			g = q;
+			b = v;
+			break;
+		case 4:
+			r = t;
+			g = p;
+			b = v;
+			break;
+		case 5:
+			r = v;
+			g = p;
+			b = q;
+			break;
+	}
+
+	return {r, g, b, 1.f};
+}
+
 int hexCharToInt(char c) {
 	if (c >= '0' && c <= '9') return c - '0';
 	if (c >= 'a' && c <= 'f') return 10 + c - 'a';
@@ -84,24 +167,6 @@ ScopedAlphaBlend::ScopedAlphaBlend(Graphics &g, bool shouldBlend)
 
 ScopedAlphaBlend::~ScopedAlphaBlend() {
 	g.setBlending(originalBlendState);
-}
-
-ScopedAdditiveBlendMode::ScopedAdditiveBlendMode(Graphics &g)
-	: g(g) {
-	originalBlendState = g.blendingEnabled;
-	originalBlendMode  = g.blendMode;
-	g.setBlending(true);
-	if (originalBlendMode != Graphics::BlendMode::Additive) {
-		g.setBlendMode(Graphics::BlendMode::Additive);
-	}
-}
-ScopedAdditiveBlendMode::~ScopedAdditiveBlendMode() {
-	if (!originalBlendState) {
-		g.setBlending(originalBlendState);
-	}
-	if (originalBlendMode != Graphics::BlendMode::Additive) {
-		g.setBlendMode(originalBlendMode);
-	}
 }
 
 ScopedNoFill::ScopedNoFill(Graphics &_graphics)

@@ -29,6 +29,10 @@ void Drawer::setColor(const glm::vec4 &c) {
 	this->color		= c;
 	isDoingGradient = false;
 }
+void Drawer::setColor(const glm::vec3 &c) {
+	this->color		= {c, 1.f};
+	isDoingGradient = false;
+}
 
 void Drawer::setColor(const glm::vec4 &c, float alpha) {
 	this->color		= c;
