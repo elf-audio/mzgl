@@ -413,7 +413,11 @@ private:
 					break;
 
 				case 'l': // lineto
-
+					if (args.size() < 2) {
+						Log::e()
+							<< "ERROR: lineto with less than 2 arguments - could be the figma bug with a nan - search the svg for nan";
+						continue;
+					}
 					verts.back().push_back({stof(args[0]), stof(args[1])});
 					break;
 			}
