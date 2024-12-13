@@ -12,7 +12,6 @@
 using namespace std;
 #include "stringUtil.h"
 
-//#ifndef _WIN32
 DateTime::DateTime(int year, int month, int day, int hour, int min, int sec) {
 	this->year	= year;
 	this->month = month;
@@ -26,35 +25,35 @@ DateTime DateTime::now() {
 	return DateTime();
 }
 DateTime::DateTime() {
-	time_t t	= time(NULL);
+	time_t t	= time(nullptr);
 	tm *timePtr = localtime(&t);
 
-	this->year	= timePtr->tm_year;
-	this->month = timePtr->tm_mon + 1;
-	this->day	= timePtr->tm_mday;
-	this->hour	= timePtr->tm_hour;
-	this->min	= timePtr->tm_min;
-	this->sec	= timePtr->tm_sec;
+	year  = timePtr->tm_year + 1900;
+	month = timePtr->tm_mon + 1;
+	day	  = timePtr->tm_mday;
+	hour  = timePtr->tm_hour;
+	min	  = timePtr->tm_min;
+	sec	  = timePtr->tm_sec;
 }
-string DateTime::timestampString() {
-	return toYear(this->year) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + "--" + zeroPad2(hour) + "."
+string DateTime::timestampString() const {
+	return zeroPad(year, 4) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + "--" + zeroPad2(hour) + "."
 		   + zeroPad2(min) + "." + zeroPad2(sec);
 }
 void DateTime::fromSql(string sql) {
-	this->year	= stoi(sql.substr(0, 4));
-	this->month = stoi(sql.substr(5, 2));
-	this->day	= stoi(sql.substr(8, 2));
-	this->hour	= stoi(sql.substr(11, 2));
-	this->min	= stoi(sql.substr(14, 2));
-	this->sec	= stoi(sql.substr(17, 2));
+	year  = stoi(sql.substr(0, 4));
+	month = stoi(sql.substr(5, 2));
+	day	  = stoi(sql.substr(8, 2));
+	hour  = stoi(sql.substr(11, 2));
+	min	  = stoi(sql.substr(14, 2));
+	sec	  = stoi(sql.substr(17, 2));
 }
 
-string DateTime::toSql() {
-	return toYear(this->year) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + " " + zeroPad2(hour) + ":"
+string DateTime::toSql() const {
+	return zeroPad(this->year, 4) + "-" + zeroPad2(month) + "-" + zeroPad2(day) + " " + zeroPad2(hour) + ":"
 		   + zeroPad2(min) + ":" + zeroPad2(sec);
 }
 
-int DateTime::getDayOfWeek() {
+int DateTime::getDayOfWeek() const {
 	// http://en.wikipedia.org/wiki/Zeller's_congruence
 	int K = year % 100;
 	int q = day;
@@ -66,52 +65,56 @@ int DateTime::getDayOfWeek() {
 }
 string DateTime::dayName(int dayIndex) {
 	switch (dayIndex) {
-		case 0: return "Mon"; break;
-		case 1: return "Tue"; break;
-		case 2: return "Wed"; break;
-		case 3: return "Thu"; break;
-		case 4: return "Fri"; break;
-		case 5: return "Sat"; break;
-		case 6: return "Sun"; break;
-		default: return "error!"; break;
+		case 0: return "Mon";
+		case 1: return "Tue";
+		case 2: return "Wed";
+		case 3: return "Thu";
+		case 4: return "Fri";
+		case 5: return "Sat";
+		case 6: return "Sun";
+		default: return "error!";
 	}
 }
 string DateTime::monthName(int monthIndex) {
 	switch (monthIndex) {
-		case 1: return "Jan"; break;
-		case 2: return "Feb"; break;
-		case 3: return "Mar"; break;
-		case 4: return "Apr"; break;
-		case 5: return "May"; break;
-		case 6: return "Jun"; break;
-		case 7: return "Jul"; break;
-		case 8: return "Aug"; break;
-		case 9: return "Sep"; break;
-		case 10: return "Oct"; break;
-		case 11: return "Nov"; break;
-		case 12: return "Dec"; break;
-		default: return "Error"; break;
+		case 1: return "Jan";
+		case 2: return "Feb";
+		case 3: return "Mar";
+		case 4: return "Apr";
+		case 5: return "May";
+		case 6: return "Jun";
+		case 7: return "Jul";
+		case 8: return "Aug";
+		case 9: return "Sep";
+		case 10: return "Oct";
+		case 11: return "Nov";
+		case 12: return "Dec";
+		default: return "Error";
 	}
 }
 
-bool DateTime::isLeapYear() {
-	int a = year;
-	return ((a % 4 == 0 && a % 100 != 0) || a % 400 == 0);
+bool DateTime::isLeapYear(int year) {
+	// A year is a leap year if it is divisible by 4
+	// but not divisible by 100, except when it is divisible by 400.
+	return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
+
 int DateTime::daysInMonth(int month, bool leapYear) { // 1 indexed
 	switch (month) {
-		case 1: return 31;
 		case 2: return leapYear ? 29 : 28;
-		case 3: return 31;
-		case 4: return 30;
-		case 5: return 31;
-		case 6: return 30;
-		case 7: return 31;
-		case 8: return 31;
-		case 9: return 30;
-		case 10: return 31;
-		case 11: return 30;
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
 		case 12: return 31;
+
+		case 4:
+		case 6:
+		case 9:
+		case 11: return 30;
+
 		default: return 0;
 	}
 }
@@ -145,22 +148,7 @@ void DateTime::setFromTimestamp(long timestamp) {
 	sec				 = tinfo->tm_sec;
 }
 
-int DateTime::daysSinceEpoch() {
+int DateTime::daysSinceEpoch() const {
 	DateTime dt(year, month, day);
 	return dt.timestamp() / (24 * 60 * 60);
 }
-string DateTime::toYear(int yr) {
-	yr -= 100;
-	if (yr > 1000) {
-		return to_string(yr);
-	} else if (yr > 100) {
-		return "2" + to_string(yr);
-	} else if (yr > 10) {
-		return "20" + to_string(yr);
-	} else if (yr > 1) {
-		return "200" + to_string(yr);
-	} else {
-		return "2000";
-	}
-}
-//#endif

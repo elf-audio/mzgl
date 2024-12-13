@@ -32,19 +32,18 @@ public:
 	// creates a date with todays date and now's time.
 	DateTime();
 	static DateTime now();
-	std::string toSql();
+	std::string toSql() const;
 	void fromSql(std::string sql);
-	int getDayOfWeek();
+	int getDayOfWeek() const;
 	void addDays(int numDays);
 	void setFromTimestamp(long timestamp);
 	long timestamp() const;
-	bool isLeapYear();
-	int daysSinceEpoch();
+	static bool isLeapYear(int year);
+	int daysSinceEpoch() const;
 	static std::string monthName(int monthIndex); // 1 is January
 	static std::string dayName(int dayIndex); // 0 is monday
 	static int daysInMonth(int month, bool leapYear); // 1 indexed
-	std::string timestampString();
+	std::string timestampString() const;
 
-private:
-	std::string toYear(int yr);
+	bool operator<(const DateTime &other) const { return timestamp() < other.timestamp(); }
 };
