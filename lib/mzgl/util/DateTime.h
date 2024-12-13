@@ -31,6 +31,7 @@ public:
 	enum DayOfWeek { Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday };
 	// creates a date with todays date and now's time.
 	DateTime();
+	static DateTime now();
 	std::string toSql();
 	void fromSql(std::string sql);
 	int getDayOfWeek();

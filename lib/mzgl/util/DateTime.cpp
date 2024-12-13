@@ -22,6 +22,9 @@ DateTime::DateTime(int year, int month, int day, int hour, int min, int sec) {
 	this->sec	= sec;
 }
 
+DateTime DateTime::now() {
+	return DateTime();
+}
 DateTime::DateTime() {
 	time_t t	= time(NULL);
 	tm *timePtr = localtime(&t);
