@@ -674,6 +674,9 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_textboxDialogComplete(JNIEnv *j
 	androidGetApp()->main.runOnMainThread([s, succ]() { android_statics.completionCallback(s, succ); });
 }
 
+
+
+
 #ifdef __cplusplus
 }
 #endif

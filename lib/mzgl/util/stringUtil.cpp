@@ -29,6 +29,14 @@ std::string to_string(float value, int precision) {
 	return out.str();
 }
 
+
+std::string timestampString() {
+	auto now = std::time(nullptr);
+	char buffer[20];
+	std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
+	return std::string(buffer);
+}
+
 // this implementation was occasionally using scientific notation
 // and couldn't turn it off using std::fixed because then std::setprecision
 // was setting decimal places and not significant figures.

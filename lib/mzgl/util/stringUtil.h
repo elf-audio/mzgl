@@ -40,3 +40,4 @@ std::string zeroPad2(int number);
 
 std::string time_point_to_string(const std::chrono::system_clock::time_point &tp);
 std::chrono::system_clock::time_point string_to_time_point(const std::string &s);
+std::string timestampString();
