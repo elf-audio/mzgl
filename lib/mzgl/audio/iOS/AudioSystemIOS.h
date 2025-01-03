@@ -8,6 +8,7 @@
 
 #pragma once
 #include "AudioSystem.h"
+#include <AudioToolbox/AudioToolbox.h>
 
 class AudioSystemIOS : public _AudioSystem {
 public:
