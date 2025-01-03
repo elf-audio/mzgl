@@ -24,6 +24,4 @@ class EventDispatcher;
 	eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher
 			 andUrl:(NSString *)url;
 - (void)shutdown;
-// - (void*) getApp;
-
 @end
