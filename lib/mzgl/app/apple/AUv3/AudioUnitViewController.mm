@@ -8,7 +8,9 @@
 
 #import "AudioUnitViewController.h"
 #import "MZGLEffectAU.h"
-#if TARGET_OS_IPHONE
+#include <thread>
+
+#if MZGL_IOS
 #	import "MZGLKitViewController.h"
 #	import "MZGLKitView.h"
 #else
@@ -25,7 +27,7 @@
 using namespace std;
 
 @implementation AudioUnitViewController {
-#if TARGET_OS_IPHONE
+#if MZGL_IOS
 	MZGLKitViewController *vc;
 	MZGLKitView *glView;
 #else
@@ -38,8 +40,6 @@ using namespace std;
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<PluginEditor> app;
 }
-
-#include <thread>
 
 - (id)init {
 	self = [super init];
@@ -68,7 +68,7 @@ using namespace std;
 	[self setPreferredContentSize:CGSizeMake(500, 800)];
 	//#endif
 }
-#if !TARGET_OS_IOS
+#if !MZGL_IOS
 
 - (instancetype)initWithNibName:(NSNibName)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
 	self = [super initWithNibName:nibNameOrNil bundle:[NSBundle bundleForClass:self.class]];
@@ -79,7 +79,7 @@ using namespace std;
 }
 #endif
 
-#if TARGET_OS_IOS
+#if MZGL_IOS
 - (MZGLKitView *)getView {
 	return glView;
 }
@@ -113,7 +113,7 @@ using namespace std;
 - (void)tryToResize {
 	if (self.view.window != nil && glView != nil) {
 		glView.frame = self.view.frame;
-#if TARGET_OS_IOS
+#if MZGL_IOS
 		auto ed = [glView getEventDispatcher];
 		if (ed != nullptr && ed->hasSetup()) {
 			[vc viewWillTransitionToSize:self.view.window.frame.size withTransitionCoordinator:nil];
@@ -145,17 +145,17 @@ using namespace std;
 	if (app == nullptr) {
 		plugin = [self getPlugin];
 		app	   = instantiatePluginEditor(g, plugin);
-#if TARGET_OS_IOS
+#if MZGL_IOS
 		vc					= [[MZGLKitViewController alloc] initWithApp:app];
 		app->viewController = (__bridge void *) self;
 
 		glView = (MZGLKitView *) vc.view;
 #else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		glView = [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
 #endif
 		glView.frame = self.view.frame;
-#if !TARGET_OS_IOS
+#if !MZGL_IOS
 		g.width	 = self.view.frame.size.width * 2;
 		g.height = self.view.frame.size.height * 2;
 		eventDispatcher->resized();

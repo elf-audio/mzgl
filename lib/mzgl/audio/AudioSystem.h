@@ -132,15 +132,10 @@ public:
 	std::vector<AudioPort> getOutputs() override { return {}; }
 };
 
-#ifdef __APPLE__
-#	include <TargetConditionals.h>
-#endif
+#include "mzgl_platform.h"
 
-#if TARGET_OS_IOS
-#	include <AudioToolbox/AudioToolbox.h>
+#if MZGL_IOS
 #	include "AudioSystemIOS.h"
-#else
-#	ifndef __ANDROID__
-#		include "PortAudioSystem.h"
-#	endif
+#elif !MZGL_ANDROID
+#	include "PortAudioSystem.h"
 #endif
