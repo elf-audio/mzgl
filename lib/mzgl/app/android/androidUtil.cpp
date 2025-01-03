@@ -354,7 +354,13 @@ void androidTextboxDialog(const std::string &title,
 	android_statics.completionCallback = completionCallback;
 	callJNI("textboxDialog", title, msg, text);
 }
-
+void androidNumberboxDialog(const std::string &title,
+							const std::string &msg,
+							const std::string &initialValue,
+							std::function<void(std::string, bool)> completionCallback) {
+	android_statics.completionCallback = completionCallback;
+	callJNI("numberboxDialog", title, msg, initialValue);
+}
 string jstringToString(JNIEnv *jni, jstring text) {
 	const char *nativeString = jni->GetStringUTFChars(text, nullptr);
 	string s				 = string(nativeString);

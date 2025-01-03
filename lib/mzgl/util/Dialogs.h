@@ -74,6 +74,11 @@ public:
 				 std::string text,
 				 std::function<void(std::string, bool)> completionCallback) const;
 
+	void numberbox(std::string title,
+				   std::string msg,
+				   std::string initialValue,
+				   std::function<void(std::string, bool)> completionCallback) const;
+
 	/**
 	 * launch a dialog with a message and 2 buttons.
 	 */
@@ -163,6 +168,17 @@ public:
 		std::vector<std::string> options,
 		int defaultOption,
 		std::function<void(std::string filePath, int segmentChosen, bool cancelled)> completionCallback) const;
+
+private:
+	enum class InputBoxType {
+		Text,
+		Number,
+	};
+	void inputbox(std::string title,
+				  std::string msg,
+				  std::string text,
+				  InputBoxType type,
+				  std::function<void(std::string, bool)> completionCallback) const;
 };
 
 namespace unit_test::dialogs {

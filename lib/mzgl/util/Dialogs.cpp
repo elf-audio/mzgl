@@ -61,10 +61,11 @@ namespace unit_test::dialogs {
 	}
 } // namespace unit_test::dialogs
 
-void Dialogs::textbox(std::string title,
-					  std::string msg,
-					  std::string text,
-					  std::function<void(std::string, bool)> completionCallback) const {
+void Dialogs::inputbox(std::string title,
+					   std::string msg,
+					   std::string text,
+					   InputBoxType type,
+					   std::function<void(std::string, bool)> completionCallback) const {
 #ifdef AUTO_TEST
 	completionCallback(title, randi(2) == 0);
 	return;
@@ -87,7 +88,8 @@ void Dialogs::textbox(std::string title,
 											handler:^(UIAlertAction *action) { completionCallback("", false); }]];
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-	  textField.text = [NSString stringWithUTF8String:text.c_str()];
+	  textField.text		 = [NSString stringWithUTF8String:text.c_str()];
+	  textField.keyboardType = type == InputBoxType::Number ? UIKeyboardTypeNumbersAndPunctuation : UIKeyboardTypeDefault;
 	  dispatch_async(dispatch_get_main_queue(), ^{ [textField selectAll:nil]; });
 	}];
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
@@ -124,12 +126,26 @@ void Dialogs::textbox(std::string title,
 	});
 #	endif
 #elif defined(__ANDROID__)
-	androidTextboxDialog(title, msg, text, completionCallback);
+	androidNumberboxDialog(title, msg, text, completionCallback);
 #elif defined(_WIN32)
 	windowsTextboxDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, text, completionCallback);
 #elif defined(__linux__)
 	linuxTextboxDialog(title, msg, text, completionCallback);
 #endif
+}
+
+void Dialogs::textbox(std::string title,
+					  std::string msg,
+					  std::string text,
+					  std::function<void(std::string, bool)> completionCallback) const {
+	inputbox(title, msg, text, InputBoxType::Text, completionCallback);
+}
+
+void Dialogs::numberbox(std::string title,
+						std::string msg,
+						std::string initialValue,
+						std::function<void(std::string, bool)> completionCallback) const {
+	inputbox(title, msg, initialValue, InputBoxType::Number, completionCallback);
 }
 
 void Dialogs::confirm(std::string title,
