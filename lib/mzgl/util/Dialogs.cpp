@@ -126,7 +126,11 @@ void Dialogs::inputbox(std::string title,
 	});
 #	endif
 #elif defined(__ANDROID__)
-	androidNumberboxDialog(title, msg, text, completionCallback);
+	if(type==InputBoxType::Number) {
+		androidNumberboxDialog(title, msg, text, completionCallback);
+	} else {
+		androidTextboxDialog(title, msg, text, completionCallback);
+	}
 #elif defined(_WIN32)
 	windowsTextboxDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, text, completionCallback);
 #elif defined(__linux__)
