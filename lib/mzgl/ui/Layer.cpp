@@ -9,6 +9,7 @@
 #include "util.h"
 #include "stringUtil.h"
 #include "log.h"
+#include "mzAssert.h"
 
 Layer::Layer(Graphics &g, const std::string &name)
 	: g(g)
@@ -118,6 +119,13 @@ bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
 
 Layer *Layer::addChild(Layer *layer) {
 	layer->parent = this;
+#ifdef DEBUG
+	mzAssert(layer != this, "Can't add a layer to itself");
+	for (auto *c: children) {
+		mzAssert(c != layer, "Can't add a layer to the same parent twice");
+	}
+
+#endif
 	children.push_back(layer);
 	return layer;
 }
