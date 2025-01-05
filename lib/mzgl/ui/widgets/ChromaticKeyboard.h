@@ -7,6 +7,8 @@
 //
 
 #pragma once
+#include "Layer.h"
+#include "Drawer.h"
 #include <set>
 
 class ChromaticKeyboard : public Layer {
@@ -24,15 +26,8 @@ public:
 	vec4 blackKeyColor {0.4f, 0.4f, 0.4f, 1.f};
 	vec4 downKeyColor {1.f, 0.5f, 0.5f, 1.f};
 
-	vector<int> sharpIndexToChromatic	  = {1, 3, 6, 8, 10};
-	vector<float> sharpOffsets			  = {0.7f, 1.8f, 3.7f, 4.75f, 5.8f};
-	vector<int> whiteNoteIndexToChromatic = {0, 2, 4, 5, 7, 9, 11};
-
 	void draw() override {
 		Drawer d;
-
-		//		d.setColor(0.2);
-		//		d.drawRect(*this);
 
 		std::set<int> downNotes;
 
@@ -41,7 +36,6 @@ public:
 		}
 
 		// white keys
-		//			d.setColor(1);
 		float radius	  = 8;
 		int numWhiteNotes = octaves * 7;
 		float ww		  = width / (float) numWhiteNotes;
@@ -58,7 +52,6 @@ public:
 			d.drawRoundedRect(r, radius, false, false, true, true);
 		}
 
-		//			d.setColor(0.4);
 		for (int i = 0; i < octaves; i++) {
 			// C#
 			int octaveOffset = (i * 7 * ww);
@@ -90,27 +83,6 @@ public:
 		vbo->draw(g);
 	}
 
-	int touchToNote(float x, float y) {
-		x -= this->x;
-		y -= this->y;
-		int numWhiteNotes = octaves * 7;
-		float n			  = x / (width / (float) numWhiteNotes);
-		int octave		  = n / 7;
-		float note		  = fmod(n, 7);
-
-		if (y < height * blackNoteHeight) {
-			for (int i = 0; i < sharpOffsets.size(); i++) {
-				if (note >= sharpOffsets[i] && note <= sharpOffsets[i] + 0.5f) {
-					return sharpIndexToChromatic[i] + octave * 12;
-				}
-			}
-		}
-		return whiteNoteIndexToChromatic[((int) note) % 7] + octave * 12;
-	}
-
-	// touch id to keyboard note
-	map<int, int> touches;
-
 	bool touchDown(float x, float y, int id) override {
 		touches[id] = touchToNote(x, y);
 		noteOn(touches[id]);
@@ -141,7 +113,31 @@ public:
 		}
 	}
 
-	function<void(int)> noteOff = [](int note) { Log::d() << "note off"; };
+	std::function<void(int)> noteOff = [](int note) { Log::d() << "note off"; };
+	std::function<void(int)> noteOn	 = [](int note) { Log::d() << "note on"; };
 
-	function<void(int)> noteOn = [](int note) { Log::d() << "note on"; };
+private:
+	int touchToNote(float x, float y) {
+		x -= this->x;
+		y -= this->y;
+		int numWhiteNotes = octaves * 7;
+		float n			  = x / (width / (float) numWhiteNotes);
+		int octave		  = n / 7;
+		float note		  = fmod(n, 7);
+
+		if (y < height * blackNoteHeight) {
+			for (int i = 0; i < sharpOffsets.size(); i++) {
+				if (note >= sharpOffsets[i] && note <= sharpOffsets[i] + 0.5f) {
+					return sharpIndexToChromatic[i] + octave * 12;
+				}
+			}
+		}
+		return whiteNoteIndexToChromatic[((int) note) % 7] + octave * 12;
+	}
+
+	// touch id to keyboard note
+	std::map<int, int> touches;
+	std::vector<int> sharpIndexToChromatic	   = {1, 3, 6, 8, 10};
+	std::vector<float> sharpOffsets			   = {0.7f, 1.8f, 3.7f, 4.75f, 5.8f};
+	std::vector<int> whiteNoteIndexToChromatic = {0, 2, 4, 5, 7, 9, 11};
 };
