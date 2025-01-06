@@ -4,6 +4,11 @@
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
 #		define MZGL_IOS 1
+#		if __has_builtin(__builtin_available)
+#			define IS_ON_IOS_VERSION_OR_LATER(version) __builtin_available(iOS version, *)
+#		else
+#			define IS_ON_IOS_VERSION_OR_LATER(version) false
+#		endif
 #	else
 #		define MZGL_MAC 1
 #	endif
