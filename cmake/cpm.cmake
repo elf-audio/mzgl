@@ -29,12 +29,12 @@ function(mzgl_download_cpm)
       EXPECTED_HASH SHA256=${CPM_EXPECTED_HASH})
 
     if(EXISTS "${XCODE_HEADER_PATH_FILE}")
-      mzgl_print_verbose_in_blue(
+      mzgl_print_debug_in_grey(
         "File exists: ${XCODE_HEADER_PATH_FILE}. Deleting it.")
       file(REMOVE "${XCODE_HEADER_PATH_FILE}")
     endif()
   else()
-    mzgl_print_verbose_in_cyan(
+    mzgl_print_debug_in_grey(
       "[CPM] --> CPM already exists in ${CPM_DOWNLOAD_LOCATION}")
   endif()
 endfunction()

@@ -85,7 +85,7 @@ function(mzgl_add_search_paths ROOTPATH)
   include_directories(${INCLUDE_DIRECTORIES_LIST})
 
   foreach(DIR IN LISTS INCLUDE_DIRECTORIES_LIST)
-    mzgl_print_verbose_in_magenta("            -> ${DIR}")
+    mzgl_print_debug_in_grey("            -> ${DIR}")
     mzgl_add_xcode_header_search_path(${DIR})
   endforeach()
 endfunction()
@@ -108,8 +108,7 @@ function(mzgl_add_package PACKAGE_NAME)
       CACHE INTERNAL "${CPM_LAST_PACKAGE_NAME} Deps dir")
 
   mzgl_restore_cmake_log_level()
-  mzgl_print_verbose_in_yellow(
-    "      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
+  mzgl_print_debug_in_grey("      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
 
   mzgl_add_search_paths("${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}")
 endfunction()
@@ -123,10 +122,10 @@ function(mzgl_add_named_package PACKAGE_STRING)
 
   set(TARGET ${NAME})
 
-  mzgl_print_verbose_in_magenta("Named package -> Developer: ${DEVELOPER}")
-  mzgl_print_verbose_in_magenta("Named package -> Name: ${NAME}")
-  mzgl_print_verbose_in_magenta("Named package -> SHA: ${SHA}")
-  mzgl_print_verbose_in_magenta("Named package -> Target: ${TARGET}")
+  mzgl_print_debug_in_grey("Named package -> Developer: ${DEVELOPER}")
+  mzgl_print_debug_in_grey("Named package -> Name: ${NAME}")
+  mzgl_print_debug_in_grey("Named package -> SHA: ${SHA}")
+  mzgl_print_debug_in_grey("Named package -> Target: ${TARGET}")
 
   mzgl_print_in_yellow("[CPM] -> Adding package gh:${DEVELOPER}/${NAME}#${SHA}")
 
@@ -146,6 +145,5 @@ function(mzgl_add_named_package PACKAGE_STRING)
       "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}"
       CACHE INTERNAL "${CPM_LAST_PACKAGE_NAME} Deps dir")
   mzgl_restore_cmake_log_level()
-  mzgl_print_verbose_in_yellow(
-    "      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
+  mzgl_print_debug_in_grey("      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
 endfunction()
