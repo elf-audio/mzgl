@@ -9,17 +9,17 @@
 #define NOMINMAX // Avoids name conflicts on Windows
 
 #include "SVG.h"
-#include "stringUtil.h"
-#include "Triangulator.h"
-#include "MitredLine.h"
-#include <algorithm>
-#include "log.h"
-#include "RoundedRect.h"
-#include <glm/gtc/type_ptr.hpp>
 #include "DisableAllWarnings.h"
+#include "MitredLine.h"
+#include "RoundedRect.h"
+#include "Triangulator.h"
+#include "log.h"
+#include "stringUtil.h"
+#include <algorithm>
+#include <glm/gtc/type_ptr.hpp>
 DISABLE_WARNINGS
-#include "pu_gixml.hpp"
 #include "filesystem.h"
+#include "pu_gixml.hpp"
 RESTORE_WARNINGS
 
 // TODO: optimization - only transform verts if there's a transformation
@@ -94,13 +94,39 @@ glm::mat3 parseTransform(string tr) {
 			transform *= m;
 
 		} else if (a.find("rotate") != -1) {
-			auto parts	   = split(a, "(");
-			float rotation = stof(parts[1]);
-			float theta	   = rotation * M_PI / 180.f;
+			auto parts = split(a, "(");
+			if (parts.size() != 2) {
+				Log::e() << "ERROR: rotate transform with no parameters";
+				continue;
+			}
+			float theta = 0;
+			parts		= split(parts[1], " ");
+			try {
+				float rotation = stof(parts[0]);
+				theta		   = rotation * M_PI / 180.f;
+			} catch (const std::exception &e) {
+				Log::e() << "ERROR: rotate transform in svg: " << e.what();
+				continue;
+			}
+
+			float sinTheta = sin(theta);
+			float cosTheta = cos(theta);
+
+			vec2 offset {0, 0};
+			if (parts.size() == 3) {
+				try {
+					vec2 c {stof(parts[1]), stof(parts[2])};
+					offset.x = c.x * (1 - cosTheta) + c.y * sinTheta;
+					offset.y = c.y * (1 - cosTheta) - c.x * sinTheta;
+				} catch (const std::exception &e) {
+					Log::e() << "ERROR: rotate transform in svg: " << e.what();
+					continue;
+				}
+			}
 
 			glm::mat3 m = {
 
-				cos(theta), sin(theta), 0, -sin(theta), cos(theta), 0, 0, 0, 1};
+				cosTheta, sinTheta, 0, -sinTheta, cosTheta, 0, offset.x, offset.y, 1};
 
 			transform *= m;
 		}
