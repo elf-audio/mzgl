@@ -80,6 +80,8 @@ set(MZGL_SOURCES
     lib/mzgl/music/chords.cpp
     lib/mzgl/music/scales.cpp
     lib/mzgl/net/netUtil.cpp
+    lib/mzgl/net/FileDownloader.cpp
+    lib/mzgl/net/FileDownloader.h
     lib/mzgl/ui/widgets/ReorderableGrid.cpp
     lib/mzgl/ui/DropDown.cpp
     lib/mzgl/ui/Layer.cpp
@@ -256,6 +258,7 @@ if(APPLE)
     lib/mzgl/util/log.cpp
     lib/mzgl/util/WebViewOverlay.cpp
     lib/mzgl/net/netUtil.cpp
+    lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
 else()
