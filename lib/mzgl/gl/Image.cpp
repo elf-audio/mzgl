@@ -29,8 +29,7 @@ bool Image::loadPngFromData(const vector<uint8_t> &inData,
 							int &outWidth,
 							int &outHeight,
 							int &outNumChannels,
-							int &outBytesPerChannel,
-							bool &outIsFloat) {
+							int &outBytesPerChannel) {
 	unsigned char *image = stbi_load_from_memory(
 		inData.data(), (int) inData.size(), &outWidth, &outHeight, &outNumChannels, STBI_default);
 

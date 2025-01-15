@@ -43,8 +43,7 @@ public:
 								int &outWidth,
 								int &outHeight,
 								int &outNumChannels,
-								int &outBytesPerChannel,
-								bool &outIsFloat);
+								int &outBytesPerChannel);
 
 	bool load(const std::string &path) {
 		return load(path, data, width, height, numChannels, bytesPerChannel, isFloat);
