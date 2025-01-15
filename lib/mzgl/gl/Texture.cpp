@@ -54,13 +54,12 @@ Texture::Texture(const std::vector<unsigned char> &pngData) {
 	int h;
 	int numChans;
 	int bytesPerChan;
-	bool isFloat;
 
-	if (!Image::loadPngFromData(pngData, outData, w, h, numChans, bytesPerChan, isFloat)) {
+	if (!Image::loadPngFromData(pngData, outData, w, h, numChans, bytesPerChan)) {
 		Log::e() << "Couldn't load image!!";
 		return;
 	}
-
+	bool isFloat = false;
 	loadFromPixels(outData, w, h, numChans, bytesPerChan, isFloat);
 }
 
