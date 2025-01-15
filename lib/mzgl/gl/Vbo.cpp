@@ -13,8 +13,6 @@
 #include "error.h"
 #include "Graphics.h"
 #include "log.h"
-#include "Graphics.h"
-#include "util.h"
 #include "Geometry.h"
 
 void Vbo::Buffer::deallocate() {
