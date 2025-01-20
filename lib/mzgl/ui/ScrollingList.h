@@ -48,7 +48,7 @@ public:
 
 	void select(int itemIndex);
 	void select(std::shared_ptr<ScrollingListItem> item);
-	int getNumItems() const { return items.size(); }
+	int getNumItems() const { return static_cast<int>(items.size()); }
 	int getSelectedIndex() const { return selectedIndex; }
 	float getContentHeight() { return content->height; }
 	//	void draw() override;

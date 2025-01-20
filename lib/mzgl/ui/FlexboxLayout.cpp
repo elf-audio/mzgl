@@ -12,7 +12,7 @@
 
 void Flexbox::LayoutBase::addChild(LayoutNodeRef child) {
 	children.push_back(child);
-	YGNodeInsertChild(node, child->node, children.size() - 1);
+	YGNodeInsertChild(node, child->node, static_cast<int>(children.size()) - 1);
 }
 
 void Flexbox::LayoutBase::update(float xOffset, float yOffset) {

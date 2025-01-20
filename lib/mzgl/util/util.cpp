@@ -258,6 +258,9 @@ std::vector<std::string> getCommandLineArgs() {
 	return Globals::commandLineArgs;
 }
 
+void addCommandLineFlag(const std::string &flag) {
+	Globals::commandLineArgs.emplace_back(flag);
+}
 bool hasCommandLineFlag(const std::string &flag) {
 	auto args = getCommandLineArgs();
 	return std::find_if(std::begin(args), std::end(args), [flag](auto &&arg) { return arg == flag; })

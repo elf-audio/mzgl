@@ -37,6 +37,7 @@ std::string getHomeDirectory();
 void loadCommandLineArgs(int argc, const char *argv[]);
 std::vector<std::string> getCommandLineArgs();
 bool hasCommandLineFlag(const std::string &flag);
+void addCommandLineFlag(const std::string &flag);
 bool hasCommandLineSetting(const std::string &setting);
 std::string getCommandLineSetting(const std::string &setting, const std::string &defaultValue = "");
 int getCommandLineSetting(const std::string &setting, int defaultValue = -1);
