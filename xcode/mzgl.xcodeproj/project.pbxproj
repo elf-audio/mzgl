@@ -777,6 +777,12 @@
 		EAE8428A2AE16F06008DB683 /* Int16Buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE842892AE16F06008DB683 /* Int16Buffer.h */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
+		EAF01F4D2D3ECA1800248121 /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
+		EAF01F4E2D3ECA1800248121 /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
+		EAF01F4F2D3ECA1800248121 /* FileDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF01F4B2D3ECA1800248121 /* FileDownloader.h */; };
+		EAF01F502D3ECA1800248121 /* FileDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF01F4B2D3ECA1800248121 /* FileDownloader.h */; };
+		EAF01F512D3ECA1800248121 /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
+		EAF01F522D3ECA1800248121 /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
 		EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
 		EAF67372289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
 		EAF67373289BC3DC001F778D /* mzAssert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6736F289BC3DB001F778D /* mzAssert.cpp */; };
@@ -1670,6 +1676,8 @@
 		EAE842892AE16F06008DB683 /* Int16Buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Int16Buffer.h; sourceTree = "<group>"; };
 		EAE94825274C0BF300718B53 /* UIBlockButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIBlockButton.h; sourceTree = "<group>"; };
 		EAE94826274C0BF300718B53 /* UIBlockButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIBlockButton.m; sourceTree = "<group>"; };
+		EAF01F4B2D3ECA1800248121 /* FileDownloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloader.h; sourceTree = "<group>"; };
+		EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = FileDownloader.cpp; sourceTree = "<group>"; };
 		EAF18F8E273BE69A00E1589E /* MidiMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MidiMessage.h; sourceTree = "<group>"; };
 		EAF6736F289BC3DB001F778D /* mzAssert.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mzAssert.cpp; sourceTree = "<group>"; };
 		EAF67370289BC3DC001F778D /* mzAssert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mzAssert.h; sourceTree = "<group>"; };
@@ -3104,6 +3112,8 @@
 		EADA5B262A138E02000DCE7B /* net */ = {
 			isa = PBXGroup;
 			children = (
+				EAF01F4B2D3ECA1800248121 /* FileDownloader.h */,
+				EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */,
 				EADA5B272A138E36000DCE7B /* netUtil.cpp */,
 				EADA5B282A138E36000DCE7B /* netUtil.h */,
 			);
@@ -3266,6 +3276,7 @@
 				EA183FEB2432C18D00A5C3E8 /* AudioFile.h in Headers */,
 				EA71A76627E39E6C0081A5CB /* aesopt.h in Headers */,
 				EA234AF824A609CA000F057B /* Yoga.h in Headers */,
+				EAF01F502D3ECA1800248121 /* FileDownloader.h in Headers */,
 				EA183FE42432C18D00A5C3E8 /* RtMidiExtras.h in Headers */,
 				EA183FC92432C18D00A5C3E8 /* util.h in Headers */,
 				EA234AFF24A609CA000F057B /* YGStyle.h in Headers */,
@@ -3450,6 +3461,7 @@
 				EA2B89ED24E7093600EA12BD /* YGEnums.h in Headers */,
 				EA2B8A4824E7093600EA12BD /* BitUtils.h in Headers */,
 				EA2B8A4D24E7093600EA12BD /* SVG.h in Headers */,
+				EAF01F4F2D3ECA1800248121 /* FileDownloader.h in Headers */,
 				EA2B8A5024E7093600EA12BD /* errors.h in Headers */,
 				EAD03BB3297FF53300D0C04A /* iOSWebView.h in Headers */,
 				EA2B8A5224E7093600EA12BD /* PluginEditor.h in Headers */,
@@ -3595,6 +3607,7 @@
 				EA183FF62432C18D00A5C3E8 /* Triangulator.cpp in Sources */,
 				EA183F9A2432C18D00A5C3E8 /* Slider.cpp in Sources */,
 				EA71A71E27E39E6B0081A5CB /* unzip.c in Sources */,
+				EAF01F512D3ECA1800248121 /* FileDownloader.cpp in Sources */,
 				EAF99AB5267A415200157A7C /* ScrollingListItem.cpp in Sources */,
 				EA73F05F28E4670900395945 /* geomutils.cpp in Sources */,
 				EA71A79A27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -3742,6 +3755,7 @@
 				EAF67382289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA234B1424A611AF000F057B /* ylog.cpp in Sources */,
 				EA5250EA2C2C64A900DE5DFC /* WebViewOverlay.cpp in Sources */,
+				EAF01F522D3ECA1800248121 /* FileDownloader.cpp in Sources */,
 				EA1841192432C4A500A5C3E8 /* SvgVbo.cpp in Sources */,
 				EAF67372289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */,
@@ -3899,6 +3913,7 @@
 				EA71A78A27E39E6C0081A5CB /* entropy.c in Sources */,
 				EA5250E32C2C644800DE5DFC /* NSBlockButton.m in Sources */,
 				EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */,
+				EAF01F4E2D3ECA1800248121 /* FileDownloader.cpp in Sources */,
 				EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */,
 				EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */,
 				EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */,
@@ -3990,6 +4005,7 @@
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
 				EAF67384289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA5250EB2C2C64AA00DE5DFC /* WebViewOverlay.cpp in Sources */,
+				EAF01F4D2D3ECA1800248121 /* FileDownloader.cpp in Sources */,
 				EA71A73F27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA68945D261C633500F76B91 /* Texture.cpp in Sources */,
 				EAF67374289BC3DC001F778D /* mzAssert.cpp in Sources */,
