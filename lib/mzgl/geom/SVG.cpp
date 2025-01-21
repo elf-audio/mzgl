@@ -31,35 +31,22 @@ bool isNumeric(int c) {
 	return false;
 }
 
-glm::vec4 parseColor(const string &hex) {
-	if (hex.empty()) return {0.f, 0.f, 0.f, 1.f};
+glm::vec4 parseColor(const string &colour) {
+	if (colour.empty()) return {0.f, 0.f, 0.f, 1.f};
 
-	if (hex[0] == '#') {
-		string s = hex.substr(1);
-		int c	 = (int) strtol(s.c_str(), nullptr, 16);
-		return hexColor(c);
+	if (isHexColour(colour)) {
+		return svgHexColor(colour);
 	}
 
-	if (hex == "none" || hex == "transparent") return {0, 0, 0, 0};
-	if (hex == "black") return hexColor(0);
-	if (hex == "silver") return hexColor(0xC0C0C0);
-	if (hex == "gray") return hexColor(0x808080);
-	if (hex == "white") return hexColor(0xFFFFFF);
-	if (hex == "maroon") return hexColor(0x800000);
-	if (hex == "red") return hexColor(0xFF0000);
-	if (hex == "purple") return hexColor(0x800080);
-	if (hex == "fuchsia") return hexColor(0xFF00FF);
-	if (hex == "green") return hexColor(0x008000);
-	if (hex == "lime") return hexColor(0x00FF00);
-	if (hex == "olive") return hexColor(0x808000);
-	if (hex == "yellow") return hexColor(0xFFFF00);
-	if (hex == "navy") return hexColor(0x000080);
-	if (hex == "blue") return hexColor(0x0000FF);
-	if (hex == "teal") return hexColor(0x008080);
-	if (hex == "aqua") return hexColor(0x00FFFF);
+	if (isRGBColour(colour)) {
+		return rgbColor(colour);
+	}
 
-	Log::e() << "ERROR: color string does not represent a color -  '" << hex << "'";
-	return {0, 0, 0, 0};
+	if (isRGBAColour(colour)) {
+		return rgbaColor(colour);
+	}
+
+	return namedColor(colour);
 }
 
 // TODO: replace with glm version
@@ -658,7 +645,18 @@ private:
 };
 
 void SVGDoc::parseViewBox(string s) {
-	auto p		   = split(s, " ");
+	viewBox.x	   = 0;
+	viewBox.y	   = 0;
+	viewBox.width  = 0;
+	viewBox.height = 0;
+
+	if (s.empty()) {
+		return;
+	}
+	auto p = split(s, " ");
+	if (p.size() != 4) {
+		return;
+	}
 	viewBox.x	   = stoi(p[0]);
 	viewBox.y	   = stoi(p[1]);
 	viewBox.width  = stoi(p[2]);
@@ -726,6 +724,10 @@ bool SVGDoc::loadFromString(const string &svgData) {
 	parseViewBox(root.attribute("viewBox").value());
 	width  = viewBox.width;
 	height = viewBox.height;
+	if (width == 0 || height == 0) {
+		viewBox.width = width = std::stoi(std::string {root.attribute("width").value()});
+		viewBox.height = height = std::stoi(std::string {root.attribute("height").value()});
+	}
 	parseDefs(root);
 
 	rootGroup = SVGGroup::create(root, defs);
