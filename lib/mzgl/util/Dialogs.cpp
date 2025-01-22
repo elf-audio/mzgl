@@ -88,8 +88,9 @@ void Dialogs::inputbox(std::string title,
 											handler:^(UIAlertAction *action) { completionCallback("", false); }]];
 
 	[alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-	  textField.text		 = [NSString stringWithUTF8String:text.c_str()];
-	  textField.keyboardType = type == InputBoxType::Number ? UIKeyboardTypeNumbersAndPunctuation : UIKeyboardTypeDefault;
+	  textField.text = [NSString stringWithUTF8String:text.c_str()];
+	  textField.keyboardType =
+		  type == InputBoxType::Number ? UIKeyboardTypeNumbersAndPunctuation : UIKeyboardTypeDefault;
 	  dispatch_async(dispatch_get_main_queue(), ^{ [textField selectAll:nil]; });
 	}];
 	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
@@ -126,7 +127,7 @@ void Dialogs::inputbox(std::string title,
 	});
 #	endif
 #elif defined(__ANDROID__)
-	if(type==InputBoxType::Number) {
+	if (type == InputBoxType::Number) {
 		androidNumberboxDialog(title, msg, text, completionCallback);
 	} else {
 		androidTextboxDialog(title, msg, text, completionCallback);
@@ -1216,7 +1217,10 @@ void Dialogs::loadFile(std::string msg,
 				  impikD = [[FilePickerDelegate alloc] init];
 			  }
 			  std::vector<NSString *> nsExts;
-			  for (const auto &ext: allowedExts) {
+			  for (auto ext: allowedExts) {
+				  if (ext[0] == '.') {
+					  ext.erase(0, 1);
+				  }
 				  nsExts.push_back([NSString stringWithUTF8String:ext.c_str()]);
 			  }
 			  NSArray *exts = [NSArray arrayWithObjects:&nsExts[0] count:nsExts.size()];
