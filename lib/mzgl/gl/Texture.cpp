@@ -22,7 +22,6 @@ vector<Texture *> Texture::textures;
 
 #ifdef MZGL_SOKOL_METAL
 #	include "SokolTexture.h"
-//impl = std::make_unique<SokolTextureImpl>(g.getAPI());
 #	define TEXTURE_CLASS SokolTexture
 #else
 #	include "OpenGLTexture.h"
@@ -54,7 +53,10 @@ TextureRef Texture::create(Graphics &g, const std::vector<unsigned char> &pngDat
 	}
 
 	bool isFloat = false;
-	loadFromPixels(outData, w, h, numChans, bytesPerChan, isFloat);
+
+	auto tex = Texture::create(g);
+	tex->loadFromPixels(outData, w, h, numChans, bytesPerChan, isFloat);
+	return tex;
 }
 
 Texture::~Texture() {
@@ -144,10 +146,7 @@ void Texture::draw(float x, float y, float width, float height) {
 	vbo->setVertices(verts);
 	vbo->setTexCoords(texCoords);
 
-	GetError();
 	bind();
-	GetError();
 	g.texShader->begin();
 	vbo->draw(g);
-	GetError();
 }
