@@ -64,7 +64,6 @@ public:
 private:
 	void createProgram(uint32_t vertexShader, uint32_t fragmentShader);
 
-	std::string readFile2(const std::string &fileName);
 	uint32_t compileShader(uint32_t type, std::string src);
 
 	uint32_t mvpLocation;
