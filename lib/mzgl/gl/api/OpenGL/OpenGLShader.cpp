@@ -7,7 +7,8 @@
 #include "mzOpenGL.h"
 #include "filesystem.h"
 #include "stringUtil.h"
-
+#include "mzAssert.h"
+#include "util.h"
 void OpenGLShader::begin() {
 #ifdef MZGL_GL2
 	instanceUniforms.clear();
@@ -172,7 +173,16 @@ void OpenGLShader::loadFromString(std::string vertCode, std::string fragCode) {
 }
 
 void OpenGLShader::load(const std::string &vertexFilePath, const std::string &fragFilePath) {
-	loadFromString(readFile2(vertexFilePath), readFile2(fragFilePath));
+	std::string vertSrc, fragSrc;
+	if (!readStringFromFile(vertexFilePath, vertSrc)) {
+		mzAssertFail("Couldn't load vert file from " + vertexFilePath);
+	}
+
+	if (!readStringFromFile(fragFilePath, fragSrc)) {
+		mzAssertFail("Couldn't load frag file from " + vertexFilePath);
+	}
+
+	loadFromString(vertSrc, fragSrc);
 }
 
 std::string OpenGLShader::getVersionForPlatform(bool isVertShader) {
@@ -253,22 +263,6 @@ void OpenGLShader::createProgram(GLuint vertexShader, GLuint fragmentShader) {
 
 	mvpLocation	  = glGetUniformLocation(shaderProgram, "mvp");
 	colorLocation = glGetUniformLocation(shaderProgram, "color");
-}
-
-std::string OpenGLShader::readFile2(const std::string &fileName) {
-	fs::ifstream ifs(fs::u8path(fileName.c_str()), std::ios::in | std::ios::binary | std::ios::ate);
-
-	if (!ifs.good()) {
-		Log::e() << "Error loading shader from " << fileName;
-		return "";
-	}
-	std::ifstream::pos_type fileSize = ifs.tellg();
-	ifs.seekg(0, std::ios::beg);
-
-	std::vector<char> bytes(fileSize);
-	ifs.read(bytes.data(), fileSize);
-
-	return std::string(bytes.data(), fileSize);
 }
 
 #ifdef MZGL_GL2
