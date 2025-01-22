@@ -194,7 +194,7 @@ public:
 	void chooseShaderAndSetDefaults(Graphics &g) {
 		bindAppropriateShader(g, colorbuffer.valid(), texCoordBuffer.valid());
 		g.currShader->setMVP(g.getMVP());
-		if (g.currShader->needsColorUniform) {
+		if (((OpenGLShader *) g.currShader)->needsColorUniform) {
 			g.currShader->setColor(g.getColor());
 		}
 	}

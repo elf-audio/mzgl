@@ -28,6 +28,9 @@ vector<Texture *> Texture::textures;
 #	define TEXTURE_CLASS OpenGLTexture
 #endif
 
+Texture::Texture(Graphics &g)
+	: g(g) {
+}
 TextureRef Texture::create(Graphics &g, uint32_t textureID, int width, int height) {
 	return TextureRef(new TEXTURE_CLASS(g, textureID, width, height));
 }

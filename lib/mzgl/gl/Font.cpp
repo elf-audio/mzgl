@@ -94,8 +94,6 @@ bool Font::isLoaded() const {
 bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	// todo - this is just a copy of the next method
 	clear();
-
-	GetError();
 	this->size = size / 2.f;
 #ifdef MZGL_SOKOL_METAL
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
@@ -104,7 +102,6 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 #endif
 	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
 
-	GetError();
 	if (fs == nullptr) {
 		Log::e() << "Could not create stash.";
 		return false;
