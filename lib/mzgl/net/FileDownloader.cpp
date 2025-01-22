@@ -1,5 +1,17 @@
 #include "FileDownloader.h"
 
+#ifdef __ANDROID__
+FileDownloader::~FileDownloader() {
+}
+
+void FileDownloader::download(const std::string &url,
+							  const fs::path &downloadLocation,
+							  const FileDownloaderCallbacks &callbacks) {
+}
+void FileDownloader::cancel() {
+}
+#endif
+
 #ifdef __APPLE__
 
 #	include "log.h"
