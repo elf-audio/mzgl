@@ -346,42 +346,45 @@ set(SOKOL_SHDC "sokol-shdc")
 
 
 
-# Process each shader file
-foreach (SHADER_SOURCE ${SHADER_SOURCES})
-    # Create a corresponding header file name
-    get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
-    set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
+set(USING_SOKOL true)
+if(USING_SOKOL)
 
-    # Custom command that runs sokol-shdc for each shader
-    add_custom_command(
-            OUTPUT ${SHADER_HEADER}
-            COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
-            DEPENDS ${SHADER_SOURCE}
-            COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
-            VERBATIM
-    )
+  # Process each shader file
+  foreach (SHADER_SOURCE ${SHADER_SOURCES})
+      # Create a corresponding header file name
+      get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
+      set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
 
-    # Append the output header to a list of all generated headers
-    list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
-endforeach ()
+      # Custom command that runs sokol-shdc for each shader
+      add_custom_command(
+              OUTPUT ${SHADER_HEADER}
+              COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
+              DEPENDS ${SHADER_SOURCE}
+              COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
+              VERBATIM
+      )
 
-# Custom target that depends on all generated shader headers
-add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
+      # Append the output header to a list of all generated headers
+      list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
+  endforeach ()
 
-# Ensure your main application depends on this custom target
-add_dependencies(libmzgl CompileShaders)
+  # Custom target that depends on all generated shader headers
+  add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
 
-target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  # Ensure your main application depends on this custom target
+  add_dependencies(libmzgl CompileShaders)
+
+  target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 
 
 
-# choose the sokol backend for platform
-add_compile_definitions(SOKOL_METAL)
+  # choose the sokol backend for platform
+  add_compile_definitions(SOKOL_METAL)
 
-# uncomment to turn on sokol
-add_compile_definitions(MZGL_SOKOL_METAL)
-
+  # uncomment to turn on sokol
+  add_compile_definitions(MZGL_SOKOL_METAL)
+endif()
 
 
 

@@ -799,9 +799,12 @@ void Graphics::clear(float c) {
 void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
 }
+#ifdef MZGL_SOKOL_METAL
+#	include "SokolAPI.h"
+#else
+#	include "OpenGLAPI.h"
+#endif
 
-#include "OpenGLAPI.h"
-#include "SokolAPI.h"
 Graphics::Graphics() {
 #ifdef MZGL_SOKOL_METAL
 	api = std::make_unique<SokolAPI>(*this);
@@ -811,9 +814,11 @@ Graphics::Graphics() {
 }
 
 int32_t Graphics::getDefaultFrameBufferId() {
+#ifndef MZGL_SOKOL_METAL
 	if (auto *openGLApi = dynamic_cast<OpenGLAPI *>(api.get())) {
-		openGLApi->getDefaultFrameBufferId();
+		return openGLApi->getDefaultFrameBufferId();
 	}
+#endif
 	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
 	return 0;
 }
