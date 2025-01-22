@@ -52,7 +52,7 @@ set(MZGL_SOURCES
     lib/mzgl/geom/Triangulator.cpp
     lib/mzgl/geom/geomutils.cpp
     lib/mzgl/geom/3D/Camera.cpp
-    lib/mzgl/gl/api/OpenGLAPI.cpp
+    lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
     lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp
     lib/mzgl/gl/api/Sokol/SokolAPI.cpp
     lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
@@ -209,6 +209,7 @@ set(HEADERS
     lib/portaudio/include
     lib/fontstash
     lib/rtmidi
+    lib/sokol
     lib/pu_gixml/src
     lib/misc
     lib/yoga
