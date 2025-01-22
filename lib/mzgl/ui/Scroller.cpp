@@ -152,5 +152,5 @@ void Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 		return;
 	}
 
-	contentVelocity = vec2(scrollX * 4.f, scrollY * 4.f);
+	contentVelocity = vec2(scrollX * 8.f, scrollY * 8.f);
 }
