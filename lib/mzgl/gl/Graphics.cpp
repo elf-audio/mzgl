@@ -30,7 +30,7 @@ glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
 	c.r = ((hex >> 16) & 0xFF) / 255.f;
 	c.g = ((hex >> 8) & 0xFF) / 255.f;
-	c.b = ((hex) &0xFF) / 255.f;
+	c.b = ((hex) & 0xFF) / 255.f;
 	c.a = a;
 	return c;
 }
@@ -307,10 +307,6 @@ bool Graphics::isBlending() const {
 	return blendingEnabled;
 }
 
-Graphics::BlendMode Graphics::getBlendMode() const {
-	return blendMode;
-}
-
 glm::mat4 Graphics::getMVP() {
 	return viewProjectionMatrix * modelMatrixStack.getMatrix();
 }
@@ -473,7 +469,7 @@ void Graphics::setColor(glm::vec4 c, float alpha) {
 	color.a = alpha;
 }
 
-const glm::vec4 &Graphics::getColor() const {
+const vec4 &Graphics::getColor() const {
 	return color;
 }
 
@@ -619,7 +615,7 @@ void Graphics::setBlendMode(BlendMode newBlendMode) {
 	api->setBlendMode(blendMode);
 }
 
-Graphics::BlendMode Graphics::getBlendMode() {
+Graphics::BlendMode Graphics::getBlendMode() const {
 	return blendMode;
 }
 void Graphics::drawVerts(const std::vector<glm::vec2> &verts,
@@ -719,7 +715,7 @@ void Graphics::reloadFont() {
 		getFont();
 		return;
 	}
-	font->load(getDefaultFontData(), 42);
+	font->load(*this, getDefaultFontData(), 42);
 }
 
 void Graphics::warpMaskForScissor(Rectf &a) {

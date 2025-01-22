@@ -87,7 +87,7 @@ public:
 	void setBlendMode(BlendMode blendMode);
 	[[nodiscard]] BlendMode getBlendMode() const;
 	[[nodiscard]] bool isBlending() const;
-	[[nodiscard]] glm::vec4 getColor() const;
+	[[nodiscard]] const vec4 &getColor() const;
 
 	void clear(float c);
 	void clear(float r, float g, float b, float a = 1.f);
