@@ -64,8 +64,6 @@ public:
 		uniformArray(name, p, length);
 	}
 
-	void loadFromString(std::string vertCode, std::string fragCode) override {}
-
 	void load(const std::string &vertexFilePath, const std::string &fragFilePath) override {}
 
 	void deallocate() override {};
@@ -140,4 +138,7 @@ private:
 
 	uint8_t *colorUniformOffset = nullptr;
 	uint8_t *mvpUniformOffset	= nullptr;
+
+protected:
+	void loadFromString(std::string vertCode, std::string fragCode) override {}
 };
