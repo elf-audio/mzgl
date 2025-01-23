@@ -77,7 +77,7 @@ public:
 	static MidiMessage cc(int channel, int control, int value);
 
 	static MidiMessage songPositionPointer(int v);
-	static MidiMessage allNotesOff();
+	static MidiMessage allNotesOff(int channel = 0);
 	static MidiMessage clock();
 	static MidiMessage songStart();
 	static MidiMessage songStop();

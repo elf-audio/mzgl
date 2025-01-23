@@ -125,8 +125,8 @@ MidiMessage MidiMessage::songPositionPointer(int position) {
 						static_cast<uint8_t>(((position & 0x3FFF) >> 7) & 0x7F)};
 }
 
-MidiMessage MidiMessage::allNotesOff() {
-	return cc(0, MidiMessageConstants::MIDI_CC_ALL_NOTES_OFF, 0);
+MidiMessage MidiMessage::allNotesOff(int channel) {
+	return cc(channel, MidiMessageConstants::MIDI_CC_ALL_NOTES_OFF, 0);
 }
 
 MidiMessage MidiMessage::clock() {
