@@ -28,6 +28,8 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 endif()
 
+
+
 set(LINUX FALSE)
 if(NOT ANDROID
    AND UNIX
@@ -52,12 +54,6 @@ set(MZGL_SOURCES
     lib/mzgl/geom/Triangulator.cpp
     lib/mzgl/geom/geomutils.cpp
     lib/mzgl/geom/3D/Camera.cpp
-    lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
-    lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp
-    lib/mzgl/gl/api/Sokol/SokolAPI.cpp
-    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
-    lib/mzgl/gl/api/Sokol/SokolVbo.cpp
-    lib/mzgl/gl/api/Sokol/SokolShader.cpp
     lib/mzgl/gl/error.cpp
     lib/mzgl/gl/Fbo.cpp
     lib/mzgl/gl/Font.cpp
@@ -165,6 +161,23 @@ if(NOT ANDROID)
     >)
 endif()
 
+if(USING_SOKOL)
+  list(
+        APPEND
+        MZGL_SOURCES
+        lib/mzgl/gl/api/Sokol/SokolAPI.cpp
+        lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
+        lib/mzgl/gl/api/Sokol/SokolVbo.cpp
+        lib/mzgl/gl/api/Sokol/SokolShader.cpp
+  )
+else()
+  list(
+        APPEND
+        MZGL_SOURCES
+        lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
+        lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp
+  )
+endif()
 
 foreach(source IN LISTS MZGL_SOURCES)
   get_filename_component(source_path "${source}" PATH)
@@ -346,7 +359,7 @@ set(SOKOL_SHDC "sokol-shdc")
 
 
 
-set(USING_SOKOL true)
+
 if(USING_SOKOL)
 
   # Process each shader file
@@ -376,16 +389,12 @@ if(USING_SOKOL)
 
   target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-
-
-
-  # choose the sokol backend for platform
-  add_compile_definitions(SOKOL_METAL)
-
   # uncomment to turn on sokol
   add_compile_definitions(MZGL_SOKOL_METAL)
 endif()
 
+# choose the sokol backend for platform
+add_compile_definitions(SOKOL_METAL)
 
 
 
