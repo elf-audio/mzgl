@@ -84,13 +84,7 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 	vbo->setTexCoords(t);
 
 	sfons->texture->bind();
-	//	g.fontShader->begin();
-	//	g.fontShader->setMVP(g.getMVP());
-	//	g.fontShader->setColor(g.getColor());
-
 	vbo->draw(g);
-
-	//	g.fontShader->end();
 	sfons->texture->unbind();
 }
 
