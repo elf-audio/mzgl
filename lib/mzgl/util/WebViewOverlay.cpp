@@ -46,7 +46,7 @@ public:
 
 		[targetController.view addSubview:webView];
 
-		targetController.modalPresentationStyle = UIModalPresentationFormSheet;
+		targetController.modalPresentationStyle = UIModalPresentationFullScreen;
 		targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
 
 		targetController.view.backgroundColor = [UIColor whiteColor];
