@@ -221,9 +221,9 @@ int FloatBuffer::findMinPos() const {
 }
 
 void FloatBuffer::getMinMax(float &min, float &max) const {
-	if (size() == 0) return;
 	min = std::numeric_limits<float>::max();
 	max = std::numeric_limits<float>::min();
+	if (size() == 0) return;
 
 	for (int i = 0; i < size(); i++) {
 		if ((*this)[i] < min) {
@@ -236,7 +236,8 @@ void FloatBuffer::getMinMax(float &min, float &max) const {
 }
 
 void FloatBuffer::normalize(float min, float max) {
-	float inMin, inMax;
+	float inMin = std::numeric_limits<float>::max();
+	float inMax = std::numeric_limits<float>::min();
 	getMinMax(inMin, inMax);
 
 	float norm	= 1.f / (inMax - inMin);
