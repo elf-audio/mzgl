@@ -14,20 +14,14 @@ public:
 		virtual void variableChanged() = 0;
 	};
 
-	explicit Variable(const T &var) { *this = var; }
+	explicit Variable(const T &var) { assign(var); }
 
 	[[maybe_unused]] const Variable<T> &operator=(const T &var) {
-		if (variable == var) return *this;
-
-		if constexpr (is_atomic<T>::value) {
-			variable.store(var.load());
-		} else {
-			variable = var;
+		if (variable == var) {
+			return *this;
 		}
 
-		for (auto *listener: listeners) {
-			listener->variableChanged();
-		}
+		assign(var);
 		return *this;
 	}
 
@@ -56,6 +50,18 @@ public:
 	}
 
 private:
+	void assign(const T &var) {
+		if constexpr (is_atomic<T>::value) {
+			variable.store(var.load());
+		} else {
+			variable = var;
+		}
+
+		for (auto *listener: listeners) {
+			listener->variableChanged();
+		}
+	}
+
 	template <typename InnerT = T>
 	struct is_atomic {
 		static const bool value = false;
