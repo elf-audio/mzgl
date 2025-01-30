@@ -68,7 +68,8 @@ void Font::fontstashError(int error, int val) {
 	// glyphs in the font atlas, make
 	// it bigger
 	if (error == FONS_ATLAS_FULL) {
-		int width, height;
+		int width  = 0;
+		int height = 0;
 		fonsGetAtlasSize(fs, &width, &height);
 		if (width < height) {
 			fonsExpandAtlas(fs, width * 2, height);
