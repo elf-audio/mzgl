@@ -29,7 +29,6 @@ std::string to_string(float value, int precision) {
 	return out.str();
 }
 
-
 std::string timestampString() {
 	auto now = std::time(nullptr);
 	char buffer[20];
@@ -246,4 +245,32 @@ std::chrono::system_clock::time_point string_to_time_point(const std::string &s)
 	std::istringstream ss(s);
 	ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+}
+
+bool startsWith(const std::string &stringToSearch, const std::string &prefix) {
+	if (prefix.size() > stringToSearch.size()) {
+		return false;
+	}
+	return stringToSearch.substr(0, prefix.size()) == prefix;
+}
+
+bool endsWith(const std::string &stringToSearch, const std::string &suffix) {
+	if (suffix.size() > stringToSearch.size()) {
+		return false;
+	}
+	return std::equal(suffix.begin(), suffix.end(), stringToSearch.end() - suffix.size());
+}
+
+bool startsWith(const std::string &stringToSearch, const std::string &prefix, CaseSensitivity caseSensitivity) {
+	if (caseSensitivity == CaseSensitivity::caseInSensitive) {
+		return startsWith(toUpperCase(stringToSearch), toUpperCase(prefix));
+	}
+	return startsWith(stringToSearch, prefix);
+}
+
+bool endsWith(const std::string &stringToSearch, const std::string &suffix, CaseSensitivity caseSensitivity) {
+	if (caseSensitivity == CaseSensitivity::caseInSensitive) {
+		return endsWith(toUpperCase(stringToSearch), toUpperCase(suffix));
+	}
+	return endsWith(stringToSearch, suffix);
 }

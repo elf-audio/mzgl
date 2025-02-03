@@ -25,6 +25,12 @@ std::string toUpperCase(std::string s);
 void replaceAll(std::string &data, std::string toSearch, std::string replaceStr);
 std::string byteSizeToString(uint64_t bytes);
 
+enum class CaseSensitivity { caseSensitive, caseInSensitive };
+[[nodiscard]] bool
+	startsWith(const std::string &stringToSearch, const std::string &prefix, CaseSensitivity caseSensitivity);
+[[nodiscard]] bool
+	endsWith(const std::string &stringToSearch, const std::string &suffix, CaseSensitivity caseSensitivity);
+
 // from oF
 std::vector<std::string>
 	split(const std::string &source, const std::string &delimiter, bool ignoreEmpty = false, bool trim = false);
