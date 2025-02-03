@@ -1,3 +1,5 @@
+
+#pragma once
 #include <cstddef>
 
 // taken from https://stackoverflow.com/questions/12942548/making-stdvector-allocate-aligned-memory
