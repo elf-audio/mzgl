@@ -8,11 +8,18 @@
 
 #pragma once
 #include "Layer.h"
-
+#include "DebugOverlay.h"
 class RootLayer : public Layer {
 public:
 	RootLayer(Graphics &g)
-		: Layer(g, "root") {}
+		: Layer(g, "root") {
+		debugOverlay = new DebugOverlay(g);
+
+		addChild(debugOverlay);
+	}
+
+	void enableDebug(bool debug) { debugOverlay->interactive = debugOverlay->visible = debug; }
+	bool isDebugging() { return debugOverlay->visible; }
 	virtual ~RootLayer() {}
 
 	void drawDebug(Layer *layer = nullptr) {
@@ -32,4 +39,7 @@ public:
 			g.drawRect(r);
 		}
 	}
+
+private:
+	DebugOverlay *debugOverlay;
 };

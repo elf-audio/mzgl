@@ -326,9 +326,9 @@ void Layer::sendToBack(Layer *child) {
 }
 
 void Layer::sendToFront(Layer *child) {
-	if (child == NULL) {
+	if (child == nullptr) {
 		Layer *parent = this->getParent();
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			parent->sendToFront(this);
 		}
 	} else {
