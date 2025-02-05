@@ -11,7 +11,6 @@
 //                                                   //
 ///////////////////////////////////////////////////////
 
-#include "../../../cpm-source-cache/iOS/search_paths.xcconfig"
 
 HEADER_SEARCH_PATHS = 						\
 			$(inherited)					\

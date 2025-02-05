@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9C038E9F2D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9C038EA02D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9C038EA12D538A410047E060 /* Base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C038E9D2D538A410047E060 /* Base64.h */; };
+		9C038EA22D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9C038EA32D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9C038EA42D538A410047E060 /* Base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C038E9D2D538A410047E060 /* Base64.h */; };
 		9C5EF32E2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
 		9C5EF32F2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
 		9C5EF3302C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
@@ -842,6 +848,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		9C038E9B2D5388C70047E060 /* ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ios.xcconfig; sourceTree = "<group>"; };
+		9C038E9C2D5388C70047E060 /* mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = mac.xcconfig; sourceTree = "<group>"; };
+		9C038E9D2D538A410047E060 /* Base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
+		9C038E9E2D538A410047E060 /* Base64.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Base64.cpp; sourceTree = "<group>"; };
 		9C15AA912CBD64A800388A51 /* search_paths.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = search_paths.xcconfig; path = "../../../cpm-source-cache/iOS/search_paths.xcconfig"; sourceTree = "<group>"; };
 		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
@@ -1729,6 +1739,8 @@
 		EA182D302432C15000A5C3E8 = {
 			isa = PBXGroup;
 			children = (
+				9C038E9B2D5388C70047E060 /* ios.xcconfig */,
+				9C038E9C2D5388C70047E060 /* mac.xcconfig */,
 				9C15AA912CBD64A800388A51 /* search_paths.xcconfig */,
 				EA1842132433497300A5C3E8 /* project.xcconfig */,
 				EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */,
@@ -1955,6 +1967,8 @@
 		EA1835E02432C18B00A5C3E8 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				9C038E9D2D538A410047E060 /* Base64.h */,
+				9C038E9E2D538A410047E060 /* Base64.cpp */,
 				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
@@ -3172,6 +3186,7 @@
 				EA297C6925C954E600F890AE /* pa_jack.h in Headers */,
 				EAF6737D289BC441001F778D /* stringUtil.h in Headers */,
 				EA71A79027E39E6C0081A5CB /* zipper.h in Headers */,
+				9C038EA42D538A410047E060 /* Base64.h in Headers */,
 				EAD03BA0297FD49700D0C04A /* MZWebView.h in Headers */,
 				EA71A78627E39E6C0081A5CB /* fileenc.h in Headers */,
 				EA71A74C27E39E6C0081A5CB /* prng.h in Headers */,
@@ -3365,6 +3380,7 @@
 				EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
 				EA924366273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h in Headers */,
 				EA2B84BA24E7093600EA12BD /* Draggable.h in Headers */,
+				9C038EA12D538A410047E060 /* Base64.h in Headers */,
 				EA71A77527E39E6C0081A5CB /* brg_endian.h in Headers */,
 				EA71A7AF27E39E6C0081A5CB /* unzipper.h in Headers */,
 				EA2B84ED24E7093600EA12BD /* AudioSystem.h in Headers */,
@@ -3652,6 +3668,7 @@
 				EA183FAF2432C18D00A5C3E8 /* LayerExplorer.mm in Sources */,
 				EA71A75E27E39E6C0081A5CB /* fileenc.c in Sources */,
 				EA71A76A27E39E6C0081A5CB /* sha1.c in Sources */,
+				9C038EA32D538A410047E060 /* Base64.cpp in Sources */,
 				EA183FC02432C18D00A5C3E8 /* util.cpp in Sources */,
 				EA297C6E25C954E600F890AE /* pa_allocation.c in Sources */,
 				EA183FE72432C18D00A5C3E8 /* AudioSystem.cpp in Sources */,
@@ -3786,6 +3803,7 @@
 				EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
 				EA71A71F27E39E6B0081A5CB /* unzip.c in Sources */,
+				9C038E9F2D538A410047E060 /* Base64.cpp in Sources */,
 				EA71A79B27E39E6C0081A5CB /* zipper.cpp in Sources */,
 				EA234B0824A609CA000F057B /* YGConfig.cpp in Sources */,
 				EA71A73D27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
@@ -3936,6 +3954,7 @@
 				EA2B8B1524E7093600EA12BD /* Layer.cpp in Sources */,
 				EA2B8B1724E7093600EA12BD /* SVG.cpp in Sources */,
 				EA3120BE274143F900370205 /* appleMidiUtils.cpp in Sources */,
+				9C038EA22D538A410047E060 /* Base64.cpp in Sources */,
 				EA2B8B1824E7093600EA12BD /* YGEnums.cpp in Sources */,
 				EA16DACE25FFABDA001C0460 /* pa_ringbuffer.c in Sources */,
 				EA64AD7626A186D7001427AD /* MZGLWebView.mm in Sources */,
@@ -4036,6 +4055,7 @@
 				EAF91F782AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA68946D261C633500F76B91 /* maths.cpp in Sources */,
 				EA68946E261C633500F76B91 /* Dylib.cpp in Sources */,
+				9C038EA02D538A410047E060 /* Base64.cpp in Sources */,
 				EA71A79D27E39E6C0081A5CB /* zipper.cpp in Sources */,
 				EA71A75127E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA71A76127E39E6C0081A5CB /* fileenc.c in Sources */,
@@ -4204,7 +4224,7 @@
 		};
 		EA182D3E2432C15000A5C3E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9C2D5388C70047E060 /* mac.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_CXX_LIBRARY = "$(inherited)";
@@ -4220,7 +4240,7 @@
 		};
 		EA182D3F2432C15000A5C3E8 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9C2D5388C70047E060 /* mac.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_CXX_LIBRARY = "$(inherited)";
@@ -4235,7 +4255,7 @@
 		};
 		EA1840F12432C33200A5C3E8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9B2D5388C70047E060 /* ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRYES5ME2M;
@@ -4253,7 +4273,7 @@
 		};
 		EA1840F22432C33200A5C3E8 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9B2D5388C70047E060 /* ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRYES5ME2M;

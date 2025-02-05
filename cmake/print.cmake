@@ -7,9 +7,22 @@ set(MAGENTA "35")
 set(CYAN "36")
 set(GREY "90")
 
+if("$ENV{TERM_PROGRAM}" STREQUAL "Apple_Terminal" OR DEFINED
+                                                     ENV{XCODE_VERSION_ACTUAL})
+  set(XCODE_TERMINAL TRUE)
+  message(STATUS "Using xcode terminal")
+else()
+  set(XCODE_TERMINAL FALSE)
+endif()
+
 function(mzgl_print MESSAGE_TYPE PRINTABLE COLOUR)
-  message(${MESSAGE_TYPE}
-          "${RESET_COLOUR_CODE}[1;${COLOUR}m${PRINTABLE}${RESET_COLOUR_CODE}[m")
+  if(XCODE_TERMINAL)
+    message(${MESSAGE_TYPE} "${PRINTABLE}")
+  else()
+    message(
+      ${MESSAGE_TYPE}
+      "${RESET_COLOUR_CODE}[1;${COLOUR}m${PRINTABLE}${RESET_COLOUR_CODE}[m")
+  endif()
 endfunction()
 
 function(mzgl_print_in_red PRINTABLE)

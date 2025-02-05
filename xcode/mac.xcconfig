@@ -1,0 +1,3 @@
+#include "mzgl.xcconfig"
+#include "../../../cpm-source-cache/macOS/search_paths.xcconfig"
+
