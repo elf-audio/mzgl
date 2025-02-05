@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <type_traits>
 
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
 	const float f = outMin + (outMax - outMin) * (inp - inMin) / (inMax - inMin);
@@ -60,13 +61,6 @@ constexpr float smootherstep(float x) {
 
 float nearestPow2(float v);
 
-constexpr double deg2rad(double deg) {
-	return deg * M_PI / 180.0;
-}
-constexpr double rad2deg(double rad) {
-	return rad * 180.0 / M_PI;
-}
-
 template <typename Precision = float>
 struct Constants {
 	static constexpr Precision pi		 = static_cast<Precision>(M_PI);
@@ -83,3 +77,15 @@ struct Constants {
 	static constexpr Precision egamma	 = static_cast<Precision>(0.577215664901532860606);
 	static constexpr Precision phi		 = static_cast<Precision>(1.61803398874989484820);
 };
+
+template <typename T>
+constexpr T deg2rad(T deg) {
+	static_assert(std::is_floating_point_v<T>, "deg2rad requires a floating-point type");
+	return deg * Constants<T>::pi / static_cast<T>(180.0);
+}
+
+template <typename T>
+constexpr T rad2deg(T rad) {
+	static_assert(std::is_floating_point_v<T>, "rad2deg requires a floating-point type");
+	return rad * static_cast<T>(180.0) / Constants<T>::pi;
+}
