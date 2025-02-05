@@ -64,7 +64,9 @@ float nearestPow2(float v);
 template <typename Precision = float>
 struct Constants {
 	static constexpr Precision pi		 = static_cast<Precision>(M_PI);
-	static constexpr Precision invPi	 = static_cast<Precision>(1 / M_PI);
+	static constexpr Precision twoPi	 = static_cast<Precision>(2.0 * M_PI);
+	static constexpr Precision piBy2	 = static_cast<Precision>(M_PI / 2.0);
+	static constexpr Precision invPi	 = static_cast<Precision>(1.0 / M_PI);
 	static constexpr Precision e		 = static_cast<Precision>(0.57721566490153286060651209);
 	static constexpr Precision log2e	 = static_cast<Precision>(1.44269504088896340736);
 	static constexpr Precision log10e	 = static_cast<Precision>(0.434294481903251827651);
