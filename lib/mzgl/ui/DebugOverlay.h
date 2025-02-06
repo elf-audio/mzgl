@@ -11,20 +11,19 @@ public:
 		visible		= false;
 	}
 	void draw() override {
+		if (mousedOverName.empty()) return;
 		sendToFront();
 		ScopedAlphaBlend b(g, true);
-
 		g.setColor(1);
-		g.drawText(mousedOverName, 20, 20);
-		if (!mousedOverName.empty()) {
-			g.noFill();
-			g.setColor(1, 0, 1);
-			g.drawRect(mousedOverRect);
-			g.fill();
-			g.setColor(1, 0, 1, 0.25);
-			ScopedAlphaBlend b(g, true);
-			g.drawRect(mousedOverRect);
-		}
+
+		g.drawTextWithBG(mousedOverName, vec4(0, 0, 0, 1), 20, 20);
+
+		g.noFill();
+		g.setColor(1, 0, 1);
+		g.drawRect(mousedOverRect);
+		g.fill();
+		g.setColor(1, 0, 1, 0.25);
+		g.drawRect(mousedOverRect);
 	}
 	std::string mousedOverName;
 	Rectf mousedOverRect;
@@ -32,7 +31,8 @@ public:
 		int status = -4; // some arbitrary value to eliminate the compiler warning
 
 		// enable c++11 by passing the flag -std=c++11 to g++
-		std::unique_ptr<char, void (*)(void *)> res {abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+		std::unique_ptr<char, void (*)(void *)> res {abi::__cxa_demangle(name, nullptr, nullptr, &status),
+													 std::free};
 
 		return (status == 0) ? res.get() : name;
 	}
