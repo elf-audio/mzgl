@@ -59,7 +59,7 @@ namespace Flexbox {
 		size_t numVals() const { return values.size(); }
 	};
 
-	typedef std::vector<LayoutAttribute> LayoutAttributeList;
+	using LayoutAttributeList = std::vector<LayoutAttribute>;
 
 	class LayoutBase {
 	public:

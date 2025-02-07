@@ -25,10 +25,13 @@ public:
 	vec4 whiteKeyColor {1.f, 1.f, 1.f, 1.f};
 	vec4 blackKeyColor {0.4f, 0.4f, 0.4f, 1.f};
 	vec4 downKeyColor {1.f, 0.5f, 0.5f, 1.f};
-
+	vec4 bgColor {0.f, 0.f, 0.f, 0.f};
 	void draw() override {
 		Drawer d;
-
+		if (bgColor.a > 0) {
+			d.setColor(bgColor);
+			d.drawRect(*this);
+		}
 		std::set<int> downNotes;
 
 		for (auto &t: touches) {
@@ -78,8 +81,10 @@ public:
 			d.drawTriangle(gradient.tr(), gradient.br(), gradient.bl(), a, b, b);
 		}
 
+		ScopedAlphaBlend s(g, drawShadow);
 		VboRef vbo = Vbo::create();
 		d.commit(vbo);
+		g.setColor(1);
 		vbo->draw(g);
 	}
 
