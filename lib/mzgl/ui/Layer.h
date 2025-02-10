@@ -72,6 +72,7 @@ public:
 	// doesn't find one
 	Layer *getChild(const std::string &name);
 
+	bool isVisible() const;
 	// called by api, do not use
 	virtual void _draw();
 	void __draw();

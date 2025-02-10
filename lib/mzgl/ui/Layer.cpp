@@ -78,6 +78,13 @@ void Layer::_draw() {
 	}
 }
 
+bool Layer::isVisible() const {
+	if (!visible) return false;
+	if (parent != nullptr) {
+		return parent->isVisible();
+	}
+	return visible;
+}
 void Layer::layoutSelfAndChildren() {
 	doLayout();
 	for (auto *c: children) {
@@ -118,14 +125,15 @@ bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
 }
 
 Layer *Layer::addChild(Layer *layer) {
+	mzAssert(layer->getParent() == nullptr, "Layer already has a parent");
+
 	layer->parent = this;
-#ifdef DEBUG
+
 	mzAssert(layer != this, "Can't add a layer to itself");
 	for (auto *c: children) {
 		mzAssert(c != layer, "Can't add a layer to the same parent twice");
 	}
 
-#endif
 	children.push_back(layer);
 	return layer;
 }
@@ -222,12 +230,10 @@ void Layer::_touchUp(float x, float y, int id) {
 		}
 
 		// everyone receives a touch up
-		//if(interactive && hitTest(x, y)) {
 		touchUp(x, y, id);
-		//}
 	}
 	// so if we're the root, we want to clear the focussed layer for this touch
-	if (parent == NULL) {
+	if (parent == nullptr) {
 		g.focusedLayers.erase(id);
 	}
 }
@@ -239,7 +245,7 @@ void Layer::_touchMoved(float x, float y, int id) {
 	float yy = y;
 	transformMouse(xx, yy);
 
-	if (parent == NULL && g.focusedLayers.find(id) != g.focusedLayers.end()) {
+	if (parent == nullptr && g.focusedLayers.find(id) != g.focusedLayers.end()) {
 		float xxx = x;
 		float yyy = y;
 
@@ -261,16 +267,6 @@ void Layer::transformMouse(float &xx, float &yy) {
 	xx -= this->x;
 	yy -= this->y;
 }
-
-//void Layer::transformFocusedMouse(float &x, float &y) {
-//	if(focusedLayer!=NULL) {
-//		if(focusedLayer->getParent()!=NULL) {
-//			glm::vec2 p = focusedLayer->getParent()->getAbsolutePosition();
-//			x -= p.x;
-//			y -= p.y;
-//		}
-//	}
-//}
 
 bool Layer::_touchDown(float x, float y, int id) {
 	if (!visible) return false;
@@ -306,9 +302,9 @@ void Layer::_update() {
 }
 
 void Layer::sendToBack(Layer *child) {
-	if (child == NULL) {
+	if (child == nullptr) {
 		Layer *parent = this->getParent();
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			parent->sendToBack(this);
 		}
 	} else {
@@ -327,9 +323,9 @@ void Layer::sendToBack(Layer *child) {
 
 void Layer::sendToFront(Layer *child) {
 	if (child == nullptr) {
-		Layer *parent = this->getParent();
-		if (parent != nullptr) {
-			parent->sendToFront(this);
+		Layer *p = this->getParent();
+		if (p != nullptr) {
+			p->sendToFront(this);
 		}
 	} else {
 		if (children.size() == 0) return;
