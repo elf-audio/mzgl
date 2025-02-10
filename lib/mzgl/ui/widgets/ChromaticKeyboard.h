@@ -17,8 +17,8 @@ public:
 		: Layer(g) {
 		interactive = true;
 	}
-
-	int octaves			  = 3;
+	int numWhiteNotes = 10;
+	//	int numNotes			  = 10;
 	float blackNoteHeight = 0.67;
 	bool drawShadow		  = true;
 
@@ -39,9 +39,9 @@ public:
 		}
 
 		// white keys
-		float radius	  = 8;
-		int numWhiteNotes = octaves * 7;
-		float ww		  = width / (float) numWhiteNotes;
+		float radius = 8;
+		//		int numWhiteNotes = octaves * 7;
+		float ww = width / (float) numWhiteNotes;
 		for (int i = 0; i < numWhiteNotes; i++) {
 			Rectf r(x + ww * i, y, ww, height);
 			r.inset(2);
@@ -55,6 +55,8 @@ public:
 			d.drawRoundedRect(r, radius, false, false, true, true);
 		}
 
+		int octaves = static_cast<int>(std::ceil(numWhiteNotes / 7.f));
+
 		for (int i = 0; i < octaves; i++) {
 			// C#
 			int octaveOffset = (i * 7 * ww);
@@ -67,7 +69,9 @@ public:
 					d.setColor(blackKeyColor);
 				}
 				Rectf r(x + octaveOffset + ww * sharpOffsets[j], y + 2, ww * 0.5f, height * blackNoteHeight);
-
+				if (r.x > right()) {
+					break;
+				}
 				d.drawRoundedRect(r, radius, false, false, true, true);
 			}
 		}
@@ -125,10 +129,10 @@ private:
 	int touchToNote(float x, float y) {
 		x -= this->x;
 		y -= this->y;
-		int numWhiteNotes = octaves * 7;
-		float n			  = x / (width / (float) numWhiteNotes);
-		int octave		  = n / 7;
-		float note		  = fmod(n, 7);
+		//		int numWhiteNotes = octaves * 7;
+		float n	   = x / (width / (float) numWhiteNotes);
+		int octave = n / 7;
+		float note = fmod(n, 7);
 
 		if (y < height * blackNoteHeight) {
 			for (int i = 0; i < sharpOffsets.size(); i++) {
