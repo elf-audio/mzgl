@@ -35,6 +35,8 @@ std::string getAndroidInternalDataPath();
 
 std::string getAndroidExternalDataPath();
 
+std::string getAndroidDocumentsPath();
+
 std::string getAndroidExternalStorageDirectory();
 
 void androidAlertDialog(const std::string &title, const std::string &msg);
