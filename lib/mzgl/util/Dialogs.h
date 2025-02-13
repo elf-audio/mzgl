@@ -169,7 +169,6 @@ public:
 		int defaultOption,
 		std::function<void(std::string filePath, int segmentChosen, bool cancelled)> completionCallback) const;
 
-private:
 	enum class InputBoxType {
 		Text,
 		Number,
