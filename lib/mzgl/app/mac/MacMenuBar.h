@@ -21,12 +21,14 @@ public:
 	void addItem(std::string title, std::string shortcut, std::function<void()> action);
 	void addItem(std::string title, std::string shortcut, KeyModifier modifier, std::function<void()> action);
 	void addSeparator();
+	void clear();
 };
 
 class MacMenuBar {
 public:
 	static MacMenuBar &instance();
 	std::shared_ptr<MacMenu> getMenu(std::string name);
+	std::vector<std::shared_ptr<MacMenu>> getMenus();
 
 private:
 	MacMenuBar();

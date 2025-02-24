@@ -68,6 +68,9 @@ shared_ptr<MacMenu> MacMenuBar::getMenu(string name) {
 
 ////////////////////////////////////////////////////////////
 
+void MacMenu::clear() {
+	[submenus[name] removeAllItems];
+}
 void MacMenu::addItem(std::string title, std::string shortcut, std::function<void()> action) {
 	addItem(title, shortcut, MacMenu::KeyModifier::None, action);
 }
@@ -76,7 +79,6 @@ void MacMenu::addItem(std::string title,
 					  std::string shortcut,
 					  MacMenu::KeyModifier modifier,
 					  std::function<void()> action) {
-#if 1
 	id titleNS			 = [NSString stringWithUTF8String:title.c_str()];
 	id scNS				 = [NSString stringWithUTF8String:shortcut.c_str()];
 	LambdaMenuItem *item = [[LambdaMenuItem alloc] initWithTitle:titleNS keyEquivalent:scNS actionLambda:action];
@@ -86,11 +88,16 @@ void MacMenu::addItem(std::string title,
 		item.keyEquivalentModifierMask = NSEventModifierFlagOption;
 	}
 	[submenus[name] addItem:item];
-#endif
 }
 
 void MacMenu::addSeparator() {
-#if 1
 	[submenus[name] addItem:[NSMenuItem separatorItem]];
-#endif
+}
+
+std::vector<std::shared_ptr<MacMenu>> MacMenuBar::getMenus() {
+	std::vector<std::shared_ptr<MacMenu>> v;
+	for (auto &m: menus) {
+		v.push_back(m.second);
+	}
+	return v;
 }
