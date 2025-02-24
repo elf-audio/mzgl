@@ -19,6 +19,9 @@ std::string to_string(double value, int precision);
 // to 'sigFigs' significant figures
 std::string toSigFigs(float value, int sigFigs);
 
+// 100.0494 -> 100.05, 100.0001 -> 100, 100.000 ->100
+std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces);
+
 std::string toLowerCase(std::string s);
 std::string toUpperCase(std::string s);
 

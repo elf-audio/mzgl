@@ -109,6 +109,27 @@ std::string toSigFigs(float f, int sigfig) {
 	return str;
 }*/
 
+std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces) {
+	std::ostringstream out;
+
+	// Round to 2 decimal places
+	double rounded = std::round(value * 100.0) / 100.0;
+
+	// Convert to string with 2 decimal places
+	out << std::fixed << std::setprecision(2) << rounded;
+	std::string result = out.str();
+
+	// Trim unnecessary trailing zeros
+	if (result.find('.') != std::string::npos) {
+		result.erase(result.find_last_not_of('0') + 1, std::string::npos);
+		if (result.back() == '.') {
+			result.pop_back(); // Remove trailing dot if needed
+		}
+	}
+
+	return result;
+}
+
 std::string toSigFigs(float value, int sigFig) {
 	// Take care of zero case
 	if (value == 0.0) {
