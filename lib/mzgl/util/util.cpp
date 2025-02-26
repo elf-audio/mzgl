@@ -786,19 +786,17 @@ void initMZGL(std::shared_ptr<App> app) {
 #endif
 
 void launchUrl(const std::string &url) {
-#ifdef __APPLE__
-#	if TARGET_OS_IOS
+#if MZGL_IOS
 
 	NSURL *nsUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 
 	if ([[UIApplication sharedApplication] canOpenURL:nsUrl]) {
 		[[UIApplication sharedApplication] openURL:nsUrl options:@{} completionHandler:nil];
 	}
-#	else
+#elif MZGL_MAC
 	NSString *urlStr = [NSString stringWithUTF8String:url.c_str()];
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlStr]];
-#	endif
-#elif defined(__ANDROID__)
+#elif MZGL_ANDROID
 	androidLaunchUrl(url);
 #else
 	Log::e() << "Launch url not implemented";

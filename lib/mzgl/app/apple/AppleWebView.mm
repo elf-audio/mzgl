@@ -13,7 +13,7 @@
 #include "log.h"
 #include "filesystem.h"
 #include <TargetConditionals.h>
-
+#include "mzgl_platform.h"
 @implementation AppleWebView {
 	std::function<void(const std::string &)> jsCallback;
 	std::function<void()> closeCallback;
@@ -60,7 +60,7 @@
 	self = [super initWithFrame:frame configuration:config];
 
 	if (self != nil) {
-#if !TARGET_OS_IOS
+#if !MZGL_IOS
 		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
 #endif
 		self.UIDelegate			= self;
@@ -84,7 +84,7 @@
 	runJavaScriptAlertPanelWithMessage:(NSString *)message
 					  initiatedByFrame:(WKFrameInfo *)frame
 					 completionHandler:(void (^)(void))completionHandler {
-#if TARGET_OS_IOS
+#if MZGL_IOS
 #else
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert addButtonWithTitle:@"OK"];
@@ -117,13 +117,16 @@
 	decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 					decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 	NSLog(@"Navigation action: %@", navigationAction.request.URL);
-	NSURL *url = navigationAction.request.URL;
+	NSURL *url		= navigationAction.request.URL;
+	BOOL isInternal = [url.scheme isEqual:@"file"] || [url.host isEqual:@"localhost"];
 
-//	if ([url.scheme isEqualToString:@"file"]) {
+	if (!isInternal) {
+		if (url == nil) return;
+		launchUrl([[url absoluteString] UTF8String]);
+		decisionHandler(WKNavigationActionPolicyCancel);
+	} else {
 		decisionHandler(WKNavigationActionPolicyAllow);
-//	} else {
-//		decisionHandler(WKNavigationActionPolicyCancel);
-//	}
+	}
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController

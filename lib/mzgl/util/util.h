@@ -157,7 +157,6 @@ void saveFileDialog(const std::string &msg,
 // but can be considered globally unique
 std::string generateUUID();
 
-// only works on iOS. this one
 void launchUrl(const std::string &url);
 
 ////////////////////////////////////////////////////////////////////////////////
