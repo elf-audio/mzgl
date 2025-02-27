@@ -10,6 +10,7 @@
 #include "NVG.h"
 #include "Tween.h"
 #include "maths.h"
+#include "Layer.h"
 
 namespace NVGUI {
 
@@ -220,7 +221,6 @@ namespace NVGUI {
 				if (amt > 1) amt = 1;
 			}
 		}
-
 
 		virtual void draw() override {
 			if (amt < 0.001) return;
