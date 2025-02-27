@@ -152,3 +152,34 @@ std::string urldecode(const std::string &value) {
 
 	return result;
 }
+
+static std::string encodeURIComponent(const std::string &input) {
+	std::ostringstream encoded;
+	for (unsigned char c: input) {
+		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/') {
+			encoded << c;
+		} else {
+			encoded << '%' << std::uppercase << std::hex << static_cast<int>(c);
+		}
+	}
+	return encoded.str();
+}
+#include "filesystem.h"
+
+std::string pathToFileUrl(const std::string &path) {
+	std::string normalizedPath = path;
+	try {
+		fs::path absPath		   = fs::absolute(path);
+		std::string normalizedPath = absPath.generic_string(); // Converts to forward slashes
+	} catch (const std::exception &e) {
+		Log::e() << "Error normalizing path: " << e.what();
+	}
+	// Handle Windows drive letters
+#ifdef _WIN32
+	if (normalizedPath.size() > 1 && normalizedPath[1] == ':') {
+		normalizedPath.insert(0, "/"); // Prepend a slash before drive letter
+	}
+#endif
+
+	return "file://" + encodeURIComponent(normalizedPath);
+}

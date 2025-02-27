@@ -72,8 +72,13 @@
 			NSURL *nsUrl = [[[NSBundle mainBundle] resourceURL] URLByAppendingPathComponent:@"www/index.html"];
 
 			if ([url length] > 0) {
-				nsUrl = [NSURL fileURLWithPath:url];
+				if ([url containsString:@"://"]) {
+					nsUrl = [NSURL URLWithString:url];
+				} else {
+					nsUrl = [NSURL fileURLWithPath:url];
+				}
 			}
+			NSLog(@"Opening URL: %@", nsUrl);
 
 			[self loadFileURL:nsUrl allowingReadAccessToURL:[nsUrl URLByDeletingLastPathComponent]];
 		}
