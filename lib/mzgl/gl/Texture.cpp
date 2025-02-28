@@ -56,7 +56,7 @@ Texture::Texture(const std::vector<unsigned char> &pngData) {
 	int bytesPerChan;
 
 	if (!Image::loadPngFromData(pngData, outData, w, h, numChans, bytesPerChan)) {
-		Log::e() << "Couldn't load image!!";
+		Log::e() << "Couldn't load image from PNG data!!";
 		return;
 	}
 	bool isFloat = false;
@@ -86,7 +86,7 @@ bool Texture::load(const string &imgFilePath) {
 	bool isFloat	 = false;
 
 	if (!Image::load(imgFilePath, outData, w, h, numChans, bytesPerChan, isFloat)) {
-		Log::e() << "Couldn't load image!!";
+		Log::e() << "Couldn't load image at " << imgFilePath;
 		return false;
 	}
 

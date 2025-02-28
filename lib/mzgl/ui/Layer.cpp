@@ -465,6 +465,7 @@ void Layer::clear() {
 	for (auto *ch: children) {
 		for (auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
 			if ((*it).second == ch) {
+				mzAssert(false, "Can't delete a layer whilst there is an interaction going on with it!");
 				g.focusedLayers.erase(it++);
 			} else {
 				it++;

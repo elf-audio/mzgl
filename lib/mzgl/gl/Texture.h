@@ -35,7 +35,7 @@ public:
 		return TextureRef(new Texture(textureID, width, height));
 	}
 
-	static TextureRef create(std::string path) {
+	static TextureRef create(const std::string &path) {
 		auto ref = TextureRef(new Texture());
 		if (ref->load(path)) {
 			return ref;
