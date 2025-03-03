@@ -211,56 +211,24 @@ void Layer::_touchOver(float x, float y) {
 }
 
 void Layer::_touchUp(float x, float y, int id) {
-	if (!visible) return;
+	if (g.focusedLayers.find(id) == g.focusedLayers.end()) return;
 
 	float xx = x;
 	float yy = y;
-	transformMouse(xx, yy);
 
-	if (parent == nullptr && g.focusedLayers.find(id) != g.focusedLayers.end()) {
-		float xxx = x;
-		float yyy = y;
-
-		g.focusedLayers[id]->absoluteToLocalCoords(xxx, yyy);
-		g.focusedLayers[id]->touchUp(xxx, yyy, id);
-
-	} else {
-		for (auto it = children.rbegin(); it != children.rend(); it++) {
-			(*it)->_touchUp(xx, yy, id);
-		}
-
-		// everyone receives a touch up
-		touchUp(x, y, id);
-	}
-	// so if we're the root, we want to clear the focussed layer for this touch
-	if (parent == nullptr) {
-		g.focusedLayers.erase(id);
-	}
+	g.focusedLayers[id]->absoluteToLocalCoords(xx, yy);
+	g.focusedLayers[id]->touchUp(xx, yy, id);
+	g.focusedLayers.erase(id);
 }
 
 void Layer::_touchMoved(float x, float y, int id) {
-	if (!visible) return;
+	if (g.focusedLayers.find(id) == g.focusedLayers.end()) return;
 
 	float xx = x;
 	float yy = y;
-	transformMouse(xx, yy);
 
-	if (parent == nullptr && g.focusedLayers.find(id) != g.focusedLayers.end()) {
-		float xxx = x;
-		float yyy = y;
-
-		g.focusedLayers[id]->absoluteToLocalCoords(xxx, yyy);
-		g.focusedLayers[id]->touchMoved(xxx, yyy, id);
-		return;
-	}
-
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		(*it)->_touchMoved(xx, yy, id);
-	}
-
-	if (interactive && inside(x, y)) {
-		touchMoved(x, y, id);
-	}
+	g.focusedLayers[id]->absoluteToLocalCoords(xx, yy);
+	g.focusedLayers[id]->touchMoved(xx, yy, id);
 }
 
 void Layer::transformMouse(float &xx, float &yy) {
