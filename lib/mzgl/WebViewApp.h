@@ -9,7 +9,6 @@
 #pragma once
 
 #include "App.h"
-#include "json.hpp"
 
 class WebViewApp : public App {
 public:
@@ -20,8 +19,4 @@ public:
 	std::string customUrl;
 	virtual void receivedJSMessage(const std::string &key, const std::string &value) {}
 	std::function<void(const std::string &)> callJS;
-	void callJSON(std::string fn, const nlohmann::json &j) {
-		auto js = fn + "('" + j.dump() + "')";
-		callJS(js);
-	}
 };

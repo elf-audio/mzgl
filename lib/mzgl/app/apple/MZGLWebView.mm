@@ -25,7 +25,7 @@
 	eventDispatcher = evtDispatcher;
 
 	std::dynamic_pointer_cast<WebViewApp>(eventDispatcher->app)->callJS = [self](const std::string &s) {
-		printf("callJS(%s)\n", s.c_str());
+		//		printf("callJS(%s)\n", s.c_str());
 		[self evaluateJavaScript:[NSString stringWithUTF8String:s.c_str()] completionHandler:nil];
 	};
 
@@ -35,10 +35,9 @@
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"fullScreenEnabled"];
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"DOMPasteAllowed"];
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"javaScriptCanAccessClipboard"];
-#ifdef DEBUG
-	//    blah
+	//	#ifdef DEBUG
 	[config.preferences setValue:[NSNumber numberWithBool:YES] forKey:@"developerExtrasEnabled"];
-#endif
+	//	#endif
 
 	self				  = [super initWithFrame:frame configuration:config];
 	std::string customUrl = [url UTF8String];
@@ -60,6 +59,7 @@
 				auto p = fs::path(customUrl);
 				if (!fs::exists(p)) {
 					NSLog(@"Path does not exist! %s", p.string().c_str());
+					NSLog(@"Current working directory: %s", fs::current_path().string().c_str());
 				}
 				baseURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:p.parent_path().string().c_str()]];
 				url		= [baseURL
