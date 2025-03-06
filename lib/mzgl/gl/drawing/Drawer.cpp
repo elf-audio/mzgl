@@ -187,11 +187,14 @@ void Drawer::drawLineStrip(const vector<vec2> &strip) {
 void Drawer::drawLineStrip(const vector<vec2> &strip, const vector<vec4> &cols) {
 	lineDrawer.thickness = strokeWeight;
 	int numVerts		 = lineDrawer.getVerts(strip, geom.verts, geom.indices);
-	for (const auto &a: cols) {
-		geom.cols.push_back(a);
-		geom.cols.push_back(a);
+
+	// I know this is not perfect but v. close (was broken before) - the issue
+	// is that you don't know which colours line up to which vertices that output from
+	// the lineDrawer - kind of need the lineDrawer to
+	for (int i = 0; i < numVerts; i++) {
+		vec4 col = cols[std::min(i / 2, static_cast<int>(cols.size()) - 1)];
+		geom.cols.emplace_back(col);
 	}
-	geom.cols.insert(geom.cols.end(), cols.begin(), cols.end());
 }
 
 void Drawer::drawBevelledLineStrip(const std::vector<vec2> &strip, MitredLine::EndCap endCap) {
