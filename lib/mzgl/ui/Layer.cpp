@@ -11,6 +11,18 @@
 #include "log.h"
 #include "mzAssert.h"
 
+void setLayerSize(std::vector<Layer *> layers, float width, float height) {
+	setLayerSize(layers, vec2(width, height));
+}
+void setLayerSize(std::vector<Layer *> layers, float sz) {
+	setLayerSize(layers, vec2(sz, sz));
+}
+void setLayerSize(std::vector<Layer *> layers, vec2 sz) {
+	for (auto *l: layers) {
+		l->size(sz);
+	}
+}
+
 Layer::Layer(Graphics &g, const std::string &name)
 	: g(g)
 	, name(name) {

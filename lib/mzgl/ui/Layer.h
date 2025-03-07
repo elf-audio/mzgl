@@ -203,3 +203,7 @@ public:
 		}
 	}
 };
+
+void setLayerSize(std::vector<Layer *> layers, float width, float height);
+void setLayerSize(std::vector<Layer *> layers, float sz);
+void setLayerSize(std::vector<Layer *> layers, vec2 sz);
