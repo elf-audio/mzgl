@@ -435,7 +435,6 @@ int keycodeToKey(int32_t k, bool shiftIsDown) {
 static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
 	//struct engine* engine = (struct engine*)app->userData;
 	// converted from Java in openframeworks android
-	Log::d() << "Type = " << AInputEvent_getType(event);
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t action = AMotionEvent_getAction(event);
 		int32_t pointerIndex =
