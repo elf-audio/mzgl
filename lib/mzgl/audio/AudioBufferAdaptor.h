@@ -72,31 +72,15 @@ public:
 		m_outputBuffer(fixedBufferSize * 4) // Buffer size with some extra headroom
 	{}
 
-	// Process input audio from OS with variable buffer size
 	void audioIn(float *data, int frames, int chans) override {
-		if (!m_target) return;
-
-		// Add incoming data to buffer
+		inputChans = chans;
 		m_inputBuffer.write(data, frames * chans);
-
-		// Process complete fixed-size chunks
-		std::vector<float> tempBuffer(destBuffSize * chans);
-
-		while (m_inputBuffer.available() >= destBuffSize * chans) {
-			// Read a fixed-size chunk from the input buffer
-			m_inputBuffer.peek(tempBuffer.data(), destBuffSize * chans);
-
-			// Send to target
-			m_target->audioIn(tempBuffer.data(), destBuffSize, chans);
-
-			// Remove the processed chunk
-			m_inputBuffer.read(nullptr, destBuffSize * chans);
-		}
 	}
 
 	// Generate output audio for OS with variable buffer size
 	void audioOut(float *data, int frames, int chans) override {
-		if (!m_target) return;
+		outputChans = chans;
+		workingBuffer.resize(destBuffSize * maxNumChans);
 
 		int outSamples	   = frames * chans;
 		int samplesWritten = 0;
@@ -105,13 +89,12 @@ public:
 			// If output buffer doesn't have enough data, get more from target
 			if (m_outputBuffer.available() < outSamples - samplesWritten) {
 				// Create a temporary buffer for target to fill
-				std::vector<float> tempBuffer(destBuffSize * chans);
+				m_inputBuffer.read(workingBuffer.data(), destBuffSize * inputChans);
+				m_target->audioIn(workingBuffer.data(), destBuffSize, inputChans);
 
 				// Get output from target
-				m_target->audioOut(tempBuffer.data(), destBuffSize, chans);
-
-				// Add to output buffer
-				m_outputBuffer.write(tempBuffer.data(), destBuffSize * chans);
+				m_target->audioOut(workingBuffer.data(), destBuffSize, chans);
+				m_outputBuffer.write(workingBuffer.data(), destBuffSize * chans);
 			}
 
 			// Read available data from the output buffer (up to what we need)
@@ -125,6 +108,10 @@ public:
 	int getDestinationBufferSize() const { return destBuffSize; }
 
 private:
+	std::vector<float> workingBuffer;
+	int maxNumChans	  = 2;
+	int inputChans	  = 0;
+	int outputChans	  = 0;
 	AudioIO *m_target = nullptr;
 	const int destBuffSize;
 

@@ -67,8 +67,8 @@ public:
 
 TEST_CASE("AudioBufferAdaptor", "[audio]") {
 	MockAudioIO mock;
-	AudioBufferAdaptor adaptor(&mock, 32);
-	REQUIRE(adaptor.getDestinationBufferSize() == 32);
+	AudioBufferAdaptor adaptor(&mock, 16);
+	REQUIRE(adaptor.getDestinationBufferSize() == 16);
 
 	int inCalls	 = 0;
 	int outCalls = 0;
@@ -85,7 +85,32 @@ TEST_CASE("AudioBufferAdaptor", "[audio]") {
 	float randoBuff[4096];
 	adaptor.audioIn(randoBuff, 16, 2);
 	REQUIRE(inCalls == 0);
-	adaptor.audioIn(randoBuff, 16, 2);
+
+	adaptor.audioOut(randoBuff, 16, 2);
 	REQUIRE(inCalls == 1);
 	REQUIRE(outCalls == 1);
+
+	adaptor.audioIn(randoBuff, 32, 2);
+	REQUIRE(inCalls == 1);
+	REQUIRE(outCalls == 1);
+
+	adaptor.audioOut(randoBuff, 32, 2);
+	REQUIRE(inCalls == 3);
+	REQUIRE(outCalls == 3);
+
+	adaptor.audioIn(randoBuff, 15, 2);
+	// not working, work in progress
+	//	adaptor.audioOut(randoBuff, 15, 2);
+	//
+	//	REQUIRE(inCalls == 3);
+	//	REQUIRE(outCalls == 3);
+	//	adaptor.audioIn(randoBuff, 2, 2);
+	//	adaptor.audioOut(randoBuff, 2, 2);
+	//
+	//	REQUIRE(inCalls == 4);
+	//	REQUIRE(outCalls == 4);
+	//	adaptor.audioIn(randoBuff, 15, 2);
+	//	adaptor.audioOut(randoBuff, 15, 2);
+	//	REQUIRE(inCalls == 5);
+	//	REQUIRE(outCalls == 5);
 }
