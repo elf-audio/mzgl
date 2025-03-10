@@ -8,8 +8,12 @@
 
 @interface TextboxSegmentedViewController : UIViewController
 
-@property (nonatomic, copy) void (^completionHandler)(NSString *filename, NSInteger selectedSegment);
+@property(nonatomic, copy) void (^completionHandler)(NSString *filename, NSInteger selectedSegment);
 
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message options:(NSArray<NSString *> *)options selected:(NSInteger)selected;
+- (instancetype)initWithTitle:(NSString *)title
+					  message:(NSString *)message
+						 text:(NSString *)text
+					  options:(NSArray<NSString *> *)options
+					 selected:(NSInteger)selected;
 
 @end

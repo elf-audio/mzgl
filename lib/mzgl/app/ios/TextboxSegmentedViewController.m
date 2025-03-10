@@ -10,6 +10,7 @@
 @property(nonatomic, strong) NSArray<NSString *> *options;
 @property(nonatomic, copy) NSString *alertTitle;
 @property(nonatomic, copy) NSString *alertMessage;
+@property(nonatomic, copy) NSString *defaultFieldText;
 @property(nonatomic, assign) NSInteger selectedItem;
 @end
 
@@ -17,14 +18,16 @@
 
 - (instancetype)initWithTitle:(NSString *)title
 					  message:(NSString *)message
+						 text:(NSString *)text
 					  options:(NSArray<NSString *> *)options
 					 selected:(NSInteger)selected {
 	self = [super init];
 	if (self) {
-		self.alertTitle	  = title;
-		self.alertMessage = message;
-		self.options	  = options;
-		self.selectedItem = selected;
+		self.alertTitle		  = title;
+		self.alertMessage	  = message;
+		self.defaultFieldText = text;
+		self.options		  = options;
+		self.selectedItem	  = selected;
 	}
 	return self;
 }
@@ -61,21 +64,21 @@
 
 	[alertView addSubview:self.titleLabel];
 
-
 	if (@available(iOS 13.0, *)) {
 		// dark mode compatibility
-		alertView.backgroundColor	= [UIColor secondarySystemBackgroundColor];
-		self.titleLabel.textColor	= [UIColor labelColor];
-//		self.messageLabel.textColor = [UIColor labelColor];
+		alertView.backgroundColor = [UIColor secondarySystemBackgroundColor];
+		self.titleLabel.textColor = [UIColor labelColor];
+		//		self.messageLabel.textColor = [UIColor labelColor];
 	} else {
-		alertView.backgroundColor	= [UIColor whiteColor];
-		self.titleLabel.textColor	= [UIColor blackColor];
+		alertView.backgroundColor = [UIColor whiteColor];
+		self.titleLabel.textColor = [UIColor blackColor];
 	}
 
 	self.textField											 = [[UITextField alloc] init];
 	self.textField.placeholder								 = @"Enter filename";
 	self.textField.borderStyle								 = UITextBorderStyleRoundedRect;
 	self.textField.translatesAutoresizingMaskIntoConstraints = NO;
+	self.textField.text 									 = self.defaultFieldText;
 	[alertView addSubview:self.textField];
 
 	self.segmentedControl					   = [[UISegmentedControl alloc] initWithItems:self.options];
@@ -112,9 +115,7 @@
 		[self.titleLabel.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-20],
 
 		[self.textField.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:20],
-		
-		
-		
+
 		[self.textField.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:20],
 		[self.textField.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-20],
 
@@ -136,7 +137,6 @@
 
 	[self addKeyboardObservers];
 	[self.textField becomeFirstResponder];
-
 }
 
 - (void)addKeyboardObservers {

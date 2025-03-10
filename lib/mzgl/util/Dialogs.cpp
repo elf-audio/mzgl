@@ -1293,6 +1293,7 @@ void Dialogs::textboxWithSegmented(std::string title,
 	TextboxSegmentedViewController *alertVC =
 		[[TextboxSegmentedViewController alloc] initWithTitle:[NSString stringWithUTF8String:title.c_str()]
 													  message:[NSString stringWithUTF8String:msg.c_str()]
+														 text:[NSString stringWithUTF8String:text.c_str()]
 													  options:@[ @"Computer", @"iCloud" ]
 													 selected:defaultOption];
 	alertVC.completionHandler = ^(NSString *filename, NSInteger selectedSegment) {
@@ -1317,6 +1318,7 @@ void Dialogs::textboxWithSegmented(std::string title,
 	  // Create a text field
 	  NSTextField *textField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 300, 24)];
 	  [textField setPlaceholderString:@""];
+	  [textField setStringValue:[NSString stringWithUTF8String:text.c_str()]];
 
 	  // Create a container view for the accessory view
 	  NSView *accessoryView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 300, 60)];
