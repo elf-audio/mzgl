@@ -402,6 +402,14 @@ void Dialogs::twoOptionDialog(std::string title,
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
+	UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+	if (topController == nil) {
+		topController = ((__bridge UIViewController *) app.viewController);
+	}
+	while (topController.presentedViewController) {
+		topController = topController.presentedViewController;
+	}
+	
 	UIAlertController *alert =
 		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
 											message:[NSString stringWithUTF8String:msg.c_str()]
@@ -414,7 +422,7 @@ void Dialogs::twoOptionDialog(std::string title,
 											  style:UIAlertActionStyleDefault
 											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[topController presentViewController:alert animated:YES completion:nil];
 
 #	else
 
