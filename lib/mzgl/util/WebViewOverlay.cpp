@@ -10,7 +10,9 @@ public:
 		: app(app)
 		, url(url)
 		, jsCallback(jsCallback) {}
-	virtual ~WebViewOverlayImpl()					 = default;
+
+	virtual ~WebViewOverlayImpl() = default;
+
 	virtual void callJs(const std::string &jsString) = 0;
 
 protected:
@@ -121,29 +123,37 @@ private:
 };
 #	endif
 #elif defined(__ANDROID__)
+
 #	include "androidUtil.h"
-#   include <fstream>
+#	include <fstream>
+
 class AndroidWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
 	AndroidWebViewOverlayImpl(App &app,
 							  const std::string &urlToOpen,
 							  std::function<void(const std::string &)> theJsCallback)
 		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
-        registerWebViewOverlay(reinterpret_cast<std::uintptr_t>(this), theJsCallback);
+		registerWebViewOverlay(reinterpret_cast<std::uintptr_t>(this), theJsCallback);
 		readHtml(urlToOpen);
 	}
 
-	~AndroidWebViewOverlayImpl() override{
-        androidStopDisplayingHtml();
-        unregisterWebViewOverlay(reinterpret_cast<std::uintptr_t>(this));
-    }
-
-	void callJs(const std::string &jsString) override {
-		androidCallJs(jsString);
+	~AndroidWebViewOverlayImpl() override {
+		androidStopDisplayingHtml();
+		unregisterWebViewOverlay(reinterpret_cast<std::uintptr_t>(this));
 	}
+
+	void callJs(const std::string &jsString) override { androidCallJs(jsString); }
 
 private:
 	void readHtml(const std::string &urlToOpen) {
+		if (startsWith(urlToOpen, "file:///android_asset", CaseSensitivity::caseInSensitive)
+			|| startsWith(urlToOpen, "https://www.", CaseSensitivity::caseInSensitive)) {
+			Log::d() << "Android, opening " << urlToOpen << " as file";
+			androidDisplayHtmlFile(urlToOpen);
+			return;
+		}
+
+		Log::d() << "Android, opening " << urlToOpen << " as stream buffer";
 		std::ifstream inputStream(urlToOpen);
 		if (!inputStream.is_open()) {
 			Log::e() << "Failed to open Html on path " << url;
@@ -151,9 +161,10 @@ private:
 		}
 		std::stringstream buffer;
 		buffer << inputStream.rdbuf();
-		androidDisplayHtml(urlToOpen);
+		androidDisplayHtml(buffer.str());
 	}
 };
+
 #endif
 
 WebViewOverlay::WebViewOverlay(App &app,
@@ -169,6 +180,7 @@ WebViewOverlay::WebViewOverlay(App &app,
 	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
 #endif
 }
+
 void WebViewOverlay::callJs(const std::string &jsString) {
 	impl->callJs(jsString);
 }
