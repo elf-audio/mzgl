@@ -6,18 +6,19 @@
 
 class WebViewOverlayImpl {
 public:
-    WebViewOverlayImpl(App &app, const std::string &url,
-                       std::function<void(const std::string &)> jsCallback)
-            : app(app), url(url), jsCallback(jsCallback) {}
+	WebViewOverlayImpl(App &app, const std::string &url, std::function<void(const std::string &)> jsCallback)
+		: app(app)
+		, url(url)
+		, jsCallback(jsCallback) {}
 
-    virtual ~WebViewOverlayImpl() = default;
+	virtual ~WebViewOverlayImpl() = default;
 
-    virtual void callJs(const std::string &jsString) = 0;
+	virtual void callJs(const std::string &jsString) = 0;
 
 protected:
-    const std::string url;
-    std::function<void(const std::string &)> jsCallback;
-    App &app;
+	const std::string url;
+	std::function<void(const std::string &)> jsCallback;
+	App &app;
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -29,159 +30,157 @@ protected:
 #	if TARGET_OS_IOS
 class iOSWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
-    AppleWebView *webView;
-    UIViewController *targetController;
+	AppleWebView *webView;
+	UIViewController *targetController;
 
-    iOSWebViewOverlayImpl(App &app,
-                          const std::string &urlToOpen,
-                          std::function<void(const std::string &)> theJsCallback)
-        : WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
-        targetController = [[UIViewController alloc] init];
+	iOSWebViewOverlayImpl(App &app,
+						  const std::string &urlToOpen,
+						  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		targetController = [[UIViewController alloc] init];
 
-        webView					 = [[AppleWebView alloc] initWithFrame:targetController.view.bounds
-             loadedCallback:[]() {}
-             jsCallback:jsCallback
-             closeCallback:[this]() { close(); }
-             url:[NSString stringWithUTF8String:url.c_str()]];
-        webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+		webView					 = [[AppleWebView alloc] initWithFrame:targetController.view.bounds
+			 loadedCallback:[]() {}
+			 jsCallback:jsCallback
+			 closeCallback:[this]() { close(); }
+			 url:[NSString stringWithUTF8String:url.c_str()]];
+		webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-        [targetController.view addSubview:webView];
+		[targetController.view addSubview:webView];
 
-        targetController.modalPresentationStyle = UIModalPresentationFullScreen;
-        targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
+		targetController.modalPresentationStyle = UIModalPresentationFullScreen;
+		targetController.modalTransitionStyle	= UIModalTransitionStyleFlipHorizontal;
 
-        targetController.view.backgroundColor = [UIColor whiteColor];
+		targetController.view.backgroundColor = [UIColor whiteColor];
 
-        [((__bridge UIViewController *) app.viewController) presentViewController:targetController
-                                                                         animated:YES
-                                                                       completion:nil];
-    }
-    void callJs(const std::string &jsString) override {
-        [webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
-    }
-    ~iOSWebViewOverlayImpl() = default;
+		[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+																		 animated:YES
+																	   completion:nil];
+	}
+	void callJs(const std::string &jsString) override {
+		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
+	}
+	~iOSWebViewOverlayImpl() = default;
 
 private:
-    void close() { [targetController dismissViewControllerAnimated:true completion:nil]; }
+	void close() { [targetController dismissViewControllerAnimated:true completion:nil]; }
 };
 
 #	else
 class MacWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
-    AppleWebView *webView;
-    MacWebViewOverlayImpl(App &app,
-                          const std::string &urlToOpen,
-                          std::function<void(const std::string &)> theJsCallback)
-        : WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
-          NSView *rootView = (__bridge NSView *) app.viewHandle;
+	AppleWebView *webView;
+	MacWebViewOverlayImpl(App &app,
+						  const std::string &urlToOpen,
+						  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+		  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
+		  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
-          webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds
-               loadedCallback:[]() {}
-               jsCallback:jsCallback
-               closeCallback:[this]() { close(); }
-               url:[NSString stringWithUTF8String:url.c_str()]];
-          webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+		  webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds
+			   loadedCallback:[]() {}
+			   jsCallback:jsCallback
+			   closeCallback:[this]() { close(); }
+			   url:[NSString stringWithUTF8String:url.c_str()]];
+		  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
-          [rootView addSubview:webView];
-          animateIn();
-        });
-    }
-    void callJs(const std::string &jsString) override {
-        [webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
-    }
-    ~MacWebViewOverlayImpl() override = default;
+		  [rootView addSubview:webView];
+		  animateIn();
+		});
+	}
+	void callJs(const std::string &jsString) override {
+		[webView callJS:[NSString stringWithUTF8String:jsString.c_str()]];
+	}
+	~MacWebViewOverlayImpl() override = default;
 
 private:
-    void animateIn() {
-        // Initial off-screen position for animation
-        NSRect startFrame = webView.frame;
-        NSRect endFrame	  = startFrame;
-        startFrame.origin.y -= startFrame.size.height;
+	void animateIn() {
+		// Initial off-screen position for animation
+		NSRect startFrame = webView.frame;
+		NSRect endFrame	  = startFrame;
+		startFrame.origin.y -= startFrame.size.height;
 
-        webView.frame = startFrame;
+		webView.frame = startFrame;
 
-        // Animate the web view sliding in
-        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-          context.duration		 = 0.5;
-          webView.animator.frame = endFrame;
-        }];
-    }
-    void close() {
-        // Create slide-out animation
-        NSRect endFrame = webView.frame;
-        endFrame.origin.y -= webView.bounds.size.height;
+		// Animate the web view sliding in
+		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		  context.duration		 = 0.5;
+		  webView.animator.frame = endFrame;
+		}];
+	}
+	void close() {
+		// Create slide-out animation
+		NSRect endFrame = webView.frame;
+		endFrame.origin.y -= webView.bounds.size.height;
 
-        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-          context.duration		 = 0.5;
-          webView.animator.frame = endFrame;
-        }
-            completionHandler:^{ [webView removeFromSuperview]; }];
-    }
+		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		  context.duration		 = 0.5;
+		  webView.animator.frame = endFrame;
+		}
+			completionHandler:^{ [webView removeFromSuperview]; }];
+	}
 };
 #	endif
 #elif defined(__ANDROID__)
 
 #	include "androidUtil.h"
-#   include <fstream>
+#	include <fstream>
 
 class AndroidWebViewOverlayImpl : public WebViewOverlayImpl {
 public:
-    AndroidWebViewOverlayImpl(App &app,
-                              const std::string &urlToOpen,
-                              std::function<void(const std::string &)> theJsCallback)
-            : WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
-        registerWebViewOverlay(reinterpret_cast<std::uintptr_t>(this), theJsCallback);
-        readHtml(urlToOpen);
-    }
+	AndroidWebViewOverlayImpl(App &app,
+							  const std::string &urlToOpen,
+							  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		registerWebViewOverlay(reinterpret_cast<std::uintptr_t>(this), theJsCallback);
+		readHtml(urlToOpen);
+	}
 
-    ~AndroidWebViewOverlayImpl() override {
-        androidStopDisplayingHtml();
-        unregisterWebViewOverlay(reinterpret_cast<std::uintptr_t>(this));
-    }
+	~AndroidWebViewOverlayImpl() override {
+		androidStopDisplayingHtml();
+		unregisterWebViewOverlay(reinterpret_cast<std::uintptr_t>(this));
+	}
 
-    void callJs(const std::string &jsString) override {
-        androidCallJs(jsString);
-    }
+	void callJs(const std::string &jsString) override { androidCallJs(jsString); }
 
 private:
-    void readHtml(const std::string &urlToOpen) {
-        if (startsWith(urlToOpen, "file:///android_asset", CaseSensitivity::caseInSensitive) ||
-            startsWith(urlToOpen, "https://www.", CaseSensitivity::caseInSensitive)) {
-            Log::d() << "Android, opening " << urlToOpen << " as file";
-            androidDisplayHtmlFile(urlToOpen);
-            return;
-        }
+	void readHtml(const std::string &urlToOpen) {
+		if (startsWith(urlToOpen, "file:///android_asset", CaseSensitivity::caseInSensitive)
+			|| startsWith(urlToOpen, "https://www.", CaseSensitivity::caseInSensitive)) {
+			Log::d() << "Android, opening " << urlToOpen << " as file";
+			androidDisplayHtmlFile(urlToOpen);
+			return;
+		}
 
-        Log::d() << "Android, opening " << urlToOpen << " as stream buffer";
-        std::ifstream inputStream(urlToOpen);
-        if (!inputStream.is_open()) {
-            Log::e() << "Failed to open Html on path " << url;
-            return;
-        }
-        std::stringstream buffer;
-        buffer << inputStream.rdbuf();
-        androidDisplayHtml(buffer.str());
-    }
+		Log::d() << "Android, opening " << urlToOpen << " as stream buffer";
+		std::ifstream inputStream(urlToOpen);
+		if (!inputStream.is_open()) {
+			Log::e() << "Failed to open Html on path " << url;
+			return;
+		}
+		std::stringstream buffer;
+		buffer << inputStream.rdbuf();
+		androidDisplayHtml(buffer.str());
+	}
 };
 
 #endif
 
 WebViewOverlay::WebViewOverlay(App &app,
-                               const std::string &url,
-                               std::function<void(const std::string &)> jsCallback) {
+							   const std::string &url,
+							   std::function<void(const std::string &)> jsCallback) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-    impl = std::make_shared<iOSWebViewOverlayImpl>(app, url, jsCallback);
+	impl = std::make_shared<iOSWebViewOverlayImpl>(app, url, jsCallback);
 #	else
-    impl = std::make_shared<MacWebViewOverlayImpl>(app, url, jsCallback);
+	impl = std::make_shared<MacWebViewOverlayImpl>(app, url, jsCallback);
 #	endif
 #elif defined(__ANDROID__)
-    impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
+	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
 #endif
 }
 
 void WebViewOverlay::callJs(const std::string &jsString) {
-    impl->callJs(jsString);
+	impl->callJs(jsString);
 }
