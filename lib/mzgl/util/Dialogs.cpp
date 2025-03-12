@@ -61,6 +61,22 @@ namespace unit_test::dialogs {
 	}
 } // namespace unit_test::dialogs
 
+#ifdef __APPLE__
+#	if TARGET_OS_IOS
+UIViewController *getTopController(App &app){
+	UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+	if (topController == nil) {
+		topController = ((__bridge UIViewController *) app.viewController);
+	}
+	while (topController.presentedViewController) {
+		topController = topController.presentedViewController;
+	}
+	return  topController;
+}
+	
+#	endif
+#endif
+
 void Dialogs::inputbox(std::string title,
 					   std::string msg,
 					   std::string text,
@@ -93,7 +109,7 @@ void Dialogs::inputbox(std::string title,
 		  type == InputBoxType::Number ? UIKeyboardTypeNumbersAndPunctuation : UIKeyboardTypeDefault;
 	  dispatch_async(dispatch_get_main_queue(), ^{ [textField selectAll:nil]; });
 	}];
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 	dispatch_async(dispatch_get_main_queue(), ^{
@@ -185,7 +201,7 @@ void Dialogs::confirm(std::string title,
 											  style:UIAlertActionStyleCancel
 											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 	// this dispatch is slightly different from runOnMainThread on OS X
@@ -262,7 +278,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 												  //okPressed();
 											  }]];
 
-	  [((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	  [getTopController(app) presentViewController:alert animated:YES completion:nil];
 	});
 
 #	else
@@ -326,7 +342,7 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 											  style:UIAlertActionStyleCancel
 											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 
@@ -402,14 +418,7 @@ void Dialogs::twoOptionDialog(std::string title,
 #endif
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-	UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
-	if (topController == nil) {
-		topController = ((__bridge UIViewController *) app.viewController);
-	}
-	while (topController.presentedViewController) {
-		topController = topController.presentedViewController;
-	}
-	
+
 	UIAlertController *alert =
 		[UIAlertController alertControllerWithTitle:[NSString stringWithUTF8String:title.c_str()]
 											message:[NSString stringWithUTF8String:msg.c_str()]
@@ -422,7 +431,7 @@ void Dialogs::twoOptionDialog(std::string title,
 											  style:UIAlertActionStyleDefault
 											handler:^(UIAlertAction *action) { buttonTwoPressed(); }]];
 
-	[topController presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 
@@ -519,7 +528,7 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 											  style:UIAlertActionStyleCancel
 											handler:^(UIAlertAction *action) { cancelPressed(); }]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 
@@ -635,7 +644,7 @@ void Dialogs::threeOptionDialog(std::string title,
 											  style:UIAlertActionStyleDefault
 											handler:^(UIAlertAction *action) { buttonThreePressed(); }]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alert animated:YES completion:nil];
+	[getTopController(app) presentViewController:alert animated:YES completion:nil];
 
 #	else
 
@@ -767,9 +776,7 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 	picker.delegate					= bgpd;
 
 	[bgpd setCompletionCallback:completionCallback];
-	UIViewController *vc = ((__bridge UIViewController *) app.viewController);
-
-	[vc presentViewController:picker animated:YES completion:^ {}];
+	[getTopController(app) presentViewController:picker animated:YES completion:^ {}];
 
 #elif defined(__ANDROID__)
 	androidImageDialog(docsPath("tmpImg.jpg"), completionCallback);
@@ -860,7 +867,7 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 																				  metrics:nil
 																					views:views]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+	[getTopController(app) presentViewController:targetController
 																	 animated:YES
 																   completion:nil];
 #	else // mac
@@ -1019,7 +1026,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, std::function<void()
 																				  metrics:nil
 																					views:views]];
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:targetController
+	[getTopController(app) presentViewController:targetController
 																	 animated:YES
 																   completion:nil];
 #	else // mac
@@ -1050,7 +1057,7 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 	UIActivityViewController *activityViewController =
 		[[UIActivityViewController alloc] initWithActivityItems:@[ URL ] applicationActivities:nil];
 
-	UIViewController *vc = ((__bridge UIViewController *) app.viewController);
+	UIViewController *vc = getTopController(app);
 
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
 		[vc presentViewController:activityViewController animated:YES completion:^{ completionCallback(true); }];
@@ -1201,9 +1208,7 @@ void Dialogs::loadFile(std::string msg,
 	//		filePicker.allowsMultipleSelection = YES;
 	//	}
 
-	UIViewController *vc = (__bridge UIViewController *) app.viewController;
-
-	[vc presentViewController:filePicker
+	[getTopController(app) presentViewController:filePicker
 					 animated:YES
 				   completion:^ {
 					   //		if (@available(iOS 11.0, *)) {
@@ -1312,7 +1317,7 @@ void Dialogs::textboxWithSegmented(std::string title,
 	alertVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
 	alertVC.modalTransitionStyle   = UIModalTransitionStyleCrossDissolve;
 
-	[((__bridge UIViewController *) app.viewController) presentViewController:alertVC animated:YES completion:nil];
+	[getTopController(app) presentViewController:alertVC animated:YES completion:nil];
 
 #	else
 	dispatch_async(dispatch_get_main_queue(), ^{
