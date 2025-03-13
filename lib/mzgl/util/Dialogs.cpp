@@ -63,7 +63,7 @@ namespace unit_test::dialogs {
 
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
-UIViewController *getTopController(App &app){
+UIViewController *getTopController(App &app) {
 	UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
 	if (topController == nil) {
 		topController = ((__bridge UIViewController *) app.viewController);
@@ -71,9 +71,9 @@ UIViewController *getTopController(App &app){
 	while (topController.presentedViewController) {
 		topController = topController.presentedViewController;
 	}
-	return  topController;
+	return topController;
 }
-	
+
 #	endif
 #endif
 
@@ -137,8 +137,8 @@ void Dialogs::inputbox(std::string title,
 					completionHandler:^(NSInteger result) { handleResult(result, label); }];
 	  [label becomeFirstResponder];
 #		else
-		[label becomeFirstResponder];
-		handleResult([alert runModal], label);
+        [label becomeFirstResponder];
+        handleResult([alert runModal], label);
 #		endif
 	});
 #	endif
@@ -226,7 +226,7 @@ void Dialogs::confirm(std::string title,
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
-		handleResult([alert runModal]);
+        handleResult([alert runModal]);
 #		endif
 	});
 #	endif
@@ -291,7 +291,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { NSLog(@"Success"); }];
 #		else
-		[alert runModal];
+        [alert runModal];
 #		endif
 	});
 #	endif
@@ -374,7 +374,7 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
-		handleResult([alert runModal]);
+        handleResult([alert runModal]);
 #		endif
 	});
 #	endif
@@ -459,16 +459,13 @@ void Dialogs::twoOptionDialog(std::string title,
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
-		handleResult([alert runModal]);
+        handleResult([alert runModal]);
 #		endif
 	});
 #	endif
 
 #elif defined(__ANDROID__)
-	//	androidTwoOptionCancelDialog(title, msg,
-	//			buttonOneText, buttonOnePressed,
-	//								 buttonTwoText, buttonTwoPressed, cancelPressed);
-	mzAssert(false);
+	androidTwoOptionDialog(title, msg, buttonOneText, buttonOnePressed, buttonTwoText, buttonTwoPressed);
 #elif defined(_WIN32)
 	//	windowsTwoOptionCancelDialog(title, msg,
 	//								 buttonOneText, buttonOnePressed,
@@ -564,7 +561,7 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
-		handleResult([alert runModal]);
+        handleResult([alert runModal]);
 #		endif
 	});
 #	endif
@@ -677,7 +674,7 @@ void Dialogs::threeOptionDialog(std::string title,
 	  [alert beginSheetModalForWindow:[NSApp mainWindow]
 					completionHandler:^(NSInteger result) { handleResult(result); }];
 #		else
-		handleResult([alert runModal]);
+            handleResult([alert runModal]);
 #		endif
 	});
 #	endif
@@ -867,9 +864,7 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 																				  metrics:nil
 																					views:views]];
 
-	[getTopController(app) presentViewController:targetController
-																	 animated:YES
-																   completion:nil];
+	[getTopController(app) presentViewController:targetController animated:YES completion:nil];
 #	else // mac
 	dispatch_async(dispatch_get_main_queue(), ^{
 	  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
@@ -1026,9 +1021,7 @@ void Dialogs::displayHtmlInWebView(const std::string &html, std::function<void()
 																				  metrics:nil
 																					views:views]];
 
-	[getTopController(app) presentViewController:targetController
-																	 animated:YES
-																   completion:nil];
+	[getTopController(app) presentViewController:targetController animated:YES completion:nil];
 #	else // mac
 
 	NSString *tmpPath = [NSString stringWithFormat:@"%@/index.html", NSTemporaryDirectory()];
@@ -1209,12 +1202,12 @@ void Dialogs::loadFile(std::string msg,
 	//	}
 
 	[getTopController(app) presentViewController:filePicker
-					 animated:YES
-				   completion:^ {
-					   //		if (@available(iOS 11.0, *)) {
-					   //			filePicker.allowsMultipleSelection = YES;
-					   //		}
-				   }];
+										animated:YES
+									  completion:^ {
+										  //		if (@available(iOS 11.0, *)) {
+										  //			filePicker.allowsMultipleSelection = YES;
+										  //		}
+									  }];
 
 #	else
 	auto allowedExts = allowedExtensions;
@@ -1374,8 +1367,8 @@ void Dialogs::textboxWithSegmented(std::string title,
 					completionHandler:^(NSInteger result) { handleResult(result, textField, locationControl); }];
 	  [textField becomeFirstResponder];
 #		else
-			[label becomeFirstResponder];
-			handleResult([alert runModal], label, locationControl);
+            [label becomeFirstResponder];
+            handleResult([alert runModal], label, locationControl);
 #		endif
 	});
 #	endif
