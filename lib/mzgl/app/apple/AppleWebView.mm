@@ -136,7 +136,7 @@
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController
 	  didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
-	if ([message.name isEqual:@"closeWindow"]) {
+	if ([message.name isEqual:@"closeWindow"] || [message.body isEqual:@"close"]) {
 		if (closeCallback) closeCallback();
 		return;
 	}

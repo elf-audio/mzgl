@@ -261,6 +261,7 @@ std::vector<std::string> getCommandLineArgs() {
 void addCommandLineFlag(const std::string &flag) {
 	Globals::commandLineArgs.emplace_back(flag);
 }
+
 bool hasCommandLineFlag(const std::string &flag) {
 #ifdef MZGL_MAC
 	auto args = getCommandLineArgs();

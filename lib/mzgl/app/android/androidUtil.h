@@ -56,6 +56,13 @@ void androidNumberboxDialog(const std::string &title,
                             const std::string &initialValue,
                             std::function<void(std::string, bool)> completionCallback);
 
+void androidTwoOptionDialog(const std::string &title,
+                            const std::string &msg,
+                            const std::string &buttonOneText,
+                            std::function<void()> buttonOnePressed,
+                            const std::string &buttonTwoText,
+                            std::function<void()> buttonTwoPressed);
+
 void androidTwoOptionCancelDialog(const std::string &title,
                                   const std::string &msg,
                                   const std::string &buttonOneText,
