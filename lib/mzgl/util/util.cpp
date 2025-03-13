@@ -263,10 +263,11 @@ void addCommandLineFlag(const std::string &flag) {
 }
 
 bool hasCommandLineFlag(const std::string &flag) {
+#ifdef MZGL_MAC
 	auto args = getCommandLineArgs();
 	return std::find_if(std::begin(args), std::end(args), [flag](auto &&arg) { return arg == flag; })
 		   != std::end(args);
-
+#endif
 	return false;
 }
 
