@@ -406,6 +406,17 @@ void androidConfirmDialog(const std::string &title,
     callJNI("confirmDialog", title, msg);
 }
 
+void androidTwoOptionDialog(const std::string &title,
+                            const std::string &msg,
+                            const std::string &buttonOneText,
+                            std::function<void()> buttonOnePressed,
+                            const std::string &buttonTwoText,
+                            std::function<void()> buttonTwoPressed) {
+    android_statics.buttonOnePressed = std::move(buttonOnePressed);
+    android_statics.buttonTwoPressed = std::move(buttonTwoPressed);
+    callJNI("twoOptionDialog", title, msg, buttonOneText, buttonTwoText);
+}
+
 void androidTwoOptionCancelDialog(const std::string &title,
                                   const std::string &msg,
                                   const std::string &buttonOneText,
