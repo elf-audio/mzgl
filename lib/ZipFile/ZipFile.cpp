@@ -53,7 +53,6 @@ bool ZipFile::unzip(const std::vector<uint8_t> &inZipData, const fs::path &outDi
 	return unzipper.extract(outDir.string());
 }
 
-
 std::vector<std::string> ZipFile::listZip(const std::vector<uint8_t> &inZipData) {
 	std::vector<std::string> fileList;
 	Unzipper unzipper((std::vector<unsigned char> &) inZipData);
@@ -87,7 +86,8 @@ bool ZipFile::getTextFileFromZip(const fs::path &pathToZip, const fs::path &file
 			return false;
 		}
 	} catch (const std::runtime_error &err) {
-		Log::e() << "Got error trying to getTextFileFromZip()" << err.what();
+		Log::e() << "Got error trying to getTextFileFromZip() - zip: " << pathToZip.string()
+				 << " - error: " << err.what();
 		return false;
 	}
 }
