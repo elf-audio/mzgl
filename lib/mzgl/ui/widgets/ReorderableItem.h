@@ -42,7 +42,7 @@ public:
 		}
 		return -1;
 	}
-	void update() override {
+	void updateDeprecated() override {
 		if (!dragging && !atOriginalPosition()) {
 			x = x * 0.8 + targetRect.x * 0.2;
 			y = y * 0.8 + targetRect.y * 0.2;

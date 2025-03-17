@@ -104,8 +104,8 @@ public:
 		if (!isPopping) ScrollingList::_draw();
 	}
 
-	void update() override {
-		ScrollingList::update();
+	void updateDeprecated() override {
+		ScrollingList::updateDeprecated();
 		if (isPushing || isPopping) {
 			animationAmt += 0.05;
 

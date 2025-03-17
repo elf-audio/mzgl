@@ -206,7 +206,7 @@ namespace NVGUI {
 		}
 		function<void()> underlayDone = []() {};
 		float amt					  = 0;
-		void update() override {
+		void updateDeprecated() override {
 			if (!shouldShow) {
 				if (amt > 0) {
 					amt -= 0.1;
@@ -282,7 +282,7 @@ namespace NVGUI {
 			originalHeight = height;
 		}
 
-		void update() override {
+		void updateDeprecated() override {
 			if (out) outAmt += 0.1;
 			else outAmt -= 0.1;
 

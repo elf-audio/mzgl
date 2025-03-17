@@ -19,7 +19,7 @@ public:
 		cornerRadius = 9;
 	}
 
-	void update() override {
+	void updateDeprecated() override {
 		if (isOn) color = {1, 0.5, 0.5, 1};
 		else {
 			if (isBlack) {
@@ -62,7 +62,7 @@ public:
 	map<int, glm::vec2> touches;
 	function<void(int)> notePressed;
 	function<void(int)> noteReleased;
-	void update() override {
+	void updateDeprecated() override {
 		for (int k = 0; k < keys.size(); k++) {
 			keys[k]->shouldBeOn = false;
 		}

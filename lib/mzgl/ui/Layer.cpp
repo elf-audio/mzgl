@@ -274,11 +274,11 @@ bool Layer::_touchDown(float x, float y, int id) {
 	return false;
 }
 
-void Layer::_update() {
+void Layer::_updateDeprecated() {
 	for (auto *c: children) {
-		c->_update();
+		c->_updateDeprecated();
 	}
-	update();
+	updateDeprecated();
 }
 
 void Layer::sendToBack(Layer *child) {

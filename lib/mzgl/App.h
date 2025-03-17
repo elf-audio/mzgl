@@ -61,7 +61,7 @@ public:
 	// LIFE-CYCLE
 	virtual void setup() {}
 
-	virtual void update() {}
+	virtual void updateDeprecated() {}
 	virtual void draw() {}
 	virtual void drawAfterUI() {}
 	virtual void exit() {}

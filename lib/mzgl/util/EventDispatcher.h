@@ -109,9 +109,9 @@ public:
 
 	bool hasSetup() { return hasCalledSetup; }
 
-	void update() {
-		app->update();
-		app->root->_update();
+	void updateDeprecated() {
+		app->updateDeprecated();
+		app->root->_updateDeprecated();
 	}
 
 	void draw() {
@@ -140,7 +140,7 @@ public:
 	}
 
 	void updateFrame() {
-		update();
+		updateDeprecated();
 
 		auto s = getSeconds();
 

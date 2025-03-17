@@ -79,7 +79,7 @@ public:
 		//MacMenuBar::instance().getMenu("LiveCoding")->addItem("Reload", "r", [this]() {compiler.recompile();});
 	}
 
-	void update() override {
+	void updateDeprecated() override {
 		compiler.update();
 		if (d != nullptr) {
 			d->update();

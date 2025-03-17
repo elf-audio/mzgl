@@ -117,7 +117,7 @@ public:
 		addChild(closeButton);
 		addChild(clearButton);
 	}
-	void update() override {
+	void updateDeprecated() override {
 		if (scroller->width != this->width - 40) {
 			scroller->width	 = this->width;
 			scroller->height = this->height;

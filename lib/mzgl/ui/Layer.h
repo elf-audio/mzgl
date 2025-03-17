@@ -61,7 +61,7 @@ public:
 	virtual void keyUp(int key) {}
 
 	// override to have something to do before the draw
-	virtual void update() {}
+	virtual void updateDeprecated() {}
 
 	[[nodiscard]] int getNumChildren() const;
 	Layer *getChild(int index);
@@ -85,7 +85,7 @@ public:
 	void _mouseZoomed(float x, float y, float zoom);
 	bool _keyDown(int key);
 	bool _keyUp(int key);
-	void _update();
+	void _updateDeprecated();
 
 	Layer *getParent();
 	Layer *getRoot();

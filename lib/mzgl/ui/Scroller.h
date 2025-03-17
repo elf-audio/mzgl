@@ -12,7 +12,7 @@ public:
 
 	void addContent(Layer *layer);
 	void clear() override;
-	void update() override;
+	void updateDeprecated() override;
 
 	void draw() override;
 

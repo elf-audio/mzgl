@@ -53,7 +53,7 @@ public:
 	float getContentHeight() { return content->height; }
 	//	void draw() override;
 	virtual void _draw() override;
-	void update() override;
+	void updateDeprecated() override;
 	bool empty() const { return items.empty(); }
 
 	virtual bool keyDown(int key) override;

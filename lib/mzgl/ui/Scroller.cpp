@@ -34,7 +34,7 @@ void Scroller::clear() {
 	content->height = 0;
 }
 
-void Scroller::update() {
+void Scroller::updateDeprecated() {
 	if (!scrolling) {
 		float lerpSpeed = 0.86;
 		if (content->y > 0) {
