@@ -19,7 +19,7 @@ public:
 		cornerRadius = 9;
 	}
 
-	void updateDeprecated() override {
+	void update() override {
 		if (isOn) color = {1, 0.5, 0.5, 1};
 		else {
 			if (isBlack) {

@@ -206,7 +206,7 @@ namespace NVGUI {
 		}
 		function<void()> underlayDone = []() {};
 		float amt					  = 0;
-		void updateDeprecated() override {
+		void update() {
 			if (!shouldShow) {
 				if (amt > 0) {
 					amt -= 0.1;
@@ -223,6 +223,7 @@ namespace NVGUI {
 		}
 
 		virtual void draw() override {
+			update();
 			if (amt < 0.001) return;
 			nvg.noStroke();
 			nvg.fill({0, 0, 0, smootherstep(amt) * 0.5});
@@ -282,7 +283,7 @@ namespace NVGUI {
 			originalHeight = height;
 		}
 
-		void updateDeprecated() override {
+		void update() {
 			if (out) outAmt += 0.1;
 			else outAmt -= 0.1;
 
@@ -300,6 +301,7 @@ namespace NVGUI {
 
 		int hoveredIndex = 0;
 		void draw() override {
+			update();
 			const float cornerRadius = originalHeight / 4.f;
 			const float textIndent	 = 9;
 

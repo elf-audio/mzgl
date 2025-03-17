@@ -117,7 +117,7 @@ public:
 		addChild(closeButton);
 		addChild(clearButton);
 	}
-	void updateDeprecated() override {
+	void updateDims() {
 		if (scroller->width != this->width - 40) {
 			scroller->width	 = this->width;
 			scroller->height = this->height;
@@ -130,6 +130,7 @@ public:
 		}
 	}
 	void draw() override {
+		updateDims();
 		ScopedAlphaBlend ab(g, true);
 		g.setColor(0, 0, 0, 0.5);
 		g.drawRect(*this);
