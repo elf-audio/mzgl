@@ -11,10 +11,11 @@
 #include "App.h"
 
 class EventDispatcher;
+class Graphics;
 
 @interface MZGLKitView : GLKView
 - (std::shared_ptr<App>)getApp;
-- (id)initWithApp:(std::shared_ptr<App>)_app;
+- (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 - (BOOL)handleNormalOpen:(NSURL *)url;
 - (void) deleteCppObjects;

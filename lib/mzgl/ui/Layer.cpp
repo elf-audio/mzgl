@@ -442,13 +442,14 @@ void Layer::transferFocus(Layer *fromLayer, Layer *toLayer) {
 }
 
 void Layer::clear() {
-	for (auto *ch: children) {
-		for (auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
-			if ((*it).second == ch) {
+	if (!g.focusedLayers.empty()) {
+		for (auto *ch: children) {
+			auto it = std::find_if(g.focusedLayers.begin(), g.focusedLayers.end(), [ch](auto && focus){
+				return focus.second == ch;
+			});
+			if (it != g.focusedLayers.end()) {
 				mzAssert(false, "Can't delete a layer whilst there is an interaction going on with it!");
-				g.focusedLayers.erase(it++);
-			} else {
-				it++;
+				g.focusedLayers.erase(it);
 			}
 		}
 	}

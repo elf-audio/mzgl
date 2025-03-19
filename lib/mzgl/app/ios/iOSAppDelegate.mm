@@ -29,7 +29,7 @@ void quitApplication() {
 @interface iOSAppDelegate () {
 	std::shared_ptr<App> app;
 	std::shared_ptr<Plugin> plugin;
-	Graphics g;
+	std::shared_ptr<Graphics> g;
 	MZGLKitViewController *mzViewController;
 }
 @end
@@ -120,18 +120,19 @@ public:
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 
 	try {
+		g = std::make_shared<Graphics>();
 		if (isPlugin()) {
 			plugin = instantiatePlugin();
-			app	   = instantiatePluginEditor(g, plugin);
+			app	   = instantiatePluginEditor(*g, plugin);
 		} else {
-			app = instantiateApp(g);
+			app = instantiateApp(*g);
 		}
 	} catch (std::exception &e) {
 		writeStringToFile("instantiateAppError.txt", e.what());
-		app = std::make_shared<ErrorApp>(g, e.what());
+		app = std::make_shared<ErrorApp>(*g, e.what());
 	}
 
-	mzViewController		  = [[MZGLKitViewController alloc] initWithApp:app];
+	mzViewController		  = [[MZGLKitViewController alloc] initWithApp:app andGraphics:g];
 	window.rootViewController = mzViewController;
 	app->viewController		  = (__bridge void *) mzViewController;
 	app->windowHandle		  = (__bridge void *) window;
@@ -191,6 +192,7 @@ public:
 
 	// destroy plugin last! it must live longer than app.
 	plugin = nullptr;
+	g = nullptr;
 }
 
 @end
