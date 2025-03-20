@@ -31,13 +31,13 @@
 //     apparently. Bit of a hack but it works.
 
 EAGLContext *context = nil;
-- (id)initWithApp:(std::shared_ptr<App>)_app {
+- (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
 	self = [super init];
 	if (self != nil) {
 		currentlyPaused				  = YES;
 		self.delegate				  = self;
 		self.preferredFramesPerSecond = 60.f;
-		mzView						  = [[MZGLKitView alloc] initWithApp:_app];
+		mzView						  = [[MZGLKitView alloc] initWithApp:_app andGraphics:_graphics];
 		self.view					  = mzView;
 		GLKView *v					  = self.view;
 

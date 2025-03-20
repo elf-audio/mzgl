@@ -34,11 +34,11 @@ using namespace std;
 	MZGLView *glView;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 #endif
-	Graphics g;
 	MZGLEffectAU *audioUnit;
 
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<PluginEditor> app;
+	std::shared_ptr<Graphics> g;
 }
 
 - (id)init {
@@ -49,10 +49,18 @@ using namespace std;
 	return self;
 }
 
+- (void)dealloc {
+	NSLog(@"dealloc AudioUnitViewController");
+	app.reset();
+	plugin.reset();
+	g.reset();
+}
+
 - (void)setup {
 	app		  = nullptr;
 	plugin	  = nullptr;
 	audioUnit = nil;
+	g		  = nullptr;
 	//#if !TARGET_OS_IOS
 	//        auto &g = appHolder.g;
 	//        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
@@ -143,10 +151,11 @@ using namespace std;
 
 - (void)viewWillAppear:(BOOL)animated {
 	if (app == nullptr) {
+		g = std::make_shared<Graphics>();
 		plugin = [self getPlugin];
-		app	   = instantiatePluginEditor(g, plugin);
+		app	   = instantiatePluginEditor(*g, plugin);
 #if MZGL_IOS
-		vc					= [[MZGLKitViewController alloc] initWithApp:app];
+		vc					= [[MZGLKitViewController alloc] initWithApp:app andGraphics:g];
 		app->viewController = (__bridge void *) self;
 
 		glView = (MZGLKitView *) vc.view;
@@ -156,8 +165,8 @@ using namespace std;
 #endif
 		glView.frame = self.view.frame;
 #if !MZGL_IOS
-		g.width	 = self.view.frame.size.width * 2;
-		g.height = self.view.frame.size.height * 2;
+		g->width	 = self.view.frame.size.width * 2;
+		g->height = self.view.frame.size.height * 2;
 		eventDispatcher->resized();
 #endif
 		[self addGLView];

@@ -13,7 +13,7 @@
 #endif
 #import "MZGLKitView.h"
 class App;
-
+class Graphics;
 class EventDispatcher;
 @interface MZGLKitViewController
 	: GLKViewController
@@ -24,7 +24,7 @@ class EventDispatcher;
 	  <GLKViewControllerDelegate>
 #endif
 
-- (id)initWithApp:(std::shared_ptr<App>)app;
+- (id)initWithApp:(std::shared_ptr<App>)app andGraphics:(std::shared_ptr<Graphics>)_graphics;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 //- (void) openURLWhenLoadedAndDeleteFile: (NSString*) urlToOpen;
 - (MZGLKitView *)getView;

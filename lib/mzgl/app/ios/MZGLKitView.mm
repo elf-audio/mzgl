@@ -19,6 +19,7 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteract
 @implementation MZGLKitView {
 	std::shared_ptr<App> app;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
+	std::shared_ptr<Graphics> graphics;
 
 	NSMutableDictionary *activeTouches;
 	bool firstFrame;
@@ -27,6 +28,7 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteract
 - (void) deleteCppObjects {
 	app = nullptr;
 	eventDispatcher = nullptr;
+	graphics = nullptr;
 }
 
 - (std::shared_ptr<App>)getApp {
@@ -37,10 +39,11 @@ API_AVAILABLE(ios(11)) @interface MZGLKitView(DragDropExtensions)<UIDropInteract
 	NSLog(@"Tearing down MZGLKitView");
 }
 
-- (id)initWithApp:(std::shared_ptr<App>)_app {
+- (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
 	self = [super init];
 	if (self != nil) {
 		app = _app;
+		graphics = _graphics;
 
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 
