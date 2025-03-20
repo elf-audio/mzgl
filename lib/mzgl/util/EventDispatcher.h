@@ -146,7 +146,7 @@ public:
 
 		app->g.frameDelta	 = s - app->g.currFrameTime;
 		app->g.currFrameTime = s;
-
+		app->g.frameNum++;
 		draw();
 	}
 

@@ -75,6 +75,7 @@ public:
 	float pixelScale	 = 2.f;
 	double frameDelta	 = 1.0 / 60.0;
 	double currFrameTime = 0.0;
+	uint32_t frameNum	 = 0;
 
 	void setColor(float r, float g, float b, float a = 1.f);
 	void setColor(glm::vec3 c);
@@ -221,8 +222,6 @@ public:
 
 	Layer *keyboardFocusedLayer = nullptr;
 
-	friend class App;
-
 	// OpenGL only
 	int32_t getDefaultFrameBufferId();
 
@@ -232,7 +231,7 @@ private:
 	bool blendingEnabled = false;
 	bool filling		 = true;
 	glm::vec4 color;
-	//glm::mat4 mvp;
+
 	MatrixStack modelMatrixStack;
 	glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
@@ -242,9 +241,6 @@ private:
 	friend class ScopedTranslate;
 
 	std::unique_ptr<GraphicsAPI> api;
-
-	// was in Globals
-	unsigned int frameNum = 0;
 };
 
 template <Graphics::BlendMode newBlendMode>

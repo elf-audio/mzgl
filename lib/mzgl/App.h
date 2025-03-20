@@ -107,10 +107,7 @@ public:
 
 	MainThreadRunner main;
 
-	void updateInternal() {
-		++g.frameNum;
-		main.pollMainThreadQueue();
-	}
+	void updateInternal() { main.pollMainThreadQueue(); }
 };
 
 std::shared_ptr<App> instantiateApp(Graphics &g);
