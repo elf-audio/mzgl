@@ -1,5 +1,7 @@
 #include "AudioBufferAdaptor.h"
 #include "tests.h"
+#include "maths.h"
+
 TEST_CASE("AudioRingBuffer_write", "[audio]") {
 	AudioRingBuffer buffer(4);
 	float data[4] = {1, 2, 3, 4};
@@ -83,6 +85,9 @@ TEST_CASE("AudioBufferAdaptor", "[audio]") {
 	};
 
 	float randoBuff[4096];
+	for (int i = 0; i < 4096; i++) {
+		randoBuff[i] = randf();
+	}
 	adaptor.audioIn(randoBuff, 16, 2);
 	REQUIRE(inCalls == 0);
 
