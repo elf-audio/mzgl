@@ -52,3 +52,18 @@ private:
 	const bool online;
 	std::shared_ptr<AllMidiDevicesImpl> impl;
 };
+
+class ScopedMidiConnectionListener {
+public:
+	ScopedMidiConnectionListener(AllMidiDevices &_devices, MidiConnectionListener *_listener)
+		: devices(_devices)
+		, listener(_listener) {
+		devices.addConnectionListener(listener);
+	}
+
+	~ScopedMidiConnectionListener() { devices.removeConnectionListener(listener); }
+
+private:
+	AllMidiDevices &devices;
+	MidiConnectionListener *listener;
+};
