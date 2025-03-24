@@ -32,7 +32,7 @@ public:
 private:
 	explicit CoreMidiIn(MIDIEndpointRef endpoint)
 		: CoreMidiDevice(endpoint) {
-		isOutput = false;
+		direction = MidiDevice::Direction::Input;
 	}
 };
 
@@ -46,7 +46,7 @@ public:
 private:
 	explicit CoreMidiOut(MIDIEndpointRef endpoint)
 		: CoreMidiDevice(endpoint) {
-		isOutput = true;
+		direction = MidiDevice::Direction::Output;
 	}
 };
 

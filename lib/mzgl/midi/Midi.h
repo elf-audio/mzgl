@@ -32,13 +32,18 @@ void MidiInCallback(double deltatime, std::vector<unsigned char> *message, void 
  */
 class MidiDevice {
 public:
-	std::string name;
-	bool isOutput = false;
-	int id;
+	enum class Direction {
+		Input,
+		Output,
+	};
 
-	MidiDevice(std::string name = "", bool output = false)
+	std::string name;
+	int id;
+	Direction direction = Direction::Input;
+
+	MidiDevice(std::string name = "", Direction _direction = Direction::Input)
 		: name(name)
-		, isOutput(output) {
+		, direction(_direction) {
 		static std::atomic<int> idCounter {0};
 		id = idCounter++;
 	}
@@ -68,10 +73,10 @@ public:
 	void close() { getPort()->closePort(); }
 
 	std::string getName() const { return name; }
-	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(isOutput, false); }
+	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(direction, false); }
 
-	static int findPortByName(std::string portSearchName, bool isOutput) {
-		auto ports						   = MidiPort::getPortNames(isOutput, false);
+	static int findPortByName(std::string portSearchName, MidiDevice::Direction direction) {
+		auto ports						   = MidiPort::getPortNames(direction, false);
 		std::string portSearchNameOriginal = portSearchName;
 		portSearchName					   = toLowerCase(portSearchName);
 
@@ -86,21 +91,21 @@ public:
 		return -1;
 	}
 
-	static std::vector<std::string> getPortNames(bool isOutput, bool alsoPrint = false) {
+	static std::vector<std::string> getPortNames(MidiDevice::Direction direction, bool alsoPrint = false) {
 		std::vector<std::string> names;
 
 		RtMidiIn midiIn;
 		RtMidiOut midiOut;
 		RtMidi *midi;
 
-		if (isOutput) {
+		if (direction == MidiDevice::Direction::Output) {
 			midi = &midiOut;
 		} else {
 			midi = &midiIn;
 		}
 
 		try {
-			std::string io	= isOutput ? "output" : "input";
+			std::string io	= direction == MidiDevice::Direction::Output ? "output" : "input";
 			uint32_t nPorts = midi->getPortCount();
 			if (alsoPrint) {
 				std::cout << "\nThere are " << nPorts << " MIDI " << io << " ports available.\n";
@@ -124,7 +129,7 @@ public:
 	}
 
 	bool open(std::string portSearchName) {
-		int portId = MidiPort::findPortByName(portSearchName, isOutput);
+		int portId = MidiPort::findPortByName(portSearchName, direction);
 		if (portId != -1) {
 			return open(portId);
 		}
@@ -143,11 +148,11 @@ class MidiIn
 	, public std::enable_shared_from_this<MidiIn> {
 public:
 	static std::vector<std::string> getPortNames(bool alsoPrint = false) {
-		return MidiPort::getPortNames(false, alsoPrint);
+		return MidiPort::getPortNames(MidiDevice::Direction::Input, alsoPrint);
 	}
 
 	MidiIn() {
-		isOutput = false;
+		direction = MidiDevice::Direction::Input;
 		try {
 			rtMidiIn = std::shared_ptr<RtMidiIn>(new RtMidiIn());
 
@@ -209,11 +214,11 @@ public:
 	RtMidi *getPort() override { return rtMidiOut.get(); }
 
 	static std::vector<std::string> getPortNames(bool alsoPrint = false) {
-		return MidiPort::getPortNames(true, alsoPrint);
+		return MidiPort::getPortNames(MidiDevice::Direction::Output, alsoPrint);
 	}
 
 	MidiOut() {
-		isOutput = true;
+		direction = MidiDevice::Direction::Output;
 		try {
 			rtMidiOut = std::make_shared<RtMidiOut>();
 		} catch (RtMidiError &error) {
@@ -231,13 +236,9 @@ public:
 		sendMessage(MidiMessage::noteOn(channel, pitch, velocity));
 	}
 
-	void noteOff(int channel, int pitch) {
-		sendMessage(MidiMessage::noteOff(channel, pitch));
-	}
+	void noteOff(int channel, int pitch) { sendMessage(MidiMessage::noteOff(channel, pitch)); }
 
-	void cc(int channel, int control, int value) {
-		sendMessage(MidiMessage::cc(channel, control, value));
-	}
+	void cc(int channel, int control, int value) { sendMessage(MidiMessage::cc(channel, control, value)); }
 
 	void sendMessage(const MidiMessage &m) {
 		auto b = m.getBytes();

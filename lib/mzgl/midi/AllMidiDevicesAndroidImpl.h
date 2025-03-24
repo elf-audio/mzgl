@@ -7,12 +7,11 @@ using AndroidMidiIdentifier = int;
 
 class AndroidMidiDevice : public MidiDevice {
 public:
-	enum class Type { input, output };
 	AndroidMidiDevice(const std::string &deviceName,
 					  AndroidMidiIdentifier device,
 					  AndroidMidiIdentifier port,
-					  Type type)
-		: MidiDevice(deviceName, type == Type::output)
+					  MidiDevice::Direction direction)
+		: MidiDevice(deviceName, direction)
 		, deviceIdentifier(device)
 		, devicePort(port) {}
 
@@ -21,7 +20,7 @@ public:
 	AndroidMidiDevice &operator=(const AndroidMidiDevice &other) {
 		if (this != &other) {
 			name			 = other.name;
-			isOutput		 = other.isOutput;
+			direction		 = other.direction;
 			deviceIdentifier = other.deviceIdentifier;
 			devicePort		 = other.devicePort;
 			id				 = other.id;
@@ -32,8 +31,8 @@ public:
 	~AndroidMidiDevice() override = default;
 
 	[[nodiscard]] bool operator==(const AndroidMidiDevice &other) const {
-		return std::tie(deviceIdentifier, devicePort, isOutput)
-			   == std::tie(other.deviceIdentifier, other.devicePort, other.isOutput);
+		return std::tie(deviceIdentifier, devicePort, direction)
+			   == std::tie(other.deviceIdentifier, other.devicePort, other.direction);
 	}
 
 	[[nodiscard]] bool operator==(const MidiDevice &other) const override {

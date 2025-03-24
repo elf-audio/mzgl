@@ -674,10 +674,10 @@ void androidOnMidiInputDeviceConnected(int32_t deviceId,
         if (isInput) {
             impl->inputDeviceConnected(
                     std::make_shared<AndroidMidiDevice>(deviceName, deviceId, portId,
-                                                        AndroidMidiDevice::Type::input));
+                                                        MidiDevice::Direction::Input));
         } else {
             impl->outputDeviceConnected(std::make_shared<AndroidMidiDevice>(
-                    deviceName, deviceId, portId, AndroidMidiDevice::Type::output));
+                    deviceName, deviceId, portId, MidiDevice::Direction::Output));
         }
     }
 }
@@ -686,10 +686,10 @@ void androidOnMidiInputDeviceDisconnected(int32_t deviceId, int32_t portId, bool
     if (auto impl = midiImpl.lock()) {
         if (isInput) {
             impl->inputDeviceDisconnected(std::make_shared<AndroidMidiDevice>(
-                    "DISCONNECTED", deviceId, portId, AndroidMidiDevice::Type::input));
+                    "DISCONNECTED", deviceId, portId, MidiDevice::Direction::Input));
         } else {
             impl->outputDeviceDisconnected(std::make_shared<AndroidMidiDevice>(
-                    "DISCONNECTED", deviceId, portId, AndroidMidiDevice::Type::output));
+                    "DISCONNECTED", deviceId, portId, MidiDevice::Direction::Output));
         }
     }
 }
@@ -715,7 +715,8 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
                                     if (auto *androidInput = dynamic_cast<AndroidMidiDevice *>(deviceToTest.get())) {
                                         return androidInput->deviceIdentifier == deviceId
                                                && androidInput->devicePort == portId &&
-                                               !androidInput->isOutput;
+                                               androidInput->direction ==
+                                               MidiDevice::Direction::Input;
                                     }
                                     return false;
                                 });
