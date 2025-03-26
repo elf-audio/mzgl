@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Layer.h"
-include "mzgl_platform.h"
+#include "mzgl_platform.h"
 #ifndef MZGL_WIN
 #include <cxxabi.h>
 #endif
