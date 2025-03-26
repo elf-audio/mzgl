@@ -17,7 +17,7 @@
 
 #pragma once
 #include <math.h>
-
+#include "maths.h"
 // b is offset
 // d is total duration
 // t is position
@@ -104,7 +104,7 @@ inline float easeInElastic(float t) {
 
 	float s		  = p / 4;
 	float postFix = pow(2.f, 10.f * (t -= 1.f)); // this is a fix, again, with post-increment operators
-	return -(postFix * sin((t - s) * (2.f * M_PI) / p));
+	return -(postFix * sin((t - s) * (2.f * Constants<float>::pi) / p));
 }
 
 inline float easeOutElastic(float t) {
@@ -113,7 +113,7 @@ inline float easeOutElastic(float t) {
 	float p = .3f;
 
 	float s = p / 4;
-	return (pow(2, -10 * t) * sin((t - s) * (2 * M_PI) / p) + 1);
+	return (pow(2, -10 * t) * sin((t - s) * (2 * Constants<float>::pi) / p) + 1);
 }
 
 inline float easeInOutElastic(float t) {
@@ -125,10 +125,10 @@ inline float easeInOutElastic(float t) {
 
 	if (t < 1) {
 		float postFix = pow(2, 10 * (t -= 1)); // postIncrement is evil
-		return -.5f * (postFix * sin((t - s) * (2 * M_PI) / p));
+		return -.5f * (postFix * sin((t - s) * (2 * Constants<float>::pi) / p));
 	}
 	float postFix = pow(2, -10 * (t -= 1)); // postIncrement is evil
-	return postFix * sin((t - s) * (2 * M_PI) / p) * .5f + 1;
+	return postFix * sin((t - s) * (2 * Constants<float>::pi) / p) * .5f + 1;
 }
 
 inline float easeInExpo(float t) {
@@ -187,12 +187,12 @@ inline float easeInOutQuint(float t) {
 }
 
 inline float easeInSine(float t) {
-	return -1 * cos(t * (M_PI / 2)) + 1;
+	return -1 * cos(t * (Constants<float>::pi / 2)) + 1;
 }
 inline float easeOutSine(float t) {
-	return sin(t * (M_PI / 2));
+	return sin(t * (Constants<float>::pi / 2));
 }
 
 inline float easeInOutSine(float t) {
-	return -1.f / 2 * (cos(M_PI * t) - 1);
+	return -1.f / 2 * (cos(Constants<float>::pi * t) - 1);
 }

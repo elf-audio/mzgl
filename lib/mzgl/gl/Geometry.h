@@ -10,7 +10,8 @@
 
 #include <vector>
 
-struct Geometry {
+class Geometry {
+public:
 	std::vector<vec2> verts;
 	std::vector<vec4> cols;
 	std::vector<uint32_t> indices;
