@@ -4,7 +4,7 @@
 #include "Layer.h"
 #include "mzgl_platform.h"
 #ifndef MZGL_WIN
-#include <cxxabi.h>
+#	include <cxxabi.h>
 #endif
 class DebugOverlay : public Layer {
 public:
@@ -31,7 +31,7 @@ public:
 	std::string mousedOverName;
 	Rectf mousedOverRect;
 	std::string demangle(const char *name) {
-		#ifndef MZGL_WIN
+#ifndef MZGL_WIN
 		int status = -4; // some arbitrary value to eliminate the compiler warning
 
 		// enable c++11 by passing the flag -std=c++11 to g++
@@ -39,9 +39,9 @@ public:
 													 std::free};
 
 		return (status == 0) ? res.get() : name;
-		#else
+#else
 		return name;
-		#endif
+#endif
 	}
 	Layer *insideWhich(Layer *l, float x, float y) {
 		if (!l->visible) return nullptr;

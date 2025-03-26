@@ -666,6 +666,10 @@ void androidDisplayMidiBLEPanel() {
     callJNI("displayMidiBLEPanel");
 }
 
+void androidScanForMidiBLEDevices() {
+    callJNI("scanForBTLEMidiDevices");
+}
+
 void androidOnMidiInputDeviceConnected(int32_t deviceId,
                                        int32_t portId,
                                        bool isInput,
@@ -769,8 +773,26 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLMidiManager_deviceRemoved(
     androidOnMidiInputDeviceDisconnected(deviceId, portId, isInput == JNI_TRUE);
 }
 
+JNIEXPORT void JNICALL Java_com_elf_MZGLBleMidiManager_deviceAdded(
+        JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput,
+        jstring deviceName) {
+    androidOnMidiInputDeviceConnected(deviceId, portId, isInput == JNI_TRUE,
+                                      jstringToString(env, deviceName));
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLBleMidiManager_deviceRemoved(
+        JNIEnv *env, jobject thiz, jint deviceId, jint portId, jboolean isInput) {
+    androidOnMidiInputDeviceDisconnected(deviceId, portId, isInput == JNI_TRUE);
+}
+
 JNIEXPORT void JNICALL Java_com_elf_MZGLMidiReceiver_midiReceived(
         JNIEnv *env, jobject thiz, jbyteArray bytes, jlong timestamp, jint deviceId, jint portId) {
+    androidParseMidiData(copyMidiBytes(env, bytes), timestamp, deviceId, portId);
+}
+
+JNIEXPORT void JNICALL
+Java_com_elf_MZGLBleMidiManager_midiReceived(JNIEnv *env, jobject thiz, jbyteArray bytes,
+                                             jlong timestamp, jint deviceId, jint portId) {
     androidParseMidiData(copyMidiBytes(env, bytes), timestamp, deviceId, portId);
 }
 
