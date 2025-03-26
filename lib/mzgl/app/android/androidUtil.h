@@ -143,6 +143,8 @@ void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int por
 
 void androidDisplayMidiBLEPanel();
 
+void androidScanForMidiBLEDevices();
+
 [[nodiscard]] std::vector<AudioPort> getAudioInputPorts();
 
 [[nodiscard]] std::vector<AudioPort> getBuiltInAudioInputPorts();
