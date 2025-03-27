@@ -6,6 +6,8 @@
 #define _UNICODE
 #include <Windows.h>
 
+#include "filesystem.h"
+
 void windowsTextboxDialog(HWND parent,
 						  std::string title,
 						  std::string msg,
@@ -59,4 +61,4 @@ extern std::unique_ptr<IWindowsFileDownloadTask> windowsDownloadFile(WindowsFile
 extern std::wstring windowsGetPathForTemporaryFile(std::wstring fileName);
 extern std::string w2n(const std::wstring &w);
 extern std::wstring n2w(const std::string &n);
-extern auto getCurrentDllPath() -> std::filesystem::path;
+extern fs::path getDLLPath();

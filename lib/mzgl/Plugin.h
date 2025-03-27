@@ -19,7 +19,7 @@
 #include "PluginParameter.h"
 #include "Midi.h"
 
-struct MidiMessage;
+class MidiMessage;
 
 class Serializable {
 public:
