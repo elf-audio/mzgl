@@ -389,9 +389,11 @@ void setDataPath(const std::string &path) {
 	dataPathOverride	 = path;
 }
 
-static auto getVSTBundlePath() -> fs::path {
+static fs::path getVSTBundlePath() {
 #ifdef _WIN32
-	return std::filesystem::canonical(getCurrentDllPath() / ".." / ".." / "..");
+	auto path			  = getDLLPath();
+	const auto parentPath = std::string {".."};
+	return fs::canonical(path / parentPath / parentPath / parentPath);
 #else
 	// FIXME: This needs to be implemented for other platforms
 	return "";
@@ -514,7 +516,7 @@ fs::path findNewestSubdirectory(const fs::path &parentPath) {
 	for (const auto &entry: fs::directory_iterator(parentPath)) {
 		if (entry.is_directory()) {
 			auto lastModified = fs::last_write_time(entry);
-			if (!newestTime.has_value() || lastModified > newestTime) {
+			if (!newestTime.has_value() || lastModified > *newestTime) {
 				newestTime		   = lastModified;
 				newestSubdirectory = entry.path();
 			}
@@ -525,8 +527,8 @@ fs::path findNewestSubdirectory(const fs::path &parentPath) {
 }
 
 void updateDocumentsDirectory() {
-	auto testDir	  = fs::temp_directory_path() / "koala" / "unit-tests";
-	auto documentsDir = testDir;
+	fs::path testDir	  = fs::temp_directory_path() / "koala" / "unit-tests";
+	fs::path documentsDir = testDir;
 
 	if (hasCommandLineFlag("--reset-documents-directory")) {
 		documentsDir = testDir / nowAsString();
