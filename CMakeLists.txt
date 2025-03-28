@@ -57,6 +57,7 @@ set(MZGL_SOURCES
     lib/mzgl/gl/Fbo.cpp
     lib/mzgl/gl/Font.cpp
     lib/mzgl/gl/Graphics.cpp
+    lib/mzgl/gl/colors.cpp
     lib/mzgl/gl/Image-win.cpp
     lib/mzgl/gl/Image.cpp
     lib/mzgl/gl/Shader.cpp

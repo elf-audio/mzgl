@@ -17,6 +17,7 @@
 #include "Font.h"
 #include <map>
 #include <functional>
+#include "colors.h"
 
 #define MZ_KEY_LEFT		 256
 #define MZ_KEY_RIGHT	 257
@@ -43,23 +44,6 @@
 class Layer;
 class App;
 
-/////////////////////////////////////////////////////////////////////////////
-// COLORS
-bool isHexColour(std::string s);
-bool isRGBColour(std::string s);
-bool isRGBAColour(std::string s);
-
-glm::vec4 hexColor(int hex, float a = 1);
-glm::vec4 hexColor(std::string s);
-
-glm::vec4 svgHexColor(std::string s);
-glm::vec4 namedColor(std::string s);
-
-glm::vec4 rgbColor(std::string s);
-glm::vec4 rgbaColor(std::string s);
-
-glm::vec3 rgb2hsv(glm::vec4 rgb);
-glm::vec4 hsv2rgb(glm::vec3 hsv);
 class ScopedAlphaBlend;
 class ScopedNoFill;
 class ScopedTranslate;

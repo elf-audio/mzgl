@@ -34,15 +34,15 @@ bool isNumeric(int c) {
 glm::vec4 parseColor(const string &colour) {
 	if (colour.empty()) return {0.f, 0.f, 0.f, 1.f};
 
-	if (isHexColour(colour)) {
+	if (isHexColor(colour)) {
 		return svgHexColor(colour);
 	}
 
-	if (isRGBColour(colour)) {
+	if (isRGBColor(colour)) {
 		return rgbColor(colour);
 	}
 
-	if (isRGBAColour(colour)) {
+	if (isRGBAColor(colour)) {
 		return rgbaColor(colour);
 	}
 

@@ -10,32 +10,32 @@ bool equals(const glm::vec4 &one, const glm::vec4 &two) {
 		   && approxEquals(one.a, two.a);
 }
 
-TEST_CASE("Validation functions", "[colours]") {
-	SECTION("Validate isHexColour") {
-		REQUIRE(isHexColour("#FFFFFF"));
-		REQUIRE(isHexColour("#FFF"));
-		REQUIRE_FALSE(isHexColour("FFF"));
-		REQUIRE_FALSE(isHexColour("#GGGGGG"));
+TEST_CASE("Validation functions", "[colors]") {
+	SECTION("Validate isHexColor") {
+		REQUIRE(isHexColor("#FFFFFF"));
+		REQUIRE(isHexColor("#FFF"));
+		REQUIRE_FALSE(isHexColor("FFF"));
+		REQUIRE_FALSE(isHexColor("#GGGGGG"));
 	}
 
-	SECTION("Validate isRGBColour") {
-		REQUIRE(isRGBColour("rgb(255, 255, 255)"));
-		REQUIRE(isRGBColour("rgb(0,0,0)"));
-		REQUIRE(isRGBColour("rgb(256, 0, 0)"));
-		REQUIRE_FALSE(isRGBColour("rgb(abc)"));
-		REQUIRE_FALSE(isRGBColour("rgb(255,255,255"));
-		REQUIRE_FALSE(isRGBColour("rgba(255,255,255"));
+	SECTION("Validate isRGBColor") {
+		REQUIRE(isRGBColor("rgb(255, 255, 255)"));
+		REQUIRE(isRGBColor("rgb(0,0,0)"));
+		REQUIRE(isRGBColor("rgb(256, 0, 0)"));
+		REQUIRE_FALSE(isRGBColor("rgb(abc)"));
+		REQUIRE_FALSE(isRGBColor("rgb(255,255,255"));
+		REQUIRE_FALSE(isRGBColor("rgba(255,255,255"));
 	}
 
 	SECTION("Validate isRGBAColour") {
-		REQUIRE(isRGBAColour("rgba(255, 255, 255, 1)"));
-		REQUIRE(isRGBAColour("rgba(0, 0, 0, 0.5)"));
-		REQUIRE(isRGBAColour("rgba(255, 255, 255)"));
-		REQUIRE_FALSE(isRGBAColour("rgba(255, 255, 255, x)"));
-		REQUIRE_FALSE(isRGBAColour("rgba(255, 255, 255, -0.1)"));
-		REQUIRE_FALSE(isRGBAColour("rgba(abc)"));
-		REQUIRE_FALSE(isRGBAColour("rgba(255,255,255"));
-		REQUIRE_FALSE(isRGBAColour("rgb(255,255,255"));
+		REQUIRE(isRGBAColor("rgba(255, 255, 255, 1)"));
+		REQUIRE(isRGBAColor("rgba(0, 0, 0, 0.5)"));
+		REQUIRE(isRGBAColor("rgba(255, 255, 255)"));
+		REQUIRE_FALSE(isRGBAColor("rgba(255, 255, 255, x)"));
+		REQUIRE_FALSE(isRGBAColor("rgba(255, 255, 255, -0.1)"));
+		REQUIRE_FALSE(isRGBAColor("rgba(abc)"));
+		REQUIRE_FALSE(isRGBAColor("rgba(255,255,255"));
+		REQUIRE_FALSE(isRGBAColor("rgb(255,255,255"));
 	}
 }
 
