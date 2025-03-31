@@ -453,6 +453,12 @@
 		EA5250E92C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
 		EA5250EA2C2C64A900DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
 		EA5250EB2C2C64AA00DE5DFC /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
+		EA5D5B202D9A9FE400F19952 /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
+		EA5D5B212D9A9FE400F19952 /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
+		EA5D5B222D9A9FE400F19952 /* colors.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5D5B1E2D9A9FE400F19952 /* colors.h */; };
+		EA5D5B232D9A9FE400F19952 /* colors.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5D5B1E2D9A9FE400F19952 /* colors.h */; };
+		EA5D5B242D9A9FE400F19952 /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
+		EA5D5B252D9A9FE400F19952 /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
 		EA64AD7426A186D7001427AD /* MZGLWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA64AD7226A186D7001427AD /* MZGLWebView.mm */; };
 		EA64AD7626A186D7001427AD /* MZGLWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA64AD7226A186D7001427AD /* MZGLWebView.mm */; };
 		EA64AD8826A1C039001427AD /* MZGLWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA64AD7326A186D7001427AD /* MZGLWebView.h */; };
@@ -1078,6 +1084,8 @@
 		EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBlockButton.m; sourceTree = "<group>"; };
 		EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewOverlay.h; sourceTree = "<group>"; };
 		EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = WebViewOverlay.cpp; sourceTree = "<group>"; };
+		EA5D5B1E2D9A9FE400F19952 /* colors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = colors.h; sourceTree = "<group>"; };
+		EA5D5B1F2D9A9FE400F19952 /* colors.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = colors.cpp; sourceTree = "<group>"; };
 		EA64AD6F26A182B3001427AD /* WebViewApp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebViewApp.h; sourceTree = "<group>"; };
 		EA64AD7226A186D7001427AD /* MZGLWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLWebView.mm; sourceTree = "<group>"; };
 		EA64AD7326A186D7001427AD /* MZGLWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLWebView.h; sourceTree = "<group>"; };
@@ -2091,6 +2099,8 @@
 		EA1836272432C18B00A5C3E8 /* gl */ = {
 			isa = PBXGroup;
 			children = (
+				EA5D5B1E2D9A9FE400F19952 /* colors.h */,
+				EA5D5B1F2D9A9FE400F19952 /* colors.cpp */,
 				EA7721032BF74F5B003607EB /* api */,
 				EA78556C2472E31C0072FD05 /* NVG.h */,
 				EA78556D2472E3320072FD05 /* NVG.cpp */,
@@ -3217,6 +3227,7 @@
 				EA234AE824A609CA000F057B /* Yoga-internal.h in Headers */,
 				EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73827E39E6C0081A5CB /* zip.h in Headers */,
+				EA5D5B232D9A9FE400F19952 /* colors.h in Headers */,
 				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA183F852432C18D00A5C3E8 /* scales.h in Headers */,
 				EA297C7D25C954E600F890AE /* pa_util.h in Headers */,
@@ -3325,6 +3336,7 @@
 				EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */,
 				EA2B82A924E7093600EA12BD /* Vbo.h in Headers */,
 				EA2B82B324E7093600EA12BD /* Graphics.h in Headers */,
+				EA5D5B222D9A9FE400F19952 /* colors.h in Headers */,
 				EAF67386289BC87E001F778D /* mainThread.h in Headers */,
 				EA2B82BD24E7093600EA12BD /* glfontstash.h in Headers */,
 				EA2B82DE24E7093600EA12BD /* stb_truetype.h in Headers */,
@@ -3676,6 +3688,7 @@
 				EA183FEF2432C18D00A5C3E8 /* SVG.cpp in Sources */,
 				EA234B0024A609CA000F057B /* YGEnums.cpp in Sources */,
 				EA71A72C27E39E6B0081A5CB /* ioapi.c in Sources */,
+				EA5D5B242D9A9FE400F19952 /* colors.cpp in Sources */,
 				EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */,
 				EA297C7225C954E600F890AE /* pa_stream.c in Sources */,
 				EAF67379289BC441001F778D /* stringUtil.cpp in Sources */,
@@ -3757,6 +3770,7 @@
 				EACEB2EA24DC28DE00BF4D1A /* Image.cpp in Sources */,
 				EA18412F2432C4FF00A5C3E8 /* DateTime.cpp in Sources */,
 				EA234B0124A609CA000F057B /* YGEnums.cpp in Sources */,
+				EA5D5B252D9A9FE400F19952 /* colors.cpp in Sources */,
 				EA1841AD2432CC7800A5C3E8 /* util.cpp in Sources */,
 				EA1841372432C52300A5C3E8 /* scales.cpp in Sources */,
 				EA71A7A527E39E6C0081A5CB /* unzipper.cpp in Sources */,
@@ -3842,6 +3856,7 @@
 				EA2B8AD424E7093600EA12BD /* YGConfig.cpp in Sources */,
 				EAD177AA282732A900E2AAE6 /* pu_gixml.cpp in Sources */,
 				EA71A78227E39E6C0081A5CB /* aestab.c in Sources */,
+				EA5D5B212D9A9FE400F19952 /* colors.cpp in Sources */,
 				EA2B8AD524E7093600EA12BD /* Triangulator.cpp in Sources */,
 				EA71A77827E39E6C0081A5CB /* prng.c in Sources */,
 				EA2B8AD824E7093600EA12BD /* Slider.cpp in Sources */,
@@ -4008,6 +4023,7 @@
 				EAA59298281065D10068FD7B /* MZGLEffectAU.mm in Sources */,
 				EA689464261C633500F76B91 /* DateTime.cpp in Sources */,
 				EA71A79727E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
+				EA5D5B202D9A9FE400F19952 /* colors.cpp in Sources */,
 				EA689465261C633500F76B91 /* YGEnums.cpp in Sources */,
 				EA689466261C633500F76B91 /* util.cpp in Sources */,
 				EA689467261C633500F76B91 /* scales.cpp in Sources */,
