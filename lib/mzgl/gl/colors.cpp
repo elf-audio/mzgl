@@ -107,15 +107,18 @@ int hexCharToInt(char c) {
 	return c;
 }
 
-glm::vec4 hexColor(std::string inp) {
+std::optional<glm::vec4> hexColor(std::string inp) {
 	glm::vec4 a;
 
+	if (inp.empty()) return std::nullopt;
 	// work out the format first
-	if (inp.size() > 1 && inp[0] == '#') {
+	if (inp[0] == '#') {
 		inp = inp.substr(1);
 	} else if (inp.size() > 2 && inp[0] == '0' && inp[1] == 'x') {
 		inp = inp.substr(2);
 	}
+
+	if (inp.size() != 3 && inp.size() != 6) return std::nullopt;
 	if (inp.size() == 3) {
 		inp = std::string(2, inp[0]) + std::string(2, inp[1]) + std::string(2, inp[2]);
 	}
@@ -127,16 +130,17 @@ glm::vec4 hexColor(std::string inp) {
 	return a;
 }
 
-glm::vec4 svgHexColor(std::string hex) {
+std::optional<glm::vec4> svgHexColor(std::string hex) {
+	if (hex.empty()) return std::nullopt;
 	return hexColor(static_cast<int>(strtol(hex.substr(1).c_str(), nullptr, 16)));
 }
 
-glm::vec4 rgbColor(std::string colourString) {
+std::optional<glm::vec4> rgbColor(std::string colourString) {
 	auto start = colourString.find("rgb(");
 	auto end   = colourString.find(")");
 
 	if (start == std::string::npos && end == std::string::npos || start >= end) {
-		return {};
+		return std::nullopt;
 	}
 
 	std::string numbers = colourString.substr(start + 4, end - (start + 4));
@@ -150,13 +154,13 @@ glm::vec4 rgbColor(std::string colourString) {
 	return glm::vec4 {colors[0], colors[1], colors[2], 1.f};
 }
 
-glm::vec4 rgbaColor(std::string colourString) {
+std::optional<glm::vec4> rgbaColor(std::string colourString) {
 	auto start = colourString.find("rgba(");
 	auto end   = colourString.find(")");
 
 	if (start == std::string::npos && end == std::string::npos || start >= end) {
 		Log::e() << "Bad RGBA string format (" << colourString << ")";
-		return {};
+		return std::nullopt;
 	}
 
 	std::string numbers = colourString.substr(start + 5, end - (start + 5));
@@ -173,13 +177,14 @@ glm::vec4 rgbaColor(std::string colourString) {
 
 	if (i != 4) {
 		Log::e() << "RGB Colour didn't have enough elements " << colourString;
+		return std::nullopt;
 	}
 
 	return glm::vec4 {colours[0], colours[1], colours[2], colours[3]};
 }
 
-glm::vec4 namedColor(std::string name) {
-	if (name == "none" || name == "transparent") return {0, 0, 0, 0};
+std::optional<glm::vec4> namedColor(std::string name) {
+	if (name == "none" || name == "transparent") return glm::vec4(0, 0, 0, 0);
 	if (name == "black") return hexColor(0);
 	if (name == "silver") return hexColor(0xC0C0C0);
 	if (name == "gray") return hexColor(0x808080);
@@ -198,7 +203,7 @@ glm::vec4 namedColor(std::string name) {
 	if (name == "aqua") return hexColor(0x00FFFF);
 
 	Log::e() << "Didnt find colour named " << name;
-	return hexColor(0xFFFFFF);
+	return std::nullopt;
 }
 
 bool isHexColor(std::string s) {
@@ -226,4 +231,11 @@ bool isRGBAColor(std::string s) {
 	return std::all_of(s.begin() + 5, s.end() - 1, [](char c) {
 		return std::isdigit(c) || c == ',' || c == '.' || std::isspace(c);
 	});
+}
+
+std::string hexColorString(glm::vec4 c) {
+	std::ostringstream oss;
+	oss << "#" << std::hex << static_cast<int>(c.r * 255) << static_cast<int>(c.g * 255)
+		<< static_cast<int>(c.b * 255);
+	return oss.str();
 }
