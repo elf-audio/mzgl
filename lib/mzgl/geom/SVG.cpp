@@ -31,8 +31,8 @@ bool isNumeric(int c) {
 	return false;
 }
 
-glm::vec4 parseColor(const string &colour) {
-	if (colour.empty()) return {0.f, 0.f, 0.f, 1.f};
+std::optional<glm::vec4> parseColor(const string &colour) {
+	if (colour.empty()) return std::nullopt;
 
 	if (isHexColor(colour)) {
 		return svgHexColor(colour);
@@ -258,8 +258,10 @@ public:
 			strokeWeight	= n.attribute("stroke-width").as_float();
 		}
 		if (n.attribute("fill")) {
-			filled	  = true;
-			fillColor = parseColor(n.attribute("fill").value());
+			filled = true;
+			if (auto col = parseColor(n.attribute("fill").value())) {
+				fillColor = *col;
+			}
 			if (n.attribute("fill-opacity")) {
 				fillColor.a = n.attribute("fill-opacity").as_float();
 			}
@@ -270,7 +272,9 @@ public:
 		if (n.attribute("stroke")) {
 			stroked = true;
 
-			strokeColor = parseColor(n.attribute("stroke").value());
+			if (auto col = parseColor(n.attribute("stroke").value())) {
+				strokeColor = *col;
+			}
 			if (n.attribute("stroke-opacity")) {
 				strokeColor.a = n.attribute("stroke-opacity").as_float();
 			}
@@ -588,8 +592,9 @@ private:
 				fillSet = true;
 				filling = fillStr != "none";
 				if (filling) {
-					glm::vec4 c = parseColor(fillStr);
-					fillColor	= glm::vec3(c.r, c.g, c.b);
+					if (auto col = parseColor(fillStr)) {
+						fillColor = glm::vec3(col->r, col->g, col->b);
+					}
 				}
 			}
 		}
@@ -605,8 +610,9 @@ private:
 				strokeSet = true;
 				stroking  = strokeStr != "none";
 				if (stroking) {
-					glm::vec4 c = parseColor(strokeStr);
-					strokeColor = glm::vec3(c.r, c.g, c.b);
+					if (auto col = parseColor(strokeStr)) {
+						strokeColor = glm::vec3(col->r, col->g, col->b);
+					}
 				}
 			}
 		}

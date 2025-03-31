@@ -47,42 +47,42 @@ TEST_CASE("Hex color conversion", "[colours]") {
 	}
 
 	SECTION("Convert string hex to glm::vec4") {
-		REQUIRE(equals(hexColor("#FFFFFF"), glm::vec4(1, 1, 1, 1)));
-		REQUIRE(equals(hexColor("#FF0000"), glm::vec4(1, 0, 0, 1)));
-		REQUIRE(equals(hexColor("#000000"), glm::vec4(0, 0, 0, 1)));
+		REQUIRE(equals(*hexColor("#FFFFFF"), glm::vec4(1, 1, 1, 1)));
+		REQUIRE(equals(*hexColor("#FF0000"), glm::vec4(1, 0, 0, 1)));
+		REQUIRE(equals(*hexColor("#000000"), glm::vec4(0, 0, 0, 1)));
 	}
 }
 
 TEST_CASE("SVG hex color conversion", "[colours]") {
 	SECTION("Convert valid SVG hex color to glm::vec4") {
-		REQUIRE(equals(svgHexColor("#FFFFFF"), glm::vec4(1, 1, 1, 1)));
-		REQUIRE(equals(svgHexColor("#FF0000"), glm::vec4(1, 0, 0, 1)));
+		REQUIRE(equals(*svgHexColor("#FFFFFF"), glm::vec4(1, 1, 1, 1)));
+		REQUIRE(equals(*svgHexColor("#FF0000"), glm::vec4(1, 0, 0, 1)));
 	}
 }
 
 TEST_CASE("Named colors", "[colours]") {
 	SECTION("Convert named colors to glm::vec4") {
-		REQUIRE(equals(namedColor("black"), glm::vec4(0, 0, 0, 1)));
-		REQUIRE(equals(namedColor("white"), glm::vec4(1, 1, 1, 1)));
-		REQUIRE(equals(namedColor("red"), glm::vec4(1, 0, 0, 1)));
-		REQUIRE(equals(namedColor("green"), glm::vec4(0, 0.5, 0, 1)));
-		REQUIRE(equals(namedColor("blue"), glm::vec4(0, 0, 1, 1)));
+		REQUIRE(equals(*namedColor("black"), glm::vec4(0, 0, 0, 1)));
+		REQUIRE(equals(*namedColor("white"), glm::vec4(1, 1, 1, 1)));
+		REQUIRE(equals(*namedColor("red"), glm::vec4(1, 0, 0, 1)));
+		REQUIRE(equals(*namedColor("green"), glm::vec4(0, 0.5, 0, 1)));
+		REQUIRE(equals(*namedColor("blue"), glm::vec4(0, 0, 1, 1)));
 	}
 
 	SECTION("Handle unsupported named colors") {
-		REQUIRE(equals(namedColor("unknown"), glm::vec4(1, 1, 1, 1)));
+		REQUIRE(equals(*namedColor("unknown"), glm::vec4(1, 1, 1, 1)));
 	}
 }
 
 TEST_CASE("RGB and RGBA color parsing", "[colours]") {
 	SECTION("Convert rgb() to glm::vec4") {
-		REQUIRE(equals(rgbColor("rgb(255, 0, 0)"), glm::vec4(1, 0, 0, 1)));
-		REQUIRE(equals(rgbColor("rgb(0, 255, 0)"), glm::vec4(0, 1, 0, 1)));
-		REQUIRE(equals(rgbColor("rgb(0, 0, 255)"), glm::vec4(0, 0, 1, 1)));
+		REQUIRE(equals(*rgbColor("rgb(255, 0, 0)"), glm::vec4(1, 0, 0, 1)));
+		REQUIRE(equals(*rgbColor("rgb(0, 255, 0)"), glm::vec4(0, 1, 0, 1)));
+		REQUIRE(equals(*rgbColor("rgb(0, 0, 255)"), glm::vec4(0, 0, 1, 1)));
 	}
 
 	SECTION("Convert rgba() to glm::vec4") {
-		REQUIRE(equals(rgbaColor("rgba(255, 0, 0, 0.5)"), glm::vec4(1, 0, 0, 0.5)));
-		REQUIRE(equals(rgbaColor("rgba(0, 255, 0, 1)"), glm::vec4(0, 1, 0, 1)));
+		REQUIRE(equals(*rgbaColor("rgba(255, 0, 0, 0.5)"), glm::vec4(1, 0, 0, 0.5)));
+		REQUIRE(equals(*rgbaColor("rgba(0, 255, 0, 1)"), glm::vec4(0, 1, 0, 1)));
 	}
 }
