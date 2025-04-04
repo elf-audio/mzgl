@@ -130,6 +130,14 @@ public:
 
 	// add all your targets ahead of time
 	void addTarget(DropTarget<T> *target) { dropTargets.push_back(target); }
+	void removeTarget(DropTarget<T> *target) {
+		for (auto it = dropTargets.begin(); it != dropTargets.end(); it++) {
+			if (*it == target) {
+				dropTargets.erase(it);
+				break;
+			}
+		}
+	}
 
 	// add draggers as items are dragged
 	void addDragger(std::shared_ptr<T> dragger) {
