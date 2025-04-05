@@ -158,6 +158,11 @@ std::string getAndroidExternalDataPath() {
     return std::string(getAndroidAppPtr()->activity->externalDataPath);
 }
 
+std::string getAndroidDocumentsPath() {
+    if (getAndroidAppPtr() == nullptr) return "";
+    return callJNIForString("getDocumentsDirectory");
+}
+
 std::string getAndroidExternalStorageDirectory() {
     return callJNIForString("getExternalStorageDirectory");
 }

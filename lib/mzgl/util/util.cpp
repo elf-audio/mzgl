@@ -12,6 +12,7 @@
 #include <iterator>
 
 #include "mzgl_platform.h"
+
 #ifdef __APPLE__
 #	include <os/log.h>
 #	include <TargetConditionals.h>
@@ -24,8 +25,10 @@
 
 #endif
 #ifdef __ANDROID__
+
 #	include "androidUtil.h"
 #	include "koalaAndroidUtil.h"
+
 #elif defined(__linux__)
 #	include "linuxUtil.h"
 #endif
@@ -63,8 +66,10 @@
 
 // this from openframeworks
 #ifndef _WIN32
+
 #	include <pwd.h>
 #	include <unistd.h>
+
 #endif
 
 #include <stdlib.h>
@@ -102,8 +107,10 @@ std::string getHomeDirectory() {
 	}
 	return homeDir;
 }
+
 #	endif
 #endif
+
 std::string utf8decomposedToPrecomposed(const std::string &str) {
 #ifdef __APPLE__
 	// Convert std::string to NSString
@@ -119,6 +126,7 @@ std::string utf8decomposedToPrecomposed(const std::string &str) {
 	return str;
 #endif
 }
+
 void deleteOrTrash(const std::string &path) {
 	if (!fs::exists(fs::path {path})) {
 		return;
@@ -315,7 +323,9 @@ float getSeconds() {
 #		include "EventsView.h"
 #	endif
 #endif
+
 #include "EventDispatcher.h"
+
 void setWindowSize(int w, int h) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
@@ -565,6 +575,7 @@ void checkForDocumentsDirectoryUpdate() {
 }
 
 bool hasPrintedTheError = false;
+
 std::string docsPath(const std::string &path) {
 	checkForDocumentsDirectoryUpdate();
 	if (isOverridingDocsPath) {
@@ -587,7 +598,11 @@ std::string docsPath(const std::string &path) {
 	}
 	return _path + "/" + path;
 #elif defined(__ANDROID__)
-	return getAndroidExternalDataPath() + "/" + path;
+	auto androidDocsPath = getAndroidDocumentsPath();
+	if (androidDocsPath.empty()) {
+		androidDocsPath = getAndroidExternalDataPath();
+	}
+	return androidDocsPath + "/" + path;
 #elif defined(_WIN32)
 
 	wchar_t *documentsDir;
@@ -694,6 +709,7 @@ std::string getPlatformName() {
 	return "Unknown";
 #endif
 }
+
 uint64_t getStorageRemainingInBytes() {
 #ifdef __APPLE__
 
@@ -752,6 +768,7 @@ std::string getLaunchUrl() {
 void setLaunchUrl(const std::string &url) {
 	Globals::launchUrl = url;
 }
+
 std::string execute(std::string cmd, int *outExitCode) {
 #ifdef __APPLE__
 	//	printf("Executing %s\n", cmd.c_str());
@@ -774,6 +791,7 @@ std::string execute(std::string cmd, int *outExitCode) {
 	return "Error - can't do this";
 #endif
 }
+
 void initMZGL(std::shared_ptr<App> app) {
 	if (!app->isHeadless()) {
 		app->g.initGraphics();
@@ -1039,6 +1057,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 	}
 	return true;
 }
+
 bool readStringFromFile(const std::string &path, std::string &outStr) {
 	fs::ifstream t(fs::u8path(path));
 	if (t.fail()) {
@@ -1068,6 +1087,7 @@ bool readStringFromFile(const std::string &path, std::string &outStr) {
 	}
 	return true;
 }
+
 bool moveFile(const std::string &from, const std::string &to) {
 	try {
 		if (!fs::copy_file(from, to)) {
@@ -1080,6 +1100,7 @@ bool moveFile(const std::string &from, const std::string &to) {
 		return false;
 	}
 }
+
 #ifdef __APPLE__
 os_log_t logObject = nullptr;
 void oslog(const std::string &s) {
@@ -1091,6 +1112,7 @@ void oslog(const std::string &s) {
 #endif
 
 #ifndef __APPLE__
+
 #	include <random>
 #	include <sstream>
 /*

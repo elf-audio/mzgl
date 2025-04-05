@@ -7,16 +7,25 @@ set(MAGENTA "35")
 set(CYAN "36")
 set(GREY "90")
 
-if("$ENV{TERM_PROGRAM}" STREQUAL "Apple_Terminal" OR DEFINED
-                                                     ENV{XCODE_VERSION_ACTUAL})
-  set(XCODE_TERMINAL TRUE)
-  message(STATUS "Using xcode terminal")
-else()
-  set(XCODE_TERMINAL FALSE)
+set(CAN_DO_COLOR FALSE)
+if(DEFINED ENV{CLION_IDE} AND "$ENV{CLION_IDE}" STREQUAL "TRUE")
+  set(CAN_DO_COLOR TRUE)
+elseif(DEFINED ENV{TERM_PROGRAM} AND "$ENV{TERM_PROGRAM}" STREQUAL
+                                     "Apple_Terminal")
+  set(CAN_DO_COLOR TRUE)
+elseif(DEFINED ENV{TERM_PROGRAM} AND "$ENV{TERM_PROGRAM}" STREQUAL "iTerm.app")
+  set(CAN_DO_COLOR TRUE)
+elseif(DEFINED ENV{TERM} AND "$ENV{TERM}" MATCHES
+                             "xterm.*|screen.*|color.*|ansi.*")
+  set(CAN_DO_COLOR TRUE)
+endif()
+
+if(NOT CAN_DO_COLOR)
+  message(DEBUG "No color support detected")
 endif()
 
 function(mzgl_print MESSAGE_TYPE PRINTABLE COLOUR)
-  if(XCODE_TERMINAL)
+  if(NOT CAN_DO_COLOR)
     message(${MESSAGE_TYPE} "${PRINTABLE}")
   else()
     message(
