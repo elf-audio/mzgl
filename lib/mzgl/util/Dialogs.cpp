@@ -1188,7 +1188,7 @@ void Dialogs::loadFile(std::string msg,
 			[docTypes addObject:(NSString *) kUTTypeMPEG4Audio];
 		} else {
 			Log::e() << "Can't find uttype for extension" << ext;
-			mzAssert(false);
+			[docTypes addObject:(NSString *) kUTTypeData];
 		}
 	}
 	//= @[(NSString*)kUTTypeAudio, (NSString*)kUTTypeVideo, (NSString*)kUTTypeQuickTimeMovie, (NSString*)kUTTypeMPEG4];
