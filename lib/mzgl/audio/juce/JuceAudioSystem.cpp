@@ -11,6 +11,8 @@ class JuceImpl
 	: public AudioIODeviceType::Listener
 	, public AudioIODeviceCallback {
 public:
+	std::atomic<bool> inProcess {false};
+
 	std::shared_ptr<AudioIODeviceType> type;
 	std::shared_ptr<AudioIODevice> dev;
 	JuceAudioSystem &sys;
@@ -40,6 +42,7 @@ public:
 										  int numOutputChannels,
 										  int numSamples,
 										  const AudioIODeviceCallbackContext &context) override {
+		inProcess.store(true);
 		if (numInputChannels > 0) {
 			interleave(interleavedIns, inputChannelData, numInputChannels, numSamples);
 			if (sys.inputCallback) {
@@ -54,6 +57,7 @@ public:
 			}
 			deinterleave(interleavedOuts, outputChannelData, numOutputChannels, numSamples);
 		}
+		inProcess.store(false);
 	}
 
 	static void
@@ -157,7 +161,9 @@ void JuceAudioSystem::setup(int numInChans, int numOutChans) {
 
 	startCurrConfig();
 }
-
+bool JuceAudioSystem::isInsideAudioCallback() {
+	return impl->inProcess.load();
+}
 void JuceAudioSystem::startCurrConfig() {
 	if (isRunning()) {
 		stop();
