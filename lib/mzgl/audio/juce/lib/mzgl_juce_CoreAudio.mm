@@ -68,24 +68,6 @@ String nsStringToJuce(NSString *str) {
 	return str.UTF8String;
 }
 
-/** Returns true if a value is at least zero, and also below a specified upper limit.
-    This is basically a quicker way to write:
-    @code valueToTest >= 0 && valueToTest < upperLimit
-    @endcode
-*/
-template <typename Type1, typename Type2>
-bool isPositiveAndBelow(Type1 valueToTest, Type2 upperLimit) noexcept {
-	jassert(Type1() <= static_cast<Type1>(
-				upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
-	return Type1() <= valueToTest && valueToTest < static_cast<Type1>(upperLimit);
-}
-
-template <typename Type>
-bool isPositiveAndBelow(int valueToTest, Type upperLimit) noexcept {
-	jassert(upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
-	return static_cast<unsigned int>(valueToTest) < static_cast<unsigned int>(upperLimit);
-}
-
 #include "juce_AudioIODevice.h"
 #include "juce_AudioIODeviceType.h"
 #include "juce_AudioIODeviceType.cpp"

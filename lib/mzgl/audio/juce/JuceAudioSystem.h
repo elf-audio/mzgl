@@ -28,6 +28,7 @@ public:
 
 	AudioPort getInput() override;
 	AudioPort getOutput() override;
+	bool isInsideAudioCallback() override;
 
 private:
 	std::shared_ptr<JuceImpl> impl;
