@@ -2063,8 +2063,8 @@ namespace juce {
 				auto inputIndex	 = inputDeviceNames.indexOf(inputDeviceName);
 				auto outputIndex = outputDeviceNames.indexOf(outputDeviceName);
 
-				auto inputDeviceID	= inputIds[inputIndex];
-				auto outputDeviceID = outputIds[outputIndex];
+				auto inputDeviceID	= inputIndex != -1 ? inputIds[inputIndex] : 0;
+				auto outputDeviceID = outputIndex != -1 ? outputIds[outputIndex] : 0;
 
 				if (inputDeviceID == 0 && outputDeviceID == 0) return nullptr;
 
