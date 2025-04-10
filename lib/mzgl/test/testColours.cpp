@@ -70,7 +70,7 @@ TEST_CASE("Named colors", "[colours]") {
 	}
 
 	SECTION("Handle unsupported named colors") {
-		REQUIRE(equals(*namedColor("unknown"), glm::vec4(1, 1, 1, 1)));
+		REQUIRE_FALSE(namedColor("unknown").has_value());
 	}
 }
 
