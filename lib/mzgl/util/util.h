@@ -42,6 +42,7 @@ bool hasCommandLineSetting(const std::string &setting);
 std::string getCommandLineSetting(const std::string &setting, const std::string &defaultValue = "");
 int getCommandLineSetting(const std::string &setting, int defaultValue = -1);
 std::string utf8decomposedToPrecomposed(const std::string &str);
+std::string utf8precomposedToDecomposed(const std::string &str);
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>

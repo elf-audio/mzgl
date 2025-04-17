@@ -119,6 +119,23 @@ std::string utf8decomposedToPrecomposed(const std::string &str) {
 	return str;
 #endif
 }
+
+std::string utf8precomposedToDecomposed(const std::string &str) {
+#ifdef __APPLE__
+	// Convert std::string to NSString
+	NSString *precomposedNSString = [NSString stringWithUTF8String:str.c_str()];
+
+	// Normalize the NSString to decomposed form
+	NSString *decomposedNSString = [precomposedNSString decomposedStringWithCanonicalMapping];
+
+	return [decomposedNSString UTF8String];
+
+#else
+	// no implementation yet
+	return str;
+#endif
+}
+
 void deleteOrTrash(const std::string &path) {
 	if (!fs::exists(fs::path {path})) {
 		return;
