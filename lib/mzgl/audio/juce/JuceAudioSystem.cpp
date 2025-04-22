@@ -231,14 +231,14 @@ int JuceAudioSystem::getBufferSize() const {
 }
 
 bool JuceAudioSystem::setInput(const AudioPort &audioInput) {
-	if (audioInput.name == currInputName) return false;
+	if (audioInput.name == currInputName) return true;
 	currInputName = audioInput.name;
 	startCurrConfig();
 	return true;
 }
 
 bool JuceAudioSystem::setOutput(const AudioPort &audioOutput) {
-	if (audioOutput.name == currOutputName) return false;
+	if (audioOutput.name == currOutputName) return true;
 	currOutputName = audioOutput.name;
 	startCurrConfig();
 	return true;
