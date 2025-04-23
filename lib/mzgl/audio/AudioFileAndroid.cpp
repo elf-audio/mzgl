@@ -70,11 +70,25 @@ bool AudioFile_loadDrLib(
 	return true;
 }
 
+int getFirstAudioTrackId(AMediaExtractor *extractor) {
+	int numTracks = AMediaExtractor_getTrackCount(extractor);
+	for (int i = 0; i < numTracks; i++) {
+		AMediaFormat *format = AMediaExtractor_getTrackFormat(extractor, i);
+		const char *mimeType;
+		if (AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mimeType)) {
+			if (strstr(mimeType, "audio/") != nullptr) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
 #ifdef __ANDROID__
 // if desiredSampleRate is zero, no resampling is done
 bool AudioFileAndroid_load(
 	std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate, int desiredSampleRate = 0) {
-	LOGD("Using NDK decoder");
+	Log::d() << "Using NDK decoder";
 
 	// open asset as file descriptor
 	off_t start;
@@ -82,7 +96,7 @@ bool AudioFileAndroid_load(
 	FILE *fp = fopen(path.c_str(), "rb");
 
 	if (fp == nullptr) {
-		LOGE("Can't open file, maybe doesn't exist (path: %s)", path.c_str());
+		Log::e() << "Can't open file, maybe doesn't exist (path: " << path << ")";
 		return false;
 	}
 
@@ -95,20 +109,26 @@ bool AudioFileAndroid_load(
 	auto amresult			   = AMediaExtractor_setDataSourceFd(extractor, fileno(fp), 0, size);
 
 	if (amresult != AMEDIA_OK) {
-		LOGE("Error setting extractor data source, err %d", amresult);
+		Log::e() << "Error setting extractor data source, err " << amresult;
 		AMediaExtractor_delete(extractor);
 		return false;
 	}
 
+	int firstAudioTrackId = getFirstAudioTrackId(extractor);
+
+	if (firstAudioTrackId == -1) {
+		Log::e() << "No audio track found in file, trying with track 0 (will probs fail)";
+		firstAudioTrackId = 0;
+		return false;
+	}
 	// Specify our desired output format by creating it from our source
-	AMediaFormat *format = AMediaExtractor_getTrackFormat(extractor, 0);
+	AMediaFormat *format = AMediaExtractor_getTrackFormat(extractor, firstAudioTrackId);
 
 	int32_t originalSampleRate;
 	if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, &originalSampleRate)) {
-		LOGD("Source sample rate %d", originalSampleRate);
-		//*outSampleRate = originalSampleRate;
+		Log::d() << "Source sample rate " << originalSampleRate;
 	} else {
-		LOGE("Failed to get sample rate");
+		Log::e() << "Failed to get sample rate";
 		AMediaExtractor_delete(extractor);
 		AMediaFormat_delete(format);
 		return false;
@@ -116,29 +136,29 @@ bool AudioFileAndroid_load(
 
 	int32_t channelCount;
 	if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &channelCount)) {
-		LOGD("Got channel count %d", channelCount);
+		Log::d() << "Got channel count " << channelCount;
 		*outNumChannels = channelCount;
 		if (channelCount != 1 && channelCount != 2) {
-			LOGE("Sample not mono or stereo - %d channels", channelCount);
+			Log::d() << "Sample not mono or stereo -" << channelCount << " channels";
 			AMediaExtractor_delete(extractor);
 			AMediaFormat_delete(format);
 			return 0;
 		}
 	} else {
-		LOGE("Failed to get channel count");
+		Log::e() << "Failed to get channel count";
 		AMediaExtractor_delete(extractor);
 		AMediaFormat_delete(format);
 		return 0;
 	}
 
 	const char *formatStr = AMediaFormat_toString(format);
-	LOGD("Output format %s", formatStr);
+	Log::d() << "Output format " << formatStr;
 
 	const char *mimeType;
 	if (AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mimeType)) {
-		LOGD("Got mime type %s", mimeType);
+		Log::d() << "Got mime type " << mimeType;
 	} else {
-		LOGE("Failed to get mime type");
+		Log::e() << "Failed to get mime type";
 		AMediaExtractor_delete(extractor);
 		AMediaFormat_delete(format);
 		return 0;
@@ -146,7 +166,7 @@ bool AudioFileAndroid_load(
 
 	// Obtain the correct decoder
 	AMediaCodec *codec = nullptr;
-	AMediaExtractor_selectTrack(extractor, 0);
+	AMediaExtractor_selectTrack(extractor, firstAudioTrackId);
 	codec = AMediaCodec_createDecoderByType(mimeType);
 	AMediaCodec_configure(codec, format, nullptr, nullptr, 0);
 	AMediaCodec_start(codec);
@@ -164,7 +184,7 @@ bool AudioFileAndroid_load(
 	if (desiredSampleRate == 0) {
 		*outSampleRate = originalSampleRate;
 	} else if (desiredSampleRate != originalSampleRate) {
-		LOGD("Decoding from %d hz to %d hz", originalSampleRate, desiredSampleRate);
+		Log::d() << "Decoding from %d hz to %d hz", originalSampleRate, desiredSampleRate;
 		isResampling   = true;
 		*outSampleRate = desiredSampleRate;
 		resampler.init(channelCount, originalSampleRate, desiredSampleRate, RESAMPLING_QUALITY);
@@ -183,7 +203,7 @@ bool AudioFileAndroid_load(
 				if (inputIndex == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
 					// LOGV("Codec.dequeueInputBuffer try again later");
 				} else {
-					LOGE("Codec.dequeueInputBuffer unknown error status");
+					Log::d() << "Codec.dequeueInputBuffer unknown error status";
 				}
 			} else {
 				// Obtain the actual buffer and read the encoded data into it
@@ -200,7 +220,7 @@ bool AudioFileAndroid_load(
 					AMediaExtractor_advance(extractor);
 
 				} else {
-					LOGD("End of extractor data stream");
+					Log::d() << "End of extractor data stream";
 					isExtracting = false;
 
 					// We need to tell the codec that we've reached the end of the stream
@@ -218,7 +238,7 @@ bool AudioFileAndroid_load(
 			if (outputIndex >= 0) {
 				// Check whether this is set earlier
 				if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
-					LOGD("Reached end of decoding stream");
+					Log::d() << "Reached end of decoding stream";
 					isDecoding = false;
 				} else {
 					// Valid index, acquire buffer
@@ -248,12 +268,12 @@ bool AudioFileAndroid_load(
 				switch (outputIndex) {
 					case AMEDIACODEC_INFO_TRY_AGAIN_LATER: LOGD("dequeueOutputBuffer: try again later"); break;
 					case AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED:
-						LOGD("dequeueOutputBuffer: output buffers changed");
+						Log::d() << "dequeueOutputBuffer: output buffers changed";
 						break;
 					case AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED:
-						LOGD("dequeueOutputBuffer: output outputFormat changed");
+						Log::d() << "dequeueOutputBuffer: output outputFormat changed";
 						format = AMediaCodec_getOutputFormat(codec);
-						LOGD("outputFormat changed to: %s", AMediaFormat_toString(format));
+						Log::d() << "outputFormat changed to: " << AMediaFormat_toString(format);
 						break;
 				}
 			}
