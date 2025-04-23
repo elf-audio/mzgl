@@ -755,7 +755,7 @@ uint64_t getStorageRemainingInBytes() {
 		auto si = fs::space(".");
 		return si.available;
 	} catch (fs::filesystem_error const &e) {
-		Log::e() << "Error in getStorageRemainingInBytes()";
+		Log::e() << "Error in getStorageRemainingInBytes() - " << e.what();
 		return 1024 * 1024 * 1024;
 	}
 #endif
@@ -1093,7 +1093,7 @@ bool moveFile(const std::string &from, const std::string &to) {
 		fs::remove(from);
 		return true;
 	} catch (const fs::filesystem_error &err) {
-		Log::e() << "Exception thrown while attempting to move file";
+		Log::e() << "Exception thrown while attempting to move file - " << err.what();
 		return false;
 	}
 }

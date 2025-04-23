@@ -79,13 +79,6 @@ public:
 		//MacMenuBar::instance().getMenu("LiveCoding")->addItem("Reload", "r", [this]() {compiler.recompile();});
 	}
 
-	void updateDeprecated() override {
-		compiler.update();
-		if (d != nullptr) {
-			d->update();
-		}
-	}
-
 	void audioIn(float *ins, int length, int numChannels) override {
 		compiler.lock();
 		if (d) d->audioIn(ins, length, numChannels);

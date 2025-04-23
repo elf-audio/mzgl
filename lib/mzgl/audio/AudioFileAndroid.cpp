@@ -69,6 +69,7 @@ bool AudioFile_loadDrLib(
 
 	return true;
 }
+#ifdef __ANDROID__
 
 int getFirstAudioTrackId(AMediaExtractor *extractor) {
 	int numTracks = AMediaExtractor_getTrackCount(extractor);
@@ -83,6 +84,7 @@ int getFirstAudioTrackId(AMediaExtractor *extractor) {
 	}
 	return -1;
 }
+#endif
 
 #ifdef __ANDROID__
 // if desiredSampleRate is zero, no resampling is done

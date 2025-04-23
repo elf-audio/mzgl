@@ -17,12 +17,10 @@ public:
 	ReorderableItem(Graphics &g, int slot)
 		: Layer(g)
 		, slot(slot) {
-		//		set(slots[slot]);
 		targetRect = *this;
 		index	   = slot;
 	}
 
-	using Layer::draw;
 	virtual void draw(Graphics &g, bool isReordering) {}
 
 	void startDragging(vec2 start, int touchId) {
@@ -42,7 +40,7 @@ public:
 		}
 		return -1;
 	}
-	void updateDeprecated() override {
+	void draw() override {
 		if (!dragging && !atOriginalPosition()) {
 			x = x * 0.8 + targetRect.x * 0.2;
 			y = y * 0.8 + targetRect.y * 0.2;
