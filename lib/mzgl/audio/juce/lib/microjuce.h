@@ -1,6 +1,8 @@
 #pragma once
-#include <CoreAudio/CoreAudio.h>
-#include <AudioToolbox/AudioToolbox.h>
+#ifdef __APPLE__
+#	include <CoreAudio/CoreAudio.h>
+#	include <AudioToolbox/AudioToolbox.h>
+#endif
 #include <memory>
 #include <cstddef>
 #include <optional>

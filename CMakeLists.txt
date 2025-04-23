@@ -46,9 +46,6 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(MZGL_SOURCES
     lib/mzgl/animation/Tween.cpp
     lib/mzgl/audio/AudioSystem.cpp
-    lib/mzgl/audio/juce/JuceAudioSystem.cpp
-    lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
-    lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
     lib/mzgl/geom/Rectf.cpp
     lib/mzgl/geom/RoundedRect.cpp
     lib/mzgl/geom/SVG.cpp
@@ -116,6 +113,9 @@ set(MZGL_SOURCES
     lib/mzgl/util/mzAssert.cpp
     lib/mzgl/util/stringUtil.cpp
     $<$<PLATFORM_ID:Darwin>:
+    lib/mzgl/audio/juce/JuceAudioSystem.cpp
+    lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
+    lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
     lib/mzgl/audio/AudioFileApple.cpp
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
