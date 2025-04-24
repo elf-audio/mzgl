@@ -464,11 +464,6 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #endif
 }
 
-std::string makeUpperCase(std::string str) {
-	std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::toupper(c); });
-	return str;
-}
-
 //#ifdef UNIT_TEST
 bool isOverridingDocsPath	 = false;
 std::string docsPathOverride = "";

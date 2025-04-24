@@ -25,6 +25,40 @@ std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces);
 std::string toLowerCase(std::string s);
 std::string toUpperCase(std::string s);
 
+template <typename T, typename = void>
+struct has_push_back : std::false_type {};
+
+template <typename T>
+struct has_push_back<T,
+					 std::void_t<decltype(std::declval<T &>().push_back(std::declval<typename T::value_type>()))>>
+	: std::true_type {};
+
+template <typename T, typename = void>
+struct has_insert : std::false_type {};
+
+template <typename T>
+struct has_insert<T, std::void_t<decltype(std::declval<T &>().insert(std::declval<typename T::value_type>()))>>
+	: std::true_type {};
+
+template <typename Container>
+Container toUpperCase(const Container &strings) {
+	Container result;
+	using ValueType = typename Container::value_type;
+
+	if constexpr (has_push_back<Container>::value) {
+		for (const auto &str: strings) {
+			result.push_back(toUpperCase(str));
+		}
+	} else if constexpr (has_insert<Container>::value) {
+		for (const auto &str: strings) {
+			result.insert(toUpperCase(str));
+		}
+	} else {
+		static_assert(sizeof(Container) == 0, "Container type not supported");
+	}
+	return result;
+}
+
 void replaceAll(std::string &data, std::string toSearch, std::string replaceStr);
 std::string byteSizeToString(uint64_t bytes);
 
