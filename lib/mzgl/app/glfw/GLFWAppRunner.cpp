@@ -58,7 +58,34 @@ static void error_callback(int error, const char *description) {
 	Log::e() << "GLFW Error: " << description;
 }
 
+int convertGlfwKeyToMzgl(int key) {
+	switch (key) {
+		case GLFW_KEY_LEFT: return MZ_KEY_LEFT;
+		case GLFW_KEY_RIGHT: return MZ_KEY_RIGHT;
+		case GLFW_KEY_DOWN: return MZ_KEY_DOWN;
+		case GLFW_KEY_UP: return MZ_KEY_UP;
+		case GLFW_KEY_BACKSPACE:
+		case GLFW_KEY_DELETE: return MZ_KEY_DELETE;
+		case GLFW_KEY_TAB: return MZ_KEY_TAB;
+		case GLFW_KEY_ESCAPE: return MZ_KEY_ESCAPE;
+		//case: MZ_KEY_SHIFT_TAB;
+		case MZ_KEY_RETURN:
+		case GLFW_KEY_ENTER: return MZ_KEY_ENTER;
+		case GLFW_KEY_RIGHT_SHIFT:
+		case GLFW_KEY_LEFT_SHIFT: return MZ_KEY_SHIFT;
+		case GLFW_KEY_RIGHT_CONTROL:
+		case GLFW_KEY_LEFT_CONTROL: return MZ_KEY_CTRL;
+		case GLFW_KEY_RIGHT_ALT:
+		case GLFW_KEY_LEFT_ALT: return MZ_KEY_ALT;
+		case GLFW_KEY_LEFT_SUPER:
+		case GLFW_KEY_RIGHT_SUPER: return MZ_KEY_CMD;
+		case GLFW_KEY_PAGE_UP: return MZ_KEY_INCREMENT;
+		case GLFW_KEY_PAGE_DOWN: return MZ_KEY_DECREMENT;
+		default: return key;
+	}
+}
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	key = convertGlfwKeyToMzgl(key);
 	windowEventHandler.key(getEventDispatcher(window), key, action);
 }
 
