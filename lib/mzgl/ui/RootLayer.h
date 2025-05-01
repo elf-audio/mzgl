@@ -17,7 +17,9 @@ public:
 
 		addChild(debugOverlay);
 	}
-
+	void setDebugOverlayCallback(const std::function<void(std::string, std::string)> &callback) {
+		debugOverlay->onLayerChanged = callback;
+	}
 	void enableDebug(bool debug) { debugOverlay->interactive = debugOverlay->visible = debug; }
 	bool isDebugging() { return debugOverlay->visible; }
 	virtual ~RootLayer() {}

@@ -28,6 +28,7 @@ public:
 		g.setColor(1, 0, 1, 0.25);
 		g.drawRect(mousedOverRect);
 	}
+	std::string layerName;
 	std::string mousedOverName;
 	Rectf mousedOverRect;
 	std::string demangle(const char *name) {
@@ -54,15 +55,41 @@ public:
 		if (l->inside(x, y)) return l;
 		return nullptr;
 	}
+
 	void touchOver(float x, float y) override {
 		auto *l = insideWhich(getParent(), x, y);
 
 		if (!l) return;
 		mousedOverRect = l->getAbsoluteRect();
-		mousedOverName = demangle(typeid(*l).name());
+		auto lastName  = layerName;
+		layerName	   = demangle(typeid(*l).name());
+		mousedOverName = layerName;
+		nameOfLayer	   = "";
 		if (!l->name.empty()) {
 			mousedOverName += " - " + l->name;
+			nameOfLayer = l->name;
+		}
+		if (layerName != lastName && sendDown && onLayerChanged != nullptr) {
+			onLayerChanged(layerName, nameOfLayer);
 		}
 	}
 	void doLayout() override { size(g.width, g.height); }
+
+	bool keyDown(int key) override {
+		if (key == MZ_KEY_ALT) {
+			sendDown = true;
+			return true;
+		}
+		return false;
+	}
+
+	void keyUp(int key) override {
+		if (key == MZ_KEY_ALT) {
+			sendDown = false;
+		}
+	}
+
+	bool sendDown {false};
+	std::string nameOfLayer;
+	std::function<void(std::string, std::string)> onLayerChanged;
 };

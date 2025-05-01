@@ -56,11 +56,21 @@ void printLayer(Layer *l, int indent = 0) {
 }
 - (NSInteger)getNumChildren;
 - (LayerNode *)getChild:(NSInteger)index;
+- (NSString *)name;
+- (NSString *)layerName;
 @end
 
 @implementation LayerNode {
 	NSMutableArray<LayerNode *> *children;
 	Layer *layer;
+}
+
+- (NSString *)name {
+	return [NSString stringWithUTF8String:demangle(typeid(*layer).name()).c_str()];
+}
+
+- (NSString *)layerName {
+	return [NSString stringWithUTF8String:layer->name.c_str()];
 }
 
 - (id)initWithLayer:(Layer *)layerCpp {
@@ -322,4 +332,88 @@ void LayerExplorer::setText(string text) {
 	NSTextView *browser = (__bridge NSTextView *) browser_;
 	dispatch_async(dispatch_get_main_queue(),
 				   ^{ [browser setString:[NSString stringWithUTF8String:text.c_str()]]; });
+}
+
+std::vector<std::string> pathToItem(Layer *rootLayer, const std::string &className, const std::string &layerName) {
+	for (int i = 0; i < rootLayer->getNumChildren(); ++i) {
+		if (auto *child = rootLayer->getChild(i)) {
+			std::string childClassName = demangle(typeid(*child).name()).c_str();
+			if (childClassName == className) {
+				if (layerName == child->name) {
+					return {childClassName};
+				}
+			}
+			auto children = pathToItem(child, className, layerName);
+			if (!children.empty()) {
+				std::vector<std::string> path;
+				path.push_back(childClassName);
+				for (auto &child2: children) {
+					path.push_back(child2);
+				}
+				return path;
+			}
+		}
+	}
+	return {};
+}
+
+NSArray *resolveAndExpandPath(NSOutlineView *outlineView,
+							  const std::vector<std::string> &pathVec,
+							  const std::string &layer) {
+	id currentParent = nil;
+	id foundItem	 = nil;
+
+	for (const std::string &key: pathVec) {
+		NSInteger childCount = [outlineView.dataSource outlineView:outlineView
+											numberOfChildrenOfItem:currentParent];
+		foundItem			 = nil;
+
+		for (NSInteger i = 0; i < childCount; ++i) {
+			id child = [outlineView.dataSource outlineView:outlineView child:i ofItem:currentParent];
+			if (![[child name] isEqualToString:[NSString stringWithUTF8String:key.c_str()]]) {
+				continue;
+			}
+
+			if (key == pathVec.back() && !layer.empty()) {
+				if (![[child layerName] isEqualToString:[NSString stringWithUTF8String:layer.c_str()]]) {
+					continue;
+				}
+			}
+
+			foundItem = child;
+			break;
+		}
+
+		if (!foundItem) {
+			NSLog(@"Failed to find path element: %s", key.c_str());
+			return nil;
+		}
+
+		[outlineView expandItem:foundItem];
+		currentParent = foundItem;
+	}
+
+	return foundItem;
+}
+
+void LayerExplorer::select(const std::string &className, const std::string &layerName) {
+	Log::d() << "Path";
+	auto nameOfLayer = layerName;
+	auto path		 = pathToItem(rootLayer, className, nameOfLayer);
+	if (path.empty()) {
+		nameOfLayer = "";
+		path		= pathToItem(rootLayer, className, nameOfLayer);
+	}
+	for (auto &parent: path) {
+		Log::d() << "  " << parent;
+	}
+	NSOutlineView *view = (__bridge NSOutlineView *) browser_;
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  id foundItem	= resolveAndExpandPath(view, path, nameOfLayer);
+	  NSInteger row = [view rowForItem:foundItem];
+	  if (row != -1) {
+		  [view scrollRowToVisible:row];
+		  [view selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
+	  }
+	});
 }
