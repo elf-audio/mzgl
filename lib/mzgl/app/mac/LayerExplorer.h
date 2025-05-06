@@ -19,6 +19,8 @@ public:
 	void setText(std::string text);
 	void setBgColor(glm::vec3 c);
 
+	void select(const std::string &className, const std::string &layerName);
+
 private:
 	Layer *rootLayer = nullptr;
 	void *browser_	 = nullptr;
