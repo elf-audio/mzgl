@@ -270,7 +270,6 @@ int nsEventToKey(NSEvent *evt) {
 		return NSDragOperationNone;
 	}
 }
-
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
@@ -301,7 +300,7 @@ int nsEventToKey(NSEvent *evt) {
 - (void)windowDidBecomeKey:(NSNotification *)notification {
 	NSWindow *window = notification.object;
 	Graphics &g		 = eventDispatcher->app->g;
-	g.pixelScale	 = [window backingScaleFactor];
+	g.pixelScale	 = window.screen.backingScaleFactor;
 	// Log::e() << "Pixel scale being set for first time: " << g.pixelScale;
 }
 

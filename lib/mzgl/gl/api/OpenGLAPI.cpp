@@ -2,6 +2,7 @@
 #include "OpenGLDefaultShaders.h"
 #include "log.h"
 #include "mzOpenGL.h"
+#include "mzgl_platform.h"
 
 static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 	switch (mode) {
@@ -139,6 +140,13 @@ void OpenGLAPI::drawVerts(const std::vector<glm::vec2> &verts,
 
 void OpenGLAPI::maskOn(const Rectf &r) {
 	glEnable(GL_SCISSOR_TEST);
+
+#if MZGL_MAC
+	if (g.pixelScale == 1.f) {
+		glScissor(r.x * 0.5f, (g.height - (r.bottom())) * 0.5f, r.width * 0.5f, r.height * 0.5f);
+		return;
+	}
+#endif
 	glScissor(r.x, g.height - (r.bottom()), r.width, r.height);
 }
 

@@ -154,6 +154,11 @@ void handleTerminateSignal(int signal) {
 #endif
 	app->windowHandle = (__bridge void *) window;
 	app->viewHandle	  = (__bridge void *) view;
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(screenDidChange:)
+												 name:NSWindowDidChangeScreenNotification
+											   object:window];
 }
 
 - (void)about:(id)event {
@@ -216,10 +221,16 @@ void handleTerminateSignal(int signal) {
 	}
 }
 
+- (void)screenDidChange:(NSNotification *)notification {
+	//	NSWindow *window = notification.object;
+	CGFloat scale = window.screen.backingScaleFactor;
+	//	NSLog(@"Window moved to screen with scale: %f", scale);
+	app->g.pixelScale = scale;
+}
+
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-	// Insert code here to tear down your application
-	Log::d() << "applicationWillTerminate " << app.use_count();
-	//delete app.get();
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+
 	[view shutdown];
 	eventDispatcher = nullptr;
 	app				= nullptr;
