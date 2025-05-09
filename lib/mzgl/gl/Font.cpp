@@ -284,7 +284,7 @@ void Font::addVerts(const std::string &text,
 	fonsAddVerts(fs, c.x, c.y, text.c_str(), NULL, verts, uvs);
 }
 
-Font::VerticalMetrics Font::getVerticalMetrics() {
+Font::VerticalMetrics Font::getVerticalMetrics() const {
 	return verticalMetrics;
 }
 void Font::draw(Graphics &g, const std::string &text, glm::vec2 c, HTextAlign halign, VTextAlign valign) {

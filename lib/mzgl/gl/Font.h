@@ -36,7 +36,7 @@ public:
 		float textHeight;
 		float lineHeight;
 	};
-	VerticalMetrics getVerticalMetrics();
+	VerticalMetrics getVerticalMetrics() const;
 
 	void
 		addVerts(const std::string &text, glm::vec2 c, std::vector<glm::vec2> &verts, std::vector<glm::vec2> &uvs);
