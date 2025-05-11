@@ -162,6 +162,9 @@ public:
 
 	void interpolateStereo(double index, float &L, float &R) const noexcept;
 
+	float interpolateCubic(double p) const noexcept;
+
+	void interpolateStereoCubic(double position, float &outputLeft, float &outputRight) const noexcept;
 	// for delay lines
 	float interpolateWrapping(double index) const noexcept;
 

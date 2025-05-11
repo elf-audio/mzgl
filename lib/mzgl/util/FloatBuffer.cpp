@@ -652,6 +652,67 @@ float FloatBuffer::interpolate(double p) const noexcept {
 	return (*this)[a] * (1.f - m) + (*this)[b] * m;
 }
 
+float FloatBuffer::interpolateCubic(double p) const noexcept {
+	int x1 = static_cast<int>(p);
+	int x0 = x1 - 1;
+	int x2 = x1 + 1;
+	int x3 = x1 + 2;
+
+	// Clamp bounds
+	const int N = static_cast<int>(size());
+	x0			= std::max(0, x0);
+	x1			= std::max(0, std::min(x1, N - 1));
+	x2			= std::max(0, std::min(x2, N - 1));
+	x3			= std::max(0, std::min(x3, N - 1));
+
+	float y0 = (*this)[x0];
+	float y1 = (*this)[x1];
+	float y2 = (*this)[x2];
+	float y3 = (*this)[x3];
+
+	float t	 = static_cast<float>(p - x1);
+	float a0 = -0.5f * y0 + 1.5f * y1 - 1.5f * y2 + 0.5f * y3;
+	float a1 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3;
+	float a2 = -0.5f * y0 + 0.5f * y2;
+	float a3 = y1;
+
+	return ((a0 * t + a1) * t + a2) * t + a3;
+}
+
+// Cubic interpolation for stereo interleaved buffer
+void FloatBuffer::interpolateStereoCubic(double position, float &outputLeft, float &outputRight) const noexcept {
+	int index1 = static_cast<int>(std::floor(position));
+	int index0 = index1 - 1;
+	int index2 = index1 + 1;
+	int index3 = index1 + 2;
+
+	float t = static_cast<float>(position - static_cast<double>(index1));
+
+	// Clamp indices to valid range
+	const int maxIndex = static_cast<int>(size() / 2) - 1;
+	index0			   = std::clamp(index0, 0, maxIndex);
+	index1			   = std::clamp(index1, 0, maxIndex);
+	index2			   = std::clamp(index2, 0, maxIndex);
+	index3			   = std::clamp(index3, 0, maxIndex);
+
+	auto sample = [&](int i, int channel) -> float {
+		size_t idx = static_cast<size_t>(i * 2 + channel);
+		if (idx >= size()) return 0.f;
+		return (*this)[idx];
+	};
+
+	auto cubic = [&](float y0, float y1, float y2, float y3, float t) -> float {
+		float a0 = y3 - y2 - y0 + y1;
+		float a1 = y0 - y1 - a0;
+		float a2 = y2 - y0;
+		float a3 = y1;
+		return ((a0 * t + a1) * t + a2) * t + a3;
+	};
+
+	outputLeft	= cubic(sample(index0, 0), sample(index1, 0), sample(index2, 0), sample(index3, 0), t);
+	outputRight = cubic(sample(index0, 1), sample(index1, 1), sample(index2, 1), sample(index3, 1), t);
+}
+
 float FloatBuffer::interpolateWrapping(double index) const noexcept {
 	int i = index;
 	int j = index + 1;
