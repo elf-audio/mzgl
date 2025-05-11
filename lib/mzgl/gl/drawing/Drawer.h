@@ -72,7 +72,7 @@ public:
 	void commit(VboRef vbo, bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	VboRef createVbo(bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	void addGeometry(Geometry &_geom);
-	bool isEmpty();
+	bool empty() const;
 
 private:
 	void getPerfectRoundedRectVerts(

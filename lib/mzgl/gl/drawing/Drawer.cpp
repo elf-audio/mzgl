@@ -40,7 +40,7 @@ void Drawer::setColor(const glm::vec4 &c, float alpha) {
 	isDoingGradient = false;
 }
 
-bool Drawer::isEmpty() {
+bool Drawer::empty() const {
 	return geom.verts.size() == 0;
 }
 void Drawer::fill() {
