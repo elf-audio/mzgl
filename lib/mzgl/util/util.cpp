@@ -1020,7 +1020,7 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData) 
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data) {
 	fs::ofstream outfile(fs::u8path(path), std::ios::out | std::ios::binary);
 	if (outfile.fail()) return false;
-	outfile.write((const char *) data.data(), data.size());
+	outfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 	if (outfile.fail()) return false;
 	outfile.close();
 	if (outfile.fail()) return false;
