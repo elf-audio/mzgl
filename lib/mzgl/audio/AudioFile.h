@@ -17,5 +17,6 @@ namespace AudioFile {
 	bool loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels);
 
 	// only really for AUv3
+	bool load(std::string path, Int16Buffer &buff, int *outNumChannels, int *outSampleRate = nullptr);
 	bool loadResampled(std::string path, Int16Buffer &buff, int newSampleRate, int *outNumChannels);
 } // namespace AudioFile

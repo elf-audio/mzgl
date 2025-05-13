@@ -153,7 +153,7 @@ public:
  * This checks the magic numbers of a file if it has .mp3 extension.
  * If it turns out to be an m4a, it will add .m4a to the end of the path
  */
-std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
+static std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
 	fs::path p(path);
 	if (p.extension() != ".mp3") {
 		return path;
@@ -183,7 +183,7 @@ std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
 	return path;
 }
 
-template <class Buffer>
+static template <class Buffer>
 bool loadAudioFile(
 	std::string path, Buffer &buff, std::optional<int> newSampleRate, int *outNumChannels, int *outSampleRate) {
 #ifdef __APPLE__
@@ -240,19 +240,17 @@ bool loadAudioFile(
 	return true;
 }
 
-bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate) {
-	return loadAudioFile(path, buff, std::nullopt, outNumChannels, outSampleRate);
-}
-
-template <class Buffer>
-bool AudioFile_loadResampled(std::string path, Buffer &buff, int newSampleRate, int *outNumChannels) {
+bool AudioFile::loadResampled(std::string path, Int16Buffer &buff, int newSampleRate, int *outNumChannels) {
 	return loadAudioFile(path, buff, newSampleRate, outNumChannels, nullptr);
 }
 
-bool AudioFile::loadResampled(std::string path, Int16Buffer &buff, int newSampleRate, int *outNumChannels) {
-	return AudioFile_loadResampled<Int16Buffer>(path, buff, newSampleRate, outNumChannels);
+bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
+	return loadAudioFile<FloatBuffer>(path, buff, newSampleRate, outNumChannels, nullptr);
 }
 
-bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSampleRate, int *outNumChannels) {
-	return AudioFile_loadResampled<FloatBuffer>(path, buff, newSampleRate, outNumChannels);
+bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate) {
+	return loadAudioFile(path, buff, std::nullopt, outNumChannels, outSampleRate);
+}
+bool AudioFile::load(std::string path, Int16Buffer &buff, int *outNumChannels, int *outSampleRate) {
+	return loadAudioFile(path, buff, std::nullopt, outNumChannels, outSampleRate);
 }
