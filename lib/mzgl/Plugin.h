@@ -23,6 +23,7 @@ class MidiMessage;
 
 class Serializable {
 public:
+	virtual ~Serializable()										  = default;
 	virtual std::string getIdentifier()							  = 0; // { return "koalafx"; }
 	virtual void serialize(std::vector<uint8_t> &outData)		  = 0;
 	virtual void deserialize(const std::vector<uint8_t> &outData) = 0;
@@ -55,6 +56,7 @@ public:
 // presets are always files, their names are the file name
 class PresetManager {
 public:
+	virtual ~PresetManager() = default;
 	Serializable *plugin;
 	PresetManager(Serializable *plugin) {
 		this->plugin = plugin;

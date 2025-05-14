@@ -47,6 +47,7 @@ typedef std::shared_ptr<SVGGroup> SVGGroupRef;
 
 class SVGNode {
 public:
+	virtual ~SVGNode() = default;
 	std::vector<SVGNodeRef> children;
 
 	virtual void getOutlines(std::vector<glm::vec2> &outlines)	  = 0;

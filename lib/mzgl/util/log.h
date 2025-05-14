@@ -30,6 +30,7 @@
 #endif
 class LogListener {
 public:
+	virtual ~LogListener() {}
 	virtual void stringLogged(const std::string &m) = 0;
 };
 

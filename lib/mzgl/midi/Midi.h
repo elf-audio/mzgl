@@ -58,6 +58,7 @@ private:
 
 class MidiListener {
 public:
+	virtual ~MidiListener() {}
 	virtual void
 		midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &m, uint64_t timestamp) = 0;
 };

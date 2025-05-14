@@ -41,11 +41,13 @@ struct AudioPort {
 
 class SampleRateChangeListener {
 public:
+	virtual ~SampleRateChangeListener() {}
 	virtual void sampleRateChanged(double newSampleRate) = 0;
 };
 
 class AudioIO {
 public:
+	virtual ~AudioIO() {}
 	virtual void audioIn(float *data, int frames, int chans) {}
 	virtual void audioOut(float *data, int frames, int chans) {}
 };
@@ -57,6 +59,7 @@ enum class StreamConfigurationStatus {
 
 class AudioDeviceChangeListener {
 public:
+	virtual ~AudioDeviceChangeListener() {}
 	virtual void audioDeviceChanged() = 0;
 };
 

@@ -18,6 +18,7 @@
  */
 class Undoable {
 public:
+	virtual ~Undoable() {}
 	// the forward action to actually do the thing
 	virtual void redo() = 0;
 
