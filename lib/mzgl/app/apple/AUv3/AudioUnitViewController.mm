@@ -191,13 +191,13 @@ using namespace std;
 	return plugin;
 }
 - (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
-	plugin = [self getPlugin];
+//	plugin = [self getPlugin];
 	//	audioUnit = [[MZGLEffectAU alloc] initWithPlugin: plugin andComponentDescription:desc error:error];
 	//
 	//	- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
 	//		   andComponentDescription:(AudioComponentDescription)componentDescription
 	//						   options:(AudioComponentInstantiationOptions)options error:(NSError **)outError;
-	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:plugin andComponentDescription:desc error:error];
+	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:[self getPlugin] andComponentDescription:desc error:error];
 	NSLog(@"MZGL: createAudioUnitWithComponentDescription");
 
 	//    if([NSThread isMainThread]) {

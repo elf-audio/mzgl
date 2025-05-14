@@ -173,9 +173,13 @@ struct Blocks {
 - (void)setupParameters {
 	NSMutableArray *paramList = [[NSMutableArray alloc] init];
 
-	for (int i = 0; i < plugin->getNumParams(); i++) {
-		auto p						   = plugin->getParam(i);
-		AudioUnitParameterID paramAddr = i;
+	const auto numParams = plugin->getNumParams();
+	for (int paramIndex = 0; paramIndex < numParams; ++paramIndex) {
+		auto p						   = plugin->getParam(paramIndex);
+		if (p == nullptr) {
+			continue;
+		}
+		AudioUnitParameterID paramAddr = paramIndex;
 		NSString *paramName			   = [NSString stringWithUTF8String:p->name.c_str()];
 
 		AUParameter *param = [AUParameterTree

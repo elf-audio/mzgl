@@ -28,6 +28,7 @@ class MidiMessage;
 
 class Serializable {
 public:
+	virtual ~Serializable() = default;
 	virtual std::string getIdentifier()							  = 0; // { return "koalafx"; }
 	virtual void serialize(std::vector<uint8_t> &outData)		  = 0;
 	virtual void deserialize(const std::vector<uint8_t> &outData) = 0;
@@ -197,10 +198,10 @@ public:
 	// midi events will come in on audio thread
 	virtual void midiReceivedAtTime(const MidiMessage &m, uint32_t delay) {}
 
-	size_t getNumParams() { return params.size(); }
+	virtual size_t getNumParams() { return params.size(); }
 
-	size_t getNumPresets() { return getPresetManager()->getNumPresets(); }
-	std::shared_ptr<PluginParameter> getParam(unsigned int i) { return params[i]; }
+	virtual size_t getNumPresets() { return getPresetManager()->getNumPresets(); }
+	virtual std::shared_ptr<PluginParameter> getParam(unsigned int i) { return params[i]; }
 
 	bool isInstrument() { return pluginIsInstrument; }
 	void hostUpdatedParameter(unsigned int i, float val) {
@@ -223,7 +224,7 @@ public:
 	}
 
 	std::function<bool()> isRunning = []() { return true; };
-	std::shared_ptr<PresetManager> getPresetManager() {
+	virtual std::shared_ptr<PresetManager> getPresetManager() {
 		return this->presetManager;
 	}
 
