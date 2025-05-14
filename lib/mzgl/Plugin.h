@@ -20,8 +20,8 @@
 #include "Midi.h"
 #include "filesystem.h"
 
-#if TARGET_OS_IOS || defined (MZGL_PLUGIN)
-#define PLUGIN_CAN_SEND_MIDI_TO_HOST
+#if TARGET_OS_IOS || defined(MZGL_PLUGIN)
+#	define PLUGIN_CAN_SEND_MIDI_TO_HOST
 #endif
 
 class MidiMessage;
@@ -55,7 +55,6 @@ public:
 	EffectPreset(std::string name)
 		: name(name) {}
 };
-
 
 // presets are always files, their names are the file name
 class PresetManager {
@@ -199,10 +198,10 @@ public:
 	// midi events will come in on audio thread
 	virtual void midiReceivedAtTime(const MidiMessage &m, uint32_t delay) {}
 
-	size_t getNumParams() { return params.size(); }
+	virtual size_t getNumParams() { return params.size(); }
 
-	size_t getNumPresets() { return getPresetManager()->getNumPresets(); }
-	std::shared_ptr<PluginParameter> getParam(unsigned int i) { return params[i]; }
+	virtual size_t getNumPresets() { return getPresetManager()->getNumPresets(); }
+	virtual std::shared_ptr<PluginParameter> getParam(unsigned int i) { return params[i]; }
 
 	bool isInstrument() { return pluginIsInstrument; }
 	void hostUpdatedParameter(unsigned int i, float val) {
@@ -225,9 +224,7 @@ public:
 	}
 
 	std::function<bool()> isRunning = []() { return true; };
-	std::shared_ptr<PresetManager> getPresetManager() {
-		return this->presetManager;
-	}
+	virtual std::shared_ptr<PresetManager> getPresetManager() { return this->presetManager; }
 
 	void setSampleRate(double _sampleRate) {
 		if (std::abs(sampleRate - _sampleRate) < 1e-3) {
@@ -262,7 +259,7 @@ public:
 
 protected:
 	bool hostIsPlaying = false;
-	std::shared_ptr<PresetManager> presetManager{std::make_shared<PresetManager>(this)};
+	std::shared_ptr<PresetManager> presetManager {std::make_shared<PresetManager>(this)};
 
 	// generic float slider
 	void addFloatParameter(
