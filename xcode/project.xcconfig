@@ -36,11 +36,10 @@ HEADERS_COMMON = 									\
 		$(PROJECT_HEADERS)							\
 		lib/opt/blahdio/blahdio/include				\
 		lib/opt/blahdio/blahdio/ext/drlibs			\
-		lib/opt/libflac/include						\
-		lib/LibTorch-Lite/install/include
+		lib/opt/libflac/include						
 
 HEADER_SEARCH_PATHS = $(inherited) $(HEADERS_COMMON)
-
+HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(inherited) lib/LibTorch-Lite/install/include
 
 // LINKER
 //-framework MetalANGLE

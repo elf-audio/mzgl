@@ -9,7 +9,7 @@
 #include "DropDown.h"
 
 void DropDown::draw() {
-	if (options.size() == 0) {
+	if (options.size() == 0 || selectedIndex < 0 || selectedIndex >= options.size()) {
 		g.setColor(1);
 		g.drawRect(x, y, width, height);
 		return;
