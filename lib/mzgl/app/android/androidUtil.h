@@ -42,58 +42,57 @@ void androidAlertDialog(const std::string &title, const std::string &msg);
 bool androidHasMicPermission();
 
 void androidConfirmDialog(const std::string &title,
-                          const std::string &msg,
-                          std::function<void()> okPressed,
-                          std::function<void()> cancelPressed);
+						  const std::string &msg,
+						  std::function<void()> okPressed,
+						  std::function<void()> cancelPressed);
 
 void androidTextboxDialog(const std::string &title,
-                          const std::string &msg,
-                          const std::string &text,
-                          std::function<void(std::string, bool)> completionCallback);
+						  const std::string &msg,
+						  const std::string &text,
+						  std::function<void(std::string, bool)> completionCallback);
 
 void androidNumberboxDialog(const std::string &title,
-                            const std::string &msg,
-                            const std::string &initialValue,
-                            std::function<void(std::string, bool)> completionCallback);
+							const std::string &msg,
+							const std::string &initialValue,
+							std::function<void(std::string, bool)> completionCallback);
 
 void androidTwoOptionDialog(const std::string &title,
-                            const std::string &msg,
-                            const std::string &buttonOneText,
-                            std::function<void()> buttonOnePressed,
-                            const std::string &buttonTwoText,
-                            std::function<void()> buttonTwoPressed);
+							const std::string &msg,
+							const std::string &buttonOneText,
+							std::function<void()> buttonOnePressed,
+							const std::string &buttonTwoText,
+							std::function<void()> buttonTwoPressed);
 
 void androidTwoOptionCancelDialog(const std::string &title,
-                                  const std::string &msg,
-                                  const std::string &buttonOneText,
-                                  std::function<void()> buttonOnePressed,
-                                  const std::string &buttonTwoText,
-                                  std::function<void()> buttonTwoPressed,
-                                  std::function<void()> cancelPressed);
+								  const std::string &msg,
+								  const std::string &buttonOneText,
+								  std::function<void()> buttonOnePressed,
+								  const std::string &buttonTwoText,
+								  std::function<void()> buttonTwoPressed,
+								  std::function<void()> cancelPressed);
 
 void androidThreeOptionCancelDialog(const std::string &title,
-                                    const std::string &msg,
-                                    const std::string &buttonOneText,
-                                    std::function<void()> buttonOnePressed,
-                                    const std::string &buttonTwoText,
-                                    std::function<void()> buttonTwoPressed,
-                                    const std::string &buttonThreeText,
-                                    std::function<void()> buttonThreePressed,
-                                    std::function<void()> cancelPressed);
+									const std::string &msg,
+									const std::string &buttonOneText,
+									std::function<void()> buttonOnePressed,
+									const std::string &buttonTwoText,
+									std::function<void()> buttonTwoPressed,
+									const std::string &buttonThreeText,
+									std::function<void()> buttonThreePressed,
+									std::function<void()> cancelPressed);
 
 std::string androidGetAppVersionString();
 
 void androidShareDialog(const std::string &message,
-                        const std::string &path,
-                        std::function<void(bool)> completionCallback);
+						const std::string &path,
+						std::function<void(bool)> completionCallback);
 
 void androidImageDialog(const std::string &copyToPath,
-                        std::function<void(bool success, std::string imgPath)> completionCallback);
+						std::function<void(bool success, std::string imgPath)> completionCallback);
 
 void androidFileDialog(std::string copyToPath,
-                       const std::vector<std::string> &allowedExtensions,
-                       std::function<void(std::string resultingPath,
-                                          bool success)> completionCallback);
+					   const std::vector<std::string> &allowedExtensions,
+					   std::function<void(std::string resultingPath, bool success)> completionCallback);
 
 void androidLaunchUrl(const std::string &url);
 
@@ -105,20 +104,19 @@ void androidStopDisplayingHtml();
 
 void androidCallJs(const std::string js);
 
-void registerWebViewOverlay(std::uintptr_t identifier,
-                            const std::function<void(const std::string &)> &jsCallback);
+void registerWebViewOverlay(std::uintptr_t identifier, const std::function<void(const std::string &)> &jsCallback);
 
 void unregisterWebViewOverlay(std::uintptr_t identifier);
 
 void notifyJSCallbacks(const std::string &jsValue);
 
-void androidDownloadFile(const std::string &url, const std::string &outputPath,
-                         const FileDownloaderCallbacks &callbacks);
+void androidDownloadFile(const std::string &url,
+						 const std::string &outputPath,
+						 const FileDownloaderCallbacks &callbacks);
 
 void androidCancelFileDownload(const std::string &url);
 
-bool androidEncodeAAC(const std::string &pathToOutput, const FloatBuffer &buff, int numChannels,
-                      int sampleRate);
+bool androidEncodeAAC(const std::string &pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
 
 std::string getAndroidTempDir();
 
@@ -138,8 +136,10 @@ void androidSetMainThreadRunner(MainThreadRunner *runner);
 
 void androidSetupMidiManager(std::shared_ptr<AllMidiDevicesAndroidImpl> impl);
 
-void androidSendMidi(const std::vector<uint8_t> &midiData, int deviceId, int portId,
-                     std::optional<uint64_t> timestampInNanoSeconds);
+void androidSendMidi(const std::vector<uint8_t> &midiData,
+					 int deviceId,
+					 int portId,
+					 std::optional<uint64_t> timestampInNanoSeconds);
 
 void androidDisplayMidiBLEPanel();
 
@@ -154,6 +154,7 @@ void androidScanForMidiBLEDevices();
 [[nodiscard]] bool hasExternalAudioInputs();
 
 [[nodiscard]] std::string getAudioInputName(int32_t deviceId);
+[[nodiscard]] int getAudioInputCount(int32_t deviceId);
 
 [[nodiscard]] int getAudioInputId(const std::string &name);
 
@@ -164,22 +165,22 @@ class EventDispatcher;
 EventDispatcher *getAndroidEventDispatcher();
 
 void callJNI(const std::string &methodName,
-             const std::string &arg1,
-             const std::string &arg2,
-             const std::string &arg3,
-             const std::string &arg4,
-             const std::string &arg5);
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3,
+			 const std::string &arg4,
+			 const std::string &arg5);
 
 void callJNI(const std::string &methodName,
-             const std::string &arg1,
-             const std::string &arg2,
-             const std::string &arg3,
-             const std::string &arg4);
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3,
+			 const std::string &arg4);
 
 void callJNI(const std::string &methodName,
-             const std::string &arg1,
-             const std::string &arg2,
-             const std::string &arg3);
+			 const std::string &arg1,
+			 const std::string &arg2,
+			 const std::string &arg3);
 
 void callJNI(const std::string &methodName, const std::string &arg1, const std::string &arg2);
 
@@ -199,8 +200,7 @@ bool callJNIForBoolean(const std::string &methodName, const std::string &arg1);
 
 bool callJNIForBoolean(const std::string &methodName, const std::string &arg1, int arg2);
 
-bool
-callJNIForBoolean(const std::string &methodName, const std::string &arg1, const std::string &arg2);
+bool callJNIForBoolean(const std::string &methodName, const std::string &arg1, const std::string &arg2);
 
 void callJNIForStringArray(const std::string &methodName, std::vector<std::string> &data);
 
@@ -228,52 +228,52 @@ std::string jstringToString(JNIEnv *jni, jstring text);
 
 class ScopedJni {
 public:
-    ScopedJni() {
-        mzAssert(jni == nullptr);
-        if (auto *appPtr = getAndroidAppPtr()) {
-            if (appPtr->activity->vm->GetEnv(reinterpret_cast<void **>(&jni), JNI_VERSION_1_6) !=
-                JNI_OK) {
-                success = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr) == JNI_OK;
-                attached = success;
-            } else {
-                success = true;
-                attached = false;
-            }
-        }
-    }
+	ScopedJni() {
+		mzAssert(jni == nullptr);
+		if (auto *appPtr = getAndroidAppPtr()) {
+			if (appPtr->activity->vm->GetEnv(reinterpret_cast<void **>(&jni), JNI_VERSION_1_6) != JNI_OK) {
+				success	 = appPtr->activity->vm->AttachCurrentThread(&jni, nullptr) == JNI_OK;
+				attached = success;
+			} else {
+				success	 = true;
+				attached = false;
+			}
+		}
+	}
 
-    ~ScopedJni() {
-        if (success && attached) {
-            if (auto *appPtr = getAndroidAppPtr()) {
-                appPtr->activity->vm->DetachCurrentThread();
-            }
-            jni = nullptr;
-        }
-    }
+	~ScopedJni() {
+		if (success && attached) {
+			if (auto *appPtr = getAndroidAppPtr()) {
+				appPtr->activity->vm->DetachCurrentThread();
+			}
+			jni = nullptr;
+		}
+	}
 
-    [[nodiscard]] JNIEnv *operator->() { return j(); }
+	[[nodiscard]] JNIEnv *operator->() { return j(); }
 
-    JNIEnv *j() { return jni; }
+	JNIEnv *j() { return jni; }
 
-    jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
-        if (auto *cl = getClass()) {
-            return jni->GetMethodID(cl, methodName.c_str(), signature.c_str());
-        }
-        return nullptr;
-    }
+	jmethodID getMethodID(const std::string &methodName, const std::string &signature) {
+		if (auto *cl = getClass()) {
+			return jni->GetMethodID(cl, methodName.c_str(), signature.c_str());
+		}
+		return nullptr;
+	}
 
-    jclass getClass() {
-        if (!success) {
-            return nullptr;
-        }
-        if (auto *appPtr = getAndroidAppPtr()) {
-            return (jclass) jni->GetObjectClass(appPtr->activity->clazz);;
-        }
-        return nullptr;
-    }
+	jclass getClass() {
+		if (!success) {
+			return nullptr;
+		}
+		if (auto *appPtr = getAndroidAppPtr()) {
+			return (jclass) jni->GetObjectClass(appPtr->activity->clazz);
+			;
+		}
+		return nullptr;
+	}
 
 private:
-    bool success = false;
-    bool attached = false;
-    JNIEnv *jni = nullptr;
+	bool success  = false;
+	bool attached = false;
+	JNIEnv *jni	  = nullptr;
 };
