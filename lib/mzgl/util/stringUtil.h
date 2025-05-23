@@ -24,6 +24,7 @@ std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces);
 
 std::string toLowerCase(std::string s);
 std::string toUpperCase(std::string s);
+std::string toLowerUnderscore(const std::string &input);
 
 template <typename T, typename = void>
 struct has_push_back : std::false_type {};

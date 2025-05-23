@@ -176,6 +176,14 @@ std::string toUpperCase(std::string s) {
 	return s;
 }
 
+std::string toLowerUnderscore(const std::string &input) {
+	std::string result = input;
+	std::transform(result.begin(), result.end(), result.begin(), [](char c) {
+		return (c == ' ') ? '_' : std::tolower(static_cast<unsigned char>(c));
+	});
+	return result;
+}
+
 std::string byteSizeToString(uint64_t bytes) {
 	char buf[256];
 	double size			= bytes;

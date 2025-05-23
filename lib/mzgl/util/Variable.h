@@ -14,8 +14,26 @@ public:
 		virtual void variableChanged() = 0;
 	};
 
+	class LambdaListener : public Listener {
+	public:
+		LambdaListener(Variable &_b, std::function<void(T)> _cb)
+			: cb(std::move(_cb))
+			, b(_b) {}
+
+		void variableChanged() override { cb(b); }
+
+	private:
+		std::function<void(T)> cb;
+		Variable &b;
+	};
+
 	explicit Variable(const T &var) { assign(var); }
 
+	virtual ~Variable() {
+		for (auto *listener: ownedListeners) {
+			delete listener;
+		}
+	}
 	[[maybe_unused]] const Variable<T> &operator=(const T &var) {
 		if (variable == var) {
 			return *this;
@@ -33,6 +51,11 @@ public:
 
 	auto getNumListeners() { return listeners.size(); }
 	void addListener(Listener *listener) { listeners.push_back(listener); }
+	void addListener(std::function<void(T)> variableChanged) {
+		auto *listener = new LambdaListener(*this, variableChanged);
+		ownedListeners.push_back(listener);
+		listeners.push_back(listener);
+	}
 	void removeListener(Listener *listener) {
 		listeners.erase(std::remove_if(std::begin(listeners),
 									   std::end(listeners),
@@ -71,6 +94,7 @@ private:
 	T variable;
 
 	std::vector<Listener *> listeners;
+	std::vector<Listener *> ownedListeners;
 };
 
 template <class T>
