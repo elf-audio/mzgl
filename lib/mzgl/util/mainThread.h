@@ -37,6 +37,11 @@ public:
 	void runOnMainThreadAndWait(std::function<void()> fn);
 
 	/**
+	 * Call only from main thread, it will run on the next loop round.
+	 */
+	void runOnNextMainLoop(std::function<void()> fn);
+
+	/**
 	 * only use this if you want to change which
 	 * thread is marked as the "main" thread -
 	 * all you have to do is call it on the

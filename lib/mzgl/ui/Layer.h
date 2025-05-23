@@ -45,6 +45,7 @@ public:
 	void sendToFront(Layer *child = nullptr);
 	void sendToBack(Layer *child = nullptr);
 
+	bool isInFront() const;
 	// override for when ui needs to be rebuilt
 	virtual void doLayout() {}
 
@@ -87,26 +88,26 @@ public:
 	bool _keyUp(int key);
 	void _updateDeprecated();
 
-	Layer *getParent();
+	Layer *getParent() const;
 	Layer *getRoot();
 
-	glm::vec2 getAbsolutePosition();
-	Rectf getAbsoluteRect();
+	glm::vec2 getAbsolutePosition() const;
+	Rectf getAbsoluteRect() const;
 
-	glm::vec2 getAbsolutePosition(glm::vec2 p);
-	Rectf getAbsoluteRect(const Rectf &r);
+	glm::vec2 getAbsolutePosition(glm::vec2 p) const;
+	Rectf getAbsoluteRect(const Rectf &r) const;
 	void setAbsolutePosition(glm::vec2 p);
-	glm::vec2 getLocalPosition(glm::vec2 pp);
+	glm::vec2 getLocalPosition(glm::vec2 pp) const;
 
 	// rather than absolute coords, this tries to give you the rect
 	// relative to an ancestor. If it can't find the ancestor, it will return false
-	bool getRectRelativeTo(const Layer *l, Rectf &r);
+	bool getRectRelativeTo(const Layer *l, Rectf &r) const;
 
 	// same functionality as getLocalPosition()
-	void absoluteToLocalCoords(float &xx, float &yy);
+	void absoluteToLocalCoords(float &xx, float &yy) const;
 
 	// same functionality as getAbsolutePosition()
-	void localToAbsoluteCoords(float &xx, float &yy);
+	void localToAbsoluteCoords(float &xx, float &yy) const;
 
 	void setBottomCenter(float x, float y) {
 		set(x - this->width / 2, y - this->height, this->width, this->height);

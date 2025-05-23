@@ -37,6 +37,10 @@ void MainThreadRunner::runOnMainThread(std::function<void()> fn) {
 	mzAssert(!isMainThread());
 	mainThreadQueue->enqueue(fn);
 }
+void MainThreadRunner::runOnNextMainLoop(std::function<void()> fn) {
+	mzAssert(isMainThread());
+	mainThreadQueue->enqueue(fn);
+}
 
 void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
 	if (isMainThread()) {

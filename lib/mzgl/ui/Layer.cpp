@@ -104,28 +104,22 @@ void Layer::layoutSelfAndChildren() {
 	}
 }
 
-bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) {
+bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) const {
 	if (parent == nullptr) return false;
 	if (parent == l) {
 		r = *this;
 		return true;
 	}
-
-	//	printf("=================================\n");
-	//	printf("Not direct parent\n");
 	Layer *curr = parent;
 	Rectf out	= *this;
 
-	//	int i = 1;
 	while (1) {
-		//		printf("run %d\n", i++);
 		if (curr == nullptr) {
 			return false;
 		}
 
 		out.x += curr->x;
 		out.y += curr->y;
-		//		printf("new xy: %.0f %.0f\n", out.x, out.y);
 		curr = curr->parent;
 
 		if (curr == l) {
@@ -321,7 +315,7 @@ void Layer::sendToFront(Layer *child) {
 	}
 }
 
-Layer *Layer::getParent() {
+Layer *Layer::getParent() const {
 	return parent;
 }
 
@@ -352,11 +346,11 @@ Layer *Layer::getLastChild() {
 	return children.back();
 }
 
-Rectf Layer::getAbsoluteRect() {
+Rectf Layer::getAbsoluteRect() const {
 	return getAbsoluteRect(*this);
 }
 
-glm::vec2 Layer::getAbsolutePosition() {
+glm::vec2 Layer::getAbsolutePosition() const {
 	return getAbsolutePosition(position());
 }
 
@@ -366,17 +360,17 @@ void Layer::setAbsolutePosition(glm::vec2 p) {
 	x += delta.x;
 	y += delta.y;
 }
-glm::vec2 Layer::getAbsolutePosition(glm::vec2 pos) {
+glm::vec2 Layer::getAbsolutePosition(glm::vec2 pos) const {
 	localToAbsoluteCoords(pos.x, pos.y);
 	return pos;
 }
 
-glm::vec2 Layer::getLocalPosition(glm::vec2 pos) {
+glm::vec2 Layer::getLocalPosition(glm::vec2 pos) const {
 	absoluteToLocalCoords(pos.x, pos.y);
 	return pos;
 }
 
-Rectf Layer::getAbsoluteRect(const Rectf &rr) {
+Rectf Layer::getAbsoluteRect(const Rectf &rr) const {
 	Rectf r;
 	glm::vec2 tl = getAbsolutePosition(rr.tl());
 	r.x			 = tl.x;
@@ -386,15 +380,15 @@ Rectf Layer::getAbsoluteRect(const Rectf &rr) {
 	return r;
 }
 
-void Layer::absoluteToLocalCoords(float &xx, float &yy) {
-	Layer *layer = this;
+void Layer::absoluteToLocalCoords(float &xx, float &yy) const {
+	const Layer *layer = this;
 	while ((layer = layer->getParent()) != nullptr) {
 		xx -= layer->x;
 		yy -= layer->y;
 	}
 }
-void Layer::localToAbsoluteCoords(float &xx, float &yy) {
-	Layer *layer = this;
+void Layer::localToAbsoluteCoords(float &xx, float &yy) const {
+	const Layer *layer = this;
 	while ((layer = layer->getParent()) != nullptr) {
 		xx += layer->x;
 		yy += layer->y;
@@ -444,9 +438,8 @@ void Layer::transferFocus(Layer *fromLayer, Layer *toLayer) {
 void Layer::clear() {
 	if (!g.focusedLayers.empty()) {
 		for (auto *ch: children) {
-			auto it = std::find_if(g.focusedLayers.begin(), g.focusedLayers.end(), [ch](auto && focus){
-				return focus.second == ch;
-			});
+			auto it = std::find_if(
+				g.focusedLayers.begin(), g.focusedLayers.end(), [ch](auto &&focus) { return focus.second == ch; });
 			if (it != g.focusedLayers.end()) {
 				mzAssert(false, "Can't delete a layer whilst there is an interaction going on with it!");
 				g.focusedLayers.erase(it);
@@ -461,6 +454,12 @@ void Layer::clear() {
 	children.clear();
 }
 
+bool Layer::isInFront() const {
+	if (parent) {
+		return parent->children.back() == this;
+	}
+	return false;
+}
 void Layer::positionAbove(Layer *l, float padding) {
 	x = l->x;
 	setBottom(l->y - padding);
