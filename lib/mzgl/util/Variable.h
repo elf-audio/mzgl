@@ -239,3 +239,41 @@ private:
 	std::reference_wrapper<AtomicVariable<T>> variable;
 	std::function<void(const T &)> callback;
 };
+
+class IndexedVariable {
+public:
+	int value = 0;
+	IndexedVariable(int v = 0, const std::vector<std::string> &_options = {})
+		: value(v)
+		, options(_options) {}
+	IndexedVariable &operator=(int v) {
+		assign(v);
+		return *this;
+	}
+	IndexedVariable &operator=(const IndexedVariable &o) {
+		assign(o.value);
+		return *this;
+	}
+	const std::vector<std::string> &getOptions() const { return options; }
+	int getNumOptions() const { return options.size(); }
+	const std::vector<std::string> options;
+
+	void addListener(std::function<void(int)> listener) { listeners.push_back(listener); }
+
+private:
+	void assign(int v) {
+		if (v < 0 || v >= static_cast<int>(options.size())) {
+			throw std::out_of_range("Index out of range");
+		}
+		if (value != v) {
+			value = v;
+			notifyListeners();
+		}
+	}
+	std::vector<std::function<void(int)>> listeners;
+	void notifyListeners() {
+		for (auto &listener: listeners) {
+			listener(value);
+		}
+	}
+};
