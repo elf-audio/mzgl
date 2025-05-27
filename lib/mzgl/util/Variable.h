@@ -4,7 +4,7 @@
 #include <atomic>
 #include <algorithm>
 #include <functional>
-
+#include "mzAssert.h"
 template <class T>
 class Variable {
 public:
@@ -42,7 +42,15 @@ public:
 		assign(var);
 		return *this;
 	}
+	void setWithoutNotification(const T &var) {
+		if constexpr (is_atomic<T>::value) {
+			variable.store(var.load());
+		} else {
+			variable = var;
+		}
+	}
 
+	[[nodiscard]] const T &get() const { return variable; }
 	bool operator==(const T &var) const { return variable == var; }
 	bool operator!=(const T &var) const { return variable != var; }
 	bool operator!() const { return !variable; }
@@ -242,7 +250,6 @@ private:
 
 class IndexedVariable {
 public:
-	int value = 0;
 	IndexedVariable(int v = 0, const std::vector<std::string> &_options = {})
 		: value(v)
 		, options(_options) {}
@@ -257,13 +264,20 @@ public:
 	const std::vector<std::string> &getOptions() const { return options; }
 	int getNumOptions() const { return options.size(); }
 	const std::vector<std::string> options;
-
+	int getValue() const { return value; }
 	void addListener(std::function<void(int)> listener) { listeners.push_back(listener); }
+	void setWithoutNotification(int v) {
+		if (v < 0 || v >= static_cast<int>(options.size())) {
+			mzAssert(false, "Index out of range");
+		}
+		value = v;
+	}
 
 private:
+	int value = 0;
 	void assign(int v) {
 		if (v < 0 || v >= static_cast<int>(options.size())) {
-			throw std::out_of_range("Index out of range");
+			mzAssert(false, "Index out of range");
 		}
 		if (value != v) {
 			value = v;
