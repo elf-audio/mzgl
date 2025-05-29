@@ -262,8 +262,13 @@ public:
 		return *this;
 	}
 	const std::vector<std::string> &getOptions() const { return options; }
+	void setOptions(const std::vector<std::string> &_options) {
+		options = _options;
+		if (value >= static_cast<int>(options.size())) {
+			value = 0; // reset to first option if current value is out of range
+		}
+	}
 	int getNumOptions() const { return options.size(); }
-	const std::vector<std::string> options;
 	int getValue() const { return value; }
 	void addListener(std::function<void(int)> listener) { listeners.push_back(listener); }
 	void setWithoutNotification(int v) {
@@ -274,6 +279,8 @@ public:
 	}
 
 private:
+	std::vector<std::string> options;
+
 	int value = 0;
 	void assign(int v) {
 		if (v < 0 || v >= static_cast<int>(options.size())) {
