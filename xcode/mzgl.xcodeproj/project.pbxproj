@@ -27,7 +27,7 @@
 		9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DA27E39E6B0081A5CB /* pwd2key.h */; };
 		9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0F25C954E600F890AE /* pa_trace.h */; };
 		9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836982432C18B00A5C3E8 /* stb_truetype.h */; };
-		9C62AAF42CF777A1008376A8 /* TextButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AB2432C18B00A5C3E8 /* TextButton.h */; };
+		9C62AAF42CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
 		9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC924A609CA000F057B /* YGLayout.h */; };
 		9C62AAF72CF777A1008376A8 /* MZGLWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA64AD7326A186D7001427AD /* MZGLWebView.h */; };
@@ -137,7 +137,7 @@
 		9C62AB5F2CF777A1008376A8 /* RootLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835BB2432C18B00A5C3E8 /* RootLayer.h */; };
 		9C62AB602CF777A1008376A8 /* pa_gitrevision.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0B25C954E600F890AE /* pa_gitrevision.h */; };
 		9C62AB612CF777A1008376A8 /* ioapi_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6C527E39E6B0081A5CB /* ioapi_mem.h */; };
-		9C62AB622CF777A1008376A8 /* ToggleButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A62432C18B00A5C3E8 /* ToggleButton.h */; };
+		9C62AB622CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB632CF777A1008376A8 /* FileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EF2432C18B00A5C3E8 /* FileWatcher.h */; };
 		9C62AB642CF777A1008376A8 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC624A609CA000F057B /* Utils.h */; };
 		9C62AB652CF777A1008376A8 /* pa_types.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BFF25C954E600F890AE /* pa_types.h */; };
@@ -158,7 +158,7 @@
 		9C62AB742CF777A1008376A8 /* pa_linux_alsa.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BEE25C954E600F890AE /* pa_linux_alsa.h */; };
 		9C62AB752CF777A1008376A8 /* DateTime.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E62432C18B00A5C3E8 /* DateTime.h */; };
 		9C62AB762CF777A1008376A8 /* mzgl_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836012432C18B00A5C3E8 /* mzgl_platform.h */; };
-		9C62AB772CF777A1008376A8 /* AlphaButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A32432C18B00A5C3E8 /* AlphaButton.h */; };
+		9C62AB772CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB782CF777A1008376A8 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AE2432C18B00A5C3E8 /* Layout.h */; };
 		9C62AB792CF777A1008376A8 /* AudioShareSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836912432C18B00A5C3E8 /* AudioShareSDK.h */; };
 		9C62AB7A2CF777A1008376A8 /* Rectf.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18361F2432C18B00A5C3E8 /* Rectf.h */; };
@@ -176,7 +176,7 @@
 		9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71FEE527F33B310005C47A /* ZipReader.h */; };
 		9C62AB872CF777A1008376A8 /* entropy.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6E227E39E6B0081A5CB /* entropy.h */; };
 		9C62AB882CF777A1008376A8 /* Image.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836422432C18B00A5C3E8 /* Image.h */; };
-		9C62AB892CF777A1008376A8 /* PadGrid.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835B72432C18B00A5C3E8 /* PadGrid.h */; };
+		9C62AB892CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB8A2CF777A1008376A8 /* event.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AE324A609CA000F057B /* event.h */; };
 		9C62AB8B2CF777A1008376A8 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18360A2432C18B00A5C3E8 /* App.h */; };
 		9C62AB8C2CF777A1008376A8 /* ScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A22432C18B00A5C3E8 /* ScrollingList.h */; };
@@ -327,8 +327,11 @@
 		9C62AC1E2CF777A1008376A8 /* DateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F22432C18B00A5C3E8 /* DateTime.cpp */; };
 		9C62AC1F2CF777A1008376A8 /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		9C62AC202CF777A1008376A8 /* MZGLWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA64AD7226A186D7001427AD /* MZGLWebView.mm */; };
-		9C62AC212CF777A1008376A8 /* PadGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835B82432C18B00A5C3E8 /* PadGrid.cpp */; };
+		9C62AC212CF777A1008376A8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		9C62AC222CF777A1008376A8 /* mainMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835D82432C18B00A5C3E8 /* mainMac.mm */; };
+		9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
+		9C9DC7552DE89CFB0070ACAC /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
+		9C9DC7562DE89D0B0070ACAC /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -3462,7 +3465,7 @@
 				9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */,
 				9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */,
 				9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */,
-				9C62AAF42CF777A1008376A8 /* TextButton.h in Headers */,
+				9C62AAF42CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */,
 				9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */,
 				9C62AAF72CF777A1008376A8 /* MZGLWebView.h in Headers */,
@@ -3572,7 +3575,7 @@
 				9C62AB5F2CF777A1008376A8 /* RootLayer.h in Headers */,
 				9C62AB602CF777A1008376A8 /* pa_gitrevision.h in Headers */,
 				9C62AB612CF777A1008376A8 /* ioapi_mem.h in Headers */,
-				9C62AB622CF777A1008376A8 /* ToggleButton.h in Headers */,
+				9C62AB622CF777A1008376A8 /* (null) in Headers */,
 				9C62AB632CF777A1008376A8 /* FileWatcher.h in Headers */,
 				9C62AB642CF777A1008376A8 /* Utils.h in Headers */,
 				9C62AB652CF777A1008376A8 /* pa_types.h in Headers */,
@@ -3593,7 +3596,7 @@
 				9C62AB742CF777A1008376A8 /* pa_linux_alsa.h in Headers */,
 				9C62AB752CF777A1008376A8 /* DateTime.h in Headers */,
 				9C62AB762CF777A1008376A8 /* mzgl_platform.h in Headers */,
-				9C62AB772CF777A1008376A8 /* AlphaButton.h in Headers */,
+				9C62AB772CF777A1008376A8 /* (null) in Headers */,
 				9C62AB782CF777A1008376A8 /* Layout.h in Headers */,
 				9C62AB792CF777A1008376A8 /* AudioShareSDK.h in Headers */,
 				9C62AB7A2CF777A1008376A8 /* Rectf.h in Headers */,
@@ -3611,7 +3614,7 @@
 				9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */,
 				9C62AB872CF777A1008376A8 /* entropy.h in Headers */,
 				9C62AB882CF777A1008376A8 /* Image.h in Headers */,
-				9C62AB892CF777A1008376A8 /* PadGrid.h in Headers */,
+				9C62AB892CF777A1008376A8 /* (null) in Headers */,
 				9C62AB8A2CF777A1008376A8 /* event.h in Headers */,
 				9C62AB8B2CF777A1008376A8 /* App.h in Headers */,
 				9C62AB8C2CF777A1008376A8 /* ScrollingList.h in Headers */,
@@ -4133,6 +4136,7 @@
 				9C62ABAE2CF777A1008376A8 /* Utils.cpp in Sources */,
 				9C62ABAF2CF777A1008376A8 /* Int16Buffer.cpp in Sources */,
 				9C62ABB02CF777A1008376A8 /* PortAudioSystem.cpp in Sources */,
+				9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */,
 				9C62ABB12CF777A1008376A8 /* Graphics.cpp in Sources */,
 				9C62ABB22CF777A1008376A8 /* YGConfig.cpp in Sources */,
 				9C62ABB32CF777A1008376A8 /* Triangulator.cpp in Sources */,
@@ -4188,6 +4192,7 @@
 				9C62ABE52CF777A1008376A8 /* FlexboxLayout.cpp in Sources */,
 				9C62ABE62CF777A1008376A8 /* unzipper.cpp in Sources */,
 				9C62ABE72CF777A1008376A8 /* Fbo.cpp in Sources */,
+				9C9DC7552DE89CFB0070ACAC /* FileDownloader.cpp in Sources */,
 				9C62ABE82CF777A1008376A8 /* ZipStreamer.cpp in Sources */,
 				9C62ABE92CF777A1008376A8 /* error.cpp in Sources */,
 				9C62ABEA2CF777A1008376A8 /* Yoga.cpp in Sources */,
@@ -4220,6 +4225,7 @@
 				9C62AC052CF777A1008376A8 /* FloatBuffer.cpp in Sources */,
 				9C62AC062CF777A1008376A8 /* pa_stream.c in Sources */,
 				9C62AC072CF777A1008376A8 /* stringUtil.cpp in Sources */,
+				9C9DC7562DE89D0B0070ACAC /* Base64.cpp in Sources */,
 				9C62AC082CF777A1008376A8 /* RoundedRect.cpp in Sources */,
 				9C62AC092CF777A1008376A8 /* NSBlockButton.m in Sources */,
 				9C62AC0A2CF777A1008376A8 /* Rectf.cpp in Sources */,
@@ -4245,7 +4251,7 @@
 				9C62AC1E2CF777A1008376A8 /* DateTime.cpp in Sources */,
 				9C62AC1F2CF777A1008376A8 /* MZGLEffectAU.mm in Sources */,
 				9C62AC202CF777A1008376A8 /* MZGLWebView.mm in Sources */,
-				9C62AC212CF777A1008376A8 /* PadGrid.cpp in Sources */,
+				9C62AC212CF777A1008376A8 /* (null) in Sources */,
 				9C62AC222CF777A1008376A8 /* mainMac.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4762,7 +4768,7 @@
 /* Begin XCBuildConfiguration section */
 		9C62AC252CF777A1008376A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9C2D5388C70047E060 /* mac.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_CXX_LIBRARY = "$(inherited)";
@@ -4774,10 +4780,13 @@
 					"$(inherited)",
 					MZGL_PLUGIN,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "-DMZGL_PLUGIN";
-				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DUSING_DESKTOP_AUV3=1",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -4785,7 +4794,7 @@
 		};
 		9C62AC262CF777A1008376A8 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */;
+			baseConfigurationReference = 9C038E9C2D5388C70047E060 /* mac.xcconfig */;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "$(inherited)";
 				CLANG_CXX_LIBRARY = "$(inherited)";
@@ -4793,9 +4802,12 @@
 				DEVELOPMENT_TEAM = CRYES5ME2M;
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = MZGL_PLUGIN;
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				OTHER_CFLAGS = "-DMZGL_PLUGIN";
-				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DUSING_DESKTOP_AUV3=1",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -4923,7 +4935,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRYES5ME2M;
 				EXECUTABLE_PREFIX = lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4939,7 +4951,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = CRYES5ME2M;
 				EXECUTABLE_PREFIX = lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};

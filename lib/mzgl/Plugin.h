@@ -205,10 +205,17 @@ public:
 
 	bool isInstrument() { return pluginIsInstrument; }
 	void hostUpdatedParameter(unsigned int i, float val) {
-		if (i >= params.size() || i < 0) return;
-		if (!params[i]->isIgnoringAutomation()) {
-			params[i]->set(val);
-			if (paramChanged) paramChanged(i, val);
+		try{
+			if (i >= params.size() || i < 0) return;
+			if (params[i] == nullptr) return;
+			if (!params[i]->isIgnoringAutomation()) {
+				params[i]->set(val);
+				if (paramChanged != nullptr){
+					paramChanged(i, val);
+				}
+			}
+		}catch(...){
+			
 		}
 	}
 

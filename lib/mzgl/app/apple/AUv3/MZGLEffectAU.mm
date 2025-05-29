@@ -171,6 +171,7 @@ struct Blocks {
 }
 
 - (void)setupParameters {
+#if TARGET_OS_IOS
 	NSMutableArray *paramList = [[NSMutableArray alloc] init];
 
 	const auto numParams = plugin->getNumParams();
@@ -204,10 +205,12 @@ struct Blocks {
 	plugin->sendUpdatedParameterToHost = [weakSelf](unsigned int i, float f) {
 		[[[weakSelf.parameterTree allParameters] objectAtIndex:i] setValue:f];
 	};
-	
+
 	_parameterTree.implementorValueObserver = ^(AUParameter *param, AUValue value) {
 		__strong __typeof__(self) strongSelf = weakSelf;
-		if (strongSelf && param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
+		if (!strongSelf) return;
+
+		if (param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
 			strongSelf->plugin->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
 		}
 	};
@@ -231,6 +234,68 @@ struct Blocks {
 		}
 		return @"?";
 	};
+#else
+	NSMutableArray *paramList = [[NSMutableArray alloc] init];
+
+	const auto numParams = plugin->getNumParams();
+	for (int paramIndex = 0; paramIndex < numParams; ++paramIndex) {
+		auto p = plugin->getParam(paramIndex);
+		if (!p) continue;
+
+		NSString *paramName = [NSString stringWithUTF8String:p->name.c_str()];
+		AUParameter *param = [AUParameterTree
+			createParameterWithIdentifier:paramName
+									 name:paramName
+								  address:paramIndex
+									  min:p->from
+									  max:p->to
+									 unit:kAudioUnitParameterUnit_Generic
+								 unitName:nil
+									flags:kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable | kAudioUnitParameterFlag_CanRamp
+							 valueStrings:nil
+					  dependentParameters:nil];
+
+		param.value = p->get();
+		[paramList addObject:param];
+	}
+
+	_parameterTree = [AUParameterTree createTreeWithChildren:paramList];
+
+	// Capture self and plugin explicitly
+	MZGLEffectAU* selfPtr = self;
+	std::shared_ptr<Plugin> pluginCopy = plugin;
+
+	plugin->sendUpdatedParameterToHost = [selfPtr](unsigned int i, float f) {
+		if (i < [[selfPtr->_parameterTree allParameters] count]) {
+			[selfPtr->_parameterTree allParameters][i].value = f;
+		}
+	};
+
+	_parameterTree.implementorValueObserver = ^(AUParameter *param, AUValue value) {
+		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+			pluginCopy->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
+		}
+	};
+
+	_parameterTree.implementorValueProvider = ^AUValue(AUParameter *param) {
+		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+			return pluginCopy->getParam(static_cast<unsigned int>(param.address))->get();
+		}
+		return 0.f;
+	};
+
+	_parameterTree.implementorStringFromValueCallback = ^(AUParameter *param, const AUValue *__nullable valuePtr) {
+		AUValue value = valuePtr ? *valuePtr : param.value;
+		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+			auto paramObj = pluginCopy->getParam(static_cast<unsigned int>(param.address));
+			if (paramObj->type == PluginParameter::Type::Int) {
+				return [NSString stringWithFormat:@"%.0f", value];
+			}
+			return [NSString stringWithFormat:@"%.2f", value];
+		}
+		return @"?";
+	};
+#endif
 }
 
 - (void) reserveBusses {
@@ -274,10 +339,6 @@ struct Blocks {
 	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
 														   busType:AUAudioUnitBusTypeInput
 															busses:@[_inputBus.bus]];
-
-	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-															busType:AUAudioUnitBusTypeOutput
-															 busses:outBusses];
 
 	[_outputBusArray addObserverToAllBusses:self
 								 forKeyPath:@"format"
@@ -348,6 +409,7 @@ struct Blocks {
 
 - (void)dealloc {
 	_factoryPresets = nil;
+	plugin.reset();
 }
 
 - (NSDictionary<NSString *, id> *)fullState {
@@ -450,10 +512,14 @@ struct Blocks {
 }
 
 - (AUAudioUnitBusArray *)inputBusses {
+#ifdef USING_DESKTOP_AUV3
+	return _inputBusArray;
+#else
 	if (isInstrument) {
 		return [super inputBusses];
 	}
 	return _inputBusArray;
+#endif
 }
 
 - (AUAudioUnitBusArray *)outputBusses {
@@ -563,6 +629,9 @@ struct Blocks {
 	std::vector<FloatBuffer> &outs = outputBuffers;
 
 	bool _isInstrument = isInstrument;
+#ifdef USING_DESKTOP_AUV3
+	_isInstrument = false;
+#endif
 
 	return ^AUAudioUnitStatus(AudioUnitRenderActionFlags *actionFlags,
 							  const AudioTimeStamp *timestamp,
