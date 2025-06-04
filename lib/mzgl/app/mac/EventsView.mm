@@ -138,51 +138,79 @@ int nsEventToKey(NSEvent *evt) {
 }
 - (void)mouseMoved:(NSEvent *)event {
 	auto mouse = [self transformMouse:event];
-
 	eventDispatcher->app->main.runOnMainThread(true,
 											   [self, mouse]() { eventDispatcher->touchOver(mouse.x, mouse.y); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
+
+/// ----------------
 - (void)mouseDown:(NSEvent *)event {
 	auto mouse = [self transformMouse:event];
-	int id	   = (int) [event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self, mouse, id]() {
-		static constexpr int Left  = 0;
-		static constexpr int Right = 1;
-
-		if (id == Left) eventDispatcher->touchDown(mouse.x, mouse.y, 0);
-		else if (id == Right) eventDispatcher->touchDown(mouse.x, mouse.y, RightMouseButton);
-		else eventDispatcher->touchDown(mouse.x, mouse.y, MiddleMouseButton);
-	});
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+- (void)rightMouseDown:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, RightMouseButton); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
+- (void)otherMouseDown:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, MiddleMouseButton); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+/// ------------------------
 - (void)mouseUp:(NSEvent *)event {
 	auto mouse = [self transformMouse:event];
-	int id	   = (int) [event buttonNumber];
-	eventDispatcher->app->main.runOnMainThread(true, [self, mouse, id]() {
-		static constexpr int Left  = 0;
-		static constexpr int Right = 1;
-		if (id == Left) eventDispatcher->touchUp(mouse.x, mouse.y, 0);
-		else if (id == Right) eventDispatcher->touchUp(mouse.x, mouse.y, RightMouseButton);
-		else eventDispatcher->touchUp(mouse.x, mouse.y, MiddleMouseButton);
-	});
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [self, mouse]() { eventDispatcher->touchUp(mouse.x, mouse.y, 0); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
-- (void)mouseDragged:(NSEvent *)event { // Mouse click-and-drag
+- (void)rightMouseUp:(NSEvent *)event {
 	auto mouse = [self transformMouse:event];
-	int id	   = (int) [event buttonNumber];
-
-	eventDispatcher->app->main.runOnMainThread(true, [self, mouse, id]() {
-		static constexpr int Left  = 0;
-		static constexpr int Right = 1;
-		if (id == Left) eventDispatcher->touchMoved(mouse.x, mouse.y, 0);
-		else if (id == Right) eventDispatcher->touchMoved(mouse.x, mouse.y, RightMouseButton);
-		else eventDispatcher->touchMoved(mouse.x, mouse.y, MiddleMouseButton);
-	});
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchUp(mouse.x, mouse.y, RightMouseButton); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
+
+- (void)otherMouseUp:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchUp(mouse.x, mouse.y, MiddleMouseButton); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+
+/// ------------------------
+
+- (void)mouseDragged:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchMoved(mouse.x, mouse.y, 0); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+
+- (void)rightMouseDragged:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchMoved(mouse.x, mouse.y, RightMouseButton); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+- (void)otherMouseDragged:(NSEvent *)event {
+	auto mouse = [self transformMouse:event];
+
+	eventDispatcher->app->main.runOnMainThread(
+		true, [self, mouse]() { eventDispatcher->touchMoved(mouse.x, mouse.y, MiddleMouseButton); });
+	NSEventDispatcher::instance().dispatch(event, self);
+}
+
+/// ------------------------
 
 - (void)scrollWheel:(NSEvent *)event { // Mouse scroll wheel movement
 	auto mouse = [self transformMouse:event];
