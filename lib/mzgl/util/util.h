@@ -78,6 +78,14 @@ void eraseIf(std::vector<T, A> &c, Predicate pred) {
 	c.erase(std::remove_if(c.begin(), c.end(), pred), c.end());
 }
 
+template <class T, class Predicate>
+void eraseFirstIf(std::vector<T> &c, Predicate pred) {
+	auto it = std::find_if(c.begin(), c.end(), pred);
+	if (it != c.end()) {
+		c.erase(it);
+	}
+}
+
 #ifdef __APPLE__
 void oslog(const std::string &s);
 #endif
