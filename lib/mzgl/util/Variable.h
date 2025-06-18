@@ -4,7 +4,9 @@
 #include <atomic>
 #include <algorithm>
 #include <functional>
+#include <string>
 #include "mzAssert.h"
+
 template <class T>
 class Variable {
 public:
