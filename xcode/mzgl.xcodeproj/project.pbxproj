@@ -667,16 +667,8 @@
 		EA73F06428E4670900395945 /* geomutils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA73F05E28E4670900395945 /* geomutils.h */; };
 		EA759B3F2715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
 		EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */; };
-		EA7721082BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
-		EA7721092BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
 		EA77210A2BF74F5B003607EB /* GraphicsAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721052BF74F5B003607EB /* GraphicsAPI.h */; };
 		EA77210B2BF74F5B003607EB /* GraphicsAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721052BF74F5B003607EB /* GraphicsAPI.h */; };
-		EA77210C2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
-		EA77210D2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
-		EA77210E2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
-		EA77210F2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
-		EA7721102BF74F5B003607EB /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
-		EA7721112BF74F5B003607EB /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
 		EA7855662472DBF40072FD05 /* nanovg_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855622472DBF40072FD05 /* nanovg_gl.h */; };
 		EA7855672472DBF40072FD05 /* nanovg.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855632472DBF40072FD05 /* nanovg.h */; };
 		EA7855682472DBF40072FD05 /* nanovg_gl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */; };
@@ -803,6 +795,72 @@
 		EAF67384289BC87E001F778D /* mainThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6737F289BC87E001F778D /* mainThread.cpp */; };
 		EAF67385289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
 		EAF67386289BC87E001F778D /* mainThread.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67380289BC87E001F778D /* mainThread.h */; };
+		EAF6F45F2E09AE8400DE5361 /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4352E09AE8400DE5361 /* OpenGLAPI.h */; };
+		EAF6F4602E09AE8400DE5361 /* font.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44B2E09AE8400DE5361 /* font.glsl.h */; };
+		EAF6F4612E09AE8400DE5361 /* SokolTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45B2E09AE8400DE5361 /* SokolTexture.h */; };
+		EAF6F4622E09AE8400DE5361 /* segmented.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44D2E09AE8400DE5361 /* segmented.glsl.h */; };
+		EAF6F4632E09AE8400DE5361 /* nothing.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44C2E09AE8400DE5361 /* nothing.glsl.h */; };
+		EAF6F4642E09AE8400DE5361 /* OpenGLVbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F43B2E09AE8400DE5361 /* OpenGLVbo.h */; };
+		EAF6F4652E09AE8400DE5361 /* SokolDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4532E09AE8400DE5361 /* SokolDefaultShaders.h */; };
+		EAF6F4662E09AE8400DE5361 /* tex.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44F2E09AE8400DE5361 /* tex.glsl.h */; };
+		EAF6F4672E09AE8400DE5361 /* slider.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44E2E09AE8400DE5361 /* slider.glsl.h */; };
+		EAF6F4682E09AE8400DE5361 /* OpenGLTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F43A2E09AE8400DE5361 /* OpenGLTexture.h */; };
+		EAF6F4692E09AE8400DE5361 /* SokolSamplerRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */; };
+		EAF6F46A2E09AE8400DE5361 /* SokolShaderRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45A2E09AE8400DE5361 /* SokolShaderRegistry.h */; };
+		EAF6F46B2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */; };
+		EAF6F46C2E09AE8400DE5361 /* SokolShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4582E09AE8400DE5361 /* SokolShader.h */; };
+		EAF6F46D2E09AE8400DE5361 /* SokolPipeline.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */; };
+		EAF6F46E2E09AE8400DE5361 /* OpenGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */; };
+		EAF6F46F2E09AE8400DE5361 /* sokolFontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */; };
+		EAF6F4702E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */; };
+		EAF6F4712E09AE8400DE5361 /* SokolVbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45C2E09AE8400DE5361 /* SokolVbo.h */; };
+		EAF6F4722E09AE8400DE5361 /* SokolAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4512E09AE8400DE5361 /* SokolAPI.h */; };
+		EAF6F4732E09AE8400DE5361 /* color.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4492E09AE8400DE5361 /* color.glsl.h */; };
+		EAF6F4742E09AE8400DE5361 /* SokolShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */; };
+		EAF6F4752E09AE8400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
+		EAF6F4762E09AE8400DE5361 /* SokolAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */; };
+		EAF6F4772E09AE8400DE5361 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
+		EAF6F4782E09AE8400DE5361 /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
+		EAF6F4792E09AE8400DE5361 /* SokolImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */; };
+		EAF6F47A2E09AE8400DE5361 /* SokolShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */; };
+		EAF6F47B2E09AE8400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
+		EAF6F47C2E09AE8400DE5361 /* SokolAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */; };
+		EAF6F47D2E09AE8400DE5361 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
+		EAF6F47E2E09AE8400DE5361 /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
+		EAF6F47F2E09AE8400DE5361 /* SokolImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */; };
+		EAF6F4802E09AE8400DE5361 /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4352E09AE8400DE5361 /* OpenGLAPI.h */; };
+		EAF6F4812E09AE8400DE5361 /* font.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44B2E09AE8400DE5361 /* font.glsl.h */; };
+		EAF6F4822E09AE8400DE5361 /* SokolTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45B2E09AE8400DE5361 /* SokolTexture.h */; };
+		EAF6F4832E09AE8400DE5361 /* segmented.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44D2E09AE8400DE5361 /* segmented.glsl.h */; };
+		EAF6F4842E09AE8400DE5361 /* nothing.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44C2E09AE8400DE5361 /* nothing.glsl.h */; };
+		EAF6F4852E09AE8400DE5361 /* OpenGLVbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F43B2E09AE8400DE5361 /* OpenGLVbo.h */; };
+		EAF6F4862E09AE8400DE5361 /* SokolDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4532E09AE8400DE5361 /* SokolDefaultShaders.h */; };
+		EAF6F4872E09AE8400DE5361 /* tex.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44F2E09AE8400DE5361 /* tex.glsl.h */; };
+		EAF6F4882E09AE8400DE5361 /* slider.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44E2E09AE8400DE5361 /* slider.glsl.h */; };
+		EAF6F4892E09AE8400DE5361 /* OpenGLTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F43A2E09AE8400DE5361 /* OpenGLTexture.h */; };
+		EAF6F48A2E09AE8400DE5361 /* SokolSamplerRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */; };
+		EAF6F48B2E09AE8400DE5361 /* SokolShaderRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45A2E09AE8400DE5361 /* SokolShaderRegistry.h */; };
+		EAF6F48C2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */; };
+		EAF6F48D2E09AE8400DE5361 /* SokolShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4582E09AE8400DE5361 /* SokolShader.h */; };
+		EAF6F48E2E09AE8400DE5361 /* SokolPipeline.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */; };
+		EAF6F48F2E09AE8400DE5361 /* OpenGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */; };
+		EAF6F4902E09AE8400DE5361 /* sokolFontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */; };
+		EAF6F4912E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */; };
+		EAF6F4922E09AE8400DE5361 /* SokolVbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F45C2E09AE8400DE5361 /* SokolVbo.h */; };
+		EAF6F4932E09AE8400DE5361 /* SokolAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4512E09AE8400DE5361 /* SokolAPI.h */; };
+		EAF6F4942E09AE8400DE5361 /* color.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4492E09AE8400DE5361 /* color.glsl.h */; };
+		EAF6F4982E09AEC200DE5361 /* sokol_log.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4962E09AEC200DE5361 /* sokol_log.h */; };
+		EAF6F4992E09AEC200DE5361 /* sokol_gfx.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4952E09AEC200DE5361 /* sokol_gfx.h */; };
+		EAF6F49A2E09AEC200DE5361 /* sokol_log.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4962E09AEC200DE5361 /* sokol_log.h */; };
+		EAF6F49B2E09AEC200DE5361 /* sokol_gfx.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4952E09AEC200DE5361 /* sokol_gfx.h */; };
+		EAF6F49C2E09AFBF00DE5361 /* SokolImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */; };
+		EAF6F49D2E09AFBF00DE5361 /* SokolImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */; };
+		EAF6F49E2E09AFF200DE5361 /* SokolShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */; };
+		EAF6F49F2E09AFF200DE5361 /* SokolShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */; };
+		EAF6F4A02E09B00400DE5361 /* SokolAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */; };
+		EAF6F4A12E09B00400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
+		EAF6F4A22E09B00400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
+		EAF6F4A32E09B00400DE5361 /* SokolAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */; };
 		EAF91F752AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
 		EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
 		EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
@@ -1181,10 +1239,7 @@
 		EA73F05D28E4670900395945 /* geomutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = geomutils.cpp; sourceTree = "<group>"; };
 		EA73F05E28E4670900395945 /* geomutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geomutils.h; sourceTree = "<group>"; };
 		EA759B3A2715A4DC0065B4D9 /* HierarchicalScrollingList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HierarchicalScrollingList.h; sourceTree = "<group>"; };
-		EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLDefaultShaders.h; sourceTree = "<group>"; };
 		EA7721052BF74F5B003607EB /* GraphicsAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsAPI.h; sourceTree = "<group>"; };
-		EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLAPI.cpp; sourceTree = "<group>"; };
-		EA7721072BF74F5B003607EB /* OpenGLAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenGLAPI.h; sourceTree = "<group>"; };
 		EA7855622472DBF40072FD05 /* nanovg_gl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl.h; sourceTree = "<group>"; };
 		EA7855632472DBF40072FD05 /* nanovg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg.h; sourceTree = "<group>"; };
 		EA7855642472DBF40072FD05 /* nanovg_gl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nanovg_gl_utils.h; sourceTree = "<group>"; };
@@ -1688,6 +1743,55 @@
 		EAF67378289BC441001F778D /* stringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stringUtil.h; sourceTree = "<group>"; };
 		EAF6737F289BC87E001F778D /* mainThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mainThread.cpp; sourceTree = "<group>"; };
 		EAF67380289BC87E001F778D /* mainThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainThread.h; sourceTree = "<group>"; };
+		EAF6F42A2E09AE8400DE5361 /* color.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = color.frag; sourceTree = "<group>"; };
+		EAF6F42B2E09AE8400DE5361 /* color.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = color.vert; sourceTree = "<group>"; };
+		EAF6F42C2E09AE8400DE5361 /* colorTexture.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = colorTexture.frag; sourceTree = "<group>"; };
+		EAF6F42D2E09AE8400DE5361 /* colorTexture.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = colorTexture.vert; sourceTree = "<group>"; };
+		EAF6F42E2E09AE8400DE5361 /* font.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = font.frag; sourceTree = "<group>"; };
+		EAF6F42F2E09AE8400DE5361 /* font.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = font.vert; sourceTree = "<group>"; };
+		EAF6F4302E09AE8400DE5361 /* nothing.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = nothing.frag; sourceTree = "<group>"; };
+		EAF6F4312E09AE8400DE5361 /* nothing.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = nothing.vert; sourceTree = "<group>"; };
+		EAF6F4322E09AE8400DE5361 /* tex.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = tex.frag; sourceTree = "<group>"; };
+		EAF6F4332E09AE8400DE5361 /* tex.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = tex.vert; sourceTree = "<group>"; };
+		EAF6F4352E09AE8400DE5361 /* OpenGLAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLAPI.h; sourceTree = "<group>"; };
+		EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLAPI.cpp; sourceTree = "<group>"; };
+		EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLDefaultShaders.h; sourceTree = "<group>"; };
+		EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLShader.h; sourceTree = "<group>"; };
+		EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLShader.cpp; sourceTree = "<group>"; };
+		EAF6F43A2E09AE8400DE5361 /* OpenGLTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLTexture.h; sourceTree = "<group>"; };
+		EAF6F43B2E09AE8400DE5361 /* OpenGLVbo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenGLVbo.h; sourceTree = "<group>"; };
+		EAF6F43D2E09AE8400DE5361 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		EAF6F43E2E09AE8400DE5361 /* modules.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = modules.xml; sourceTree = "<group>"; };
+		EAF6F43F2E09AE8400DE5361 /* Sokol.iml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Sokol.iml; sourceTree = "<group>"; };
+		EAF6F4402E09AE8400DE5361 /* vcs.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = vcs.xml; sourceTree = "<group>"; };
+		EAF6F4412E09AE8400DE5361 /* workspace.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = workspace.xml; sourceTree = "<group>"; };
+		EAF6F4432E09AE8400DE5361 /* color.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = color.glsl; sourceTree = "<group>"; };
+		EAF6F4442E09AE8400DE5361 /* colorTexture.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = colorTexture.glsl; sourceTree = "<group>"; };
+		EAF6F4452E09AE8400DE5361 /* font.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = font.glsl; sourceTree = "<group>"; };
+		EAF6F4462E09AE8400DE5361 /* nothing.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = nothing.glsl; sourceTree = "<group>"; };
+		EAF6F4472E09AE8400DE5361 /* tex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = tex.glsl; sourceTree = "<group>"; };
+		EAF6F4492E09AE8400DE5361 /* color.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = color.glsl.h; sourceTree = "<group>"; };
+		EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = colorTexture.glsl.h; sourceTree = "<group>"; };
+		EAF6F44B2E09AE8400DE5361 /* font.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = font.glsl.h; sourceTree = "<group>"; };
+		EAF6F44C2E09AE8400DE5361 /* nothing.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nothing.glsl.h; sourceTree = "<group>"; };
+		EAF6F44D2E09AE8400DE5361 /* segmented.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = segmented.glsl.h; sourceTree = "<group>"; };
+		EAF6F44E2E09AE8400DE5361 /* slider.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = slider.glsl.h; sourceTree = "<group>"; };
+		EAF6F44F2E09AE8400DE5361 /* tex.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tex.glsl.h; sourceTree = "<group>"; };
+		EAF6F4512E09AE8400DE5361 /* SokolAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolAPI.h; sourceTree = "<group>"; };
+		EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SokolAPI.cpp; sourceTree = "<group>"; };
+		EAF6F4532E09AE8400DE5361 /* SokolDefaultShaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolDefaultShaders.h; sourceTree = "<group>"; };
+		EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sokolFontstash.h; sourceTree = "<group>"; };
+		EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = SokolImplementation.cpp; sourceTree = "<group>"; };
+		EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolPipeline.h; sourceTree = "<group>"; };
+		EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolSamplerRegistry.h; sourceTree = "<group>"; };
+		EAF6F4582E09AE8400DE5361 /* SokolShader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolShader.h; sourceTree = "<group>"; };
+		EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SokolShader.cpp; sourceTree = "<group>"; };
+		EAF6F45A2E09AE8400DE5361 /* SokolShaderRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolShaderRegistry.h; sourceTree = "<group>"; };
+		EAF6F45B2E09AE8400DE5361 /* SokolTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolTexture.h; sourceTree = "<group>"; };
+		EAF6F45C2E09AE8400DE5361 /* SokolVbo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolVbo.h; sourceTree = "<group>"; };
+		EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SokolVbo.cpp; sourceTree = "<group>"; };
+		EAF6F4952E09AEC200DE5361 /* sokol_gfx.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sokol_gfx.h; sourceTree = "<group>"; };
+		EAF6F4962E09AEC200DE5361 /* sokol_log.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sokol_log.h; sourceTree = "<group>"; };
 		EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Int16Buffer.cpp; sourceTree = "<group>"; };
 		EAF99AB3267A40D200157A7C /* ScrollingListItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollingListItem.h; sourceTree = "<group>"; };
 		EAF99AB4267A415100157A7C /* ScrollingListItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollingListItem.cpp; sourceTree = "<group>"; };
@@ -1757,6 +1861,7 @@
 		EA182D402432C18800A5C3E8 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				EAF6F4972E09AEC200DE5361 /* sokol */,
 				EA6A6BE42B0FA0EA007026A7 /* farbot */,
 				EAAA54B02755436D00021ACA /* glm */,
 				EA297BEB25C954E600F890AE /* portaudio */,
@@ -2544,10 +2649,9 @@
 		EA7721032BF74F5B003607EB /* api */ = {
 			isa = PBXGroup;
 			children = (
-				EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */,
+				EAF6F43C2E09AE8400DE5361 /* OpenGL */,
+				EAF6F45E2E09AE8400DE5361 /* Sokol */,
 				EA7721052BF74F5B003607EB /* GraphicsAPI.h */,
-				EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */,
-				EA7721072BF74F5B003607EB /* OpenGLAPI.h */,
 			);
 			path = api;
 			sourceTree = "<group>";
@@ -3124,6 +3228,108 @@
 			path = net;
 			sourceTree = "<group>";
 		};
+		EAF6F4342E09AE8400DE5361 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F42A2E09AE8400DE5361 /* color.frag */,
+				EAF6F42B2E09AE8400DE5361 /* color.vert */,
+				EAF6F42C2E09AE8400DE5361 /* colorTexture.frag */,
+				EAF6F42D2E09AE8400DE5361 /* colorTexture.vert */,
+				EAF6F42E2E09AE8400DE5361 /* font.frag */,
+				EAF6F42F2E09AE8400DE5361 /* font.vert */,
+				EAF6F4302E09AE8400DE5361 /* nothing.frag */,
+				EAF6F4312E09AE8400DE5361 /* nothing.vert */,
+				EAF6F4322E09AE8400DE5361 /* tex.frag */,
+				EAF6F4332E09AE8400DE5361 /* tex.vert */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		EAF6F43C2E09AE8400DE5361 /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F4342E09AE8400DE5361 /* shaders */,
+				EAF6F4352E09AE8400DE5361 /* OpenGLAPI.h */,
+				EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */,
+				EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */,
+				EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */,
+				EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */,
+				EAF6F43A2E09AE8400DE5361 /* OpenGLTexture.h */,
+				EAF6F43B2E09AE8400DE5361 /* OpenGLVbo.h */,
+			);
+			path = OpenGL;
+			sourceTree = "<group>";
+		};
+		EAF6F4422E09AE8400DE5361 /* .idea */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F43D2E09AE8400DE5361 /* .gitignore */,
+				EAF6F43E2E09AE8400DE5361 /* modules.xml */,
+				EAF6F43F2E09AE8400DE5361 /* Sokol.iml */,
+				EAF6F4402E09AE8400DE5361 /* vcs.xml */,
+				EAF6F4412E09AE8400DE5361 /* workspace.xml */,
+			);
+			path = .idea;
+			sourceTree = "<group>";
+		};
+		EAF6F4482E09AE8400DE5361 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F4432E09AE8400DE5361 /* color.glsl */,
+				EAF6F4442E09AE8400DE5361 /* colorTexture.glsl */,
+				EAF6F4452E09AE8400DE5361 /* font.glsl */,
+				EAF6F4462E09AE8400DE5361 /* nothing.glsl */,
+				EAF6F4472E09AE8400DE5361 /* tex.glsl */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		EAF6F4502E09AE8400DE5361 /* xcodeShaders */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F4492E09AE8400DE5361 /* color.glsl.h */,
+				EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */,
+				EAF6F44B2E09AE8400DE5361 /* font.glsl.h */,
+				EAF6F44C2E09AE8400DE5361 /* nothing.glsl.h */,
+				EAF6F44D2E09AE8400DE5361 /* segmented.glsl.h */,
+				EAF6F44E2E09AE8400DE5361 /* slider.glsl.h */,
+				EAF6F44F2E09AE8400DE5361 /* tex.glsl.h */,
+			);
+			path = xcodeShaders;
+			sourceTree = "<group>";
+		};
+		EAF6F45E2E09AE8400DE5361 /* Sokol */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F4422E09AE8400DE5361 /* .idea */,
+				EAF6F4482E09AE8400DE5361 /* shaders */,
+				EAF6F4502E09AE8400DE5361 /* xcodeShaders */,
+				EAF6F4512E09AE8400DE5361 /* SokolAPI.h */,
+				EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */,
+				EAF6F4532E09AE8400DE5361 /* SokolDefaultShaders.h */,
+				EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */,
+				EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */,
+				EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */,
+				EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */,
+				EAF6F4582E09AE8400DE5361 /* SokolShader.h */,
+				EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */,
+				EAF6F45A2E09AE8400DE5361 /* SokolShaderRegistry.h */,
+				EAF6F45B2E09AE8400DE5361 /* SokolTexture.h */,
+				EAF6F45C2E09AE8400DE5361 /* SokolVbo.h */,
+				EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */,
+			);
+			path = Sokol;
+			sourceTree = "<group>";
+		};
+		EAF6F4972E09AEC200DE5361 /* sokol */ = {
+			isa = PBXGroup;
+			children = (
+				EAF6F4952E09AEC200DE5361 /* sokol_gfx.h */,
+				EAF6F4962E09AEC200DE5361 /* sokol_log.h */,
+			);
+			path = sokol;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -3135,7 +3341,6 @@
 				EA183FED2432C18D00A5C3E8 /* Camera.h in Headers */,
 				EA183FFC2432C18D00A5C3E8 /* MitredLine.h in Headers */,
 				EA1840062432C18D00A5C3E8 /* Vbo.h in Headers */,
-				EA7721082BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */,
 				EA1840102432C18D00A5C3E8 /* Graphics.h in Headers */,
 				EA18404B2432C18D00A5C3E8 /* glfontstash.h in Headers */,
 				EA71A75827E39E6C0081A5CB /* pwd2key.h in Headers */,
@@ -3158,6 +3363,29 @@
 				EA71A77427E39E6C0081A5CB /* brg_endian.h in Headers */,
 				EA297CAE25C954E600F890AE /* pa_mac_core_blocking.h in Headers */,
 				EA77210A2BF74F5B003607EB /* GraphicsAPI.h in Headers */,
+				EAF6F45F2E09AE8400DE5361 /* OpenGLAPI.h in Headers */,
+				EAF6F4602E09AE8400DE5361 /* font.glsl.h in Headers */,
+				EAF6F4612E09AE8400DE5361 /* SokolTexture.h in Headers */,
+				EAF6F4622E09AE8400DE5361 /* segmented.glsl.h in Headers */,
+				EAF6F4632E09AE8400DE5361 /* nothing.glsl.h in Headers */,
+				EAF6F4642E09AE8400DE5361 /* OpenGLVbo.h in Headers */,
+				EAF6F4652E09AE8400DE5361 /* SokolDefaultShaders.h in Headers */,
+				EAF6F4662E09AE8400DE5361 /* tex.glsl.h in Headers */,
+				EAF6F4672E09AE8400DE5361 /* slider.glsl.h in Headers */,
+				EAF6F4682E09AE8400DE5361 /* OpenGLTexture.h in Headers */,
+				EAF6F4692E09AE8400DE5361 /* SokolSamplerRegistry.h in Headers */,
+				EAF6F46A2E09AE8400DE5361 /* SokolShaderRegistry.h in Headers */,
+				EAF6F46B2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */,
+				EAF6F46C2E09AE8400DE5361 /* SokolShader.h in Headers */,
+				EAF6F46D2E09AE8400DE5361 /* SokolPipeline.h in Headers */,
+				EAF6F46E2E09AE8400DE5361 /* OpenGLShader.h in Headers */,
+				EAF6F46F2E09AE8400DE5361 /* sokolFontstash.h in Headers */,
+				EAF6F4982E09AEC200DE5361 /* sokol_log.h in Headers */,
+				EAF6F4992E09AEC200DE5361 /* sokol_gfx.h in Headers */,
+				EAF6F4702E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */,
+				EAF6F4712E09AE8400DE5361 /* SokolVbo.h in Headers */,
+				EAF6F4722E09AE8400DE5361 /* SokolAPI.h in Headers */,
+				EAF6F4732E09AE8400DE5361 /* color.glsl.h in Headers */,
 				EA234AF224A609CA000F057B /* YGNode.h in Headers */,
 				EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */,
 				EA71A79E27E39E6C0081A5CB /* tools.h in Headers */,
@@ -3284,7 +3512,6 @@
 				EA183FC92432C18D00A5C3E8 /* util.h in Headers */,
 				EA234AFF24A609CA000F057B /* YGStyle.h in Headers */,
 				EA183FA02432C18D00A5C3E8 /* iOSStyleWidgets.h in Headers */,
-				EA7721102BF74F5B003607EB /* OpenGLAPI.h in Headers */,
 				EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */,
 				EA183FB52432C18D00A5C3E8 /* TextConsole.h in Headers */,
 				EA71FEE727F33B310005C47A /* ZipReader.h in Headers */,
@@ -3414,6 +3641,27 @@
 				EA2B875A24E7093600EA12BD /* maths.h in Headers */,
 				EA71A75927E39E6C0081A5CB /* pwd2key.h in Headers */,
 				EA2B879324E7093600EA12BD /* nanovg_gl.h in Headers */,
+				EAF6F4802E09AE8400DE5361 /* OpenGLAPI.h in Headers */,
+				EAF6F4812E09AE8400DE5361 /* font.glsl.h in Headers */,
+				EAF6F4822E09AE8400DE5361 /* SokolTexture.h in Headers */,
+				EAF6F4832E09AE8400DE5361 /* segmented.glsl.h in Headers */,
+				EAF6F4842E09AE8400DE5361 /* nothing.glsl.h in Headers */,
+				EAF6F4852E09AE8400DE5361 /* OpenGLVbo.h in Headers */,
+				EAF6F4862E09AE8400DE5361 /* SokolDefaultShaders.h in Headers */,
+				EAF6F4872E09AE8400DE5361 /* tex.glsl.h in Headers */,
+				EAF6F4882E09AE8400DE5361 /* slider.glsl.h in Headers */,
+				EAF6F4892E09AE8400DE5361 /* OpenGLTexture.h in Headers */,
+				EAF6F48A2E09AE8400DE5361 /* SokolSamplerRegistry.h in Headers */,
+				EAF6F48B2E09AE8400DE5361 /* SokolShaderRegistry.h in Headers */,
+				EAF6F48C2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */,
+				EAF6F48D2E09AE8400DE5361 /* SokolShader.h in Headers */,
+				EAF6F48E2E09AE8400DE5361 /* SokolPipeline.h in Headers */,
+				EAF6F48F2E09AE8400DE5361 /* OpenGLShader.h in Headers */,
+				EAF6F4902E09AE8400DE5361 /* sokolFontstash.h in Headers */,
+				EAF6F4912E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */,
+				EAF6F4922E09AE8400DE5361 /* SokolVbo.h in Headers */,
+				EAF6F4932E09AE8400DE5361 /* SokolAPI.h in Headers */,
+				EAF6F4942E09AE8400DE5361 /* color.glsl.h in Headers */,
 				EA2B879524E7093600EA12BD /* MZGLKitViewController.h in Headers */,
 				EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */,
 				EA2B87C924E7093600EA12BD /* RecompilingDylib.h in Headers */,
@@ -3435,12 +3683,10 @@
 				EA2B88BA24E7093600EA12BD /* DateTime.h in Headers */,
 				EA71A77327E39E6C0081A5CB /* hmac.h in Headers */,
 				EA2B88CA24E7093600EA12BD /* mzgl_platform.h in Headers */,
-				EA7721092BF74F5B003607EB /* OpenGLDefaultShaders.h in Headers */,
 				EA71A7B927E39E6C0081A5CB /* ZipFile.h in Headers */,
 				EA2B88F324E7093600EA12BD /* Layout.h in Headers */,
 				EA2B88F524E7093600EA12BD /* AudioShareSDK.h in Headers */,
 				EA2B88F824E7093600EA12BD /* Rectf.h in Headers */,
-				EA7721112BF74F5B003607EB /* OpenGLAPI.h in Headers */,
 				EA2B890824E7093600EA12BD /* AudioFile.h in Headers */,
 				EA2B891224E7093600EA12BD /* Yoga.h in Headers */,
 				EA2B891324E7093600EA12BD /* RtMidiExtras.h in Headers */,
@@ -3448,6 +3694,8 @@
 				EA2B891C24E7093600EA12BD /* util.h in Headers */,
 				EA71FEE827F33B310005C47A /* ZipReader.h in Headers */,
 				EA2B892224E7093600EA12BD /* YGStyle.h in Headers */,
+				EAF6F49A2E09AEC200DE5361 /* sokol_log.h in Headers */,
+				EAF6F49B2E09AEC200DE5361 /* sokol_gfx.h in Headers */,
 				EA2B893824E7093600EA12BD /* iOSStyleWidgets.h in Headers */,
 				EA2B895524E7093600EA12BD /* TextConsole.h in Headers */,
 				EA2B898224E7093600EA12BD /* Image.h in Headers */,
@@ -3593,7 +3841,6 @@
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
 				EABBA6D82B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
-				EA77210C2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EADA5B292A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA234AFD24A609CA000F057B /* YGNodePrint.cpp in Sources */,
 				EA5250E82C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
@@ -3669,6 +3916,12 @@
 				EA71A7B027E39E6C0081A5CB /* ZipFile.cpp in Sources */,
 				EA71A78027E39E6C0081A5CB /* aestab.c in Sources */,
 				EA3120BC274143F900370205 /* appleMidiUtils.cpp in Sources */,
+				EAF6F4742E09AE8400DE5361 /* SokolShader.cpp in Sources */,
+				EAF6F4752E09AE8400DE5361 /* SokolVbo.cpp in Sources */,
+				EAF6F4762E09AE8400DE5361 /* SokolAPI.cpp in Sources */,
+				EAF6F4772E09AE8400DE5361 /* OpenGLAPI.cpp in Sources */,
+				EAF6F4782E09AE8400DE5361 /* OpenGLShader.cpp in Sources */,
+				EAF6F4792E09AE8400DE5361 /* SokolImplementation.cpp in Sources */,
 				EA183F862432C18D00A5C3E8 /* scales.cpp in Sources */,
 				EA71A77627E39E6C0081A5CB /* prng.c in Sources */,
 				EA183FEC2432C18D00A5C3E8 /* Camera.cpp in Sources */,
@@ -3727,6 +3980,8 @@
 			files = (
 				EA18412E2432C4FF00A5C3E8 /* errors.cpp in Sources */,
 				EA73F06028E4670900395945 /* geomutils.cpp in Sources */,
+				EAF6F4A02E09B00400DE5361 /* SokolAPI.cpp in Sources */,
+				EAF6F4A12E09B00400DE5361 /* SokolVbo.cpp in Sources */,
 				EA1841282432C4F300A5C3E8 /* Midi.cpp in Sources */,
 				EA71A7B527E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA71FEEA27F33B310005C47A /* ZipReader.cpp in Sources */,
@@ -3783,10 +4038,10 @@
 				EAD03BAF297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924362273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */,
-				EA77210D2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EA1841302432C4FF00A5C3E8 /* maths.cpp in Sources */,
 				EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
+				EAF6F49C2E09AFBF00DE5361 /* SokolImplementation.cpp in Sources */,
 				EA71A71F27E39E6B0081A5CB /* unzip.c in Sources */,
 				9C038E9F2D538A410047E060 /* Base64.cpp in Sources */,
 				EA71A79B27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -3836,6 +4091,7 @@
 				EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */,
 				EA71A78927E39E6C0081A5CB /* entropy.c in Sources */,
 				9C5EF32F2C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
+				EAF6F49E2E09AFF200DE5361 /* SokolShader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3869,6 +4125,12 @@
 				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
 				EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */,
 				EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */,
+				EAF6F47A2E09AE8400DE5361 /* SokolShader.cpp in Sources */,
+				EAF6F47B2E09AE8400DE5361 /* SokolVbo.cpp in Sources */,
+				EAF6F47C2E09AE8400DE5361 /* SokolAPI.cpp in Sources */,
+				EAF6F47D2E09AE8400DE5361 /* OpenGLAPI.cpp in Sources */,
+				EAF6F47E2E09AE8400DE5361 /* OpenGLShader.cpp in Sources */,
+				EAF6F47F2E09AE8400DE5361 /* SokolImplementation.cpp in Sources */,
 				EA71A72427E39E6B0081A5CB /* zip.c in Sources */,
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
 				EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */,
@@ -3905,7 +4167,6 @@
 				EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */,
 				EA2B8AF924E7093600EA12BD /* util.cpp in Sources */,
 				EA2B8AFA24E7093600EA12BD /* AudioSystem.cpp in Sources */,
-				EA77210E2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EA2B8AFC24E7093600EA12BD /* FlexboxLayout.cpp in Sources */,
 				EA2B8AFF24E7093600EA12BD /* Fbo.cpp in Sources */,
 				EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */,
@@ -4036,10 +4297,10 @@
 				EAD03BB1297FF53300D0C04A /* iOSWebView.mm in Sources */,
 				EA924364273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A77F27E39E6C0081A5CB /* pwd2key.c in Sources */,
-				EA77210F2BF74F5B003607EB /* OpenGLAPI.cpp in Sources */,
 				EAA44CD7267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EAF91F782AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA68946D261C633500F76B91 /* maths.cpp in Sources */,
+				EAF6F49D2E09AFBF00DE5361 /* SokolImplementation.cpp in Sources */,
 				EA68946E261C633500F76B91 /* Dylib.cpp in Sources */,
 				9C038EA02D538A410047E060 /* Base64.cpp in Sources */,
 				EA71A79D27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -4083,12 +4344,15 @@
 				EA71A72527E39E6B0081A5CB /* zip.c in Sources */,
 				EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */,
 				EA71A7A727E39E6C0081A5CB /* unzipper.cpp in Sources */,
+				EAF6F4A22E09B00400DE5361 /* SokolVbo.cpp in Sources */,
+				EAF6F4A32E09B00400DE5361 /* SokolAPI.cpp in Sources */,
 				EA689497261C633500F76B91 /* AVFoundationVideoGrabber.mm in Sources */,
 				EA68949A261C633500F76B91 /* Rectf.cpp in Sources */,
 				EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */,
 				EAF9A15426F8B42200698263 /* log.cpp in Sources */,
 				EA68949B261C633500F76B91 /* FloatBuffer.cpp in Sources */,
 				9C5EF3312C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
+				EAF6F49F2E09AFF200DE5361 /* SokolShader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
