@@ -171,9 +171,23 @@ void OpenGLShader::loadFromString(std::string vertCode, std::string fragCode) {
 
 	createProgram(vertexShader, fragmentShader);
 }
-
+#ifdef ANDROID
+#	include "androidUtil.h"
+static std::string fixAndroidDataPath(const std::string &s) {
+	std::string prefix = "../data/";
+	if (s.find(prefix) != -1) {
+		return s.substr(prefix.size());
+	}
+	mzAssert(false, "invalid android path");
+	return "";
+}
+#endif
 void OpenGLShader::load(const std::string &vertexFilePath, const std::string &fragFilePath) {
 	std::string vertSrc, fragSrc;
+#ifdef ANDROID
+	vertSrc = loadAndroidAssetAsString(fixAndroidDataPath(vertexFilePath));
+	fragSrc = loadAndroidAssetAsString(fixAndroidDataPath(fragFilePath));
+#else
 	if (!readStringFromFile(vertexFilePath, vertSrc)) {
 		mzAssertFail("Couldn't load vert file from " + vertexFilePath);
 	}
@@ -181,7 +195,7 @@ void OpenGLShader::load(const std::string &vertexFilePath, const std::string &fr
 	if (!readStringFromFile(fragFilePath, fragSrc)) {
 		mzAssertFail("Couldn't load frag file from " + vertexFilePath);
 	}
-
+#endif
 	loadFromString(vertSrc, fragSrc);
 }
 
