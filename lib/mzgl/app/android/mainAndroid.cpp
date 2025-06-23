@@ -545,6 +545,7 @@ void clearUpGLResources() {
 		((OpenGLShader *) shader)->shaderProgram = 0;
 	}
 #endif
+	graphics.currShader = nullptr;
 }
 
 bool ignoreNextGainedFocus = false;
