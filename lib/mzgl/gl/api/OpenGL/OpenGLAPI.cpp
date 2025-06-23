@@ -1,4 +1,5 @@
 #include "OpenGLAPI.h"
+#include "OpenGLShader.h"
 #include "OpenGLDefaultShaders.h"
 #include "log.h"
 #include "mzOpenGL.h"
