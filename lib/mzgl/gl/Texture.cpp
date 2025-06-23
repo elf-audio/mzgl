@@ -15,7 +15,7 @@
 #include "mzAssert.h"
 
 #ifdef __ANDROID__
-vector<Texture *> Texture::textures;
+std::vector<Texture *> Texture::textures;
 #endif
 
 #include "Image.h"

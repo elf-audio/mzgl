@@ -38,7 +38,7 @@ Shader::Shader(Graphics &g, std::string name)
 }
 
 #ifdef __ANDROID__
-vector<Shader *> Shader::shaders;
+std::vector<Shader *> Shader::shaders;
 #endif
 
 Shader::~Shader() {

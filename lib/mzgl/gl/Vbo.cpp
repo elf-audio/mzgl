@@ -21,6 +21,10 @@
 #	include "OpenGLVbo.h"
 #endif
 
+#ifdef __ANDROID__
+std::vector<Vbo *> Vbo::vbos;
+#endif
+
 VboRef Vbo::create() {
 #ifdef MZGL_SOKOL_METAL
 	return VboRef(new SokolVbo());
