@@ -861,6 +861,10 @@
 		EAF6F4A12E09B00400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
 		EAF6F4A22E09B00400DE5361 /* SokolVbo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F45D2E09AE8400DE5361 /* SokolVbo.cpp */; };
 		EAF6F4A32E09B00400DE5361 /* SokolAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4522E09AE8400DE5361 /* SokolAPI.cpp */; };
+		EAF6F4A42E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
+		EAF6F4A52E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
+		EAF6F4A62E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
+		EAF6F4A72E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
 		EAF91F752AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
 		EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
 		EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */; };
@@ -4049,6 +4053,8 @@
 				EA71A73D27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
 				EA4B48FC24588303000E79BF /* mainiOS.mm in Sources */,
 				EA234B1924A63513000F057B /* FlexboxLayout.cpp in Sources */,
+				EAF6F4A42E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
+				EAF6F4A52E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA1841142432C4A500A5C3E8 /* Image.mm in Sources */,
 				EA71A75B27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA18412D2432C4FF00A5C3E8 /* FileWatcher.cpp in Sources */,
@@ -4310,6 +4316,8 @@
 				EA689472261C633500F76B91 /* mainiOS.mm in Sources */,
 				EA689473261C633500F76B91 /* FlexboxLayout.cpp in Sources */,
 				EA71A75D27E39E6C0081A5CB /* aescrypt.c in Sources */,
+				EAF6F4A62E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
+				EAF6F4A72E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA71A78327E39E6C0081A5CB /* aestab.c in Sources */,
 				EA689474261C633500F76B91 /* Image.mm in Sources */,
 				EA689475261C633500F76B91 /* FileWatcher.cpp in Sources */,
