@@ -357,7 +357,7 @@ void setWindowSize(int w, int h) {
 	  dispatcher->resized();
 
 	  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (USEC_PER_SEC)), dispatch_get_main_queue(), ^{
-		MZGLView *view = (MZGLView *) win.delegate;
+		EventsView *view = (EventsView *) win.delegate;
 		[view windowResized:[[NSNotification alloc] initWithName:@"" object:win userInfo:nil]];
 		[win display];
 		[win center];

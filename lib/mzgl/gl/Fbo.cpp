@@ -65,12 +65,12 @@ bool checkFramebufferStatus(GLuint fbo) {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);   // unbind
 }
 
-void Fbo::setup(int w, int h, Texture::PixelFormat fmt, bool hasDepth, int numSamples) {
+void Fbo::setup(Graphics &g, int w, int h, Texture::PixelFormat fmt, bool hasDepth, int numSamples) {
 	deallocate();
 	this->width		 = w;
 	this->height	 = h;
 	this->numSamples = numSamples;
-	tex				 = Texture::create();
+	tex				 = Texture::create(g);
 	tex->allocate(w, h, fmt);
 
 	glGenFramebuffers(1, &fboId);
