@@ -18,6 +18,13 @@
 #include <utility>
 #include "GraphicsAPI.h"
 
+#include <array>
+#include <utility>
+
+void Graphics::init() {
+	api->init();
+}
+
 Graphics::~Graphics() = default;
 
 void Graphics::setBlending(bool shouldBlend) {
@@ -68,10 +75,6 @@ ScopedFill::~ScopedFill() {
 
 bool Graphics::isBlending() const {
 	return blendingEnabled;
-}
-
-Graphics::BlendMode Graphics::getBlendMode() const {
-	return blendMode;
 }
 
 glm::mat4 Graphics::getMVP() {
@@ -236,7 +239,7 @@ void Graphics::setColor(glm::vec4 c, float alpha) {
 	color.a = alpha;
 }
 
-glm::vec4 Graphics::getColor() const {
+const vec4 &Graphics::getColor() const {
 	return color;
 }
 
@@ -293,7 +296,7 @@ void Graphics::drawRect(const Rectf &r) {
 	if (isFilling()) {
 		drawVerts({r.tl(), r.tr(), r.br(), r.br(), r.bl(), r.tl()});
 	} else {
-		drawVerts({r.tl(), r.tr(), r.br(), r.bl()}, Vbo::PrimitiveType::LineLoop);
+		drawVerts({r.tl(), r.tr(), r.br(), r.bl(), r.tl()}, Vbo::PrimitiveType::LineStrip);
 	}
 }
 
@@ -316,17 +319,26 @@ void Graphics::drawCircle(float x, float y, float r) {
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
-	std::vector<glm::vec2> verts;
-	verts.reserve(circleResolution + 2);
-
-	for (const auto &[cosVal, sinVal]: sinCos) {
-		verts.emplace_back(x + cosVal * r, y + sinVal * r);
-	}
-
 	if (isFilling()) {
-		drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
+		std::vector<glm::vec2> verts;
+		verts.reserve(circleResolution * 2 + 2);
+
+		verts.emplace_back(x, y);
+		for (const auto &[cosVal, sinVal]: sinCos) {
+			verts.emplace_back(x + cosVal * r, y + sinVal * r);
+			verts.emplace_back(verts[0]);
+		}
+		verts.pop_back();
+		drawVerts(verts, Vbo::PrimitiveType::TriangleStrip);
 	} else {
-		drawVerts(verts, Vbo::PrimitiveType::LineLoop);
+		std::vector<glm::vec2> verts;
+		verts.reserve(circleResolution + 2);
+
+		for (const auto &[cosVal, sinVal]: sinCos) {
+			verts.emplace_back(x + cosVal * r, y + sinVal * r);
+		}
+		verts.emplace_back(verts.front());
+		drawVerts(verts, Vbo::PrimitiveType::LineStrip);
 	}
 }
 
@@ -336,32 +348,46 @@ void Graphics::drawArc(glm::vec2 c, float r, float startAngle, float endAngle) {
 	if (startAngle > endAngle) {
 		Log::e() << "drawArc doesn't wrap angles for now! Feel like implementing it?";
 	}
-	verts.reserve((endAngle - startAngle) / 0.1f + 2.f);
 
 	if (isFilling()) {
+		verts.reserve((endAngle - startAngle) * 2.f / 0.1f + 2.f);
+
 		verts.emplace_back(c);
-	}
 
-	// resolution is about 60
-	for (float f = startAngle; f < endAngle; f += 0.1) {
-		verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
-	}
-	if (startAngle != endAngle) {
-		verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
-	}
+		// resolution is about 60
+		for (float f = startAngle; f < endAngle; f += 0.1) {
+			verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+			verts.emplace_back(c);
+		}
+		if (startAngle != endAngle) {
+			verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
+			verts.emplace_back(c);
+		}
 
-	if (isFilling()) {
-		drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
+		verts.pop_back();
+		drawVerts(verts, Vbo::PrimitiveType::TriangleStrip);
 	} else {
-		Log::e() << "Warning! non-filled arcs not implemented in drawArc";
+		verts.reserve((endAngle - startAngle) / 0.1f + 2.f);
+
+		// resolution is about 60
+		for (float f = startAngle; f < endAngle; f += 0.1) {
+			verts.emplace_back(c.x + cos(f) * r, c.y + sin(f) * r);
+		}
+		if (startAngle != endAngle) {
+			verts.emplace_back(c.x + cos(endAngle) * r, c.y + sin(endAngle) * r);
+		}
+		drawLineStrip(verts);
 	}
 }
 
-void Graphics::setBlendMode(BlendMode blendMode) {
-	this->blendMode = blendMode;
+void Graphics::setBlendMode(BlendMode newBlendMode) {
+	blendMode = newBlendMode;
 	api->setBlendMode(blendMode);
 }
 
+Graphics::BlendMode Graphics::getBlendMode() const {
+	return blendMode;
+}
 void Graphics::drawVerts(const std::vector<glm::vec2> &verts,
 						 const std::vector<glm::vec4> &cols,
 						 Vbo::PrimitiveType type) {
@@ -402,8 +428,7 @@ void Graphics::drawLineStrip(const std::vector<vec2> &pts) {
 
 void Graphics::drawRoundedRect(const Rectf &r, float radius) {
 	if (radius < 2) drawRect(r);
-	VboRef m = Vbo::create();
-	makeRoundedRectVbo(m, r, radius, isFilling());
+	auto m = makeRoundedRectVbo(r, radius, isFilling());
 	m->draw(*this);
 }
 
@@ -444,7 +469,7 @@ std::vector<unsigned char> Graphics::getDefaultFontTTFData() {
 Font &Graphics::getFont() {
 	if (font == nullptr) {
 		font = new Font();
-		font->load(getDefaultFontData(), 42);
+		font->load(*this, getDefaultFontData(), 42);
 	}
 	return *font;
 }
@@ -460,7 +485,7 @@ void Graphics::reloadFont() {
 		getFont();
 		return;
 	}
-	font->load(getDefaultFontData(), 42);
+	font->load(*this, getDefaultFontData(), 42);
 }
 
 void Graphics::warpMaskForScissor(Rectf &a) {
@@ -469,6 +494,7 @@ void Graphics::warpMaskForScissor(Rectf &a) {
 
 #include "Triangulator.h"
 void Graphics::drawShape(const std::vector<vec2> &shape) {
+	if (shape.empty()) return;
 	if (isFilling()) {
 		Triangulator t;
 		std::vector<std::vector<vec2>> verts = {shape};
@@ -480,7 +506,9 @@ void Graphics::drawShape(const std::vector<vec2> &shape) {
 		vbo->setIndices(indices);
 		vbo->draw(*this, Vbo::PrimitiveType::Triangles);
 	} else {
-		drawVerts(shape, Vbo::PrimitiveType::LineLoop);
+		auto verts = shape;
+		verts.push_back(verts[0]);
+		drawVerts(verts, Vbo::PrimitiveType::LineStrip);
 	}
 }
 void Graphics::drawText(const std::string &s, float x, float y) {
@@ -541,16 +569,26 @@ void Graphics::clear(float c) {
 void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
 }
+#ifdef MZGL_SOKOL_METAL
+#	include "SokolAPI.h"
+#else
+#	include "OpenGLAPI.h"
+#endif
 
-#include "OpenGLAPI.h"
 Graphics::Graphics() {
+#ifdef MZGL_SOKOL_METAL
+	api = std::make_unique<SokolAPI>(*this);
+#else
 	api = std::make_unique<OpenGLAPI>(*this);
+#endif
 }
 
 int32_t Graphics::getDefaultFrameBufferId() {
+#ifndef MZGL_SOKOL_METAL
 	if (auto *openGLApi = dynamic_cast<OpenGLAPI *>(api.get())) {
-		openGLApi->getDefaultFrameBufferId();
+		return openGLApi->getDefaultFrameBufferId();
 	}
+#endif
 	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
 	return 0;
 }

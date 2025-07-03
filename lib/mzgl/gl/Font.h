@@ -17,8 +17,8 @@ enum class VTextAlign { Top, Centre, Bottom, Baseline };
 
 class Font {
 public:
-	bool load(std::string path, float fontSize);
-	bool load(const std::vector<unsigned char> &data, float fontSize);
+	bool load(Graphics &g, std::string path, float fontSize);
+	bool load(Graphics &g, const std::vector<unsigned char> &data, float fontSize);
 
 	void draw(Graphics &g, const std::string &text, float x, float y);
 	void draw(Graphics &g, const std::string &text, glm::vec2 c);
@@ -60,7 +60,7 @@ public:
 
 	std::vector<std::string> wrapText(const std::string &text, float width) const;
 
-	TextureRef getAtlasTexture();
+	TextureRef getAtlasTexture(Graphics &g);
 
 	Font();
 	virtual ~Font();

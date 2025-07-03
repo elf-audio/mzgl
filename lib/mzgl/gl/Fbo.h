@@ -17,7 +17,9 @@ public:
 	int height = 0;
 	TextureRef tex;
 
-	void setup(int w,
+	// TODO: could probably remove quite a lot of Graphics &gs from here
+	void setup(Graphics &g,
+			   int w,
 			   int h,
 			   Texture::PixelFormat format = Texture::PixelFormat::RGBA,
 			   bool hasDepth			   = false,

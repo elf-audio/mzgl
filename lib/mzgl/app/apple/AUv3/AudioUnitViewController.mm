@@ -31,7 +31,8 @@ using namespace std;
 	MZGLKitViewController *vc;
 	MZGLKitView *glView;
 #else
-	MZGLView *glView;
+
+	EventsView *glView;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 #endif
 	MZGLEffectAU *audioUnit;
@@ -92,7 +93,7 @@ using namespace std;
 	return glView;
 }
 #else
-- (MZGLView *)getView {
+- (EventsView *)getView {
 	return glView;
 }
 #endif
