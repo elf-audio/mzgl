@@ -15,6 +15,33 @@ function(mzgl_add_xcode_header_search_path PATH)
       CACHE STRING "Global header search paths" FORCE)
 endfunction()
 
+function(mzgl_patch_cmake_version CMAKE_LISTS_PATH)
+  if(NOT EXISTS "${CMAKE_LISTS_PATH}")
+    message(
+      WARNING "CMakeLists.txt not found at ${CMAKE_LISTS_PATH}, skipping patch."
+    )
+    return()
+  endif()
+
+  file(READ "${CMAKE_LISTS_PATH}" _cmake_content)
+
+  string(
+    REGEX
+    REPLACE "cmake_minimum_required\\(VERSION +[0-9]+\\.[0-9]+(\\.[0-9]+)?\\)"
+            "cmake_minimum_required(VERSION 3.5...${CMAKE_VERSION})"
+            _cmake_content "${_cmake_content}")
+
+  string(REGEX
+         REPLACE "cmake_policy\\( *VERSION +[0-9]+\\.[0-9]+(\\.[0-9]+)? *\\)"
+                 "cmake_policy(VERSION 3.5)" _cmake_content "${_cmake_content}")
+
+  file(WRITE "${CMAKE_LISTS_PATH}" "${_cmake_content}")
+  message(
+    STATUS
+      "Patched ${CMAKE_LISTS_PATH} to use minimum CMake version 3.5 for compatibility."
+  )
+endfunction()
+
 # @brief Write the include paths to a file in cpm-source-cache
 #
 # Writes a xcode compatible file to include from
@@ -106,6 +133,9 @@ function(mzgl_add_package PACKAGE_NAME)
   set("${CPM_LAST_PACKAGE_NAME}_DEPS_DIR"
       "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}"
       CACHE INTERNAL "${CPM_LAST_PACKAGE_NAME} Deps dir")
+
+  mzgl_patch_cmake_version(
+    "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}/CMakeLists.txt")
 
   mzgl_restore_cmake_log_level()
   mzgl_print_debug_in_grey("      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
