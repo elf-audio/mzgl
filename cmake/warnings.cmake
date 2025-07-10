@@ -1,5 +1,5 @@
 function(mzgl_supress_target_warnings TARGET)
-  mzgl_print_in_green("Supressing warnings in ${TARGET}")
+  mzgl_print_in_red("[WARNINGS] -> Supressed in ${TARGET}")
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
     target_compile_options("${TARGET}" PRIVATE -w)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
