@@ -1,5 +1,5 @@
 function(mzgl_supress_target_warnings TARGET)
-  mzgl_print_in_green("Supressing warnings in ${TARGET}")
+  mzgl_print_in_red("[WARNINGS] -> Supressed in ${TARGET}")
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
     target_compile_options("${TARGET}" PRIVATE -w)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -15,10 +15,5 @@ function(mzgl_supress_warnings)
   mzgl_supress_target_warnings(ZipFile)
   if(NOT WIN32)
     mzgl_supress_target_warnings(staticZipper)
-  endif()
-  if(NOT ANDROID
-     AND NOT WIN32
-     AND NOT IOS)
-    mzgl_supress_target_warnings(PortAudio)
   endif()
 endfunction()

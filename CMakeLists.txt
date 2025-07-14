@@ -230,7 +230,10 @@ set(HEADERS
     # lib/ghc-filesystem/include
 )
 
+mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/ghc-filesystem")
+mzgl_save_cmake_log_level()
 add_subdirectory(lib/ghc-filesystem EXCLUDE_FROM_ALL)
+mzgl_restore_cmake_log_level()
 # include_directories() list(APPEND HEADERS "${filesystem_SOURCE_DIR}/include")
 set(YOGA_SOURCES
     lib/yoga/Utils.cpp
@@ -267,7 +270,10 @@ endif(MZGL_UNIT_TEST)
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
 
+mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/ZipFile")
+mzgl_save_cmake_log_level()
 add_subdirectory(lib/ZipFile EXCLUDE_FROM_ALL)
+mzgl_restore_cmake_log_level()
 # add_dependencies(libmzgl pugixml)
 
 # Apple platforms have a special audio file reader
@@ -409,17 +415,16 @@ else()
   list(APPEND MZGL_LIBS z)
 endif()
 
-cmake_policy(SET CMP0077 NEW)
-set(PA_BUILD_STATIC ON) # CACHE BOOL "build portaudio static library")
-set(PA_BUILD_SHARED OFF) # CACHE BOOL "build portaudio shared library")
-
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE
 # "lib-windows/release-${OF_PLATFORM}-${ARCH_BIT}")
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG
 # "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
 
 if(NOT ANDROID)
+  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
+  mzgl_save_cmake_log_level()
   add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
+  mzgl_restore_cmake_log_level()
 
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
   # add_subdirectory("lib/RtMidi" "rtmidi-build")
@@ -471,7 +476,23 @@ elseif(APPLE)
   add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
   target_link_libraries(
     libmzgl
-    "-framework OpenGL -framework Metal -framework MetalKit -framework Accelerate -framework AppKit -framework StoreKit -framework CoreVideo -framework CoreMidi -framework CoreAudio -framework AVFoundation -framework CoreMedia -framework WebKit -framework AudioUnit -framework CoreAudioKit -framework UniformTypeIdentifiers"
+    "-framework OpenGL"
+    "-framework Metal"
+    "-framework MetalKit"
+    "-framework Accelerate"
+    "-framework AppKit" 
+    "-framework StoreKit"
+    "-framework CoreVideo"
+    "-framework CoreMidi"
+    "-framework CoreAudio"
+    "-framework AVFoundation"
+    "-framework CoreMedia"
+    "-framework WebKit"
+    "-framework AudioUnit"
+    "-framework CoreAudioKit"
+    "-framework UniformTypeIdentifiers"
+    "-framework AudioToolbox"
+    "-framework IOKit"
   )
 
 elseif(WIN32)
@@ -540,19 +561,17 @@ elseif(LINUX)
     ${ALSA_LIBRARIES})
 endif()
 
-if(NOT ANDROID
-   AND NOT WIN32
-   AND NOT IOS)
-  add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
-  list(APPEND MZGL_LIBS PortAudio)
-endif()
-if(WIN32)
-  add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
-  list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
-endif()
-
 if(NOT ANDROID AND NOT IOS)
-  list(APPEND MZGL_LIBS RtMidi glfw)
+  mzgl_add_portaudio()
+  mzgl_print_verbose_in_cyan("ADDING PORTAUDIO")
+  list(
+    APPEND
+    MZGL_LIBS
+    RtMidi
+    glfw
+    PortAudio
+    $<$<PLATFORM_ID:Windows>:Urlmon
+    Wininet>)
 endif()
 
 target_link_libraries(libmzgl ${MZGL_LIBS})

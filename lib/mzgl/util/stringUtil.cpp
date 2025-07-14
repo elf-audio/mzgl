@@ -303,3 +303,17 @@ bool endsWith(const std::string &stringToSearch, const std::string &suffix, Case
 	}
 	return endsWith(stringToSearch, suffix);
 }
+
+std::vector<std::string> tokenize(const std::string &path, const char delimiter) {
+	std::vector<std::string> tokens;
+	std::istringstream stream(path);
+	std::string token;
+
+	while (std::getline(stream, token, delimiter)) {
+		if (!token.empty()) {
+			tokens.push_back(token);
+		}
+	}
+
+	return tokens;
+}
