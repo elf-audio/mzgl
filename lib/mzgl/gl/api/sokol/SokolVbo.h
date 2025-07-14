@@ -9,6 +9,8 @@ class Graphics;
 class Shader;
 class SokolVbo : public Vbo {
 public:
+	~SokolVbo() override = default;
+	
 	void clear() {}
 
 	class Buffer {

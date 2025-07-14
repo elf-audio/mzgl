@@ -393,9 +393,10 @@ if(USING_SOKOL)
   add_compile_definitions(MZGL_SOKOL_METAL)
 endif()
 
+if(APPLE)
 # choose the sokol backend for platform
 add_compile_definitions(SOKOL_METAL)
-
+endif()
 
 
 
