@@ -101,7 +101,7 @@ public:
 	}
 
 private:
-	std::vector<std::string> macExcludes = {"glfw", "MetalANGLE"};
+	std::vector<std::string> macExcludes = {"glfw"};
 	std::string lastErrorStr;
 
 	std::string makeUserIncludes() {
