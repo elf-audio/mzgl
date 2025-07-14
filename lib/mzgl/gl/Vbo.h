@@ -27,76 +27,51 @@ class Geometry;
 
 class Vbo {
 public:
-	class Buffer {
-	public:
-		uint32_t id			= 0;
-		uint32_t size		= 0;
-		uint32_t dimensions = 0;
-
-		void deallocate();
-	};
 	enum class PrimitiveType {
 		Triangles,
 		TriangleStrip,
-		TriangleFan,
-		LineLoop,
 		LineStrip,
 		Lines,
 		None,
 	};
 
-	uint32_t vertexArrayObject;
-	Buffer vertexBuffer;
-	Buffer colorbuffer;
-	Buffer texCoordBuffer;
-	Buffer normalBuffer;
-	Buffer indexBuffer;
-
-	static VboRef create() { return VboRef(new Vbo()); }
+	static VboRef create();
 
 	virtual ~Vbo();
 
-#ifdef __ANDROID__
-	static std::vector<Vbo *> vbos;
-	static void printVbos();
-#endif
-	void clear();
+	virtual Vbo &setVertices(const std::vector<vec2> &verts) = 0;
+	virtual Vbo &setVertices(const std::vector<vec3> &verts) = 0;
+	virtual Vbo &setVertices(const std::vector<vec4> &verts) = 0;
 
-	Vbo &setVertices(const std::vector<vec2> &verts);
-	Vbo &setVertices(const std::vector<vec3> &verts);
-	Vbo &setVertices(const std::vector<vec4> &verts);
+	virtual Vbo &setColors(const std::vector<vec4> &cols)											= 0;
+	virtual Vbo &setTexCoords(const std::vector<vec2> &tcs)											= 0;
+	virtual Vbo &setNormals(const std::vector<vec3> &norms)											= 0;
+	virtual Vbo &setIndices(const std::vector<unsigned int> &indices)								= 0;
+	virtual size_t getNumVerts()																	= 0;
+	virtual void draw_(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1) = 0;
 
-	Vbo &setColors(const std::vector<vec4> &cols);
-	Vbo &setTexCoords(const std::vector<vec2> &tcs);
-	Vbo &setNormals(const std::vector<vec3> &norms);
-	Vbo &setIndices(const std::vector<unsigned int> &indices);
-
+	virtual void deallocate() = 0;
+	////////////////////////////////////////////
 	Vbo &setGeometry(const Geometry &geom);
-
 	Vbo &setMode(PrimitiveType mode);
 
 	// if primitive type is none, it will use whatever PrimitiveType stored in the vbo
-	void draw(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1);
 	void draw(Graphics &g, vec2 offset);
 	void drawInstanced(Graphics &g, size_t instances) { draw(g, PrimitiveType::None, instances); };
-	size_t getNumVerts() { return vertexBuffer.size; }
-
+	void draw(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1);
 #ifdef DO_DRAW_STATS
 	static int numDrawnVerts;
 	static int numDrawCalls;
 	static void resetDrawStats();
 #endif
-private:
-#ifdef DO_DRAW_STATS
-	static int _numDrawnVerts;
-	static int _numDrawCalls;
+
+#ifdef __ANDROID__
+	static std::vector<Vbo *> vbos;
 #endif
-	void chooseShaderAndSetDefaults(Graphics &g);
 
-	PrimitiveType mode = PrimitiveType::None;
-
-	void deallocateResources();
+protected:
+	Vbo();
 
 private:
-	Vbo();
+	PrimitiveType mode = PrimitiveType::Triangles;
 };

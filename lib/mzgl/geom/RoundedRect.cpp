@@ -10,7 +10,7 @@
 #include "maths.h"
 #include "Graphics.h"
 #include "MitredLine.h"
-
+#include "Drawer.h"
 using namespace std;
 
 vector<glm::vec2> roundedRectCache;
@@ -22,15 +22,18 @@ void createRoundedRectCache(vector<glm::vec2> &cache, int numSteps) {
 	}
 }
 
-void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid, float strokeWeight) {
-	m->clear();
+VboRef makeRoundedRectVbo(const Rectf &r, float radius, bool solid, float strokeWeight) {
 	vector<glm::vec2> verts;
 	getRoundedRectVerts(r, radius, verts);
 
 	if (solid) {
-		m->setVertices(verts);
-		m->setMode(Vbo::PrimitiveType::TriangleFan);
+		Drawer d;
+		d.setColor(1);
+		d.drawTriangleFan(verts);
+		return d.createVbo();
+
 	} else {
+		auto m = Vbo::create();
 		MitredLine lineDrawer;
 
 		verts.pop_back();
@@ -45,6 +48,7 @@ void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid, floa
 		m->setIndices(indices);
 
 		m->setMode(Vbo::PrimitiveType::TriangleStrip);
+		return m;
 	}
 }
 
@@ -120,14 +124,11 @@ void RoundedRect::touch() {
 void RoundedRect::draw(Graphics &g, const Rectf &r, float radius) {
 	if (mesh == nullptr || r != oldRect || oldSolid != g.isFilling() || radius != oldRadius
 		|| g.getStrokeWeight() != oldStrokeWeight) {
-		if (mesh == nullptr) {
-			mesh = Vbo::create();
-		}
 		oldRect			= r;
 		oldSolid		= g.isFilling();
 		oldRadius		= radius;
 		oldStrokeWeight = g.getStrokeWeight();
-		makeRoundedRectVbo(mesh, r, radius, oldSolid, g.getStrokeWeight());
+		mesh			= makeRoundedRectVbo(r, radius, oldSolid, g.getStrokeWeight());
 	}
 	mesh->draw(g);
 }

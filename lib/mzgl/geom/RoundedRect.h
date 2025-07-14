@@ -12,7 +12,7 @@
 #include "Vbo.h"
 #include "Graphics.h"
 
-void makeRoundedRectVbo(VboRef m, const Rectf &r, float radius, bool solid = true, float strokeWeight = 1);
+VboRef makeRoundedRectVbo(const Rectf &r, float radius, bool solid = true, float strokeWeight = 1);
 
 void getRoundedRectVerts(const Rectf &r, float radius, std::vector<glm::vec2> &outVerts);
 

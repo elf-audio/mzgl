@@ -18,9 +18,6 @@
 #include "MZGLWebView.h"
 #include "util.h"
 
-#ifdef USE_METALANGLE
-#	import "MZMGLKViewController.h"
-#endif
 using namespace std;
 
 #if defined(__APPLE__)
@@ -43,10 +40,6 @@ void handleTerminateSignal(int signal) {
 	std::shared_ptr<App> app;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
-
-#ifdef USE_METALANGLE
-	MZMGLKViewController *controller;
-#endif
 }
 @end
 
@@ -132,26 +125,17 @@ void handleTerminateSignal(int signal) {
 - (void)makeWindow {
 	NSRect windowRect = [self setupWindow];
 
-#ifdef USE_METALANGLE
-	controller = [[MZMGLKViewController alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
-	view	   = controller.view;
-#else
-	view				   = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
-	EventsView *aView	   = (EventsView *) view;
-	aView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-#endif
+	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 
 	window.delegate = view;
 	[[window contentView] addSubview:view];
 	[window makeKeyAndOrderFront:nil];
 	[window center];
 	[window makeMainWindow];
-#ifdef USE_METALANGLE
-	app->viewController = controller;
-#else
+
 	// this doesn't work - there is no contentViewController
 	app->viewController = (__bridge void *) window.windowController.contentViewController;
-#endif
+
 	app->windowHandle = (__bridge void *) window;
 	app->viewHandle	  = (__bridge void *) view;
 

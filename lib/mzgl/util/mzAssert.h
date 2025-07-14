@@ -1,7 +1,4 @@
 //
-//  mzAssert.h
-//  mzgl
-//
 //  Created by Marek Bereza on 04/08/2022.
 //  Copyright © 2022 Marek Bereza. All rights reserved.
 //
@@ -38,8 +35,11 @@
 #	define mzAssert(...)					  selectMzAssert(__VA_ARGS__, mzAssertWithMessage, mzAssertNoMessage)(__VA_ARGS__)
 
 #else
-#	define mzAssert(...) {};
+#	define mzAssert(...)			 {};
+#	define mzAssertWithMessage(...) {};
 #endif
+
+#define mzAssertFail(...) mzAssertWithMessage(false, #__VA_ARGS__)
 
 void mzEnableAssert(bool enabled);
 bool mzAssertEnabled();

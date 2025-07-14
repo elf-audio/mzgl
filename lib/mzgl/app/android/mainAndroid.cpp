@@ -524,13 +524,11 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 	}
 	return 0; // event not handled
 }
-
+#include "OpenGLShader.h"
 void clearUpGLResources() {
-	//  Vbo::printVbos();
 	Log::d() << "cleaning up GL resources";
 	for (auto *vbo: Vbo::vbos) {
-		vbo->clear();
-		vbo->vertexArrayObject = 0;
+		vbo->deallocate();
 	}
 
 	for (auto *tex: Texture::textures) {
@@ -540,10 +538,14 @@ void clearUpGLResources() {
 	for (auto *font: Font::fonts) {
 		font->clear();
 	}
-
+#ifdef MZGL_SOKOL_METAL
+	static_assert(false, "Sokol isn't supported on android yet");
+#else
 	for (auto *shader: Shader::shaders) {
-		shader->shaderProgram = 0;
+		((OpenGLShader *) shader)->shaderProgram = 0;
 	}
+#endif
+	graphics.currShader = nullptr;
 }
 
 bool ignoreNextGainedFocus = false;
