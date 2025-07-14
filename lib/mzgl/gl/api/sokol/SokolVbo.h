@@ -71,7 +71,7 @@ public:
 	}
 
 	Vbo &setVertices(const std::vector<vec2> &verts) override {
-		// TODO: remove me
+		
 		if (verts.size() == 0) return *this;
 		positionBuffer.set(verts);
 		return *this;
