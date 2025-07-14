@@ -6,6 +6,7 @@
 //  Copyright © 2019 Marek Bereza. All rights reserved.
 //
 
+#if !TARGET_OS_SIMULATOR
 #import "AudioUnitViewController.h"
 #import "MZGLEffectAU.h"
 #include <thread>
@@ -216,3 +217,4 @@ using namespace std;
 }
 
 @end
+#endif
