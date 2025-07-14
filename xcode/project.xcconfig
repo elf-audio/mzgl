@@ -42,12 +42,11 @@ HEADER_SEARCH_PATHS = $(inherited) $(HEADERS_COMMON)
 HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(inherited) lib/LibTorch-Lite/install/include
 
 // LINKER
-//-framework MetalANGLE
 FRAMEWORKS_COMMON =  -framework WebKit -framework StoreKit -framework CoreMIDI -framework CoreMedia -framework Accelerate -framework AVFoundation -framework AudioToolbox -framework ImageIO -framework CoreGraphics
 FRAMEWORKS_MAC = -framework CoreAudio -framework CoreVideo -framework Cocoa -framework OpenGL
 FRAMEWORKS_IOS = -framework SystemConfiguration -framework UIKit -framework QuartzCore -framework Security -framework MobileCoreServices -framework NetworkExtension -framework GLKit -framework OpenGLES -framework CoreAudioKit
 
-FRAMEWORK_SEARCH_PATHS = $(MZGLROOT)/lib/MetalANGLE/
+FRAMEWORK_SEARCH_PATHS = 
 
 OTHER_LDFLAGS[sdk=macosx*][config=Debug] = -all_load $(FRAMEWORKS_COMMON) $(FRAMEWORKS_MAC)
 OTHER_LDFLAGS[sdk=macosx*][config=Release] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_MAC)
