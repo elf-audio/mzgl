@@ -19,8 +19,6 @@ static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 
 class OpenGLVbo : public Vbo {
 public:
-	~OpenGLVbo() override = default;
-
 	size_t getNumVerts() override { return vertexBuffer.size; }
 
 	class Buffer {
