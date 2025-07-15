@@ -6,6 +6,7 @@ using namespace glm;
 #include <map>
 #include <memory>
 #include <string>
+#include <cstring>
 #include "Shader.h"
 class Graphics;
 
