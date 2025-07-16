@@ -25,21 +25,6 @@
 		EA15B280291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		EA15B281291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA35518C25CB05D5003DF2FB /* EventsView.mm */; };
-		EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; };
-		EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; };
-		EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; };
-		EA16DACA25FFABDA001C0460 /* pa_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFE25C954E600F890AE /* pa_stream.c */; };
-		EA16DACB25FFABDA001C0460 /* pa_cpuload.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0125C954E600F890AE /* pa_cpuload.c */; };
-		EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BF925C954E600F890AE /* pa_dither.c */; };
-		EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0625C954E600F890AE /* pa_debugprint.c */; };
-		EA16DACE25FFABDA001C0460 /* pa_ringbuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0A25C954E600F890AE /* pa_ringbuffer.c */; };
-		EA16DACF25FFABDA001C0460 /* pa_converters.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0225C954E600F890AE /* pa_converters.c */; };
-		EA16DAD025FFABDA001C0460 /* pa_process.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFC25C954E600F890AE /* pa_process.c */; };
-		EA16DAD125FFABDA001C0460 /* pa_allocation.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFA25C954E600F890AE /* pa_allocation.c */; };
-		EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0D25C954E600F890AE /* pa_front.c */; };
-		EA16DAD325FFABDA001C0460 /* pa_trace.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0425C954E600F890AE /* pa_trace.c */; };
-		EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */; };
-		EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE425C95E2400F890AE /* pa_unix_util.c */; };
 		EA16DADC25FFAEA1001C0460 /* MZGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA3551B425CB201F003DF2FB /* MZGLView.mm */; };
 		EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; };
 		EA183F852432C18D00A5C3E8 /* scales.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18359D2432C18B00A5C3E8 /* scales.h */; };
@@ -146,10 +131,6 @@
 		EA1840102432C18D00A5C3E8 /* Graphics.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836412432C18B00A5C3E8 /* Graphics.h */; };
 		EA1840112432C18D00A5C3E8 /* Image.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836422432C18B00A5C3E8 /* Image.h */; };
 		EA1840442432C18D00A5C3E8 /* AudioShareSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836912432C18B00A5C3E8 /* AudioShareSDK.h */; };
-		EA1840482432C18D00A5C3E8 /* stb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836982432C18B00A5C3E8 /* stb_truetype.h */; };
-		EA1840492432C18D00A5C3E8 /* gl3corefontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */; };
-		EA18404A2432C18D00A5C3E8 /* fontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369A2432C18B00A5C3E8 /* fontstash.h */; };
-		EA18404B2432C18D00A5C3E8 /* glfontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369B2432C18B00A5C3E8 /* glfontstash.h */; };
 		EA1840F32432C36300A5C3E8 /* MZGLKitView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C62432C18B00A5C3E8 /* MZGLKitView.mm */; };
 		EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */; };
 		EA1840F62432C36300A5C3E8 /* iOSAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835CA2432C18B00A5C3E8 /* iOSAppDelegate.mm */; };
@@ -237,57 +218,11 @@
 		EA297BE525C954CD00F890AE /* PortAudioSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BE225C954CD00F890AE /* PortAudioSystem.h */; };
 		EA297BE625C954CD00F890AE /* PortAudioSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */; };
 		EA297BE725C954CD00F890AE /* PortAudioSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */; };
-		EA297C6325C954E600F890AE /* pa_win_ds.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BED25C954E600F890AE /* pa_win_ds.h */; };
-		EA297C6425C954E600F890AE /* pa_linux_alsa.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BEE25C954E600F890AE /* pa_linux_alsa.h */; };
-		EA297C6525C954E600F890AE /* pa_win_waveformat.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BEF25C954E600F890AE /* pa_win_waveformat.h */; };
-		EA297C6625C954E600F890AE /* pa_win_wmme.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF025C954E600F890AE /* pa_win_wmme.h */; };
-		EA297C6725C954E600F890AE /* portaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF125C954E600F890AE /* portaudio.h */; };
-		EA297C6825C954E600F890AE /* pa_asio.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF225C954E600F890AE /* pa_asio.h */; };
-		EA297C6925C954E600F890AE /* pa_jack.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF325C954E600F890AE /* pa_jack.h */; };
-		EA297C6A25C954E600F890AE /* pa_win_wasapi.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF425C954E600F890AE /* pa_win_wasapi.h */; };
-		EA297C6B25C954E600F890AE /* pa_mac_core.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF525C954E600F890AE /* pa_mac_core.h */; };
-		EA297C6C25C954E600F890AE /* pa_win_wdmks.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF625C954E600F890AE /* pa_win_wdmks.h */; };
-		EA297C6D25C954E600F890AE /* pa_dither.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BF925C954E600F890AE /* pa_dither.c */; };
-		EA297C6E25C954E600F890AE /* pa_allocation.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFA25C954E600F890AE /* pa_allocation.c */; };
-		EA297C6F25C954E600F890AE /* pa_debugprint.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BFB25C954E600F890AE /* pa_debugprint.h */; };
-		EA297C7025C954E600F890AE /* pa_process.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFC25C954E600F890AE /* pa_process.c */; };
-		EA297C7125C954E600F890AE /* pa_ringbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BFD25C954E600F890AE /* pa_ringbuffer.h */; };
-		EA297C7225C954E600F890AE /* pa_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFE25C954E600F890AE /* pa_stream.c */; };
-		EA297C7325C954E600F890AE /* pa_types.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BFF25C954E600F890AE /* pa_types.h */; };
-		EA297C7425C954E600F890AE /* pa_memorybarrier.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0025C954E600F890AE /* pa_memorybarrier.h */; };
-		EA297C7525C954E600F890AE /* pa_cpuload.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0125C954E600F890AE /* pa_cpuload.c */; };
-		EA297C7625C954E600F890AE /* pa_converters.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0225C954E600F890AE /* pa_converters.c */; };
-		EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0325C954E600F890AE /* pa_hostapi.h */; };
-		EA297C7825C954E600F890AE /* pa_trace.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0425C954E600F890AE /* pa_trace.c */; };
-		EA297C7925C954E600F890AE /* pa_process.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0525C954E600F890AE /* pa_process.h */; };
-		EA297C7A25C954E600F890AE /* pa_debugprint.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0625C954E600F890AE /* pa_debugprint.c */; };
-		EA297C7B25C954E600F890AE /* pa_allocation.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0725C954E600F890AE /* pa_allocation.h */; };
-		EA297C7C25C954E600F890AE /* pa_dither.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0825C954E600F890AE /* pa_dither.h */; };
-		EA297C7D25C954E600F890AE /* pa_util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0925C954E600F890AE /* pa_util.h */; };
-		EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0A25C954E600F890AE /* pa_ringbuffer.c */; };
-		EA297C7F25C954E600F890AE /* pa_gitrevision.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0B25C954E600F890AE /* pa_gitrevision.h */; };
-		EA297C8025C954E600F890AE /* pa_cpuload.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0C25C954E600F890AE /* pa_cpuload.h */; };
-		EA297C8125C954E600F890AE /* pa_front.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0D25C954E600F890AE /* pa_front.c */; };
-		EA297C8225C954E600F890AE /* pa_stream.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0E25C954E600F890AE /* pa_stream.h */; };
-		EA297C8325C954E600F890AE /* pa_trace.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0F25C954E600F890AE /* pa_trace.h */; };
-		EA297C8425C954E600F890AE /* pa_converters.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C1025C954E600F890AE /* pa_converters.h */; };
-		EA297C8525C954E600F890AE /* pa_endianness.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C1125C954E600F890AE /* pa_endianness.h */; };
-		EA297CAB25C954E600F890AE /* pa_mac_core_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C4B25C954E600F890AE /* pa_mac_core_internal.h */; };
-		EA297CAD25C954E600F890AE /* pa_mac_core_utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C4E25C954E600F890AE /* pa_mac_core_utilities.h */; };
-		EA297CAE25C954E600F890AE /* pa_mac_core_blocking.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C4F25C954E600F890AE /* pa_mac_core_blocking.h */; };
-		EA297CAF25C954E600F890AE /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; };
-		EA297CB025C954E600F890AE /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; };
-		EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; };
-		EA297CEF25C95E2500F890AE /* pa_unix_util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297CE325C95E2400F890AE /* pa_unix_util.h */; };
-		EA297CF025C95E2500F890AE /* pa_unix_util.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE425C95E2400F890AE /* pa_unix_util.c */; };
-		EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */; };
 		EA2B826424E7093600EA12BD /* Scroller.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AA2432C18B00A5C3E8 /* Scroller.h */; };
 		EA2B827824E7093600EA12BD /* Camera.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18361C2432C18B00A5C3E8 /* Camera.h */; };
 		EA2B828024E7093600EA12BD /* MitredLine.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18362D2432C18B00A5C3E8 /* MitredLine.h */; };
 		EA2B82A924E7093600EA12BD /* Vbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836372432C18B00A5C3E8 /* Vbo.h */; };
 		EA2B82B324E7093600EA12BD /* Graphics.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836412432C18B00A5C3E8 /* Graphics.h */; };
-		EA2B82BD24E7093600EA12BD /* glfontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369B2432C18B00A5C3E8 /* glfontstash.h */; };
-		EA2B82DE24E7093600EA12BD /* stb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836982432C18B00A5C3E8 /* stb_truetype.h */; };
 		EA2B82EB24E7093600EA12BD /* YGLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC924A609CA000F057B /* YGLayout.h */; };
 		EA2B832024E7093600EA12BD /* YGFloatOptional.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC524A609CA000F057B /* YGFloatOptional.h */; };
 		EA2B832424E7093600EA12BD /* YGValue.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AE124A609CA000F057B /* YGValue.h */; };
@@ -312,7 +247,6 @@
 		EA2B851C24E7093600EA12BD /* Texture.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836402432C18B00A5C3E8 /* Texture.h */; };
 		EA2B852124E7093600EA12BD /* EventDispatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */; };
 		EA2B853024E7093600EA12BD /* YGNodePrint.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234ACC24A609CA000F057B /* YGNodePrint.h */; };
-		EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */; };
 		EA2B854824E7093600EA12BD /* MacAppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D22432C18B00A5C3E8 /* MacAppDelegate.h */; };
 		EA2B855624E7093600EA12BD /* mzgl.pch in Headers */ = {isa = PBXBuildFile; fileRef = EA18360B2432C18B00A5C3E8 /* mzgl.pch */; };
 		EA2B858D24E7093600EA12BD /* Triangulator.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836202432C18B00A5C3E8 /* Triangulator.h */; };
@@ -373,7 +307,6 @@
 		EA2B8A5024E7093600EA12BD /* errors.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E52432C18B00A5C3E8 /* errors.h */; };
 		EA2B8A5224E7093600EA12BD /* PluginEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835C12432C18B00A5C3E8 /* PluginEditor.h */; };
 		EA2B8A7024E7093600EA12BD /* AudioSystemIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836152432C18B00A5C3E8 /* AudioSystemIOS.h */; };
-		EA2B8A8A24E7093600EA12BD /* fontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369A2432C18B00A5C3E8 /* fontstash.h */; };
 		EA2B8A9A24E7093600EA12BD /* error.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836292432C18B00A5C3E8 /* error.h */; };
 		EA2B8ACE24E7093600EA12BD /* Image.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1836342432C18B00A5C3E8 /* Image.mm */; };
 		EA2B8ACF24E7093600EA12BD /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD824A609CA000F057B /* YGNodePrint.cpp */; };
@@ -918,11 +851,7 @@
 		EA1732B32459EAB3009E7B55 /* RecompilingAppDylib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecompilingAppDylib.h; sourceTree = "<group>"; };
 		EA1732BB245AD802009E7B55 /* DefaultFont.inc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefaultFont.inc.h; sourceTree = "<group>"; };
 		EA182D392432C15000A5C3E8 /* libmzgl-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		EA182D422432C18800A5C3E8 /* json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
-		EA182D432432C18800A5C3E8 /* readerwriterqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readerwriterqueue.h; sourceTree = "<group>"; };
 		EA182DC42432C18800A5C3E8 /* atomicops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atomicops.h; sourceTree = "<group>"; };
-		EA182DC62432C18800A5C3E8 /* MPE_fastpoly2tri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPE_fastpoly2tri.h; sourceTree = "<group>"; };
-		EA182DC72432C18800A5C3E8 /* concurrentqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = concurrentqueue.h; sourceTree = "<group>"; };
 		EA182DC92432C18800A5C3E8 /* RtMidi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RtMidi.cpp; sourceTree = "<group>"; };
 		EA182DCA2432C18800A5C3E8 /* RtMidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtMidi.h; sourceTree = "<group>"; };
 		EA18359D2432C18B00A5C3E8 /* scales.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scales.h; sourceTree = "<group>"; };
@@ -1043,10 +972,6 @@
 		EA1836432432C18B00A5C3E8 /* App.h.gch */ = {isa = PBXFileReference; lastKnownFileType = file; path = App.h.gch; sourceTree = "<group>"; };
 		EA1836902432C18B00A5C3E8 /* AudioShareSDK.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioShareSDK.m; sourceTree = "<group>"; };
 		EA1836912432C18B00A5C3E8 /* AudioShareSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioShareSDK.h; sourceTree = "<group>"; };
-		EA1836982432C18B00A5C3E8 /* stb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_truetype.h; sourceTree = "<group>"; };
-		EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl3corefontstash.h; sourceTree = "<group>"; };
-		EA18369A2432C18B00A5C3E8 /* fontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fontstash.h; sourceTree = "<group>"; };
-		EA18369B2432C18B00A5C3E8 /* glfontstash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glfontstash.h; sourceTree = "<group>"; };
 		EA1840E52432C1EF00A5C3E8 /* mzgl.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = mzgl.xcconfig; sourceTree = "<group>"; };
 		EA1840EA2432C33200A5C3E8 /* libmzgl-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA1842132433497300A5C3E8 /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
@@ -1085,52 +1010,6 @@
 		EA234B1724A63513000F057B /* FlexboxLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FlexboxLayout.cpp; sourceTree = "<group>"; };
 		EA297BE225C954CD00F890AE /* PortAudioSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortAudioSystem.h; sourceTree = "<group>"; };
 		EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = PortAudioSystem.cpp; sourceTree = "<group>"; };
-		EA297BED25C954E600F890AE /* pa_win_ds.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_ds.h; sourceTree = "<group>"; };
-		EA297BEE25C954E600F890AE /* pa_linux_alsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_linux_alsa.h; sourceTree = "<group>"; };
-		EA297BEF25C954E600F890AE /* pa_win_waveformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_waveformat.h; sourceTree = "<group>"; };
-		EA297BF025C954E600F890AE /* pa_win_wmme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_wmme.h; sourceTree = "<group>"; };
-		EA297BF125C954E600F890AE /* portaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = portaudio.h; sourceTree = "<group>"; };
-		EA297BF225C954E600F890AE /* pa_asio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_asio.h; sourceTree = "<group>"; };
-		EA297BF325C954E600F890AE /* pa_jack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_jack.h; sourceTree = "<group>"; };
-		EA297BF425C954E600F890AE /* pa_win_wasapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_wasapi.h; sourceTree = "<group>"; };
-		EA297BF525C954E600F890AE /* pa_mac_core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_mac_core.h; sourceTree = "<group>"; };
-		EA297BF625C954E600F890AE /* pa_win_wdmks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_win_wdmks.h; sourceTree = "<group>"; };
-		EA297BF925C954E600F890AE /* pa_dither.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_dither.c; sourceTree = "<group>"; };
-		EA297BFA25C954E600F890AE /* pa_allocation.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_allocation.c; sourceTree = "<group>"; };
-		EA297BFB25C954E600F890AE /* pa_debugprint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_debugprint.h; sourceTree = "<group>"; };
-		EA297BFC25C954E600F890AE /* pa_process.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_process.c; sourceTree = "<group>"; };
-		EA297BFD25C954E600F890AE /* pa_ringbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_ringbuffer.h; sourceTree = "<group>"; };
-		EA297BFE25C954E600F890AE /* pa_stream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_stream.c; sourceTree = "<group>"; };
-		EA297BFF25C954E600F890AE /* pa_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_types.h; sourceTree = "<group>"; };
-		EA297C0025C954E600F890AE /* pa_memorybarrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_memorybarrier.h; sourceTree = "<group>"; };
-		EA297C0125C954E600F890AE /* pa_cpuload.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_cpuload.c; sourceTree = "<group>"; };
-		EA297C0225C954E600F890AE /* pa_converters.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_converters.c; sourceTree = "<group>"; };
-		EA297C0325C954E600F890AE /* pa_hostapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_hostapi.h; sourceTree = "<group>"; };
-		EA297C0425C954E600F890AE /* pa_trace.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_trace.c; sourceTree = "<group>"; };
-		EA297C0525C954E600F890AE /* pa_process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_process.h; sourceTree = "<group>"; };
-		EA297C0625C954E600F890AE /* pa_debugprint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_debugprint.c; sourceTree = "<group>"; };
-		EA297C0725C954E600F890AE /* pa_allocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_allocation.h; sourceTree = "<group>"; };
-		EA297C0825C954E600F890AE /* pa_dither.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_dither.h; sourceTree = "<group>"; };
-		EA297C0925C954E600F890AE /* pa_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_util.h; sourceTree = "<group>"; };
-		EA297C0A25C954E600F890AE /* pa_ringbuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_ringbuffer.c; sourceTree = "<group>"; };
-		EA297C0B25C954E600F890AE /* pa_gitrevision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_gitrevision.h; sourceTree = "<group>"; };
-		EA297C0C25C954E600F890AE /* pa_cpuload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_cpuload.h; sourceTree = "<group>"; };
-		EA297C0D25C954E600F890AE /* pa_front.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_front.c; sourceTree = "<group>"; };
-		EA297C0E25C954E600F890AE /* pa_stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_stream.h; sourceTree = "<group>"; };
-		EA297C0F25C954E600F890AE /* pa_trace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_trace.h; sourceTree = "<group>"; };
-		EA297C1025C954E600F890AE /* pa_converters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_converters.h; sourceTree = "<group>"; };
-		EA297C1125C954E600F890AE /* pa_endianness.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_endianness.h; sourceTree = "<group>"; };
-		EA297C4B25C954E600F890AE /* pa_mac_core_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_mac_core_internal.h; sourceTree = "<group>"; };
-		EA297C4C25C954E600F890AE /* notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
-		EA297C4E25C954E600F890AE /* pa_mac_core_utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_mac_core_utilities.h; sourceTree = "<group>"; };
-		EA297C4F25C954E600F890AE /* pa_mac_core_blocking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_mac_core_blocking.h; sourceTree = "<group>"; };
-		EA297C5025C954E600F890AE /* pa_mac_core.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_mac_core.c; sourceTree = "<group>"; };
-		EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_mac_core_utilities.c; sourceTree = "<group>"; };
-		EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_mac_core_blocking.c; sourceTree = "<group>"; };
-		EA297C6225C954E600F890AE /* SConscript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SConscript; sourceTree = "<group>"; };
-		EA297CE325C95E2400F890AE /* pa_unix_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pa_unix_util.h; sourceTree = "<group>"; };
-		EA297CE425C95E2400F890AE /* pa_unix_util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_unix_util.c; sourceTree = "<group>"; };
-		EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pa_unix_hostapis.c; sourceTree = "<group>"; };
 		EA2B8B3124E7093600EA12BD /* libmzgl macOS testing.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl macOS testing.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA3120BA274143F900370205 /* appleMidiUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = appleMidiUtils.cpp; sourceTree = "<group>"; };
 		EA3120BB274143F900370205 /* appleMidiUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = appleMidiUtils.h; sourceTree = "<group>"; };
@@ -1868,14 +1747,12 @@
 				EAF6F4972E09AEC200DE5361 /* sokol */,
 				EA6A6BE42B0FA0EA007026A7 /* farbot */,
 				EAAA54B02755436D00021ACA /* glm */,
-				EA297BEB25C954E600F890AE /* portaudio */,
 				EA18359A2432C18B00A5C3E8 /* mzgl */,
 				EA234AC424A609CA000F057B /* yoga */,
 				EA7855612472DBF40072FD05 /* nanovg */,
 				EA182D412432C18800A5C3E8 /* misc */,
 				EA182DC82432C18800A5C3E8 /* rtmidi */,
 				EA18368F2432C18B00A5C3E8 /* AudioShare */,
-				EA1836972432C18B00A5C3E8 /* fontstash */,
 				EAD1779A282732A900E2AAE6 /* pu_gixml */,
 				EA71A6A727E39E6B0081A5CB /* ZipFile */,
 			);
@@ -1886,13 +1763,9 @@
 		EA182D412432C18800A5C3E8 /* misc */ = {
 			isa = PBXGroup;
 			children = (
-				EA182D422432C18800A5C3E8 /* json.hpp */,
-				EA182D432432C18800A5C3E8 /* readerwriterqueue.h */,
 				EA8086CA29119DF60072148D /* filesystem.h */,
 				EA182DC42432C18800A5C3E8 /* atomicops.h */,
 				EACEB2E324DB81A400BF4D1A /* stb_image.h */,
-				EA182DC62432C18800A5C3E8 /* MPE_fastpoly2tri.h */,
-				EA182DC72432C18800A5C3E8 /* concurrentqueue.h */,
 			);
 			path = misc;
 			sourceTree = "<group>";
@@ -2265,17 +2138,6 @@
 			path = AudioShare;
 			sourceTree = "<group>";
 		};
-		EA1836972432C18B00A5C3E8 /* fontstash */ = {
-			isa = PBXGroup;
-			children = (
-				EA1836982432C18B00A5C3E8 /* stb_truetype.h */,
-				EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */,
-				EA18369A2432C18B00A5C3E8 /* fontstash.h */,
-				EA18369B2432C18B00A5C3E8 /* glfontstash.h */,
-			);
-			path = fontstash;
-			sourceTree = "<group>";
-		};
 		EA234AC424A609CA000F057B /* yoga */ = {
 			isa = PBXGroup;
 			children = (
@@ -2336,115 +2198,6 @@
 				EA297BE325C954CD00F890AE /* PortAudioSystem.cpp */,
 			);
 			path = portaudio;
-			sourceTree = "<group>";
-		};
-		EA297BEB25C954E600F890AE /* portaudio */ = {
-			isa = PBXGroup;
-			children = (
-				EA297BEC25C954E600F890AE /* include */,
-				EA297BF725C954E600F890AE /* src */,
-			);
-			path = portaudio;
-			sourceTree = "<group>";
-		};
-		EA297BEC25C954E600F890AE /* include */ = {
-			isa = PBXGroup;
-			children = (
-				EA297BED25C954E600F890AE /* pa_win_ds.h */,
-				EA297BEE25C954E600F890AE /* pa_linux_alsa.h */,
-				EA297BEF25C954E600F890AE /* pa_win_waveformat.h */,
-				EA297BF025C954E600F890AE /* pa_win_wmme.h */,
-				EA297BF125C954E600F890AE /* portaudio.h */,
-				EA297BF225C954E600F890AE /* pa_asio.h */,
-				EA297BF325C954E600F890AE /* pa_jack.h */,
-				EA297BF425C954E600F890AE /* pa_win_wasapi.h */,
-				EA297BF525C954E600F890AE /* pa_mac_core.h */,
-				EA297BF625C954E600F890AE /* pa_win_wdmks.h */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		EA297BF725C954E600F890AE /* src */ = {
-			isa = PBXGroup;
-			children = (
-				EA297CD725C95E2400F890AE /* os */,
-				EA297BF825C954E600F890AE /* common */,
-				EA297C1225C954E600F890AE /* hostapi */,
-				EA297C6225C954E600F890AE /* SConscript */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
-		EA297BF825C954E600F890AE /* common */ = {
-			isa = PBXGroup;
-			children = (
-				EA297BF925C954E600F890AE /* pa_dither.c */,
-				EA297BFA25C954E600F890AE /* pa_allocation.c */,
-				EA297BFB25C954E600F890AE /* pa_debugprint.h */,
-				EA297BFC25C954E600F890AE /* pa_process.c */,
-				EA297BFD25C954E600F890AE /* pa_ringbuffer.h */,
-				EA297BFE25C954E600F890AE /* pa_stream.c */,
-				EA297BFF25C954E600F890AE /* pa_types.h */,
-				EA297C0025C954E600F890AE /* pa_memorybarrier.h */,
-				EA297C0125C954E600F890AE /* pa_cpuload.c */,
-				EA297C0225C954E600F890AE /* pa_converters.c */,
-				EA297C0325C954E600F890AE /* pa_hostapi.h */,
-				EA297C0425C954E600F890AE /* pa_trace.c */,
-				EA297C0525C954E600F890AE /* pa_process.h */,
-				EA297C0625C954E600F890AE /* pa_debugprint.c */,
-				EA297C0725C954E600F890AE /* pa_allocation.h */,
-				EA297C0825C954E600F890AE /* pa_dither.h */,
-				EA297C0925C954E600F890AE /* pa_util.h */,
-				EA297C0A25C954E600F890AE /* pa_ringbuffer.c */,
-				EA297C0B25C954E600F890AE /* pa_gitrevision.h */,
-				EA297C0C25C954E600F890AE /* pa_cpuload.h */,
-				EA297C0D25C954E600F890AE /* pa_front.c */,
-				EA297C0E25C954E600F890AE /* pa_stream.h */,
-				EA297C0F25C954E600F890AE /* pa_trace.h */,
-				EA297C1025C954E600F890AE /* pa_converters.h */,
-				EA297C1125C954E600F890AE /* pa_endianness.h */,
-			);
-			path = common;
-			sourceTree = "<group>";
-		};
-		EA297C1225C954E600F890AE /* hostapi */ = {
-			isa = PBXGroup;
-			children = (
-				EA297C4A25C954E600F890AE /* coreaudio */,
-			);
-			path = hostapi;
-			sourceTree = "<group>";
-		};
-		EA297C4A25C954E600F890AE /* coreaudio */ = {
-			isa = PBXGroup;
-			children = (
-				EA297C4B25C954E600F890AE /* pa_mac_core_internal.h */,
-				EA297C4C25C954E600F890AE /* notes.txt */,
-				EA297C4E25C954E600F890AE /* pa_mac_core_utilities.h */,
-				EA297C4F25C954E600F890AE /* pa_mac_core_blocking.h */,
-				EA297C5025C954E600F890AE /* pa_mac_core.c */,
-				EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */,
-				EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */,
-			);
-			path = coreaudio;
-			sourceTree = "<group>";
-		};
-		EA297CD725C95E2400F890AE /* os */ = {
-			isa = PBXGroup;
-			children = (
-				EA297CE225C95E2400F890AE /* unix */,
-			);
-			path = os;
-			sourceTree = "<group>";
-		};
-		EA297CE225C95E2400F890AE /* unix */ = {
-			isa = PBXGroup;
-			children = (
-				EA297CE325C95E2400F890AE /* pa_unix_util.h */,
-				EA297CE425C95E2400F890AE /* pa_unix_util.c */,
-				EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */,
-			);
-			path = unix;
 			sourceTree = "<group>";
 		};
 		EA3551B225CB201F003DF2FB /* GL */ = {
@@ -3346,10 +3099,7 @@
 				EA183FFC2432C18D00A5C3E8 /* MitredLine.h in Headers */,
 				EA1840062432C18D00A5C3E8 /* Vbo.h in Headers */,
 				EA1840102432C18D00A5C3E8 /* Graphics.h in Headers */,
-				EA18404B2432C18D00A5C3E8 /* glfontstash.h in Headers */,
 				EA71A75827E39E6C0081A5CB /* pwd2key.h in Headers */,
-				EA297C8325C954E600F890AE /* pa_trace.h in Headers */,
-				EA1840482432C18D00A5C3E8 /* stb_truetype.h in Headers */,
 				EABBA6DC2B4715E100B483CB /* midiMessagePrinting.h in Headers */,
 				EA234AE924A609CA000F057B /* YGLayout.h in Headers */,
 				EA64AD8826A1C039001427AD /* MZGLWebView.h in Headers */,
@@ -3363,9 +3113,7 @@
 				EA3120C0274143F900370205 /* appleMidiUtils.h in Headers */,
 				EA73F06328E4670900395945 /* geomutils.h in Headers */,
 				EA234AF324A609CA000F057B /* YGMacros.h in Headers */,
-				EA297C6625C954E600F890AE /* pa_win_wmme.h in Headers */,
 				EA71A77427E39E6C0081A5CB /* brg_endian.h in Headers */,
-				EA297CAE25C954E600F890AE /* pa_mac_core_blocking.h in Headers */,
 				EA77210A2BF74F5B003607EB /* GraphicsAPI.h in Headers */,
 				EAF6F45F2E09AE8400DE5361 /* OpenGLAPI.h in Headers */,
 				EAF6F4602E09AE8400DE5361 /* font.glsl.h in Headers */,
@@ -3398,13 +3146,10 @@
 				EA71A76E27E39E6C0081A5CB /* brg_types.h in Headers */,
 				EAD03BB2297FF53300D0C04A /* iOSWebView.h in Headers */,
 				EA183F942432C18D00A5C3E8 /* SimpleButton.h in Headers */,
-				EA297C7125C954E600F890AE /* pa_ringbuffer.h in Headers */,
 				EA183FFF2432C18D00A5C3E8 /* NineSlice.h in Headers */,
 				EA183FF72432C18D00A5C3E8 /* RoundedRect.h in Headers */,
-				EA297C6B25C954E600F890AE /* pa_mac_core.h in Headers */,
 				EA6ACC652475DE7100BC0012 /* NVGUI.h in Headers */,
 				EA183F8B2432C18D00A5C3E8 /* DropDown.h in Headers */,
-				EA297C6925C954E600F890AE /* pa_jack.h in Headers */,
 				EAF6737D289BC441001F778D /* stringUtil.h in Headers */,
 				EA71A79027E39E6C0081A5CB /* zipper.h in Headers */,
 				9C038EA42D538A410047E060 /* Base64.h in Headers */,
@@ -3430,27 +3175,19 @@
 				EA18400F2432C18D00A5C3E8 /* Texture.h in Headers */,
 				EA183FD02432C18D00A5C3E8 /* EventDispatcher.h in Headers */,
 				EA234AEE24A609CA000F057B /* YGNodePrint.h in Headers */,
-				EA1840492432C18D00A5C3E8 /* gl3corefontstash.h in Headers */,
 				EA183FB22432C18D00A5C3E8 /* MacAppDelegate.h in Headers */,
 				EA183FE12432C18D00A5C3E8 /* mzgl.pch in Headers */,
-				EA297CEF25C95E2500F890AE /* pa_unix_util.h in Headers */,
 				EA183FF12432C18D00A5C3E8 /* Triangulator.h in Headers */,
 				EA71A76827E39E6C0081A5CB /* aes_via_ace.h in Headers */,
 				EA234B1524A611AF000F057B /* ylog.h in Headers */,
 				EAF67375289BC3DC001F778D /* mzAssert.h in Headers */,
 				EA5250E02C2C644800DE5DFC /* NSBlockButton.h in Headers */,
-				EA297C8025C954E600F890AE /* pa_cpuload.h in Headers */,
-				EA297C6A25C954E600F890AE /* pa_win_wasapi.h in Headers */,
-				EA297C6525C954E600F890AE /* pa_win_waveformat.h in Headers */,
 				EAF67385289BC87E001F778D /* mainThread.h in Headers */,
-				EA297C6C25C954E600F890AE /* pa_win_wdmks.h in Headers */,
 				EA183F962432C18D00A5C3E8 /* Slider.h in Headers */,
 				EA183FB42432C18D00A5C3E8 /* NSEventDispatcher.h in Headers */,
 				EA183FBE2432C18D00A5C3E8 /* FloatBuffer.h in Headers */,
 				EA71A77A27E39E6C0081A5CB /* aes.h in Headers */,
 				EA183FFE2432C18D00A5C3E8 /* Drawer.h in Headers */,
-				EA297C8425C954E600F890AE /* pa_converters.h in Headers */,
-				EA297C6F25C954E600F890AE /* pa_debugprint.h in Headers */,
 				EA183FA22432C18D00A5C3E8 /* LiveCodeApp.h in Headers */,
 				EA183FD62432C18D00A5C3E8 /* AllMidiDevices.h in Headers */,
 				EA234AFB24A609CA000F057B /* experiments-inl.h in Headers */,
@@ -3460,48 +3197,36 @@
 				EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73827E39E6C0081A5CB /* zip.h in Headers */,
 				EA5D5B232D9A9FE400F19952 /* colors.h in Headers */,
-				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA183F852432C18D00A5C3E8 /* scales.h in Headers */,
-				EA297C7D25C954E600F890AE /* pa_util.h in Headers */,
 				EAE8428A2AE16F06008DB683 /* Int16Buffer.h in Headers */,
 				EA234AE724A609CA000F057B /* CompactValue.h in Headers */,
 				EA7855672472DBF40072FD05 /* nanovg.h in Headers */,
 				EA183FC72432C18D00A5C3E8 /* log.h in Headers */,
 				EA1840012432C18D00A5C3E8 /* Shader.h in Headers */,
-				EA297C6725C954E600F890AE /* portaudio.h in Headers */,
 				EA3551BF25CB2028003DF2FB /* MZMGLKView.h in Headers */,
 				EA183FDD2432C18D00A5C3E8 /* Tween.h in Headers */,
 				EA1840022432C18D00A5C3E8 /* SvgVbo.h in Headers */,
 				EA71A73627E39E6C0081A5CB /* crypt.h in Headers */,
 				EA183FC42432C18D00A5C3E8 /* maths.h in Headers */,
 				EA3551B525CB201F003DF2FB /* MZGLView.h in Headers */,
-				EA297C8525C954E600F890AE /* pa_endianness.h in Headers */,
 				EA7855662472DBF40072FD05 /* nanovg_gl.h in Headers */,
 				EA183FAD2432C18D00A5C3E8 /* MZGLKitViewController.h in Headers */,
 				EA71A72627E39E6B0081A5CB /* iowin32.h in Headers */,
 				EA183FBF2432C18D00A5C3E8 /* RecompilingDylib.h in Headers */,
 				EA183FB02432C18D00A5C3E8 /* MacMenuBar.h in Headers */,
 				EA183FA12432C18D00A5C3E8 /* RootLayer.h in Headers */,
-				EA297C7F25C954E600F890AE /* pa_gitrevision.h in Headers */,
 				EA71A73027E39E6C0081A5CB /* ioapi_mem.h in Headers */,
 				EA183FCC2432C18D00A5C3E8 /* FileWatcher.h in Headers */,
 				EA234AE624A609CA000F057B /* Utils.h in Headers */,
-				EA297C7325C954E600F890AE /* pa_types.h in Headers */,
 				EA183FF32432C18D00A5C3E8 /* QuadraticEquation.h in Headers */,
 				EA183FDE2432C18D00A5C3E8 /* animation.h in Headers */,
 				EA183FC52432C18D00A5C3E8 /* Dylib.h in Headers */,
 				EACF1E462863532B0086EE11 /* MacFilePickerDelegate.h in Headers */,
-				EA297C8225C954E600F890AE /* pa_stream.h in Headers */,
 				EA183F9B2432C18D00A5C3E8 /* DrawingCanvas.h in Headers */,
-				EA297C6325C954E600F890AE /* pa_win_ds.h in Headers */,
-				EA297C7B25C954E600F890AE /* pa_allocation.h in Headers */,
 				EA183FD32432C18D00A5C3E8 /* Plugin.h in Headers */,
 				EA183F972432C18D00A5C3E8 /* DrawingFunction.h in Headers */,
 				EA759B3F2715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
-				EA297C7C25C954E600F890AE /* pa_dither.h in Headers */,
 				EA183FEE2432C18D00A5C3E8 /* LineEquation.h in Headers */,
-				EA297C7925C954E600F890AE /* pa_process.h in Headers */,
-				EA297C6425C954E600F890AE /* pa_linux_alsa.h in Headers */,
 				EA183FC32432C18D00A5C3E8 /* DateTime.h in Headers */,
 				EA183FDC2432C18D00A5C3E8 /* mzgl_platform.h in Headers */,
 				EA183F952432C18D00A5C3E8 /* Layout.h in Headers */,
@@ -3528,10 +3253,7 @@
 				EA183FAA2432C18D00A5C3E8 /* MZGLKitView.h in Headers */,
 				EA234AFC24A609CA000F057B /* experiments.h in Headers */,
 				EA234AEF24A609CA000F057B /* YGEnums.h in Headers */,
-				EA297CAD25C954E600F890AE /* pa_mac_core_utilities.h in Headers */,
 				EACA2608275F4F4E00B3DE68 /* FlatSet.h in Headers */,
-				EA297CAB25C954E600F890AE /* pa_mac_core_internal.h in Headers */,
-				EA297C6825C954E600F890AE /* pa_asio.h in Headers */,
 				EAD177AC282732A900E2AAE6 /* pu_giconfig.hpp in Headers */,
 				EA234B0524A609CA000F057B /* BitUtils.h in Headers */,
 				EA183FF22432C18D00A5C3E8 /* SVG.h in Headers */,
@@ -3539,13 +3261,11 @@
 				EA183FA52432C18D00A5C3E8 /* PluginEditor.h in Headers */,
 				EA71A77227E39E6C0081A5CB /* hmac.h in Headers */,
 				EA183FE82432C18D00A5C3E8 /* AudioSystemIOS.h in Headers */,
-				EA18404A2432C18D00A5C3E8 /* fontstash.h in Headers */,
 				EA71A74027E39E6C0081A5CB /* ioapi.h in Headers */,
 				EA15B280291D49E70051570A /* UndoManager.h in Headers */,
 				EA183FF92432C18D00A5C3E8 /* error.h in Headers */,
 				EAD177AE282732A900E2AAE6 /* pu_gixml.hpp in Headers */,
 				EAD03BA9297FD9A200D0C04A /* MacWebView.h in Headers */,
-				EA297C7425C954E600F890AE /* pa_memorybarrier.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3569,8 +3289,6 @@
 				EA2B82B324E7093600EA12BD /* Graphics.h in Headers */,
 				EA5D5B222D9A9FE400F19952 /* colors.h in Headers */,
 				EAF67386289BC87E001F778D /* mainThread.h in Headers */,
-				EA2B82BD24E7093600EA12BD /* glfontstash.h in Headers */,
-				EA2B82DE24E7093600EA12BD /* stb_truetype.h in Headers */,
 				EA2B82EB24E7093600EA12BD /* YGLayout.h in Headers */,
 				EA2B832024E7093600EA12BD /* YGFloatOptional.h in Headers */,
 				EA2B832424E7093600EA12BD /* YGValue.h in Headers */,
@@ -3609,7 +3327,6 @@
 				EA2B851C24E7093600EA12BD /* Texture.h in Headers */,
 				EA2B852124E7093600EA12BD /* EventDispatcher.h in Headers */,
 				EA2B853024E7093600EA12BD /* YGNodePrint.h in Headers */,
-				EA2B853124E7093600EA12BD /* gl3corefontstash.h in Headers */,
 				EA2B854824E7093600EA12BD /* MacAppDelegate.h in Headers */,
 				EA2B855624E7093600EA12BD /* mzgl.pch in Headers */,
 				EA71A75727E39E6C0081A5CB /* aestab.h in Headers */,
@@ -3719,7 +3436,6 @@
 				EA2B8A5224E7093600EA12BD /* PluginEditor.h in Headers */,
 				EAD177AD282732A900E2AAE6 /* pu_giconfig.hpp in Headers */,
 				EA2B8A7024E7093600EA12BD /* AudioSystemIOS.h in Headers */,
-				EA2B8A8A24E7093600EA12BD /* fontstash.h in Headers */,
 				EA71A77127E39E6C0081A5CB /* entropy.h in Headers */,
 				EA2B8A9A24E7093600EA12BD /* error.h in Headers */,
 				EA71A73B27E39E6C0081A5CB /* unzip.h in Headers */,
@@ -3865,14 +3581,11 @@
 				EA183FB72432C18D00A5C3E8 /* MacAppDelegate.mm in Sources */,
 				EA234AF024A609CA000F057B /* YGLayout.cpp in Sources */,
 				EA234B1324A611AF000F057B /* ylog.cpp in Sources */,
-				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
-				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
 				EA71A78827E39E6C0081A5CB /* entropy.c in Sources */,
 				EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA18400C2432C18D00A5C3E8 /* Vbo.cpp in Sources */,
 				EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */,
 				EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */,
-				EA297CAF25C954E600F890AE /* pa_mac_core.c in Sources */,
 				EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EA183FC82432C18D00A5C3E8 /* Dylib.cpp in Sources */,
 				EA183FAE2432C18D00A5C3E8 /* TextConsole.mm in Sources */,
@@ -3895,7 +3608,6 @@
 				EA71A75A27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA183FCE2432C18D00A5C3E8 /* errors.cpp in Sources */,
 				EA183FD12432C18D00A5C3E8 /* maths.cpp in Sources */,
-				EA297C8125C954E600F890AE /* pa_front.c in Sources */,
 				EA183FE62432C18D00A5C3E8 /* AudioFileApple.cpp in Sources */,
 				EA234AF924A609CA000F057B /* experiments.cpp in Sources */,
 				EA183FB62432C18D00A5C3E8 /* MacMenuBar.mm in Sources */,
@@ -3905,7 +3617,6 @@
 				EA71A76A27E39E6C0081A5CB /* sha1.c in Sources */,
 				9C038EA32D538A410047E060 /* Base64.cpp in Sources */,
 				EA183FC02432C18D00A5C3E8 /* util.cpp in Sources */,
-				EA297C6E25C954E600F890AE /* pa_allocation.c in Sources */,
 				EA183FE72432C18D00A5C3E8 /* AudioSystem.cpp in Sources */,
 				EA234B1824A63513000F057B /* FlexboxLayout.cpp in Sources */,
 				EA71A7A427E39E6C0081A5CB /* unzipper.cpp in Sources */,
@@ -3914,9 +3625,7 @@
 				EA1840042432C18D00A5C3E8 /* error.cpp in Sources */,
 				EA234AF424A609CA000F057B /* Yoga.cpp in Sources */,
 				9C5EF32E2C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
-				EA297C6D25C954E600F890AE /* pa_dither.c in Sources */,
 				EAD03B9C297FD49700D0C04A /* MZWebView.cpp in Sources */,
-				EA297C7025C954E600F890AE /* pa_process.c in Sources */,
 				EA71A7B027E39E6C0081A5CB /* ZipFile.cpp in Sources */,
 				EA71A78027E39E6C0081A5CB /* aestab.c in Sources */,
 				EA3120BC274143F900370205 /* appleMidiUtils.cpp in Sources */,
@@ -3929,25 +3638,21 @@
 				EA183F862432C18D00A5C3E8 /* scales.cpp in Sources */,
 				EA71A77627E39E6C0081A5CB /* prng.c in Sources */,
 				EA183FEC2432C18D00A5C3E8 /* Camera.cpp in Sources */,
-				EA297CF025C95E2500F890AE /* pa_unix_util.c in Sources */,
 				EA234B0924A609CA000F057B /* YGNode.cpp in Sources */,
 				EA183FD42432C18D00A5C3E8 /* Midi.cpp in Sources */,
 				EA183FCD2432C18D00A5C3E8 /* FileWatcher.cpp in Sources */,
 				EAF99ABB267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA183F932432C18D00A5C3E8 /* DropDown.cpp in Sources */,
-				EA297C7825C954E600F890AE /* pa_trace.c in Sources */,
 				EA71A73227E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */,
 				EA183F8F2432C18D00A5C3E8 /* Layer.cpp in Sources */,
-				EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */,
 				EA924361273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA183FEF2432C18D00A5C3E8 /* SVG.cpp in Sources */,
 				EA234B0024A609CA000F057B /* YGEnums.cpp in Sources */,
 				EA71A72C27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA5D5B242D9A9FE400F19952 /* colors.cpp in Sources */,
 				EA9949162475432A004D0DB7 /* FloatBuffer.cpp in Sources */,
-				EA297C7225C954E600F890AE /* pa_stream.c in Sources */,
 				EAF67379289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA183FF52432C18D00A5C3E8 /* RoundedRect.cpp in Sources */,
 				EA5250E22C2C644800DE5DFC /* NSBlockButton.m in Sources */,
@@ -3958,14 +3663,10 @@
 				EAF67371289BC3DC001F778D /* mzAssert.cpp in Sources */,
 				EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */,
 				EA71A72227E39E6B0081A5CB /* zip.c in Sources */,
-				EA297C7625C954E600F890AE /* pa_converters.c in Sources */,
 				EA71A77C27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA183FDF2432C18D00A5C3E8 /* Tween.cpp in Sources */,
-				EA297CB025C954E600F890AE /* pa_mac_core_utilities.c in Sources */,
 				EA1840092432C18D00A5C3E8 /* Shader.cpp in Sources */,
-				EA297C7525C954E600F890AE /* pa_cpuload.c in Sources */,
 				EA183F902432C18D00A5C3E8 /* Layout.cpp in Sources */,
-				EA297C7A25C954E600F890AE /* pa_debugprint.c in Sources */,
 				EA18400A2432C18D00A5C3E8 /* SvgVbo.cpp in Sources */,
 				EA7B45A72B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA234B0324A609CA000F057B /* YGValue.cpp in Sources */,
@@ -4112,7 +3813,6 @@
 				EA2B8AD024E7093600EA12BD /* Drawer.cpp in Sources */,
 				EAF67383289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA2B8AD124E7093600EA12BD /* Utils.cpp in Sources */,
-				EA16DAD325FFABDA001C0460 /* pa_trace.c in Sources */,
 				EA16DADC25FFAEA1001C0460 /* MZGLView.mm in Sources */,
 				EA2B8AD324E7093600EA12BD /* Graphics.cpp in Sources */,
 				EA2B8AD424E7093600EA12BD /* YGConfig.cpp in Sources */,
@@ -4128,7 +3828,6 @@
 				EA71A7B627E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
 				EA2B8ADC24E7093600EA12BD /* YGLayout.cpp in Sources */,
 				EA71A75427E39E6C0081A5CB /* hmac.c in Sources */,
-				EA16DACD25FFABDA001C0460 /* pa_debugprint.c in Sources */,
 				EA2B8ADF24E7093600EA12BD /* ylog.cpp in Sources */,
 				EA15B27E291D49E70051570A /* UndoManager.cpp in Sources */,
 				EAF6F47A2E09AE8400DE5361 /* SokolShader.cpp in Sources */,
@@ -4141,7 +3840,6 @@
 				EA2B8AE024E7093600EA12BD /* Vbo.cpp in Sources */,
 				EAD03BB82980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA9C32E7299F9BD7000C1DD2 /* AudioUnitViewController.mm in Sources */,
-				EA16DAD225FFABDA001C0460 /* pa_front.c in Sources */,
 				EAF91F772AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA5250E92C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA73F06128E4670900395945 /* geomutils.cpp in Sources */,
@@ -4165,17 +3863,12 @@
 				EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA2B8AF424E7093600EA12BD /* MacMenuBar.mm in Sources */,
 				EABBA6DA2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
-				EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */,
 				EA2B8AF824E7093600EA12BD /* LayerExplorer.mm in Sources */,
 				EA71A7B227E39E6C0081A5CB /* ZipFile.cpp in Sources */,
-				EA16DACA25FFABDA001C0460 /* pa_stream.c in Sources */,
-				EA16DAD025FFABDA001C0460 /* pa_process.c in Sources */,
-				EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */,
 				EA2B8AF924E7093600EA12BD /* util.cpp in Sources */,
 				EA2B8AFA24E7093600EA12BD /* AudioSystem.cpp in Sources */,
 				EA2B8AFC24E7093600EA12BD /* FlexboxLayout.cpp in Sources */,
 				EA2B8AFF24E7093600EA12BD /* Fbo.cpp in Sources */,
-				EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */,
 				EAF99ABD267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA2B8B0024E7093600EA12BD /* error.cpp in Sources */,
 				EA2B8B0224E7093600EA12BD /* Yoga.cpp in Sources */,
@@ -4183,15 +3876,12 @@
 				EA2B8B0724E7093600EA12BD /* Camera.cpp in Sources */,
 				EA71A78A27E39E6C0081A5CB /* entropy.c in Sources */,
 				EA5250E32C2C644800DE5DFC /* NSBlockButton.m in Sources */,
-				EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */,
 				EAF01F4E2D3ECA1800248121 /* FileDownloader.cpp in Sources */,
 				EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */,
 				EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */,
 				EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */,
 				EAD03BA7297FD9A200D0C04A /* MacWebView.mm in Sources */,
-				EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */,
 				EA2B8B0D24E7093600EA12BD /* DropDown.cpp in Sources */,
-				EA16DAD125FFABDA001C0460 /* pa_allocation.c in Sources */,
 				EA71A76C27E39E6C0081A5CB /* sha1.c in Sources */,
 				EAD82ECB269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA71A79C27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -4209,17 +3899,14 @@
 				EA3120BE274143F900370205 /* appleMidiUtils.cpp in Sources */,
 				9C038EA22D538A410047E060 /* Base64.cpp in Sources */,
 				EA2B8B1824E7093600EA12BD /* YGEnums.cpp in Sources */,
-				EA16DACE25FFABDA001C0460 /* pa_ringbuffer.c in Sources */,
 				EA64AD7626A186D7001427AD /* MZGLWebView.mm in Sources */,
 				EA71A77E27E39E6C0081A5CB /* pwd2key.c in Sources */,
-				EA16DACB25FFABDA001C0460 /* pa_cpuload.c in Sources */,
 				EA2B8B1A24E7093600EA12BD /* FloatBuffer.cpp in Sources */,
 				EA71A7A627E39E6C0081A5CB /* unzipper.cpp in Sources */,
 				EA2B8B1C24E7093600EA12BD /* RoundedRect.cpp in Sources */,
 				EA2B8B1D24E7093600EA12BD /* Rectf.cpp in Sources */,
 				EA71A72027E39E6B0081A5CB /* unzip.c in Sources */,
 				EA71A79627E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
-				EA16DACF25FFABDA001C0460 /* pa_converters.c in Sources */,
 				EA2B8B1F24E7093600EA12BD /* YGStyle.cpp in Sources */,
 				EA924363273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A76027E39E6C0081A5CB /* fileenc.c in Sources */,
@@ -4237,7 +3924,6 @@
 				EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */,
 				EA9C32E9299F9EFF000C1DD2 /* MZGLEffectAU.mm in Sources */,
 				EAF67373289BC3DC001F778D /* mzAssert.cpp in Sources */,
-				EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
