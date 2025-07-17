@@ -29,6 +29,10 @@ function(mzgl_print_in_red PRINTABLE)
   mzgl_print(STATUS "${PRINTABLE}" "${RED}")
 endfunction()
 
+function(mzgl_print_fatal_in_red PRINTABLE)
+  mzgl_print(FATAL_ERROR "${PRINTABLE}" "${RED}")
+endfunction()
+
 function(mzgl_print_in_green PRINTABLE)
   mzgl_print(STATUS "${PRINTABLE}" "${GREEN}")
 endfunction()
