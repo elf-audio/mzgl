@@ -97,7 +97,7 @@ namespace winfs {
 		std::string string() const { return inner.string(); }
 		std::wstring wstring() const { return inner.wstring(); }
 		std::string generic_string() const { return inner.generic_string(); }
-		std::string u8string() const { return inner.u8string(); }
+		std::u8string u8string() const { return inner.u8string(); }
 		path filename() const { return path(inner.filename()); }
 		path parent_path() const { return path(inner.parent_path()); }
 		path extension() const { return path(inner.extension()); }
