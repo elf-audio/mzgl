@@ -5,8 +5,12 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
 	int argc = 1;
+	//	char *argv[1];
+	//	argv[0] = "mzgl";
+	//
+	char arg0[] = "mzgl";
 	char *argv[1];
-	argv[0] = "mzgl";
+	argv[0] = arg0;
 
 #else
 int main(int argc, char *argv[]) {
