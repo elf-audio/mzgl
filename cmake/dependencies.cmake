@@ -34,6 +34,17 @@ function(mzgl_add_portaudio)
   mzgl_patch_cmake_version(
     "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}/CMakeLists.txt")
 
+  if(UNIX AND NOT APPLE)
+    set(PA_ALSA_C
+        "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}/src/hostapi/alsa/pa_linux_alsa.c"
+    )
+    file(READ "${PA_ALSA_C}" PA_ALSA_SRC)
+    string(REPLACE "unsigned long captureFrames, playbackFrames;"
+                   "unsigned long captureFrames = 0, playbackFrames = 0;"
+                   PA_ALSA_SRC "${PA_ALSA_SRC}")
+    file(WRITE "${PA_ALSA_C}" "${PA_ALSA_SRC}")
+  endif()
+
   add_subdirectory("${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}"
                    "${CMAKE_BINARY_DIR}/portaudio" EXCLUDE_FROM_ALL)
   include_directories(SYSTEM INTERFACE ${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR})
