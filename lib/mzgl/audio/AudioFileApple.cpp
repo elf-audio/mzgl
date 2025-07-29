@@ -183,7 +183,7 @@ static std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
 	return path;
 }
 
-static template <class Buffer>
+template <class Buffer>
 bool loadAudioFile(
 	std::string path, Buffer &buff, std::optional<int> newSampleRate, int *outNumChannels, int *outSampleRate) {
 #ifdef __APPLE__

@@ -23,10 +23,10 @@ public:
 
 	virtual void draw(Graphics &g, bool isReordering) {}
 
-	void startDragging(vec2 start, int touchId) {
-		touchStart	  = start;
-		this->touchId = touchId;
-		dragging	  = true;
+	void startDragging(vec2 start, int _touchId) {
+		touchStart = start;
+		touchId	   = _touchId;
+		dragging   = true;
 	}
 
 	int update(const std::vector<Rectf> &slots, float x, float y) {

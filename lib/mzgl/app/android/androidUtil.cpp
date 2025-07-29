@@ -111,24 +111,20 @@ bool loadAndroidAsset(const std::string &path, std::vector<unsigned char> &outDa
 	AAsset *pAsset =
 		AAssetManager_open(getAndroidAppPtr()->activity->assetManager, path.c_str(), AASSET_MODE_BUFFER);
 	if (pAsset == nullptr) {
-		LOGE("Can't open %s", path.c_str());
+		Log::e() << "Can't open " << path;
 		return false;
-	} else {
-		size_t length		= AAsset_getLength(pAsset);
-		unsigned char *data = (unsigned char *) AAsset_getBuffer(pAsset);
-		if (data == nullptr) {
-			LOGE("ERROR READING");
-			AAsset_close(pAsset);
-			return false;
-		}
-		//LOGE("About to copy data - data length: %d\n", length);
-		// POSSIBLE BUG HERE - DO I NEED TO FREE data?
-		outData.insert(outData.end(), data, data + length);
-		//LOGE("Closing asset\n");
-		AAsset_close(pAsset);
-		//LOGE("Copied data");
-		return true;
 	}
+	size_t length		= AAsset_getLength(pAsset);
+	unsigned char *data = (unsigned char *) AAsset_getBuffer(pAsset);
+	if (data == nullptr) {
+		Log::e() << "ERROR READING";
+		AAsset_close(pAsset);
+		return false;
+	}
+
+	outData.insert(outData.end(), data, data + length);
+	AAsset_close(pAsset);
+	return true;
 }
 
 void listAndroidAssetDir(const std::string &path, vector<std::string> &outPaths) {

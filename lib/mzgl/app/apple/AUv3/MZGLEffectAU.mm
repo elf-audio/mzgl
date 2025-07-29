@@ -468,7 +468,9 @@ struct Blocks {
 	if (currentPreset == nil) {
 		AULog(@"setCurrentPreset called with nil");
 	} else {
-		AULog(@"setCurrentPreset called with num %i ('%@')", currentPreset.number, currentPreset.name);
+		AULog(@"setCurrentPreset called with num %i ('%@')",
+			  static_cast<int>(currentPreset.number),
+			  currentPreset.name);
 	}
 	if (nil == currentPreset) { /*AULog(@"nil passed to setCurrentPreset!");*/
 		return;

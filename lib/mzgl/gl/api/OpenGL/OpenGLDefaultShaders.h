@@ -41,7 +41,7 @@ in vec4 Position;
 uniform lowp vec4 color;
 out lowp vec4 colorV;
 
-void main(void) {
+void main() {
 	colorV		= color;
 	gl_Position = mvp * Position;
 }
@@ -50,7 +50,7 @@ std::string nothingFragSrc = OPENGL_STRINGIFY(
 in lowp vec4 colorV;
 out vec4 fragColor;
 
-void main(void) {
+void main() {
     fragColor = colorV;
 }
 );
@@ -65,7 +65,7 @@ uniform lowp vec4 color;
 
 out lowp vec4 colorV;
 out lowp vec2 texCoordV;
-void main(void) {
+void main() {
 	colorV		= color;
 	texCoordV	= TexCoord;
 	gl_Position = mvp * Position;
@@ -77,7 +77,7 @@ in lowp vec2 texCoordV;
 out vec4 fragColor;
 uniform sampler2D myTextureSampler;
 
-void main(void) {
+void main() {
     fragColor = texture(myTextureSampler, texCoordV) * colorV;
 }
 );
@@ -91,7 +91,7 @@ in lowp vec4 Color;
 
 out lowp vec4 colorV;
 
-void main(void) {
+void main() {
 	colorV		= Color * color;
 	gl_Position = mvp * Position;
 }
@@ -100,7 +100,7 @@ std::string colorFragSrc = OPENGL_STRINGIFY(
 in lowp vec4 colorV;
 out vec4 fragColor;
 
-void main(void) {
+void main() {
     fragColor = colorV;
 }
 );
@@ -114,7 +114,7 @@ in lowp vec4 Color;
 
 out lowp vec4 colorV;
 out lowp vec2 texCoordV;
-void main(void) {
+void main() {
 	colorV		= Color;
 	texCoordV	= TexCoord;
 	gl_Position = mvp * Position;
@@ -126,12 +126,9 @@ in lowp vec2 texCoordV;
 out vec4 fragColor;
 uniform sampler2D myTextureSampler;
 
-void main(void) {
-    fragColor = texture(myTextureSampler, texCoordV) * colorV;
+void main() {
+	fragColor = texture(myTextureSampler, texCoordV) * colorV;
 }
 );
 
-
 // clang-format on
-
-
