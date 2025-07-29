@@ -85,7 +85,6 @@ set(MZGL_SOURCES
     lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/net/FileDownloader.h
     lib/mzgl/ui/widgets/ReorderableGrid.cpp
-    lib/mzgl/ui/DropDown.cpp
     lib/mzgl/ui/Layer.cpp
     lib/mzgl/ui/Layout.cpp
     lib/mzgl/ui/Scroller.cpp

@@ -45,13 +45,11 @@
 		EA183F852432C18D00A5C3E8 /* scales.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18359D2432C18B00A5C3E8 /* scales.h */; };
 		EA183F862432C18D00A5C3E8 /* scales.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18359E2432C18B00A5C3E8 /* scales.cpp */; };
 		EA183F892432C18D00A5C3E8 /* ScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A22432C18B00A5C3E8 /* ScrollingList.h */; };
-		EA183F8B2432C18D00A5C3E8 /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
 		EA183F8C2432C18D00A5C3E8 /* Scroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A52432C18B00A5C3E8 /* Scroller.cpp */; };
 		EA183F8E2432C18D00A5C3E8 /* Layer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A72432C18B00A5C3E8 /* Layer.h */; };
 		EA183F8F2432C18D00A5C3E8 /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A82432C18B00A5C3E8 /* Layer.cpp */; };
 		EA183F902432C18D00A5C3E8 /* Layout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A92432C18B00A5C3E8 /* Layout.cpp */; };
 		EA183F912432C18D00A5C3E8 /* Scroller.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AA2432C18B00A5C3E8 /* Scroller.h */; };
-		EA183F932432C18D00A5C3E8 /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
 		EA183F942432C18D00A5C3E8 /* SimpleButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AD2432C18B00A5C3E8 /* SimpleButton.h */; };
 		EA183F952432C18D00A5C3E8 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AE2432C18B00A5C3E8 /* Layout.h */; };
 		EA183F962432C18D00A5C3E8 /* Slider.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835AF2432C18B00A5C3E8 /* Slider.h */; };
@@ -180,7 +178,6 @@
 		EA1841312432C51E00A5C3E8 /* Scroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A52432C18B00A5C3E8 /* Scroller.cpp */; };
 		EA1841322432C51E00A5C3E8 /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A82432C18B00A5C3E8 /* Layer.cpp */; };
 		EA1841332432C51E00A5C3E8 /* Layout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A92432C18B00A5C3E8 /* Layout.cpp */; };
-		EA1841342432C51E00A5C3E8 /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
 		EA1841352432C51E00A5C3E8 /* ScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835B12432C18B00A5C3E8 /* ScrollingList.cpp */; };
 		EA1841362432C51E00A5C3E8 /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835B32432C18B00A5C3E8 /* Slider.cpp */; };
 		EA1841372432C52300A5C3E8 /* scales.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18359E2432C18B00A5C3E8 /* scales.cpp */; };
@@ -296,7 +293,6 @@
 		EA2B844D24E7093600EA12BD /* NineSlice.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836302432C18B00A5C3E8 /* NineSlice.h */; };
 		EA2B845324E7093600EA12BD /* RoundedRect.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836262432C18B00A5C3E8 /* RoundedRect.h */; };
 		EA2B846024E7093600EA12BD /* NVGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA6ACC642475DE7000BC0012 /* NVGUI.h */; };
-		EA2B847324E7093600EA12BD /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
 		EA2B849324E7093600EA12BD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18363F2432C18B00A5C3E8 /* Font.h */; };
 		EA2B84BA24E7093600EA12BD /* Draggable.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835B22432C18B00A5C3E8 /* Draggable.h */; };
 		EA2B84ED24E7093600EA12BD /* AudioSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836172432C18B00A5C3E8 /* AudioSystem.h */; };
@@ -405,7 +401,6 @@
 		EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AE024A609CA000F057B /* YGNode.cpp */; };
 		EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F82432C18B00A5C3E8 /* Midi.cpp */; };
 		EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
-		EA2B8B0D24E7093600EA12BD /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
 		EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835B12432C18B00A5C3E8 /* ScrollingList.cpp */; };
 		EA2B8B1524E7093600EA12BD /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A82432C18B00A5C3E8 /* Layer.cpp */; };
 		EA2B8B1724E7093600EA12BD /* SVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18361E2432C18B00A5C3E8 /* SVG.cpp */; };
@@ -500,7 +495,6 @@
 		EA689486261C633500F76B91 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234ACE24A609CA000F057B /* YGLayout.cpp */; };
 		EA689487261C633500F76B91 /* Tween.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836052432C18B00A5C3E8 /* Tween.cpp */; };
 		EA689488261C633500F76B91 /* MitredLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18362C2432C18B00A5C3E8 /* MitredLine.cpp */; };
-		EA68948A261C633500F76B91 /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
 		EA68948D261C633500F76B91 /* NVG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA78556D2472E3320072FD05 /* NVG.cpp */; };
 		EA68948F261C633500F76B91 /* Layer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A82432C18B00A5C3E8 /* Layer.cpp */; };
 		EA689490261C633500F76B91 /* AudioFileApple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836122432C18B00A5C3E8 /* AudioFileApple.cpp */; };
@@ -920,13 +914,11 @@
 		EA18359D2432C18B00A5C3E8 /* scales.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scales.h; sourceTree = "<group>"; };
 		EA18359E2432C18B00A5C3E8 /* scales.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scales.cpp; sourceTree = "<group>"; };
 		EA1835A22432C18B00A5C3E8 /* ScrollingList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScrollingList.h; sourceTree = "<group>"; };
-		EA1835A42432C18B00A5C3E8 /* DropDown.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropDown.h; sourceTree = "<group>"; };
 		EA1835A52432C18B00A5C3E8 /* Scroller.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scroller.cpp; sourceTree = "<group>"; };
 		EA1835A72432C18B00A5C3E8 /* Layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Layer.h; sourceTree = "<group>"; };
 		EA1835A82432C18B00A5C3E8 /* Layer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Layer.cpp; sourceTree = "<group>"; };
 		EA1835A92432C18B00A5C3E8 /* Layout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Layout.cpp; sourceTree = "<group>"; };
 		EA1835AA2432C18B00A5C3E8 /* Scroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scroller.h; sourceTree = "<group>"; };
-		EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DropDown.cpp; sourceTree = "<group>"; };
 		EA1835AD2432C18B00A5C3E8 /* SimpleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleButton.h; sourceTree = "<group>"; };
 		EA1835AE2432C18B00A5C3E8 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Layout.h; sourceTree = "<group>"; };
 		EA1835AF2432C18B00A5C3E8 /* Slider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Slider.h; sourceTree = "<group>"; };
@@ -1940,8 +1932,6 @@
 				EA1835B12432C18B00A5C3E8 /* ScrollingList.cpp */,
 				EAF99AB9267A43B000157A7C /* ScrollingListDeletable.h */,
 				EAF99ABA267A43E400157A7C /* ScrollingListDeletable.cpp */,
-				EA1835A42432C18B00A5C3E8 /* DropDown.h */,
-				EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */,
 				EA1835A72432C18B00A5C3E8 /* Layer.h */,
 				EA1835A82432C18B00A5C3E8 /* Layer.cpp */,
 				EA234B0F24A60BFA000F057B /* FlexboxLayout.h */,
@@ -3375,7 +3365,6 @@
 				EA183FF72432C18D00A5C3E8 /* RoundedRect.h in Headers */,
 				EA297C6B25C954E600F890AE /* pa_mac_core.h in Headers */,
 				EA6ACC652475DE7100BC0012 /* NVGUI.h in Headers */,
-				EA183F8B2432C18D00A5C3E8 /* DropDown.h in Headers */,
 				EA297C6925C954E600F890AE /* pa_jack.h in Headers */,
 				EAF6737D289BC441001F778D /* stringUtil.h in Headers */,
 				EA71A79027E39E6C0081A5CB /* zipper.h in Headers */,
@@ -3560,7 +3549,6 @@
 				EA2B845324E7093600EA12BD /* RoundedRect.h in Headers */,
 				EA2B846024E7093600EA12BD /* NVGUI.h in Headers */,
 				EA71A78727E39E6C0081A5CB /* fileenc.h in Headers */,
-				EA2B847324E7093600EA12BD /* DropDown.h in Headers */,
 				EAF6737E289BC441001F778D /* stringUtil.h in Headers */,
 				EA2B849324E7093600EA12BD /* Font.h in Headers */,
 				EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
@@ -3900,7 +3888,6 @@
 				EA183FD42432C18D00A5C3E8 /* Midi.cpp in Sources */,
 				EA183FCD2432C18D00A5C3E8 /* FileWatcher.cpp in Sources */,
 				EAF99ABB267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
-				EA183F932432C18D00A5C3E8 /* DropDown.cpp in Sources */,
 				EA297C7825C954E600F890AE /* pa_trace.c in Sources */,
 				EA71A73227E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
@@ -4042,7 +4029,6 @@
 				EA1841252432C4E800A5C3E8 /* Tween.cpp in Sources */,
 				EA18411C2432C4AC00A5C3E8 /* MitredLine.cpp in Sources */,
 				EA71A79527E39E6C0081A5CB /* CDirEntry.cpp in Sources */,
-				EA1841342432C51E00A5C3E8 /* DropDown.cpp in Sources */,
 				EA78556F2472E3320072FD05 /* NVG.cpp in Sources */,
 				EA1841322432C51E00A5C3E8 /* Layer.cpp in Sources */,
 				EA1841232432C4CF00A5C3E8 /* AudioFileApple.cpp in Sources */,
@@ -4156,7 +4142,6 @@
 				EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */,
 				EAD03BA7297FD9A200D0C04A /* MacWebView.mm in Sources */,
 				EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */,
-				EA2B8B0D24E7093600EA12BD /* DropDown.cpp in Sources */,
 				EA16DAD125FFABDA001C0460 /* pa_allocation.c in Sources */,
 				EA71A76C27E39E6C0081A5CB /* sha1.c in Sources */,
 				EAD82ECB269CA19400861BE3 /* Dialogs.cpp in Sources */,
@@ -4303,7 +4288,6 @@
 				EA689487261C633500F76B91 /* Tween.cpp in Sources */,
 				EA689488261C633500F76B91 /* MitredLine.cpp in Sources */,
 				EA71A72F27E39E6B0081A5CB /* ioapi.c in Sources */,
-				EA68948A261C633500F76B91 /* DropDown.cpp in Sources */,
 				EA68948D261C633500F76B91 /* NVG.cpp in Sources */,
 				EA68948F261C633500F76B91 /* Layer.cpp in Sources */,
 				EAA59297281065B10068FD7B /* AudioUnitViewController.mm in Sources */,
