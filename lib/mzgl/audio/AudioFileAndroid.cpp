@@ -293,6 +293,11 @@ bool AudioFileAndroid_load(
 
 bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate) {
 #ifdef __ANDROID__
+	// on some shit android phones, the OS level audio file loading is broken somehow
+	// so if you're loading a wav file, better to stick with dr_wav
+	if (fs::path(toLowerCase(path)).extension() == ".wav") {
+		return AudioFile_loadDrLib(path, buff, outNumChannels, outSampleRate, 0);
+	}
 	return AudioFileAndroid_load(path, buff, outNumChannels, outSampleRate, 0);
 #else
 	return AudioFile_loadDrLib(path, buff, outNumChannels, outSampleRate, 0);

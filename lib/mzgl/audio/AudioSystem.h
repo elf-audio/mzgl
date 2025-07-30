@@ -25,7 +25,7 @@ struct AudioPort {
 
 	bool isValid() { return portId != -1; }
 
-	std::string toString() {
+	std::string toString() const {
 		std::string s = "[id: " + std::to_string(portId) + "] " + name + " (ins: " + std::to_string(numInChannels);
 		s += " / outs: " + std::to_string(numOutChannels);
 		if (isDefaultInput) s += ",default-input";
