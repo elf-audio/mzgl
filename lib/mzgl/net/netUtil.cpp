@@ -10,6 +10,8 @@
 #include "stringUtil.h"
 #include "util.h"
 #include "log.h"
+#include "mzgl_platform.h"
+
 #ifdef __APPLE__
 #	include <Foundation/Foundation.h>
 #endif
@@ -110,7 +112,26 @@ std::string postToUrl(const std::string url, const std::vector<std::pair<std::st
 	return "";
 #endif
 }
+#if MZGL_ANDROID
+#	include "androidUtil.h"
+#endif
+void pingUrl(const std::string &_url) {
+#ifdef __APPLE__
+	std::string url = _url;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	  @autoreleasepool {
+		  NSURL *nsUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+		  if (!nsUrl) return;
 
+		  NSURLSession *session		 = [NSURLSession sharedSession];
+		  NSURLSessionDataTask *task = [session dataTaskWithURL:nsUrl];
+		  [task resume];
+	  }
+	});
+#elif MZGL_ANDROID
+	callJNI("pingUrl", _url);
+#endif
+}
 std::string urlencode(const std::string &value) {
 	static auto hex_digt = "0123456789ABCDEF";
 
