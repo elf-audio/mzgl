@@ -153,10 +153,12 @@ static int engine_init_display(struct engine *engine) {
 	return 0;
 }
 
-bool checkGlError(const char *funcName) {
+static bool checkGlError(const char *funcName) {
 	GLint err = glGetError();
 	if (err != GL_NO_ERROR) {
-		LOGE("GL error after %s(): 0x%08x\n", funcName, err);
+		std::stringstream ss;
+		ss << "GL error after " << funcName << "() = 0x" << std::hex << err;
+		Log::e() << ss.str();
 		return true;
 	}
 	return false;

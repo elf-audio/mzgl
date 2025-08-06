@@ -30,7 +30,7 @@ using namespace std;
 #ifdef __ANDROID__
 vector<Font *> Font::fonts;
 #endif
-
+#include "error.h"
 /*
  This uses the version of fontstash on github as of 16/01/18
  changing this line:
@@ -93,6 +93,7 @@ bool Font::isLoaded() const {
 
 bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	// todo - this is just a copy of the next method
+	GetError();
 	clear();
 	this->size = size / 2.f;
 #ifdef MZGL_SOKOL_METAL
@@ -250,7 +251,7 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 	// for some reason, they blow up and set the whole texture alpha to 1, so
 	// this code just turns it shy of 1
 	auto c = g.getColor();
-	if (c.a == 1) c.a = 0.999;
+	if (c.a == 1.f) c.a = 0.999f;
 	shader->setColor(c);
 #else
 	shader->setColor(g.getColor());

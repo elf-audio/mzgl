@@ -26,9 +26,7 @@ public:
 	void setBlending(bool shouldBlend) override {
 		// doesn't need to do anything
 	}
-	void setLineWidth(float f) override {
-		// unsupported?
-	}
+
 	void setBlendMode(Graphics::BlendMode blendMode) override {
 		// doesn't need to do anything
 	}

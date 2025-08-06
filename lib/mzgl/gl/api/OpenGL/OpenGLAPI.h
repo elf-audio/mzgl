@@ -9,7 +9,6 @@ public:
 
 	void init() override;
 
-	void setLineWidth(float f) override;
 	void setBlending(bool shouldBlend) override;
 
 	void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) override;

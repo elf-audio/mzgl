@@ -42,20 +42,28 @@ public:
 			: buffer(buffer)
 			, attribute(attribute) {
 			if (!buffer.valid()) return;
+			GetError();
 			glEnableVertexAttribArray(attribute);
+			GetError();
 			glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
+			GetError();
 			glVertexAttribPointer(attribute,
 								  buffer.dimensions, // size
 								  GL_FLOAT, // type
 								  GL_FALSE, // normalized?
 								  0, // stride
 								  (void *) 0 // array buffer offset
+
 			);
+			GetError();
 		}
 		~BufferBinding() {
 			if (!buffer.valid()) return;
+			GetError();
 			glDisableVertexAttribArray(attribute);
+			GetError();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			GetError();
 		}
 
 	private:
@@ -196,7 +204,25 @@ public:
 			g.currShader->setColor(g.getColor());
 		}
 	}
+	class VertexArrayBinding {
+	public:
+		VertexArrayBinding(uint32_t vao)
+			: vao(vao) {
+			if (vao != 0) {
+				glBindVertexArray(vao);
+			}
+		}
+		~VertexArrayBinding() {
+			if (vao != 0) {
+				glBindVertexArray(0);
+			}
+		}
+
+	private:
+		uint32_t vao;
+	};
 	void draw_(Graphics &g, Vbo::PrimitiveType mode, size_t instances) override {
+		GetError();
 		if (vertexBuffer.size == 0) {
 			return;
 		}
@@ -206,23 +232,21 @@ public:
 			return;
 		}
 #endif
-
+		GetError();
 		chooseShaderAndSetDefaults(g);
-
+		GetError();
 #ifndef MZGL_GL2
-		glBindVertexArray(vertexArrayObject);
+		VertexArrayBinding vao(vertexArrayObject);
 #endif
 		auto shader = dynamic_cast<OpenGLShader *>(g.currShader);
-
 		BufferBinding vertexBinding(vertexBuffer, shader->positionAttribute);
 		BufferBinding colorBinding(colorbuffer, shader->colorAttribute);
 		BufferBinding texCoordBinding(texCoordBuffer, shader->texCoordAttribute);
 		BufferBinding normalBinding(normalBuffer, shader->normAttribute);
-
 		if (indexBuffer.valid()) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
 		}
-
+		GetError();
 		auto glMode = primitiveTypeToGLMode(mode);
 		if (instances > 1) {
 			if (indexBuffer.valid()) {
@@ -253,13 +277,12 @@ public:
 				glDrawArrays(glMode, 0, (GLsizei) vertexBuffer.size);
 			}
 		}
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-#ifndef MZGL_GL2
-		glBindVertexArray(0);
-#endif
-
+		GetError();
+		if (indexBuffer.valid()) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		}
+		GetError();
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		GetError();
 	}
 };

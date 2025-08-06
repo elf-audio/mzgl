@@ -14,7 +14,6 @@ public:
 	virtual ~GraphicsAPI()									 = default;
 	virtual void init()										 = 0;
 	virtual void setBlending(bool shouldBlend)				 = 0;
-	virtual void setLineWidth(float f)						 = 0;
 	virtual void setBlendMode(Graphics::BlendMode blendMode) = 0;
 	virtual void clear(vec4 c)								 = 0;
 

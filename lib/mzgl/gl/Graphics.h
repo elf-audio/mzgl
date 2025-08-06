@@ -109,7 +109,9 @@ public:
 	void fill();
 	bool isFilling();
 
+	[[deprecated]]
 	void setStrokeWeight(float f);
+	[[deprecated]]
 	float getStrokeWeight();
 
 	/////////////////////////////////////////////////////////////////////////////
