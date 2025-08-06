@@ -595,6 +595,7 @@ int32_t Graphics::getDefaultFrameBufferId() {
 #	include "OpenGLShader.h"
 #endif
 void Graphics::clearUpResources() {
+#ifdef __ANDROID__
 	Log::d() << "cleaning up GL resources";
 	for (auto *vbo: Vbo::vbos) {
 		vbo->deallocate();
@@ -607,13 +608,12 @@ void Graphics::clearUpResources() {
 	for (auto *font: Font::fonts) {
 		font->clear();
 	}
-#ifdef MZGL_SOKOL_METAL
-	static_assert(false, "Sokol isn't supported on android yet");
-#else
+	
 	for (auto *shader: Shader::shaders) {
 		((OpenGLShader *) shader)->shaderProgram = 0;
 	}
+	
 	dynamic_cast<OpenGLAPI *>(api.get())->cleanUp();
-#endif
 	currShader = nullptr;
+#endif
 }
