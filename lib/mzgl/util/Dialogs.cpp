@@ -288,8 +288,13 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	  [alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { NSLog(@"Success"); }];
+	  NSWindow *window = [NSApp mainWindow];
+	  if (window == nil) {
+		  Log::e() << "No main window found for alert dialog, using runModal instead";
+		  [alert runModal];
+		  return;
+	  }
+	  [alert beginSheetModalForWindow:window completionHandler:^(NSInteger result) { NSLog(@"Success"); }];
 #		else
         [alert runModal];
 #		endif
