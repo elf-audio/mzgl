@@ -12,7 +12,14 @@
 #	include <stdlib.h>
 #	include <assert.h>
 #	include "log.h"
-#	include <csignal>
+#	if defined(_WIN32)
+#		include <intrin.h>
+#		define DEBUG_BREAK() __debugbreak()
+#	else
+#		include <csignal>
+#		define DEBUG_BREAK() std::raise(SIGTRAP)
+#	endif
+
 #	include "mzOpenGL.h"
 
 extern bool alreadyHadGLError;
@@ -37,7 +44,7 @@ extern bool alreadyHadGLError;
 						Log::e() << "Unkown GL Error - " << __FILE__ << ": " << __LINE__ << " - " << Error;       \
 						break;                                                                                    \
 				}                                                                                                 \
-				std::raise(SIGTRAP);                                                                              \
+				DEBUG_BREAK();                                                                                    \
 			}                                                                                                     \
 		}
 
@@ -69,7 +76,7 @@ extern bool alreadyHadGLError;
 					break;                                                                                        \
 				default: break;                                                                                   \
 			}                                                                                                     \
-			std::raise(SIGTRAP);                                                                                  \
+			DEBUG_BREAK();                                                                                        \
 		}
 
 #	define GetShaderInfoLog(Shader, Source)                                                                      \
