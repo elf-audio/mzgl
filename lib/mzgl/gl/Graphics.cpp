@@ -591,3 +591,29 @@ int32_t Graphics::getDefaultFrameBufferId() {
 	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
 	return 0;
 }
+#ifndef MZGL_SOKOL_METAL
+#	include "OpenGLShader.h"
+#endif
+void Graphics::clearUpResources() {
+	Log::d() << "cleaning up GL resources";
+	for (auto *vbo: Vbo::vbos) {
+		vbo->deallocate();
+	}
+
+	for (auto *tex: Texture::textures) {
+		tex->deallocate();
+	}
+
+	for (auto *font: Font::fonts) {
+		font->clear();
+	}
+#ifdef MZGL_SOKOL_METAL
+	static_assert(false, "Sokol isn't supported on android yet");
+#else
+	for (auto *shader: Shader::shaders) {
+		((OpenGLShader *) shader)->shaderProgram = 0;
+	}
+	dynamic_cast<OpenGLAPI *>(api.get())->cleanUp();
+#endif
+	currShader = nullptr;
+}
