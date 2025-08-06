@@ -125,7 +125,6 @@ set(MZGL_SOURCES
     lib/mzgl/app/mac/NSBlockButton.m
     lib/mzgl/app/mac/MacFilePickerDelegate.mm
     lib/mzgl/app/mac/GL/MZGLView.mm
-    lib/mzgl/app/mac/Metal/MZMetalView.mm
     lib/mzgl/app/mac/LayerExplorer.mm
     lib/mzgl/app/mac/TextConsole.mm
     lib/mzgl/app/mac/mainMac.mm
@@ -168,6 +167,9 @@ if(USING_SOKOL)
         lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
         lib/mzgl/gl/api/Sokol/SokolVbo.cpp
         lib/mzgl/gl/api/Sokol/SokolShader.cpp
+          $<$<PLATFORM_ID:Darwin>:
+          lib/mzgl/app/mac/Metal/MZMetalView.mm
+          >
   )
 else()
   list(
