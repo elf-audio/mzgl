@@ -55,6 +55,16 @@ void OpenGLAPI::init() {
 	glGenBuffers(1, &immediateIndexBuffer);
 	GetError();
 }
+void OpenGLAPI::cleanUp() {
+	glDeleteBuffers(1, &immediateVertexBuffer);
+	immediateVertexBuffer = 0;
+	glDeleteBuffers(1, &immediateColorBuffer);
+	immediateColorBuffer = 0;
+	glDeleteBuffers(1, &immediateIndexBuffer);
+	immediateIndexBuffer = 0;
+	glDeleteVertexArrays(1, &immediateVertexArray);
+	immediateVertexArray = 0;
+}
 static ShaderRef loadDefaultShader(Graphics &g, const std::string &vertSrc, const std::string &fragSrc) {
 	auto shader = Shader::create(g);
 	shader->loadFromString(vertSrc, fragSrc);

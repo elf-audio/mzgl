@@ -30,6 +30,9 @@ std::vector<Texture *> Texture::textures;
 
 Texture::Texture(Graphics &g)
 	: g(g) {
+#ifdef __ANDROID__
+	textures.push_back(this);
+#endif
 }
 TextureRef Texture::create(Graphics &g, uint32_t textureID, int width, int height) {
 	return TextureRef(new TEXTURE_CLASS(g, textureID, width, height));

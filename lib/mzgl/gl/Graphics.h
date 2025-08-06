@@ -58,6 +58,13 @@ public:
 	Graphics();
 	~Graphics();
 	void init();
+
+	// this is really only for android
+	// where when app is backgrounded
+	// you need to delete all opengl resources
+	// and recreate them when the app is foregrounded again.
+	void clearUpResources();
+
 	int width			 = 0;
 	int height			 = 0;
 	float pixelScale	 = 2.f;

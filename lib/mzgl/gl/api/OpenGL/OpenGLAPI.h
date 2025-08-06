@@ -28,6 +28,7 @@ public:
 	void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) override;
 	void clear(vec4 c) override;
 	void setBlendMode(Graphics::BlendMode blendMode) override;
+	void cleanUp();
 
 	int32_t getDefaultFrameBufferId();
 

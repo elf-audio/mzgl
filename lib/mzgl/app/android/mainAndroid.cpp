@@ -526,29 +526,6 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 	}
 	return 0; // event not handled
 }
-#include "OpenGLShader.h"
-void clearUpGLResources() {
-	Log::d() << "cleaning up GL resources";
-	for (auto *vbo: Vbo::vbos) {
-		vbo->deallocate();
-	}
-
-	for (auto *tex: Texture::textures) {
-		tex->deallocate();
-	}
-
-	for (auto *font: Font::fonts) {
-		font->clear();
-	}
-#ifdef MZGL_SOKOL_METAL
-	static_assert(false, "Sokol isn't supported on android yet");
-#else
-	for (auto *shader: Shader::shaders) {
-		((OpenGLShader *) shader)->shaderProgram = 0;
-	}
-#endif
-	graphics.currShader = nullptr;
-}
 
 bool ignoreNextGainedFocus = false;
 bool clearedUpGLResources  = false;
@@ -587,7 +564,7 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 		case APP_CMD_TERM_WINDOW:
 			// The window is being hidden or closed, clean it up.
 			Log::d() << "APP_CMD_TERM_WINDOW";
-			clearUpGLResources();
+			graphics.clearUpResources();
 			clearedUpGLResources = true;
 			engine_term_display(engine);
 			engineReady = false;
