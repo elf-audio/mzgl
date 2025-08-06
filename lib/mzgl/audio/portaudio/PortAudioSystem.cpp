@@ -41,8 +41,8 @@ PortAudioSystem::PortAudioSystem() {
 
 	if (verbose) {
 		int numApis = Pa_GetHostApiCount();
-		if(numApis==paNotInitialized) {
-			Log::e()<< "Portaudio not initizliaed";
+		if (numApis == paNotInitialized) {
+			Log::e() << "Portaudio not initizliaed";
 		}
 		Log::d() << "Listing Host API's (" << numApis << ")";
 		for (int i = 0; i < numApis; ++i) {
@@ -359,7 +359,9 @@ vector<AudioPort> PortAudioSystem::getInputs() {
 
 void printOutPorts();
 void PortAudioSystem::rescanPorts() {
+#ifdef __APPLE__
 	printOutPorts();
+#endif
 	if (verbose) {
 		Log::d() << "PortAudioSystem::rescanPorts()";
 	}
@@ -459,9 +461,10 @@ double PortAudioSystem::getHostTime() {
 }
 
 /////////////////////////////////////
-#include <AudioToolbox/AudioToolbox.h>
-#include <CoreAudio/CoreAudio.h>
-#include <CoreFoundation/CoreFoundation.h>
+#ifdef __APPLE__
+#	include <AudioToolbox/AudioToolbox.h>
+#	include <CoreAudio/CoreAudio.h>
+#	include <CoreFoundation/CoreFoundation.h>
 //#include <iostream>
 //#include <string>
 //#include <vector>
@@ -589,3 +592,4 @@ void printOutPorts() {
 		Log::d() << port.toString();
 	}
 }
+#endif
