@@ -87,9 +87,8 @@ public:
 
 		ScopedAlphaBlend s(g, drawShadow);
 		VboRef vbo = Vbo::create();
-		d.commit(vbo);
 		g.setColor(1);
-		vbo->draw(g);
+		d.draw(g);
 	}
 
 	bool touchDown(float x, float y, int id) override {

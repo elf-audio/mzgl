@@ -23,6 +23,9 @@
 
 void Graphics::init() {
 	api->init();
+	drawerVbo = Vbo::create();
+	setBlending(true);
+	setBlendMode(BlendMode::Alpha);
 }
 
 Graphics::~Graphics() = default;
@@ -79,12 +82,6 @@ bool Graphics::isBlending() const {
 
 glm::mat4 Graphics::getMVP() {
 	return viewProjectionMatrix * modelMatrixStack.getMatrix();
-}
-
-void Graphics::initGraphics() {
-	api->init();
-	setBlending(true);
-	setBlendMode(BlendMode::Alpha);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -249,7 +246,7 @@ void Graphics::drawPlus(vec2 c, int diameter, int thickness) {
 	d.drawRect(r);
 	r.setFromCentre(c, thickness, diameter);
 	d.drawRect(r);
-	d.createVbo(true)->draw(*this);
+	d.draw(*this);
 }
 
 void Graphics::drawCross(vec2 c, int diameter, int thickness) {
@@ -263,24 +260,24 @@ void Graphics::drawCross(vec2 c, int diameter, int thickness) {
 void Graphics::drawChevronLeft(vec2 c, int radius, int thickness) {
 	Drawer d;
 	d.drawChevronLeft(c, radius, thickness);
-	d.createVbo(true)->draw(*this);
+	d.draw(*this);
 }
 void Graphics::drawChevronDown(vec2 c, int radius, int thickness) {
 	Drawer d;
 	d.drawChevronDown(c, radius, thickness);
-	d.createVbo(true)->draw(*this);
+	d.draw(*this);
 }
 
 void Graphics::drawChevronUp(vec2 c, int radius, int thickness) {
 	Drawer d;
 	d.drawChevronUp(c, radius, thickness);
-	d.createVbo(true)->draw(*this);
+	d.draw(*this);
 }
 
 void Graphics::drawChevronRight(vec2 c, int radius, int thickness) {
 	Drawer d;
 	d.drawChevronRight(c, radius, thickness);
-	d.createVbo(true)->draw(*this);
+	d.draw(*this);
 }
 
 void Graphics::draw(const Rectf &r) {

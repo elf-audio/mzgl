@@ -69,6 +69,7 @@ public:
 	void drawChevronDown(vec2 c, int radius, int thickness);
 	void drawChevronLeft(vec2 c, int radius, int thickness);
 	void drawChevronRight(vec2 c, int radius, int thickness);
+	void draw(Graphics &g, bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	void commit(VboRef vbo, bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	VboRef createVbo(bool ignoreColor = false, bool addNormalizedTexCoords = false);
 	void addGeometry(Geometry &_geom);

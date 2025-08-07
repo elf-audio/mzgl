@@ -469,7 +469,12 @@ void Drawer::commit(VboRef vbo, bool ignoreColor, bool addNormalizedTexCoords) {
 	}
 	geom.clear();
 }
-
+void Drawer::draw(Graphics &g, bool ignoreColor, bool addNormalizedTexCoords) {
+	commit(g.drawerVbo, ignoreColor, addNormalizedTexCoords);
+	if (g.drawerVbo->getNumVerts() > 0) {
+		g.drawerVbo->draw(g);
+	}
+}
 VboRef Drawer::createVbo(bool ignoreColor, bool addNormalizedTexCoords) {
 	VboRef vbo = Vbo::create();
 	commit(vbo, ignoreColor, addNormalizedTexCoords);

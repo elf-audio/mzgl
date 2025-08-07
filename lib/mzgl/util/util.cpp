@@ -788,7 +788,7 @@ std::string execute(std::string cmd, int *outExitCode) {
 }
 void initMZGL(std::shared_ptr<App> app) {
 	if (!app->isHeadless()) {
-		app->g.initGraphics();
+		app->g.init();
 	}
 	Globals::startTime	 = std::chrono::system_clock::now();
 	app->g.frameDelta	 = 1.f / 60.f;

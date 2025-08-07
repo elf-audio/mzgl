@@ -193,7 +193,7 @@ public:
 	/////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////
 	// PRIVATE
-	void initGraphics();
+
 	void setupView(bool flipped = true, int w = 0, int h = 0);
 	void setupViewOrtho(float w = 0.f, float h = 0.f);
 	unsigned int getFrameNum() { return frameNum; }
@@ -222,6 +222,8 @@ public:
 	// OpenGL only
 	int32_t getDefaultFrameBufferId();
 	GraphicsAPI &getAPI() { return *api; }
+
+	VboRef drawerVbo;
 
 private:
 	float strokeWeight	= 1;
