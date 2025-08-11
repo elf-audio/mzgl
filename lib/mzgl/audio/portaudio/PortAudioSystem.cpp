@@ -32,25 +32,12 @@ bool PortAudioSystem::checkPaError(PaError err, string msg) {
 PortAudioSystem::PortAudioSystem() {
 	if (verbose) {
 		Log::d() << "PortAudioSystem()";
+		printf("PortAudioSystem()\n");
 	}
-
 	auto err = Pa_Initialize();
 	if (!checkPaError(err, "Intializing port audio")) {
 		throw std::runtime_error("dang! portaudio not working");
 	}
-
-	if (verbose) {
-		int numApis = Pa_GetHostApiCount();
-		if (numApis == paNotInitialized) {
-			Log::e() << "Portaudio not initizliaed";
-		}
-		Log::d() << "Listing Host API's (" << numApis << ")";
-		for (int i = 0; i < numApis; ++i) {
-			const PaHostApiInfo *apiInfo = Pa_GetHostApiInfo(i);
-			Log::d() << "> API " << apiInfo->name;
-		}
-	}
-
 	rescanPorts();
 }
 
@@ -106,6 +93,63 @@ static int PortAudioSystem_callback(const void *inputBuffer,
 	as->finishedAudioCallback();
 	return paContinue;
 }
+
+//#ifdef __APPLE__
+//double getMacDefaultDeviceSampleRate() {
+//
+//
+//
+//	AudioObjectID      deviceID;
+//
+//	// load the current default device
+//	UInt32 deviceSize = sizeof(deviceID);
+//	AudioObjectPropertyAddress address = { kAudioHardwarePropertyDefaultInputDevice, kAudioObjectPropertyScopeGlobal,  kAudioObjectPropertyElementMaster};
+//
+//	auto err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, &deviceSize, &deviceID);
+//
+//
+//	if(err != kAudioHardwareNoError) {
+//		NSLog(@"Error getting default device");
+//		return 0;
+//	}
+//
+//
+//	AudioObjectPropertyAddress addr;
+//
+//	addr.mSelector = kAudioDevicePropertyNominalSampleRate;
+//	addr.mScope = kAudioObjectPropertyScopeGlobal;
+//	addr.mElement = kAudioObjectPropertyElementMaster;
+//
+//	UInt32 dataSize = 0;
+//	err = AudioObjectGetPropertyDataSize(deviceID, &addr, 0, NULL, &dataSize);
+//
+//
+//	if(err != kAudioHardwareNoError) {
+//		NSLog(@"Error getting prop size");
+//		return 0;
+//	}
+//
+//	double val;
+//
+//
+//	err = AudioObjectGetPropertyData( deviceID,
+//								&addr,
+//								0,
+//								NULL,
+//								&dataSize,
+//								&val);
+//
+//	if(err != kAudioHardwareNoError) {
+//		NSLog(@"Error getting prop");
+//		return 0;
+//	}
+////	this->sampleRate = val;
+////					this->sampleRate = outSampleRate;
+////			NSLog(@"Want %f Hz", this->sampleRate);
+//
+//	return val;
+//}
+//#endif
 
 AudioPort PortAudioSystem::getPort(int dev) {
 	if (verbose) {
@@ -357,11 +401,7 @@ vector<AudioPort> PortAudioSystem::getInputs() {
 	return ret;
 }
 
-void printOutPorts();
 void PortAudioSystem::rescanPorts() {
-#ifdef __APPLE__
-	printOutPorts();
-#endif
 	if (verbose) {
 		Log::d() << "PortAudioSystem::rescanPorts()";
 	}
@@ -374,9 +414,6 @@ void PortAudioSystem::rescanPorts() {
 	if (numDevices < 0) {
 		Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
 		return;
-	}
-	if (verbose) {
-		Log::d() << "Portaudio: Found " << numDevices << " devices";
 	}
 	//	Log::d() << "Found " << numDevices << " devices";
 	const vector<double> standardSampleRates = {
@@ -459,137 +496,3 @@ double PortAudioSystem::getOutputLatency() {
 double PortAudioSystem::getHostTime() {
 	return hostTime;
 }
-
-/////////////////////////////////////
-#ifdef __APPLE__
-#	include <AudioToolbox/AudioToolbox.h>
-#	include <CoreAudio/CoreAudio.h>
-#	include <CoreFoundation/CoreFoundation.h>
-//#include <iostream>
-//#include <string>
-//#include <vector>
-//#include <iomanip>
-//#include <sstream>
-std::vector<AudioPort> rescan_Ports() {
-	std::vector<AudioPort> ports;
-
-	AudioDeviceID defaultInput	= 0;
-	AudioDeviceID defaultOutput = 0;
-	UInt32 size					= sizeof(AudioDeviceID);
-
-	// Get default input/output
-	AudioObjectPropertyAddress defInputAddr = {kAudioHardwarePropertyDefaultInputDevice,
-											   kAudioObjectPropertyScopeGlobal,
-											   kAudioObjectPropertyElementMain};
-	AudioObjectGetPropertyData(kAudioObjectSystemObject, &defInputAddr, 0, nullptr, &size, &defaultInput);
-
-	AudioObjectPropertyAddress defOutputAddr = {kAudioHardwarePropertyDefaultOutputDevice,
-												kAudioObjectPropertyScopeGlobal,
-												kAudioObjectPropertyElementMain};
-	AudioObjectGetPropertyData(kAudioObjectSystemObject, &defOutputAddr, 0, nullptr, &size, &defaultOutput);
-
-	// Get all audio devices
-	AudioObjectPropertyAddress devicesAddr = {
-		kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-	AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &devicesAddr, 0, nullptr, &size);
-	UInt32 deviceCount		 = size / sizeof(AudioDeviceID);
-	AudioDeviceID *deviceIDs = new AudioDeviceID[deviceCount];
-	AudioObjectGetPropertyData(kAudioObjectSystemObject, &devicesAddr, 0, nullptr, &size, deviceIDs);
-
-	for (UInt32 i = 0; i < deviceCount; i++) {
-		AudioDeviceID deviceID = deviceIDs[i];
-		AudioPort port;
-		port.portId = static_cast<int>(deviceID);
-
-		// Device name
-		CFStringRef deviceName				= nullptr;
-		AudioObjectPropertyAddress nameAddr = {
-			kAudioObjectPropertyName, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-		size = sizeof(deviceName);
-		if (AudioObjectGetPropertyData(deviceID, &nameAddr, 0, nullptr, &size, &deviceName) == noErr) {
-			char name[256];
-			CFStringGetCString(deviceName, name, sizeof(name), kCFStringEncodingUTF8);
-			port.name = name;
-			CFRelease(deviceName);
-		}
-
-		// Default sample rate
-		AudioObjectPropertyAddress rateAddr = {kAudioDevicePropertyNominalSampleRate,
-											   kAudioObjectPropertyScopeGlobal,
-											   kAudioObjectPropertyElementMain};
-		size								= sizeof(Float64);
-		Float64 defaultRate;
-		if (AudioObjectGetPropertyData(deviceID, &rateAddr, 0, nullptr, &size, &defaultRate) == noErr) {
-			port.defaultSampleRate = defaultRate;
-		}
-
-		// Supported sample rates
-		AudioObjectPropertyAddress availableRatesAddr = {kAudioDevicePropertyAvailableNominalSampleRates,
-														 kAudioObjectPropertyScopeGlobal,
-														 kAudioObjectPropertyElementMain};
-		size										  = 0;
-		if (AudioObjectGetPropertyDataSize(deviceID, &availableRatesAddr, 0, nullptr, &size) == noErr) {
-			UInt32 count			= size / sizeof(AudioValueRange);
-			AudioValueRange *ranges = new AudioValueRange[count];
-			if (AudioObjectGetPropertyData(deviceID, &availableRatesAddr, 0, nullptr, &size, ranges) == noErr) {
-				for (UInt32 j = 0; j < count; j++) {
-					if (ranges[j].mMinimum == ranges[j].mMaximum) {
-						port.supportedSampleRates.push_back(ranges[j].mMinimum);
-					} else {
-						// continuous range; just log min & max
-						port.supportedSampleRates.push_back(ranges[j].mMinimum);
-						port.supportedSampleRates.push_back(ranges[j].mMaximum);
-					}
-				}
-			}
-			delete[] ranges;
-		}
-
-		// Input channels
-		AudioObjectPropertyAddress inAddr = {kAudioDevicePropertyStreamConfiguration,
-											 kAudioDevicePropertyScopeInput,
-											 kAudioObjectPropertyElementMain};
-		size							  = 0;
-		if (AudioObjectGetPropertyDataSize(deviceID, &inAddr, 0, nullptr, &size) == noErr) {
-			AudioBufferList *bufferList = (AudioBufferList *) malloc(size);
-			if (AudioObjectGetPropertyData(deviceID, &inAddr, 0, nullptr, &size, bufferList) == noErr) {
-				for (UInt32 j = 0; j < bufferList->mNumberBuffers; j++) {
-					port.numInChannels += bufferList->mBuffers[j].mNumberChannels;
-				}
-			}
-			free(bufferList);
-		}
-
-		// Output channels
-		AudioObjectPropertyAddress outAddr = {kAudioDevicePropertyStreamConfiguration,
-											  kAudioDevicePropertyScopeOutput,
-											  kAudioObjectPropertyElementMain};
-		size							   = 0;
-		if (AudioObjectGetPropertyDataSize(deviceID, &outAddr, 0, nullptr, &size) == noErr) {
-			AudioBufferList *bufferList = (AudioBufferList *) malloc(size);
-			if (AudioObjectGetPropertyData(deviceID, &outAddr, 0, nullptr, &size, bufferList) == noErr) {
-				for (UInt32 j = 0; j < bufferList->mNumberBuffers; j++) {
-					port.numOutChannels += bufferList->mBuffers[j].mNumberChannels;
-				}
-			}
-			free(bufferList);
-		}
-
-		// Default input/output check
-		if (deviceID == defaultInput) port.isDefaultInput = true;
-		if (deviceID == defaultOutput) port.isDefaultOutput = true;
-
-		ports.push_back(port);
-	}
-
-	delete[] deviceIDs;
-	return ports;
-}
-void printOutPorts() {
-	auto ports = rescan_Ports();
-	// Print all ports
-	for (const auto &port: ports) {
-		Log::d() << port.toString();
-	}
-}
-#endif
