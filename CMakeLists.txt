@@ -28,8 +28,6 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 endif()
 
-
-
 set(LINUX FALSE)
 if(NOT ANDROID
    AND UNIX
@@ -161,23 +159,18 @@ endif()
 
 if(USING_SOKOL)
   list(
-        APPEND
-        MZGL_SOURCES
-        lib/mzgl/gl/api/Sokol/SokolAPI.cpp
-        lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
-        lib/mzgl/gl/api/Sokol/SokolVbo.cpp
-        lib/mzgl/gl/api/Sokol/SokolShader.cpp
-          $<$<PLATFORM_ID:Darwin>:
-          lib/mzgl/app/mac/Metal/MZMetalView.mm
-          >
-  )
+    APPEND
+    MZGL_SOURCES
+    lib/mzgl/gl/api/Sokol/SokolAPI.cpp
+    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
+    lib/mzgl/gl/api/Sokol/SokolVbo.cpp
+    lib/mzgl/gl/api/Sokol/SokolShader.cpp
+    $<$<PLATFORM_ID:Darwin>:
+    lib/mzgl/app/mac/Metal/MZMetalView.mm
+    >)
 else()
-  list(
-        APPEND
-        MZGL_SOURCES
-        lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
-        lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp
-  )
+  list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
+       lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp)
 endif()
 
 foreach(source IN LISTS MZGL_SOURCES)
@@ -253,8 +246,6 @@ set(YOGA_SOURCES
 # lib/zipper/minizip/iowin32.c) list(APPEND HEADERS lib/zipper/zipper/tps)
 # endif()
 
-
-
 option(
   MZGL_UNIT_TEST
   "should this be a unit testing build - omits a main, so catch2 can take control"
@@ -298,7 +289,6 @@ if(APPLE)
     lib/mzgl/util/WebViewOverlay.cpp
     lib/mzgl/net/netUtil.cpp
     lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
-
     lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
@@ -348,45 +338,37 @@ include_directories(libmzgl PUBLIC ${HEADERS})
 include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
-
-
-## COMPILE SOKOL SHADERS
-# List of shader files
+# COMPILE SOKOL SHADERS List of shader files
 set(SHADER_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/nothing.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/color.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorTexture.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/tex.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl"
-)
-
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl")
 
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")
 
-
-
-
 if(USING_SOKOL)
 
   # Process each shader file
-  foreach (SHADER_SOURCE ${SHADER_SOURCES})
-      # Create a corresponding header file name
-      get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
-      set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
+  foreach(SHADER_SOURCE ${SHADER_SOURCES})
+    # Create a corresponding header file name
+    get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
+    set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
 
-      # Custom command that runs sokol-shdc for each shader
-      add_custom_command(
-              OUTPUT ${SHADER_HEADER}
-              COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
-              DEPENDS ${SHADER_SOURCE}
-              COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
-              VERBATIM
-      )
+    # Custom command that runs sokol-shdc for each shader
+    add_custom_command(
+      OUTPUT ${SHADER_HEADER}
+      COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output
+              ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
+      DEPENDS ${SHADER_SOURCE}
+      COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
+      VERBATIM)
 
-      # Append the output header to a list of all generated headers
-      list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
-  endforeach ()
+    # Append the output header to a list of all generated headers
+    list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
+  endforeach()
 
   # Custom target that depends on all generated shader headers
   add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
@@ -401,11 +383,9 @@ if(USING_SOKOL)
 endif()
 
 if(APPLE)
-# choose the sokol backend for platform
-add_compile_definitions(SOKOL_METAL)
+  # choose the sokol backend for platform
+  add_compile_definitions(SOKOL_METAL)
 endif()
-
-
 
 set(MZGL_LIBS ZipFile yoga pu_gixml ghc_filesystem)
 
@@ -416,10 +396,9 @@ else()
   list(APPEND MZGL_LIBS z)
 endif()
 
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE
-# "lib-windows/release-${OF_PLATFORM}-${ARCH_BIT}")
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG
-# "lib-windows/debug-${OF_PLATFORM}-${ARCH_BIT}")
+cmake_policy(SET CMP0077 NEW)
+set(PA_BUILD_STATIC ON)
+set(PA_BUILD_SHARED OFF)
 
 if(NOT ANDROID)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
@@ -472,7 +451,6 @@ if(ANDROID)
     log
     mediandk)
 
-
 elseif(APPLE)
   add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
   target_link_libraries(
@@ -481,7 +459,7 @@ elseif(APPLE)
     "-framework Metal"
     "-framework MetalKit"
     "-framework Accelerate"
-    "-framework AppKit" 
+    "-framework AppKit"
     "-framework StoreKit"
     "-framework CoreVideo"
     "-framework CoreMidi"
@@ -493,8 +471,7 @@ elseif(APPLE)
     "-framework CoreAudioKit"
     "-framework UniformTypeIdentifiers"
     "-framework AudioToolbox"
-    "-framework IOKit"
-  )
+    "-framework IOKit")
 
 elseif(WIN32)
 
@@ -562,17 +539,24 @@ elseif(LINUX)
     ${ALSA_LIBRARIES})
 endif()
 
+if(NOT ANDROID
+   AND NOT WIN32
+   AND NOT IOS)
+  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
+  mzgl_save_cmake_log_level()
+  add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
+  list(APPEND MZGL_LIBS PortAudio)
+  mzgl_restore_cmake_log_level()
+endif()
+if(WIN32)
+  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
+  mzgl_save_cmake_log_level()
+  add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
+  list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
+  mzgl_restore_cmake_log_level()
+endif()
 if(NOT ANDROID AND NOT IOS)
-  mzgl_add_portaudio()
-  mzgl_print_verbose_in_cyan("ADDING PORTAUDIO")
-  list(
-    APPEND
-    MZGL_LIBS
-    RtMidi
-    glfw
-    PortAudio
-    $<$<PLATFORM_ID:Windows>:Urlmon
-    Wininet>)
+  list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
 
 target_link_libraries(libmzgl ${MZGL_LIBS})
