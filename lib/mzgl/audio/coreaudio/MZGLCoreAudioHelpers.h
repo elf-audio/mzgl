@@ -12,55 +12,65 @@ struct InterleaveAudioBufferList {
 	AudioBuffer mBuffers[1];
 };
 
-struct AudioRing {
-	std::vector<float> buf;
-	size_t framesCap = 0;
-	int chans		 = 0;
-	std::atomic<size_t> r {0};
-	std::atomic<size_t> w {0};
+struct CoreAudioDeviceStateChangeListener {
+	struct DeviceAndCallbacks {
+		AudioDeviceID device;
+		std::function<void()> sampleRateChanged;
+		std::function<void()> bufferSizeChanged;
+	};
 
-	void init(size_t capacityFrames, int channels) {
-		chans	  = channels;
-		framesCap = capacityFrames;
-		buf.assign(framesCap * (size_t) chans, 0.0f);
-		r = w = 0;
+	CoreAudioDeviceStateChangeListener(const DeviceAndCallbacks &_inDevice, const DeviceAndCallbacks &_outDevice)
+		: inDevice {_inDevice}
+		, outDevice {_outDevice} {
+		if (inDevice.device != kAudioObjectUnknown) {
+			bind(inDevice);
+		}
+		if (outDevice.device != kAudioObjectUnknown) {
+			bind(outDevice);
+		}
 	}
 
-	[[nodiscard]] size_t availableToRead() const {
-		size_t rr = r.load(std::memory_order_acquire);
-		size_t ww = w.load(std::memory_order_acquire);
-		return (ww + framesCap - rr) % framesCap;
+	~CoreAudioDeviceStateChangeListener() {
+		if (inDevice.device != kAudioObjectUnknown) {
+			unbind(inDevice);
+		}
+		if (outDevice.device != kAudioObjectUnknown) {
+			unbind(outDevice);
+		}
 	}
 
-	[[nodiscard]] size_t availableToWrite() const { return framesCap - 1 - availableToRead(); }
+	void bind(DeviceAndCallbacks &device) {
+		AudioObjectAddPropertyListenerBlock(
+			device.device, &sampleRateAddress, deviceParamQueue, ^(UInt32, const AudioObjectPropertyAddress *) {
+			  device.sampleRateChanged();
+			});
 
-	[[nodiscard]] size_t write(const float *interleaved, size_t frames) {
-		frames			= std::min(frames, availableToWrite());
-		size_t ww		= w.load(std::memory_order_relaxed);
-		size_t toEnd	= framesCap - ww;
-		size_t f1		= std::min(frames, toEnd);
-		size_t f2		= frames - f1;
-		const size_t s1 = f1 * (size_t) chans;
-		const size_t s2 = f2 * (size_t) chans;
-		std::memcpy(&buf[ww * (size_t) chans], interleaved, s1 * sizeof(float));
-		if (f2) std::memcpy(&buf[0], interleaved + s1, s2 * sizeof(float));
-		w.store((ww + frames) % framesCap, std::memory_order_release);
-		return frames;
+		AudioObjectAddPropertyListenerBlock(
+			device.device, &bufferSizeAddress, deviceParamQueue, ^(UInt32, const AudioObjectPropertyAddress *) {
+			  device.bufferSizeChanged();
+			});
 	}
 
-	[[nodiscard]] size_t read(float *interleavedOut, size_t frames) {
-		frames			= std::min(frames, availableToRead());
-		size_t rr		= r.load(std::memory_order_relaxed);
-		size_t toEnd	= framesCap - rr;
-		size_t f1		= std::min(frames, toEnd);
-		size_t f2		= frames - f1;
-		const size_t s1 = f1 * (size_t) chans;
-		const size_t s2 = f2 * (size_t) chans;
-		std::memcpy(interleavedOut, &buf[rr * (size_t) chans], s1 * sizeof(float));
-		if (f2) std::memcpy(interleavedOut + s1, &buf[0], s2 * sizeof(float));
-		r.store((rr + frames) % framesCap, std::memory_order_release);
-		return frames;
+	void unbind(DeviceAndCallbacks &device) {
+		AudioObjectRemovePropertyListenerBlock(device.device,
+											   &sampleRateAddress,
+											   deviceParamQueue,
+											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
+		AudioObjectRemovePropertyListenerBlock(device.device,
+											   &bufferSizeAddress,
+											   deviceParamQueue,
+											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
 	}
+
+	AudioObjectPropertyAddress sampleRateAddress {
+		kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+	AudioObjectPropertyAddress bufferSizeAddress {
+		kAudioDevicePropertyBufferFrameSize, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+
+	dispatch_queue_t deviceParamQueue =
+		dispatch_queue_create("com.elfaudio.coreaudio.devparams", DISPATCH_QUEUE_SERIAL);
+	DeviceAndCallbacks inDevice;
+	DeviceAndCallbacks outDevice;
 };
 
 struct CoreAudioState {
@@ -97,7 +107,70 @@ struct CoreAudioState {
 
 	std::vector<float> inputScratch;
 	std::atomic<uint32_t> inputBufferCapacityFrames {0};
-	AudioRing ring;
+
+	std::unique_ptr<CoreAudioDeviceStateChangeListener> deviceListener;
+};
+
+struct CoreAudioDeviceListener {
+	CoreAudioDeviceListener(const std::function<void()> &_onDevicesChanged)
+		: onDevicesChanged {_onDevicesChanged} {
+		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
+											&deviceAddresses,
+											deviceQueue,
+											^(UInt32, const AudioObjectPropertyAddress *) {
+											  if (onDevicesChanged) {
+												  onDevicesChanged();
+											  }
+											});
+
+		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
+											&defaultInputAddress,
+											deviceQueue,
+											^(UInt32, const AudioObjectPropertyAddress *) {
+											  if (onDevicesChanged) {
+												  onDevicesChanged();
+											  }
+											});
+
+		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
+											&defaultOutputAddress,
+											deviceQueue,
+											^(UInt32, const AudioObjectPropertyAddress *) {
+											  if (onDevicesChanged) {
+												  onDevicesChanged();
+											  }
+											});
+	}
+	~CoreAudioDeviceListener() {
+		if (!deviceQueue) {
+			return;
+		}
+		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
+											   &deviceAddresses,
+											   deviceQueue,
+											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
+		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
+											   &defaultInputAddress,
+											   deviceQueue,
+											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
+		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
+											   &defaultOutputAddress,
+											   deviceQueue,
+											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
+		deviceQueue = nullptr;
+	}
+
+	AudioObjectPropertyAddress deviceAddresses {
+		kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+	AudioObjectPropertyAddress defaultInputAddress {kAudioHardwarePropertyDefaultInputDevice,
+													kAudioObjectPropertyScopeGlobal,
+													kAudioObjectPropertyElementMain};
+	AudioObjectPropertyAddress defaultOutputAddress {kAudioHardwarePropertyDefaultOutputDevice,
+													 kAudioObjectPropertyScopeGlobal,
+													 kAudioObjectPropertyElementMain};
+
+	dispatch_queue_t deviceQueue {dispatch_queue_create("com.elfaudio.coreaudio.devices", DISPATCH_QUEUE_SERIAL)};
+	std::function<void()> onDevicesChanged;
 };
 
 static inline uint64_t hostTimeToNanos(uint64_t hostTime) {
@@ -111,59 +184,10 @@ static inline uint64_t hostTimeToNanos(uint64_t hostTime) {
 	return (hostTime * s_timebase.numer) / s_timebase.denom;
 }
 
-static void readInputs(CoreAudioSystem &system,
-					   CoreAudioState &state,
-					   AudioUnitRenderActionFlags *ioActionFlags,
-					   const AudioTimeStamp *inTimeStamp,
-					   UInt32 inNumberFrames) {
-	if (state.audioUnitIn && state.inChans > 0) {
-		InterleaveAudioBufferList abl;
-		abl.mNumberBuffers				= 1;
-		abl.mBuffers[0].mNumberChannels = (UInt32) state.inChans.load();
-		abl.mBuffers[0].mDataByteSize	= inNumberFrames * sizeof(float) * (UInt32) state.inChans.load();
-		abl.mBuffers[0].mData			= state.inputScratch.data();
-
-		static constexpr UInt32 inputBusIndex = 1;
-
-		auto result = AudioUnitRender(state.audioUnitIn,
-									  ioActionFlags,
-									  inTimeStamp,
-									  inputBusIndex,
-									  inNumberFrames,
-									  reinterpret_cast<AudioBufferList *>(&abl));
-		if (result != noErr) {
-			std::memset(state.inputScratch.data(), 0, abl.mBuffers[0].mDataByteSize);
-		} else {
-			system.inputCallback(state.inputScratch.data(), (int) inNumberFrames, state.inChans.load());
-			//
-			//			(void) state.ring.write(state.inputScratch.data(), (size_t) inNumberFrames);
-		}
-	}
-}
-
-static void
-	writeOutputs(CoreAudioSystem &system, CoreAudioState &state, AudioBufferList *ioData, UInt32 inNumberFrames) {
-	if (state.outChans > 0 && ioData && ioData->mNumberBuffers >= 1) {
-		if (auto outputPtr = reinterpret_cast<float *>(ioData->mBuffers[0].mData)) {
-			std::memset(outputPtr, 0, inNumberFrames * sizeof(float) * static_cast<size_t>(state.outChans.load()));
-			system.outputCallback(outputPtr, static_cast<int>(inNumberFrames), state.outChans.load());
-		}
-	}
-}
-
-static void startCallback(CoreAudioState &state, const AudioTimeStamp *inTimeStamp) {
-	state.insideCallback.store(true);
-	state.lastBufferBeginHostTime.store(inTimeStamp ? inTimeStamp->mHostTime : mach_absolute_time());
-}
-
-static void endCallback(CoreAudioState &state) {
-	state.insideCallback.store(false);
-}
-
 static OSStatus inputRenderProc(void *inRefCon,
 								AudioUnitRenderActionFlags *ioActionFlags,
 								const AudioTimeStamp *inTimeStamp,
-								UInt32 inBusNumber,
+								UInt32,
 								UInt32 inNumberFrames,
 								AudioBufferList *) {
 	if (auto *system = reinterpret_cast<CoreAudioSystem *>(inRefCon)) {
@@ -213,17 +237,27 @@ static OSStatus inputRenderProc(void *inRefCon,
 	return (OSStatus) -1;
 }
 
-static OSStatus renderProc(void *inRefCon,
-						   AudioUnitRenderActionFlags *ioActionFlags,
-						   const AudioTimeStamp *inTimeStamp,
-						   UInt32,
-						   UInt32 inNumberFrames,
-						   AudioBufferList *ioData) {
-	if (auto *self = reinterpret_cast<CoreAudioSystem *>(inRefCon)) {
-		startCallback(self->getState(), inTimeStamp);
-		//		readInputs(*self, self->getState(), ioActionFlags, inTimeStamp, inNumberFrames);
-		writeOutputs(*self, self->getState(), ioData, inNumberFrames);
-		endCallback(self->getState());
+static OSStatus outputRenderProc(void *inRefCon,
+								 AudioUnitRenderActionFlags *,
+								 const AudioTimeStamp *inTimeStamp,
+								 UInt32,
+								 UInt32 inNumberFrames,
+								 AudioBufferList *ioData) {
+	if (auto *system = reinterpret_cast<CoreAudioSystem *>(inRefCon)) {
+		system->getState().insideCallback.store(true);
+		system->getState().lastBufferBeginHostTime.store(inTimeStamp ? inTimeStamp->mHostTime
+																	 : mach_absolute_time());
+		if (system->getState().outChans > 0 && ioData && ioData->mNumberBuffers >= 1) {
+			if (auto outputPtr = reinterpret_cast<float *>(ioData->mBuffers[0].mData)) {
+				std::memset(outputPtr,
+							0,
+							inNumberFrames * sizeof(float)
+								* static_cast<size_t>(system->getState().outChans.load()));
+				system->outputCallback(
+					outputPtr, static_cast<int>(inNumberFrames), system->getState().outChans.load());
+			}
+		}
+		system->getState().insideCallback.store(false);
 	}
 
 	return noErr;

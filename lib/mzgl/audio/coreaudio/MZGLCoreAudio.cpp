@@ -12,6 +12,13 @@
 #include "mzAssert.h"
 
 CoreAudioSystem::CoreAudioSystem() {
+	deviceListener = std::make_unique<CoreAudioDeviceListener>([this]() {
+		if (verbose) {
+			Log::d() << "CoreAudio: Device list changed, rescanning ports";
+		}
+		rescanPorts();
+		deviceChanges.notify([](auto &&listener) { listener->audioDeviceChanged(); });
+	});
 #ifdef DEBUG
 	verbose = true;
 #endif
@@ -20,6 +27,7 @@ CoreAudioSystem::CoreAudioSystem() {
 
 CoreAudioSystem::~CoreAudioSystem() {
 	try {
+		deviceListener.reset();
 		stop();
 	} catch (...) {
 		Log::e() << "Failed to stop CoreAudioSystem during destruction";
@@ -85,13 +93,18 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 
 	mzAssert(inputPort.has_value() && outputPort.has_value());
 
-	state				= std::make_unique<CoreAudioState>();
-	state->inChans		= std::max(0, numInChannels);
-	state->outChans		= std::max(0, numOutChannels);
-	state->deviceOut	= outputPort.has_value() ? outputPort->portId : kAudioObjectUnknown;
-	state->deviceIn		= inputPort.has_value() ? inputPort->portId : kAudioObjectUnknown;
-	state->sampleRate	= sampleRate;
-	state->bufferFrames = bufferSize;
+	state				  = std::make_unique<CoreAudioState>();
+	state->inChans		  = std::max(0, numInChannels);
+	state->outChans		  = std::max(0, numOutChannels);
+	state->deviceOut	  = outputPort.has_value() ? outputPort->portId : kAudioObjectUnknown;
+	state->deviceIn		  = inputPort.has_value() ? inputPort->portId : kAudioObjectUnknown;
+	state->sampleRate	  = sampleRate;
+	state->bufferFrames	  = bufferSize;
+	state->deviceListener = std::make_unique<CoreAudioDeviceStateChangeListener>(
+		CoreAudioDeviceStateChangeListener::DeviceAndCallbacks {
+			.device = state->deviceIn, .sampleRateChanged = []() {}, .bufferSizeChanged = []() {}},
+		CoreAudioDeviceStateChangeListener::DeviceAndCallbacks {
+			.device = state->deviceOut, .sampleRateChanged = []() {}, .bufferSizeChanged = []() {}});
 
 	setDeviceSampleRate(state->deviceOut, sampleRate);
 	setDeviceSampleRate(state->deviceIn, sampleRate);
@@ -203,7 +216,7 @@ void CoreAudioSystem::computeAndAllocInputCapacity() {
 	const size_t samples			 = (size_t) capacityFrames * (size_t) std::max(1, state->inChans.load());
 	state->inputScratch.assign(samples, 0.0f);
 
-	state->ring.init((size_t) capacityFrames * 8, std::max(1, state->inChans.load()));
+	//	state->ring.init((size_t) capacityFrames * 8, std::max(1, state->inChans.load()));
 }
 
 void CoreAudioSystem::createOutputAudioUnit() {
@@ -266,7 +279,7 @@ void CoreAudioSystem::createOutputAudioUnit() {
 	setMaxFramesPerSlice(state->audioUnitOut, (UInt32) state->bufferFrames);
 
 	AURenderCallbackStruct callback {};
-	callback.inputProc		 = renderProc;
+	callback.inputProc		 = outputRenderProc;
 	callback.inputProcRefCon = this;
 	result					 = AudioUnitSetProperty(state->audioUnitOut,
 									kAudioUnitProperty_SetRenderCallback,

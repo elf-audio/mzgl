@@ -3,6 +3,8 @@
 #include <memory>
 
 struct CoreAudioState;
+struct CoreAudioDeviceListener;
+;
 
 #include "AudioSystem.h"
 
@@ -52,17 +54,13 @@ private:
 	void computeAndAllocInputCapacity();
 	void createInputAudioUnit();
 	void createOutputAudioUnit();
-	//	void connectOutput();
-	//	void enableAudioIO();
-	//	void setupStreamFormat();
-	//	void setupAudioBuffers();
-	//	void setupCallback();
 
 	void restart();
 
 	void printDeviceList() const;
 
 	std::unique_ptr<CoreAudioState> state;
+	std::unique_ptr<CoreAudioDeviceListener> deviceListener;
 
 	std::optional<AudioPort> inputPort;
 	std::optional<AudioPort> outputPort;
