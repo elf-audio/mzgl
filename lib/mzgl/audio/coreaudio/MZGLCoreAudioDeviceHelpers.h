@@ -282,3 +282,52 @@ static void getDeviceList(std::vector<AudioPort> &inputPorts, std::vector<AudioP
 		}
 	}
 }
+
+static void setDeviceBufferFrames(AudioDeviceID dev, AudioObjectPropertyScope scope, UInt32 frames) {
+	if (dev == kAudioObjectUnknown) {
+		return;
+	}
+	AudioObjectPropertyAddress address {
+		kAudioDevicePropertyBufferFrameSize, scope, kAudioObjectPropertyElementMain};
+	AudioObjectSetPropertyData(dev, &address, 0, nullptr, sizeof(frames), &frames);
+}
+
+static void setDeviceSampleRate(AudioDeviceID dev, double sampleRate) {
+	if (dev == kAudioObjectUnknown) {
+		return;
+	}
+	AudioObjectPropertyAddress address {
+		kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+	Float64 fs = sampleRate;
+	AudioObjectSetPropertyData(dev, &address, 0, nullptr, sizeof(fs), &fs);
+}
+
+static void setMaxFramesPerSlice(AudioUnit au, UInt32 frames) {
+	AudioUnitSetProperty(
+		au, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &frames, sizeof(frames));
+}
+
+static UInt32 getDeviceMaxFrameSize(AudioUnit au) {
+	UInt32 v  = 0;
+	UInt32 sz = sizeof(v);
+	if (AudioUnitGetProperty(au, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &v, &sz)
+		!= noErr) {
+		v = 0;
+	}
+	return v;
+}
+
+static AudioStreamBasicDescription makeInterleavedASBD(double sampleRate, int channels) {
+	AudioStreamBasicDescription f {};
+	f.mSampleRate  = sampleRate;
+	f.mFormatID	   = kAudioFormatLinearPCM;
+	f.mFormatFlags = static_cast<UInt32>(kAudioFormatFlagIsFloat)
+					 | static_cast<UInt32>(kAudioFormatFlagsNativeEndian)
+					 | static_cast<UInt32>(kAudioFormatFlagIsPacked);
+	f.mFramesPerPacket	= 1;
+	f.mChannelsPerFrame = std::max(1, channels);
+	f.mBitsPerChannel	= 8 * sizeof(float);
+	f.mBytesPerFrame	= sizeof(float) * f.mChannelsPerFrame;
+	f.mBytesPerPacket	= f.mBytesPerFrame;
+	return f;
+}

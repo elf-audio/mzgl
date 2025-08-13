@@ -49,12 +49,14 @@ private:
 	void updateRunningParameters();
 
 	void setupState(int numInChannels, int numOutChannels);
-	void createAudioUnit();
-	void connectOutput();
-	void enableAudioIO();
-	void setupStreamFormat();
-	void setupAudioBuffers();
-	void setupCallback();
+	void computeAndAllocInputCapacity();
+	void createInputAudioUnit();
+	void createOutputAudioUnit();
+	//	void connectOutput();
+	//	void enableAudioIO();
+	//	void setupStreamFormat();
+	//	void setupAudioBuffers();
+	//	void setupCallback();
 
 	void restart();
 
