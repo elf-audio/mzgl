@@ -1,202 +1,22 @@
 #include "MZGLCoreAudio.h"
 
-#include <AudioToolbox/AudioToolbox.h>
-#include <CoreAudio/CoreAudio.h>
-#include <mach/mach_time.h>
 #include <atomic>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <algorithm>
 
+#include "MZGLCoreAudioDeviceHelpers.h"
+#include "MZGLCoreAudioHelpers.h"
+#include "MZGLCoreAudioAggregrateHelpers.h"
 #include "log.h"
+#include "mzAssert.h"
 
-struct InterleaveAudioBufferList {
-	UInt32 mNumberBuffers;
-	AudioBuffer mBuffers[1];
-};
-
-struct CoreAudioState {
-	AudioComponentInstance audioUnit {nullptr};
-	AudioDeviceID deviceOut {kAudioObjectUnknown};
-	AudioDeviceID deviceIn {kAudioObjectUnknown};
-	AudioStreamBasicDescription fmt {};
-	uint32_t bufferFrames = 512;
-	double sampleRate	  = 48000.0;
-
-	std::atomic<bool> running {false};
-	std::atomic<bool> insideCallback {false};
-	std::atomic<uint64_t> lastBufferBeginHostTime {0};
-
-	std::atomic<int> inChans {0};
-	std::atomic<int> outChans {0};
-
-	std::vector<float> inputInterleaved;
-	uint32_t inputBufferCapacityFrames = 0;
-};
-
-enum class DeviceType { Input, Output };
-
-static AudioDeviceID getDefaultDevice(DeviceType type) {
-	AudioObjectPropertyAddress address {type == DeviceType::Output ? kAudioHardwarePropertyDefaultOutputDevice
-																   : kAudioHardwarePropertyDefaultInputDevice,
-										kAudioObjectPropertyScopeGlobal,
-										kAudioObjectPropertyElementMain};
-	auto dev  = kAudioObjectUnknown;
-	auto size = static_cast<UInt32>(sizeof(dev));
-
-	if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, nullptr, &size, &dev) == noErr) {
-		return dev;
-	}
-	return kAudioObjectUnknown;
-}
-
-static std::optional<double> getDeviceSampleRate(AudioDeviceID dev) {
-	if (dev == kAudioObjectUnknown) {
-		return std::nullopt;
-	}
-
-	AudioObjectPropertyAddress address {
-		kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-	Float64 sampleRate = 0.0;
-	UInt32 size		   = static_cast<UInt32>(sizeof(sampleRate));
-	if (AudioObjectGetPropertyData(dev, &address, 0, nullptr, &size, &sampleRate) == noErr) {
-		return static_cast<double>(sampleRate);
-	}
-
-	return std::nullopt;
-}
-
-static std::optional<UInt32> getDeviceFrameSize(AudioDeviceID dev) {
-	if (dev == kAudioObjectUnknown) {
-		return std::nullopt;
-	}
-
-	AudioObjectPropertyAddress address {
-		kAudioDevicePropertyBufferFrameSize, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-	UInt32 frames = 0;
-	auto size	  = static_cast<UInt32>(sizeof(frames));
-
-	if (AudioObjectGetPropertyData(dev, &address, 0, nullptr, &size, &frames) == noErr) {
-		return frames;
-	}
-	return std::nullopt;
-}
-
-static std::optional<UInt32> getDeviceLatency(AudioDeviceID dev, DeviceType type) {
-	if (dev == kAudioObjectUnknown) {
-		return std::nullopt;
-	}
-	AudioObjectPropertyAddress address {kAudioDevicePropertyLatency,
-										type == DeviceType::Output ? kAudioDevicePropertyScopeOutput
-																   : kAudioDevicePropertyScopeInput,
-										kAudioObjectPropertyElementMain};
-	UInt32 latency = 0;
-	auto size	   = static_cast<UInt32>(sizeof(latency));
-	if (AudioObjectGetPropertyData(dev, &address, 0, nullptr, &size, &latency) != noErr) {
-		return std::nullopt;
-	}
-
-	AudioObjectPropertyAddress safetyAddress {kAudioDevicePropertySafetyOffset,
-											  type == DeviceType::Output ? kAudioDevicePropertyScopeOutput
-																		 : kAudioDevicePropertyScopeInput,
-											  kAudioObjectPropertyElementMain};
-	UInt32 safety = 0;
-	size		  = static_cast<UInt32>(sizeof(safety));
-	if (AudioObjectGetPropertyData(dev, &safetyAddress, 0, nullptr, &size, &safety) == noErr) {
-		latency += safety;
-	}
-	return latency;
-}
-
-static inline uint64_t hostTimeToNanos(uint64_t hostTime) {
-	static mach_timebase_info_data_t s_timebase;
-	static std::atomic<bool> inited {false};
-	if (!inited.load()) {
-		(void) mach_timebase_info(&s_timebase);
-		inited.store(true);
-	}
-
-	return (hostTime * s_timebase.numer) / s_timebase.denom;
-}
-
-static void readInputs(CoreAudioSystem &system,
-					   CoreAudioState &state,
-					   AudioUnitRenderActionFlags *ioActionFlags,
-					   const AudioTimeStamp *inTimeStamp,
-					   UInt32 inNumberFrames) {
-	if (state.inChans <= 0) {
-		return;
-	}
-
-	const auto framesToRender = std::min<UInt32>(inNumberFrames, state.inputBufferCapacityFrames);
-
-	InterleaveAudioBufferList audioBufferList {};
-	audioBufferList.mNumberBuffers				= 1;
-	audioBufferList.mBuffers[0].mNumberChannels = static_cast<UInt32>(state.inChans.load());
-	audioBufferList.mBuffers[0].mDataByteSize =
-		framesToRender * sizeof(float) * audioBufferList.mBuffers[0].mNumberChannels;
-	audioBufferList.mBuffers[0].mData = state.inputInterleaved.data();
-
-	static constexpr UInt32 inputBusIndex = 1;
-
-	auto result = AudioUnitRender(state.audioUnit,
-								  ioActionFlags,
-								  inTimeStamp,
-								  inputBusIndex,
-								  framesToRender,
-								  reinterpret_cast<AudioBufferList *>(&audioBufferList));
-
-	float *inputPtr = (result == noErr) ? state.inputInterleaved.data() : nullptr;
-
-	if (result == noErr && framesToRender < inNumberFrames && inputPtr) {
-		auto tailFrames	 = inNumberFrames - framesToRender;
-		auto tailSamples = tailFrames * static_cast<size_t>(state.inChans.load());
-		std::memset(inputPtr + framesToRender * state.inChans.load(), 0, tailSamples * sizeof(float));
-	}
-
-	if (inputPtr) {
-		system.inputCallback(inputPtr, static_cast<int>(inNumberFrames), state.inChans.load());
-	}
-}
-
-static void
-	writeOutputs(CoreAudioSystem &system, CoreAudioState &state, AudioBufferList *ioData, UInt32 inNumberFrames) {
-	if (state.outChans > 0 && ioData && ioData->mNumberBuffers >= 1) {
-		if (auto outputPtr = reinterpret_cast<float *>(ioData->mBuffers[0].mData)) {
-			std::memset(outputPtr, 0, inNumberFrames * sizeof(float) * static_cast<size_t>(state.outChans.load()));
-			system.outputCallback(outputPtr, static_cast<int>(inNumberFrames), state.outChans.load());
-		}
-	}
-}
-
-static void startCallback(CoreAudioState &state, const AudioTimeStamp *inTimeStamp) {
-	state.insideCallback.store(true);
-	state.lastBufferBeginHostTime.store(inTimeStamp ? inTimeStamp->mHostTime : mach_absolute_time());
-}
-
-static void endCallback(CoreAudioState &state) {
-	state.insideCallback.store(false);
-}
-
-static OSStatus renderProc(void *inRefCon,
-						   AudioUnitRenderActionFlags *ioActionFlags,
-						   const AudioTimeStamp *inTimeStamp,
-						   UInt32 inBusNumber,
-						   UInt32 inNumberFrames,
-						   AudioBufferList *ioData) {
-	if (auto *self = reinterpret_cast<CoreAudioSystem *>(inRefCon)) {
-		startCallback(self->getState(), inTimeStamp);
-		readInputs(*self, self->getState(), ioActionFlags, inTimeStamp, inNumberFrames);
-		writeOutputs(*self, self->getState(), ioData, inNumberFrames);
-		endCallback(self->getState());
-	}
-
-	return noErr;
-}
-
-CoreAudioSystem::CoreAudioSystem()
-	: state {std::make_unique<CoreAudioState>()} {
+CoreAudioSystem::CoreAudioSystem() {
+#ifdef DEBUG
+	verbose = true;
+#endif
+	rescanPorts();
 }
 
 CoreAudioSystem::~CoreAudioSystem() {
@@ -207,46 +27,71 @@ CoreAudioSystem::~CoreAudioSystem() {
 	}
 }
 
-double CoreAudioSystem::getPreferredSampleRate() const {
-	auto outputSampleRate = getDeviceSampleRate(state->deviceOut);
-	auto inputSampleRate  = getDeviceSampleRate(state->deviceIn);
+std::optional<double> getSampleRateForPort(const std::optional<AudioPort> &port) {
+	if (port.has_value() && (port->numOutChannels > 0 || port->numInChannels > 0)) {
+		if (auto sampleRate = getDeviceSampleRate(port->portId); sampleRate.has_value()) {
+			return *sampleRate;
+		}
+	}
+	return std::nullopt;
+}
 
-	if (state->outChans > 0 && outputSampleRate.has_value()) {
-		return *outputSampleRate;
+std::optional<uint32_t> getFrameSizeForPort(const std::optional<AudioPort> &port) {
+	if (port.has_value() && (port->numOutChannels > 0 || port->numInChannels > 0)) {
+		if (auto frameSize = getDeviceFrameSize(port->portId); frameSize.has_value()) {
+			return *frameSize;
+		}
+	}
+	return std::nullopt;
+}
+
+double CoreAudioSystem::getPreferredSampleRate() const {
+	if (auto sr = getSampleRateForPort(outputPort); sr.has_value()) {
+		return *sr;
 	}
 
-	if (state->inChans > 0 && inputSampleRate.has_value()) {
-		return *inputSampleRate;
+	if (auto sr = getSampleRateForPort(inputPort); sr.has_value()) {
+		return *sr;
 	}
 
 	return defaultSampleRate;
 }
 
 uint32_t CoreAudioSystem::getPreferredNumberOfFrames() const {
-	auto outputFrameSize = getDeviceFrameSize(state->deviceOut);
-	if (outputFrameSize.has_value()) {
-		return *outputFrameSize;
+	if (auto frameSize = getFrameSizeForPort(outputPort); frameSize.has_value()) {
+		return *frameSize;
 	}
 
-	auto inputFrameSize = getDeviceFrameSize(state->deviceIn);
-	if (inputFrameSize.has_value()) {
-		return *inputFrameSize;
+	if (auto frameSize = getFrameSizeForPort(inputPort); frameSize.has_value()) {
+		return *frameSize;
 	}
+
 	return defaultNumberOfFrames;
 }
 
 void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
+	if (!inputPort.has_value() || !outputPort.has_value()) {
+		rescanPorts();
+	}
+
+	mzAssert(inputPort.has_value() && outputPort.has_value());
+
+	state			= std::make_unique<CoreAudioState>();
 	state->inChans	= std::max(0, numInChannels);
 	state->outChans = std::max(0, numOutChannels);
 
-	state->deviceOut = getDefaultDevice(DeviceType::Output);
-	state->deviceIn	 = getDefaultDevice(DeviceType::Input);
+	auto aggName = "mzgl_aggregate_" + outputPort->name + "_" + inputPort->name;
 
-	state->sampleRate = getPreferredSampleRate();
-	sampleRate		  = state->sampleRate;
-
-	state->bufferFrames = getPreferredNumberOfFrames();
-	bufferSize			= state->bufferFrames;
+	auto agg = createAggregateDevice(inputPort->portId, outputPort->portId, aggName);
+	if (agg.has_value()) {
+		state->deviceOut = *agg;
+		state->deviceIn	 = *agg;
+	} else {
+		Log::e() << "CoreAudio: could not create aggregate device for input: " << inputPort->name
+				 << " and output: " << outputPort->name;
+		state->deviceOut = outputPort.has_value() ? outputPort->portId : kAudioObjectUnknown;
+		state->deviceIn	 = inputPort.has_value() ? inputPort->portId : kAudioObjectUnknown;
+	}
 }
 
 void CoreAudioSystem::createAudioUnit() {
@@ -306,9 +151,11 @@ void CoreAudioSystem::enableAudioIO() {
 
 void CoreAudioSystem::setupStreamFormat() {
 	state->fmt				= {};
-	state->fmt.mSampleRate	= state->sampleRate;
+	state->fmt.mSampleRate	= sampleRate;
 	state->fmt.mFormatID	= kAudioFormatLinearPCM;
-	state->fmt.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+	state->fmt.mFormatFlags = static_cast<UInt32>(kAudioFormatFlagIsFloat)
+							  | static_cast<UInt32>(kAudioFormatFlagsNativeEndian)
+							  | static_cast<UInt32>(kAudioFormatFlagIsPacked);
 	state->fmt.mBitsPerChannel	= sizeof(float) * 8;
 	state->fmt.mFramesPerPacket = 1;
 
@@ -341,14 +188,14 @@ void CoreAudioSystem::setupStreamFormat() {
 	}
 
 	if (state->deviceOut != kAudioObjectUnknown) {
-		auto frames = state->bufferFrames;
 		AudioObjectPropertyAddress addr {
 			kAudioDevicePropertyBufferFrameSize, kAudioDevicePropertyScopeOutput, kAudioObjectPropertyElementMain};
+		auto frames = static_cast<UInt32>(bufferSize);
 		UInt32 size = sizeof(frames);
 		AudioObjectSetPropertyData(state->deviceOut, &addr, 0, nullptr, size, &frames);
 	}
 
-	UInt32 maxFrames = state->bufferFrames;
+	auto maxFrames = static_cast<UInt32>(bufferSize);
 	AudioUnitSetProperty(state->audioUnit,
 						 kAudioUnitProperty_MaximumFramesPerSlice,
 						 kAudioUnitScope_Global,
@@ -358,17 +205,10 @@ void CoreAudioSystem::setupStreamFormat() {
 }
 
 void CoreAudioSystem::setupAudioBuffers() {
-	UInt32 maxFrames = state->bufferFrames;
-	AudioUnitSetProperty(state->audioUnit,
-						 kAudioUnitProperty_MaximumFramesPerSlice,
-						 kAudioUnitScope_Global,
-						 0,
-						 &maxFrames,
-						 sizeof(maxFrames));
-
-	UInt32 size = sizeof(maxFrames);
-	AudioUnitGetProperty(
-		state->audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, &size);
+	auto maxFrames = static_cast<UInt32>(bufferSize);
+	auto size	   = static_cast<UInt32>(sizeof(maxFrames));
+	AudioUnitSetProperty(
+		state->audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, size);
 
 	if (state->inChans > 0) {
 		const size_t samples = static_cast<size_t>(maxFrames) * static_cast<size_t>(state->inChans);
@@ -398,6 +238,11 @@ void CoreAudioSystem::setupCallback() {
 }
 
 void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
+	if (state != nullptr) {
+		Log::d() << "CoreAudioSystem is running, stopping before setup";
+		stop();
+	}
+
 	try {
 		setupState(numInChannels, numOutChannels);
 		createAudioUnit();
@@ -414,7 +259,7 @@ void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
 
 void CoreAudioSystem::start() {
 	if (state == nullptr) {
-		Log::e() << "CoreAudioSystem state is null, cannot start";
+		Log::e() << "CoreAudioSystem state is null, cannot start. You must call setup(int, int) first.";
 		return;
 	}
 
@@ -457,6 +302,20 @@ void CoreAudioSystem::stop() {
 		Log::e() << "CoreAudioSystem failed to stop audio unit with error " << result;
 	}
 	state->running.store(result == noErr);
+	state = nullptr;
+}
+
+void CoreAudioSystem::restart() {
+	if (!isRunning()) {
+		return;
+	}
+
+	auto in	 = state->inChans.load();
+	auto out = state->outChans.load();
+
+	stop();
+	setup(in, out);
+	start();
 }
 
 bool CoreAudioSystem::isRunning() {
@@ -468,35 +327,109 @@ bool CoreAudioSystem::isInsideAudioCallback() {
 }
 
 void CoreAudioSystem::setVerbose(bool _verbose) {
+	verbose = _verbose;
 }
 
 std::vector<AudioPort> CoreAudioSystem::getInputs() {
-	return {};
+	return inputPorts;
 }
 
 std::vector<AudioPort> CoreAudioSystem::getOutputs() {
-	return {};
+	return outputPorts;
 }
 
 bool CoreAudioSystem::setInput(const AudioPort &audioInput) {
+	inputPort = audioInput;
+	updateRunningParameters();
+	restart();
+	return true;
 }
 
 bool CoreAudioSystem::setOutput(const AudioPort &audioOutput) {
+	outputPort = audioOutput;
+	updateRunningParameters();
+	restart();
+	return true;
+}
+
+void CoreAudioSystem::setSampleRate(float _sampleRate) {
+	sampleRate = _sampleRate;
+	restart();
+}
+
+void CoreAudioSystem::setBufferSize(int _size) {
+	bufferSize = _size;
+	restart();
+}
+
+void CoreAudioSystem::updateRunningParameters() {
+	sampleRate = getPreferredSampleRate();
+	bufferSize = getPreferredNumberOfFrames();
+}
+
+void CoreAudioSystem::updateDefaultIOPorts() {
+	bool changedPorts = false;
+	if (!inputPort.has_value()) {
+		for (const auto &port: inputPorts) {
+			if (port.isDefaultInput) {
+				inputPort	 = port;
+				changedPorts = true;
+				break;
+			}
+		}
+	}
+
+	if (!outputPort.has_value()) {
+		for (const auto &port: outputPorts) {
+			if (port.isDefaultOutput) {
+				outputPort	 = port;
+				changedPorts = true;
+				break;
+			}
+		}
+	}
+
+	if (changedPorts) {
+		updateRunningParameters();
+	}
 }
 
 void CoreAudioSystem::rescanPorts() {
+	getDeviceList(inputPorts, outputPorts);
+	updateDefaultIOPorts();
+	if (verbose) {
+		printDeviceList();
+	}
+}
+
+void CoreAudioSystem::printDeviceList() const {
+	Log::d() << "CoreAudioSystem: Input Devices:";
+	for (const auto &port: inputPorts) {
+		Log::d() << port.toString();
+	}
+
+	Log::d() << "CoreAudioSystem: Output Devices:";
+	for (const auto &port: outputPorts) {
+		Log::d() << port.toString();
+	}
 }
 
 AudioPort CoreAudioSystem::getInput() {
+	if (inputPort.has_value()) {
+		return *inputPort;
+	}
 	return {};
 }
 
 AudioPort CoreAudioSystem::getOutput() {
+	if (outputPort.has_value()) {
+		return *outputPort;
+	}
 	return {};
 }
 
 double CoreAudioSystem::getOutputLatency() {
-	if (!state) {
+	if (state == nullptr) {
 		return 0.0;
 	}
 
@@ -505,11 +438,11 @@ double CoreAudioSystem::getOutputLatency() {
 		return 0.0;
 	}
 
-	return *frames / state->sampleRate;
+	return *frames / sampleRate;
 }
 
 double CoreAudioSystem::getNanoSecondsAtBufferBegin() {
-	return static_cast<double>(hostTimeToNanos(state->lastBufferBeginHostTime.load()));
+	return state == nullptr ? 0.0 : static_cast<double>(hostTimeToNanos(state->lastBufferBeginHostTime.load()));
 }
 
 double CoreAudioSystem::getHostTime() {
@@ -517,5 +450,8 @@ double CoreAudioSystem::getHostTime() {
 }
 
 CoreAudioState &CoreAudioSystem::getState() {
+	if (state == nullptr) {
+		throw std::runtime_error("CoreAudioSystem state is null, cannot get state");
+	}
 	return *state;
 }

@@ -20,13 +20,15 @@ public:
 
 	void setVerbose(bool _verbose) override;
 
+	void rescanPorts() override;
 	std::vector<AudioPort> getInputs() override;
 	std::vector<AudioPort> getOutputs() override;
 
+	void setSampleRate(float sampleRate) override;
+	void setBufferSize(int size) override;
+
 	[[nodiscard]] bool setInput(const AudioPort &audioInput) override;
 	[[nodiscard]] bool setOutput(const AudioPort &audioOutput) override;
-	void rescanPorts() override;
-
 	[[nodiscard]] AudioPort getInput() override;
 	[[nodiscard]] AudioPort getOutput() override;
 
@@ -43,6 +45,8 @@ private:
 
 	[[nodiscard]] double getPreferredSampleRate() const;
 	[[nodiscard]] uint32_t getPreferredNumberOfFrames() const;
+	void updateDefaultIOPorts();
+	void updateRunningParameters();
 
 	void setupState(int numInChannels, int numOutChannels);
 	void createAudioUnit();
@@ -52,5 +56,16 @@ private:
 	void setupAudioBuffers();
 	void setupCallback();
 
+	void restart();
+
+	void printDeviceList() const;
+
 	std::unique_ptr<CoreAudioState> state;
+
+	std::optional<AudioPort> inputPort;
+	std::optional<AudioPort> outputPort;
+	std::vector<AudioPort> inputPorts;
+	std::vector<AudioPort> outputPorts;
+
+	bool verbose {false};
 };
