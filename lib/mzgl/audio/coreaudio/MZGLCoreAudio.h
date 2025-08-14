@@ -4,7 +4,6 @@
 
 struct CoreAudioState;
 struct CoreAudioDeviceListener;
-;
 
 #include "AudioSystem.h"
 
@@ -51,6 +50,7 @@ private:
 	void updateRunningParameters();
 
 	void setupState(int numInChannels, int numOutChannels);
+	void checkDeviceAvailability();
 	void computeAndAllocInputCapacity();
 	void createInputAudioUnit();
 	void createOutputAudioUnit();
