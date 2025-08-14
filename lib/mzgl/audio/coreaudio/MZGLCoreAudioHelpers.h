@@ -14,52 +14,67 @@ struct InterleaveAudioBufferList {
 
 struct CoreAudioDeviceStateChangeListener {
 	struct DeviceAndCallbacks {
-		AudioDeviceID device;
+		AudioDeviceID device {kAudioObjectUnknown};
 		std::function<void()> sampleRateChanged;
 		std::function<void()> bufferSizeChanged;
 	};
 
-	CoreAudioDeviceStateChangeListener(const DeviceAndCallbacks &_inDevice, const DeviceAndCallbacks &_outDevice)
-		: inDevice {_inDevice}
-		, outDevice {_outDevice} {
+	CoreAudioDeviceStateChangeListener(const DeviceAndCallbacks &inDev, const DeviceAndCallbacks &outDev)
+		: inDevice {inDev}
+		, outDevice {outDev} {
 		if (inDevice.device != kAudioObjectUnknown) {
-			bind(inDevice);
+			bindIn();
 		}
 		if (outDevice.device != kAudioObjectUnknown) {
-			bind(outDevice);
+			bindOut();
 		}
 	}
 
 	~CoreAudioDeviceStateChangeListener() {
 		if (inDevice.device != kAudioObjectUnknown) {
-			unbind(inDevice);
+			unbindIn();
 		}
 		if (outDevice.device != kAudioObjectUnknown) {
-			unbind(outDevice);
+			unbindOut();
 		}
 	}
 
-	void bind(DeviceAndCallbacks &device) {
-		AudioObjectAddPropertyListenerBlock(
-			device.device, &sampleRateAddress, deviceParamQueue, ^(UInt32, const AudioObjectPropertyAddress *) {
-			  device.sampleRateChanged();
-			});
-
-		AudioObjectAddPropertyListenerBlock(
-			device.device, &bufferSizeAddress, deviceParamQueue, ^(UInt32, const AudioObjectPropertyAddress *) {
-			  device.bufferSizeChanged();
-			});
+	static OSStatus callback(AudioObjectID, UInt32, const AudioObjectPropertyAddress[], void *inClientData) {
+		auto *fn = static_cast<std::function<void()> *>(inClientData);
+		if (fn && *fn) {
+			try {
+				(*fn)();
+			} catch (...) {}
+		}
+		return noErr;
 	}
 
-	void unbind(DeviceAndCallbacks &device) {
-		AudioObjectRemovePropertyListenerBlock(device.device,
-											   &sampleRateAddress,
-											   deviceParamQueue,
-											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
-		AudioObjectRemovePropertyListenerBlock(device.device,
-											   &bufferSizeAddress,
-											   deviceParamQueue,
-											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
+	void bindIn() {
+		AudioObjectAddPropertyListener(
+			inDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&inSampleRateFn));
+		AudioObjectAddPropertyListener(
+			inDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&inBufferSizeFn));
+	}
+
+	void unbindIn() {
+		AudioObjectRemovePropertyListener(
+			inDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&inSampleRateFn));
+		AudioObjectRemovePropertyListener(
+			inDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&inBufferSizeFn));
+	}
+
+	void bindOut() {
+		AudioObjectAddPropertyListener(
+			outDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&outSampleRateFn));
+		AudioObjectAddPropertyListener(
+			outDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&outBufferSizeFn));
+	}
+
+	void unbindOut() {
+		AudioObjectRemovePropertyListener(
+			outDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&outSampleRateFn));
+		AudioObjectRemovePropertyListener(
+			outDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&outBufferSizeFn));
 	}
 
 	AudioObjectPropertyAddress sampleRateAddress {
@@ -67,10 +82,13 @@ struct CoreAudioDeviceStateChangeListener {
 	AudioObjectPropertyAddress bufferSizeAddress {
 		kAudioDevicePropertyBufferFrameSize, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
 
-	dispatch_queue_t deviceParamQueue =
-		dispatch_queue_create("com.elfaudio.coreaudio.devparams", DISPATCH_QUEUE_SERIAL);
 	DeviceAndCallbacks inDevice;
 	DeviceAndCallbacks outDevice;
+
+	std::function<void()> &inSampleRateFn  = inDevice.sampleRateChanged;
+	std::function<void()> &inBufferSizeFn  = inDevice.bufferSizeChanged;
+	std::function<void()> &outSampleRateFn = outDevice.sampleRateChanged;
+	std::function<void()> &outBufferSizeFn = outDevice.bufferSizeChanged;
 };
 
 struct CoreAudioState {
@@ -112,52 +130,35 @@ struct CoreAudioState {
 };
 
 struct CoreAudioDeviceListener {
-	CoreAudioDeviceListener(const std::function<void()> &_onDevicesChanged)
-		: onDevicesChanged {_onDevicesChanged} {
-		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
-											&deviceAddresses,
-											deviceQueue,
-											^(UInt32, const AudioObjectPropertyAddress *) {
-											  if (onDevicesChanged) {
-												  onDevicesChanged();
-											  }
-											});
+	CoreAudioDeviceListener(const std::function<void()> &cb)
+		: onDevicesChanged(cb) {
+		context.fn = &onDevicesChanged;
 
-		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
-											&defaultInputAddress,
-											deviceQueue,
-											^(UInt32, const AudioObjectPropertyAddress *) {
-											  if (onDevicesChanged) {
-												  onDevicesChanged();
-											  }
-											});
-
-		AudioObjectAddPropertyListenerBlock(kAudioObjectSystemObject,
-											&defaultOutputAddress,
-											deviceQueue,
-											^(UInt32, const AudioObjectPropertyAddress *) {
-											  if (onDevicesChanged) {
-												  onDevicesChanged();
-											  }
-											});
+		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &deviceAddresses, &propProc, &context);
+		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &defaultInputAddress, &propProc, &context);
+		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &defaultOutputAddress, &propProc, &context);
 	}
+
 	~CoreAudioDeviceListener() {
-		if (!deviceQueue) {
-			return;
+		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &deviceAddresses, &propProc, &context);
+		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &defaultInputAddress, &propProc, &context);
+		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &defaultOutputAddress, &propProc, &context);
+		context.fn = nullptr;
+	}
+
+private:
+	struct Context {
+		std::function<void()> *fn {nullptr};
+	};
+
+	static OSStatus propProc(AudioObjectID, UInt32, const AudioObjectPropertyAddress[], void *inClientData) {
+		auto *context = static_cast<Context *>(inClientData);
+		if (context && context->fn && *context->fn) {
+			try {
+				(*context->fn)();
+			} catch (...) {}
 		}
-		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
-											   &deviceAddresses,
-											   deviceQueue,
-											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
-		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
-											   &defaultInputAddress,
-											   deviceQueue,
-											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
-		AudioObjectRemovePropertyListenerBlock(kAudioObjectSystemObject,
-											   &defaultOutputAddress,
-											   deviceQueue,
-											   reinterpret_cast<AudioObjectPropertyListenerBlock>(^ {}));
-		deviceQueue = nullptr;
+		return noErr;
 	}
 
 	AudioObjectPropertyAddress deviceAddresses {
@@ -169,8 +170,8 @@ struct CoreAudioDeviceListener {
 													 kAudioObjectPropertyScopeGlobal,
 													 kAudioObjectPropertyElementMain};
 
-	dispatch_queue_t deviceQueue {dispatch_queue_create("com.elfaudio.coreaudio.devices", DISPATCH_QUEUE_SERIAL)};
 	std::function<void()> onDevicesChanged;
+	Context context {};
 };
 
 static inline uint64_t hostTimeToNanos(uint64_t hostTime) {
