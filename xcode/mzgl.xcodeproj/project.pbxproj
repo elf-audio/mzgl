@@ -754,6 +754,14 @@
 		EADA5B2C2A138E36000DCE7B /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
 		EADA5B2D2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
 		EADA5B2E2A138E36000DCE7B /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
+		EAE0F12E2E4E31E1005AA55C /* MZGLCoreAudio.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F1292E4E31E1005AA55C /* MZGLCoreAudio.h */; };
+		EAE0F12F2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F12B2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h */; };
+		EAE0F1302E4E31E1005AA55C /* MZGLCoreAudioHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F12C2E4E31E1005AA55C /* MZGLCoreAudioHelpers.h */; };
+		EAE0F1312E4E31E1005AA55C /* MZGLCoreAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAE0F12A2E4E31E1005AA55C /* MZGLCoreAudio.cpp */; };
+		EAE0F1322E4E31E1005AA55C /* MZGLCoreAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAE0F12A2E4E31E1005AA55C /* MZGLCoreAudio.cpp */; };
+		EAE0F1332E4E31E1005AA55C /* MZGLCoreAudio.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F1292E4E31E1005AA55C /* MZGLCoreAudio.h */; };
+		EAE0F1342E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F12B2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h */; };
+		EAE0F1352E4E31E1005AA55C /* MZGLCoreAudioHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE0F12C2E4E31E1005AA55C /* MZGLCoreAudioHelpers.h */; };
 		EAE8428A2AE16F06008DB683 /* Int16Buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE842892AE16F06008DB683 /* Int16Buffer.h */; };
 		EAE94827274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
 		EAE94828274C0BF300718B53 /* UIBlockButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE94826274C0BF300718B53 /* UIBlockButton.m */; };
@@ -1713,6 +1721,10 @@
 		EADA5B282A138E36000DCE7B /* netUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = netUtil.h; sourceTree = "<group>"; };
 		EADBBCDB24925ACB001E0047 /* Knob.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Knob.h; sourceTree = "<group>"; };
 		EADDACC024BC8FF800C5F885 /* ChromaticKeyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChromaticKeyboard.h; sourceTree = "<group>"; };
+		EAE0F1292E4E31E1005AA55C /* MZGLCoreAudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZGLCoreAudio.h; sourceTree = "<group>"; };
+		EAE0F12A2E4E31E1005AA55C /* MZGLCoreAudio.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MZGLCoreAudio.cpp; sourceTree = "<group>"; };
+		EAE0F12B2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZGLCoreAudioDeviceHelpers.h; sourceTree = "<group>"; };
+		EAE0F12C2E4E31E1005AA55C /* MZGLCoreAudioHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MZGLCoreAudioHelpers.h; sourceTree = "<group>"; };
 		EAE3C63326D39E8F0000613E /* SampleProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleProvider.h; sourceTree = "<group>"; };
 		EAE842892AE16F06008DB683 /* Int16Buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Int16Buffer.h; sourceTree = "<group>"; };
 		EAE94825274C0BF300718B53 /* UIBlockButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIBlockButton.h; sourceTree = "<group>"; };
@@ -2121,6 +2133,7 @@
 		EA18360C2432C18B00A5C3E8 /* audio */ = {
 			isa = PBXGroup;
 			children = (
+				EAE0F12D2E4E31E1005AA55C /* coreaudio */,
 				EA297BE125C954CD00F890AE /* portaudio */,
 				EA18360E2432C18B00A5C3E8 /* RtAudio */,
 				EA1836122432C18B00A5C3E8 /* AudioFileApple.cpp */,
@@ -3196,6 +3209,17 @@
 			path = net;
 			sourceTree = "<group>";
 		};
+		EAE0F12D2E4E31E1005AA55C /* coreaudio */ = {
+			isa = PBXGroup;
+			children = (
+				EAE0F1292E4E31E1005AA55C /* MZGLCoreAudio.h */,
+				EAE0F12A2E4E31E1005AA55C /* MZGLCoreAudio.cpp */,
+				EAE0F12B2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h */,
+				EAE0F12C2E4E31E1005AA55C /* MZGLCoreAudioHelpers.h */,
+			);
+			path = coreaudio;
+			sourceTree = "<group>";
+		};
 		EAF6F4342E09AE8400DE5361 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -3394,6 +3418,9 @@
 				EA183FB22432C18D00A5C3E8 /* MacAppDelegate.h in Headers */,
 				EA183FE12432C18D00A5C3E8 /* mzgl.pch in Headers */,
 				EA297CEF25C95E2500F890AE /* pa_unix_util.h in Headers */,
+				EAE0F12E2E4E31E1005AA55C /* MZGLCoreAudio.h in Headers */,
+				EAE0F12F2E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h in Headers */,
+				EAE0F1302E4E31E1005AA55C /* MZGLCoreAudioHelpers.h in Headers */,
 				EA183FF12432C18D00A5C3E8 /* Triangulator.h in Headers */,
 				EA71A76827E39E6C0081A5CB /* aes_via_ace.h in Headers */,
 				EA234B1524A611AF000F057B /* ylog.h in Headers */,
@@ -3570,6 +3597,9 @@
 				EA71A75727E39E6C0081A5CB /* aestab.h in Headers */,
 				EA2B858D24E7093600EA12BD /* Triangulator.h in Headers */,
 				EA2B859124E7093600EA12BD /* ylog.h in Headers */,
+				EAE0F1332E4E31E1005AA55C /* MZGLCoreAudio.h in Headers */,
+				EAE0F1342E4E31E1005AA55C /* MZGLCoreAudioDeviceHelpers.h in Headers */,
+				EAE0F1352E4E31E1005AA55C /* MZGLCoreAudioHelpers.h in Headers */,
 				EA71A76F27E39E6C0081A5CB /* brg_types.h in Headers */,
 				EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */,
 				EA71A79F27E39E6C0081A5CB /* tools.h in Headers */,
@@ -3804,6 +3834,7 @@
 				EA5250E82C2C648F00DE5DFC /* WebViewOverlay.cpp in Sources */,
 				EA183FFD2432C18D00A5C3E8 /* Drawer.cpp in Sources */,
 				EACF1E452863532B0086EE11 /* MacFilePickerDelegate.mm in Sources */,
+				EAE0F1312E4E31E1005AA55C /* MZGLCoreAudio.cpp in Sources */,
 				EA234AEC24A609CA000F057B /* Utils.cpp in Sources */,
 				EAF91F752AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA297BE625C954CD00F890AE /* PortAudioSystem.cpp in Sources */,
@@ -4162,6 +4193,7 @@
 				EA2B8B1824E7093600EA12BD /* YGEnums.cpp in Sources */,
 				EA16DACE25FFABDA001C0460 /* pa_ringbuffer.c in Sources */,
 				EA64AD7626A186D7001427AD /* MZGLWebView.mm in Sources */,
+				EAE0F1322E4E31E1005AA55C /* MZGLCoreAudio.cpp in Sources */,
 				EA71A77E27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA16DACB25FFABDA001C0460 /* pa_cpuload.c in Sources */,
 				EA2B8B1A24E7093600EA12BD /* FloatBuffer.cpp in Sources */,
