@@ -191,6 +191,7 @@ set(HEADERS
     lib/mzgl/app/glfw
     lib/mzgl/app/web
     lib/mzgl/audio
+    lib/mzgl/audio/coreaudio
     lib/mzgl/audio/portaudio
     lib/mzgl/audio/juce
     lib/mzgl/audio/juce/lib
@@ -304,6 +305,13 @@ if(ANDROID)
        lib/mzgl/midi/AllMidiDevicesAndroidImpl.cpp)
 else()
   list(APPEND MZGL_SOURCES lib/mzgl/audio/portaudio/PortAudioSystem.cpp)
+
+  if(APPLE)
+    if(NOT IOS)
+      list(APPEND MZGL_SOURCES lib/mzgl/audio/coreaudio/MZGLCoreAudio.cpp
+           lib/mzgl/audio/coreaudio/MZGLCoreAudio.h)
+    endif()
+  endif()
 
   if(NOT APPLE)
     list(APPEND MZGL_SOURCES lib/mzgl/app/glfw/mainGlfw.cpp)
