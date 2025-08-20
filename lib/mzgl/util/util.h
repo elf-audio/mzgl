@@ -139,6 +139,8 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData);
 std::vector<unsigned char> readFile(const std::string &filename);
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data);
 bool writeStringToFile(const std::string &path, const std::string &data);
+bool writeStringToFileAtomically(const std::string &path, const std::string &data, std::string *err = nullptr);
+
 bool readStringFromFile(const std::string &path, std::string &outStr);
 
 ////////////////////////////////////////////////////////////////////////////////

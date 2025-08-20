@@ -1033,6 +1033,80 @@ std::vector<unsigned char> readFile(const std::string &filename) {
 	return outData;
 }
 
+bool writeStringToFileAtomically(const std::string &path, const std::string &data, std::string *err) {
+	namespace fs = std::filesystem;
+	fs::path p(path);
+	fs::path dir = p.parent_path().empty() ? "." : p.parent_path();
+	fs::path tmp = p;
+	tmp += ".tmpXXXXXX";
+
+	// 1) create unique temp in same dir
+	std::string tmpTemplate = (dir / tmp).string();
+	std::vector<char> tmpl(tmpTemplate.begin(), tmpTemplate.end());
+	tmpl.push_back('\0');
+	int fd = ::mkstemp(tmpl.data());
+	if (fd < 0) {
+		if (err) *err = strerror(errno);
+		return false;
+	}
+
+	// 2) write all bytes
+	const char *buf = data.data();
+	size_t left		= data.size();
+	while (left) {
+		ssize_t n = ::write(fd, buf, left);
+		if (n <= 0) {
+			if (err) *err = strerror(errno);
+			::close(fd);
+			::unlink(tmpl.data());
+			return false;
+		}
+		buf += n;
+		left -= n;
+	}
+
+	// 3) flush to stable storage
+#if defined(__APPLE__)
+	// fsync is usually enough; F_FULLFSYNC is the strongest
+	if (::fsync(fd) != 0) {
+		if (err) *err = strerror(errno);
+		::close(fd);
+		::unlink(tmpl.data());
+		return false;
+	}
+	// Uncomment for maximum durability (slower):
+	// if (::fcntl(fd, F_FULLFSYNC, 0) != 0) { ... }
+#else
+	if (::fdatasync(fd) != 0) {
+		if (err) *err = strerror(errno);
+		::close(fd);
+		::unlink(tmpl.data());
+		return false;
+	}
+#endif
+
+	if (::close(fd) != 0) {
+		if (err) *err = strerror(errno);
+		::unlink(tmpl.data());
+		return false;
+	}
+
+	// 4) atomic replace
+	if (::rename(tmpl.data(), path.c_str()) != 0) {
+		if (err) *err = strerror(errno);
+		::unlink(tmpl.data());
+		return false;
+	}
+
+	// 5) fsync the directory so the rename is durable
+	int dfd = ::open(dir.string().c_str(), O_RDONLY);
+	if (dfd >= 0) {
+		(void) ::fsync(dfd);
+		::close(dfd);
+	}
+	return true;
+}
+
 bool writeStringToFile(const std::string &path, const std::string &data) {
 	fs::ofstream outfile(fs::u8path(path), std::ios::out);
 	if (outfile.fail()) {
