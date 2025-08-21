@@ -34,7 +34,7 @@ public:
 	 * This will block your current thread until the fn()
 	 * has run on the main thread.
 	 */
-	void runOnMainThreadAndWait(std::function<void()> fn, bool logToLockfile = false);
+	void runOnMainThreadAndWait(std::function<void()> fn, bool logToLockfile = false, std::string prepend = "");
 
 	/**
 	 * Call only from main thread, it will run on the next loop round.
