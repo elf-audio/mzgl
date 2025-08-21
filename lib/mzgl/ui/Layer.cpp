@@ -260,7 +260,7 @@ bool Layer::_touchDown(float x, float y, int id) {
 		}
 	}
 
-	if (interactive && inside(x, y)) {
+	if (interactive && (inside(x, y) || receivesTouchesOutside)) {
 		g.focusedLayers[id] = this;
 
 		return touchDown(x, y, id);

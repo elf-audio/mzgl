@@ -38,8 +38,8 @@ public:
 
 	[[nodiscard]] std::string toString() const;
 
-	bool clipToBounds = false;
-
+	bool clipToBounds			= false;
+	bool receivesTouchesOutside = false;
 	// reorder layers - if the parameter is null, it's referring to this
 	// layer.
 	void sendToFront(Layer *child = nullptr);
