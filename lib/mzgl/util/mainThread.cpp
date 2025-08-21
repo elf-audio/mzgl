@@ -41,33 +41,46 @@ void MainThreadRunner::runOnNextMainLoop(std::function<void()> fn) {
 	mzAssert(isMainThread());
 	mainThreadQueue->enqueue(fn);
 }
-
-void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn) {
+#include "util.h"
+void MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn, bool logToLockfile) {
+	if (logToLockfile) writeToLockFile("101.1");
 	if (isMainThread()) {
+		if (logToLockfile) writeToLockFile("101.2");
 		Log::e() << "runOnMainThreadAndWait() called from main thread";
 		fn();
+		if (logToLockfile) writeToLockFile("101.3");
 		return;
 	}
+	if (logToLockfile) writeToLockFile("101.4");
 	mzAssert(!isMainThread());
+	if (logToLockfile) writeToLockFile("101.5");
 	std::atomic<bool> done {false};
-	mainThreadQueue->enqueue([fn, &done]() {
+
+	mainThreadQueue->enqueue([fn, &done, logToLockfile]() {
+		if (logToLockfile) writeToLockFile("101.5");
 		fn();
+		if (logToLockfile) writeToLockFile("101.6");
 		done.store(true);
+		if (logToLockfile) writeToLockFile("101.7");
 	});
+	if (logToLockfile) writeToLockFile("101.8");
 	int originalPollCount = pollCount;
 
 	const uint64_t sleepTime = 100;
 	uint64_t duration		 = 0;
+
 	while (!done.load()) {
 		std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 		duration += sleepTime;
-
+		if (logToLockfile) writeToLockFile("101.9");
 		// this may never have polled
 		if (duration > 1'000'000 && pollCount == 0) {
 			Log::e() << "Main thread may be not active";
 			pollMainThreadQueue();
+			if (logToLockfile) writeToLockFile("101.10");
 		}
 	}
+	if (logToLockfile) writeToLockFile("101.11");
 }
 
 void MainThreadRunner::runOnMainThread(bool checkIfOnMainThread, std::function<void()> fn) {

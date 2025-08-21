@@ -184,3 +184,19 @@ void setDocsPath(const std::string &newDocsPath);
 void setDataPath(const std::string &newDataPath);
 
 void quitApplication();
+
+void writeToLockFile(const std::string &msg);
+std::string readFromLockFile();
+
+// the lockfile is a file that gets created when loading the auto saved state
+// it is then deleted when reading is finished. If the lockfile exists when
+// koala is trying to load the auto saved state, koala will give up trying to
+// load it because it may have crashed koala on startup, and it will alert
+// the user that there is a problem with the song. Therefore, it is important
+// to delete the lockfile in the case that koala didn't crash, but hadn't
+// finished loading the song before the user closes the app. So call
+// deleteLockFileIfExists() on App::exit() because if App::exit() is called
+// it means koala is exiting normally and didn't crash.
+// if it returns true, don't try to auto save because there wasn't time to load the song.
+bool deleteLockFileIfExists();
+std::string getLockFilePath();

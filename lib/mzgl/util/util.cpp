@@ -1032,9 +1032,8 @@ std::vector<unsigned char> readFile(const std::string &filename) {
 	readFile(filename, outData);
 	return outData;
 }
-
+#include "filesystem.h"
 bool writeStringToFileAtomically(const std::string &path, const std::string &data, std::string *err) {
-	namespace fs = std::filesystem;
 	fs::path p(path);
 	fs::path dir = p.parent_path().empty() ? "." : p.parent_path();
 	fs::path tmp = p;
@@ -1238,4 +1237,31 @@ bool isTabletDevice() {
 	// assume its a desktop, so lets call it tablet
 	return true;
 #endif
+}
+
+std::string getLockFilePath() {
+	return docsPath("default-lock");
+}
+
+bool deleteLockFileIfExists() {
+	const auto lockFilePath = getLockFilePath();
+	try {
+		if (fs::exists(lockFilePath)) {
+			fs::remove(lockFilePath);
+			return true;
+		}
+	} catch (fs::filesystem_error &err) {
+		Log::e() << "Error deleting lockfile in deleteLockFileIfExists() - " << err.what();
+	}
+	return false;
+}
+
+void writeToLockFile(const std::string &msg) {
+	writeStringToFileAtomically(getLockFilePath(), msg);
+}
+
+std::string readFromLockFile() {
+	std::string outStr;
+	readStringFromFile(getLockFilePath(), outStr);
+	return outStr;
 }
