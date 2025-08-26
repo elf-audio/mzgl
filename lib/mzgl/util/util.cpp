@@ -59,8 +59,6 @@
 #	include <locale>
 #	include <sstream>
 #	include <processthreadsapi.h>
-#	include <pwd.h>
-#	include <unistd.h>
 #	include <io.h>
 #	include <fcntl.h>
 #	include <windows.h>
@@ -68,6 +66,7 @@
 #	include <climits>
 #	include <sys/stat.h>
 #else
+#	include <pwd.h>
 #	include <unistd.h>
 #	include <fcntl.h>
 #	include <sys/stat.h>
