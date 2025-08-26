@@ -7,11 +7,25 @@
 //
 
 #include "util.h"
+
 #include <algorithm>
 #include <cctype>
 #include <iterator>
+#include <thread>
+#include <stdlib.h>
+#include <stdio.h>
+#include <optional>
+#include <iomanip>
+#include <algorithm>
+#include <chrono>
+#include <fstream>
 
 #include "mzgl_platform.h"
+#include "log.h"
+#include "filesystem.h"
+#include "App.h"
+#include "mainThread.h"
+
 #ifdef __APPLE__
 #	include <os/log.h>
 #	include <TargetConditionals.h>
@@ -21,8 +35,8 @@
 #	else
 #		include <Cocoa/Cocoa.h>
 #	endif
-
 #endif
+
 #ifdef __ANDROID__
 #	include "androidUtil.h"
 #	include "koalaAndroidUtil.h"
@@ -37,7 +51,6 @@
 #	include <commdlg.h>
 #	include <direct.h>
 #	define _WIN32_DCOM
-
 #	include <shlobj.h>
 #	include <tchar.h>
 #	include <ShObjIdl_core.h>
@@ -46,31 +59,19 @@
 #	include <locale>
 #	include <sstream>
 #	include <processthreadsapi.h>
-#endif
-
-#include <chrono>
-#include <fstream>
-
-#include "log.h"
-#include <iomanip>
-#include <algorithm>
-
-#include "filesystem.h"
-
-#include "App.h"
-#include "mainThread.h"
-#include <thread>
-
-// this from openframeworks
-#ifndef _WIN32
 #	include <pwd.h>
 #	include <unistd.h>
+#	include <io.h>
+#	include <fcntl.h>
+#	include <windows.h>
+#	include <random>
+#	include <climits>
+#	include <sys/stat.h>
+#else
+#	include <unistd.h>
+#	include <fcntl.h>
+#	include <sys/stat.h>
 #endif
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <optional>
-#include "filesystem.h"
 
 void setThreadName(const std::string &name) {
 #if defined(__APPLE__)
@@ -156,7 +157,7 @@ void deleteOrTrash(const std::string &path) {
 			  resultingItemURL:nil
 						 error:&error];
 		if (!success || error) {
-			NSLog(@"Error moving file to trash: %@", error);
+			NSLog(@ "Error moving file to trash: %@", error);
 			stdDeleteFn();
 		}
 	} else {
@@ -358,7 +359,7 @@ void setWindowSize(int w, int h) {
 
 	  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t) (USEC_PER_SEC)), dispatch_get_main_queue(), ^{
 		EventsView *view = (EventsView *) win.delegate;
-		[view windowResized:[[NSNotification alloc] initWithName:@"" object:win userInfo:nil]];
+		[view windowResized:[[NSNotification alloc] initWithName:@ "" object:win userInfo:nil]];
 		[win display];
 		[win center];
 	  });
@@ -726,7 +727,7 @@ uint64_t getStorageRemainingInBytes() {
 		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
 		if (!results) {
-			NSLog(@"Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
+			NSLog(@ "Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
 
 			return 1000000000;
 			//		abort();
@@ -821,13 +822,13 @@ void launchUrl(const std::string &url) {
 std::string getAppVersionString() {
 	std::string version;
 #ifdef __APPLE__
-	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	NSString *str = [[NSBundle mainBundle] objectForInfoDictionaryKey:@ "CFBundleShortVersionString"];
 	if (str == nil) {
 		return "not available";
 	}
 	std::string v = std::string([str UTF8String]);
 
-	NSString *ver = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+	NSString *ver = [[NSBundle mainBundle] objectForInfoDictionaryKey:@ "CFBundleVersion"];
 	if (ver != nil) {
 		v += " (" + std::string([ver UTF8String]) + ")";
 	}
@@ -1032,78 +1033,150 @@ std::vector<unsigned char> readFile(const std::string &filename) {
 	readFile(filename, outData);
 	return outData;
 }
-#include "filesystem.h"
-bool writeStringToFileAtomically(const std::string &path, const std::string &data, std::string *err) {
-	fs::path p(path);
-	fs::path dir = p.parent_path().empty() ? "." : p.parent_path();
-	fs::path tmp = p;
-	tmp += ".tmpXXXXXX";
 
-	// 1) create unique temp in same dir
-	std::string tmpTemplate = (dir / tmp).string();
-	std::vector<char> tmpl(tmpTemplate.begin(), tmpTemplate.end());
-	tmpl.push_back('\0');
-	int fd = ::mkstemp(tmpl.data());
+static inline void setErr(std::string *err, const std::string &msg) {
+	if (err) *err = msg;
+}
+
+bool writeStringToFileAtomically(const std::string &pathUtf8, const std::string &data, std::string *err) {
+	std::error_code ec;
+	fs::path p(pathUtf8);
+	fs::path dir = p.parent_path().empty() ? fs::path(".") : p.parent_path();
+
+#if defined(_WIN32)
+	auto make_random_suffix = []() -> std::wstring {
+		static thread_local std::random_device rd;
+		static thread_local std::uniform_int_distribution<uint64_t> dist;
+		uint64_t a = dist(rd), b = dist(rd);
+		wchar_t buf[33];
+		_snwprintf_s(buf,
+					 _countof(buf),
+					 _TRUNCATE,
+					 L"%016llx%016llx",
+					 static_cast<unsigned long long>(a),
+					 static_cast<unsigned long long>(b));
+		return std::wstring(buf);
+	};
+
+	const std::wstring baseName = p.filename().wstring();
+	const std::wstring prefix	= baseName + L".tmp.";
+
+	fs::path tmp;
+	int fd = -1;
+	for (int attempt = 0; attempt < 16; ++attempt) {
+		tmp = dir / (prefix + make_random_suffix());
+		fd	= _wopen(tmp.c_str(), _O_CREAT | _O_EXCL | _O_WRONLY | _O_BINARY, _S_IREAD | _S_IWRITE);
+		if (fd >= 0) break;
+		if (errno != EEXIST) {
+			setErr(err, "open(tmp) failed: " + std::to_string(errno));
+			return false;
+		}
+	}
 	if (fd < 0) {
-		if (err) *err = strerror(errno);
+		setErr(err, "open(tmp) failed after retries");
 		return false;
 	}
 
-	// 2) write all bytes
+	const char *buf = data.data();
+	size_t left		= data.size();
+	while (left) {
+		unsigned int chunk = left > static_cast<size_t>(INT_MAX) ? static_cast<unsigned int>(INT_MAX)
+																 : static_cast<unsigned int>(left);
+		int n			   = _write(fd, buf, chunk);
+		if (n <= 0) {
+			setErr(err, "write failed: " + std::to_string(errno));
+			_close(fd);
+			_wunlink(tmp.c_str());
+			return false;
+		}
+		buf += n;
+		left -= static_cast<size_t>(n);
+	}
+
+	if (_commit(fd) != 0) {
+		setErr(err, "commit failed: " + std::to_string(errno));
+		_close(fd);
+		_wunlink(tmp.c_str());
+		return false;
+	}
+
+	if (_close(fd) != 0) {
+		setErr(err, "close failed: " + std::to_string(errno));
+		_wunlink(tmp.c_str());
+		return false;
+	}
+
+	if (!MoveFileExW(tmp.c_str(), p.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+		setErr(err, "MoveFileExW failed: " + std::to_string(GetLastError()));
+		_wunlink(tmp.c_str());
+		return false;
+	}
+
+	return true;
+
+#else
+	fs::path tmp = p.filename();
+	tmp += ".tmpXXXXXX";
+
+	std::string tmplStr = (dir / tmp).string();
+	std::vector<char> tmpl(tmplStr.begin(), tmplStr.end());
+	tmpl.push_back('\0');
+
+	int fd = ::mkstemp(tmpl.data());
+	if (fd < 0) {
+		setErr(err, std::string("mkstemp failed: ") + std::strerror(errno));
+		return false;
+	}
+
 	const char *buf = data.data();
 	size_t left		= data.size();
 	while (left) {
 		ssize_t n = ::write(fd, buf, left);
 		if (n <= 0) {
-			if (err) *err = strerror(errno);
+			setErr(err, std::string("write failed: ") + std::strerror(errno));
 			::close(fd);
 			::unlink(tmpl.data());
 			return false;
 		}
-		buf += n;
-		left -= n;
+		buf += static_cast<size_t>(n);
+		left -= static_cast<size_t>(n);
 	}
 
-	// 3) flush to stable storage
-#if defined(__APPLE__)
-	// fsync is usually enough; F_FULLFSYNC is the strongest
+#	if defined(__APPLE__)
 	if (::fsync(fd) != 0) {
-		if (err) *err = strerror(errno);
+		setErr(err, std::string("fsync failed: ") + std::strerror(errno));
 		::close(fd);
 		::unlink(tmpl.data());
 		return false;
 	}
-	// Uncomment for maximum durability (slower):
-	// if (::fcntl(fd, F_FULLFSYNC, 0) != 0) { ... }
-#else
+#	else
 	if (::fdatasync(fd) != 0) {
-		if (err) *err = strerror(errno);
+		setErr(err, std::string("fdatasync failed: ") + std::strerror(errno));
 		::close(fd);
 		::unlink(tmpl.data());
 		return false;
 	}
-#endif
+#	endif
 
 	if (::close(fd) != 0) {
-		if (err) *err = strerror(errno);
+		setErr(err, std::string("close failed: ") + std::strerror(errno));
 		::unlink(tmpl.data());
 		return false;
 	}
 
-	// 4) atomic replace
-	if (::rename(tmpl.data(), path.c_str()) != 0) {
-		if (err) *err = strerror(errno);
+	if (::rename(tmpl.data(), p.string().c_str()) != 0) {
+		setErr(err, std::string("rename failed: ") + std::strerror(errno));
 		::unlink(tmpl.data());
 		return false;
 	}
 
-	// 5) fsync the directory so the rename is durable
 	int dfd = ::open(dir.string().c_str(), O_RDONLY);
 	if (dfd >= 0) {
 		(void) ::fsync(dfd);
 		::close(dfd);
 	}
 	return true;
+#endif
 }
 
 bool writeStringToFile(const std::string &path, const std::string &data) {
