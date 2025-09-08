@@ -7,6 +7,7 @@
 #include <sstream>
 #include <array>
 #include <algorithm>
+#include <iomanip>
 
 glm::vec4 hexColor(int hex, float a) {
 	glm::vec4 c;
@@ -234,8 +235,15 @@ bool isRGBAColor(std::string s) {
 }
 
 std::string hexColorString(glm::vec4 c) {
+	auto toByte = [](float v) { return static_cast<int>(std::lround(v * 255.0f)); };
+
+	int r = toByte(c.r);
+	int g = toByte(c.g);
+	int b = toByte(c.b);
+
 	std::ostringstream oss;
-	oss << "#" << std::hex << static_cast<int>(c.r * 255) << static_cast<int>(c.g * 255)
-		<< static_cast<int>(c.b * 255);
+	oss << '#' << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << r << std::setw(2)
+		<< std::setfill('0') << g << std::setw(2) << std::setfill('0') << b;
+
 	return oss.str();
 }

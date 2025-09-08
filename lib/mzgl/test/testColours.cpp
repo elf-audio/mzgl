@@ -51,6 +51,12 @@ TEST_CASE("Hex color conversion", "[colours]") {
 		REQUIRE(equals(*hexColor("#FF0000"), glm::vec4(1, 0, 0, 1)));
 		REQUIRE(equals(*hexColor("#000000"), glm::vec4(0, 0, 0, 1)));
 	}
+	SECTION("Convert hex color to correct string") {
+		REQUIRE(hexColorString(hexColor(0xABCDEF)) == "#ABCDEF");
+		REQUIRE(hexColorString(hexColor(0xFFFFFF)) == "#FFFFFF");
+		REQUIRE(hexColorString(hexColor(0x000000)) == "#000000");
+		REQUIRE(hexColorString(hexColor(0x00FFFF)) == "#00FFFF");
+	}
 }
 
 TEST_CASE("SVG hex color conversion", "[colours]") {

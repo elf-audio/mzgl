@@ -793,6 +793,7 @@ void initMZGL(std::shared_ptr<App> app) {
 	Globals::startTime	 = std::chrono::system_clock::now();
 	app->g.frameDelta	 = 1.f / 60.f;
 	app->g.currFrameTime = 0.f;
+	app->main.setMainThreadId();
 }
 
 #if TARGET_OS_IOS
