@@ -108,6 +108,8 @@ set(MZGL_SOURCES
     lib/mzgl/util/ScopedUrl.cpp
     lib/mzgl/util/util.cpp
     lib/mzgl/util/mainThread.cpp
+    lib/mzgl/util/TaskRunner.cpp
+    lib/mzgl/util/TaskRunner.h
     lib/mzgl/util/mzAssert.cpp
     lib/mzgl/util/stringUtil.cpp
     $<$<PLATFORM_ID:Darwin>:
