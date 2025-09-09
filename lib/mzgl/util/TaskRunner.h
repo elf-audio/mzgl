@@ -45,7 +45,6 @@ public:
 		if (synchronous) return;
 
 		fut = std::async(std::launch::async, [this]() {
-
 			setThreadName(this->name);
 
 			TaskSpec spec;
@@ -103,10 +102,9 @@ private:
 	class Task {
 	public:
 		std::future<void> taskFuture;
-		std::atomic<bool> isDone {false};
 
 		Task(TaskSpec spec) {
-			taskFuture = std::async(std::launch::async, [this, spec = std::move(spec)]() {
+			taskFuture = std::async(std::launch::async, [spec = std::move(spec)]() {
 #if (DEBUG || UNIT_TEST)
 				// sets a thread name that is readable in xcode when debugging
 				setThreadName("runTask()");
@@ -117,14 +115,14 @@ private:
 					std::string ex = err.what();
 					Log::e() << "exception in runTask: " << ex;
 				}
-				isDone.store(true);
+
 				if (spec.onDone) {
 					spec.onDone();
 				}
 			});
 		}
 
-		bool done() { return isDone.load(); }
+		bool done() { return taskFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
 	};
 
 	moodycamel::ConcurrentQueue<TaskSpec> taskQueue;
@@ -141,7 +139,7 @@ public:
 
 	// don't use this, for testing only
 	void clearAnyDoneTasks() {
-		tasks.remove_if([](const std::shared_ptr<Task> task) { return task->done(); });
+		tasks.remove_if([](const std::shared_ptr<Task> &task) { return task->done(); });
 	}
 	void waitTilAllTasksAreDone() {
 		while (tasks.size() > 0) {
