@@ -105,8 +105,6 @@ bool MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn,
 		writeToLockFile(prepend + "4");
 	}
 
-	mzAssert(!isMainThread());
-
 	if (logToLockfile) {
 		writeToLockFile(prepend + "5");
 	}
