@@ -5,11 +5,11 @@
 #include <stdio.h>
 
 using namespace std;
-bool Resampler::init(int numChannels, int inSampleRate, int outSampleRate, int quality) {
-	ratio			  = outSampleRate / (double) inSampleRate;
-	int error		  = 0;
-	this->numChannels = numChannels;
-	resampler		  = speex_resampler_init(numChannels, inSampleRate, outSampleRate, quality, &error);
+bool Resampler::init(int _numChannels, int inSampleRate, int outSampleRate, int quality) {
+	ratio		= outSampleRate / (double) inSampleRate;
+	int error	= 0;
+	numChannels = _numChannels;
+	resampler	= speex_resampler_init(numChannels, inSampleRate, outSampleRate, quality, &error);
 	if (error != 0) {
 		printf("Got resampler error: %d\n", error);
 		return false;

@@ -10,6 +10,7 @@
 #ifdef __ANDROID__
 #	include "androidUtil.h"
 #	include "media/NdkMediaExtractor.h"
+#	include "media/NdkMediaFormat.h"
 #endif
 
 #include "filesystem.h"
@@ -23,8 +24,11 @@
 using namespace std;
 
 #define RESAMPLING_QUALITY 5
-bool AudioFile_loadDrLib(
-	std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate, int desiredSampleRate = 0) {
+bool AudioFile_loadDrLib(std::string path,
+						 FloatBuffer &buff,
+						 int *outNumChannels,
+						 int *outSampleRate,
+						 const int desiredSampleRate = 0) {
 	Resampler resampler;
 	bool isResampling = false;
 
@@ -88,8 +92,11 @@ int getFirstAudioTrackId(AMediaExtractor *extractor) {
 
 #ifdef __ANDROID__
 // if desiredSampleRate is zero, no resampling is done
-bool AudioFileAndroid_load(
-	std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate, int desiredSampleRate = 0) {
+bool AudioFileAndroid_load(std::string path,
+						   FloatBuffer &buff,
+						   int *outNumChannels,
+						   int *outSampleRate,
+						   const int desiredSampleRate = 0) {
 	Log::d() << "Using NDK decoder";
 
 	// open asset as file descriptor
@@ -136,12 +143,12 @@ bool AudioFileAndroid_load(
 		return false;
 	}
 
-	int32_t channelCount;
-	if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &channelCount)) {
-		Log::d() << "Got channel count " << channelCount;
-		*outNumChannels = channelCount;
-		if (channelCount != 1 && channelCount != 2) {
-			Log::d() << "Sample not mono or stereo -" << channelCount << " channels";
+	int32_t fileChannelCount;
+	if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &fileChannelCount)) {
+		Log::d() << "Got channel count " << fileChannelCount;
+		*outNumChannels = fileChannelCount;
+		if (fileChannelCount != 1 && fileChannelCount != 2) {
+			Log::d() << "Sample not mono or stereo -" << fileChannelCount << " channels";
 			AMediaExtractor_delete(extractor);
 			AMediaFormat_delete(format);
 			return 0;
@@ -183,17 +190,25 @@ bool AudioFileAndroid_load(
 	vector<float> resampled;
 	bool isResampling = false;
 
-	if (desiredSampleRate == 0) {
-		*outSampleRate = originalSampleRate;
-	} else if (desiredSampleRate != originalSampleRate) {
-		Log::d() << "Decoding from %d hz to %d hz", originalSampleRate, desiredSampleRate;
-		isResampling   = true;
+	auto configureResampler = [&](int inRate) {
+		if (desiredSampleRate == 0) {
+			*outSampleRate = inRate;
+			isResampling   = false;
+			return;
+		}
 		*outSampleRate = desiredSampleRate;
-		resampler.init(channelCount, originalSampleRate, desiredSampleRate, RESAMPLING_QUALITY);
-	}
+		if (desiredSampleRate == inRate) {
+			isResampling = false;
+		} else {
+			isResampling = true;
+			resampler.init(fileChannelCount, inRate, desiredSampleRate, RESAMPLING_QUALITY);
+		}
+	};
+
+	configureResampler(originalSampleRate);
 
 	constexpr float sint16ToFloat = (1.0f / 32768.0f);
-
+	int decoderChannelCount		  = fileChannelCount;
 	while (isExtracting || isDecoding) {
 		if (isExtracting) {
 			// Obtain the index of the next available input buffer
@@ -251,9 +266,15 @@ bool AudioFileAndroid_load(
 					int16_t *outBuff = (int16_t *) outputBuffer;
 					int numSamples	 = info.size / 2;
 
+					int sampleAdvance = 1;
+					if (fileChannelCount == 1 && decoderChannelCount == 2) {
+						// if the file is mono but the decoder is outputting stereo, we need to halve the number of samples
+						numSamples /= 2;
+						sampleAdvance = 2;
+					}
 					vector<float> fBuff(numSamples);
 					for (int i = 0; i < numSamples; i++)
-						fBuff[i] = (float) outBuff[i] * sint16ToFloat;
+						fBuff[i] = (float) outBuff[i * sampleAdvance] * sint16ToFloat;
 
 					if (isResampling) {
 						resampler.process(fBuff, resampled);
@@ -276,6 +297,17 @@ bool AudioFileAndroid_load(
 						Log::d() << "dequeueOutputBuffer: output outputFormat changed";
 						format = AMediaCodec_getOutputFormat(codec);
 						Log::d() << "outputFormat changed to: " << AMediaFormat_toString(format);
+						int32_t newRate	 = 0;
+						int32_t newChans = 0;
+						if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &newChans))
+							decoderChannelCount = newChans;
+
+						if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, &newRate))
+							originalSampleRate = newRate;
+
+						configureResampler(originalSampleRate);
+						Log::d() << "Reconfiguring starting sample rate to " << originalSampleRate;
+
 						break;
 				}
 			}
@@ -322,7 +354,13 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	// fallback to ndk decoder if nothing else can open it.
 	Log::d() << "USING ndk media decoder to open " << path;
 	int outSampleRate = 0;
-	return AudioFileAndroid_load(path, buff, outNumChannels, &outSampleRate, newSampleRate);
+
+	bool success = AudioFileAndroid_load(path, buff, outNumChannels, &outSampleRate, newSampleRate);
+	Log::d() << "Loaded " << path << " with ndk decoder, success: " << success << ", "
+			 << "sample rate: " << outSampleRate << ", channels: " << (outNumChannels ? *outNumChannels : -1)
+			 << ", samples: " << buff.size();
+	Log::d() << "Resampled to " << newSampleRate << " hz";
+	return success;
 
 #else
 	int outSampleRate = 0;
