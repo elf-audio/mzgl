@@ -86,7 +86,6 @@ void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
 	currNumDrawnVerts += getNumVerts();
 	currNumDrawCalls++;
 #endif
-
 	if (_mode != PrimitiveType::None) {
 		mode = _mode;
 	}
