@@ -5,7 +5,7 @@
 #include <mutex>
 #include <memory>
 #include <atomic>
-
+#include <optional>
 class MainThreadRunner final {
 public:
 	MainThreadRunner();
