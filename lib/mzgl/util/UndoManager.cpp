@@ -78,6 +78,8 @@ public:
 
 	void addStep(UndoableRef item) { items.push_back(item); }
 
+	[[nodiscard]] bool empty() const { return items.empty(); }
+
 private:
 	std::deque<UndoableRef> items;
 };
@@ -86,10 +88,30 @@ void UndoManager::beginGroup() {
 	mzAssert(undoGroup == nullptr);
 	undoGroup = std::make_shared<GroupUndoable>();
 }
+
 void UndoManager::endGroup() {
 	auto group = undoGroup;
 	undoGroup  = nullptr;
 	commit(group);
+}
+
+void UndoManager::beginGesture() {
+	if (gestureGroup != nullptr) {
+		return;
+	}
+	gestureGroup = std::make_shared<GroupUndoable>();
+}
+
+
+void UndoManager::endGesture() {
+	if (gestureGroup == nullptr) {
+		return;
+	}
+	auto group = gestureGroup;
+	gestureGroup = nullptr;
+	if (!dynamic_pointer_cast<GroupUndoable>(group)->empty()) {
+		commit(group);
+	}
 }
 
 /**
@@ -98,19 +120,27 @@ void UndoManager::endGroup() {
  * - instead commit() calls redo() on your Undoable.
  */
 void UndoManager::commit(UndoableRef item) {
+	if (gestureGroup !=  nullptr) {
+		item->redo();
+		dynamic_pointer_cast<GroupUndoable>(gestureGroup)->addStep(item);
+		return;
+	}
+
 	if (undoGroup != nullptr) {
 		auto ug = std::dynamic_pointer_cast<GroupUndoable>(undoGroup);
 		ug->addStep(item);
 		return;
 	}
+
 	if (canRedo()) {
 		undoStack.erase(undoPos, undoStack.end());
 	}
+
 	undoStack.push_back(item);
+
 	while (undoStack.size() > MAX_UNDO_LEVELS) {
 		undoStack.pop_front();
 	}
-	//	Log::d() << "COMMIT: Stack size: " << undoStack.size();
 
 	item->redo();
 	undoPos = undoStack.end();

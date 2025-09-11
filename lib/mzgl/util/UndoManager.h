@@ -56,6 +56,9 @@ public:
 	void beginGroup();
 	void endGroup();
 
+	void beginGesture();
+	void endGesture();
+
 	bool undo();
 	bool redo();
 
@@ -66,6 +69,7 @@ public:
 
 private:
 	UndoableRef undoGroup = nullptr;
+	UndoableRef gestureGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;
 };
