@@ -6,6 +6,8 @@
 #include <memory>
 #include <atomic>
 #include <optional>
+#include <condition_variable>
+
 class MainThreadRunner final {
 public:
 	MainThreadRunner();
