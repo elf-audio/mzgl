@@ -114,10 +114,37 @@ void CoreAudioSystem::checkDeviceAvailability() {
 	}
 }
 
+void updateChannelCount(int &channelsRequested, std::optional<AudioPort> &port, const std::vector<AudioPort> &allPorts) {
+	if (channelsRequested != std::numeric_limits<int>::max()) {
+		return;
+	}
+	if (!port.has_value()) {
+		return;
+	}
+
+	auto iter=  std::find_if(allPorts.begin(), allPorts.end(), [&](auto && in) {
+			return in.name == port->name;
+		});
+
+	if (iter != allPorts.end()) {
+		channelsRequested = iter->numInChannels;
+	}
+}
+
 void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	if (!inputPort.has_value() || !outputPort.has_value()) {
 		rescanPorts();
 	}
+
+	std::vector<AudioPort> inputPorts;
+	std::vector<AudioPort> outputPorts;
+	getDeviceList(inputPorts, outputPorts);
+
+	auto originalInChannels = numInChannels;
+	auto originalOutChannels = numOutChannels;
+
+	updateChannelCount(numInChannels, inputPort, inputPorts);
+	updateChannelCount(numOutChannels, outputPort, outputPorts);
 
 	if (verbose) {
 		Log::d() << "CORE AUDIO STARTUP:";
@@ -125,8 +152,8 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 		Log::d() << "  Output Port: " << (outputPort.has_value() ? outputPort->name : "none");
 		Log::d() << "  Sample Rate: " << sampleRate;
 		Log::d() << "  Buffer Size: " << bufferSize;
-		Log::d() << "  In Channels: " << numInChannels;
-		Log::d() << "  Out Channels: " << numOutChannels;
+		Log::d() << "  In Channels: " << numInChannels << "(" << originalInChannels << ")";
+		Log::d() << "  Out Channels: " << numOutChannels << "(" << originalOutChannels << ")";
 	}
 
 	mzAssert(inputPort.has_value() && outputPort.has_value());
