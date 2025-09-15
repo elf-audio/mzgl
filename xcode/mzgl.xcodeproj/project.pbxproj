@@ -664,6 +664,12 @@
 		EA7B45A82B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
 		EA7B45A92B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
 		EA7B45AA2B19FA8800F19B8D /* ScopedUrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */; };
+		EA7D710B2E781291002B9465 /* TaskRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7D71092E781291002B9465 /* TaskRunner.h */; };
+		EA7D710C2E781291002B9465 /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
+		EA7D710D2E781291002B9465 /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
+		EA7D710E2E781291002B9465 /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
+		EA7D710F2E781291002B9465 /* TaskRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7D71092E781291002B9465 /* TaskRunner.h */; };
+		EA7D71102E781291002B9465 /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
 		EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */; };
 		EA81A9622756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
 		EA81A9632756F0AC009C911E /* BufferedAudioBus.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EA81A9552756F0AC009C911E /* BufferedAudioBus.hpp */; };
@@ -1239,6 +1245,8 @@
 		EA78556D2472E3320072FD05 /* NVG.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NVG.cpp; sourceTree = "<group>"; };
 		EA7B45A52B19F9F600F19B8D /* ScopedUrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedUrl.h; sourceTree = "<group>"; };
 		EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedUrl.cpp; sourceTree = "<group>"; };
+		EA7D71092E781291002B9465 /* TaskRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskRunner.h; sourceTree = "<group>"; };
+		EA7D710A2E781291002B9465 /* TaskRunner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TaskRunner.cpp; sourceTree = "<group>"; };
 		EA8086CA29119DF60072148D /* filesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = filesystem.h; sourceTree = "<group>"; };
 		EA81A9512756F0AC009C911E /* MZGLEffectAU.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLEffectAU.mm; sourceTree = "<group>"; };
 		EA81A9532756F0AC009C911E /* MZGLEffectAU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLEffectAU.h; sourceTree = "<group>"; };
@@ -2053,48 +2061,50 @@
 			children = (
 				9C038E9D2D538A410047E060 /* Base64.h */,
 				9C038E9E2D538A410047E060 /* Base64.cpp */,
-				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
+				EA1835E62432C18B00A5C3E8 /* DateTime.h */,
+				EA1835F22432C18B00A5C3E8 /* DateTime.cpp */,
 				EAD82EC7269CA18000861BE3 /* Dialogs.h */,
 				EAD82EC8269CA19400861BE3 /* Dialogs.cpp */,
-				EAE842892AE16F06008DB683 /* Int16Buffer.h */,
-				EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */,
-				EAF6736F289BC3DB001F778D /* mzAssert.cpp */,
-				EAF67370289BC3DC001F778D /* mzAssert.h */,
-				EAF6737F289BC87E001F778D /* mainThread.cpp */,
-				EAF67380289BC87E001F778D /* mainThread.h */,
-				EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */,
-				EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */,
-				EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */,
-				EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */,
-				EAA44CD3267A2BE50014C203 /* Haptics.cpp */,
-				EAA44CD2267A2BCB0014C203 /* Haptics.h */,
-				EAF67378289BC441001F778D /* stringUtil.h */,
-				EAA9BE5D2A30E180008BFEF4 /* Listenable.h */,
-				EAF67377289BC441001F778D /* stringUtil.cpp */,
-				EAD27F7A29B6778200225521 /* RingBuffer.h */,
-				EA1835EC2432C18B00A5C3E8 /* util.h */,
-				EA1835E32432C18B00A5C3E8 /* util.cpp */,
-				EA15B27A291D49E70051570A /* UndoManager.cpp */,
-				EA15B27B291D49E70051570A /* UndoManager.h */,
-				EA1835E52432C18B00A5C3E8 /* errors.h */,
-				EA1835E62432C18B00A5C3E8 /* DateTime.h */,
-				EAD47FB125892D4100D2172A /* ThreadPool.h */,
-				EA1835E72432C18B00A5C3E8 /* maths.h */,
-				EA1835F42432C18B00A5C3E8 /* maths.cpp */,
-				EA1835EA2432C18B00A5C3E8 /* log.h */,
-				EAF9A15026F8B42200698263 /* log.cpp */,
-				EA1732B32459EAB3009E7B55 /* RecompilingAppDylib.h */,
-				EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */,
 				EA1835E82432C18B00A5C3E8 /* Dylib.h */,
 				EA1835EB2432C18B00A5C3E8 /* Dylib.cpp */,
+				EA1835E52432C18B00A5C3E8 /* errors.h */,
+				EA1835F12432C18B00A5C3E8 /* errors.cpp */,
+				EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */,
 				EA1835EF2432C18B00A5C3E8 /* FileWatcher.h */,
 				EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */,
-				EA1835F12432C18B00A5C3E8 /* errors.cpp */,
-				EA1835F22432C18B00A5C3E8 /* DateTime.cpp */,
-				EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */,
+				EACA2606275F4F4D00B3DE68 /* FlatSet.h */,
+				EA1835E12432C18B00A5C3E8 /* FloatBuffer.h */,
+				EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */,
+				EAA44CD2267A2BCB0014C203 /* Haptics.h */,
+				EAA44CD3267A2BE50014C203 /* Haptics.cpp */,
+				EAE842892AE16F06008DB683 /* Int16Buffer.h */,
+				EAF91F742AE16F7A00C1FD1C /* Int16Buffer.cpp */,
+				EAA9BE5D2A30E180008BFEF4 /* Listenable.h */,
+				EA1835EA2432C18B00A5C3E8 /* log.h */,
+				EAF9A15026F8B42200698263 /* log.cpp */,
+				EAF67380289BC87E001F778D /* mainThread.h */,
+				EAF6737F289BC87E001F778D /* mainThread.cpp */,
+				EA1835E72432C18B00A5C3E8 /* maths.h */,
+				EA1835F42432C18B00A5C3E8 /* maths.cpp */,
+				EAF67370289BC3DC001F778D /* mzAssert.h */,
+				EAF6736F289BC3DB001F778D /* mzAssert.cpp */,
+				EA1732B32459EAB3009E7B55 /* RecompilingAppDylib.h */,
+				EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */,
+				EAD27F7A29B6778200225521 /* RingBuffer.h */,
 				EAE3C63326D39E8F0000613E /* SampleProvider.h */,
 				EA7B45A52B19F9F600F19B8D /* ScopedUrl.h */,
 				EA7B45A62B19FA8800F19B8D /* ScopedUrl.cpp */,
+				EAF67378289BC441001F778D /* stringUtil.h */,
+				EAF67377289BC441001F778D /* stringUtil.cpp */,
+				EA7D71092E781291002B9465 /* TaskRunner.h */,
+				EA7D710A2E781291002B9465 /* TaskRunner.cpp */,
+				EAD47FB125892D4100D2172A /* ThreadPool.h */,
+				EA15B27B291D49E70051570A /* UndoManager.h */,
+				EA15B27A291D49E70051570A /* UndoManager.cpp */,
+				EA1835EC2432C18B00A5C3E8 /* util.h */,
+				EA1835E32432C18B00A5C3E8 /* util.cpp */,
+				EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */,
+				EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -3364,6 +3374,7 @@
 				EAF6F4672E09AE8400DE5361 /* slider.glsl.h in Headers */,
 				EAF6F4682E09AE8400DE5361 /* OpenGLTexture.h in Headers */,
 				EAF6F4692E09AE8400DE5361 /* SokolSamplerRegistry.h in Headers */,
+				EA7D710F2E781291002B9465 /* TaskRunner.h in Headers */,
 				EAF6F46A2E09AE8400DE5361 /* SokolShaderRegistry.h in Headers */,
 				EAF6F46B2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */,
 				EAF6F46C2E09AE8400DE5361 /* SokolShader.h in Headers */,
@@ -3574,6 +3585,7 @@
 				EA2B844D24E7093600EA12BD /* NineSlice.h in Headers */,
 				EAD03BBB2980185000D0C04A /* AppleWebView.h in Headers */,
 				EA2B845324E7093600EA12BD /* RoundedRect.h in Headers */,
+				EA7D710B2E781291002B9465 /* TaskRunner.h in Headers */,
 				EA2B846024E7093600EA12BD /* NVGUI.h in Headers */,
 				EA71A78727E39E6C0081A5CB /* fileenc.h in Headers */,
 				EAF6737E289BC441001F778D /* stringUtil.h in Headers */,
@@ -3876,6 +3888,7 @@
 				EA78556E2472E3320072FD05 /* NVG.cpp in Sources */,
 				EA1840052432C18D00A5C3E8 /* Font.cpp in Sources */,
 				EA99490424730DB8004D0DB7 /* nanovg.cpp in Sources */,
+				EA7D71102E781291002B9465 /* TaskRunner.cpp in Sources */,
 				EA183F8C2432C18D00A5C3E8 /* Scroller.cpp in Sources */,
 				EA71A75A27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA183FCE2432C18D00A5C3E8 /* errors.cpp in Sources */,
@@ -3994,6 +4007,7 @@
 				EA81A9572756F0AC009C911E /* MZGLEffectAU.mm in Sources */,
 				EA71A76B27E39E6C0081A5CB /* sha1.c in Sources */,
 				EA234B0424A609CA000F057B /* YGValue.cpp in Sources */,
+				EA7D710D2E781291002B9465 /* TaskRunner.cpp in Sources */,
 				EAF99ABC267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA1841162432C4A500A5C3E8 /* Font.cpp in Sources */,
 				EAF67382289BC87E001F778D /* mainThread.cpp in Sources */,
@@ -4146,6 +4160,7 @@
 				EA2B8AF124E7093600EA12BD /* AudioFileApple.cpp in Sources */,
 				EA2B8AF324E7093600EA12BD /* experiments.cpp in Sources */,
 				EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
+				EA7D710C2E781291002B9465 /* TaskRunner.cpp in Sources */,
 				EA2B8AF424E7093600EA12BD /* MacMenuBar.mm in Sources */,
 				EABBA6DA2B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
 				EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */,
@@ -4256,6 +4271,7 @@
 				EA689457261C633500F76B91 /* SvgVbo.cpp in Sources */,
 				EA689458261C633500F76B91 /* Layout.cpp in Sources */,
 				EA68945B261C633500F76B91 /* Shader.cpp in Sources */,
+				EA7D710E2E781291002B9465 /* TaskRunner.cpp in Sources */,
 				EA68945C261C633500F76B91 /* SVG.cpp in Sources */,
 				EAF67384289BC87E001F778D /* mainThread.cpp in Sources */,
 				EA5250EB2C2C64AA00DE5DFC /* WebViewOverlay.cpp in Sources */,

@@ -147,6 +147,7 @@ bool MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn,
 	if (logToLockfile) {
 		writeToLockFile(prepend + "11");
 	}
+	return true;
 }
 
 bool MainThreadRunner::runOnMainThread(bool checkIfOnMainThread, std::function<void()> fn) {
