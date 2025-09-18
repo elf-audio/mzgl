@@ -211,6 +211,20 @@ void AudioSystemIOS::stop() {
 	AudioOutputUnitStop(audioUnit);
 }
 
+void updateChannelCount(int &channelsRequested, const AudioPort &port, const std::vector<AudioPort> &allPorts) {
+	if (channelsRequested != std::numeric_limits<int>::max()) {
+		return;
+	}
+	
+	auto iter=  std::find_if(allPorts.begin(), allPorts.end(), [&](auto && in) {
+		return in.name == port.name;
+	});
+
+	if (iter != allPorts.end()) {
+		channelsRequested = iter->numInChannels;
+	}
+}
+
 void AudioSystemIOS::configureAudioUnit() {
 	//---------------------------------------------------------- audio unit.
 
@@ -226,6 +240,9 @@ void AudioSystemIOS::configureAudioUnit() {
 	checkStatus(AudioComponentInstanceNew(inputComponent, &audioUnit));
 
 	UInt32 on = 1;
+
+	updateChannelCount(numInChannels, getInput(), getInputs());
+	updateChannelCount(numOutChannels, getOutput(), getOutputs());
 
 	////////////////////////////////////////////////////////////////////////////////
 	// OUTPUT
