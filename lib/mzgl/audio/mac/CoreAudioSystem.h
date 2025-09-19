@@ -36,7 +36,8 @@ public:
 	[[nodiscard]] double getOutputLatency() override;
 
 	[[nodiscard]] double getNanoSecondsAtBufferBegin() override;
-	[[nodiscard]] double getHostTime();
+
+	[[deprecated("Use getNanoSecondsAtBufferBegin()")]] [[nodiscard]] double getHostTime();
 
 	[[nodiscard]] CoreAudioState &getState();
 
