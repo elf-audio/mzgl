@@ -43,6 +43,7 @@ int MidiCCMessageParser::toValue(MidiCCMessageParser::ChangeType type) {
 		case MidiCCMessageParser::ChangeType::Negative: return -1;
 		case MidiCCMessageParser::ChangeType::NoChange: return 0;
 	}
+	return 0;
 }
 
 MidiCCMessageParser::ChangeType MidiCCMessageParser::toType(const std::string &type) {
