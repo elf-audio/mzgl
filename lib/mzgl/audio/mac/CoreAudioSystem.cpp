@@ -1,4 +1,4 @@
-#include "MZGLCoreAudio.h"
+#include "CoreAudioSystem.h"
 
 #include <atomic>
 #include <vector>
@@ -6,8 +6,8 @@
 #include <cstring>
 #include <algorithm>
 
-#include "MZGLCoreAudioDeviceHelpers.h"
-#include "MZGLCoreAudioHelpers.h"
+#include "coreAudioDeviceHelpers.h"
+#include "coreAudioHelpers.h"
 #include "log.h"
 #include "mzAssert.h"
 
@@ -114,7 +114,9 @@ void CoreAudioSystem::checkDeviceAvailability() {
 	}
 }
 
-void updateChannelCount(int &channelsRequested, std::optional<AudioPort> &port, const std::vector<AudioPort> &allPorts) {
+void updateChannelCount(int &channelsRequested,
+						std::optional<AudioPort> &port,
+						const std::vector<AudioPort> &allPorts) {
 	if (channelsRequested != std::numeric_limits<int>::max()) {
 		return;
 	}
@@ -122,9 +124,7 @@ void updateChannelCount(int &channelsRequested, std::optional<AudioPort> &port, 
 		return;
 	}
 
-	auto iter=  std::find_if(allPorts.begin(), allPorts.end(), [&](auto && in) {
-			return in.name == port->name;
-		});
+	auto iter = std::find_if(allPorts.begin(), allPorts.end(), [&](auto &&in) { return in.name == port->name; });
 
 	if (iter != allPorts.end()) {
 		channelsRequested = iter->numInChannels;
@@ -140,7 +140,7 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	std::vector<AudioPort> outputPorts;
 	getDeviceList(inputPorts, outputPorts);
 
-	auto originalInChannels = numInChannels;
+	auto originalInChannels	 = numInChannels;
 	auto originalOutChannels = numOutChannels;
 
 	updateChannelCount(numInChannels, inputPort, inputPorts);

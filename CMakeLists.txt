@@ -193,7 +193,7 @@ set(HEADERS
     lib/mzgl/app/glfw
     lib/mzgl/app/web
     lib/mzgl/audio
-    lib/mzgl/audio/coreaudio
+    lib/mzgl/audio/mac
     lib/mzgl/audio/portaudio
     lib/mzgl/audio/juce
     lib/mzgl/audio/juce/lib
@@ -310,8 +310,8 @@ else()
 
   if(APPLE)
     if(NOT IOS)
-      list(APPEND MZGL_SOURCES lib/mzgl/audio/coreaudio/MZGLCoreAudio.cpp
-           lib/mzgl/audio/coreaudio/MZGLCoreAudio.h)
+      list(APPEND MZGL_SOURCES lib/mzgl/audio/mac/CoreAudioSystem.cpp
+              lib/mzgl/audio/mac/CoreAudioSystem.h)
     endif()
   endif()
 

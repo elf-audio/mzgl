@@ -151,7 +151,7 @@ public:
 #if MZGL_IOS
 #	include "AudioSystemIOS.h"
 #elif MZGL_MAC
-#	include "MZGLCoreAudio.h"
+#	include "CoreAudioSystem.h"
 #elif !MZGL_ANDROID && !MZGL_MAC
 #	include "PortAudioSystem.h"
 #endif
