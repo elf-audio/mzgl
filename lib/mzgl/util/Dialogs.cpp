@@ -1300,12 +1300,13 @@ void Dialogs::textboxWithSegmented(std::string title,
 								   std::function<void(std::string, int, bool)> completionCallback) const {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
+	NSString *deviceType = [UIDevice currentDevice].model;
 
 	TextboxSegmentedViewController *alertVC =
 		[[TextboxSegmentedViewController alloc] initWithTitle:[NSString stringWithUTF8String:title.c_str()]
 													  message:[NSString stringWithUTF8String:msg.c_str()]
 														 text:[NSString stringWithUTF8String:text.c_str()]
-													  options:@[ @"Computer", @"iCloud" ]
+													  options:@[ deviceType, @"iCloud" ]
 													 selected:defaultOption];
 	alertVC.completionHandler = ^(NSString *filename, NSInteger selectedSegment) {
 	  dispatch_async(dispatch_get_main_queue(),
