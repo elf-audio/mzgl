@@ -43,17 +43,6 @@ public:
 	CFURLRef url;
 };
 
-class DataBuffer {
-public:
-	explicit DataBuffer(size_t bufferSize) { data = (UInt8 *) malloc(sizeof(UInt8 *) * bufferSize); }
-	~DataBuffer() {
-		if (data != nullptr) {
-			free(data);
-		}
-	}
-	UInt8 *data = nullptr;
-};
-
 class AudioFileRef {
 public:
 	AudioFileRef() = default;
@@ -111,28 +100,26 @@ public:
 		static constexpr UInt32 bytePerKb	   = 1024;
 
 		auto outputBufferSize = outputSizeInKb * bytePerKb;
-		auto sizePerPacket	  = audioFormat.mBytesPerPacket;
-		auto packetsPerBuffer = outputBufferSize / sizePerPacket;
-
-		DataBuffer outputBuffer {outputBufferSize};
-
+		auto packetsPerBuffer = outputBufferSize / audioFormat.mBytesPerPacket;
+		
+		std::vector<uint8_t> outputBuffer(outputBufferSize, 0);
 		AudioBufferList convertedData;
 		convertedData.mNumberBuffers			  = 1;
 		convertedData.mBuffers[0].mNumberChannels = audioFormat.mChannelsPerFrame;
 		convertedData.mBuffers[0].mDataByteSize	  = outputBufferSize;
-		convertedData.mBuffers[0].mData			  = outputBuffer.data;
+		convertedData.mBuffers[0].mData			  = outputBuffer.data();
 
 		bool done = false;
 		while (!done) {
 			auto frameCount = packetsPerBuffer;
 
+			convertedData.mBuffers[0].mDataByteSize = outputBufferSize;
 			if (!checkStatus(ExtAudioFileRead(file, &frameCount, &convertedData), "reading packet")) {
 				return false;
 			}
 
 			buff.append((float *) convertedData.mBuffers[0].mData, frameCount * audioFormat.mChannelsPerFrame);
-
-			done = frameCount != packetsPerBuffer;
+			done = frameCount == 0;
 		}
 		return true;
 	}
