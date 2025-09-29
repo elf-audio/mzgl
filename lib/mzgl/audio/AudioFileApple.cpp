@@ -101,7 +101,7 @@ public:
 
 		auto outputBufferSize = outputSizeInKb * bytePerKb;
 		auto packetsPerBuffer = outputBufferSize / audioFormat.mBytesPerPacket;
-		
+
 		std::vector<uint8_t> outputBuffer(outputBufferSize, 0);
 		AudioBufferList convertedData;
 		convertedData.mNumberBuffers			  = 1;
@@ -109,6 +109,8 @@ public:
 		convertedData.mBuffers[0].mDataByteSize	  = outputBufferSize;
 		convertedData.mBuffers[0].mData			  = outputBuffer.data();
 
+		// this function doesn't give a 100% accurate frame count - with wav files sometimes its 2 samples too short
+		// but its close enough for us at the moment.
 		bool done = false;
 		while (!done) {
 			auto frameCount = packetsPerBuffer;
