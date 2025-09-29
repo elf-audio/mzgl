@@ -107,9 +107,9 @@ std::optional<size_t> Int16Buffer::findFirstOnset(float threshold) const {
 
 	size_t sampleCounter = 0;
 	
-	auto thresholdInt16 = static_cast<int16_t>(threshold * 32767.f);
+	const auto thresholdInt16 = static_cast<int16_t>(threshold * 32767.f);
 	for (int i = 0; i < size(); i++) {
-		if (std::abs((*this)[i]) > thresholdInt16) {
+		if (std::abs(d[i]) > thresholdInt16) {
 			return sampleCounter;
 		}
 
