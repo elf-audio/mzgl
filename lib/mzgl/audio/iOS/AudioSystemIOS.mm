@@ -169,7 +169,7 @@ static void routeChangeNotificationHandler(CFNotificationCenterRef center,
 }
 void AudioSystemIOS::handleRouteChange() {
 	//	Log::w() << "Got route change notification - should re-query samplerate";
-	Log::d() << "Route changed to " << getInput().name;
+//	Log::d() << "Route changed to " << getInput().name;
 }
 
 AudioSystemIOS::AudioSystemIOS() {
