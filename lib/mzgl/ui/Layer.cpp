@@ -39,6 +39,14 @@ Layer::Layer(Graphics &g, const std::string &name, const std::vector<Layer *> &c
 
 Layer::~Layer() {
 	clear();
+	// removed from focusedLayers if exists
+	for (auto it = g.focusedLayers.begin(); it != g.focusedLayers.end();) {
+		if (it->second == this) {
+			it = g.focusedLayers.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 std::string Layer::toString() const {
@@ -221,7 +229,9 @@ void Layer::_touchUp(float x, float y, int id) {
 
 	float xx = x;
 	float yy = y;
-
+	Log::d() << "touchUp on " << name << " (" << typeid(*this).name() << ") for touchId " << id;
+	Log::d() << "Focused layer is " << g.focusedLayers[id]->name << " (" << typeid(*g.focusedLayers[id]).name()
+			 << ")";
 	g.focusedLayers[id]->absoluteToLocalCoords(xx, yy);
 	g.focusedLayers[id]->touchUp(xx, yy, id);
 	g.focusedLayers.erase(id);
@@ -241,6 +251,7 @@ void Layer::transformMouse(float &xx, float &yy) {
 	xx -= this->x;
 	yy -= this->y;
 }
+#include <typeinfo>
 
 bool Layer::_touchDown(float x, float y, int id) {
 	if (!visible) return false;
@@ -262,7 +273,7 @@ bool Layer::_touchDown(float x, float y, int id) {
 
 	if (interactive && (inside(x, y) || receivesTouchesOutside)) {
 		g.focusedLayers[id] = this;
-
+		Log::d() << "touchDown on " << name << " (" << typeid(*this).name() << ") for touchId " << id;
 		return touchDown(x, y, id);
 	}
 	return false;
