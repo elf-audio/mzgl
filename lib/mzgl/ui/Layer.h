@@ -9,7 +9,6 @@
 #include "Graphics.h"
 #include <string>
 #include "Texture.h"
-#include "RoundedRect.h"
 #include <map>
 #include "Font.h"
 #include <functional>
@@ -164,9 +163,6 @@ public:
 
 protected:
 	void transformMouse(float &x, float &y);
-
-	// vbo for drawing rounded rects
-	RoundedRect roundedRect;
 
 	void maskOn();
 	void maskOff();
