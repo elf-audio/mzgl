@@ -200,3 +200,5 @@ std::string readFromLockFile();
 // if it returns true, don't try to auto save because there wasn't time to load the song.
 bool deleteLockFileIfExists();
 std::string getLockFilePath();
+void disableLockFileWriting();
+void enableLockFileWriting();

@@ -1328,8 +1328,16 @@ bool deleteLockFileIfExists() {
 	}
 	return false;
 }
+static bool lockFileDisabled = false;
+void disableLockFileWriting() {
+	lockFileDisabled = true;
+}
 
+void enableLockFileWriting() {
+	lockFileDisabled = false;
+}
 void writeToLockFile(const std::string &msg) {
+	if (lockFileDisabled) return;
 	writeStringToFileAtomically(getLockFilePath(), msg);
 }
 
