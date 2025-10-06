@@ -1328,9 +1328,10 @@ bool deleteLockFileIfExists() {
 	}
 	return false;
 }
-static bool lockFileDisabled = false;
+static std::atomic<bool> lockFileDisabled {false};
 void disableLockFileWriting() {
 	lockFileDisabled = true;
+	deleteLockFileIfExists();
 }
 
 void enableLockFileWriting() {
