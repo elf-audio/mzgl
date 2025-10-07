@@ -1339,7 +1339,7 @@ void enableLockFileWriting() {
 }
 void writeToLockFile(const std::string &msg) {
 	if (lockFileDisabled) return;
-	writeStringToFileAtomically(getLockFilePath(), msg);
+	writeStringToFileAtomically(getLockFilePath(), msg + "-" + to_string(getSeconds(), 1));
 }
 
 std::string readFromLockFile() {
