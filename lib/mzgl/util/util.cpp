@@ -614,9 +614,8 @@ std::string docsPath(const std::string &path) {
 		TCHAR szExeFileName[MAX_PATH];
 		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
 		retPath = documentsDirUtf8 + "\\Koala";
-		if (!fs::exists(retPath)) {
-			fs::create_directory(retPath);
-		}
+		fs::create_directories(retPath);
+
 		retPath += "\\" + path;
 	} else {
 		Log::e() << "Error: " << result << "\n";
@@ -657,9 +656,9 @@ std::string appSupportPath(const std::string &path) {
 															inDomains:NSUserDomainMask] lastObject];
 	std::string _path = [[url path] UTF8String];
 	_path += "/" + getAppId();
-	if (!fs::exists(_path)) {
-		fs::create_directory(_path);
-	}
+
+	fs::create_directories(_path);
+
 	return _path + "/" + path;
 #	else
 	Log::e() << "appSupportPath() not available on iOS";
