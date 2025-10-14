@@ -35,7 +35,7 @@ public:
 };
 
 namespace Log {
-
+	enum class LogLevel { Verbose = 1, Debug, Info, Warning, Error };
 	class Logger {
 	public:
 		static constexpr int userLogLevel = 1;
@@ -63,7 +63,7 @@ namespace Log {
 
 	protected:
 		std::string levelName;
-		int level = 0;
+		LogLevel level = LogLevel::Verbose;
 
 	private:
 		std::stringstream msg;
@@ -73,7 +73,7 @@ namespace Log {
 	class v : public Logger {
 	public:
 		virtual ~v() {
-			level	  = 1;
+			level	  = LogLevel::Verbose;
 			levelName = "verbose";
 		}
 	};
@@ -81,7 +81,7 @@ namespace Log {
 	class d : public Logger {
 	public:
 		virtual ~d() {
-			level	  = 2;
+			level	  = LogLevel::Debug;
 			levelName = "debug";
 		}
 	};
@@ -89,21 +89,21 @@ namespace Log {
 	class i : public Logger {
 	public:
 		virtual ~i() {
-			level	  = 3;
+			level	  = LogLevel::Info;
 			levelName = "info";
 		}
 	};
 	class w : public Logger {
 	public:
 		virtual ~w() {
-			level	  = 4;
+			level	  = LogLevel::Warning;
 			levelName = "warning";
 		}
 	};
 	class e : public Logger {
 	public:
 		virtual ~e() {
-			level	  = 5;
+			level	  = LogLevel::Error;
 			levelName = "error";
 		}
 	};
