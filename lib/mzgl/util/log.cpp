@@ -74,9 +74,9 @@ Log::Logger::~Logger() {
 	}
 	msg << std::endl;
 #ifdef __ANDROID__
-	if (level == 4) {
+	if (level == LogLevel::Error) {
 		__android_log_print(ANDROID_LOG_ERROR, "mzgl", "%s", msg.str().c_str());
-	} else if (level == 3) {
+	} else if (level == LogLevel::Warning) {
 		__android_log_print(ANDROID_LOG_WARN, "mzgl", "%s", msg.str().c_str());
 	} else {
 		__android_log_print(ANDROID_LOG_INFO, "mzgl", "%s", msg.str().c_str());
