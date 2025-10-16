@@ -79,11 +79,13 @@ void eraseIf(std::vector<T, A> &c, Predicate pred) {
 }
 
 template <class T, class Predicate>
-void eraseFirstIf(std::vector<T> &c, Predicate pred) {
+[[maybe_unused]] bool eraseFirstIf(std::vector<T> &c, Predicate pred) {
 	auto it = std::find_if(c.begin(), c.end(), pred);
 	if (it != c.end()) {
 		c.erase(it);
+		return true;
 	}
+	return false;
 }
 
 #ifdef __APPLE__
