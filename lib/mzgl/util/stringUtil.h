@@ -87,3 +87,15 @@ std::chrono::system_clock::time_point string_to_time_point(const std::string &s)
 std::string timestampString();
 
 std::vector<std::string> tokenize(const std::string &path, const char delimiter);
+
+enum class NaNBehaviour { ConsideredAnError, ResetToDefault, Allowed };
+enum class ErrorBehaviour { ReturnDefault, ThrowException };
+[[nodiscard]] float stringToFloat(const std::string &conversion,
+								  ErrorBehaviour errorBehaviour = ErrorBehaviour::ReturnDefault,
+								  float defaultOnError			= 0.f,
+								  NaNBehaviour naNBehaviour		= NaNBehaviour::ResetToDefault);
+
+[[nodiscard]] double stringToDouble(const std::string &conversion,
+									ErrorBehaviour errorBehaviour = ErrorBehaviour::ReturnDefault,
+									double defaultOnError		  = 0.0,
+									NaNBehaviour naNBehaviour	  = NaNBehaviour::ResetToDefault);

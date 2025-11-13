@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
+#include "log.h"
 
 std::string zeroPad2(int number) {
 	return zeroPad(number, 2);
@@ -316,4 +317,68 @@ std::vector<std::string> tokenize(const std::string &path, const char delimiter)
 	}
 
 	return tokens;
+}
+
+float stringToFloat(const std::string &conversion,
+					ErrorBehaviour errorBehaviour,
+					float defaultOnError,
+					NaNBehaviour naNBehaviour) {
+	std::string error;
+	try {
+		auto result = std::stof(conversion);
+		if (std::isnan(result)) {
+			if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
+				throw std::runtime_error("nan");
+			}
+			if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+				result = defaultOnError;
+			}
+		}
+		return result;
+	} catch (const std::runtime_error &e) {
+		error = "caused a NaN";
+	} catch (const std::invalid_argument &e) {
+		error = "caused invalid argument";
+	} catch (const std::out_of_range &e) {
+		error = "out of range argument";
+	} catch (...) {
+		error = "unknown error";
+	}
+	Log::e() << "Converting " << conversion << " to float, caused " << error;
+	if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
+		return defaultOnError;
+	}
+	throw std::runtime_error("stof failed");
+}
+
+double stringToDouble(const std::string &conversion,
+					  ErrorBehaviour errorBehaviour,
+					  double defaultOnError,
+					  NaNBehaviour naNBehaviour) {
+	std::string error;
+	try {
+		auto result = std::stod(conversion);
+		if (std::isnan(result)) {
+			if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
+				throw std::runtime_error("nan");
+			}
+			if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+				result = defaultOnError;
+			}
+		}
+		return result;
+	} catch (const std::runtime_error &e) {
+		error = "caused a NaN";
+	} catch (const std::invalid_argument &e) {
+		error = "caused invalid argument";
+	} catch (const std::out_of_range &e) {
+		error = "out of range argument";
+	} catch (...) {
+		error = "unknown error";
+	}
+	Log::e() << "Converting " << conversion << " to double, caused " << error;
+	if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
+		return defaultOnError;
+	}
+	throw std::runtime_error("stod failed");
 }

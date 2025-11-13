@@ -5,6 +5,7 @@
 #include "colors.h"
 #include "log.h"
 #include "maths.h"
+#include "stringUtil.h"
 #include <sstream>
 #include <array>
 #include <algorithm>
@@ -175,7 +176,7 @@ std::optional<glm::vec4> rgbaColor(std::string colourString) {
 	}
 
 	std::getline(iss, token, ',');
-	colours[i++] = static_cast<float>(std::clamp(mzgl::maths::stof(token), 0.f, 1.f));
+	colours[i++] = static_cast<float>(std::clamp(stringToFloat(token), 0.f, 1.f));
 
 	if (i != 4) {
 		Log::e() << "RGB Colour didn't have enough elements " << colourString;
