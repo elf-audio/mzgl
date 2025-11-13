@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <type_traits>
+#include "log.h"
 
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
 	const float f = outMin + (outMax - outMin) * (inp - inMin) / (inMax - inMin);
@@ -91,3 +92,71 @@ constexpr T rad2deg(T rad) {
 	static_assert(std::is_floating_point_v<T>, "rad2deg requires a floating-point type");
 	return rad * static_cast<T>(180.0) / Constants<T>::pi;
 }
+
+namespace mzgl::maths {
+	enum class NaNBehaviour { ConsideredAnError, ResetToDefault, Allowed };
+	enum class ErrorBehaviour { ReturnDefault, ThrowException };
+	[[nodiscard]] constexpr inline float stof(const std::string &conversion,
+											  ErrorBehaviour errorBehaviour = ErrorBehaviour::ReturnDefault,
+											  float defaultOnError			= 0.f,
+											  NaNBehaviour naNBehaviour		= NaNBehaviour::ResetToDefault) {
+		std::string error;
+		try {
+			auto result = std::stof(conversion);
+			if (std::isnan(result)) {
+				if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
+					throw std::runtime_error("nan");
+				}
+				if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+					result = defaultOnError;
+				}
+			}
+			return result;
+		} catch (const std::runtime_error &e) {
+			error = "caused a NaN";
+		} catch (const std::invalid_argument &e) {
+			error = "caused invalid argument";
+		} catch (const std::out_of_range &e) {
+			error = "out of range argument";
+		} catch (...) {
+			error = "unknown error";
+		}
+		Log::e() << "Converting " << conversion << " to float, caused " << error;
+		if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
+			return defaultOnError;
+		}
+		throw std::runtime_error("stof failed");
+	}
+
+	[[nodiscard]] constexpr inline double stod(const std::string &conversion,
+											   ErrorBehaviour errorBehaviour = ErrorBehaviour::ReturnDefault,
+											   double defaultOnError		 = 0.0,
+											   NaNBehaviour naNBehaviour	 = NaNBehaviour::ResetToDefault) {
+		std::string error;
+		try {
+			auto result = std::stod(conversion);
+			if (std::isnan(result)) {
+				if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
+					throw std::runtime_error("nan");
+				}
+				if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+					result = defaultOnError;
+				}
+			}
+			return result;
+		} catch (const std::runtime_error &e) {
+			error = "caused a NaN";
+		} catch (const std::invalid_argument &e) {
+			error = "caused invalid argument";
+		} catch (const std::out_of_range &e) {
+			error = "out of range argument";
+		} catch (...) {
+			error = "unknown error";
+		}
+		Log::e() << "Converting " << conversion << " to double, caused " << error;
+		if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
+			return defaultOnError;
+		}
+		throw std::runtime_error("stof failed");
+	}
+} // namespace mzgl::maths
