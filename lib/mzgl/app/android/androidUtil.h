@@ -265,9 +265,18 @@ public:
 		if (!success) {
 			return nullptr;
 		}
+
 		if (auto *appPtr = getAndroidAppPtr()) {
-			return (jclass) jni->GetObjectClass(appPtr->activity->clazz);
-			;
+			auto clazz = appPtr->activity->clazz;
+			if (clazz == nullptr) {
+				return nullptr;
+			}
+
+			if (jni->IsSameObject(clazz, nullptr)) {
+				return nullptr;
+			}
+
+			return (jclass) jni->GetObjectClass(clazz);
 		}
 		return nullptr;
 	}
