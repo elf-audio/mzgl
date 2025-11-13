@@ -167,6 +167,10 @@ static bool checkGlError(const char *funcName) {
 static void engine_term_display(struct engine *engine);
 
 static bool prepareFrame(struct engine *engine) {
+    if (engine == nullptr) {
+        return false;
+    }
+
 	if (engine->display == nullptr) {
 		// No display.
 		return false;
@@ -197,6 +201,14 @@ static void engine_draw_frame(struct engine *engine) {
 		return;
 	}
 
+	if (engine->display == EGL_NO_DISPLAY || engine->surface == EGL_NO_SURFACE) {
+        return;
+    }
+
+    if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
+        return;
+    }
+
 	if (!firstFrameAlreadyRendered) {
 		graphics.width	= engine->width;
 		graphics.height = engine->height;
@@ -205,7 +217,10 @@ static void engine_draw_frame(struct engine *engine) {
 		eventDispatcher = make_shared<EventDispatcher>(app);
 		// just draw *something* whilst loading... - doesn't seem to work
 		eventDispatcher->androidDrawLoading();
-		eglSwapBuffers(engine->display, engine->surface);
+		if (!eglSwapBuffers(engine->display, engine->surface)) {
+            firstFrameAlreadyRendered = false;
+            return;
+        }
 
 		eventDispatcher->setup();
 		firstFrameAlreadyRendered = true;
@@ -214,8 +229,12 @@ static void engine_draw_frame(struct engine *engine) {
 	{
 		// ugh, super ugly, but this checks for orientation changes
 		int wBefore = engine->width;
-		eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width);
-		eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height);
+		if (!eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width)) {
+		    return;
+		}
+		if (!eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height)) {
+		    return;
+		}
 
 		if (wBefore != engine->width) {
 			graphics.width	= engine->width;
@@ -225,13 +244,15 @@ static void engine_draw_frame(struct engine *engine) {
 		}
 	}
 
-	if (eventDispatcher != nullptr) {
-		eventDispatcher->runFrame();
-	} else {
-		firstFrameAlreadyRendered = false;
-	}
+	eventDispatcher->runFrame();
 
-	eglSwapBuffers(engine->display, engine->surface);
+    if (!eglSwapBuffers(engine->display, engine->surface)) {
+        EGLint error = eglGetError();
+        if (error == EGL_BAD_SURFACE || error == EGL_CONTEXT_LOST) {
+            eventDispatcher.reset();
+            firstFrameAlreadyRendered = false;
+        }
+    }
 }
 
 /**
