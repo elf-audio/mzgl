@@ -4,210 +4,203 @@
 #include "EventDispatcher.h"
 #include <android_native_app_glue.h>
 #include <util/log.h>
-
+#include "Graphics.h"
 #include "androidUtil.h"
 #include "Shader.h"
 #include "Texture.h"
 
-using namespace std;
+#include "androidKeyCodes.h"
 
-bool engineReady = false;
-
-/**
- * Shared state for our app.
- */
-struct engine {
-	struct android_app *app;
-
-	EGLDisplay display;
-	EGLSurface surface;
-	EGLContext context;
-	EGLConfig config;
-	int32_t width  = 0;
-	int32_t height = 0;
-};
-
-#include "Graphics.h"
-
-bool firstFrameAlreadyRendered = false;
 Graphics graphics;
 
-shared_ptr<EventDispatcher> eventDispatcher = nullptr;
-shared_ptr<App> app							= nullptr;
+std::shared_ptr<EventDispatcher> eventDispatcher = nullptr;
+std::shared_ptr<App> app						 = nullptr;
 
-shared_ptr<App> androidGetApp() {
-	return app;
-}
+class RenderEngine {
+public:
+	struct android_app *app;
 
-void chooseConfig(struct engine *engine) {
-	EGLint numConfigs;
+	EGLDisplay display		  = nullptr;
+	EGLSurface surface		  = nullptr;
+	EGLContext context		  = nullptr;
+	EGLConfig config		  = nullptr;
+	bool clearedUpGLResources = false;
 
-	/*
+	int32_t width  = 0;
+	int32_t height = 0;
+
+	void chooseConfig() {
+		EGLint numConfigs;
+
+		/*
      * Here specify the attributes of the desired configuration.
      * Below, we select an EGLConfig with at least 8 bits per color
      * component compatible with on-screen windows
      */
-	const EGLint attribs[] = {EGL_SURFACE_TYPE,
-							  EGL_WINDOW_BIT,
-							  EGL_BLUE_SIZE,
-							  8,
-							  EGL_GREEN_SIZE,
-							  8,
-							  EGL_RED_SIZE,
-							  8,
-							  EGL_RENDERABLE_TYPE,
-							  EGL_OPENGL_ES2_BIT,
-							  //            EGL_NATIVE_RENDERABLE, EGL_TRUE,
-							  //            EGL_RENDERABLE_TYPE,
-							  // EGL_ALPHA_SIZE, 8,
-							  EGL_NONE};
+		const EGLint attribs[] = {EGL_SURFACE_TYPE,
+								  EGL_WINDOW_BIT,
+								  EGL_BLUE_SIZE,
+								  8,
+								  EGL_GREEN_SIZE,
+								  8,
+								  EGL_RED_SIZE,
+								  8,
+								  EGL_RENDERABLE_TYPE,
+								  EGL_OPENGL_ES2_BIT,
+								  //            EGL_NATIVE_RENDERABLE, EGL_TRUE,
+								  //            EGL_RENDERABLE_TYPE,
+								  // EGL_ALPHA_SIZE, 8,
+								  EGL_NONE};
 
-	/* Here, the application chooses the configuration it desires.
-     * find the best match if possible, otherwise use the very first one
-     */
-	eglChooseConfig(engine->display, attribs, nullptr, 0, &numConfigs);
-	std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-	assert(supportedConfigs);
-	eglChooseConfig(engine->display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
-	assert(numConfigs);
+		/* Here, the application chooses the configuration it desires.
+         * find the best match if possible, otherwise use the very first one
+         */
+		eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
+		std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
+		eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
 
-	auto i = 0;
+		auto i = 0;
 
-	for (; i < numConfigs; i++) {
-		auto &cfg = supportedConfigs[i];
-		EGLint r, g, b, /*a, */ d;
-		if (eglGetConfigAttrib(engine->display, cfg, EGL_RED_SIZE, &r)
-			&& eglGetConfigAttrib(engine->display, cfg, EGL_GREEN_SIZE, &g)
-			&& eglGetConfigAttrib(engine->display, cfg, EGL_BLUE_SIZE, &b) &&
-			//eglGetConfigAttrib(display, cfg, EGL_ALPHA_SIZE, &a)  &&
-			eglGetConfigAttrib(engine->display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8
-			&& b == 8 /*&& a == 8*/ && d == 0) {
-			engine->config = supportedConfigs[i];
-			break;
+		for (; i < numConfigs; i++) {
+			auto &cfg = supportedConfigs[i];
+			EGLint r, g, b, d;
+			if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
+				&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
+				&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
+				&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
+				config = supportedConfigs[i];
+				break;
+			}
+		}
+
+		Log::i() << "Found " << numConfigs << " configs, using config " << i;
+		if (i == numConfigs) {
+			Log::w() << "Didn't find a supported config, so going with first (default)";
+			config = supportedConfigs[0];
 		}
 	}
 
-	LOGI("Found %d configs, using config %d", numConfigs, i);
-	if (i == numConfigs) {
-		LOGI("Didn't find a supported config, so going with first (default)");
-		engine->config = supportedConfigs[0];
-	}
-}
+	/**
+	 * Initialize an EGL context for the current display.
+ 	 */
+	int initDisplay() {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-// must have created a config and display before this
-void createSurface(struct engine *engine) {
-	EGLint format;
-	/* EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is
-     * guaranteed to be accepted by ANativeWindow_setBuffersGeometry().
-     * As soon as we picked a EGLConfig, we can safely reconfigure the
-     * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
-	eglGetConfigAttrib(engine->display, engine->config, EGL_NATIVE_VISUAL_ID, &format);
-	engine->surface = eglCreateWindowSurface(engine->display, engine->config, engine->app->window, NULL);
+		EGLint major;
+		EGLint minor;
+		eglInitialize(display, &major, &minor);
+		Log::e() << "EGL VERSION " << major << "." << minor;
 
-	eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width);
-	eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height);
-}
+		chooseConfig();
 
-/**
- * Initialize an EGL context for the current display.
- */
-static int engine_init_display(struct engine *engine) {
-	engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+		createSurface();
 
-	EGLint major;
-	EGLint minor;
-	eglInitialize(engine->display, &major, &minor);
-	LOGE("EGL VERSION %d.%d", major, minor);
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		/// now make the context
 
-	chooseConfig(engine);
+		EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-	createSurface(engine);
+		context = eglCreateContext(display, config, nullptr, contextAttribs);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	/// now make the context
+		EGLint contextVersion;
+		if (eglQueryContext(display, context, EGL_CONTEXT_CLIENT_VERSION, &contextVersion)) {
+			Log::i() << "context version " << contextVersion;
+		} else {
+			Log::e() << "Couldn't query context version";
+		}
 
-	EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+		Log::i() << "About to set eglMakeCurrent";
+		if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
+			Log::w() << "Unable to eglMakeCurrent";
+			return -1;
+		}
 
-	engine->context = eglCreateContext(engine->display, engine->config, NULL, contextAttribs);
+		const GLubyte *glVersion = glGetString(GL_VERSION);
+		if (glVersion != nullptr) {
+			Log::d() << "GL VERSION: " << glVersion;
+		} else {
+			Log::d() << "GL VERSION WAS NULL";
+		}
 
-	EGLint contextVersion;
-	if (eglQueryContext(engine->display, engine->context, EGL_CONTEXT_CLIENT_VERSION, &contextVersion)) {
-		LOGE("context version %d", contextVersion);
-	} else {
-		LOGE("Couldn't query context version");
+		return 0;
 	}
 
-	LOGI("About to set eglMakeCurrent");
-	if (eglMakeCurrent(engine->display, engine->surface, engine->surface, engine->context) == EGL_FALSE) {
-		LOGW("Unable to eglMakeCurrent");
-		return -1;
+	void createSurface() {
+		EGLint format;
+		/* EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is
+         * guaranteed to be accepted by ANativeWindow_setBuffersGeometry().
+         * As soon as we picked a EGLConfig, we can safely reconfigure the
+         * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
+		eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
+		surface = eglCreateWindowSurface(display, config, app->window, nullptr);
+
+		eglQuerySurface(display, surface, EGL_WIDTH, &width);
+		eglQuerySurface(display, surface, EGL_HEIGHT, &height);
 	}
 
-	const GLubyte *glVersion = glGetString(GL_VERSION);
-	if (glVersion != nullptr) {
-		LOGE("GL VERSION: %s", glVersion);
-	} else {
-		LOGE("GL VERSION WAS NULL");
-	}
+	bool prepareFrame() {
+		if (display == nullptr) {
+			return false;
+		}
 
-	return 0;
-}
+		auto err = glGetError();
+		if (err != GL_NO_ERROR) {
+			LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
+			if (surface == nullptr) {
+				createSurface();
+			}
+		}
 
-static bool checkGlError(const char *funcName) {
-	GLint err = glGetError();
-	if (err != GL_NO_ERROR) {
-		std::stringstream ss;
-		ss << "GL error after " << funcName << "() = 0x" << std::hex << err;
-		Log::e() << ss.str();
+		EGLint outInt;
+		auto result = eglQueryContext(display, context, EGL_CONFIG_ID, &outInt);
+		if (result != EGL_TRUE) {
+			return false;
+		}
 		return true;
 	}
-	return false;
-}
 
-static void engine_term_display(struct engine *engine);
-
-static bool prepareFrame(struct engine *engine) {
-    if (engine == nullptr) {
-        return false;
-    }
-
-	if (engine->display == nullptr) {
-		// No display.
-		return false;
-	}
-
-	GLint err = glGetError();
-	if (err != GL_NO_ERROR) {
-		LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
-		if (engine->surface == nullptr) {
-			createSurface(engine);
+	/**
+     * Tear down the EGL context currently associated with the display.
+     */
+	void termDisplay() {
+		graphics.clearUpResources();
+		clearedUpGLResources = true;
+		if (display != nullptr) {
+			eglMakeCurrent(display, nullptr, nullptr, nullptr);
+			if (context != nullptr) {
+				eglDestroyContext(display, context);
+			}
+			if (surface != nullptr) {
+				eglDestroySurface(display, surface);
+			}
+			eglTerminate(display);
 		}
-	}
 
-	EGLint outInt;
-	auto result = eglQueryContext(engine->display, engine->context, EGL_CONFIG_ID, &outInt);
-	if (result != EGL_TRUE) {
-		Log::e() << "Got false";
-		return false;
+		display = nullptr;
+		context = nullptr;
+		surface = nullptr;
 	}
-	return true;
+	[[nodiscard]] bool ready() const { return display != nullptr; }
+};
+std::shared_ptr<RenderEngine> engine = nullptr;
+
+bool firstFrameAlreadyRendered = false;
+
+std::shared_ptr<App> androidGetApp() {
+	return app;
 }
 
 /**
  * Just the current frame in the display.
  */
-static void engine_draw_frame(struct engine *engine) {
-	if (!prepareFrame(engine)) {
+static void engine_draw_frame() {
+	if (!engine->prepareFrame()) {
 		return;
 	}
 
-	if (engine->display == EGL_NO_DISPLAY || engine->surface == EGL_NO_SURFACE) {
-        return;
-    }
-
-    if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
-        return;
-    }
+	if (engine->display == nullptr || engine->surface == nullptr || eglGetCurrentContext() == nullptr) {
+		return;
+	}
 
 	if (!firstFrameAlreadyRendered) {
 		graphics.width	= engine->width;
@@ -218,9 +211,9 @@ static void engine_draw_frame(struct engine *engine) {
 		// just draw *something* whilst loading... - doesn't seem to work
 		eventDispatcher->androidDrawLoading();
 		if (!eglSwapBuffers(engine->display, engine->surface)) {
-            firstFrameAlreadyRendered = false;
-            return;
-        }
+			firstFrameAlreadyRendered = false;
+			return;
+		}
 
 		eventDispatcher->setup();
 		firstFrameAlreadyRendered = true;
@@ -229,11 +222,9 @@ static void engine_draw_frame(struct engine *engine) {
 	{
 		// ugh, super ugly, but this checks for orientation changes
 		int wBefore = engine->width;
-		if (!eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width)) {
-		    return;
-		}
-		if (!eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height)) {
-		    return;
+		if (!eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width)
+			|| !eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height)) {
+			return;
 		}
 
 		if (wBefore != engine->width) {
@@ -246,217 +237,20 @@ static void engine_draw_frame(struct engine *engine) {
 
 	eventDispatcher->runFrame();
 
-    if (!eglSwapBuffers(engine->display, engine->surface)) {
-        EGLint error = eglGetError();
-        if (error == EGL_BAD_SURFACE || error == EGL_CONTEXT_LOST) {
-            eventDispatcher.reset();
-            firstFrameAlreadyRendered = false;
-        }
-    }
-}
-
-/**
- * Tear down the EGL context currently associated with the display.
- */
-static void engine_term_display(struct engine *engine) {
-	if (engine->display != EGL_NO_DISPLAY) {
-		eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-		if (engine->context != EGL_NO_CONTEXT) {
-			eglDestroyContext(engine->display, engine->context);
+	if (!eglSwapBuffers(engine->display, engine->surface)) {
+		EGLint error = eglGetError();
+		if (error == EGL_BAD_SURFACE || error == EGL_CONTEXT_LOST) {
+			eventDispatcher.reset();
+			firstFrameAlreadyRendered = false;
 		}
-		if (engine->surface != EGL_NO_SURFACE) {
-			eglDestroySurface(engine->display, engine->surface);
-		}
-		eglTerminate(engine->display);
 	}
-
-	engine->display = EGL_NO_DISPLAY;
-	engine->context = EGL_NO_CONTEXT;
-	engine->surface = EGL_NO_SURFACE;
-}
-
-// get rid of this include, it's for fixing some touch problem in android koala
-//#include "Global.h"
-
-int keycodeToKey(int32_t k, bool shiftIsDown) {
-	const static std::map<int32_t, int> keyboardMap {{AKEYCODE_0, '0'},
-													 {AKEYCODE_1, '1'},
-													 {AKEYCODE_2, '2'},
-													 {AKEYCODE_3, '3'},
-													 {AKEYCODE_4, '4'},
-													 {AKEYCODE_5, '5'},
-													 {AKEYCODE_6, '6'},
-													 {AKEYCODE_7, '7'},
-													 {AKEYCODE_8, '8'},
-													 {AKEYCODE_9, '9'},
-													 {AKEYCODE_STAR, '*'},
-													 {AKEYCODE_POUND, '#'},
-													 {AKEYCODE_A, 'a'},
-													 {AKEYCODE_B, 'b'},
-													 {AKEYCODE_C, 'c'},
-													 {AKEYCODE_D, 'd'},
-													 {AKEYCODE_E, 'e'},
-													 {AKEYCODE_F, 'f'},
-													 {AKEYCODE_G, 'g'},
-													 {AKEYCODE_H, 'h'},
-													 {AKEYCODE_I, 'i'},
-													 {AKEYCODE_J, 'j'},
-													 {AKEYCODE_K, 'k'},
-													 {AKEYCODE_L, 'l'},
-													 {AKEYCODE_M, 'm'},
-													 {AKEYCODE_N, 'n'},
-													 {AKEYCODE_O, 'o'},
-													 {AKEYCODE_P, 'p'},
-													 {AKEYCODE_Q, 'q'},
-													 {AKEYCODE_R, 'r'},
-													 {AKEYCODE_S, 's'},
-													 {AKEYCODE_T, 't'},
-													 {AKEYCODE_U, 'u'},
-													 {AKEYCODE_V, 'v'},
-													 {AKEYCODE_W, 'w'},
-													 {AKEYCODE_X, 'x'},
-													 {AKEYCODE_Y, 'y'},
-													 {AKEYCODE_Z, 'z'},
-													 {AKEYCODE_COMMA, ','},
-													 {AKEYCODE_PERIOD, '.'},
-													 {AKEYCODE_SPACE, ' '},
-													 {AKEYCODE_ENTER, '\n'},
-													 {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
-													 {AKEYCODE_DEL, MZ_KEY_DELETE},
-													 {AKEYCODE_GRAVE, '`'},
-													 {AKEYCODE_MINUS, '-'},
-													 {AKEYCODE_EQUALS, '='},
-													 {AKEYCODE_LEFT_BRACKET, '['},
-													 {AKEYCODE_RIGHT_BRACKET, ']'},
-													 {AKEYCODE_BACKSLASH, '\\'},
-													 {AKEYCODE_SEMICOLON, ';'},
-													 {AKEYCODE_APOSTROPHE, '\''},
-													 {AKEYCODE_SLASH, '/'},
-													 {AKEYCODE_AT, '@'},
-													 {AKEYCODE_PLUS, '+'},
-													 {AKEYCODE_NUMPAD_0, '0'},
-													 {AKEYCODE_NUMPAD_1, '1'},
-													 {AKEYCODE_NUMPAD_2, '2'},
-													 {AKEYCODE_NUMPAD_3, '3'},
-													 {AKEYCODE_NUMPAD_4, '4'},
-													 {AKEYCODE_NUMPAD_5, '5'},
-													 {AKEYCODE_NUMPAD_6, '6'},
-													 {AKEYCODE_NUMPAD_7, '7'},
-													 {AKEYCODE_NUMPAD_8, '8'},
-													 {AKEYCODE_NUMPAD_9, '9'},
-													 {AKEYCODE_NUMPAD_DIVIDE, '/'},
-													 {AKEYCODE_NUMPAD_MULTIPLY, '*'},
-													 {AKEYCODE_NUMPAD_SUBTRACT, '-'},
-													 {AKEYCODE_NUMPAD_ADD, '+'},
-													 {AKEYCODE_NUMPAD_DOT, '.'},
-													 {AKEYCODE_NUMPAD_COMMA, ','},
-													 {AKEYCODE_NUMPAD_ENTER, '\n'},
-													 {AKEYCODE_NUMPAD_EQUALS, '='},
-													 {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
-													 {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
-													 {AKEYCODE_TAB, MZ_KEY_TAB},
-													 {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
-													 {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
-													 {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
-													 {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
-
-	const static std::map<int32_t, int> shiftKeyboardMap {{AKEYCODE_0, '!'},
-														  {AKEYCODE_1, '@'},
-														  {AKEYCODE_2, '2'},
-														  {AKEYCODE_3, '$'},
-														  {AKEYCODE_4, '$'},
-														  {AKEYCODE_5, '%'},
-														  {AKEYCODE_6, '^'},
-														  {AKEYCODE_7, '&'},
-														  {AKEYCODE_8, '*'},
-														  {AKEYCODE_9, '('},
-														  {AKEYCODE_STAR, '*'},
-														  {AKEYCODE_POUND, '#'},
-														  {AKEYCODE_A, 'A'},
-														  {AKEYCODE_B, 'B'},
-														  {AKEYCODE_C, 'C'},
-														  {AKEYCODE_D, 'D'},
-														  {AKEYCODE_E, 'E'},
-														  {AKEYCODE_F, 'F'},
-														  {AKEYCODE_G, 'G'},
-														  {AKEYCODE_H, 'H'},
-														  {AKEYCODE_I, 'I'},
-														  {AKEYCODE_J, 'J'},
-														  {AKEYCODE_K, 'K'},
-														  {AKEYCODE_L, 'L'},
-														  {AKEYCODE_M, 'M'},
-														  {AKEYCODE_N, 'N'},
-														  {AKEYCODE_O, 'O'},
-														  {AKEYCODE_P, 'P'},
-														  {AKEYCODE_Q, 'Q'},
-														  {AKEYCODE_R, 'R'},
-														  {AKEYCODE_S, 'S'},
-														  {AKEYCODE_T, 'T'},
-														  {AKEYCODE_U, 'U'},
-														  {AKEYCODE_V, 'V'},
-														  {AKEYCODE_W, 'W'},
-														  {AKEYCODE_X, 'X'},
-														  {AKEYCODE_Y, 'Y'},
-														  {AKEYCODE_Z, 'Z'},
-														  {AKEYCODE_COMMA, '<'},
-														  {AKEYCODE_PERIOD, '>'},
-														  {AKEYCODE_SPACE, ' '},
-														  {AKEYCODE_ENTER, '\n'},
-														  {AKEYCODE_FORWARD_DEL, MZ_KEY_DELETE},
-														  {AKEYCODE_DEL, MZ_KEY_DELETE},
-														  {AKEYCODE_GRAVE, '~'},
-														  {AKEYCODE_MINUS, '_'},
-														  {AKEYCODE_EQUALS, '+'},
-														  {AKEYCODE_LEFT_BRACKET, '{'},
-														  {AKEYCODE_RIGHT_BRACKET, '}'},
-														  {AKEYCODE_BACKSLASH, '|'},
-														  {AKEYCODE_SEMICOLON, ':'},
-														  {AKEYCODE_APOSTROPHE, '\"'},
-														  {AKEYCODE_SLASH, '?'},
-														  {AKEYCODE_AT, '@'},
-														  {AKEYCODE_PLUS, '+'},
-														  {AKEYCODE_NUMPAD_0, '0'},
-														  {AKEYCODE_NUMPAD_1, '1'},
-														  {AKEYCODE_NUMPAD_2, '2'},
-														  {AKEYCODE_NUMPAD_3, '3'},
-														  {AKEYCODE_NUMPAD_4, '4'},
-														  {AKEYCODE_NUMPAD_5, '5'},
-														  {AKEYCODE_NUMPAD_6, '6'},
-														  {AKEYCODE_NUMPAD_7, '7'},
-														  {AKEYCODE_NUMPAD_8, '8'},
-														  {AKEYCODE_NUMPAD_9, '9'},
-														  {AKEYCODE_NUMPAD_DIVIDE, '/'},
-														  {AKEYCODE_NUMPAD_MULTIPLY, '*'},
-														  {AKEYCODE_NUMPAD_SUBTRACT, '-'},
-														  {AKEYCODE_NUMPAD_ADD, '+'},
-														  {AKEYCODE_NUMPAD_DOT, '.'},
-														  {AKEYCODE_NUMPAD_COMMA, ','},
-														  {AKEYCODE_NUMPAD_ENTER, '\n'},
-														  {AKEYCODE_NUMPAD_EQUALS, '='},
-														  {AKEYCODE_NUMPAD_LEFT_PAREN, '('},
-														  {AKEYCODE_NUMPAD_RIGHT_PAREN, ')'},
-														  {AKEYCODE_TAB, MZ_KEY_SHIFT_TAB},
-														  {AKEYCODE_DPAD_LEFT, MZ_KEY_LEFT},
-														  {AKEYCODE_DPAD_RIGHT, MZ_KEY_RIGHT},
-														  {AKEYCODE_DPAD_DOWN, MZ_KEY_DOWN},
-														  {AKEYCODE_DPAD_UP, MZ_KEY_UP}};
-
-	auto &keymap = (shiftIsDown) ? shiftKeyboardMap : keyboardMap;
-	auto iter	 = keymap.find(k);
-	if (iter != keymap.end()) {
-		return static_cast<int>(iter->second);
-	}
-
-	Log::e() << "Unhandled key found \'" << k << "\'";
-	return 0;
 }
 
 /**
  * Process the next input event.
  * Return 1 if you handle an event, 0 if you don't.
  */
-static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) {
-	//struct engine* engine = (struct engine*)app->userData;
+static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *event) {
 	// converted from Java in openframeworks android
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t action = AMotionEvent_getAction(event);
@@ -485,7 +279,6 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 
 			case AMOTION_EVENT_ACTION_DOWN:
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				//LOGW("pointer down %d", touchId);
 				eventDispatcher->touchDown(AMotionEvent_getX(event, pointerIndex),
 										   AMotionEvent_getY(event, pointerIndex),
 										   AMotionEvent_getPointerId(event, pointerIndex));
@@ -493,7 +286,6 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 				break;
 			case AMOTION_EVENT_ACTION_UP:
 			case AMOTION_EVENT_ACTION_POINTER_UP:
-				//LOGW("pointer up %d", touchId);
 				eventDispatcher->touchUp(AMotionEvent_getX(event, pointerIndex),
 										 AMotionEvent_getY(event, pointerIndex),
 										 AMotionEvent_getPointerId(event, pointerIndex));
@@ -548,47 +340,37 @@ static int32_t engine_handle_input(struct android_app *app, AInputEvent *event) 
 	return 0; // event not handled
 }
 
-bool ignoreNextGainedFocus = false;
-bool clearedUpGLResources  = false;
-
 /**
  * Process the next main command.
  */
 static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
-	struct engine *engine = (struct engine *) appPtr->userData;
-
 	switch (cmd) {
 		case APP_CMD_INIT_WINDOW:
 			Log::d() << "APP_CMD_INIT_WINDOW";
 			// The window is being shown, get it ready.
 			if (engine->app->window != nullptr) {
-				engine_init_display(engine);
-				engineReady = true;
+				engine->initDisplay();
 
 				initMZGL(app);
-				if (eventDispatcher != nullptr && prepareFrame(engine)) {
-					//                    engine_draw_blankFrame(engine);
+				if (eventDispatcher != nullptr && engine->prepareFrame()) {
 					graphics.width	= engine->width;
 					graphics.height = engine->height;
 					eventDispatcher->androidDrawLoading();
 					eglSwapBuffers(engine->display, engine->surface);
 				}
-				if (clearedUpGLResources && eventDispatcher != nullptr) {
+				if (engine->clearedUpGLResources && eventDispatcher != nullptr) {
 					eventDispatcher->resized();
 					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
-					clearedUpGLResources = false;
+					engine->clearedUpGLResources = false;
 				}
-				engine_draw_frame(engine);
+				engine_draw_frame();
 			}
 			break;
 
 		case APP_CMD_TERM_WINDOW:
 			// The window is being hidden or closed, clean it up.
 			Log::d() << "APP_CMD_TERM_WINDOW";
-			graphics.clearUpResources();
-			clearedUpGLResources = true;
-			engine_term_display(engine);
-			engineReady = false;
+			engine->termDisplay();
 			break;
 
 		case APP_CMD_LOST_FOCUS: Log::d() << "APP_CMD_LOST_FOCUS"; break;
@@ -638,10 +420,8 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 	}
 }
 
-android_app *globalAppPtr = nullptr;
-
 android_app *getAndroidAppPtr() {
-	return globalAppPtr;
+	return engine->app;
 }
 
 EventDispatcher *getAndroidEventDispatcher() {
@@ -656,34 +436,14 @@ int android_loop_all(int timeoutMillis, int *outFd, int *outEvents, void **outDa
 	return result;
 }
 
-/**
- * This is the main entry point of a native application that is using
- * android_native_app_glue.  It runs in its own thread, with its own
- * event loop for receiving input events and doing other things.
- */
-void android_main(struct android_app *state) {
-	app				= nullptr;
-	eventDispatcher = nullptr;
-
-	globalAppPtr = state;
-	struct engine engine;
-
-	memset(&engine, 0, sizeof(engine));
-	state->userData		= &engine;
-	state->onAppCmd		= engine_handle_cmd;
-	state->onInputEvent = engine_handle_input;
-	engine.app			= state;
-
-	app = instantiateApp(graphics);
-
+static void runLoop(android_app *state) {
 	// loop waiting for stuff to do.
-	while (1) {
+	while (true) {
 		// Read all pending events.
-		int ident;
 		int events;
 		struct android_poll_source *source;
 
-		while ((ident = android_loop_all(engineReady ? 0 : -1, nullptr, &events, (void **) &source)) >= 0) {
+		while (android_loop_all(engine->ready() ? 0 : -1, nullptr, &events, (void **) &source) >= 0) {
 			// Process this event.
 			if (source != nullptr) {
 				source->process(state, source);
@@ -691,11 +451,28 @@ void android_main(struct android_app *state) {
 
 			// Check if we are exiting.
 			if (state->destroyRequested != 0) {
-				engine_term_display(&engine);
+				engine->termDisplay();
 				return;
 			}
 		}
 
-		engine_draw_frame(&engine);
+		engine_draw_frame();
 	}
+}
+/**
+ * This is the main entry point of a native application that is using
+ * android_native_app_glue.  It runs in its own thread, with its own
+ * event loop for receiving input events and doing other things.
+ */
+void android_main(android_app *state) {
+	state->onAppCmd		= engine_handle_cmd;
+	state->onInputEvent = engine_handle_input;
+	engine				= std::make_shared<RenderEngine>(state);
+
+	app = instantiateApp(graphics);
+
+	runLoop(state);
+	engine			= nullptr;
+	eventDispatcher = nullptr;
+	app				= nullptr;
 }
