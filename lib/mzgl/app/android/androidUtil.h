@@ -262,24 +262,24 @@ public:
 	}
 
 	jclass getClass() {
-        if (!success) {
-            return nullptr;
-        }
+		if (!success) {
+			return nullptr;
+		}
 
-        if (auto *appPtr = getAndroidAppPtr()) {
-            auto clazz = appPtr->activity->clazz;
-            if (clazz == nullptr) {
-                return nullptr;
-            }
+		if (auto *appPtr = getAndroidAppPtr()) {
+			auto clazz = appPtr->activity->clazz;
+			if (clazz == nullptr) {
+				return nullptr;
+			}
 
-            if (jni->IsSameObject(clazz, nullptr)) {
-                return nullptr;
-            }
+			if (jni->IsSameObject(clazz, nullptr)) {
+				return nullptr;
+			}
 
-            return (jclass) jni->GetObjectClass(clazz);
-        }
-        return nullptr;
-    }
+			return (jclass) jni->GetObjectClass(clazz);
+		}
+		return nullptr;
+	}
 
 private:
 	bool success  = false;
