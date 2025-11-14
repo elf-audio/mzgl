@@ -16,84 +16,92 @@ Graphics graphics;
 std::shared_ptr<EventDispatcher> eventDispatcher = nullptr;
 std::shared_ptr<App> app						 = nullptr;
 
+EGLConfig chooseConfig(EGLDisplay display) {
+	EGLConfig config = nullptr;
+
+	EGLint numConfigs;
+
+	/*
+     * Here specify the attributes of the desired configuration.
+     * Below, we select an EGLConfig with at least 8 bits per color
+     * component compatible with on-screen windows
+     */
+	const EGLint attribs[] = {EGL_SURFACE_TYPE,
+							  EGL_WINDOW_BIT,
+							  EGL_BLUE_SIZE,
+							  8,
+							  EGL_GREEN_SIZE,
+							  8,
+							  EGL_RED_SIZE,
+							  8,
+							  EGL_RENDERABLE_TYPE,
+							  EGL_OPENGL_ES2_BIT,
+							  //            EGL_NATIVE_RENDERABLE, EGL_TRUE,
+							  //            EGL_RENDERABLE_TYPE,
+							  // EGL_ALPHA_SIZE, 8,
+							  EGL_NONE};
+
+	/* Here, the application chooses the configuration it desires.
+         * find the best match if possible, otherwise use the very first one
+         */
+	eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
+	std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
+	eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
+
+	auto i = 0;
+
+	for (; i < numConfigs; i++) {
+		auto &cfg = supportedConfigs[i];
+		EGLint r, g, b, d;
+		if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
+			&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
+			&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
+			&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
+			config = supportedConfigs[i];
+			break;
+		}
+	}
+
+	Log::i() << "Found " << numConfigs << " configs, using config " << i;
+	if (i == numConfigs) {
+		Log::w() << "Didn't find a supported config, so going with first (default)";
+		config = supportedConfigs[0];
+	}
+	return config;
+}
+
 class RenderEngine {
 public:
-	struct android_app *app;
+	struct android_app *androidApp;
 
+	RenderEngine(android_app *_app)
+		: androidApp(_app) {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+		;
+		surface = nullptr;
+		context = nullptr;
+	}
+	bool hasFocus			  = false;
 	EGLDisplay display		  = nullptr;
 	EGLSurface surface		  = nullptr;
 	EGLContext context		  = nullptr;
-	EGLConfig config		  = nullptr;
 	bool clearedUpGLResources = false;
 
 	int32_t width  = 0;
 	int32_t height = 0;
 
-	void chooseConfig() {
-		EGLint numConfigs;
-
-		/*
-     * Here specify the attributes of the desired configuration.
-     * Below, we select an EGLConfig with at least 8 bits per color
-     * component compatible with on-screen windows
-     */
-		const EGLint attribs[] = {EGL_SURFACE_TYPE,
-								  EGL_WINDOW_BIT,
-								  EGL_BLUE_SIZE,
-								  8,
-								  EGL_GREEN_SIZE,
-								  8,
-								  EGL_RED_SIZE,
-								  8,
-								  EGL_RENDERABLE_TYPE,
-								  EGL_OPENGL_ES2_BIT,
-								  //            EGL_NATIVE_RENDERABLE, EGL_TRUE,
-								  //            EGL_RENDERABLE_TYPE,
-								  // EGL_ALPHA_SIZE, 8,
-								  EGL_NONE};
-
-		/* Here, the application chooses the configuration it desires.
-         * find the best match if possible, otherwise use the very first one
-         */
-		eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
-		std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-		eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
-
-		auto i = 0;
-
-		for (; i < numConfigs; i++) {
-			auto &cfg = supportedConfigs[i];
-			EGLint r, g, b, d;
-			if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
-				&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
-				&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
-				&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
-				config = supportedConfigs[i];
-				break;
-			}
-		}
-
-		Log::i() << "Found " << numConfigs << " configs, using config " << i;
-		if (i == numConfigs) {
-			Log::w() << "Didn't find a supported config, so going with first (default)";
-			config = supportedConfigs[0];
-		}
-	}
-
 	/**
 	 * Initialize an EGL context for the current display.
  	 */
 	int initDisplay() {
-		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
 		EGLint major;
 		EGLint minor;
 		eglInitialize(display, &major, &minor);
 		Log::e() << "EGL VERSION " << major << "." << minor;
 
-		chooseConfig();
+		auto config = chooseConfig(display);
 
-		createSurface();
+		surface = createSurface(config);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		/// now make the context
@@ -125,19 +133,6 @@ public:
 		return 0;
 	}
 
-	void createSurface() {
-		EGLint format;
-		/* EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is
-         * guaranteed to be accepted by ANativeWindow_setBuffersGeometry().
-         * As soon as we picked a EGLConfig, we can safely reconfigure the
-         * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
-		eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
-		surface = eglCreateWindowSurface(display, config, app->window, nullptr);
-
-		eglQuerySurface(display, surface, EGL_WIDTH, &width);
-		eglQuerySurface(display, surface, EGL_HEIGHT, &height);
-	}
-
 	bool prepareFrame() {
 		if (display == nullptr) {
 			return false;
@@ -147,7 +142,7 @@ public:
 		if (err != GL_NO_ERROR) {
 			LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
 			if (surface == nullptr) {
-				createSurface();
+				surface = createSurface(chooseConfig(display));
 			}
 		}
 
@@ -157,6 +152,59 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+	bool getSurfaceDims(EGLSurface surf, int &w, int &h) const {
+		return (eglQuerySurface(display, surf, EGL_WIDTH, &w) && eglQuerySurface(display, surf, EGL_HEIGHT, &h));
+	}
+
+	EGLSurface createSurface(EGLConfig config) {
+		EGLSurface surf;
+		surf = eglCreateWindowSurface(display, config, androidApp->window, nullptr);
+		getSurfaceDims(surf, width, height);
+
+		return surf;
+	}
+
+	void drawFrame() {
+		if (!prepareFrame()) {
+			return;
+		}
+
+		if (surface == nullptr || eglGetCurrentContext() == nullptr) {
+			return;
+		}
+
+		if (!firstFrameAlreadyRendered) {
+			graphics.width	= width;
+			graphics.height = height;
+
+			glViewport(0, 0, graphics.width, graphics.height);
+			eventDispatcher->androidDrawLoading();
+			eglSwapBuffers(display, surface);
+
+			eventDispatcher->setup();
+			firstFrameAlreadyRendered = true;
+		}
+
+		{
+			// ugh, super ugly, but this checks for orientation changes
+			int wBefore = width;
+			if (!getSurfaceDims(surface, width, height)) {
+				return;
+			}
+
+			if (wBefore != width) {
+				graphics.width	= width;
+				graphics.height = height;
+				glViewport(0, 0, graphics.width, graphics.height);
+				eventDispatcher->resized();
+			}
+		}
+
+		eventDispatcher->runFrame();
+
+		eglSwapBuffers(display, surface);
 	}
 
 	/**
@@ -175,73 +223,100 @@ public:
 			}
 			eglTerminate(display);
 		}
-
 		display = nullptr;
 		context = nullptr;
 		surface = nullptr;
 	}
-	[[nodiscard]] bool ready() const { return display != nullptr; }
-};
-std::shared_ptr<RenderEngine> engine = nullptr;
 
-bool firstFrameAlreadyRendered = false;
+	/**
+ * Process the next main command.
+ */
+	static void handleCmdStatic(struct android_app *appPtr, int32_t cmd) {
+		auto *_engine = static_cast<RenderEngine *>(appPtr->userData);
+		_engine->handleCmd(appPtr, cmd);
+	}
+	void handleCmd(struct android_app *appPtr, int32_t cmd) {
+		if (!eventDispatcher || !eventDispatcher->app) return;
+		switch (cmd) {
+			case APP_CMD_INIT_WINDOW:
+				Log::d() << "APP_CMD_INIT_WINDOW";
+				// The window is being shown, get it ready.
+				if (androidApp->window != nullptr) {
+					initDisplay();
+
+					initMZGL(app);
+					if (prepareFrame()) {
+						graphics.width	= width;
+						graphics.height = height;
+						eventDispatcher->androidDrawLoading();
+						eglSwapBuffers(display, surface);
+					}
+					if (clearedUpGLResources) {
+						eventDispatcher->resized();
+						eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
+						clearedUpGLResources = false;
+					}
+					hasFocus = true;
+					drawFrame();
+				}
+				break;
+
+			case APP_CMD_TERM_WINDOW:
+				// The window is being hidden or closed, clean it up.
+				Log::d() << "APP_CMD_TERM_WINDOW";
+				termDisplay();
+				hasFocus = false;
+				break;
+
+			case APP_CMD_GAINED_FOCUS:
+				Log::d() << "APP_CMD_GAINED_FOCUS";
+				hasFocus = true;
+				break;
+			case APP_CMD_LOST_FOCUS:
+				Log::d() << "APP_CMD_LOST_FOCUS";
+				hasFocus = false;
+				break;
+
+			case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
+
+			case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
+
+			case APP_CMD_STOP:
+				Log::d() << "APP_CMD_STOP";
+				eventDispatcher->didEnterBackground();
+				break;
+
+			case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
+
+			case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
+
+			case APP_CMD_RESUME:
+				Log::d() << "APP_CMD_RESUME";
+				eventDispatcher->androidOnResume();
+				break;
+
+			case APP_CMD_DESTROY:
+				LOGE("APP_CMD_DESTROY");
+				eventDispatcher->exit();
+				break;
+
+			case APP_CMD_LOW_MEMORY:
+				Log::d() << "APP_CMD_LOW_MEMORY";
+				eventDispatcher->memoryWarning();
+				break;
+
+			case APP_CMD_PAUSE:
+				Log::d() << "APP_CMD_PAUSE";
+				eventDispatcher->androidOnPause();
+				break;
+		}
+	}
+	[[nodiscard]] bool ready() const { return hasFocus; }
+	bool firstFrameAlreadyRendered = false;
+};
 
 std::shared_ptr<App> androidGetApp() {
 	return app;
-}
-
-/**
- * Just the current frame in the display.
- */
-static void engine_draw_frame() {
-	if (!engine->prepareFrame()) {
-		return;
-	}
-
-	if (engine->display == nullptr || engine->surface == nullptr || eglGetCurrentContext() == nullptr) {
-		return;
-	}
-
-	if (!firstFrameAlreadyRendered) {
-		graphics.width	= engine->width;
-		graphics.height = engine->height;
-		glViewport(0, 0, graphics.width, graphics.height);
-
-		// just draw *something* whilst loading... - doesn't seem to work
-		eventDispatcher->androidDrawLoading();
-		if (!eglSwapBuffers(engine->display, engine->surface)) {
-			firstFrameAlreadyRendered = false;
-			return;
-		}
-
-		eventDispatcher->setup();
-		firstFrameAlreadyRendered = true;
-	}
-
-	{
-		// ugh, super ugly, but this checks for orientation changes
-		int wBefore = engine->width;
-		if (!eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width)
-			|| !eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height)) {
-			return;
-		}
-
-		if (wBefore != engine->width) {
-			graphics.width	= engine->width;
-			graphics.height = engine->height;
-			glViewport(0, 0, graphics.width, graphics.height);
-			eventDispatcher->resized();
-		}
-	}
-
-	eventDispatcher->runFrame();
-
-	if (!eglSwapBuffers(engine->display, engine->surface)) {
-		EGLint error = eglGetError();
-		if (error == EGL_BAD_SURFACE || error == EGL_CONTEXT_LOST) {
-			firstFrameAlreadyRendered = false;
-		}
-	}
 }
 
 /**
@@ -338,131 +413,40 @@ static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *
 	return 0; // event not handled
 }
 
-/**
- * Process the next main command.
- */
-static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
-	if (!eventDispatcher || !eventDispatcher->app) return;
-	switch (cmd) {
-		case APP_CMD_INIT_WINDOW:
-			Log::d() << "APP_CMD_INIT_WINDOW";
-			// The window is being shown, get it ready.
-			if (engine->app->window != nullptr) {
-				engine->initDisplay();
-
-				initMZGL(app);
-				if (engine->prepareFrame()) {
-					graphics.width	= engine->width;
-					graphics.height = engine->height;
-					eventDispatcher->androidDrawLoading();
-					eglSwapBuffers(engine->display, engine->surface);
-				}
-				if (engine->clearedUpGLResources) {
-					eventDispatcher->resized();
-					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
-					engine->clearedUpGLResources = false;
-				}
-				engine_draw_frame();
-			}
-			break;
-
-		case APP_CMD_TERM_WINDOW:
-			// The window is being hidden or closed, clean it up.
-			Log::d() << "APP_CMD_TERM_WINDOW";
-			engine->termDisplay();
-			break;
-
-		case APP_CMD_LOST_FOCUS: Log::d() << "APP_CMD_LOST_FOCUS"; break;
-
-		case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
-
-		case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
-
-		case APP_CMD_STOP:
-			Log::d() << "APP_CMD_STOP";
-			eventDispatcher->didEnterBackground();
-			break;
-
-		case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
-
-		case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
-
-		case APP_CMD_RESUME:
-			Log::d() << "APP_CMD_RESUME";
-			eventDispatcher->androidOnResume();
-			break;
-
-		case APP_CMD_DESTROY:
-			LOGE("APP_CMD_DESTROY");
-			eventDispatcher->exit();
-			break;
-
-		case APP_CMD_LOW_MEMORY:
-			Log::d() << "APP_CMD_LOW_MEMORY";
-			eventDispatcher->memoryWarning();
-			break;
-
-		case APP_CMD_PAUSE:
-			Log::d() << "APP_CMD_PAUSE";
-			eventDispatcher->androidOnPause();
-			break;
-	}
-}
-
-android_app *getAndroidAppPtr() {
-	return engine->app;
-}
-
 EventDispatcher *getAndroidEventDispatcher() {
 	return eventDispatcher.get();
 }
 
-int android_loop_all(int timeoutMillis, int *outFd, int *outEvents, void **outData) {
-	int result;
-	do {
-		result = ALooper_pollOnce(timeoutMillis, outFd, outEvents, outData);
-	} while (result == ALOOPER_POLL_CALLBACK);
-	return result;
+std::shared_ptr<RenderEngine> engine = nullptr;
+
+android_app *getAndroidAppPtr() {
+	return engine->androidApp;
 }
 
-static void runLoop(android_app *state) {
+void android_main(android_app *state) {
+	engine = std::make_shared<RenderEngine>(state);
+
+	state->onAppCmd		= RenderEngine::handleCmdStatic;
+	state->onInputEvent = engine_handle_input;
+	state->userData		= engine.get();
+	app					= instantiateApp(graphics);
+	eventDispatcher		= make_shared<EventDispatcher>(app);
+
 	// loop waiting for stuff to do.
-	while (true) {
+	while (!state->destroyRequested) {
 		// Read all pending events.
 		int events;
 		struct android_poll_source *source;
 
-		while (android_loop_all(engine->ready() ? 0 : -1, nullptr, &events, (void **) &source) >= 0) {
-			// Process this event.
-			if (source != nullptr) {
-				source->process(state, source);
-			}
+		auto result = ALooper_pollOnce(engine->ready() ? 0 : -1, nullptr, &events, (void **) &source);
 
-			// Check if we are exiting.
-			if (state->destroyRequested != 0) {
-				engine->termDisplay();
-				return;
-			}
+		mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+
+		if (source != nullptr) source->process(state, source);
+
+		if (engine->ready()) {
+			engine->drawFrame();
 		}
-
-		engine_draw_frame();
 	}
-}
-/**
- * This is the main entry point of a native application that is using
- * android_native_app_glue.  It runs in its own thread, with its own
- * event loop for receiving input events and doing other things.
- */
-void android_main(android_app *state) {
-	state->onAppCmd		= engine_handle_cmd;
-	state->onInputEvent = engine_handle_input;
-	engine				= std::make_shared<RenderEngine>(state);
-
-	app				= instantiateApp(graphics);
-	eventDispatcher = make_shared<EventDispatcher>(app);
-
-	runLoop(state);
-	engine			= nullptr;
-	eventDispatcher = nullptr;
-	app				= nullptr;
+	engine->termDisplay();
 }
