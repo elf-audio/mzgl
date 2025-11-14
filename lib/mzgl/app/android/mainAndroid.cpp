@@ -94,6 +94,8 @@ public:
 	 * Initialize an EGL context for the current display.
  	 */
 	int initDisplay() {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
 		EGLint major;
 		EGLint minor;
 		eglInitialize(display, &major, &minor);
@@ -133,27 +135,6 @@ public:
 		return 0;
 	}
 
-	bool prepareFrame() {
-		if (display == nullptr) {
-			return false;
-		}
-
-		auto err = glGetError();
-		if (err != GL_NO_ERROR) {
-			LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
-			if (surface == nullptr) {
-				surface = createSurface(chooseConfig(display));
-			}
-		}
-
-		EGLint outInt;
-		auto result = eglQueryContext(display, context, EGL_CONFIG_ID, &outInt);
-		if (result != EGL_TRUE) {
-			return false;
-		}
-		return true;
-	}
-
 	bool getSurfaceDims(EGLSurface surf, int &w, int &h) const {
 		return (eglQuerySurface(display, surf, EGL_WIDTH, &w) && eglQuerySurface(display, surf, EGL_HEIGHT, &h));
 	}
@@ -162,15 +143,12 @@ public:
 		EGLSurface surf;
 		surf = eglCreateWindowSurface(display, config, androidApp->window, nullptr);
 		getSurfaceDims(surf, width, height);
-
+		graphics.width	= width;
+		graphics.height = height;
 		return surf;
 	}
 
 	void drawFrame() {
-		if (!prepareFrame()) {
-			return;
-		}
-
 		if (surface == nullptr || eglGetCurrentContext() == nullptr) {
 			return;
 		}
@@ -205,6 +183,11 @@ public:
 		eventDispatcher->runFrame();
 
 		eglSwapBuffers(display, surface);
+
+		auto err = glGetError();
+		if (err != GL_NO_ERROR) {
+			Log::e() << "GL error in engine_draw_frame(): " << err;
+		}
 	}
 
 	/**
@@ -228,9 +211,6 @@ public:
 		surface = nullptr;
 	}
 
-	/**
- * Process the next main command.
- */
 	static void handleCmdStatic(struct android_app *appPtr, int32_t cmd) {
 		auto *_engine = static_cast<RenderEngine *>(appPtr->userData);
 		_engine->handleCmd(appPtr, cmd);
@@ -241,24 +221,24 @@ public:
 			case APP_CMD_INIT_WINDOW:
 				Log::d() << "APP_CMD_INIT_WINDOW";
 				// The window is being shown, get it ready.
-				if (androidApp->window != nullptr) {
-					initDisplay();
-
-					initMZGL(app);
-					if (prepareFrame()) {
-						graphics.width	= width;
-						graphics.height = height;
-						eventDispatcher->androidDrawLoading();
-						eglSwapBuffers(display, surface);
-					}
-					if (clearedUpGLResources) {
-						eventDispatcher->resized();
-						eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
-						clearedUpGLResources = false;
-					}
-					hasFocus = true;
-					drawFrame();
+				if (androidApp->window == nullptr) {
+					Log::e() << "androidApp->window is null in APP_CMD_INIT_WINDOW";
+					return;
 				}
+				initDisplay();
+				initMZGL(app);
+
+				eventDispatcher->androidDrawLoading();
+				eglSwapBuffers(display, surface);
+
+				if (clearedUpGLResources) {
+					eventDispatcher->resized();
+					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
+					clearedUpGLResources = false;
+				}
+				hasFocus = true;
+				drawFrame();
+
 				break;
 
 			case APP_CMD_TERM_WINDOW:
@@ -432,9 +412,7 @@ void android_main(android_app *state) {
 	app					= instantiateApp(graphics);
 	eventDispatcher		= make_shared<EventDispatcher>(app);
 
-	// loop waiting for stuff to do.
 	while (!state->destroyRequested) {
-		// Read all pending events.
 		int events;
 		struct android_poll_source *source;
 
