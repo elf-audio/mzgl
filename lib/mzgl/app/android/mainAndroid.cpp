@@ -207,7 +207,6 @@ static void engine_draw_frame() {
 		graphics.height = engine->height;
 		glViewport(0, 0, graphics.width, graphics.height);
 
-		eventDispatcher = make_shared<EventDispatcher>(app);
 		// just draw *something* whilst loading... - doesn't seem to work
 		eventDispatcher->androidDrawLoading();
 		if (!eglSwapBuffers(engine->display, engine->surface)) {
@@ -240,7 +239,6 @@ static void engine_draw_frame() {
 	if (!eglSwapBuffers(engine->display, engine->surface)) {
 		EGLint error = eglGetError();
 		if (error == EGL_BAD_SURFACE || error == EGL_CONTEXT_LOST) {
-			eventDispatcher.reset();
 			firstFrameAlreadyRendered = false;
 		}
 	}
@@ -344,6 +342,7 @@ static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *
  * Process the next main command.
  */
 static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
+	if (!eventDispatcher || !eventDispatcher->app) return;
 	switch (cmd) {
 		case APP_CMD_INIT_WINDOW:
 			Log::d() << "APP_CMD_INIT_WINDOW";
@@ -352,13 +351,13 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 				engine->initDisplay();
 
 				initMZGL(app);
-				if (eventDispatcher != nullptr && engine->prepareFrame()) {
+				if (engine->prepareFrame()) {
 					graphics.width	= engine->width;
 					graphics.height = engine->height;
 					eventDispatcher->androidDrawLoading();
 					eglSwapBuffers(engine->display, engine->surface);
 				}
-				if (engine->clearedUpGLResources && eventDispatcher != nullptr) {
+				if (engine->clearedUpGLResources) {
 					eventDispatcher->resized();
 					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
 					engine->clearedUpGLResources = false;
@@ -381,9 +380,7 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 
 		case APP_CMD_STOP:
 			Log::d() << "APP_CMD_STOP";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->didEnterBackground();
-			}
+			eventDispatcher->didEnterBackground();
 			break;
 
 		case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
@@ -392,30 +389,22 @@ static void engine_handle_cmd(struct android_app *appPtr, int32_t cmd) {
 
 		case APP_CMD_RESUME:
 			Log::d() << "APP_CMD_RESUME";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->androidOnResume();
-			}
+			eventDispatcher->androidOnResume();
 			break;
 
 		case APP_CMD_DESTROY:
 			LOGE("APP_CMD_DESTROY");
-			if (eventDispatcher != nullptr) {
-				eventDispatcher->exit();
-			}
+			eventDispatcher->exit();
 			break;
 
 		case APP_CMD_LOW_MEMORY:
 			Log::d() << "APP_CMD_LOW_MEMORY";
-			if (eventDispatcher != nullptr) {
-				eventDispatcher->memoryWarning();
-			}
+			eventDispatcher->memoryWarning();
 			break;
 
 		case APP_CMD_PAUSE:
 			Log::d() << "APP_CMD_PAUSE";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->androidOnPause();
-			}
+			eventDispatcher->androidOnPause();
 			break;
 	}
 }
@@ -469,7 +458,8 @@ void android_main(android_app *state) {
 	state->onInputEvent = engine_handle_input;
 	engine				= std::make_shared<RenderEngine>(state);
 
-	app = instantiateApp(graphics);
+	app				= instantiateApp(graphics);
+	eventDispatcher = make_shared<EventDispatcher>(app);
 
 	runLoop(state);
 	engine			= nullptr;
