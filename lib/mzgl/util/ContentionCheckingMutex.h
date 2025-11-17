@@ -11,22 +11,56 @@ enum class StackTraceMode { Error, Info };
 
 #ifdef __clang__
 #	include <execinfo.h>
+#	include <cxxabi.h>
+
+inline std::string demangleSymbol(const char *symbol) {
+	const char *mangled_start = nullptr;
+	const char *mangled_end	  = nullptr;
+
+	for (const char *p = symbol; *p; ++p) {
+		if (*p == '(') {
+			mangled_start = p + 1;
+		} else if (*p == '+') {
+			mangled_end = p;
+			break;
+		}
+	}
+
+	if (!mangled_start || !mangled_end || mangled_start == mangled_end) {
+		return symbol;
+	}
+
+	std::string mangled(mangled_start, mangled_end);
+
+	int status			  = 0;
+	size_t demangled_size = 0;
+
+	char *demangled = abi::__cxa_demangle(mangled.c_str(), nullptr, &demangled_size, &status);
+
+	if (status == 0 && demangled != nullptr) {
+		std::string out(demangled);
+		free(demangled);
+		return out;
+	}
+
+	return symbol;
+}
 inline void printInfoStack(char **symbols, int frames) {
 	Log::i() << "Call stack:";
 	for (int i = 4; i < frames; i++) {
-		Log::i() << "  " << symbols[i];
+		Log::i() << "  " << demangleSymbol(symbols[i]);
 	}
 }
 
 inline void printErrorStack(char **symbols, int frames) {
 	Log::e() << "Call stack:";
 	for (int i = 4; i < frames; i++) {
-		Log::e() << "  " << symbols[i];
+		Log::e() << "  " << demangleSymbol(symbols[i]);
 	}
 }
 
 inline void printStack(StackTraceMode mode) {
-	static constexpr auto numFrames = 20;
+	static constexpr auto numFrames = 100;
 	void *callstack[numFrames];
 	int frames	   = backtrace(callstack, numFrames);
 	char **symbols = backtrace_symbols(callstack, frames);
