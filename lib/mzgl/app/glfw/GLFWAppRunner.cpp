@@ -38,8 +38,6 @@ void quitApplication() {
 }
 #endif
 
-using namespace std;
-
 DesktopWindowEventHandler windowEventHandler;
 bool framebuferResized = false;
 

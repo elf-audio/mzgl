@@ -14,8 +14,6 @@
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"
 
-using namespace std;
-
 @implementation EventsView {
 	NSInteger acceptedDraggingSequenceNo;
 	bool dropped;
@@ -58,7 +56,7 @@ using namespace std;
 }
 
 int nsEventToKey(NSEvent *evt) {
-	string s = [[evt characters] UTF8String];
+	std::string s = [[evt characters] UTF8String];
 	if (s.size() == 1) {
 		return s[0];
 	}
@@ -263,7 +261,7 @@ int nsEventToKey(NSEvent *evt) {
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
-	vector<string> paths;
+	std::vector<std::string> paths;
 	for (NSString *url in filenames) {
 		paths.push_back([url UTF8String]);
 	}
@@ -318,7 +316,7 @@ int nsEventToKey(NSEvent *evt) {
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
 	NSPasteboard *pboard = [sender draggingPasteboard];
 	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
-	vector<ScopedUrlRef> paths;
+	std::vector<ScopedUrlRef> paths;
 	for (NSString *url in filenames) {
 		paths.push_back(ScopedUrl::create([url UTF8String]));
 	}
