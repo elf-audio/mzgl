@@ -7,9 +7,13 @@
 #include <optional>
 #include <chrono>
 
+#include "mzgl_platform.h"
+#include "log.h"
+#include "mzAssert.h"
+
 enum class StackTraceMode { Error, Info };
 
-#ifdef __clang__
+#ifdef MZGL_MAC
 #	include <execinfo.h>
 #	include <cxxabi.h>
 
@@ -77,9 +81,6 @@ inline void printStack(StackTraceMode mode) {
 inline void printStack(StackTraceMode) {
 }
 #endif
-
-#include "log.h"
-#include "mzAssert.h"
 
 #ifdef _MSC_VER
 #	define FUNCTION_NAME __FUNCSIG__
