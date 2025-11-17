@@ -242,6 +242,7 @@ const vec4 &Graphics::getColor() const {
 void Graphics::drawPlus(vec2 c, int diameter, int thickness) {
 	Drawer d;
 	Rectf r;
+	d.setColor(color);
 	r.setFromCentre(c, diameter, thickness);
 	d.drawRect(r);
 	r.setFromCentre(c, thickness, diameter);
@@ -605,11 +606,11 @@ void Graphics::clearUpResources() {
 	for (auto *font: Font::fonts) {
 		font->clear();
 	}
-	
+
 	for (auto *shader: Shader::shaders) {
 		((OpenGLShader *) shader)->shaderProgram = 0;
 	}
-	
+
 	dynamic_cast<OpenGLAPI *>(api.get())->cleanUp();
 	currShader = nullptr;
 #endif
