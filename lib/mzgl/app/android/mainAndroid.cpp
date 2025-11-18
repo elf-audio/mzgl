@@ -87,49 +87,34 @@ public:
 	int32_t width  = 0;
 	int32_t height = 0;
 
-	/**
-	 * Initialize an EGL context for the current display.
- 	 */
-	int initDisplay() {
-		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-		EGLint major;
-		EGLint minor;
-		eglInitialize(display, &major, &minor);
-		Log::e() << "EGL VERSION " << major << "." << minor;
-
-		auto config = chooseConfig(display);
-
-		surface = createSurface(config);
-
-		////////////////////////////////////////////////////////////////////////////////////////////////
-		/// now make the context
-
-		EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-
-		context = eglCreateContext(display, config, nullptr, contextAttribs);
-
+	void printContextVersion() const {
 		EGLint contextVersion;
 		if (eglQueryContext(display, context, EGL_CONTEXT_CLIENT_VERSION, &contextVersion)) {
 			Log::i() << "context version " << contextVersion;
 		} else {
 			Log::e() << "Couldn't query context version";
 		}
+	}
+	
+	void initWindow() {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-		Log::i() << "About to set eglMakeCurrent";
+		EGLint major, minor;
+		eglInitialize(display, &major, &minor);
+		Log::d() << "EGL VERSION " << major << "." << minor;
+
+		auto config = chooseConfig(display);
+
+		surface = createSurface(config);
+
+		EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+		context					= eglCreateContext(display, config, nullptr, contextAttribs);
+
+		printContextVersion();
+
 		if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
 			Log::w() << "Unable to eglMakeCurrent";
-			return -1;
 		}
-
-		const GLubyte *glVersion = glGetString(GL_VERSION);
-		if (glVersion != nullptr) {
-			Log::d() << "GL VERSION: " << glVersion;
-		} else {
-			Log::d() << "GL VERSION WAS NULL";
-		}
-
-		return 0;
 	}
 
 	bool getSurfaceDims(EGLSurface surf, int &w, int &h) const {
@@ -222,7 +207,7 @@ public:
 					Log::e() << "androidApp->window is null in APP_CMD_INIT_WINDOW";
 					return;
 				}
-				initDisplay();
+				initWindow();
 				initMZGL(app);
 
 				eventDispatcher->androidDrawLoading();
