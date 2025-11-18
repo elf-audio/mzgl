@@ -95,7 +95,7 @@ public:
 			Log::e() << "Couldn't query context version";
 		}
 	}
-	
+
 	void initWindow() {
 		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
@@ -147,19 +147,17 @@ public:
 			firstFrameAlreadyRendered = true;
 		}
 
-		{
-			// ugh, super ugly, but this checks for orientation changes
-			int wBefore = width;
-			if (!getSurfaceDims(surface, width, height)) {
-				return;
-			}
+		// ugh, super ugly, but this checks for orientation changes
+		int wBefore = width;
+		if (!getSurfaceDims(surface, width, height)) {
+			return;
+		}
 
-			if (wBefore != width) {
-				graphics.width	= width;
-				graphics.height = height;
-				glViewport(0, 0, graphics.width, graphics.height);
-				eventDispatcher->resized();
-			}
+		if (wBefore != width) {
+			graphics.width	= width;
+			graphics.height = height;
+			glViewport(0, 0, graphics.width, graphics.height);
+			eventDispatcher->resized();
 		}
 
 		eventDispatcher->runFrame();
@@ -172,10 +170,7 @@ public:
 		}
 	}
 
-	/**
-     * Tear down the EGL context currently associated with the display.
-     */
-	void termDisplay() {
+	void terminateDisplay() {
 		graphics.clearUpResources();
 		clearedUpGLResources = true;
 		if (display != nullptr) {
@@ -226,7 +221,7 @@ public:
 			case APP_CMD_TERM_WINDOW:
 				// The window is being hidden or closed, clean it up.
 				Log::d() << "APP_CMD_TERM_WINDOW";
-				termDisplay();
+				terminateDisplay();
 				hasFocus = false;
 				break;
 
@@ -239,20 +234,10 @@ public:
 				hasFocus = false;
 				break;
 
-			case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
-			case APP_CMD_CONTENT_RECT_CHANGED: Log::d() << "APP_CMD_CONTENT_RECT_CHANGED"; break;
-			case APP_CMD_WINDOW_REDRAW_NEEDED: Log::d() << "APP_CMD_WINDOW_REDRAW_NEEDED"; break;
-			case APP_CMD_INPUT_CHANGED: Log::d() << "APP_CMD_INPUT_CHANGED"; break;
-			case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
-
 			case APP_CMD_STOP:
 				Log::d() << "APP_CMD_STOP";
 				eventDispatcher->didEnterBackground();
 				break;
-
-			case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
-
-			case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
 
 			case APP_CMD_RESUME:
 				Log::d() << "APP_CMD_RESUME";
@@ -273,6 +258,13 @@ public:
 				Log::d() << "APP_CMD_PAUSE";
 				eventDispatcher->androidOnPause();
 				break;
+			case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
+			case APP_CMD_CONTENT_RECT_CHANGED: Log::d() << "APP_CMD_CONTENT_RECT_CHANGED"; break;
+			case APP_CMD_WINDOW_REDRAW_NEEDED: Log::d() << "APP_CMD_WINDOW_REDRAW_NEEDED"; break;
+			case APP_CMD_INPUT_CHANGED: Log::d() << "APP_CMD_INPUT_CHANGED"; break;
+			case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
+			case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
+			case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
 		}
 	}
 	[[nodiscard]] bool ready() const { return hasFocus; }
@@ -411,5 +403,5 @@ void android_main(android_app *state) {
 			engine->drawFrame();
 		}
 	}
-	engine->termDisplay();
+	engine->terminateDisplay();
 }
