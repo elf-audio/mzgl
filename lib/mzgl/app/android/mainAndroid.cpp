@@ -406,11 +406,12 @@ android_app *getAndroidAppPtr() {
 void android_main(android_app *state) {
 	engine = std::make_shared<RenderEngine>(state);
 
+	app					= instantiateApp(graphics);
+	eventDispatcher		= make_shared<EventDispatcher>(app);
+
 	state->onAppCmd		= RenderEngine::handleCmdStatic;
 	state->onInputEvent = engine_handle_input;
 	state->userData		= engine.get();
-	app					= instantiateApp(graphics);
-	eventDispatcher		= make_shared<EventDispatcher>(app);
 
 	while (!state->destroyRequested) {
 		int events;
