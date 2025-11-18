@@ -72,14 +72,11 @@ EGLConfig chooseConfig(EGLDisplay display) {
 
 class RenderEngine {
 public:
-	struct android_app *androidApp;
+	android_app *androidApp;
 
-	RenderEngine(android_app *_app)
+	explicit RenderEngine(android_app *_app)
 		: androidApp(_app) {
 		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-		;
-		surface = nullptr;
-		context = nullptr;
 	}
 	bool hasFocus			  = false;
 	EGLDisplay display		  = nullptr;
@@ -211,11 +208,11 @@ public:
 		surface = nullptr;
 	}
 
-	static void handleCmdStatic(struct android_app *appPtr, int32_t cmd) {
+	static void handleCmdStatic(android_app *appPtr, int32_t cmd) {
 		auto *_engine = static_cast<RenderEngine *>(appPtr->userData);
-		_engine->handleCmd(appPtr, cmd);
+		_engine->handleCmd(cmd);
 	}
-	void handleCmd(struct android_app *appPtr, int32_t cmd) {
+	void handleCmd(int32_t cmd) {
 		if (!eventDispatcher || !eventDispatcher->app) return;
 		switch (cmd) {
 			case APP_CMD_INIT_WINDOW:
@@ -258,7 +255,9 @@ public:
 				break;
 
 			case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
-
+			case APP_CMD_CONTENT_RECT_CHANGED: Log::d() << "APP_CMD_CONTENT_RECT_CHANGED"; break;
+			case APP_CMD_WINDOW_REDRAW_NEEDED: Log::d() << "APP_CMD_WINDOW_REDRAW_NEEDED"; break;
+			case APP_CMD_INPUT_CHANGED: Log::d() << "APP_CMD_INPUT_CHANGED"; break;
 			case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
 
 			case APP_CMD_STOP:
@@ -404,21 +403,22 @@ android_app *getAndroidAppPtr() {
 }
 
 void android_main(android_app *state) {
-	engine = std::make_shared<RenderEngine>(state);
-
+	engine				= std::make_shared<RenderEngine>(state);
+	state->userData		= engine.get();
 	state->onAppCmd		= RenderEngine::handleCmdStatic;
 	state->onInputEvent = engine_handle_input;
-	state->userData		= engine.get();
 	app					= instantiateApp(graphics);
 	eventDispatcher		= make_shared<EventDispatcher>(app);
 
 	while (!state->destroyRequested) {
-		int events;
-		struct android_poll_source *source;
+		android_poll_source *source = nullptr;
 
-		auto result = ALooper_pollOnce(engine->ready() ? 0 : -1, nullptr, &events, (void **) &source);
+		auto result = ALooper_pollOnce(engine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
 
-		mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+		if (result == ALOOPER_POLL_ERROR) {
+			Log::e() << "ALooper_pollOnce returned an error";
+			mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+		}
 
 		if (source != nullptr) source->process(state, source);
 
