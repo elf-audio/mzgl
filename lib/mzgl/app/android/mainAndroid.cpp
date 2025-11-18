@@ -395,6 +395,7 @@ void android_main(android_app *state) {
 		if (result == ALOOPER_POLL_ERROR) {
 			Log::e() << "ALooper_pollOnce returned an error";
 			mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+			continue;
 		}
 
 		if (source != nullptr) source->process(state, source);
