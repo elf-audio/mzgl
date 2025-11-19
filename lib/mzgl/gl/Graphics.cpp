@@ -613,5 +613,6 @@ void Graphics::clearUpResources() {
 
 	dynamic_cast<OpenGLAPI *>(api.get())->cleanUp();
 	currShader = nullptr;
+	Log::d() << "done cleaning up GL resources";
 #endif
 }

@@ -171,8 +171,11 @@ public:
 	}
 
 	void terminateDisplay() {
-		graphics.clearUpResources();
-		clearedUpGLResources = true;
+		Log::d() << "RenderEngine::terminateDisplay()";
+		if (!clearedUpGLResources) {
+			graphics.clearUpResources();
+			clearedUpGLResources = true;
+		}
 		if (display != nullptr) {
 			eglMakeCurrent(display, nullptr, nullptr, nullptr);
 			if (context != nullptr) {
