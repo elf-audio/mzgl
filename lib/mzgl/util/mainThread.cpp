@@ -309,5 +309,5 @@ void MainThreadRunner::testAndSetMainThreadId() {
 		setMainThreadId();
 	}
 #endif
-	mzAssert(isMainThread(), "First poll must be called on the real main thread");
+	mzAssert(isMainThread(), "Must be called on the real main thread");
 }
