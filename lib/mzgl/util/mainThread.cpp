@@ -3,6 +3,7 @@
 #include "mzAssert.h"
 #include "concurrentqueue.h"
 #include "util.h"
+#include "mzgl_platform.h"
 
 class MainThreadRunner::LambdaQueue : public moodycamel::ConcurrentQueue<std::function<void()>> {};
 
@@ -290,9 +291,23 @@ void MainThreadRunner::pollMainThreadQueue() {
 }
 
 void MainThreadRunner::testAndSetMainThreadId() {
+#if MZGL_MAC
+	/**
+	 * Note: 24/11/2025
+	 * In open GL we are guaranteed that the callbacks come from a single "main" thread
+	 * However, when using Metal, the callbacks can come from any thread, and the OS can
+	 * move this around. On Intel mac specifically, with an integrated dual graphics card
+	 * the thread id will be different after the first call.
+	 * Setting this every call to poll internal is required to make sure that all
+	 * future tests work in the way we expect
+	 * Other platforms appear unaffected
+	 */
+	setMainThreadId();
+#else
 	bool expected = false;
 	if (hasSetMainThreadId.compare_exchange_strong(expected, true)) {
 		setMainThreadId();
-		mzAssert(isMainThread(), "First poll must be called on the real main thread");
 	}
+#endif
+	mzAssert(isMainThread(), "Must be called on the real main thread");
 }
