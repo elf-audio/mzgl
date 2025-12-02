@@ -68,7 +68,7 @@ public:
 	void clear();
 
 private:
-	UndoableRef undoGroup = nullptr;
+	UndoableRef undoGroup	 = nullptr;
 	UndoableRef gestureGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;
@@ -82,18 +82,27 @@ public:
 	T &ref;
 	T newVal;
 	T oldVal;
-	AssignmentUndoable(T &oldVal, T newVal)
-		: ref(oldVal)
-		, oldVal(oldVal)
-		, newVal(newVal) {}
+	std::function<void()> onChange = nullptr;
+	AssignmentUndoable(T &_oldVal, T _newVal, std::function<void()> _onChange = nullptr)
+		: ref(_oldVal)
+		, oldVal(_oldVal)
+		, newVal(_newVal)
+		, onChange(_onChange) {}
 
-	void redo() override { ref = newVal; }
-	void undo() override { ref = oldVal; }
+	void redo() override {
+		ref = newVal;
+		if (onChange) onChange();
+	}
+	void undo() override {
+		ref = oldVal;
+		if (onChange) onChange();
+	}
 };
 
 template <typename T>
-std::shared_ptr<AssignmentUndoable<T>> undoableAssignment(T &oldVal, T newVal) {
-	return std::make_shared<AssignmentUndoable<T>>(oldVal, newVal);
+std::shared_ptr<AssignmentUndoable<T>>
+	undoableAssignment(T &oldVal, T newVal, std::function<void()> onChange = nullptr) {
+	return std::make_shared<AssignmentUndoable<T>>(oldVal, newVal, onChange);
 }
 
 /*
