@@ -23,6 +23,18 @@ void setLayerSize(std::vector<Layer *> layers, vec2 sz) {
 	}
 }
 
+void arrangeHorizontally(std::vector<Layer *> layers, float padding) {
+	for (size_t i = 1; i < layers.size(); i++) {
+		layers[i]->x = layers[i - 1]->right() + padding;
+	}
+}
+
+void arrangeVertically(std::vector<Layer *> layers, float padding) {
+	for (size_t i = 1; i < layers.size(); i++) {
+		layers[i]->y = layers[i - 1]->bottom() + padding;
+	}
+}
+
 Layer::Layer(Graphics &g, const std::string &name)
 	: g(g)
 	, name(name) {
