@@ -133,6 +133,7 @@ public:
 
 	[[nodiscard]] operator T() const { return variable.load(); }
 
+	[[nodiscard]] T get() const { return variable.load(); }
 	auto getNumListeners() { return listeners.size(); }
 	void addListener(Listener *listener) { listeners.push_back(listener); }
 	void removeListener(Listener *listener) {
