@@ -4,42 +4,21 @@
 #include "EventDispatcher.h"
 #include <android_native_app_glue.h>
 #include <util/log.h>
-
+#include "Graphics.h"
 #include "androidUtil.h"
 #include "Shader.h"
 #include "Texture.h"
 
-using namespace std;
+#include "androidKeyCodes.h"
 
-bool engineReady = false;
-
-/**
- * Shared state for our app.
- */
-struct AppEngine {
-	android_app *app = nullptr;
-
-	EGLDisplay display = nullptr;
-	EGLSurface surface = nullptr;
-	EGLContext context = nullptr;
-	EGLConfig config;
-	int32_t width  = 0;
-	int32_t height = 0;
-};
-
-#include "Graphics.h"
-
-bool firstFrameAlreadyRendered = false;
 Graphics graphics;
 
-shared_ptr<EventDispatcher> eventDispatcher = nullptr;
-shared_ptr<App> app							= nullptr;
+std::shared_ptr<EventDispatcher> eventDispatcher = nullptr;
+std::shared_ptr<App> app						 = nullptr;
 
-shared_ptr<App> androidGetApp() {
-	return app;
-}
+EGLConfig chooseConfig(EGLDisplay display) {
+	EGLConfig config = nullptr;
 
-void chooseConfig(AppEngine *engine) {
 	EGLint numConfigs;
 
 	/*
@@ -63,194 +42,247 @@ void chooseConfig(AppEngine *engine) {
 							  EGL_NONE};
 
 	/* Here, the application chooses the configuration it desires.
-     * find the best match if possible, otherwise use the very first one
-     */
-	eglChooseConfig(engine->display, attribs, nullptr, 0, &numConfigs);
+         * find the best match if possible, otherwise use the very first one
+         */
+	eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
 	std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-	assert(supportedConfigs);
-	eglChooseConfig(engine->display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
-	assert(numConfigs);
+	eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
 
 	auto i = 0;
 
 	for (; i < numConfigs; i++) {
 		auto &cfg = supportedConfigs[i];
-		EGLint r, g, b, /*a, */ d;
-		if (eglGetConfigAttrib(engine->display, cfg, EGL_RED_SIZE, &r)
-			&& eglGetConfigAttrib(engine->display, cfg, EGL_GREEN_SIZE, &g)
-			&& eglGetConfigAttrib(engine->display, cfg, EGL_BLUE_SIZE, &b) &&
-			//eglGetConfigAttrib(display, cfg, EGL_ALPHA_SIZE, &a)  &&
-			eglGetConfigAttrib(engine->display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8
-			&& b == 8 /*&& a == 8*/ && d == 0) {
-			engine->config = supportedConfigs[i];
+		EGLint r, g, b, d;
+		if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
+			&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
+			&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
+			&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
+			config = supportedConfigs[i];
 			break;
 		}
 	}
 
-	LOGI("Found %d configs, using config %d", numConfigs, i);
+	Log::i() << "Found " << numConfigs << " configs, using config " << i;
 	if (i == numConfigs) {
-		LOGI("Didn't find a supported config, so going with first (default)");
-		engine->config = supportedConfigs[0];
+		Log::w() << "Didn't find a supported config, so going with first (default)";
+		config = supportedConfigs[0];
 	}
+	return config;
 }
 
-// must have created a config and display before this
-void createSurface(AppEngine *engine) {
-	EGLint format;
-	/* EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is
-     * guaranteed to be accepted by ANativeWindow_setBuffersGeometry().
-     * As soon as we picked a EGLConfig, we can safely reconfigure the
-     * ANativeWindow buffers to match, using EGL_NATIVE_VISUAL_ID. */
-	eglGetConfigAttrib(engine->display, engine->config, EGL_NATIVE_VISUAL_ID, &format);
-	engine->surface = eglCreateWindowSurface(engine->display, engine->config, engine->app->window, nullptr);
+class RenderEngine {
+public:
+	android_app *androidApp;
 
-	eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width);
-	eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height);
-}
-
-/**
- * Initialize an EGL context for the current display.
- */
-static int engine_init_display(AppEngine *engine) {
-	engine->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-	EGLint major;
-	EGLint minor;
-	eglInitialize(engine->display, &major, &minor);
-	LOGE("EGL VERSION %d.%d", major, minor);
-
-	chooseConfig(engine);
-
-	createSurface(engine);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	/// now make the context
-
-	EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-
-	engine->context = eglCreateContext(engine->display, engine->config, nullptr, contextAttribs);
-
-	EGLint contextVersion;
-	if (eglQueryContext(engine->display, engine->context, EGL_CONTEXT_CLIENT_VERSION, &contextVersion)) {
-		LOGE("context version %d", contextVersion);
-	} else {
-		LOGE("Couldn't query context version");
+	explicit RenderEngine(android_app *_app)
+		: androidApp(_app) {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 	}
+	bool hasFocus			  = false;
+	EGLDisplay display		  = nullptr;
+	EGLSurface surface		  = nullptr;
+	EGLContext context		  = nullptr;
+	bool clearedUpGLResources = false;
 
-	LOGI("About to set eglMakeCurrent");
-	if (eglMakeCurrent(engine->display, engine->surface, engine->surface, engine->context) == EGL_FALSE) {
-		LOGW("Unable to eglMakeCurrent");
-		return -1;
-	}
+	int32_t width  = 0;
+	int32_t height = 0;
 
-	const GLubyte *glVersion = glGetString(GL_VERSION);
-	if (glVersion != nullptr) {
-		LOGE("GL VERSION: %s", glVersion);
-	} else {
-		LOGE("GL VERSION WAS NULL");
-	}
-
-	return 0;
-}
-
-static void engine_term_display(AppEngine *engine);
-
-static bool prepareFrame(AppEngine *engine) {
-	if (engine->display == nullptr) {
-		// No display.
-		return false;
-	}
-
-	auto err = glGetError();
-	if (err != GL_NO_ERROR) {
-		LOGE("GL error in engine_draw_frame(): 0x%08x\n", err);
-		if (engine->surface == nullptr) {
-			createSurface(engine);
+	void printContextVersion() const {
+		EGLint contextVersion;
+		if (eglQueryContext(display, context, EGL_CONTEXT_CLIENT_VERSION, &contextVersion)) {
+			Log::i() << "context version " << contextVersion;
+		} else {
+			Log::e() << "Couldn't query context version";
 		}
 	}
 
-	EGLint outInt;
-	auto result = eglQueryContext(engine->display, engine->context, EGL_CONFIG_ID, &outInt);
-	if (result != EGL_TRUE) {
-		Log::e() << "Got false";
-		return false;
-	}
-	return true;
-}
+	void initWindow() {
+		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-/**
- * Just the current frame in the display.
- */
-static void engine_draw_frame(AppEngine *engine) {
-	if (!prepareFrame(engine)) {
-		return;
-	}
+		EGLint major, minor;
+		eglInitialize(display, &major, &minor);
+		Log::d() << "EGL VERSION " << major << "." << minor;
 
-	if (!firstFrameAlreadyRendered) {
-		graphics.width	= engine->width;
-		graphics.height = engine->height;
-		glViewport(0, 0, graphics.width, graphics.height);
+		auto config = chooseConfig(display);
 
-		eventDispatcher = make_shared<EventDispatcher>(app);
-		// just draw *something* whilst loading... - doesn't seem to work
-		eventDispatcher->androidDrawLoading();
-		eglSwapBuffers(engine->display, engine->surface);
+		surface = createSurface(config);
 
-		eventDispatcher->setup();
-		firstFrameAlreadyRendered = true;
+		EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+		context					= eglCreateContext(display, config, nullptr, contextAttribs);
+
+		printContextVersion();
+
+		if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
+			Log::w() << "Unable to eglMakeCurrent";
+		}
 	}
 
-	{
+	bool getSurfaceDims(EGLSurface surf, int &w, int &h) const {
+		return (eglQuerySurface(display, surf, EGL_WIDTH, &w) && eglQuerySurface(display, surf, EGL_HEIGHT, &h));
+	}
+
+	EGLSurface createSurface(EGLConfig config) {
+		EGLSurface surf;
+		surf = eglCreateWindowSurface(display, config, androidApp->window, nullptr);
+		getSurfaceDims(surf, width, height);
+		graphics.width	= width;
+		graphics.height = height;
+		return surf;
+	}
+
+	void drawFrame() {
+		if (surface == nullptr || eglGetCurrentContext() == nullptr) {
+			return;
+		}
+
+		if (!firstFrameAlreadyRendered) {
+			graphics.width	= width;
+			graphics.height = height;
+
+			glViewport(0, 0, graphics.width, graphics.height);
+			eventDispatcher->androidDrawLoading();
+			eglSwapBuffers(display, surface);
+
+			eventDispatcher->setup();
+			firstFrameAlreadyRendered = true;
+		}
+
 		// ugh, super ugly, but this checks for orientation changes
-		int wBefore = engine->width;
-		eglQuerySurface(engine->display, engine->surface, EGL_WIDTH, &engine->width);
-		eglQuerySurface(engine->display, engine->surface, EGL_HEIGHT, &engine->height);
+		int wBefore = width;
+		if (!getSurfaceDims(surface, width, height)) {
+			return;
+		}
 
-		if (wBefore != engine->width) {
-			graphics.width	= engine->width;
-			graphics.height = engine->height;
+		if (wBefore != width) {
+			graphics.width	= width;
+			graphics.height = height;
 			glViewport(0, 0, graphics.width, graphics.height);
 			eventDispatcher->resized();
 		}
-	}
 
-	if (eventDispatcher != nullptr) {
 		eventDispatcher->runFrame();
-	} else {
-		firstFrameAlreadyRendered = false;
+
+		eglSwapBuffers(display, surface);
+
+		auto err = glGetError();
+		if (err != GL_NO_ERROR) {
+			Log::e() << "GL error in engine_draw_frame(): " << err;
+		}
 	}
 
-	eglSwapBuffers(engine->display, engine->surface);
-}
-
-/**
- * Tear down the EGL context currently associated with the display.
- */
-static void engine_term_display(AppEngine *engine) {
-	if (engine->display != EGL_NO_DISPLAY) {
-		eglMakeCurrent(engine->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-		if (engine->context != EGL_NO_CONTEXT) {
-			eglDestroyContext(engine->display, engine->context);
+	void terminateDisplay() {
+		Log::d() << "RenderEngine::terminateDisplay()";
+		if (!clearedUpGLResources) {
+			graphics.clearUpResources();
+			clearedUpGLResources = true;
 		}
-		if (engine->surface != EGL_NO_SURFACE) {
-			eglDestroySurface(engine->display, engine->surface);
+		if (display != nullptr) {
+			eglMakeCurrent(display, nullptr, nullptr, nullptr);
+			if (context != nullptr) {
+				eglDestroyContext(display, context);
+			}
+			if (surface != nullptr) {
+				eglDestroySurface(display, surface);
+			}
+			eglTerminate(display);
 		}
-		eglTerminate(engine->display);
+		display = nullptr;
+		context = nullptr;
+		surface = nullptr;
 	}
 
-	engine->display = EGL_NO_DISPLAY;
-	engine->context = EGL_NO_CONTEXT;
-	engine->surface = EGL_NO_SURFACE;
-}
+	static void handleCmdStatic(android_app *appPtr, int32_t cmd) {
+		auto *_engine = static_cast<RenderEngine *>(appPtr->userData);
+		_engine->handleCmd(cmd);
+	}
+	void handleCmd(int32_t cmd) {
+		if (!eventDispatcher || !eventDispatcher->app) return;
+		switch (cmd) {
+			case APP_CMD_INIT_WINDOW:
+				Log::d() << "APP_CMD_INIT_WINDOW";
+				// The window is being shown, get it ready.
+				if (androidApp->window == nullptr) {
+					Log::e() << "androidApp->window is null in APP_CMD_INIT_WINDOW";
+					return;
+				}
+				initWindow();
+				initMZGL(app);
 
-#include "androidKeyCodes.h"
+				eventDispatcher->androidDrawLoading();
+				eglSwapBuffers(display, surface);
+
+				if (clearedUpGLResources) {
+					eventDispatcher->resized();
+					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
+					clearedUpGLResources = false;
+				}
+				hasFocus = true;
+				drawFrame();
+
+				break;
+
+			case APP_CMD_TERM_WINDOW:
+				// The window is being hidden or closed, clean it up.
+				Log::d() << "APP_CMD_TERM_WINDOW";
+				terminateDisplay();
+				hasFocus = false;
+				break;
+
+			case APP_CMD_GAINED_FOCUS:
+				Log::d() << "APP_CMD_GAINED_FOCUS";
+				hasFocus = true;
+				break;
+			case APP_CMD_LOST_FOCUS:
+				Log::d() << "APP_CMD_LOST_FOCUS";
+				hasFocus = false;
+				break;
+
+			case APP_CMD_STOP:
+				Log::d() << "APP_CMD_STOP";
+				eventDispatcher->didEnterBackground();
+				break;
+
+			case APP_CMD_RESUME:
+				Log::d() << "APP_CMD_RESUME";
+				eventDispatcher->androidOnResume();
+				break;
+
+			case APP_CMD_DESTROY:
+				LOGE("APP_CMD_DESTROY");
+				eventDispatcher->exit();
+				break;
+
+			case APP_CMD_LOW_MEMORY:
+				Log::d() << "APP_CMD_LOW_MEMORY";
+				eventDispatcher->memoryWarning();
+				break;
+
+			case APP_CMD_PAUSE:
+				Log::d() << "APP_CMD_PAUSE";
+				eventDispatcher->androidOnPause();
+				break;
+			case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
+			case APP_CMD_CONTENT_RECT_CHANGED: Log::d() << "APP_CMD_CONTENT_RECT_CHANGED"; break;
+			case APP_CMD_WINDOW_REDRAW_NEEDED: Log::d() << "APP_CMD_WINDOW_REDRAW_NEEDED"; break;
+			case APP_CMD_INPUT_CHANGED: Log::d() << "APP_CMD_INPUT_CHANGED"; break;
+			case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
+			case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
+			case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
+		}
+	}
+	[[nodiscard]] bool ready() const { return hasFocus; }
+	bool firstFrameAlreadyRendered = false;
+};
+
+std::shared_ptr<App> androidGetApp() {
+	return app;
+}
 
 /**
  * Process the next input event.
  * Return 1 if you handle an event, 0 if you don't.
  */
-static int32_t engine_handle_input(android_app *app, AInputEvent *event) {
-	//engine* engine = (engine*)app->userData;
+static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *event) {
 	// converted from Java in openframeworks android
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t action = AMotionEvent_getAction(event);
@@ -279,7 +311,6 @@ static int32_t engine_handle_input(android_app *app, AInputEvent *event) {
 
 			case AMOTION_EVENT_ACTION_DOWN:
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				//LOGW("pointer down %d", touchId);
 				eventDispatcher->touchDown(AMotionEvent_getX(event, pointerIndex),
 										   AMotionEvent_getY(event, pointerIndex),
 										   AMotionEvent_getPointerId(event, pointerIndex));
@@ -287,7 +318,6 @@ static int32_t engine_handle_input(android_app *app, AInputEvent *event) {
 				break;
 			case AMOTION_EVENT_ACTION_UP:
 			case AMOTION_EVENT_ACTION_POINTER_UP:
-				//LOGW("pointer up %d", touchId);
 				eventDispatcher->touchUp(AMotionEvent_getX(event, pointerIndex),
 										 AMotionEvent_getY(event, pointerIndex),
 										 AMotionEvent_getPointerId(event, pointerIndex));
@@ -342,153 +372,40 @@ static int32_t engine_handle_input(android_app *app, AInputEvent *event) {
 	return 0; // event not handled
 }
 
-bool clearedUpGLResources = false;
-
-/**
- * Process the next main command.
- */
-static void engine_handle_cmd(android_app *appPtr, int32_t cmd) {
-	AppEngine *engine = (AppEngine *) appPtr->userData;
-
-	switch (cmd) {
-		case APP_CMD_INIT_WINDOW:
-			Log::d() << "APP_CMD_INIT_WINDOW";
-			// The window is being shown, get it ready.
-			if (engine->app->window != nullptr) {
-				engine_init_display(engine);
-				engineReady = true;
-
-				initMZGL(app);
-				if (eventDispatcher != nullptr && prepareFrame(engine)) {
-					//                    engine_draw_blankFrame(engine);
-					graphics.width	= engine->width;
-					graphics.height = engine->height;
-					eventDispatcher->androidDrawLoading();
-					eglSwapBuffers(engine->display, engine->surface);
-				}
-				if (clearedUpGLResources && eventDispatcher != nullptr) {
-					eventDispatcher->resized();
-					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
-					clearedUpGLResources = false;
-				}
-				engine_draw_frame(engine);
-			}
-			break;
-
-		case APP_CMD_TERM_WINDOW:
-			// The window is being hidden or closed, clean it up.
-			Log::d() << "APP_CMD_TERM_WINDOW";
-			graphics.clearUpResources();
-			clearedUpGLResources = true;
-			engine_term_display(engine);
-			engineReady = false;
-			break;
-
-		case APP_CMD_LOST_FOCUS: Log::d() << "APP_CMD_LOST_FOCUS"; break;
-
-		case APP_CMD_CONFIG_CHANGED: Log::e() << "APP_CMD_CONFIG_CHANGED"; break;
-
-		case APP_CMD_START: Log::d() << "APP_CMD_START"; break;
-
-		case APP_CMD_STOP:
-			Log::d() << "APP_CMD_STOP";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->didEnterBackground();
-			}
-			break;
-
-		case APP_CMD_SAVE_STATE: Log::d() << "APP_CMD_SAVE_STATE"; break;
-
-		case APP_CMD_WINDOW_RESIZED: Log::e() << "APP_CMD_WINDOW_RESIZED"; break;
-
-		case APP_CMD_RESUME:
-			Log::d() << "APP_CMD_RESUME";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->androidOnResume();
-			}
-			break;
-
-		case APP_CMD_DESTROY:
-			LOGE("APP_CMD_DESTROY");
-			if (eventDispatcher != nullptr) {
-				eventDispatcher->exit();
-			}
-			break;
-
-		case APP_CMD_LOW_MEMORY:
-			Log::d() << "APP_CMD_LOW_MEMORY";
-			if (eventDispatcher != nullptr) {
-				eventDispatcher->memoryWarning();
-			}
-			break;
-
-		case APP_CMD_PAUSE:
-			Log::d() << "APP_CMD_PAUSE";
-			if (eventDispatcher && eventDispatcher->app != nullptr) {
-				eventDispatcher->androidOnPause();
-			}
-			break;
-	}
-}
-
-android_app *globalAppPtr = nullptr;
-
-android_app *getAndroidAppPtr() {
-	return globalAppPtr;
-}
-
 EventDispatcher *getAndroidEventDispatcher() {
 	return eventDispatcher.get();
 }
 
-int android_loop_all(int timeoutMillis, int *outFd, int *outEvents, void **outData) {
-	int result;
-	do {
-		result = ALooper_pollOnce(timeoutMillis, outFd, outEvents, outData);
-	} while (result == ALOOPER_POLL_CALLBACK);
-	return result;
+std::shared_ptr<RenderEngine> engine = nullptr;
+
+android_app *getAndroidAppPtr() {
+	return engine->androidApp;
 }
 
-/**
- * This is the main entry point of a native application that is using
- * android_native_app_glue.  It runs in its own thread, with its own
- * event loop for receiving input events and doing other things.
- */
 void android_main(android_app *state) {
-	app				= nullptr;
-	eventDispatcher = nullptr;
-
-	globalAppPtr = state;
-	AppEngine engine;
-
-	memset(&engine, 0, sizeof(AppEngine));
-	state->userData		= &engine;
-	state->onAppCmd		= engine_handle_cmd;
+	engine				= std::make_shared<RenderEngine>(state);
+	state->userData		= engine.get();
+	state->onAppCmd		= RenderEngine::handleCmdStatic;
 	state->onInputEvent = engine_handle_input;
-	engine.app			= state;
+	app					= instantiateApp(graphics);
+	eventDispatcher		= make_shared<EventDispatcher>(app);
 
-	app = instantiateApp(graphics);
-
-	// loop waiting for stuff to do.
-	while (true) {
-		// Read all pending events.
-		int ident;
-		int events;
+	while (!state->destroyRequested) {
 		android_poll_source *source = nullptr;
 
-		while ((ident = android_loop_all(engineReady ? 0 : -1, nullptr, &events, (void **) &source)) >= 0) {
-			// Process this event.
-			if (source != nullptr) {
-				source->process(state, source);
-			}
+		auto result = ALooper_pollOnce(engine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
 
-			// Check if we are exiting.
-			if (state->destroyRequested != 0) {
-				engine_term_display(&engine);
-				return;
-			}
+		if (result == ALOOPER_POLL_ERROR) {
+			Log::e() << "ALooper_pollOnce returned an error";
+			mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+			continue;
 		}
 
-		engine_draw_frame(&engine);
+		if (source != nullptr) source->process(state, source);
+
+		if (engine->ready()) {
+			engine->drawFrame();
+		}
 	}
+	engine->terminateDisplay();
 }

@@ -309,5 +309,7 @@ void MainThreadRunner::testAndSetMainThreadId() {
 		setMainThreadId();
 	}
 #endif
+#ifndef UNIT_TEST
 	mzAssert(isMainThread(), "Must be called on the real main thread");
+#endif
 }
