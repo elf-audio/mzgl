@@ -29,6 +29,15 @@ public:
 		Variable &b;
 	};
 
+	Variable(const Variable &other)
+		: Variable(other.variable) {}
+	Variable &operator=(const Variable &other) {
+		if (this != &other) {
+			assign(other.variable);
+		}
+
+		return *this;
+	}
 	explicit Variable(const T &var) { assign(var); }
 
 	virtual ~Variable() {
@@ -116,6 +125,15 @@ public:
 		virtual void variableChanged() = 0;
 	};
 
+	AtomicVariable(const AtomicVariable &other)
+		: AtomicVariable(other.get()) {}
+	AtomicVariable &operator=(const AtomicVariable &other) {
+		if (this != &other) {
+			assign(other.get());
+		}
+
+		return *this;
+	}
 	explicit AtomicVariable(const T &var) { assign(var); }
 
 	[[maybe_unused]] const AtomicVariable<T> &operator=(const T &var) {
