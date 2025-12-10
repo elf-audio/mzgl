@@ -56,7 +56,7 @@ public:
 		}
 #endif
 
-		NSError *err;
+		NSError *err = nil;
 
 		NSURLBookmarkCreationOptions opts =
 #if TARGET_OS_IOS
@@ -138,7 +138,7 @@ private:
 		} else {
 			for (id b in books) {
 				BOOL isStale = NO;
-				NSError *err;
+				NSError *err = nil;
 
 				NSURLBookmarkResolutionOptions opts =
 #if TARGET_OS_IOS
