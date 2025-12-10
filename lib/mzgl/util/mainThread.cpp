@@ -291,7 +291,7 @@ void MainThreadRunner::pollMainThreadQueue() {
 }
 
 void MainThreadRunner::testAndSetMainThreadId() {
-#if MZGL_MAC
+#if MZGL_MAC && !defined(__aarch64__) && !defined(__arm64__)
 	/**
 	 * Note: 24/11/2025
 	 * In open GL we are guaranteed that the callbacks come from a single "main" thread
