@@ -98,7 +98,9 @@ public:
 		glBindVertexArray(vertexArrayObject);
 #endif
 		glBindBuffer(GL_ARRAY_BUFFER, buff.id);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, buff.size * sizeof(float) * buff.dimensions, data.data());
+
+		const GLsizeiptr bytes = data.size() * sizeof(T);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, bytes, data.data());
 	}
 
 	template <class T>
