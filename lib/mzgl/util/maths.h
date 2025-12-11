@@ -14,6 +14,8 @@
 #include "log.h"
 
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
+	if (inMax - inMin == 0.f) return outMin;
+
 	const float f = outMin + (outMax - outMin) * (inp - inMin) / (inMax - inMin);
 	if (clamp) {
 		if (outMax > outMin) {
@@ -26,6 +28,8 @@ constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, f
 }
 
 constexpr double mapd(double inp, double inMin, double inMax, double outMin, double outMax, bool clamp = false) {
+	if (inMax - inMin == 0.f) return outMin;
+
 	double norm = (inp - inMin) / (inMax - inMin);
 	double f	= outMin + (outMax - outMin) * norm;
 	if (clamp) {
