@@ -93,12 +93,13 @@ bool Font::isLoaded() const {
 
 bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	// todo - this is just a copy of the next method
-	GetError();
+
 	clear();
 	this->size = size / 2.f;
 #ifdef MZGL_SOKOL_METAL
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
+	GetError();
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 #endif
 	fonsSetErrorCallback(fs, &fontstashErrorCallback, this);
