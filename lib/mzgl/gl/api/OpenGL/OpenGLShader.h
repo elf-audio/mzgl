@@ -12,9 +12,6 @@ public:
 	OpenGLShader(Graphics &g, std::string name)
 		: Shader(g) {}
 	~OpenGLShader() override;
-#ifdef MZGL_GL2
-	void setInstanceUniforms(int whichInstance);
-#endif
 
 	// should be private in some way but vbo needs it because it manages shaders
 	bool needsColorUniform = false;
@@ -68,19 +65,4 @@ private:
 
 	uint32_t mvpLocation;
 	uint32_t colorLocation;
-	// this is supposed to be for GL2 simulating instancing
-
-#ifdef MZGL_GL2
-
-	struct InstanceUniform {
-		int dimensions = 0;
-		std::vector<float> data;
-		std::string name;
-		InstanceUniform(std::string name, float *data, int numItems, int dimensions)
-			: name(name)
-			, dimensions(dimensions)
-			, data(data, data + numItems * dimensions) {}
-	};
-	std::vector<std::shared_ptr<InstanceUniform>> instanceUniforms;
-#endif
 };

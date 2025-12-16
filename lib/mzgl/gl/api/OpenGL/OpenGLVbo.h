@@ -82,9 +82,8 @@ public:
 	void setBuffer(Buffer &buff, const std::vector<T> &v) {
 		if (buff.id != 0) glDeleteBuffers(1, &buff.id);
 
-#ifndef MZGL_GL2
 		glBindVertexArray(vertexArrayObject);
-#endif
+
 		buff.dimensions = sizeof(T) / 4;
 		buff.size		= v.size();
 		glGenBuffers(1, &buff.id);
@@ -94,9 +93,8 @@ public:
 
 	template <class T>
 	void updateVertBuffer(Buffer &buff, const std::vector<T> &data) {
-#ifndef MZGL_GL2
 		glBindVertexArray(vertexArrayObject);
-#endif
+
 		glBindBuffer(GL_ARRAY_BUFFER, buff.id);
 
 		const GLsizeiptr bytes = data.size() * sizeof(T);
@@ -119,9 +117,7 @@ public:
 
 	OpenGLVbo()
 		: Vbo() {
-#ifndef MZGL_GL2
 		glGenVertexArrays(1, &vertexArrayObject);
-#endif
 	}
 	~OpenGLVbo() override { deallocate(); }
 
@@ -131,10 +127,8 @@ public:
 		texCoordBuffer.deallocate();
 		normalBuffer.deallocate();
 		indexBuffer.deallocate();
-#ifndef MZGL_GL2
 		if (vertexArrayObject != 0) glDeleteVertexArrays(1, &vertexArrayObject);
 		vertexArrayObject = 0;
-#endif
 	}
 
 	Vbo &setVertices(const std::vector<vec2> &verts) override {
@@ -164,9 +158,7 @@ public:
 	Vbo &setIndices(const std::vector<unsigned int> &indices) override {
 		if (indexBuffer.id != 0) glDeleteBuffers(1, &indexBuffer.id);
 
-#ifndef MZGL_GL2
 		glBindVertexArray(vertexArrayObject);
-#endif
 		indexBuffer.size = indices.size();
 
 		glGenBuffers(1, &indexBuffer.id);
@@ -229,17 +221,16 @@ public:
 			return;
 		}
 
-#ifndef MZGL_GL2
 		if (vertexArrayObject == 0) {
 			return;
 		}
-#endif
+
 		GetError();
 		chooseShaderAndSetDefaults(g);
 		GetError();
-#ifndef MZGL_GL2
+
 		VertexArrayBinding vao(vertexArrayObject);
-#endif
+
 		auto shader = dynamic_cast<OpenGLShader *>(g.currShader);
 		BufferBinding vertexBinding(vertexBuffer, shader->positionAttribute);
 		BufferBinding colorBinding(colorbuffer, shader->colorAttribute);
@@ -252,25 +243,9 @@ public:
 		auto glMode = primitiveTypeToGLMode(mode);
 		if (instances > 1) {
 			if (indexBuffer.valid()) {
-#ifdef MZGL_GL2
-				// simulate instancing in gl2
-				for (int i = 0; i < instances; i++) {
-					shader->setInstanceUniforms(i);
-					glDrawElements(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr);
-				}
-#else
 				glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, instances);
-#endif
 			} else {
-#ifdef MZGL_GL2
-				// simulate instancing in gl2
-				for (int i = 0; i < instances; i++) {
-					shader->setInstanceUniforms(i);
-					glDrawArrays(glMode, 0, (GLsizei) indexBuffer.size);
-				}
-#else
 				glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, instances);
-#endif
 			}
 		} else {
 			if (indexBuffer.valid()) {

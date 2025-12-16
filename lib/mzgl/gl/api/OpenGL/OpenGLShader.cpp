@@ -10,9 +10,6 @@
 #include "mzAssert.h"
 #include "util.h"
 void OpenGLShader::begin() {
-#ifdef MZGL_GL2
-	instanceUniforms.clear();
-#endif
 	g.currShader = this;
 	glUseProgram(shaderProgram);
 }
@@ -70,75 +67,29 @@ void OpenGLShader::uniform(const std::string &name, glm::vec4 p) {
 	glUniform4fv(vecId, 1, (const GLfloat *) &p);
 }
 
-#ifdef MZGL_GL2
-void OpenGLShader::setInstanceUniforms(int whichInstance) {
-	for (auto i: instanceUniforms) {
-		switch (i->dimensions) {
-			case 1: uniform(i->name, i->data[whichInstance]); break;
-			case 2: uniform(i->name, vec2(i->data[whichInstance * 2], i->data[whichInstance * 2 + 1])); break;
-			case 3:
-				uniform(i->name,
-						vec3(i->data[whichInstance * 3],
-							 i->data[whichInstance * 3 + 1],
-							 i->data[whichInstance * 3 + 2]));
-				break;
-
-			case 4:
-				uniform(i->name,
-						vec4(i->data[whichInstance * 4],
-							 i->data[whichInstance * 4 + 1],
-							 i->data[whichInstance * 4 + 2],
-							 i->data[whichInstance * 4 + 3]));
-				break;
-				// TODO: case for 16
-		}
-	}
-}
-#endif
-
 void OpenGLShader::uniform(const std::string &name, const glm::mat4 *p, size_t length) {
-#ifdef MZGL_GL2
-	instanceUniforms.push_back(std::make_shared<InstanceUniform>(name, (float *) p, length, 16));
-#else
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	glUniformMatrix4fv(vecId, (GLsizei) length, GL_FALSE, (const GLfloat *) p);
-#endif
 }
 
 void OpenGLShader::uniform(const std::string &name, const float *p, size_t length) {
-#ifdef MZGL_GL2
-	instanceUniforms.push_back(std::make_shared<InstanceUniform>(name, (float *) p, length, 1));
-#else
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	glUniform1fv(vecId, (GLsizei) length, (const GLfloat *) p);
-#endif
 }
 
 void OpenGLShader::uniform(const std::string &name, const glm::vec2 *p, size_t length) {
-#ifdef MZGL_GL2
-	instanceUniforms.push_back(std::make_shared<InstanceUniform>(name, (float *) p, length, 2));
-#else
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	glUniform2fv(vecId, (GLsizei) length, (const GLfloat *) p);
-#endif
 }
 
 void OpenGLShader::uniform(const std::string &name, const glm::vec3 *p, size_t length) {
-#ifdef MZGL_GL2
-	instanceUniforms.push_back(std::make_shared<InstanceUniform>(name, (float *) p, length, 3));
-#else
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	glUniform3fv(vecId, (GLsizei) length, (const GLfloat *) p);
-#endif
 }
 
 void OpenGLShader::uniform(const std::string &name, const glm::vec4 *p, size_t length) {
-#ifdef MZGL_GL2
-	instanceUniforms.push_back(std::make_shared<InstanceUniform>(name, (float *) p, length, 4));
-#else
 	GLuint vecId = glGetUniformLocation(shaderProgram, name.c_str());
 	glUniform4fv(vecId, (GLsizei) length, (const GLfloat *) p);
-#endif
 }
 
 void OpenGLShader::uniform(const std::string &name, const std::vector<glm::vec4> &p) {
@@ -200,25 +151,7 @@ void OpenGLShader::load(const std::string &vertexFilePath, const std::string &fr
 }
 
 std::string OpenGLShader::getVersionForPlatform(bool isVertShader) {
-#ifdef MZGL_GL2
-
-	// convert GL3 shader to GL2 shader
-	std::string version = "#version 120\n" // this is gl version 2.1
-						  "#define lowp\n"
-						  "#define highp\n"
-						  "#define mediump\n"
-						  "#define texture texture2D\n";
-	if (isVertShader) {
-		version += "#define out varying\n";
-		version += "#define in attribute\n";
-	} else {
-		version += "#define in varying\n";
-		version += "#define fragColor gl_FragColor\n";
-	}
-#else
 	std::string version = "#version 150\n"; // this is GL version 3.2
-#endif
-
 #if TARGET_OS_IOS || defined(__ANDROID__) || defined(__arm__) || defined(USE_METALANGLE) || defined(__linux__)
 	version = "#version 300 es\nprecision highp float;\n";
 #endif
@@ -279,34 +212,12 @@ void OpenGLShader::createProgram(GLuint vertexShader, GLuint fragmentShader) {
 	colorLocation = glGetUniformLocation(shaderProgram, "color");
 }
 
-#ifdef MZGL_GL2
-static std::string removeSquareBrackets(const std::string &s) {
-	std::string out;
-	bool bracketOpen = false;
-	for (int i = 0; i < s.size(); i++) {
-		if (s[i] == '[') {
-			bracketOpen = true;
-		} else if (!bracketOpen) {
-			out += s[i];
-		}
-		if (s[i] == ']') bracketOpen = false;
-	}
-	return out;
-}
-#endif
-
 GLuint OpenGLShader::compileShader(GLenum type, std::string src) {
 	std::string typeString = "unknown";
 	if (type == GL_VERTEX_SHADER) typeString = "Vert";
 	else if (type == GL_FRAGMENT_SHADER) typeString = "Frag";
 
 	GLuint shader;
-#ifdef MZGL_GL2
-	replaceAll(src, "out vec4 fragColor;", "");
-	// this removes any instance related stuff because
-	// opengl 2 can't do instancing.
-	src = removeSquareBrackets(src);
-#endif
 	const GLchar *source = (GLchar *) src.c_str();
 
 	shader = glCreateShader(type);
