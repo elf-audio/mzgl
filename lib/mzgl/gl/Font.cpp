@@ -170,18 +170,53 @@ TextureRef Font::getAtlasTexture(Graphics &g) {
 std::string Font::ellipsize(const std::string &str, int w) const {
 	if (str.size() < 4 || getWidth(str) <= w) return str;
 
+	// Helper function to get the byte length of a UTF-8 character
+	auto utf8CharLen = [](const char c) -> int {
+		unsigned char uc = static_cast<unsigned char>(c);
+		if ((uc & 0x80) == 0) return 1; // 0xxxxxxx - 1 byte
+		if ((uc & 0xE0) == 0xC0) return 2; // 110xxxxx - 2 bytes
+		if ((uc & 0xF0) == 0xE0) return 3; // 1110xxxx - 3 bytes
+		if ((uc & 0xF8) == 0xF0) return 4; // 11110xxx - 4 bytes
+		return 1; // Invalid UTF-8, treat as single byte
+	};
+
+	// Helper to safely remove one UTF-8 character from the front
+	auto popFrontChar = [&utf8CharLen](std::string &s) {
+		if (s.empty()) return;
+		int len = utf8CharLen(s[0]);
+		s.erase(0, len);
+	};
+
+	// Helper to safely remove one UTF-8 character from the back
+	auto popBackChar = [&utf8CharLen](std::string &s) {
+		if (s.empty()) return;
+		int pos = s.size() - 1;
+		// Walk backwards to find the start of the last character
+		while (pos > 0 && (static_cast<unsigned char>(s[pos]) & 0xC0) == 0x80) {
+			--pos; // continuation byte (10xxxxxx)
+		}
+		s.erase(pos);
+	};
+
 	auto s = str;
 
+	// Find the middle in terms of byte position (approximation)
 	auto centreIndex = s.size() / 2;
-	auto front		 = s.substr(0, centreIndex - 2);
-	auto back		 = s.substr(centreIndex + 1);
+
+	// Adjust centreIndex to a valid UTF-8 character boundary
+	while (centreIndex > 0 && (static_cast<unsigned char>(s[centreIndex]) & 0xC0) == 0x80) {
+		--centreIndex;
+	}
+
+	auto front = s.substr(0, centreIndex > 2 ? centreIndex - 2 : 0);
+	auto back  = s.substr(centreIndex < s.size() - 1 ? centreIndex + 1 : s.size());
 
 	bool flipFlop = false;
-	while (front.size() > 1 && back.size() > 1) {
+	while (!front.empty() && !back.empty()) {
 		s = front + "..." + back;
 		if (getWidth(s) <= w) return s;
-		if (flipFlop) back.erase(0, 1);
-		else front.pop_back();
+		if (flipFlop) popFrontChar(back);
+		else popBackChar(front);
 		flipFlop = !flipFlop;
 	}
 	return s;
