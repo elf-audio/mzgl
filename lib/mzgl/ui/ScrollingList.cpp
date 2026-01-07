@@ -347,7 +347,7 @@ bool ScrollingList::keyDown(int key) {
 			focus(getNumItems() - 1);
 		}
 		return true;
-	} else if (key == MZ_KEY_RIGHT || key == MZ_KEY_ENTER || key == MZ_KEY_RETURN) {
+	} else if (key == MZ_KEY_RIGHT || key == MZ_KEY_RETURN) {
 		if (getSelectedIndex() != -1) {
 			select(getSelectedIndex());
 		} else if (getNumItems() > 0) {

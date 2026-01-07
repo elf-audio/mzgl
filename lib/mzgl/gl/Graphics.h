@@ -28,7 +28,6 @@
 #define MZ_KEY_ESCAPE	  27
 #define MZ_KEY_SHIFT_TAB  25
 #define MZ_KEY_RETURN	  13
-#define MZ_KEY_ENTER	  3
 #define MZ_KEY_SHIFT	  1001
 #define MZ_KEY_FN		  1002
 #define MZ_KEY_CTRL		  1002

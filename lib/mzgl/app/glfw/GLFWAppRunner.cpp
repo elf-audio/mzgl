@@ -68,7 +68,7 @@ int convertGlfwKeyToMzgl(int key) {
 		case GLFW_KEY_ESCAPE: return MZ_KEY_ESCAPE;
 		//case: MZ_KEY_SHIFT_TAB;
 		case MZ_KEY_RETURN:
-		case GLFW_KEY_ENTER: return MZ_KEY_ENTER;
+		case GLFW_KEY_ENTER: return MZ_KEY_RETURN;
 		case GLFW_KEY_RIGHT_SHIFT:
 		case GLFW_KEY_LEFT_SHIFT: return MZ_KEY_SHIFT;
 		case GLFW_KEY_RIGHT_CONTROL:
