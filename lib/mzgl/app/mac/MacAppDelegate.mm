@@ -77,14 +77,14 @@ void handleTerminateSignal(int signal) {
 
 	[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 }
+
+int getTitleBarHeight(NSWindow *window) {
+	NSRect frameRect = window.frame;
+	NSRect contentRect = [window contentRectForFrameRect:frameRect];
+
+	return frameRect.size.height - contentRect.size.height;
+}
 - (NSRect)setupWindow {
-	{
-		NSWindow *___ = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
-													styleMask:NSWindowStyleMaskTitled
-													  backing:NSBackingStoreBuffered
-														defer:YES
-													   screen:nil];
-	}
 
 	NSScreen *mainScreen = [NSScreen mainScreen];
 
@@ -108,16 +108,21 @@ void handleTerminateSignal(int signal) {
 				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable
 					backing:NSBackingStoreBuffered
 					  defer:NO];
+	
+	
+	// START OF TRANSPARENT TITLE BAR WINDOW
+//	CGFloat titleBarHeight = getTitleBarHeight(window);
+//	windowRect.origin.y -= titleBarHeight;
+//	windowRect.size.height += titleBarHeight;
+//	window.titlebarAppearsTransparent = YES;
+//	window.styleMask |= NSWindowStyleMaskFullSizeContentView;
+	
+	
 	window.acceptsMouseMovedEvents = YES;
 	id appName					   = [[NSProcessInfo processInfo] processName];
 
 	[window cascadeTopLeftFromPoint:NSMakePoint(20, 20)];
 	[window setTitle:appName];
-	//	NSLog(@"window frame size: %f x %f, pixelScale: %f", window.frame.size.width, window.frame.size.height, app->g.pixelScale);
-
-	// if the screen isn't big enough to create the window, lets update graphics dims here.
-	//	app->g.width = window.contentView.frame.size.width*app->g.pixelScale;
-	//	app->g.height = window.contentView.frame.size.height*app->g.pixelScale;
 
 	return windowRect;
 }

@@ -355,7 +355,7 @@ int nsEventToKey(NSEvent *evt) {
 }
 // this helps with crashing when resizing, but you don't get nice resizing
 - (void)windowDidEndLiveResize:(NSNotification *)notification {
-	//- (void)windowDidResize:(NSNotification *)notification {
+
 	[super windowResized:notification];
 	[super enableDrawing];
 }
