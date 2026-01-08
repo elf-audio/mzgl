@@ -18,8 +18,6 @@
 #include "MZGLWebView.h"
 #include "util.h"
 
-using namespace std;
-
 #if defined(__APPLE__)
 void quitApplication() {
 	[NSApp terminate:nil];
@@ -78,12 +76,8 @@ void handleTerminateSignal(int signal) {
 	[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 }
 
-int getTitleBarHeight(NSWindow *window) {
-	NSRect frameRect   = window.frame;
-	NSRect contentRect = [window contentRectForFrameRect:frameRect];
+bool hasTransparentTitleBar = true;
 
-	return frameRect.size.height - contentRect.size.height;
-}
 - (NSRect)setupWindow {
 	NSScreen *mainScreen = [NSScreen mainScreen];
 
@@ -108,12 +102,7 @@ int getTitleBarHeight(NSWindow *window) {
 					backing:NSBackingStoreBuffered
 					  defer:NO];
 
-	bool hasTransparentTitleBar = false;
 	if (hasTransparentTitleBar) {
-		// START OF TRANSPARENT TITLE BAR WINDOW
-		CGFloat titleBarHeight = getTitleBarHeight(window);
-		windowRect.origin.y -= titleBarHeight;
-		windowRect.size.height += titleBarHeight;
 		window.titlebarAppearsTransparent = YES;
 		window.styleMask |= NSWindowStyleMaskFullSizeContentView;
 	}
@@ -130,6 +119,10 @@ int getTitleBarHeight(NSWindow *window) {
 - (void)makeWindow {
 	NSRect windowRect = [self setupWindow];
 
+	if (hasTransparentTitleBar) {
+		windowRect.size.height += windowRect.origin.y;
+		windowRect.origin.y = 0;
+	}
 	view = [[EventsView alloc] initWithFrame:windowRect eventDispatcher:eventDispatcher];
 
 	window.delegate = view;
@@ -172,7 +165,7 @@ int getTitleBarHeight(NSWindow *window) {
 }
 
 - (void)makeMenus {
-	string appName = [[[NSProcessInfo processInfo] processName] UTF8String];
+	std::string appName = [[[NSProcessInfo processInfo] processName] UTF8String];
 
 	auto appMenu = MacMenuBar::instance().getMenu(appName);
 	appMenu->addItem("Quit " + appName, "q", []() { [[NSApplication sharedApplication] terminate:nil]; });
@@ -227,7 +220,7 @@ int getTitleBarHeight(NSWindow *window) {
 }
 
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
-	string fn		   = [filename UTF8String];
+	std::string fn	   = [filename UTF8String];
 	auto evtDispatcher = eventDispatcher;
 	app->main.runOnMainThread(true, [evtDispatcher, fn]() {
 		if (evtDispatcher) evtDispatcher->openUrl(ScopedUrl::create(fn));

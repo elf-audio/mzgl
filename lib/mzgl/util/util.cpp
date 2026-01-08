@@ -1368,5 +1368,15 @@ SafeInsets getSafeInsets() {
 	insets.left	  = callJNIForInt("getSafeInsetEdge", 3);
 	return insets;
 #endif
+#if MZGL_MAC && !MZGL_PLUGIN
+	//	NSWindow *window = [NSApp mainWindow];
+	NSWindow *window = NSApp.windows.firstObject;
+	if (window != nil) {
+		int topInset = window.frame.size.height - window.contentLayoutRect.size.height;
+		topInset *= window.backingScaleFactor;
+		return {topInset + 10, 0, 0, 0};
+	}
+#endif
+
 	return {0, 0, 0, 0};
 }

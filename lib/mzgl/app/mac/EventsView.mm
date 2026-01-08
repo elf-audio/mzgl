@@ -37,6 +37,10 @@
 	return self;
 }
 
+- (BOOL)mouseDownCanMoveWindow {
+	return YES;
+}
+
 - (BOOL)acceptsFirstResponder {
 	return YES;
 }

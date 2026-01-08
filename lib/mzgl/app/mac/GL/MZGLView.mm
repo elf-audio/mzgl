@@ -130,21 +130,34 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 	[[self openGLContext] makeCurrentContext];
 }
 
+static int getTitleBarHeight(NSWindow *window) {
+	NSRect frameRect   = window.frame;
+	NSRect contentRect = [window contentRectForFrameRect:frameRect];
+
+	return frameRect.size.height - contentRect.size.height;
+}
+
 - (void)windowResized:(NSNotification *)notification {
 	Log::d() << "windowDidResize";
 
 	NSWindow *window = notification.object;
 
-	Graphics &g	 = eventDispatcher->app->g;
-	g.width		 = window.contentLayoutRect.size.width;
-	g.height	 = window.contentLayoutRect.size.height;
+	Graphics &g = eventDispatcher->app->g;
+	g.width		= window.contentLayoutRect.size.width;
+	g.height	= window.contentLayoutRect.size.height;
+
+	bool hasTransparentTitleBar = true;
+
+	if (hasTransparentTitleBar) {
+		g.width	 = window.frame.size.width;
+		g.height = window.frame.size.height;
+	}
 	g.pixelScale = [window backingScaleFactor];
 
 	auto f		  = self.frame;
 	f.size.width  = g.width;
 	f.size.height = g.height;
-
-	self.frame = f;
+	self.frame	  = f;
 
 	glViewport(0, 0, g.width * g.pixelScale, g.height * g.pixelScale);
 
