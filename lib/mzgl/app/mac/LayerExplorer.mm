@@ -24,7 +24,6 @@ public:
 		g.drawRect(*this);
 		g.setColor(1, 1, 0);
 		g.noFill();
-		g.setStrokeWeight(3);
 		g.drawRect(*this);
 		g.fill();
 	}

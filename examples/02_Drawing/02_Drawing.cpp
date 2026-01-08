@@ -28,9 +28,6 @@ public:
 		// the default is filled
 		g.noFill();
 
-		// how thick should the lines be?
-		g.setStrokeWeight(5);
-
 		// set colour to green
 		g.setColor(0, 1, 0);
 		g.drawCircle(centre, radius);

@@ -115,11 +115,6 @@ public:
 	void fill();
 	bool isFilling();
 
-	[[deprecated]]
-	void setStrokeWeight(float f);
-	[[deprecated]]
-	float getStrokeWeight();
-
 	/////////////////////////////////////////////////////////////////////////////
 	// SHAPES
 
@@ -225,7 +220,6 @@ public:
 	VboRef drawerVbo;
 
 private:
-	float strokeWeight	= 1;
 	BlendMode blendMode = BlendMode::Alpha;
 
 	bool blendingEnabled = false;

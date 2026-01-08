@@ -26,7 +26,8 @@ class RoundedRect {
 public:
 	VboRef mesh;
 
-	void draw(Graphics &g, const Rectf &r, float radius);
+	void fill(Graphics &g, const Rectf &r, float radius);
+	void stroke(Graphics &g, const Rectf &r, float radius, float strokeWeight);
 
 	// resets cache and forces redraw
 	void touch();

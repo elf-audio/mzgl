@@ -121,14 +121,22 @@ void RoundedRect::touch() {
 	oldRect.width = 0.f;
 }
 
-void RoundedRect::draw(Graphics &g, const Rectf &r, float radius) {
-	if (mesh == nullptr || r != oldRect || oldSolid != g.isFilling() || radius != oldRadius
-		|| g.getStrokeWeight() != oldStrokeWeight) {
+void RoundedRect::fill(Graphics &g, const Rectf &r, float radius) {
+	if (mesh == nullptr || r != oldRect || !oldSolid || radius != oldRadius) {
+		oldRect	  = r;
+		oldSolid  = true;
+		oldRadius = radius;
+		mesh	  = makeRoundedRectVbo(r, radius, true);
+	}
+	mesh->draw(g);
+}
+void RoundedRect::stroke(Graphics &g, const Rectf &r, float radius, float strokeWeight) {
+	if (mesh == nullptr || r != oldRect || oldSolid || radius != oldRadius || strokeWeight != oldStrokeWeight) {
 		oldRect			= r;
-		oldSolid		= g.isFilling();
+		oldSolid		= true;
 		oldRadius		= radius;
-		oldStrokeWeight = g.getStrokeWeight();
-		mesh			= makeRoundedRectVbo(r, radius, oldSolid, g.getStrokeWeight());
+		oldStrokeWeight = strokeWeight;
+		mesh			= makeRoundedRectVbo(r, radius, false, strokeWeight);
 	}
 	mesh->draw(g);
 }

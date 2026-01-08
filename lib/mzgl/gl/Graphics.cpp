@@ -200,15 +200,6 @@ void Graphics::fill() {
 	filling = true;
 }
 
-float Graphics::getStrokeWeight() {
-	return strokeWeight;
-}
-void Graphics::setStrokeWeight(float f) {
-	if (f != strokeWeight) {
-		strokeWeight = f;
-	}
-}
-
 void Graphics::setHexColor(int hex, float a) {
 	auto c = hexColor(hex);
 	c.a	   = a;
