@@ -1348,7 +1348,7 @@ std::string readFromLockFile() {
 }
 
 SafeInsets getSafeInsets() {
-#if TARGET_OS_IOS && !MZGL_PLUGIN
+#if MZGL_IOS && !MZGL_PLUGIN
 	UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
 	if (@available(iOS 11.0, *)) {
 		UIEdgeInsets insets = [window safeAreaInsets];
@@ -1358,6 +1358,15 @@ SafeInsets getSafeInsets() {
 				static_cast<int>(insets.bottom * scale),
 				static_cast<int>(insets.left * scale)};
 	}
+#endif
+
+#if MZGL_ANDROID
+	SafeInsets insets;
+	insets.top	  = callJNIForInt("getSafeInsetEdge", 0);
+	insets.right  = callJNIForInt("getSafeInsetEdge", 1);
+	insets.bottom = callJNIForInt("getSafeInsetEdge", 2);
+	insets.left	  = callJNIForInt("getSafeInsetEdge", 3);
+	return insets;
 #endif
 	return {0, 0, 0, 0};
 }

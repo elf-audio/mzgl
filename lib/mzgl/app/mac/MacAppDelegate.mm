@@ -79,13 +79,12 @@ void handleTerminateSignal(int signal) {
 }
 
 int getTitleBarHeight(NSWindow *window) {
-	NSRect frameRect = window.frame;
+	NSRect frameRect   = window.frame;
 	NSRect contentRect = [window contentRectForFrameRect:frameRect];
 
 	return frameRect.size.height - contentRect.size.height;
 }
 - (NSRect)setupWindow {
-
 	NSScreen *mainScreen = [NSScreen mainScreen];
 
 	float w = app->g.width / app->g.pixelScale;
@@ -103,21 +102,22 @@ int getTitleBarHeight(NSWindow *window) {
 
 	NSRect windowRect = NSMakeRect(0, 0, w, h);
 
-	window						   = [[NSWindow alloc]
+	window = [[NSWindow alloc]
 		initWithContentRect:windowRect
 				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable
 					backing:NSBackingStoreBuffered
 					  defer:NO];
-	
-	
-	// START OF TRANSPARENT TITLE BAR WINDOW
-//	CGFloat titleBarHeight = getTitleBarHeight(window);
-//	windowRect.origin.y -= titleBarHeight;
-//	windowRect.size.height += titleBarHeight;
-//	window.titlebarAppearsTransparent = YES;
-//	window.styleMask |= NSWindowStyleMaskFullSizeContentView;
-	
-	
+
+	bool hasTransparentTitleBar = false;
+	if (hasTransparentTitleBar) {
+		// START OF TRANSPARENT TITLE BAR WINDOW
+		CGFloat titleBarHeight = getTitleBarHeight(window);
+		windowRect.origin.y -= titleBarHeight;
+		windowRect.size.height += titleBarHeight;
+		window.titlebarAppearsTransparent = YES;
+		window.styleMask |= NSWindowStyleMaskFullSizeContentView;
+	}
+
 	window.acceptsMouseMovedEvents = YES;
 	id appName					   = [[NSProcessInfo processInfo] processName];
 

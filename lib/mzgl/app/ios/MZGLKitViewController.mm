@@ -19,8 +19,10 @@
 @implementation MZGLKitViewController {
 	MZGLKitView *mzView;
 	BOOL currentlyPaused;
+	BOOL sizeChangeTriggered;
+	CGSize lastSize;
 }
-- (void) deleteCppObjects {
+- (void)deleteCppObjects {
 	[mzView deleteCppObjects];
 }
 // in an AUV3, all instances of the plugin run
@@ -80,19 +82,32 @@ EAGLContext *context = nil;
 	}
 }
 
+// this will happen on orientation, but happens before the actual layout happens
+// and new safe insets are provided by the OS, so we should wait til
+// viewDidLayoutSubviews gets called before doing the work. Problem is
+// viewDidLayoutSubviews gets called a lot so we need to gate it.
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id)coordinator {
 	//	NSLog(@"Orientation changed %.0f %.0f", size.width, size.height);
-	if (mzView != nil) {
-		auto app = [mzView getApp];
-		if (app != nullptr) {
-			app->g.width  = size.width * app->g.pixelScale;
-			app->g.height = size.height * app->g.pixelScale;
 
-			auto eventDispatcher = [mzView getEventDispatcher];
-			if (eventDispatcher && eventDispatcher->hasSetup()) {
-				eventDispatcher->resized();
+	sizeChangeTriggered = YES;
+	lastSize			= size;
+}
+
+- (void)viewDidLayoutSubviews {
+	if (sizeChangeTriggered) {
+		if (mzView != nil) {
+			auto app = [mzView getApp];
+			if (app != nullptr) {
+				app->g.width  = lastSize.width * app->g.pixelScale;
+				app->g.height = lastSize.height * app->g.pixelScale;
+
+				auto eventDispatcher = [mzView getEventDispatcher];
+				if (eventDispatcher && eventDispatcher->hasSetup()) {
+					eventDispatcher->resized();
+				}
 			}
 		}
+		sizeChangeTriggered = NO;
 	}
 }
 
