@@ -79,7 +79,7 @@ public:
 		touchDelta = touch - startTouch;
 
 		if (!active) {
-			if (glm::length(touchDelta) > hysteresisDistance) { //} * g.width / 750.f) {
+			if (glm::length(touchDelta) > hysteresisDistance) {
 				activate();
 			}
 		}

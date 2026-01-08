@@ -1346,3 +1346,18 @@ std::string readFromLockFile() {
 	readStringFromFile(getLockFilePath(), outStr);
 	return outStr;
 }
+
+SafeInsets getSafeInsets() {
+#if TARGET_OS_IOS && !MZGL_PLUGIN
+	UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
+	if (@available(iOS 11.0, *)) {
+		UIEdgeInsets insets = [window safeAreaInsets];
+		auto scale			= [UIScreen mainScreen].scale;
+		return {static_cast<int>(insets.top * scale),
+				static_cast<int>(insets.right * scale),
+				static_cast<int>(insets.bottom * scale),
+				static_cast<int>(insets.left * scale)};
+	}
+#endif
+	return {0, 0, 0, 0};
+}

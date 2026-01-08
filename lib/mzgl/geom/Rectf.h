@@ -240,4 +240,9 @@ public:
 		r += offset;
 		return r;
 	}
+	Rectf operator-(const glm::vec2 &offset) const {
+		Rectf r = *this;
+		r -= offset;
+		return r;
+	}
 };

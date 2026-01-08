@@ -156,6 +156,14 @@ bool isTabletDevice();
 // returns -1 if not supported
 int64_t getAvailableMemory();
 
+struct SafeInsets {
+	int top;
+	int right;
+	int bottom;
+	int left;
+};
+SafeInsets getSafeInsets();
+
 ////////////////////////////////////////////////////////////////////////////////
 
 enum class Cursor {

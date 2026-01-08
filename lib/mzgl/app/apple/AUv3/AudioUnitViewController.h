@@ -6,9 +6,6 @@
 //  Copyright © 2019 Marek Bereza. All rights reserved.
 //
 
-#if !TARGET_OS_SIMULATOR
-
-
 #import <CoreAudioKit/CoreAudioKit.h>
 
 #include "mzgl_platform.h"
@@ -21,4 +18,3 @@
 #endif
 @end
 
-#endif
