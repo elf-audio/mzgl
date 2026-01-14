@@ -24,7 +24,7 @@ public:
 
 	bool touchDown(float x, float y, int id) override;
 
-	void mouseScrolled(float x, float y, float scrollX, float scrollY) override;
+	bool mouseScrolled(float x, float y, float scrollX, float scrollY) override;
 
 	bool drawingScrollbar = false;
 	bool scrollbarDims	  = true;

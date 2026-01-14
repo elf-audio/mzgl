@@ -54,8 +54,8 @@ public:
 	virtual void touchMoved(float x, float y, int id) {}
 	virtual void touchUp(float x, float y, int id) {}
 
-	virtual void mouseScrolled(float x, float y, float scrollX, float scrollY) {}
-	virtual void mouseZoomed(float x, float y, float zoom) {}
+	virtual bool mouseScrolled(float x, float y, float scrollX, float scrollY) { return false; }
+	virtual bool mouseZoomed(float x, float y, float zoom) { return false; }
 
 	virtual bool keyDown(int key) { return false; }
 	virtual void keyUp(int key) {}
@@ -81,8 +81,8 @@ public:
 	void _touchUp(float x, float y, int id);
 	void _touchMoved(float x, float y, int id);
 	bool _touchDown(float x, float y, int id);
-	void _mouseScrolled(float x, float y, float scrollX, float scrollY);
-	void _mouseZoomed(float x, float y, float zoom);
+	bool _mouseScrolled(float x, float y, float scrollX, float scrollY);
+	bool _mouseZoomed(float x, float y, float zoom);
 	bool _keyDown(int key);
 	bool _keyUp(int key);
 	void _updateDeprecated();

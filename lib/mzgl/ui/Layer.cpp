@@ -192,34 +192,50 @@ void Layer::addChildren(std::vector<Layer *> layers) {
 	}
 }
 
-void Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
-	if (!visible) return;
+bool Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
+	if (!visible) return false;
 
 	float xx = x;
 	float yy = y;
 	transformMouse(xx, yy);
+
+	// if we're clipping to bounds, reject any touches
+	// that aren't inside the bounds
+	if (clipToBounds && !inside(x, y)) return false;
+
 	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		(*it)->_mouseScrolled(xx, yy, scrollX, scrollY);
+		if ((*it)->_mouseScrolled(xx, yy, scrollX, scrollY)) {
+			return true;
+		}
 	}
 
 	if (interactive && inside(x, y)) {
-		mouseScrolled(x, y, scrollX, scrollY);
+		return mouseScrolled(x, y, scrollX, scrollY);
 	}
+	return false;
 }
 
-void Layer::_mouseZoomed(float x, float y, float zoom) {
-	if (!visible) return;
+bool Layer::_mouseZoomed(float x, float y, float zoom) {
+	if (!visible) return false;
 
 	float xx = x;
 	float yy = y;
 	transformMouse(xx, yy);
+
+	// if we're clipping to bounds, reject any touches
+	// that aren't inside the bounds
+	if (clipToBounds && !inside(x, y)) return false;
+
 	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		(*it)->_mouseZoomed(xx, yy, zoom);
+		if ((*it)->_mouseZoomed(xx, yy, zoom)) {
+			return true;
+		}
 	}
 
 	if (interactive && inside(x, y)) {
-		mouseZoomed(x, y, zoom);
+		return mouseZoomed(x, y, zoom);
 	}
+	return false;
 }
 
 void Layer::_touchOver(float x, float y) {
@@ -272,9 +288,7 @@ bool Layer::_touchDown(float x, float y, int id) {
 
 	// if we're clipping to bounds, reject any touches
 	// that aren't inside the bounds
-	if (clipToBounds) {
-		if (!inside(x, y)) return false;
-	}
+	if (clipToBounds && !inside(x, y)) return false;
 
 	for (auto it = children.rbegin(); it != children.rend(); it++) {
 		if ((*it)->_touchDown(xx, yy, id)) {

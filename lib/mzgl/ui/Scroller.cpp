@@ -147,10 +147,11 @@ void Scroller::setContentHeight(float contentHeight) {
 	this->content->height	   = contentHeight;
 	contentHeightExplicitlySet = true;
 }
-void Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
+bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	if (content->height <= height) {
-		return;
+		return true;
 	}
 
 	contentVelocity = vec2(scrollX * 4.f, scrollY * 4.f);
+	return true;
 }
