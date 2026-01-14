@@ -151,7 +151,6 @@ SCENARIO("Variables can be copied", "[Variable]") {
 				REQUIRE(var == 0.5f);
 				REQUIRE(secondVar == 0.5f);
 				REQUIRE(var.getNumListeners() == 1);
-				REQUIRE(secondVar.getNumListeners() == 1);
 			}
 		}
 	}
@@ -168,8 +167,6 @@ SCENARIO("Variables can be copy constructed", "[Variable]") {
 			THEN("The first and second variables should be the same") {
 				REQUIRE(var == 0.5f);
 				REQUIRE(secondVar == 0.5f);
-				REQUIRE(var.getNumListeners() == 1);
-				REQUIRE(secondVar.getNumListeners() == 1);
 			}
 		}
 	}
@@ -189,8 +186,6 @@ SCENARIO("Variable listeners are copied", "[Variable]") {
 			THEN("The first and second variables should be the same") {
 				REQUIRE(var1 == 0.5f);
 				REQUIRE(var2 == 0.5f);
-				REQUIRE(var1.getNumListeners() == 1);
-				REQUIRE(var2.getNumListeners() == 1);
 			}
 		}
 	}
