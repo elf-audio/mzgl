@@ -28,7 +28,7 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 			default: [self setDepthStencilPixelFormat:MTLPixelFormatInvalid]; break;
 		}
 		self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
-		[self setDrawableSize:frame.size];
+		[self setDrawableSize:[self convertSizeToBacking:frame.size]];
 
 		// TODO: this might be why it looks a bit crispy, try linear?
 		//		[self.layer setMagnificationFilter:kCAFilterNearest];
