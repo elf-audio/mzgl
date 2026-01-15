@@ -30,6 +30,7 @@ UndoManager::UndoManager() {
 void UndoManager::clear() {
 	undoStack.clear();
 	undoPos = undoStack.end();
+	notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 }
 
 std::size_t UndoManager::size() const {
@@ -54,6 +55,7 @@ bool UndoManager::undo() {
 	undoPos--;
 	(*undoPos)->undo();
 	//	Log::d() << "UNDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
+	notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 	return true;
 }
 
@@ -62,6 +64,7 @@ bool UndoManager::redo() {
 	(*undoPos)->redo();
 	undoPos++;
 	//	Log::d() << "REDO: Stack pos: " << std::distance(undoStack.begin(), undoPos) << " size: " << undoStack.size();
+	notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 	return true;
 }
 
@@ -111,6 +114,9 @@ void UndoManager::endGesture() {
 	gestureGroup = nullptr;
 	if (!dynamic_pointer_cast<GroupUndoable>(group)->empty()) {
 		commit(group);
+	} else {
+		// Notify even if gesture was empty, in case state needs updating
+		notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 	}
 }
 
@@ -144,4 +150,5 @@ void UndoManager::commit(UndoableRef item) {
 
 	item->redo();
 	undoPos = undoStack.end();
+	notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 }

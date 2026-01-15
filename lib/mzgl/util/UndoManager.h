@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <deque>
+#include "Listenable.h"
 
 /**
  * this is a thing that can be undone or redone,
@@ -28,7 +29,13 @@ public:
 
 using UndoableRef = std::shared_ptr<Undoable>;
 
-class UndoManager {
+class UndoManagerListener {
+public:
+	virtual ~UndoManagerListener() = default;
+	virtual void undoRedoStateChanged() = 0;
+};
+
+class UndoManager : public Listenable<UndoManagerListener> {
 public:
 	static constexpr int MAX_UNDO_LEVELS = 40;
 
