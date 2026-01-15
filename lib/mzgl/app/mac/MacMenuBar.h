@@ -12,16 +12,32 @@
 #include <functional>
 #include <map>
 
+class MacMenuItem;
+
 class MacMenu {
 public:
 	enum class KeyModifier { None, Shift, Alt };
 	std::string name;
 	MacMenu(std::string name)
 		: name(name) {}
-	void addItem(std::string title, std::string shortcut, std::function<void()> action);
-	void addItem(std::string title, std::string shortcut, KeyModifier modifier, std::function<void()> action);
+	std::shared_ptr<MacMenuItem> addItem(std::string title, std::string shortcut, std::function<void()> action);
+	std::shared_ptr<MacMenuItem> addItem(std::string title,
+										 std::string shortcut,
+										 KeyModifier modifier,
+										 std::function<void()> action);
 	void addSeparator();
 	void clear();
+};
+
+class MacMenuItem {
+public:
+	void setEnabled(bool enabled);
+	bool isEnabled() const;
+	void *getNativeMenuItem();
+	void setNativeMenuItem(void *item);
+
+private:
+	void *nativeMenuItem = nullptr;
 };
 
 class MacMenuBar {
