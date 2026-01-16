@@ -25,6 +25,11 @@ public:
 
 	// how to reverse the forward action.
 	virtual void undo() = 0;
+
+	// Returns estimated memory size in bytes for this undoable action.
+	// Override in subclasses to enable memory-aware undo limits.
+	// Default implementation returns 0 (no memory tracking).
+	virtual size_t getMemorySize() const { return 0; }
 };
 
 using UndoableRef = std::shared_ptr<Undoable>;
@@ -37,9 +42,10 @@ public:
 
 class UndoManager : public Listenable<UndoManagerListener> {
 public:
-	static constexpr int MAX_UNDO_LEVELS = 40;
+	static constexpr int MAX_UNDO_LEVELS		= 40;
+	static constexpr size_t DEFAULT_MEMORY_LIMIT = 100 * 1024 * 1024; // 100MB
 
-	UndoManager();
+	UndoManager(size_t memoryLimit = DEFAULT_MEMORY_LIMIT);
 
 	/**
 	 * To perform an undoable action - wrap it in an undoable
@@ -49,11 +55,19 @@ public:
 	void commit(UndoableRef item);
 
 	/**
-	 * Same thing as above but with lambdas for convenience
+	 * Same thing as above but with lambdas for convenience.
+	 * The optional memorySize parameter allows tracking memory usage
+	 * for this undo action (in bytes). When total memory usage exceeds
+	 * the configured limit, older actions are automatically evicted.
 	 */
-	void commit(std::function<void()> &&redo, std::function<void()> &&undo);
+	void commit(std::function<void()> &&redo, std::function<void()> &&undo, size_t memorySize = 0);
 
 	std::size_t size() const;
+
+	// Memory tracking API
+	size_t getMemoryUsage() const;
+	size_t getMemoryLimit() const;
+	void setMemoryLimit(size_t limit);
 
 	/**
 	 * You can group multiple commits by sandwiching between
@@ -79,6 +93,15 @@ private:
 	UndoableRef gestureGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;
+
+	// Memory tracking
+	size_t memoryLimit;
+	size_t currentMemoryUsage;
+
+	// Helper methods for memory management
+	void addMemoryUsage(size_t bytes);
+	void subtractMemoryUsage(size_t bytes);
+	void evictOldEntriesIfNeeded();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
