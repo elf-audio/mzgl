@@ -166,14 +166,15 @@ void UndoManager::commit(UndoableRef item) {
 	undoStack.push_back(item);
 	addMemoryUsage(item->getMemorySize());
 
+	// Update position to end (must be done before eviction to have valid iterator)
+	undoPos = undoStack.end();
+
 	// Evict old entries if needed
 	evictOldEntriesIfNeeded();
 
 	// Execute the action
 	item->redo();
 
-	// Update position
-	undoPos = undoStack.end();
 	notify([](UndoManagerListener *l) { l->undoRedoStateChanged(); });
 }
 
@@ -199,11 +200,12 @@ void UndoManager::evictOldEntriesIfNeeded() {
 		// Calculate position of undoPos in the stack
 		size_t posIndex = std::distance(undoStack.begin(), undoPos);
 
-		// Can't remove if it would invalidate undoPos
-		// (i.e., we're at the beginning and haven't undone anything)
-		if (posIndex == 0) {
-			// We're at the oldest entry and can't undo further
-			// This is an edge case where current state > limit
+		// Stop evicting if we would lose the current state or undo capability
+		// - posIndex == 0: undoPos at begin(), can't undo further
+		// - posIndex == 1: only one item before undoPos, removing it would make undo impossible
+		if (posIndex <= 1) {
+			// Edge case: single oversized item or just added item
+			// Keep at least one item to maintain undo stack integrity
 			break;
 		}
 
