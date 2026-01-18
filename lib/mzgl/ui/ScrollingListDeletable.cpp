@@ -17,7 +17,7 @@ void ScrollingListDeletableView::draw() {
 
 	float pos = notDeletePos;
 	if (deleting) {
-		deleteDecidey = std::clamp(deleteDecidey + (shouldDelete ? 0.05f : -0.05f), 0.f, 1.f);
+		deleteDecidey = std::clamp(deleteDecidey + (swipedFarEnoughToDelete ? 0.05f : -0.05f), 0.f, 1.f);
 		pos			  = mapf(easeInOutCubic(deleteDecidey), 0, 1, notDeletePos, deletePos);
 	}
 
@@ -116,20 +116,20 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 			if (deleting) {
 				horizontalScrollTarget = delta.x;
 
-				if (x < decidePoint - width * 0.02 && !shouldDelete) {
-					shouldDelete = true;
+				if (x < decidePoint - width * 0.02 && !swipedFarEnoughToDelete) {
+					swipedFarEnoughToDelete = true;
 					haptics.lightTap();
-				} else if (x > decidePoint + width * 0.02 && shouldDelete) {
-					shouldDelete = false;
+				} else if (x > decidePoint + width * 0.02 && swipedFarEnoughToDelete) {
+					swipedFarEnoughToDelete = false;
 					haptics.lightTap();
 				}
 			} else if (delta.x < -width * 0.5) {
 				haptics.lightTap();
-				horizontalScrollTarget = -width;
-				deleting			   = true;
-				shouldDelete		   = true;
-				start.x				   = width + x;
-				decidePoint			   = x + width * 0.05;
+				horizontalScrollTarget	= -width;
+				deleting				= true;
+				swipedFarEnoughToDelete = true;
+				start.x					= width + x;
+				decidePoint				= x + width * 0.05;
 				//		} else if(horizontalScrollTarget>deleteButtonWidth) {
 				//			horizontalScrollTarget = deleteButtonWidth;
 			} else {
@@ -162,13 +162,21 @@ void ScrollingListDeletableView::touchMoved(float x, float y, int id) {
 void ScrollingListDeletableView::touchUp(float x, float y, int id) {
 	if (canDelete && horizontallyScrolling) {
 		if (deleting) {
-			if (shouldDelete) {
-				horizontalScrollTarget = -width;
-				collapsing			   = true;
-				deleteSelf();
+			auto deleteOrNot = [this](bool shouldDelete) {
+				if (shouldDelete) {
+					horizontalScrollTarget = -width;
+					collapsing			   = true;
+					deleteSelf();
+				} else {
+					horizontalScrollTarget = 0.f;
+				}
+			};
+			if (swipedFarEnoughToDelete && settings.checkIfShouldDelete) {
+				settings.checkIfShouldDelete(deleteOrNot);
 			} else {
-				horizontalScrollTarget = 0.f;
+				deleteOrNot(swipedFarEnoughToDelete);
 			}
+
 		} else {
 			if (settings.hasActionButton && horizontalScrollTarget > settings.actionButtonWidth / 2) {
 				horizontalScrollTarget = settings.actionButtonWidth;

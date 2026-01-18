@@ -30,6 +30,7 @@ public:
 		Font *font						 = nullptr;
 		const Dialogs &dialogs;
 		bool momentary = true;
+		std::function<void(std::function<void(bool)>)> checkIfShouldDelete;
 
 		enum class SelectionBehaviour {
 			OnMouseDown,
@@ -68,7 +69,7 @@ private:
 	float initialScrollTarget	 = 0.f;
 	bool deleting				 = false;
 	float decidePoint			 = 0;
-	bool shouldDelete			 = false;
+	bool swipedFarEnoughToDelete = false;
 	float deleteDecidey			 = 0.f;
 	vec2 totalMovement {0.f, 0.f};
 	vec2 prevTouch {0.f, 0.f};
