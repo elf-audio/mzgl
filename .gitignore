@@ -18,3 +18,4 @@ opt/iPlug2
 examples/build/*
 examples/bin/*
 .idea
+lib/mzgl/App.h.pch
