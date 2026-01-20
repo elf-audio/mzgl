@@ -20,9 +20,7 @@ public:
 		targetRect = *this;
 		index	   = slot;
 	}
-
-	virtual void draw(Graphics &g, bool isReordering) {}
-
+	
 	void startDragging(vec2 start, int _touchId) {
 		touchStart = start;
 		touchId	   = _touchId;

@@ -75,27 +75,11 @@ void ReorderableGrid::doLayout(int numCols) {
 
 void ReorderableGrid::draw() {
 	ScopedAlphaBlend bl(g, true);
-	g.pushMatrix();
-	g.translate(x, y);
-
+	ScopedTranslate tr(g, x, y);
+	
 	for (auto &sl: slotPositions) {
 		drawSlotPosition(sl);
 	}
-
-	// draw all non-dragging items
-	for (auto *item: items) {
-		if (!item->dragging) {
-			item->draw(g, reordering);
-		}
-	}
-
-	// draw all dragging items
-	for (auto *item: items) {
-		if (item->dragging) {
-			item->draw(g, reordering);
-		}
-	}
-	g.popMatrix();
 }
 
 bool ReorderableGrid::touchDown(float x, float y, int id) {
