@@ -20,7 +20,6 @@ HEADER_SEARCH_PATHS = 						\
 			../opt/blahdio/ext/drlibs		\
 			../lib/ZipFile/lib				\
 			../lib/ghc-filesystem/include   \
-			../lib/farbot/include			\
 			../lib/ZipFile/lib/zipper
 OTHER_CFLAGS = -DSOKOL_METAL
 OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__ -DSOKOL_METAL

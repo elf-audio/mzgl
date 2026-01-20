@@ -1865,7 +1865,6 @@
 			isa = PBXGroup;
 			children = (
 				EAF6F4972E09AEC200DE5361 /* sokol */,
-				EA6A6BE42B0FA0EA007026A7 /* farbot */,
 				EAAA54B02755436D00021ACA /* glm */,
 				EA297BEB25C954E600F890AE /* portaudio */,
 				EA18359A2432C18B00A5C3E8 /* mzgl */,
@@ -2467,44 +2466,12 @@
 			path = apple;
 			sourceTree = "<group>";
 		};
-		EA6A6BE42B0FA0EA007026A7 /* farbot */ = {
-			isa = PBXGroup;
-			children = (
-				EA6A6BE52B0FA0EA007026A7 /* CMakeLists.txt */,
-				EA6A6BE62B0FA0EA007026A7 /* LICENSE */,
-				EA6A6BE72B0FA0EA007026A7 /* test */,
-				EA6A6BE92B0FA0EA007026A7 /* include */,
-				EA6A6BF22B0FA0EB007026A7 /* README.md */,
-			);
-			path = farbot;
-			sourceTree = "<group>";
-		};
 		EA6A6BE72B0FA0EA007026A7 /* test */ = {
 			isa = PBXGroup;
 			children = (
 				EA6A6BE82B0FA0EA007026A7 /* test.cpp */,
 			);
 			path = test;
-			sourceTree = "<group>";
-		};
-		EA6A6BE92B0FA0EA007026A7 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				EA6A6BEA2B0FA0EB007026A7 /* farbot */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		EA6A6BEA2B0FA0EB007026A7 /* farbot */ = {
-			isa = PBXGroup;
-			children = (
-				EA6A6BEB2B0FA0EB007026A7 /* AsyncCaller.hpp */,
-				EA6A6BEC2B0FA0EB007026A7 /* RealtimeTraits.hpp */,
-				EA6A6BED2B0FA0EB007026A7 /* detail */,
-				EA6A6BF02B0FA0EB007026A7 /* fifo.hpp */,
-				EA6A6BF12B0FA0EB007026A7 /* RealtimeObject.hpp */,
-			);
-			path = farbot;
 			sourceTree = "<group>";
 		};
 		EA6A6BED2B0FA0EB007026A7 /* detail */ = {

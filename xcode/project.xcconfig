@@ -29,7 +29,6 @@ HEADERS_COMMON = 									\
 		$(MZGLROOT)/lib/glm							\
 		$(MZGLROOT)/lib/nanovg						\
 		$(MZGLROOT)/lib/yoga						\
-		$(MZGLROOT)/lib/farbot/include				\
 		$(MZGLROOT)/lib/PGMidi						\
 		$(MZGLROOT)/lib/Polyline2D/include			\
 		lib/opt/gzip-hpp/include					\
