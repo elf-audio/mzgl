@@ -76,8 +76,10 @@ private:
 	static bool isIdle(const std::atomic<uint32_t> &pending, const std::atomic<bool> &inCb);
 
 	class LambdaQueue;
+	class ProducerTokenWrapper;
 	std::thread::id mainThreadId;
 	std::shared_ptr<LambdaQueue> mainThreadQueue;
+	std::unique_ptr<ProducerTokenWrapper> producerToken;
 	std::atomic<bool> hasSetMainThreadId {false};
 	std::mutex pollMutex;
 
