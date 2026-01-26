@@ -143,12 +143,16 @@ std::string getAndroidTempDir() {
 
 std::string getAndroidInternalDataPath() {
 	if (getAndroidAppPtr() == nullptr) return "";
-	return std::string(getAndroidAppPtr()->activity->internalDataPath);
+	const char *path = getAndroidAppPtr()->activity->internalDataPath;
+	if (path == nullptr) return "";
+	return std::string(path);
 }
 
 std::string getAndroidExternalDataPath() {
 	if (getAndroidAppPtr() == nullptr) return "";
-	return std::string(getAndroidAppPtr()->activity->externalDataPath);
+	const char *path = getAndroidAppPtr()->activity->externalDataPath;
+	if (path == nullptr) return "";
+	return std::string(path);
 }
 
 std::string getAndroidExternalStorageDirectory() {
