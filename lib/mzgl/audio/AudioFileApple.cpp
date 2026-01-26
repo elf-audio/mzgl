@@ -148,7 +148,7 @@ static std::string checkItsNotAnMp4PretendingToBeAnMp3(std::string path) {
 		return path;
 	}
 
-	int bytesToRead = 11;
+	constexpr int bytesToRead = 11;
 	if (fs::file_size(p) > bytesToRead) {
 		char data[bytesToRead];
 		std::ifstream fstr;
