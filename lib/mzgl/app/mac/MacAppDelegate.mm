@@ -160,7 +160,7 @@ bool hasTransparentTitleBar = true;
 	[win setContentView:textView];
 	id appName = [[NSProcessInfo processInfo] processName];
 	[win cascadeTopLeftFromPoint:NSMakePoint(40, 40)];
-	[textView insertText:[@"About " stringByAppendingString:appName]];
+	[textView setString:[@"About " stringByAppendingString:appName]];
 	[win orderFrontRegardless];
 }
 

@@ -364,9 +364,9 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	mzAssert(bytes.size() < 65536);
 
 	static constexpr auto packetExtraSpace = 100;
-	Byte packetBuffer[bytes.size() + packetExtraSpace];
+	std::vector<Byte> packetBuffer(bytes.size() + packetExtraSpace);
 
-	auto *packetList   = (MIDIPacketList *) packetBuffer;
+	auto *packetList   = (MIDIPacketList *) packetBuffer.data();
 	MIDIPacket *packet = MIDIPacketListInit(packetList);
 
 	uint64_t timestamp = 0;
