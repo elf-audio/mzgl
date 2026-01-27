@@ -13,6 +13,16 @@
 		9C038EA22D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
 		9C038EA32D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
 		9C038EA42D538A410047E060 /* Base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C038E9D2D538A410047E060 /* Base64.h */; };
+		9C04FB8E2F337D5900DBABAD /* GLRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB8C2F337D5900DBABAD /* GLRenderer.h */; };
+		9C04FB8F2F337D5900DBABAD /* GLRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */; };
+		9C04FB902F337D5900DBABAD /* GLRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB8C2F337D5900DBABAD /* GLRenderer.h */; };
+		9C04FB912F337D5900DBABAD /* GLRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */; };
+		9C04FB922F337D5900DBABAD /* GLRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */; };
+		9C04FB932F337D5900DBABAD /* GLRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */; };
+		9C04FB942F337D5900DBABAD /* GLRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB8C2F337D5900DBABAD /* GLRenderer.h */; };
+		9C04FB962F337D6600DBABAD /* GLRenderMode.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB952F337D6600DBABAD /* GLRenderMode.h */; };
+		9C04FB972F337D6600DBABAD /* GLRenderMode.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB952F337D6600DBABAD /* GLRenderMode.h */; };
+		9C04FB982F337D6600DBABAD /* GLRenderMode.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C04FB952F337D6600DBABAD /* GLRenderMode.h */; };
 		9C5EF32E2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
 		9C5EF32F2C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
 		9C5EF3302C9C6A7200D282EC /* MidiMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */; };
@@ -21,12 +31,12 @@
 		9C62AAEB2CF777A1008376A8 /* Camera.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18361C2432C18B00A5C3E8 /* Camera.h */; };
 		9C62AAEC2CF777A1008376A8 /* MitredLine.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18362D2432C18B00A5C3E8 /* MitredLine.h */; };
 		9C62AAED2CF777A1008376A8 /* Vbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836372432C18B00A5C3E8 /* Vbo.h */; };
-		9C62AAEE2CF777A1008376A8 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
+		9C62AAEE2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAEF2CF777A1008376A8 /* Graphics.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836412432C18B00A5C3E8 /* Graphics.h */; };
-		9C62AAF02CF777A1008376A8 /* glfontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369B2432C18B00A5C3E8 /* glfontstash.h */; };
+		9C62AAF02CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DA27E39E6B0081A5CB /* pwd2key.h */; };
 		9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0F25C954E600F890AE /* pa_trace.h */; };
-		9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836982432C18B00A5C3E8 /* stb_truetype.h */; };
+		9C62AAF32CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF42CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
 		9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC924A609CA000F057B /* YGLayout.h */; };
@@ -58,7 +68,7 @@
 		9C62AB102CF777A1008376A8 /* RoundedRect.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836262432C18B00A5C3E8 /* RoundedRect.h */; };
 		9C62AB112CF777A1008376A8 /* pa_mac_core.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF525C954E600F890AE /* pa_mac_core.h */; };
 		9C62AB122CF777A1008376A8 /* NVGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA6ACC642475DE7000BC0012 /* NVGUI.h */; };
-		9C62AB132CF777A1008376A8 /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
+		9C62AB132CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB142CF777A1008376A8 /* pa_jack.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF325C954E600F890AE /* pa_jack.h */; };
 		9C62AB152CF777A1008376A8 /* stringUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67378289BC441001F778D /* stringUtil.h */; };
 		9C62AB162CF777A1008376A8 /* zipper.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6EE27E39E6B0081A5CB /* zipper.h */; };
@@ -84,7 +94,7 @@
 		9C62AB2A2CF777A1008376A8 /* Texture.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836402432C18B00A5C3E8 /* Texture.h */; };
 		9C62AB2B2CF777A1008376A8 /* EventDispatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */; };
 		9C62AB2C2CF777A1008376A8 /* YGNodePrint.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234ACC24A609CA000F057B /* YGNodePrint.h */; };
-		9C62AB2D2CF777A1008376A8 /* gl3corefontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */; };
+		9C62AB2D2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB2E2CF777A1008376A8 /* MacAppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D22432C18B00A5C3E8 /* MacAppDelegate.h */; };
 		9C62AB2F2CF777A1008376A8 /* mzgl.pch in Headers */ = {isa = PBXBuildFile; fileRef = EA18360B2432C18B00A5C3E8 /* mzgl.pch */; };
 		9C62AB302CF777A1008376A8 /* pa_unix_util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297CE325C95E2400F890AE /* pa_unix_util.h */; };
@@ -170,7 +180,7 @@
 		9C62AB802CF777A1008376A8 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EC2432C18B00A5C3E8 /* util.h */; };
 		9C62AB812CF777A1008376A8 /* YGStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AD924A609CA000F057B /* YGStyle.h */; };
 		9C62AB822CF777A1008376A8 /* iOSStyleWidgets.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835BA2432C18B00A5C3E8 /* iOSStyleWidgets.h */; };
-		9C62AB832CF777A1008376A8 /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
+		9C62AB832CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB842CF777A1008376A8 /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
 		9C62AB852CF777A1008376A8 /* TextConsole.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D52432C18B00A5C3E8 /* TextConsole.h */; };
 		9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71FEE527F33B310005C47A /* ZipReader.h */; };
@@ -195,7 +205,7 @@
 		9C62AB992CF777A1008376A8 /* PluginEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835C12432C18B00A5C3E8 /* PluginEditor.h */; };
 		9C62AB9A2CF777A1008376A8 /* hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6E327E39E6B0081A5CB /* hmac.h */; };
 		9C62AB9B2CF777A1008376A8 /* AudioSystemIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836152432C18B00A5C3E8 /* AudioSystemIOS.h */; };
-		9C62AB9C2CF777A1008376A8 /* fontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369A2432C18B00A5C3E8 /* fontstash.h */; };
+		9C62AB9C2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB9D2CF777A1008376A8 /* ioapi.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6D027E39E6B0081A5CB /* ioapi.h */; };
 		9C62AB9E2CF777A1008376A8 /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		9C62AB9F2CF777A1008376A8 /* error.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836292432C18B00A5C3E8 /* error.h */; };
@@ -206,7 +216,7 @@
 		9C62ABA52CF777A1008376A8 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6D827E39E6B0081A5CB /* hmac.c */; };
 		9C62ABA62CF777A1008376A8 /* Image.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1836342432C18B00A5C3E8 /* Image.mm */; };
 		9C62ABA72CF777A1008376A8 /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
-		9C62ABA82CF777A1008376A8 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		9C62ABA82CF777A1008376A8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		9C62ABA92CF777A1008376A8 /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
 		9C62ABAA2CF777A1008376A8 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD824A609CA000F057B /* YGNodePrint.cpp */; };
 		9C62ABAB2CF777A1008376A8 /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
@@ -288,7 +298,7 @@
 		9C62ABF72CF777A1008376A8 /* Midi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F82432C18B00A5C3E8 /* Midi.cpp */; };
 		9C62ABF82CF777A1008376A8 /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
 		9C62ABF92CF777A1008376A8 /* ScrollingListDeletable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99ABA267A43E400157A7C /* ScrollingListDeletable.cpp */; };
-		9C62ABFA2CF777A1008376A8 /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
+		9C62ABFA2CF777A1008376A8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		9C62ABFB2CF777A1008376A8 /* pa_trace.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0425C954E600F890AE /* pa_trace.c */; };
 		9C62ABFC2CF777A1008376A8 /* ioapi_buf.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C927E39E6B0081A5CB /* ioapi_buf.c */; };
 		9C62ABFD2CF777A1008376A8 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
@@ -332,6 +342,9 @@
 		9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
 		9C9DC7552DE89CFB0070ACAC /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
 		9C9DC7562DE89D0B0070ACAC /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9CE896C02F277A74005AEDDB /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
+		9CE896C12F277A88005AEDDB /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
+		9CE896C22F277A88005AEDDB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -1225,6 +1238,9 @@
 		9C038E9C2D5388C70047E060 /* mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = mac.xcconfig; sourceTree = "<group>"; };
 		9C038E9D2D538A410047E060 /* Base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
 		9C038E9E2D538A410047E060 /* Base64.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Base64.cpp; sourceTree = "<group>"; };
+		9C04FB8C2F337D5900DBABAD /* GLRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLRenderer.h; sourceTree = "<group>"; };
+		9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GLRenderer.mm; sourceTree = "<group>"; };
+		9C04FB952F337D6600DBABAD /* GLRenderMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLRenderMode.h; sourceTree = "<group>"; };
 		9C15AA912CBD64A800388A51 /* search_paths.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = search_paths.xcconfig; path = "../../../cpm-source-cache/iOS/search_paths.xcconfig"; sourceTree = "<group>"; };
 		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
 		9CB94F202F39EB4100996766 /* pathUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pathUtil.h; sourceTree = "<group>"; };
@@ -2350,6 +2366,7 @@
 		EA1835CD2432C18B00A5C3E8 /* mac */ = {
 			isa = PBXGroup;
 			children = (
+				9C04FB952F337D6600DBABAD /* GLRenderMode.h */,
 				EA3551BA25CB2028003DF2FB /* MetalANGLE */,
 				EA3551B225CB201F003DF2FB /* GL */,
 				EA1835CE2432C18B00A5C3E8 /* TextConsole.mm */,
@@ -2756,6 +2773,8 @@
 		EA3551B225CB201F003DF2FB /* GL */ = {
 			isa = PBXGroup;
 			children = (
+				9C04FB8C2F337D5900DBABAD /* GLRenderer.h */,
+				9C04FB8D2F337D5900DBABAD /* GLRenderer.mm */,
 				EA3551B325CB201F003DF2FB /* MZGLView.h */,
 				EA3551B425CB201F003DF2FB /* MZGLView.mm */,
 			);
@@ -3610,15 +3629,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C62AAEA2CF777A1008376A8 /* Scroller.h in Headers */,
+				9C04FB972F337D6600DBABAD /* GLRenderMode.h in Headers */,
 				9C62AAEB2CF777A1008376A8 /* Camera.h in Headers */,
+				9C04FB8E2F337D5900DBABAD /* GLRenderer.h in Headers */,
 				9C62AAEC2CF777A1008376A8 /* MitredLine.h in Headers */,
 				9C62AAED2CF777A1008376A8 /* Vbo.h in Headers */,
-				9C62AAEE2CF777A1008376A8 /* OpenGLDefaultShaders.h in Headers */,
+				9C62AAEE2CF777A1008376A8 /* (null) in Headers */,
 				9C62AAEF2CF777A1008376A8 /* Graphics.h in Headers */,
-				9C62AAF02CF777A1008376A8 /* glfontstash.h in Headers */,
+				9C62AAF02CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */,
 				9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */,
-				9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */,
+				9C62AAF32CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF42CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */,
 				9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */,
@@ -3650,7 +3671,7 @@
 				9C62AB102CF777A1008376A8 /* RoundedRect.h in Headers */,
 				9C62AB112CF777A1008376A8 /* pa_mac_core.h in Headers */,
 				9C62AB122CF777A1008376A8 /* NVGUI.h in Headers */,
-				9C62AB132CF777A1008376A8 /* DropDown.h in Headers */,
+				9C62AB132CF777A1008376A8 /* (null) in Headers */,
 				9C62AB142CF777A1008376A8 /* pa_jack.h in Headers */,
 				9C62AB152CF777A1008376A8 /* stringUtil.h in Headers */,
 				9C62AB162CF777A1008376A8 /* zipper.h in Headers */,
@@ -3676,7 +3697,7 @@
 				9C62AB2A2CF777A1008376A8 /* Texture.h in Headers */,
 				9C62AB2B2CF777A1008376A8 /* EventDispatcher.h in Headers */,
 				9C62AB2C2CF777A1008376A8 /* YGNodePrint.h in Headers */,
-				9C62AB2D2CF777A1008376A8 /* gl3corefontstash.h in Headers */,
+				9C62AB2D2CF777A1008376A8 /* (null) in Headers */,
 				9C62AB2E2CF777A1008376A8 /* MacAppDelegate.h in Headers */,
 				9C62AB2F2CF777A1008376A8 /* mzgl.pch in Headers */,
 				9C62AB302CF777A1008376A8 /* pa_unix_util.h in Headers */,
@@ -3762,7 +3783,7 @@
 				9C62AB802CF777A1008376A8 /* util.h in Headers */,
 				9C62AB812CF777A1008376A8 /* YGStyle.h in Headers */,
 				9C62AB822CF777A1008376A8 /* iOSStyleWidgets.h in Headers */,
-				9C62AB832CF777A1008376A8 /* OpenGLAPI.h in Headers */,
+				9C62AB832CF777A1008376A8 /* (null) in Headers */,
 				9C62AB842CF777A1008376A8 /* netUtil.h in Headers */,
 				9C62AB852CF777A1008376A8 /* TextConsole.h in Headers */,
 				9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */,
@@ -3787,7 +3808,7 @@
 				9C62AB992CF777A1008376A8 /* PluginEditor.h in Headers */,
 				9C62AB9A2CF777A1008376A8 /* hmac.h in Headers */,
 				9C62AB9B2CF777A1008376A8 /* AudioSystemIOS.h in Headers */,
-				9C62AB9C2CF777A1008376A8 /* fontstash.h in Headers */,
+				9C62AB9C2CF777A1008376A8 /* (null) in Headers */,
 				9C62AB9D2CF777A1008376A8 /* ioapi.h in Headers */,
 				9C62AB9E2CF777A1008376A8 /* UndoManager.h in Headers */,
 				9C62AB9F2CF777A1008376A8 /* error.h in Headers */,
@@ -3934,6 +3955,7 @@
 				EA3551BF25CB2028003DF2FB /* MZMGLKView.h in Headers */,
 				EA183FDD2432C18D00A5C3E8 /* Tween.h in Headers */,
 				EA1840022432C18D00A5C3E8 /* SvgVbo.h in Headers */,
+				9C04FB902F337D5900DBABAD /* GLRenderer.h in Headers */,
 				EA71A73627E39E6C0081A5CB /* crypt.h in Headers */,
 				EA183FC42432C18D00A5C3E8 /* maths.h in Headers */,
 				EA3551B525CB201F003DF2FB /* MZGLView.h in Headers */,
@@ -3998,6 +4020,7 @@
 				EA234B0524A609CA000F057B /* BitUtils.h in Headers */,
 				EA183FF22432C18D00A5C3E8 /* SVG.h in Headers */,
 				EA183FC22432C18D00A5C3E8 /* errors.h in Headers */,
+				9C04FB982F337D6600DBABAD /* GLRenderMode.h in Headers */,
 				EA183FA52432C18D00A5C3E8 /* PluginEditor.h in Headers */,
 				EA71A77227E39E6C0081A5CB /* hmac.h in Headers */,
 				EA183FE82432C18D00A5C3E8 /* AudioSystemIOS.h in Headers */,
@@ -4072,6 +4095,7 @@
 				EA2B853024E7093600EA12BD /* YGNodePrint.h in Headers */,
 				EA2B854824E7093600EA12BD /* MacAppDelegate.h in Headers */,
 				EA2B855624E7093600EA12BD /* mzgl.pch in Headers */,
+				9C04FB962F337D6600DBABAD /* GLRenderMode.h in Headers */,
 				EA71A75727E39E6C0081A5CB /* aestab.h in Headers */,
 				EA2B858D24E7093600EA12BD /* Triangulator.h in Headers */,
 				EA2B859124E7093600EA12BD /* ylog.h in Headers */,
@@ -4096,6 +4120,7 @@
 				EA71A79327E39E6C0081A5CB /* defs.h in Headers */,
 				EA2B86F724E7093600EA12BD /* CompactValue.h in Headers */,
 				EA2B871224E7093600EA12BD /* nanovg.h in Headers */,
+				9C04FB942F337D5900DBABAD /* GLRenderer.h in Headers */,
 				EA2B871524E7093600EA12BD /* log.h in Headers */,
 				EA2B871C24E7093600EA12BD /* Shader.h in Headers */,
 				EA71A78527E39E6C0081A5CB /* sha1.h in Headers */,
@@ -4325,13 +4350,14 @@
 				9C62ABA52CF777A1008376A8 /* hmac.c in Sources */,
 				9C62ABA62CF777A1008376A8 /* Image.mm in Sources */,
 				9C62ABA72CF777A1008376A8 /* midiMessagePrinting.cpp in Sources */,
-				9C62ABA82CF777A1008376A8 /* OpenGLAPI.cpp in Sources */,
+				9C62ABA82CF777A1008376A8 /* (null) in Sources */,
 				9C62ABA92CF777A1008376A8 /* netUtil.cpp in Sources */,
 				9C62ABAA2CF777A1008376A8 /* YGNodePrint.cpp in Sources */,
 				9C62ABAB2CF777A1008376A8 /* WebViewOverlay.cpp in Sources */,
 				9C62ABAC2CF777A1008376A8 /* Drawer.cpp in Sources */,
 				9C62ABAD2CF777A1008376A8 /* MacFilePickerDelegate.mm in Sources */,
 				9C62ABAE2CF777A1008376A8 /* Utils.cpp in Sources */,
+				9C04FB8F2F337D5900DBABAD /* GLRenderer.mm in Sources */,
 				9C62ABAF2CF777A1008376A8 /* Int16Buffer.cpp in Sources */,
 				9C62ABB02CF777A1008376A8 /* PortAudioSystem.cpp in Sources */,
 				9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */,
@@ -4359,6 +4385,7 @@
 				9C62ABC62CF777A1008376A8 /* TextConsole.mm in Sources */,
 				9C62ABC72CF777A1008376A8 /* MacWebView.mm in Sources */,
 				9C62ABC82CF777A1008376A8 /* CDirEntry.cpp in Sources */,
+				9CE896C02F277A74005AEDDB /* TaskRunner.cpp in Sources */,
 				9C62ABC92CF777A1008376A8 /* log.cpp in Sources */,
 				9C62ABCA2CF777A1008376A8 /* mainThread.cpp in Sources */,
 				9C62ABCB2CF777A1008376A8 /* MitredLine.cpp in Sources */,
@@ -4409,7 +4436,7 @@
 				9C62ABF72CF777A1008376A8 /* Midi.cpp in Sources */,
 				9C62ABF82CF777A1008376A8 /* FileWatcher.cpp in Sources */,
 				9C62ABF92CF777A1008376A8 /* ScrollingListDeletable.cpp in Sources */,
-				9C62ABFA2CF777A1008376A8 /* DropDown.cpp in Sources */,
+				9C62ABFA2CF777A1008376A8 /* (null) in Sources */,
 				9C62ABFB2CF777A1008376A8 /* pa_trace.c in Sources */,
 				9C62ABFC2CF777A1008376A8 /* ioapi_buf.c in Sources */,
 				9C62ABFD2CF777A1008376A8 /* Dialogs.cpp in Sources */,
@@ -4446,6 +4473,8 @@
 				9C62AC1B2CF777A1008376A8 /* YGValue.cpp in Sources */,
 				9C62AC1C2CF777A1008376A8 /* pu_gixml.cpp in Sources */,
 				9C62AC1D2CF777A1008376A8 /* Image.cpp in Sources */,
+				9CE896C12F277A88005AEDDB /* OpenGLShader.cpp in Sources */,
+				9CE896C22F277A88005AEDDB /* OpenGLAPI.cpp in Sources */,
 				9C62AC1E2CF777A1008376A8 /* DateTime.cpp in Sources */,
 				9C62AC1F2CF777A1008376A8 /* MZGLEffectAU.mm in Sources */,
 				9C62AC202CF777A1008376A8 /* MZGLWebView.mm in Sources */,
@@ -4553,6 +4582,7 @@
 				EA183FCD2432C18D00A5C3E8 /* FileWatcher.cpp in Sources */,
 				EAF99ABB267A43E400157A7C /* ScrollingListDeletable.cpp in Sources */,
 				EA297C7825C954E600F890AE /* pa_trace.c in Sources */,
+				9C04FB912F337D5900DBABAD /* GLRenderer.mm in Sources */,
 				EA71A73227E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD82EC9269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA9C32E6299F9BD6000C1DD2 /* AudioUnitViewController.mm in Sources */,
@@ -4666,6 +4696,7 @@
 				EAF91F762AE16F7A00C1FD1C /* Int16Buffer.cpp in Sources */,
 				EA18412A2432C4FF00A5C3E8 /* Dylib.cpp in Sources */,
 				EAF6F49C2E09AFBF00DE5361 /* SokolImplementation.cpp in Sources */,
+				9C04FB922F337D5900DBABAD /* GLRenderer.mm in Sources */,
 				EA71A71F27E39E6B0081A5CB /* unzip.c in Sources */,
 				9C038E9F2D538A410047E060 /* Base64.cpp in Sources */,
 				EA71A79B27E39E6C0081A5CB /* zipper.cpp in Sources */,
@@ -4772,6 +4803,7 @@
 				EA2B8AE624E7093600EA12BD /* MitredLine.cpp in Sources */,
 				EA2B8AE824E7093600EA12BD /* event.cpp in Sources */,
 				EA2B8AEA24E7093600EA12BD /* Texture.cpp in Sources */,
+				9C04FB932F337D5900DBABAD /* GLRenderer.mm in Sources */,
 				EA2B8AEB24E7093600EA12BD /* NVG.cpp in Sources */,
 				EA2B8AEC24E7093600EA12BD /* Font.cpp in Sources */,
 				EAF9A15326F8B42200698263 /* log.cpp in Sources */,

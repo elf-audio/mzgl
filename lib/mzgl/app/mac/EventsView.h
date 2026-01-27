@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
+#import "GLRenderMode.h"
 
 #ifdef MZGL_SOKOL_METAL
 #	include "MZMetalView.h"
@@ -19,6 +20,12 @@
 #endif
 
 @interface EventsView : GL_VIEW_CLASS <NSWindowDelegate>
+
+- (id)initWithFrame:(NSRect)frame
+	eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher
+	 withRenderMode:(RenderMode)renderMode;
+
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
+
 - (void)shutdown;
 @end

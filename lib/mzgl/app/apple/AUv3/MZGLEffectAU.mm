@@ -13,7 +13,9 @@
 #include "Midi.h"
 
 #if !TARGET_OS_IOS
-#define USING_DESKTOP_AUV3
+#	ifndef USING_DESKTOP_AUV3
+#		define USING_DESKTOP_AUV3
+#	endif
 #endif
 
 #define AULog(fmt, ...) NSLog(@"[MZGLEffectAU %d] %@", inst, [NSString stringWithFormat:(fmt), ##__VA_ARGS__]);
@@ -102,9 +104,9 @@ struct Blocks {
 	return self;
 }
 
--(void) setupMidiOutput {
+- (void)setupMidiOutput {
 #ifdef PLUGIN_CAN_SEND_MIDI_TO_HOST
-	__weak __typeof__(self) weakSelf = self;
+	__weak __typeof__(self) weakSelf  = self;
 	plugin->onSendMidiToAudioUnitHost = [weakSelf](const MidiMessage &midiMessage,
 												   std::optional<uint64_t> timestampInNanoSeconds) {
 		static constexpr uint8_t cable			   = 0;
@@ -132,17 +134,17 @@ struct Blocks {
 
 - (void)setupIsRunningCallback {
 	__weak __typeof__(self) weakSelf = self;
-	plugin->isRunning = [weakSelf, plug = plugin.get()]() -> bool {
-		if ([weakSelf respondsToSelector:@selector(isRunning)]) {
-			if (@available(iOS 11.0, *)) {
-				return [weakSelf isRunning];
-			}
-			NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
-			return plug->hasStarted;
-		} else {
-			NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
-			return plug->hasStarted;
-		}
+	plugin->isRunning				 = [weakSelf, plug = plugin.get()]() -> bool {
+		   if ([weakSelf respondsToSelector:@selector(isRunning)]) {
+			   if (@available(iOS 11.0, *)) {
+				   return [weakSelf isRunning];
+			   }
+			   NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
+			   return plug->hasStarted;
+		   } else {
+			   NSLog(@"Error: audiounit.isRunning doesn't exist on this system");
+			   return plug->hasStarted;
+		   }
 	};
 }
 
@@ -155,10 +157,10 @@ struct Blocks {
 			[p addObject:NewAUPreset(i, [NSString stringWithUTF8String:presetNames[i].c_str()])];
 		}
 	}
-	
+
 	_factoryPresets = [p copy];
-	
-	__weak __typeof__(self) weakSelf = self;
+
+	__weak __typeof__(self) weakSelf					   = self;
 	plugin->getPresetManager()->getUserPresetNamesCallback = [weakSelf]() -> std::vector<std::string> {
 		std::vector<std::string> names;
 		for (NSUInteger i = 0; i < [[weakSelf userPresets] count]; i++) {
@@ -166,7 +168,7 @@ struct Blocks {
 		}
 		return names;
 	};
-	
+
 	_currentPreset = _factoryPresets.firstObject;
 }
 
@@ -176,7 +178,7 @@ struct Blocks {
 
 	const auto numParams = plugin->getNumParams();
 	for (int paramIndex = 0; paramIndex < numParams; ++paramIndex) {
-		auto p						   = plugin->getParam(paramIndex);
+		auto p = plugin->getParam(paramIndex);
 		if (p == nullptr) {
 			continue;
 		}
@@ -200,39 +202,40 @@ struct Blocks {
 	}
 
 	_parameterTree = [AUParameterTree createTreeWithChildren:paramList];
-	
-	__weak __typeof__(self) weakSelf = self;
+
+	__weak __typeof__(self) weakSelf   = self;
 	plugin->sendUpdatedParameterToHost = [weakSelf](unsigned int i, float f) {
 		[[[weakSelf.parameterTree allParameters] objectAtIndex:i] setValue:f];
 	};
 
 	_parameterTree.implementorValueObserver = ^(AUParameter *param, AUValue value) {
-		__strong __typeof__(self) strongSelf = weakSelf;
-		if (!strongSelf) return;
+	  __strong __typeof__(self) strongSelf = weakSelf;
+	  if (!strongSelf) return;
 
-		if (param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
-			strongSelf->plugin->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
-		}
+	  if (param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
+		  strongSelf->plugin->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
+	  }
 	};
 
 	_parameterTree.implementorValueProvider = ^AUValue(AUParameter *param) {
-		__strong __typeof__(self) strongSelf = weakSelf;
-		if (strongSelf && param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
-			return strongSelf->plugin->getParam(static_cast<unsigned int>(param.address))->get();
-		}
-		return 0.f;
+	  __strong __typeof__(self) strongSelf = weakSelf;
+	  if (strongSelf && param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
+		  return strongSelf->plugin->getParam(static_cast<unsigned int>(param.address))->get();
+	  }
+	  return 0.f;
 	};
-	
+
 	_parameterTree.implementorStringFromValueCallback = ^(AUParameter *param, const AUValue *__nullable valuePtr) {
-	  AUValue value = valuePtr == nil ? param.value : *valuePtr;
-		__strong __typeof__(self) strongSelf = weakSelf;
-		if (strongSelf && param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
-			if (strongSelf->plugin->getParam(static_cast<unsigned int>(param.address))->type == PluginParameter::Type::Int) {
-				return [NSString stringWithFormat:@"%.0f", value];
-			}
-			return [NSString stringWithFormat:@"%.2f", value];
-		}
-		return @"?";
+	  AUValue value						   = valuePtr == nil ? param.value : *valuePtr;
+	  __strong __typeof__(self) strongSelf = weakSelf;
+	  if (strongSelf && param.address >= 0 && param.address < strongSelf->plugin->getNumParams()) {
+		  if (strongSelf->plugin->getParam(static_cast<unsigned int>(param.address))->type
+			  == PluginParameter::Type::Int) {
+			  return [NSString stringWithFormat:@"%.0f", value];
+		  }
+		  return [NSString stringWithFormat:@"%.2f", value];
+	  }
+	  return @"?";
 	};
 #else
 	NSMutableArray *paramList = [[NSMutableArray alloc] init];
@@ -243,17 +246,18 @@ struct Blocks {
 		if (!p) continue;
 
 		NSString *paramName = [NSString stringWithUTF8String:p->name.c_str()];
-		AUParameter *param = [AUParameterTree
-			createParameterWithIdentifier:paramName
-									 name:paramName
-								  address:paramIndex
-									  min:p->from
-									  max:p->to
-									 unit:kAudioUnitParameterUnit_Generic
-								 unitName:nil
-									flags:kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable | kAudioUnitParameterFlag_CanRamp
-							 valueStrings:nil
-					  dependentParameters:nil];
+		AUParameter *param	= [AUParameterTree
+			 createParameterWithIdentifier:paramName
+									  name:paramName
+								   address:paramIndex
+									   min:p->from
+									   max:p->to
+									  unit:kAudioUnitParameterUnit_Generic
+								  unitName:nil
+									 flags:kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable
+										   | kAudioUnitParameterFlag_CanRamp
+							  valueStrings:nil
+					   dependentParameters:nil];
 
 		param.value = p->get();
 		[paramList addObject:param];
@@ -261,8 +265,7 @@ struct Blocks {
 
 	_parameterTree = [AUParameterTree createTreeWithChildren:paramList];
 
-	// Capture self and plugin explicitly
-	MZGLEffectAU* selfPtr = self;
+	MZGLEffectAU *selfPtr			   = self;
 	std::shared_ptr<Plugin> pluginCopy = plugin;
 
 	plugin->sendUpdatedParameterToHost = [selfPtr](unsigned int i, float f) {
@@ -272,113 +275,86 @@ struct Blocks {
 	};
 
 	_parameterTree.implementorValueObserver = ^(AUParameter *param, AUValue value) {
-		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
-			pluginCopy->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
-		}
+	  if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+		  pluginCopy->hostUpdatedParameter(static_cast<unsigned int>(param.address), value);
+	  }
 	};
 
 	_parameterTree.implementorValueProvider = ^AUValue(AUParameter *param) {
-		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
-			return pluginCopy->getParam(static_cast<unsigned int>(param.address))->get();
-		}
-		return 0.f;
+	  if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+		  return pluginCopy->getParam(static_cast<unsigned int>(param.address))->get();
+	  }
+	  return 0.f;
 	};
 
 	_parameterTree.implementorStringFromValueCallback = ^(AUParameter *param, const AUValue *__nullable valuePtr) {
-		AUValue value = valuePtr ? *valuePtr : param.value;
-		if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
-			auto paramObj = pluginCopy->getParam(static_cast<unsigned int>(param.address));
-			if (paramObj->type == PluginParameter::Type::Int) {
-				return [NSString stringWithFormat:@"%.0f", value];
-			}
-			return [NSString stringWithFormat:@"%.2f", value];
-		}
-		return @"?";
+	  AUValue value = valuePtr ? *valuePtr : param.value;
+	  if (pluginCopy && param.address >= 0 && param.address < pluginCopy->getNumParams()) {
+		  auto paramObj = pluginCopy->getParam(static_cast<unsigned int>(param.address));
+		  if (paramObj->type == PluginParameter::Type::Int) {
+			  return [NSString stringWithFormat:@"%.0f", value];
+		  }
+		  return [NSString stringWithFormat:@"%.2f", value];
+	  }
+	  return @"?";
 	};
 #endif
 }
 
-- (void) reserveBusses {
+- (void)reserveBusses {
 	static constexpr auto busSize = 8192;
-	
+
 	inputBus.reserve(busSize);
 	outputBuffers.resize(plugin->getNumOutputBusses());
-	
+
 	for (auto &bus: outputBuffers) {
 		bus.reserve(busSize);
 	}
 }
 
-+ (AVAudioFormat*) getDefaultBusFormat {
++ (AVAudioFormat *)getDefaultBusFormat {
 	return [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:2];
 }
 
-- (void) setupStreamDescription {
+- (void)setupStreamDescription {
 	AVAudioFormat *defaultFormat = [MZGLEffectAU getDefaultBusFormat];
 	asbd						 = *defaultFormat.streamDescription;
 }
 
-#ifdef USING_DESKTOP_AUV3
-- (void) setupBusses {
+- (void)setupBusses {
 	AVAudioFormat *defaultFormat = [MZGLEffectAU getDefaultBusFormat];
-	
-	static constexpr auto supportedAudioChannels = 2;
-	
-	_inputBus.init(defaultFormat, supportedAudioChannels);
-	_inputBus.bus.name = @"Input";
 
-	NSMutableArray *outBusses = [[NSMutableArray alloc] init];
-	AUAudioUnitBus *outputBus = [[AUAudioUnitBus alloc] initWithFormat:defaultFormat error:nil];
-	outputBus.name = @"Output";
-	[outBusses addObject:outputBus];
-	
-	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-															busType:AUAudioUnitBusTypeOutput
-															 busses:outBusses];
-
-	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-														   busType:AUAudioUnitBusTypeInput
-															busses:@[_inputBus.bus]];
-
-	[_outputBusArray addObserverToAllBusses:self
-								 forKeyPath:@"format"
-									options:0
-									context:(__bridge void *_Nullable) (self)];
-}
-#else
-- (void) setupBusses {
-	AVAudioFormat *defaultFormat = [MZGLEffectAU getDefaultBusFormat];
-	
 	static constexpr auto supportedAudioChannels = 8;
+
 	_inputBus.init(defaultFormat, supportedAudioChannels);
 	_inputBus.bus.name = @"Input";
-	
+
 	NSMutableArray *outBusses = [[NSMutableArray alloc] init];
+	int numOutBusses		  = plugin->getNumOutputBusses();
 	for (int i = 0; i < numOutBusses; i++) {
 		AUAudioUnitBus *b = [[AUAudioUnitBus alloc] initWithFormat:defaultFormat error:nil];
 		b.name			  = [NSString stringWithFormat:@"Output %d", (i + 1)];
 		[outBusses addObject:b];
 	}
-	
-	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-														    busType:AUAudioUnitBusTypeInput
-														     busses:@[_inputBus.bus]];
 
 	_outputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
-														     busType:AUAudioUnitBusTypeOutput
+															 busType:AUAudioUnitBusTypeOutput
 															  busses:outBusses];
-	
+
+	_inputBusArray = [[AUAudioUnitBusArray alloc] initWithAudioUnit:self
+															busType:AUAudioUnitBusTypeInput
+															 busses:@[ _inputBus.bus ]];
+
 	[_outputBusArray addObserverToAllBusses:self
 								 forKeyPath:@"format"
 									options:0
 									context:(__bridge void *_Nullable) (self)];
 }
-#endif
 
 - (void)setupWithPlugin:(std::shared_ptr<Plugin>)_plugin
 	andComponentDescription:(AudioComponentDescription)componentDescription {
 	inst		 = instanceNumber++;
-	allocated    = false;
+	allocated	 = false;
 	plugin		 = _plugin;
 	isInstrument = !(componentDescription.componentType == 'aufx' || componentDescription.componentType == 'aumf');
 	self.maximumFramesToRender = 1024;
@@ -468,8 +444,9 @@ struct Blocks {
 			AULog(@"Returning Current Factory Preset: %ld\n", (long) _currentFactoryPresetIndex);
 			return [_factoryPresets objectAtIndex:_currentFactoryPresetIndex];
 		}
-		
-		Log::e() << "AudioUnit current preset index " << _currentFactoryPresetIndex << " is out of range for " << [_factoryPresets count];
+
+		Log::e() << "AudioUnit current preset index " << _currentFactoryPresetIndex << " is out of range for "
+				 << [_factoryPresets count];
 		return nil;
 	}
 	return _currentPreset;
@@ -479,7 +456,7 @@ struct Blocks {
 	if (nil == currentPreset) {
 		return;
 	}
-	
+
 	if (currentPreset.number >= 0) {
 		for (AUAudioUnitPreset *factoryPreset in _factoryPresets) {
 			if (currentPreset.number == factoryPreset.number) {
@@ -512,14 +489,7 @@ struct Blocks {
 }
 
 - (AUAudioUnitBusArray *)inputBusses {
-#ifdef USING_DESKTOP_AUV3
 	return _inputBusArray;
-#else
-	if (isInstrument) {
-		return [super inputBusses];
-	}
-	return _inputBusArray;
-#endif
 }
 
 - (AUAudioUnitBusArray *)outputBusses {
@@ -530,24 +500,9 @@ struct Blocks {
 	if (![super allocateRenderResourcesAndReturnError:outError]) {
 		return NO;
 	}
-	
-	
-#ifdef USING_DESKTOP_AUV3
-	AUAudioUnitBus *inputBus = [_inputBusArray objectAtIndexedSubscript:0];
-	AUAudioUnitBus *outputBus = [_outputBusArray objectAtIndexedSubscript:0];
-
-	if (inputBus.format.channelCount != 2 || outputBus.format.channelCount != 2) {
-		if (outError) {
-			*outError = [NSError errorWithDomain:NSOSStatusErrorDomain
-											code:kAudioUnitErr_FailedInitialization
-										userInfo:@{NSLocalizedDescriptionKey : @"Unsupported channel configuration"}];
-		}
-		return NO;
-	}
 
 	allocated = false;
-#endif
-	
+
 	AUAudioUnitBus *firstOutputBus = [_outputBusArray objectAtIndexedSubscript:0];
 
 	if (firstOutputBus.format.channelCount != _inputBus.bus.format.channelCount) {
@@ -557,7 +512,6 @@ struct Blocks {
 										userInfo:nil];
 		}
 		self.renderResourcesAllocated = NO;
-
 		return NO;
 	}
 
@@ -594,22 +548,12 @@ struct Blocks {
 }
 
 - (BOOL)canProcessInPlace {
-	return YES;
-}
-
 #ifdef USING_DESKTOP_AUV3
-- (NSArray<NSNumber *> *)channelCapabilities {
-	return @[@2, @2];
-}
-
-- (NSArray<NSNumber *> *)supportedChannelCounts {
-	return @[@2];
-}
-
-- (BOOL)shouldChangeToFormat:(AVAudioFormat *)format forBus:(AUAudioUnitBus *)bus {
-	return format.channelCount == 2;
-}
+	return NO;
+#else
+	return YES;
 #endif
+}
 
 - (AUInternalRenderBlock)internalRenderBlock {
 	__block BufferedInputBus *input = &_inputBus;
@@ -629,9 +573,6 @@ struct Blocks {
 	std::vector<FloatBuffer> &outs = outputBuffers;
 
 	bool _isInstrument = isInstrument;
-#ifdef USING_DESKTOP_AUV3
-	_isInstrument = false;
-#endif
 
 	return ^AUAudioUnitStatus(AudioUnitRenderActionFlags *actionFlags,
 							  const AudioTimeStamp *timestamp,
@@ -644,7 +585,6 @@ struct Blocks {
 
 	  AudioBufferList *inAudioBufferList = nullptr;
 
-	  // only do all this on the first render block
 	  if (outputBusNumber == 0) {
 		  if (blks->transportState) {
 			  AUHostTransportStateFlags transportStateFlags = 0;
@@ -681,28 +621,23 @@ struct Blocks {
 			  ev = ev->head.next;
 		  }
 
-		  if (outputBusNumber != 0) return noErr;
-
-		  // pull in samples to filter
-		  if (!_isInstrument) {
+		  bool hasInput = false;
+		  if (pullInputBlock != nullptr) {
 			  AUAudioUnitStatus err = input->pullInput(actionFlags, timestamp, frameCount, 0, pullInputBlock);
-			  if (err != 0) {
-				  return err;
+			  if (err == noErr) {
+				  inAudioBufferList = input->mutableAudioBufferList;
+				  hasInput			= true;
 			  }
+		  }
 
-			  inAudioBufferList = input->mutableAudioBufferList;
-
+		  if (hasInput && inAudioBufferList != nullptr) {
 			  if (inputBusData.size() != frameCount * inAudioBufferList->mNumberBuffers) {
 				  inputBusData.resize(frameCount * inAudioBufferList->mNumberBuffers);
 			  }
 
-			  // do processing here
-			  // interleave audio channels
 			  if (inAudioBufferList->mNumberBuffers == 1) {
-				  // mono
 				  memcpy(inputBusData.data(), inAudioBufferList->mBuffers[0].mData, sizeof(float) * frameCount);
 			  } else if (inAudioBufferList->mNumberBuffers == 2) {
-				  // stereo
 				  float *L = (float *) inAudioBufferList->mBuffers[0].mData;
 				  float *R = (float *) inAudioBufferList->mBuffers[1].mData;
 
@@ -714,7 +649,6 @@ struct Blocks {
 
 			  if (outs[0].size() != frameCount * inAudioBufferList->mNumberBuffers) {
 				  int numSampsPerBuff = frameCount * inAudioBufferList->mNumberBuffers;
-				  // as long as buffer size is less than 4096, memory is already allocated
 				  for (auto &o: outs) {
 					  o.resize(numSampsPerBuff);
 				  }
@@ -722,25 +656,22 @@ struct Blocks {
 
 			  eff->process(&inputBusData, outs.data(), inAudioBufferList->mNumberBuffers);
 		  } else {
-			  if (inputBusData.size() != frameCount * outAudioBufferList->mNumberBuffers) {
-				  inputBusData.resize(frameCount * outAudioBufferList->mNumberBuffers, 0);
+			  if (inputBusData.size() != frameCount * 2) {
+				  inputBusData.resize(frameCount * 2, 0);
 			  }
 
-			  if (outs[0].size() != frameCount * outAudioBufferList->mNumberBuffers) {
-				  int numSampsPerBuff = frameCount * outAudioBufferList->mNumberBuffers;
-				  // as long as buffer size is less than 4096, memory is already allocated
+			  if (outs[0].size() != frameCount * 2) {
+				  int numSampsPerBuff = frameCount * 2;
 				  for (auto &o: outs) {
 					  o.resize(numSampsPerBuff);
 				  }
 			  }
 
-			  eff->process(&inputBusData, outs.data(), outAudioBufferList->mNumberBuffers);
+			  eff->process(&inputBusData, outs.data(), 2);
 		  }
 
-		  // now do any midi output events
 		  if (eff->getNumMidiOuts() > 0 && blks->midiOut) {
 			  for (auto &m: eff->midiOutMessages) {
-				  //					typedef OSStatus (^AUMIDIOutputEventBlock)(AUEventSampleTime eventSampleTime, uint8_t cable, NSInteger length, const uint8_t *midiBytes);
 				  AUEventSampleTime t = timestamp->mSampleTime + m.delay;
 				  auto b			  = m.msg.getBytes();
 				  blks->midiOut(t, m.outputNo, b.size(), b.data());
@@ -749,24 +680,28 @@ struct Blocks {
 		  }
 	  }
 
-	  // copy into the audioOutBufferList the appropriate buffer
+#ifdef USING_DESKTOP_AUV3
+	  if (outputBusNumber >= outs.size() || outs[outputBusNumber].size() < frameCount * 2) {
+		  if (outAudioBufferList->mBuffers[0].mData != nullptr) {
+			  memset(outAudioBufferList->mBuffers[0].mData, 0, sizeof(float) * frameCount);
+			  if (outAudioBufferList->mNumberBuffers > 1) {
+				  memset(outAudioBufferList->mBuffers[1].mData, 0, sizeof(float) * frameCount);
+			  }
+		  }
+		  return noErr;
+	  }
 
-	  // now outs has all the samples
+	  float *L = (float *) outAudioBufferList->mBuffers[0].mData;
+	  float *R = (float *) outAudioBufferList->mBuffers[1].mData;
 
-	  //         Important:
-	  //         If the caller passed non-null output pointers (outputData->mBuffers[x].mData), use those.
-	  //
-	  //         If the caller passed null output buffer pointers, process in memory owned by the Audio Unit
-	  //         and modify the (outputData->mBuffers[x].mData) pointers to point to this owned memory.
-	  //         The Audio Unit is responsible for preserving the validity of this memory until the next call to render,
-	  //         or deallocateRenderResources is called.
-	  //
-	  //         If your algorithm cannot process in-place, you will need to preallocate an output buffer
-	  //         and use it here.
-	  //
-	  //         See the description of the canProcessInPlace property.
-
-	  // If passed null output buffer pointers, process in-place in the input buffer.
+	  if (L != nullptr && R != nullptr) {
+		  for (int i = 0; i < frameCount; i++) {
+			  L[i] = outs[outputBusNumber][i * 2];
+			  R[i] = outs[outputBusNumber][i * 2 + 1];
+		  }
+	  }
+#else
+	  // iOS handling - original in-place logic
 	  if (outAudioBufferList->mBuffers[0].mData == nullptr) {
 		  for (UInt32 i = 0; i < outAudioBufferList->mNumberBuffers; ++i) {
 			  outAudioBufferList->mBuffers[i].mData = inAudioBufferList->mBuffers[i].mData;
@@ -780,6 +715,7 @@ struct Blocks {
 		  L[i] = outs[outputBusNumber][i * 2];
 		  R[i] = outs[outputBusNumber][i * 2 + 1];
 	  }
+#endif
 
 	  return noErr;
 	};

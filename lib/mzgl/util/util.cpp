@@ -30,6 +30,7 @@
 #	include <os/log.h>
 #	include <TargetConditionals.h>
 #	include <Foundation/Foundation.h>
+#	include <dlfcn.h>
 #	if TARGET_OS_IOS
 #		import <UIKit/UIKit.h>
 #	else
@@ -412,13 +413,23 @@ void setDataPath(const std::string &path) {
 	dataPathOverride	 = path;
 }
 
-#ifdef _WIN32
 static fs::path getVSTBundlePath() {
+#ifdef _WIN32
 	auto path			  = getDLLPath();
 	const auto parentPath = std::string {".."};
 	return fs::canonical(path / parentPath / parentPath / parentPath);
-}
+#elif defined(__APPLE__)
+	Dl_info info;
+	if (dladdr((void *) getVSTBundlePath, &info) && info.dli_fname) {
+		fs::path dylibPath = info.dli_fname;
+		return dylibPath.parent_path().parent_path().parent_path();
+	}
+	return "";
+#else
+	// FIXME: This needs to be implemented for other platforms
+	return "";
 #endif
+}
 
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
 std::string dataPath(const std::string &path, const std::string &appBundleId) {
@@ -429,10 +440,16 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 	if (isOverridingDataPath) return dataPathOverride + "/" + path;
 #endif
 
-#if defined(MZGL_PLUGIN_VST)
-	const auto bundlePath {getVSTBundlePath()};
-	const auto dataPath {bundlePath / "Contents" / "Resources" / "data"};
-	return (dataPath / path).string();
+#if defined(__APPLE__) && defined(MZGL_PLUGIN)
+	Dl_info info;
+	if (dladdr((void *) dataPath, &info) && info.dli_fname) {
+		std::string dylibPath = info.dli_fname;
+		if (dylibPath.find(".vst3") != std::string::npos) {
+			const auto bundlePath {getVSTBundlePath()};
+			const auto dataPath {bundlePath / "Contents" / "Resources" / "data"};
+			return (dataPath / path).string();
+		}
+	}
 #endif
 
 #if defined(__APPLE__) && defined(MZGL_MAC_GLFW)

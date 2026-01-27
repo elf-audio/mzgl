@@ -128,6 +128,7 @@ set(MZGL_SOURCES
     lib/mzgl/app/mac/NSBlockButton.m
     lib/mzgl/app/mac/MacFilePickerDelegate.mm
     lib/mzgl/app/mac/GL/MZGLView.mm
+    lib/mzgl/app/mac/GL/GLRenderer.mm
     lib/mzgl/app/mac/LayerExplorer.mm
     lib/mzgl/app/mac/TextConsole.mm
     lib/mzgl/app/mac/mainMac.mm
@@ -586,6 +587,18 @@ endif()
 
 if(NOT WIN32)
   add_compile_options(-fdiagnostics-color=always)
+endif()
+
+# macOS plugin variant with MZGL_PLUGIN defined
+if(APPLE)
+  add_library(
+    mzgl-macOS-plugin STATIC
+    ${MZGL_SOURCES} lib/mzgl/midi/midiMessagePrinting.cpp
+    lib/mzgl/midi/midiMessagePrinting.h)
+  target_include_directories(mzgl-macOS-plugin PUBLIC ${HEADERS})
+  target_compile_definitions(mzgl-macOS-plugin PUBLIC MZGL_PLUGIN)
+  get_target_property(LIBMZGL_LINK_LIBS libmzgl LINK_LIBRARIES)
+  target_link_libraries(mzgl-macOS-plugin ${LIBMZGL_LINK_LIBS})
 endif()
 
 mzgl_supress_warnings()
