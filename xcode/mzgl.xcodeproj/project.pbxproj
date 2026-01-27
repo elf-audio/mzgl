@@ -21,12 +21,12 @@
 		9C62AAEB2CF777A1008376A8 /* Camera.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18361C2432C18B00A5C3E8 /* Camera.h */; };
 		9C62AAEC2CF777A1008376A8 /* MitredLine.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18362D2432C18B00A5C3E8 /* MitredLine.h */; };
 		9C62AAED2CF777A1008376A8 /* Vbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836372432C18B00A5C3E8 /* Vbo.h */; };
-		9C62AAEE2CF777A1008376A8 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721042BF74F5B003607EB /* OpenGLDefaultShaders.h */; };
+		9C62AAEE2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAEF2CF777A1008376A8 /* Graphics.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836412432C18B00A5C3E8 /* Graphics.h */; };
-		9C62AAF02CF777A1008376A8 /* glfontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369B2432C18B00A5C3E8 /* glfontstash.h */; };
+		9C62AAF02CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6DA27E39E6B0081A5CB /* pwd2key.h */; };
 		9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C0F25C954E600F890AE /* pa_trace.h */; };
-		9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836982432C18B00A5C3E8 /* stb_truetype.h */; };
+		9C62AAF32CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF42CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */ = {isa = PBXBuildFile; fileRef = EABBA6D72B4715E100B483CB /* midiMessagePrinting.h */; };
 		9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AC924A609CA000F057B /* YGLayout.h */; };
@@ -58,7 +58,7 @@
 		9C62AB102CF777A1008376A8 /* RoundedRect.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836262432C18B00A5C3E8 /* RoundedRect.h */; };
 		9C62AB112CF777A1008376A8 /* pa_mac_core.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF525C954E600F890AE /* pa_mac_core.h */; };
 		9C62AB122CF777A1008376A8 /* NVGUI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA6ACC642475DE7000BC0012 /* NVGUI.h */; };
-		9C62AB132CF777A1008376A8 /* DropDown.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A42432C18B00A5C3E8 /* DropDown.h */; };
+		9C62AB132CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB142CF777A1008376A8 /* pa_jack.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297BF325C954E600F890AE /* pa_jack.h */; };
 		9C62AB152CF777A1008376A8 /* stringUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF67378289BC441001F778D /* stringUtil.h */; };
 		9C62AB162CF777A1008376A8 /* zipper.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6EE27E39E6B0081A5CB /* zipper.h */; };
@@ -84,7 +84,7 @@
 		9C62AB2A2CF777A1008376A8 /* Texture.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836402432C18B00A5C3E8 /* Texture.h */; };
 		9C62AB2B2CF777A1008376A8 /* EventDispatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835F32432C18B00A5C3E8 /* EventDispatcher.h */; };
 		9C62AB2C2CF777A1008376A8 /* YGNodePrint.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234ACC24A609CA000F057B /* YGNodePrint.h */; };
-		9C62AB2D2CF777A1008376A8 /* gl3corefontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836992432C18B00A5C3E8 /* gl3corefontstash.h */; };
+		9C62AB2D2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB2E2CF777A1008376A8 /* MacAppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D22432C18B00A5C3E8 /* MacAppDelegate.h */; };
 		9C62AB2F2CF777A1008376A8 /* mzgl.pch in Headers */ = {isa = PBXBuildFile; fileRef = EA18360B2432C18B00A5C3E8 /* mzgl.pch */; };
 		9C62AB302CF777A1008376A8 /* pa_unix_util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297CE325C95E2400F890AE /* pa_unix_util.h */; };
@@ -170,7 +170,7 @@
 		9C62AB802CF777A1008376A8 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835EC2432C18B00A5C3E8 /* util.h */; };
 		9C62AB812CF777A1008376A8 /* YGStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = EA234AD924A609CA000F057B /* YGStyle.h */; };
 		9C62AB822CF777A1008376A8 /* iOSStyleWidgets.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835BA2432C18B00A5C3E8 /* iOSStyleWidgets.h */; };
-		9C62AB832CF777A1008376A8 /* OpenGLAPI.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7721072BF74F5B003607EB /* OpenGLAPI.h */; };
+		9C62AB832CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB842CF777A1008376A8 /* netUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EADA5B282A138E36000DCE7B /* netUtil.h */; };
 		9C62AB852CF777A1008376A8 /* TextConsole.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D52432C18B00A5C3E8 /* TextConsole.h */; };
 		9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71FEE527F33B310005C47A /* ZipReader.h */; };
@@ -195,7 +195,7 @@
 		9C62AB992CF777A1008376A8 /* PluginEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835C12432C18B00A5C3E8 /* PluginEditor.h */; };
 		9C62AB9A2CF777A1008376A8 /* hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6E327E39E6B0081A5CB /* hmac.h */; };
 		9C62AB9B2CF777A1008376A8 /* AudioSystemIOS.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836152432C18B00A5C3E8 /* AudioSystemIOS.h */; };
-		9C62AB9C2CF777A1008376A8 /* fontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18369A2432C18B00A5C3E8 /* fontstash.h */; };
+		9C62AB9C2CF777A1008376A8 /* (null) in Headers */ = {isa = PBXBuildFile; };
 		9C62AB9D2CF777A1008376A8 /* ioapi.h in Headers */ = {isa = PBXBuildFile; fileRef = EA71A6D027E39E6B0081A5CB /* ioapi.h */; };
 		9C62AB9E2CF777A1008376A8 /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		9C62AB9F2CF777A1008376A8 /* error.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836292432C18B00A5C3E8 /* error.h */; };
@@ -206,7 +206,7 @@
 		9C62ABA52CF777A1008376A8 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6D827E39E6B0081A5CB /* hmac.c */; };
 		9C62ABA62CF777A1008376A8 /* Image.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1836342432C18B00A5C3E8 /* Image.mm */; };
 		9C62ABA72CF777A1008376A8 /* midiMessagePrinting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EABBA6D62B4715E100B483CB /* midiMessagePrinting.cpp */; };
-		9C62ABA82CF777A1008376A8 /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7721062BF74F5B003607EB /* OpenGLAPI.cpp */; };
+		9C62ABA82CF777A1008376A8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		9C62ABA92CF777A1008376A8 /* netUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADA5B272A138E36000DCE7B /* netUtil.cpp */; };
 		9C62ABAA2CF777A1008376A8 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD824A609CA000F057B /* YGNodePrint.cpp */; };
 		9C62ABAB2CF777A1008376A8 /* WebViewOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5250E52C2C648F00DE5DFC /* WebViewOverlay.cpp */; };
@@ -288,7 +288,7 @@
 		9C62ABF72CF777A1008376A8 /* Midi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F82432C18B00A5C3E8 /* Midi.cpp */; };
 		9C62ABF82CF777A1008376A8 /* FileWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835F02432C18B00A5C3E8 /* FileWatcher.cpp */; };
 		9C62ABF92CF777A1008376A8 /* ScrollingListDeletable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF99ABA267A43E400157A7C /* ScrollingListDeletable.cpp */; };
-		9C62ABFA2CF777A1008376A8 /* DropDown.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835AC2432C18B00A5C3E8 /* DropDown.cpp */; };
+		9C62ABFA2CF777A1008376A8 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		9C62ABFB2CF777A1008376A8 /* pa_trace.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0425C954E600F890AE /* pa_trace.c */; };
 		9C62ABFC2CF777A1008376A8 /* ioapi_buf.c in Sources */ = {isa = PBXBuildFile; fileRef = EA71A6C927E39E6B0081A5CB /* ioapi_buf.c */; };
 		9C62ABFD2CF777A1008376A8 /* Dialogs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAD82EC8269CA19400861BE3 /* Dialogs.cpp */; };
@@ -332,6 +332,9 @@
 		9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
 		9C9DC7552DE89CFB0070ACAC /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
 		9C9DC7562DE89D0B0070ACAC /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9CE896C02F277A74005AEDDB /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
+		9CE896C12F277A88005AEDDB /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
+		9CE896C22F277A88005AEDDB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -3667,12 +3670,12 @@
 				9C62AAEB2CF777A1008376A8 /* Camera.h in Headers */,
 				9C62AAEC2CF777A1008376A8 /* MitredLine.h in Headers */,
 				9C62AAED2CF777A1008376A8 /* Vbo.h in Headers */,
-				9C62AAEE2CF777A1008376A8 /* OpenGLDefaultShaders.h in Headers */,
+				9C62AAEE2CF777A1008376A8 /* (null) in Headers */,
 				9C62AAEF2CF777A1008376A8 /* Graphics.h in Headers */,
-				9C62AAF02CF777A1008376A8 /* glfontstash.h in Headers */,
+				9C62AAF02CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF12CF777A1008376A8 /* pwd2key.h in Headers */,
 				9C62AAF22CF777A1008376A8 /* pa_trace.h in Headers */,
-				9C62AAF32CF777A1008376A8 /* stb_truetype.h in Headers */,
+				9C62AAF32CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF42CF777A1008376A8 /* (null) in Headers */,
 				9C62AAF52CF777A1008376A8 /* midiMessagePrinting.h in Headers */,
 				9C62AAF62CF777A1008376A8 /* YGLayout.h in Headers */,
@@ -3704,7 +3707,7 @@
 				9C62AB102CF777A1008376A8 /* RoundedRect.h in Headers */,
 				9C62AB112CF777A1008376A8 /* pa_mac_core.h in Headers */,
 				9C62AB122CF777A1008376A8 /* NVGUI.h in Headers */,
-				9C62AB132CF777A1008376A8 /* DropDown.h in Headers */,
+				9C62AB132CF777A1008376A8 /* (null) in Headers */,
 				9C62AB142CF777A1008376A8 /* pa_jack.h in Headers */,
 				9C62AB152CF777A1008376A8 /* stringUtil.h in Headers */,
 				9C62AB162CF777A1008376A8 /* zipper.h in Headers */,
@@ -3730,7 +3733,7 @@
 				9C62AB2A2CF777A1008376A8 /* Texture.h in Headers */,
 				9C62AB2B2CF777A1008376A8 /* EventDispatcher.h in Headers */,
 				9C62AB2C2CF777A1008376A8 /* YGNodePrint.h in Headers */,
-				9C62AB2D2CF777A1008376A8 /* gl3corefontstash.h in Headers */,
+				9C62AB2D2CF777A1008376A8 /* (null) in Headers */,
 				9C62AB2E2CF777A1008376A8 /* MacAppDelegate.h in Headers */,
 				9C62AB2F2CF777A1008376A8 /* mzgl.pch in Headers */,
 				9C62AB302CF777A1008376A8 /* pa_unix_util.h in Headers */,
@@ -3816,7 +3819,7 @@
 				9C62AB802CF777A1008376A8 /* util.h in Headers */,
 				9C62AB812CF777A1008376A8 /* YGStyle.h in Headers */,
 				9C62AB822CF777A1008376A8 /* iOSStyleWidgets.h in Headers */,
-				9C62AB832CF777A1008376A8 /* OpenGLAPI.h in Headers */,
+				9C62AB832CF777A1008376A8 /* (null) in Headers */,
 				9C62AB842CF777A1008376A8 /* netUtil.h in Headers */,
 				9C62AB852CF777A1008376A8 /* TextConsole.h in Headers */,
 				9C62AB862CF777A1008376A8 /* ZipReader.h in Headers */,
@@ -3841,7 +3844,7 @@
 				9C62AB992CF777A1008376A8 /* PluginEditor.h in Headers */,
 				9C62AB9A2CF777A1008376A8 /* hmac.h in Headers */,
 				9C62AB9B2CF777A1008376A8 /* AudioSystemIOS.h in Headers */,
-				9C62AB9C2CF777A1008376A8 /* fontstash.h in Headers */,
+				9C62AB9C2CF777A1008376A8 /* (null) in Headers */,
 				9C62AB9D2CF777A1008376A8 /* ioapi.h in Headers */,
 				9C62AB9E2CF777A1008376A8 /* UndoManager.h in Headers */,
 				9C62AB9F2CF777A1008376A8 /* error.h in Headers */,
@@ -4375,7 +4378,7 @@
 				9C62ABA52CF777A1008376A8 /* hmac.c in Sources */,
 				9C62ABA62CF777A1008376A8 /* Image.mm in Sources */,
 				9C62ABA72CF777A1008376A8 /* midiMessagePrinting.cpp in Sources */,
-				9C62ABA82CF777A1008376A8 /* OpenGLAPI.cpp in Sources */,
+				9C62ABA82CF777A1008376A8 /* (null) in Sources */,
 				9C62ABA92CF777A1008376A8 /* netUtil.cpp in Sources */,
 				9C62ABAA2CF777A1008376A8 /* YGNodePrint.cpp in Sources */,
 				9C62ABAB2CF777A1008376A8 /* WebViewOverlay.cpp in Sources */,
@@ -4409,6 +4412,7 @@
 				9C62ABC62CF777A1008376A8 /* TextConsole.mm in Sources */,
 				9C62ABC72CF777A1008376A8 /* MacWebView.mm in Sources */,
 				9C62ABC82CF777A1008376A8 /* CDirEntry.cpp in Sources */,
+				9CE896C02F277A74005AEDDB /* TaskRunner.cpp in Sources */,
 				9C62ABC92CF777A1008376A8 /* log.cpp in Sources */,
 				9C62ABCA2CF777A1008376A8 /* mainThread.cpp in Sources */,
 				9C62ABCB2CF777A1008376A8 /* MitredLine.cpp in Sources */,
@@ -4459,7 +4463,7 @@
 				9C62ABF72CF777A1008376A8 /* Midi.cpp in Sources */,
 				9C62ABF82CF777A1008376A8 /* FileWatcher.cpp in Sources */,
 				9C62ABF92CF777A1008376A8 /* ScrollingListDeletable.cpp in Sources */,
-				9C62ABFA2CF777A1008376A8 /* DropDown.cpp in Sources */,
+				9C62ABFA2CF777A1008376A8 /* (null) in Sources */,
 				9C62ABFB2CF777A1008376A8 /* pa_trace.c in Sources */,
 				9C62ABFC2CF777A1008376A8 /* ioapi_buf.c in Sources */,
 				9C62ABFD2CF777A1008376A8 /* Dialogs.cpp in Sources */,
@@ -4496,6 +4500,8 @@
 				9C62AC1B2CF777A1008376A8 /* YGValue.cpp in Sources */,
 				9C62AC1C2CF777A1008376A8 /* pu_gixml.cpp in Sources */,
 				9C62AC1D2CF777A1008376A8 /* Image.cpp in Sources */,
+				9CE896C12F277A88005AEDDB /* OpenGLShader.cpp in Sources */,
+				9CE896C22F277A88005AEDDB /* OpenGLAPI.cpp in Sources */,
 				9C62AC1E2CF777A1008376A8 /* DateTime.cpp in Sources */,
 				9C62AC1F2CF777A1008376A8 /* MZGLEffectAU.mm in Sources */,
 				9C62AC202CF777A1008376A8 /* MZGLWebView.mm in Sources */,
