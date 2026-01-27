@@ -6,7 +6,6 @@
 //  Copyright © 2019 Marek Bereza. All rights reserved.
 //
 
-#if !TARGET_OS_SIMULATOR
 #import "AudioUnitViewController.h"
 #import "MZGLEffectAU.h"
 #include <thread>
@@ -32,8 +31,7 @@ using namespace std;
 	MZGLKitViewController *vc;
 	MZGLKitView *glView;
 #else
-
-	EventsView *glView;
+	MZGLView *glView;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 #endif
 	MZGLEffectAU *audioUnit;
@@ -53,9 +51,9 @@ using namespace std;
 
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
-	app.reset();
-	plugin.reset();
 	g.reset();
+//	app.reset();
+//	plugin.reset();
 }
 
 - (void)setup {
@@ -94,7 +92,7 @@ using namespace std;
 	return glView;
 }
 #else
-- (EventsView *)getView {
+- (MZGLView *)getView {
 	return glView;
 }
 #endif
@@ -117,6 +115,10 @@ using namespace std;
 }
 
 - (void)viewDidLayoutSubviews {
+	[self tryToResize];
+}
+
+- (void)viewDidLayout {
 	[self tryToResize];
 }
 
@@ -199,4 +201,3 @@ using namespace std;
 	return audioUnit;
 }
 @end
-#endif
