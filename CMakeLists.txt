@@ -90,6 +90,7 @@ set(MZGL_SOURCES
     lib/mzgl/ui/ScrollingListDeletable.cpp
     lib/mzgl/ui/ScrollingListItem.cpp
     lib/mzgl/ui/Slider.cpp
+    lib/mzgl/ui/Select.cpp
     lib/mzgl/ui/FlexboxLayout.cpp
     lib/mzgl/util/Base64.cpp
     lib/mzgl/util/Base64.h
