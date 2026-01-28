@@ -172,11 +172,11 @@ bool hasTransparentTitleBar = true;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification {
-	Log::d() << "applicationWillFinishLaunching";
+//	Log::d() << "applicationWillFinishLaunching";
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	Log::d() << "applicationDidFinishLaunching";
+//	Log::d() << "applicationDidFinishLaunching";
 
 	signal(SIGTERM, handleTerminateSignal);
 
@@ -216,7 +216,6 @@ bool hasTransparentTitleBar = true;
 	[view shutdown];
 	eventDispatcher = nullptr;
 	app				= nullptr;
-	Log::d() << "applicationWillTerminate " << app.use_count();
 }
 
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
