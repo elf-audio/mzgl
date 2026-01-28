@@ -3,6 +3,7 @@
 //
 
 #include "Select.h"
+#include "Font.h"
 
 Select::Select(Graphics &g, const std::string &label, const std::vector<std::string> &options)
 	: Layer(g, "select")
@@ -85,17 +86,22 @@ void Select::draw() {
 	g.noFill();
 	g.drawRect(*this);
 
-	float textY = y + collapsedHeight * 0.7f;
+	float rowH     = expanded ? collapsedHeight : height;
+	float textY    = y + rowH * 0.7f;
+	float textPad  = 8.f;
+	float arrowPad = 28.f;
+	int maxTextW   = static_cast<int>(width - textPad - arrowPad);
+	Font &font     = g.getFont();
 
 	if (!expanded) {
 		// Draw label and selected value
 		g.setColor(1.f);
 		std::string displayText = label.empty() ? options[selectedIndex] : label + ": " + options[selectedIndex];
-		g.drawText(displayText, x + 8, textY);
+		g.drawText(font.ellipsize(displayText, maxTextW), x + textPad, textY);
 
 		// Draw dropdown arrow
 		float arrowX = x + width - 20;
-		float arrowY = y + collapsedHeight * 0.5f;
+		float arrowY = y + rowH * 0.5f;
 		g.setColor(0.7f);
 		g.fill();
 		g.drawTriangle({arrowX, arrowY - 4}, {arrowX + 8, arrowY - 4}, {arrowX + 4, arrowY + 4});
@@ -107,13 +113,14 @@ void Select::draw() {
 
 		g.setColor(1.f);
 		std::string displayText = label.empty() ? options[selectedIndex] : label + ": " + options[selectedIndex];
-		g.drawText(displayText, x + 8, textY);
+		g.drawText(font.ellipsize(displayText, maxTextW), x + textPad, textY);
 
 		// Divider
 		g.setColor(0.4f);
 		g.drawLine(x, y + collapsedHeight, x + width, y + collapsedHeight);
 
-		// Draw options
+		// Draw options (full width available, no arrow)
+		int optMaxW = static_cast<int>(width - textPad * 2);
 		for (int i = 0; i < static_cast<int>(options.size()); i++) {
 			float optY = y + collapsedHeight * (i + 1);
 
@@ -126,7 +133,7 @@ void Select::draw() {
 
 			// Option text
 			g.setColor(i == selectedIndex ? 0.5f : 1.f);
-			g.drawText(options[i], x + 8, optY + collapsedHeight * 0.7f);
+			g.drawText(font.ellipsize(options[i], optMaxW), x + textPad, optY + collapsedHeight * 0.7f);
 		}
 	}
 
