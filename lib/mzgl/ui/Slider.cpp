@@ -9,24 +9,21 @@
 #include "Slider.h"
 #include "maths.h"
 #include "stringUtil.h"
-Slider &Slider::darkTheme() {
-	color		= hexColor(0x474747);
-	railColor	= hexColor(0x232323);
-	handleColor = hexColor(0xb2b2b2);
-	return *this;
-}
+
+static vec4 railColor {0.6, 0.6, 0.6, 1};
+static vec4 handleColor = hexColor(0xCCCCCC);
 
 void Slider::setValue(float f) {
-	drag(mapf(f, min, max, x + height / 2, x + width - height / 2));
+	*value = f;
 }
 
-Slider::Slider(Graphics &g, const std::string &name, float &value, float min, float max, float curve)
-	: Layer(g, name) {
+Slider::Slider(Graphics &g, const std::string &name, float &_value, float _min, float _max, float _power)
+	: Layer(g, name)
+	, minValue(_min)
+	, maxValue(_max)
+	, power(_power)
+	, value(&_value) {
 	interactive = true;
-	this->value = &value;
-	this->min	= min;
-	this->max	= max;
-	this->curve = curve;
 }
 
 static std::string str(float val) {
@@ -35,41 +32,49 @@ static std::string str(float val) {
 	return to_string(val, 0);
 }
 
+float Slider::valueToNormalized(float x) {
+	float val = mapf(x, minValue, maxValue, 0, 1, true);
+	if (power != 1.f) {
+		val = std::pow(val, 1.f / power);
+	}
+	return val;
+}
+
+float Slider::normalizedToValue(float val) {
+	if (power != 1.f) {
+		if (val > 1) val = 1;
+		else if (val < 0) val = 0;
+		val = std::pow(val, power);
+	}
+	return mapf(val, 0, 1, minValue, maxValue, true);
+}
+
 void Slider::draw() {
 	g.setColor(railColor);
 	g.drawRect(*this);
 	g.setColor(handleColor);
-	float handleWidth = height;
-	float normVal	  = mapf(*value, min, max, 0, 1, true);
-	float val		  = std::pow(normVal, 1.0f / curve) * (width - height) + height / 2;
-	g.drawRect(x + val - handleWidth / 2, y, handleWidth, height);
+
+	auto norm = valueToNormalized(*value);
+	g.drawRect(x, y, width * norm, height);
 	if (!name.empty()) {
 		g.setColor(0);
 		g.drawText(name + ": " + str(*value), x + 5, y + height - 5);
 	}
 }
-void Slider::drag(float x) {
-	float handleWidth = height;
-	float normVal	  = mapf(x, handleWidth / 2, width - handleWidth / 2, 0, 1, true);
-	float val		  = std::pow(normVal, curve) * (max - min) + min;
-
-	if (value != nullptr) {
-		*value = val;
-	}
-
-	if (valueChanged) {
-		valueChanged(val);
-	}
-}
 
 bool Slider::touchDown(float x, float y, int id) {
-	if (inside(x, y)) {
-		drag(x);
-		return true;
-	}
-	return false;
+	if (!inside(x, y)) return false;
+	touchMoved(x, y, id);
+	return true;
 }
 
 void Slider::touchMoved(float x, float y, int id) {
-	drag(x);
+	float norm = std::clamp((x - this->x) / width, 0.f, 1.f);
+	float val  = normalizedToValue(norm);
+	if (val != *value) {
+		*value = val;
+		if (valueChanged) {
+			valueChanged(val);
+		}
+	}
 }
