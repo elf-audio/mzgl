@@ -51,6 +51,7 @@ float Slider::normalizedToValue(float val) {
 }
 
 void Slider::draw() {
+	g.fill();
 	g.setColor(railColor);
 	g.drawRect(*this);
 	g.setColor(handleColor);
