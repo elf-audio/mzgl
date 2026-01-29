@@ -22,7 +22,8 @@ Slider::Slider(Graphics &g, const std::string &name, float &_value, float _min, 
 	, minValue(_min)
 	, maxValue(_max)
 	, power(_power)
-	, value(&_value) {
+	, value(&_value)
+	, initialValue(_value) {
 	interactive = true;
 }
 
@@ -64,7 +65,18 @@ void Slider::draw() {
 
 bool Slider::touchDown(float x, float y, int id) {
 	if (!inside(x, y)) return false;
-	touchMoved(x, y, id);
+
+	float now = static_cast<float>(g.currFrameTime);
+	if (now - lastTapTime < doubleTapInterval) {
+		*value = initialValue;
+		if (valueChanged) {
+			valueChanged(initialValue);
+		}
+		lastTapTime = 0;
+	} else {
+		lastTapTime = now;
+		touchMoved(x, y, id);
+	}
 	return true;
 }
 

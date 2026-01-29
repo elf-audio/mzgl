@@ -31,4 +31,8 @@ public:
 private:
 	float valueToNormalized(float x);
 	float normalizedToValue(float val);
+
+	float initialValue = 0;
+	float lastTapTime  = 0;
+	static constexpr float doubleTapInterval = 0.35f;
 };
