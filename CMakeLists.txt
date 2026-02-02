@@ -224,7 +224,6 @@ set(HEADERS
     lib/pu_gixml/src
     lib/misc
     lib/yoga
-    lib/farbot/include
     # lib/ghc-filesystem/include
 )
 
@@ -312,7 +311,7 @@ else()
   if(APPLE)
     if(NOT IOS)
       list(APPEND MZGL_SOURCES lib/mzgl/audio/mac/CoreAudioSystem.cpp
-              lib/mzgl/audio/mac/CoreAudioSystem.h)
+           lib/mzgl/audio/mac/CoreAudioSystem.h)
     endif()
   endif()
 
