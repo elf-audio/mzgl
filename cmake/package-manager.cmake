@@ -128,7 +128,7 @@ function(mzgl_add_package PACKAGE_NAME)
   mzgl_print_in_yellow("[CPM] -> Adding package ${PACKAGE_NAME}")
   mzgl_save_cmake_log_level()
 
-  cpmaddpackage(${PACKAGE_NAME})
+  cpmaddpackage(${PACKAGE_NAME} ${ARGN})
 
   set("${CPM_LAST_PACKAGE_NAME}_DEPS_DIR"
       "${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}"
