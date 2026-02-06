@@ -40,11 +40,6 @@ public:
 	}
 	explicit Variable(const T &var) { assign(var); }
 
-	virtual ~Variable() {
-		for (auto *listener: ownedListeners) {
-			delete listener;
-		}
-	}
 	[[maybe_unused]] const Variable<T> &operator=(const T &var) {
 		if (variable == var) {
 			return *this;
@@ -71,9 +66,9 @@ public:
 	auto getNumListeners() { return listeners.size(); }
 	void addListener(Listener *listener) { listeners.push_back(listener); }
 	void addListener(std::function<void(T)> variableChanged) {
-		auto *listener = new LambdaListener(*this, variableChanged);
+		auto listener = std::make_shared<LambdaListener>(*this, variableChanged);
 		ownedListeners.push_back(listener);
-		listeners.push_back(listener);
+		listeners.push_back(listener.get());
 	}
 	void removeListener(Listener *listener) {
 		listeners.erase(std::remove_if(std::begin(listeners),
@@ -113,7 +108,7 @@ private:
 	T variable;
 
 	std::vector<Listener *> listeners;
-	std::vector<Listener *> ownedListeners;
+	std::vector<std::shared_ptr<Listener>> ownedListeners;
 };
 
 template <class T>
@@ -271,6 +266,13 @@ private:
 
 class IndexedVariable {
 public:
+	class Listener {
+	public:
+		virtual ~Listener() = default;
+		virtual void indexedVariableChanged(int value) {}
+		virtual void indexedVariableOptionsChanged() {}
+	};
+
 	IndexedVariable(int v = 0, const std::vector<std::string> &_options = {})
 		: value(v)
 		, options(_options) {}
@@ -288,10 +290,40 @@ public:
 		if (value >= static_cast<int>(options.size())) {
 			value = 0; // reset to first option if current value is out of range
 		}
+		for (auto *listener: listeners) {
+			listener->indexedVariableOptionsChanged();
+		}
 	}
 	int getNumOptions() const { return options.size(); }
 	int getValue() const { return value; }
-	void addListener(std::function<void(int)> listener) { listeners.push_back(listener); }
+
+private:
+	class LambdaListener : public Listener {
+	public:
+		LambdaListener(IndexedVariable &_b, std::function<void(int)> _cb)
+			: cb(std::move(_cb))
+			, b(_b) {}
+
+		void indexedVariableChanged(int a) override { cb(a); }
+
+	private:
+		std::function<void(int)> cb;
+		IndexedVariable &b;
+	};
+
+public:
+	void addListener(std::function<void(int)> variableChanged) {
+		auto listener = std::make_shared<LambdaListener>(*this, std::move(variableChanged));
+		ownedListeners.push_back(listener);
+		listeners.push_back(listener.get());
+	}
+	void addListener(Listener *listener) { listeners.push_back(listener); }
+	void removeListener(Listener *listener) {
+		listeners.erase(std::remove_if(std::begin(listeners),
+									   std::end(listeners),
+									   [listener](auto &&l) { return l == listener; }),
+						std::end(listeners));
+	}
 	void setWithoutNotification(int v) {
 		if (v < 0 || v >= static_cast<int>(options.size())) {
 			mzAssert(false, "Index out of range");
@@ -301,7 +333,7 @@ public:
 
 private:
 	std::vector<std::string> options;
-
+	std::vector<std::shared_ptr<Listener>> ownedListeners;
 	int value = 0;
 	void assign(int v) {
 		if (v < 0 || v >= static_cast<int>(options.size())) {
@@ -312,10 +344,40 @@ private:
 			notifyListeners();
 		}
 	}
-	std::vector<std::function<void(int)>> listeners;
+	std::vector<Listener *> listeners;
 	void notifyListeners() {
-		for (auto &listener: listeners) {
-			listener(value);
+		for (auto *listener: listeners) {
+			listener->indexedVariableChanged(value);
 		}
 	}
+};
+
+class IndexedVariableWatcher : private IndexedVariable::Listener {
+public:
+	IndexedVariableWatcher(IndexedVariable &var,
+						   std::function<void(int)> onValueChanged = nullptr,
+						   std::function<void()> onOptionsChanged  = nullptr)
+		: variable(var)
+		, valueCallback(std::move(onValueChanged))
+		, optionsCallback(std::move(onOptionsChanged)) {
+		variable.addListener(this);
+	}
+
+	~IndexedVariableWatcher() { variable.removeListener(this); }
+
+	IndexedVariableWatcher(const IndexedVariableWatcher &)			  = delete;
+	IndexedVariableWatcher &operator=(const IndexedVariableWatcher &) = delete;
+
+private:
+	void indexedVariableChanged(int value) override {
+		if (valueCallback) valueCallback(value);
+	}
+
+	void indexedVariableOptionsChanged() override {
+		if (optionsCallback) optionsCallback();
+	}
+
+	IndexedVariable &variable;
+	std::function<void(int)> valueCallback;
+	std::function<void()> optionsCallback;
 };
