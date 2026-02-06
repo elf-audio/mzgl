@@ -45,6 +45,11 @@ public:
 	}
 	~ScopedListener() { listenable.removeListener(listener); }
 
+	ScopedListener(const ScopedListener &)			  = delete;
+	ScopedListener &operator=(const ScopedListener &) = delete;
+	ScopedListener(ScopedListener &&)				  = delete;
+	ScopedListener &operator=(ScopedListener &&)	  = delete;
+
 private:
 	Listenable<T> &listenable;
 	T *listener;
