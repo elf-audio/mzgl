@@ -24,9 +24,13 @@
 #include <memory.h>
 
 #include "nanovg.h"
+
+#include "mzgl_platform.h"
 #define FONTSTASH_IMPLEMENTATION
-#include "fontstash-nvg.h"
 #define STB_IMAGE_IMPLEMENTATION
+CLANG_IGNORE_WARNINGS_BEGIN("-Wcomma")
+CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-variable")
+#include "fontstash-nvg.h"
 #include "stb_image.h"
 
 #ifdef _MSC_VER
@@ -2934,3 +2938,5 @@ void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* l
 		*lineh *= invscale;
 }
 // vim: ft=c nu noet ts=4
+
+CLANG_IGNORE_WARNINGS_END

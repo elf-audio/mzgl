@@ -14,7 +14,12 @@
 #define FONTSTASH_IMPLEMENTATION // Expands implementation
 
 #include "mzOpenGL.h"
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wcomma")
+CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-variable")
+CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-function")
 #include "fontstash.h"
+CLANG_IGNORE_WARNINGS_END
 #include "util.h"
 #ifdef __APPLE__ // I don't think this block is needed
 #	include <TargetConditionals.h>
@@ -111,7 +116,7 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	// have to make some memory here that will be freed by fontstash
 	unsigned char *d = new unsigned char[data.size()];
 	memcpy(d, data.data(), data.size());
-	fontNormal = fonsAddFontMem(fs, "sans", d, data.size(), 1);
+	fontNormal = fonsAddFontMem(fs, "sans", d, static_cast<int>(data.size()), 1);
 	if (fontNormal == FONS_INVALID) {
 		Log::e() << "Could not add font normal.";
 		return false;
@@ -190,7 +195,7 @@ std::string Font::ellipsize(const std::string &str, int w) const {
 	// Helper to safely remove one UTF-8 character from the back
 	auto popBackChar = [&utf8CharLen](std::string &s) {
 		if (s.empty()) return;
-		int pos = s.size() - 1;
+		int pos = static_cast<int>(s.size()) - 1;
 		// Walk backwards to find the start of the last character
 		while (pos > 0 && (static_cast<unsigned char>(s[pos]) & 0xC0) == 0x80) {
 			--pos; // continuation byte (10xxxxxx)
@@ -437,7 +442,7 @@ Font::Font() {
 static std::pair<std::string, std::string> splitAtWidth(const Font &f, const std::string &word, float width) {
 	std::string first  = "";
 	std::string second = "";
-	for (int i = word.size(); i > 0; i--) {
+	for (int i = static_cast<int>(word.size()); i > 0; i--) {
 		auto sub = word.substr(0, i);
 		if (f.getWidth(sub) <= width) {
 			first  = sub;
@@ -491,7 +496,6 @@ static void addLines(const Font &f, std::vector<std::string> &lines, const std::
 				// fit on the line with a '/'
 				// printf("Word too long: %s\n", (*it).c_str());
 				// break the word down
-				auto &word		 = *it;
 				auto beforeAfter = splitAtWidth(f, lineWithNextWord, width);
 				lines.push_back(beforeAfter.first);
 				*it = beforeAfter.second;

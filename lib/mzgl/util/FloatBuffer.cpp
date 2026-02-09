@@ -199,7 +199,7 @@ int FloatBuffer::findMaxPos() const {
 		}
 	}
 #endif
-	return pos;
+	return static_cast<int>(pos);
 }
 
 int FloatBuffer::findMinPos() const {

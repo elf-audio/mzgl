@@ -42,7 +42,7 @@
 	self				  = [super initWithFrame:frame configuration:config];
 	std::string customUrl = [url UTF8String];
 	if (self != nil) {
-		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 		self.UIDelegate = self;
 
 		if (customUrl != "" && customUrl.find("http") != -1) {

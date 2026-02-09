@@ -112,6 +112,8 @@ set(MZGL_SOURCES
     lib/mzgl/util/TaskRunner.cpp
     lib/mzgl/util/TaskRunner.h
     lib/mzgl/util/mzAssert.cpp
+    lib/mzgl/util/pathUtil.h
+    lib/mzgl/util/pathUtil.cpp
     lib/mzgl/util/stringUtil.cpp
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/audio/juce/JuceAudioSystem.cpp

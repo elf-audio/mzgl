@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wunused-function")
 #include "MPE_fastpoly2tri.h"
+CLANG_IGNORE_WARNINGS_END
 
 #include "Graphics.h"
 class Triangulator {

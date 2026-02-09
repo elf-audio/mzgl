@@ -79,6 +79,8 @@
 	return eventDispatcher;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
 	if (displayLink != NULL) {
 		CVDisplayLinkStop(displayLink);
@@ -87,6 +89,7 @@
 	// can't do this apparently, but clang warns about it.
 	//	[super dealloc];
 }
+#pragma clang diagnostic pop
 
 CVReturn displayCallback(CVDisplayLinkRef displayLink,
 						 const CVTimeStamp *inNow,
@@ -128,13 +131,6 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 
 - (void)createGLResources {
 	[[self openGLContext] makeCurrentContext];
-}
-
-static int getTitleBarHeight(NSWindow *window) {
-	NSRect frameRect   = window.frame;
-	NSRect contentRect = [window contentRectForFrameRect:frameRect];
-
-	return frameRect.size.height - contentRect.size.height;
 }
 
 - (void)windowResized:(NSNotification *)notification {

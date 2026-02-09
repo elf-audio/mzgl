@@ -159,7 +159,7 @@ bool ZipReaderFile::seek(int offset, SeekOrigin origin) {
 	return true;
 }
 
-size_t ZipReaderFile::read(int8_t *d, uint32_t sz) {
+size_t ZipReaderFile::read(int8_t *d, size_t sz) {
 	int pos = (int) zip.tellg() - fileStart;
 	if (fileSize - pos >= sz) {
 		zip.read((char *) d, sz);
@@ -200,7 +200,7 @@ void ZipReaderFile::extract(const std::string &path) {
 ZipEndOfCD readEndOfCD(std::ifstream &zip) {
 	ZipEndOfCD endOfCd;
 	zip.seekg(0, std::ios_base::end);
-	int size = zip.tellg();
+	int size = static_cast<int>(zip.tellg());
 
 	auto pos = size - 4; // or so?
 	while (pos > 0) {
@@ -238,7 +238,7 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 	}
 	zip.seekg(endOfCd.cdFileOffset, std::ios_base::beg);
 	zip.read((char *) cd.data(), cd.size());
-	int charsRead = zip.gcount();
+	int charsRead = static_cast<int>(zip.gcount());
 	if (charsRead != cd.size()) {
 		printf("Couldn't read first entry - only read %d chars(%ld)\n", charsRead, cd.size());
 		throw std::runtime_error("Couldn't read first CD entry");

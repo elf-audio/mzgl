@@ -40,7 +40,7 @@ private:
 			pipelineDesc.layout.attrs[i] = {.format = attrs[i], .buffer_index = i};
 		}
 		if (isInstancing) {
-			int instanceIndexBuffer									   = attrs.size() - 1;
+			int instanceIndexBuffer									   = static_cast<int>(attrs.size()) - 1;
 			pipelineDesc.layout.buffers[instanceIndexBuffer].step_func = SG_VERTEXSTEP_PER_INSTANCE;
 			pipelineDesc.layout.buffers[instanceIndexBuffer].step_rate = 1;
 		}

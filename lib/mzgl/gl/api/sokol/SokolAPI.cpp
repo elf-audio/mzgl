@@ -1,5 +1,7 @@
 
-
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wshorten-64-to-32")
+CLANG_IGNORE_ADDITONAL_WARNING("-Wmacro-redefined")
 #include "SokolAPI.h"
 #include "SokolDefaultShaders.h"
 

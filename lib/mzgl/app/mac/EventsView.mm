@@ -8,8 +8,6 @@
 
 #import "EventsView.h"
 #include "util.h"
-#include "mzgl/util/log.h"
-#include "mainThread.h"
 
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"
@@ -32,7 +30,7 @@
 		lastControlState = false;
 		lastOptionState	 = false;
 		lastCommandState = false;
-		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 	}
 	return self;
 }
@@ -70,6 +68,7 @@ int nsEventToKey(NSEvent *evt) {
 		case 124: return MZ_KEY_RIGHT;
 		case 125: return MZ_KEY_DOWN;
 		case 126: return MZ_KEY_UP;
+		default: break;
 	}
 	printf("keycode: %u\n", keyCode);
 	return keyCode;
@@ -263,8 +262,9 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
-	NSPasteboard *pboard = [sender draggingPasteboard];
-	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
+	NSPasteboard *pboard		= [sender draggingPasteboard];
+	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
+														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
 	std::vector<std::string> paths;
 	for (NSString *url in filenames) {
 		paths.push_back([url UTF8String]);
@@ -318,8 +318,9 @@ int nsEventToKey(NSEvent *evt) {
 	}
 }
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
-	NSPasteboard *pboard = [sender draggingPasteboard];
-	NSArray *filenames	 = [pboard propertyListForType:NSFilenamesPboardType];
+	NSPasteboard *pboard		= [sender draggingPasteboard];
+	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
+														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
 	std::vector<ScopedUrlRef> paths;
 	for (NSString *url in filenames) {
 		paths.push_back(ScopedUrl::create([url UTF8String]));
@@ -359,7 +360,6 @@ int nsEventToKey(NSEvent *evt) {
 }
 // this helps with crashing when resizing, but you don't get nice resizing
 - (void)windowDidEndLiveResize:(NSNotification *)notification {
-
 	[super windowResized:notification];
 	[super enableDrawing];
 }

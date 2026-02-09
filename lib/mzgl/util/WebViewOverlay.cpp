@@ -75,7 +75,6 @@ public:
 						  std::function<void(const std::string &)> theJsCallback)
 		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
 		dispatch_async(dispatch_get_main_queue(), ^{
-		  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
 		  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
 		  webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds

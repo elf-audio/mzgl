@@ -32,3 +32,18 @@
 #else
 #	define IS_ON_IOS_VERSION_OR_LATER(version) false
 #endif
+
+#ifdef __clang__
+#define CLANG_PRAGMA(x) _Pragma(#x)
+#define CLANG_IGNORE_WARNINGS_BEGIN(warning) \
+	CLANG_PRAGMA(clang diagnostic push) \
+	CLANG_PRAGMA(clang diagnostic ignored warning)
+#define CLANG_IGNORE_ADDITONAL_WARNING(warning) \
+	CLANG_PRAGMA(clang diagnostic ignored warning)
+#define CLANG_IGNORE_WARNINGS_END \
+	CLANG_PRAGMA(clang diagnostic pop)
+#else
+#define CLANG_IGNORE_WARNINGS_BEGIN(warning)
+#define CLANG_IGNORE_WARNING(warning)
+#define CLANG_IGNORE_WARNINGS_END
+#endif

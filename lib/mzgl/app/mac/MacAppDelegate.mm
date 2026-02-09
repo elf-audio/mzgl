@@ -71,7 +71,7 @@ void handleTerminateSignal(int signal) {
 	// no runloop because no graphics, so lets make one for runOnMainThread
 	NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 / 60.0
 											repeats:YES
-											  block:^(NSTimer *_Nonnull timer) { app->updateInternal(); }];
+											  block:^(NSTimer *_Nonnull timer) { self->app->updateInternal(); }];
 
 	[[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
 }
@@ -185,13 +185,10 @@ bool hasTransparentTitleBar = true;
 	if (!app->isHeadless()) {
 		[self makeMenus];
 		if (app->isWebView()) {
-			auto webViewApp = dynamic_pointer_cast<WebViewApp>(app);
+			auto webViewApp = std::dynamic_pointer_cast<WebViewApp>(app);
 			NSString *url	= [NSString stringWithUTF8String:webViewApp->customUrl.c_str()];
 			[self makeWebView:url];
 			eventDispatcher->setup();
-
-			NSRunLoop *rl = [NSRunLoop currentRunLoop];
-
 		} else {
 			[self makeWindow];
 		}

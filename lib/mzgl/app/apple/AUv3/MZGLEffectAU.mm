@@ -221,7 +221,7 @@ struct Blocks {
 	//	__weak __typeof__(self) weakSelf = self;
 	plugin->getPresetManager()->getUserPresetNamesCallback = [weakSelf]() -> vector<string> {
 		vector<string> names;
-		int numPresets = [[weakSelf userPresets] count];
+		int numPresets = static_cast<int>([[weakSelf userPresets] count]);
 		for (int i = 0; i < numPresets; i++) {
 			names.push_back([[[[weakSelf userPresets] objectAtIndex:i] name] UTF8String]);
 		}
@@ -288,14 +288,14 @@ struct Blocks {
 
 	_parameterTree.implementorValueObserver = ^(AUParameter *param, AUValue value) {
 	  if (param.address >= 0 && param.address < eff->getNumParams()) {
-		  eff->hostUpdatedParameter(param.address, value);
+		  eff->hostUpdatedParameter(static_cast<uint32_t>(param.address), value);
 	  }
 	};
 
 	// implementorValueProvider is called when the value needs to be refreshed.
 	_parameterTree.implementorValueProvider = ^(AUParameter *param) {
 	  if (param.address >= 0 && param.address < eff->getNumParams()) {
-		  return eff->getParam(param.address)->get();
+		  return eff->getParam(static_cast<uint32_t>(param.address))->get();
 	  }
 	  return 0.f;
 	};
@@ -331,7 +331,7 @@ struct Blocks {
 	_parameterTree.implementorStringFromValueCallback = ^(AUParameter *param, const AUValue *__nullable valuePtr) {
 	  AUValue value = valuePtr == nil ? param.value : *valuePtr;
 	  if (param.address >= 0 && param.address < eff->getNumParams()) {
-		  if (eff->getParam(param.address)->type == PluginParameter::Type::Int) {
+		  if (eff->getParam(static_cast<uint32_t>(param.address))->type == PluginParameter::Type::Int) {
 			  return [NSString stringWithFormat:@"%.0f", value];
 		  } else {
 			  return [NSString stringWithFormat:@"%.2f", value];
@@ -409,7 +409,7 @@ struct Blocks {
 		if (data != nil) {
 			AULog(@"data not null");
 
-			uint32_t length = [data length];
+			uint32_t length = static_cast<uint32_t>([data length]);
 			vector<uint8_t> serialized;
 			const uint8_t *d = (const uint8_t *) [data bytes];
 			if (d != nullptr) {
@@ -481,7 +481,7 @@ struct Blocks {
 		// factory preset
 		for (AUAudioUnitPreset *factoryPreset in _factoryPresets) {
 			if (currentPreset.number == factoryPreset.number) {
-				plugin->getPresetManager()->loadFactoryPreset(currentPreset.number);
+				plugin->getPresetManager()->loadFactoryPreset(static_cast<int>(currentPreset.number));
 				// set factory preset as current
 				_currentPreset			   = currentPreset;
 				_currentFactoryPresetIndex = factoryPreset.number;

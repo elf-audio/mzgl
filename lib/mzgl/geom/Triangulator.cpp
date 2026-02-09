@@ -7,8 +7,11 @@
 //
 
 #include "Triangulator.h"
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wunused-function")
 #define MPE_POLY2TRI_IMPLEMENTATION
 #include "MPE_fastpoly2tri.h"
+CLANG_IGNORE_WARNINGS_END
 #include "log.h"
 
 using namespace std;
