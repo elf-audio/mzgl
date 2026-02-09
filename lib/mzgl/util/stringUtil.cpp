@@ -236,6 +236,17 @@ std::vector<std::string>
 	}
 	return result;
 }
+
+std::string join(const std::vector<std::string> &elements, const std::string &delimiter) {
+	std::ostringstream os;
+	for (size_t i = 0; i < elements.size(); ++i) {
+		os << elements[i];
+		if (i != elements.size() - 1) {
+			os << delimiter;
+		}
+	}
+	return os.str();
+}
 //--------------------------------------------------
 std::string trimFront(const std::string &src) {
 	auto dst = src;

@@ -72,7 +72,7 @@ enum class CaseSensitivity { caseSensitive, caseInSensitive };
 // from oF
 std::vector<std::string>
 	split(const std::string &source, const std::string &delimiter, bool ignoreEmpty = false, bool trim = false);
-
+std::string join(const std::vector<std::string> &elements, const std::string &delimiter);
 std::string trim(const std::string &src);
 std::string trimFront(const std::string &src);
 std::string trimBack(const std::string &src);
