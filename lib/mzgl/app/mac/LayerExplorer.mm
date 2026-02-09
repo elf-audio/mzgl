@@ -12,7 +12,7 @@ using namespace std;
 #include <typeinfo>
 #include <cstdlib>
 #include <memory>
-#include <cxxabi.h>
+#include "className.h"
 
 class SelectionLayer : public Layer {
 public:
@@ -31,20 +31,11 @@ public:
 
 SelectionLayer *selectionLayer;
 
-static std::string demangle(const char *name) {
-	int status = -4; // some arbitrary value to eliminate the compiler warning
-
-	// enable c++11 by passing the flag -std=c++11 to g++
-	std::unique_ptr<char, void (*)(void *)> res {abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
-
-	return (status == 0) ? res.get() : name;
-}
-
 void printLayer(Layer *l, int indent = 0) {
 	for (int i = 0; i < indent; i++)
 		printf("\t");
 
-	printf("%s\n", demangle(typeid(*l).name()).c_str());
+	printf("%s\n", className(l).c_str());
 
 	for (int i = 0; i < l->getNumChildren(); i++) {
 		printLayer(l->getChild(i), indent + 1);
@@ -65,7 +56,7 @@ void printLayer(Layer *l, int indent = 0) {
 }
 
 - (NSString *)name {
-	return [NSString stringWithUTF8String:demangle(typeid(*layer).name()).c_str()];
+	return [NSString stringWithUTF8String:className(layer).c_str()];
 }
 
 - (NSString *)layerName {
@@ -145,7 +136,7 @@ void printLayer(Layer *l, int indent = 0) {
 	Layer *layer = [l getLayer];
 
 	if ([tableColumn.identifier isEqualToString:@"Layer"]) {
-		NSString *s = [NSString stringWithFormat:@"%s", demangle(typeid(*layer).name()).c_str()];
+		NSString *s = [NSString stringWithFormat:@"%s", className(layer).c_str()];
 		[v.textField setStringValue:s];
 	} else if ([tableColumn.identifier isEqualToString:@"Name"]) {
 		[v.textField setStringValue:[NSString stringWithFormat:@"%s", layer->name.c_str()]];
@@ -333,16 +324,17 @@ void LayerExplorer::setText(string text) {
 				   ^{ [browser setString:[NSString stringWithUTF8String:text.c_str()]]; });
 }
 
-std::vector<std::string> pathToItem(Layer *rootLayer, const std::string &className, const std::string &layerName) {
+std::vector<std::string>
+	pathToItem(Layer *rootLayer, const std::string &_className, const std::string &layerName) {
 	for (int i = 0; i < rootLayer->getNumChildren(); ++i) {
 		if (auto *child = rootLayer->getChild(i)) {
-			std::string childClassName = demangle(typeid(*child).name()).c_str();
-			if (childClassName == className) {
+			std::string childClassName = className(child).c_str();
+			if (childClassName == _className) {
 				if (layerName == child->name) {
 					return {childClassName};
 				}
 			}
-			auto children = pathToItem(child, className, layerName);
+			auto children = pathToItem(child, _className, layerName);
 			if (!children.empty()) {
 				std::vector<std::string> path;
 				path.push_back(childClassName);
