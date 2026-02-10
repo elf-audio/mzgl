@@ -12,7 +12,7 @@ public:
 		, g(g) {}
 
 	void makeCppFile(const std::string &path, const std::string &objName) override {
-		fs::ofstream outFile(fs::u8path(path));
+		fs::ofstream outFile(u8path(path));
 
 		outFile << "#include \"" + objName + ".h\"\n\n";
 		outFile << "extern \"C\" {\n\n";

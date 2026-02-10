@@ -420,7 +420,10 @@ if(NOT ANDROID)
 
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
   # add_subdirectory("lib/RtMidi" "rtmidi-build")
-  if(NOT APPLE) # we just link the framework I think
+  if(APPLE)
+    set_source_files_properties(lib/rtmidi/RtMidi.cpp
+                                PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
+  else()
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)
