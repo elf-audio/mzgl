@@ -194,7 +194,7 @@ iOSVideoGrabber *grabber;
 		// Called after added to captureSession
 		
 		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
-		// TODO : All this is deprecated nad needs rework
+		// TODO : All this is deprecated and needs rework
 		if (IS_IOS_7_OR_LATER == false) {
 			if (IS_IOS_6_OR_LATER) {
 #	ifdef __IPHONE_6_0

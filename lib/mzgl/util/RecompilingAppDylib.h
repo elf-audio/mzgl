@@ -2,6 +2,7 @@
 
 #include "RecompilingDylib.h"
 #include "Graphics.h"
+#include "pathUtil.h"
 #include "log.h"
 
 class RecompilingAppDylib : public RecompilingDylib<App> {

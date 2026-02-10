@@ -45,5 +45,6 @@
 #else
 #define CLANG_IGNORE_WARNINGS_BEGIN(warning)
 #define CLANG_IGNORE_WARNING(warning)
+#define CLANG_IGNORE_ADDITONAL_WARNING(warning)
 #define CLANG_IGNORE_WARNINGS_END
 #endif

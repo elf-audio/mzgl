@@ -4,6 +4,7 @@ CLANG_IGNORE_WARNINGS_BEGIN("-Wshorten-64-to-32")
 CLANG_IGNORE_ADDITONAL_WARNING("-Wmacro-redefined")
 #include "SokolAPI.h"
 #include "SokolDefaultShaders.h"
+CLANG_IGNORE_WARNINGS_END
 
 void SokolAPI::loadDefaultShaders() {
 	registerShaders(shaderRegistry);
@@ -36,3 +37,4 @@ void SokolAPI::clear(vec4 c) {
 	vbo->setIndices({0, 1, 2, 0, 2, 3});
 	vbo->draw(g);
 }
+

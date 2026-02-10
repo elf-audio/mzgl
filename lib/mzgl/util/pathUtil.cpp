@@ -13,6 +13,7 @@ fs::path u8path(const std::string &s) {
 }
 
 #if MZGL_WIN
+#include <windows.h>
 fs::path u8winPath(const std::string &s) {
 	if (s.empty()) {
 		return fs::path();

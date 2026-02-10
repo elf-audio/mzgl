@@ -32,6 +32,7 @@ CLANG_IGNORE_WARNINGS_BEGIN("-Wcomma")
 CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-variable")
 #include "fontstash-nvg.h"
 #include "stb_image.h"
+CLANG_IGNORE_WARNINGS_END
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100)  // unreferenced formal parameter
@@ -1084,7 +1085,6 @@ static float nvg__distPtSeg(float x, float y, float px, float py, float qx, floa
 
 static void nvg__appendCommands(NVGcontext* ctx, float* vals, int nvals)
 {
-	NVGstate* state = nvg__getState(ctx);
 	int i;
 
 	if (ctx->ncommands+nvals > ctx->ccommands) {
@@ -2939,4 +2939,3 @@ void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* l
 }
 // vim: ft=c nu noet ts=4
 
-CLANG_IGNORE_WARNINGS_END

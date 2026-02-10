@@ -21,6 +21,7 @@
 #include "Dylib.h"
 
 #include "filesystem.h"
+#include "pathUtil.h"
 
 #include <sys/stat.h>
 #include "util.h"
