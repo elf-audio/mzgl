@@ -266,8 +266,8 @@ int nsEventToKey(NSEvent *evt) {
 	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
 														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
 	std::vector<std::string> paths;
-	for (NSString *url in filenames) {
-		paths.push_back([url UTF8String]);
+	for (NSURL *url in filenames) {
+		paths.push_back([[url path] UTF8String]);
 	}
 	dropped = false;
 	if (eventDispatcher->canOpenFiles(paths)) {
@@ -322,16 +322,14 @@ int nsEventToKey(NSEvent *evt) {
 	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
 														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
 	std::vector<ScopedUrlRef> paths;
-	for (NSString *url in filenames) {
-		paths.push_back(ScopedUrl::create([url UTF8String]));
+	for (NSURL *url in filenames) {
+		paths.push_back(ScopedUrl::create([[url path] UTF8String]));
 	}
 
-	//    [self lock];
-	eventDispatcher->app->main.runOnMainThreadAndWait([self, paths]() {
+	dropped = true;
+	eventDispatcher->app->main.runOnMainThread(true, [self, paths]() {
 		eventDispatcher->filesDropped(paths, 0);
-		dropped = true;
 	});
-	//    [self unlock];
 
 	return true;
 }

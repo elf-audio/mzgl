@@ -29,15 +29,8 @@ private:
 
 		virtual ~Bookmark() {
 			Log::d() << "STOPPING ACCESS FOR '" << path << "'";
-#if !defined(DEBUG) || TARGET_OS_IOS
-
+#if TARGET_OS_IOS
 			[url stopAccessingSecurityScopedResource];
-#else
-#	pragma warning For some reason, this crashes in CLion builds but not Xcode builds
-			// it happens on destruction of the App, and url becomes invalid memory somehow.
-			// Maybe we should use [NSApp stop] rather than [NSApp terminate] and let
-			// control flow to end of main func nicely (see comment in mainMac.mm)
-			Log::d() << "Not actually stopping access for " << path << " because of a bug";
 #endif
 		}
 	};
