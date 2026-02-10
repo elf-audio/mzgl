@@ -47,7 +47,7 @@
 		EA16DAD725FFABE1001C0460 /* pa_unix_hostapis.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */; };
 		EA16DAD825FFABE1001C0460 /* pa_unix_util.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE425C95E2400F890AE /* pa_unix_util.c */; };
 		EA16DADC25FFAEA1001C0460 /* MZGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA3551B425CB201F003DF2FB /* MZGLView.mm */; };
-		EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32"; }; };
+		EA1838282432C18B00A5C3E8 /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-vla-extension"; }; };
 		EA183F852432C18D00A5C3E8 /* scales.h in Headers */ = {isa = PBXBuildFile; fileRef = EA18359D2432C18B00A5C3E8 /* scales.h */; };
 		EA183F862432C18D00A5C3E8 /* scales.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18359E2432C18B00A5C3E8 /* scales.cpp */; };
 		EA183F892432C18D00A5C3E8 /* ScrollingList.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835A22432C18B00A5C3E8 /* ScrollingList.h */; };
@@ -415,7 +415,7 @@
 		EA2B8B1C24E7093600EA12BD /* RoundedRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836242432C18B00A5C3E8 /* RoundedRect.cpp */; };
 		EA2B8B1D24E7093600EA12BD /* Rectf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836232432C18B00A5C3E8 /* Rectf.cpp */; };
 		EA2B8B1F24E7093600EA12BD /* YGStyle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD224A609CA000F057B /* YGStyle.cpp */; };
-		EA2B8B2024E7093600EA12BD /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32"; }; };
+		EA2B8B2024E7093600EA12BD /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA182DC92432C18800A5C3E8 /* RtMidi.cpp */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-vla-extension"; }; };
 		EA2B8B2124E7093600EA12BD /* Tween.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836052432C18B00A5C3E8 /* Tween.cpp */; };
 		EA2B8B2224E7093600EA12BD /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18363A2432C18B00A5C3E8 /* Shader.cpp */; };
 		EA2B8B2624E7093600EA12BD /* Layout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835A92432C18B00A5C3E8 /* Layout.cpp */; };
