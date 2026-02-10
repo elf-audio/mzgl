@@ -18,6 +18,7 @@
 CLANG_IGNORE_WARNINGS_BEGIN("-Wcomma")
 CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-variable")
 CLANG_IGNORE_ADDITONAL_WARNING("-Wunused-function")
+CLANG_IGNORE_ADDITONAL_WARNING("-Wshorten-64-to-32")
 #include "fontstash.h"
 CLANG_IGNORE_WARNINGS_END
 #include "util.h"

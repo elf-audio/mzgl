@@ -31,9 +31,9 @@
 		EA15B280291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		EA15B281291D49E70051570A /* UndoManager.h in Headers */ = {isa = PBXBuildFile; fileRef = EA15B27B291D49E70051570A /* UndoManager.h */; };
 		EA16DAC025FFABB0001C0460 /* EventsView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA35518C25CB05D5003DF2FB /* EventsView.mm */; };
-		EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; };
+		EA16DAC425FFABCD001C0460 /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-deprecated-declarations"; }; };
 		EA16DAC525FFABCD001C0460 /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; };
-		EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; };
+		EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; settings = {COMPILER_FLAGS = "-Wno-deprecated-declarations"; }; };
 		EA16DACA25FFABDA001C0460 /* pa_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BFE25C954E600F890AE /* pa_stream.c */; };
 		EA16DACB25FFABDA001C0460 /* pa_cpuload.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C0125C954E600F890AE /* pa_cpuload.c */; };
 		EA16DACC25FFABDA001C0460 /* pa_dither.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297BF925C954E600F890AE /* pa_dither.c */; };
@@ -275,8 +275,8 @@
 		EA297CAD25C954E600F890AE /* pa_mac_core_utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C4E25C954E600F890AE /* pa_mac_core_utilities.h */; };
 		EA297CAE25C954E600F890AE /* pa_mac_core_blocking.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297C4F25C954E600F890AE /* pa_mac_core_blocking.h */; };
 		EA297CAF25C954E600F890AE /* pa_mac_core.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5025C954E600F890AE /* pa_mac_core.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32"; }; };
-		EA297CB025C954E600F890AE /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-ambiguous-macro"; }; };
-		EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32"; }; };
+		EA297CB025C954E600F890AE /* pa_mac_core_utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5125C954E600F890AE /* pa_mac_core_utilities.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-ambiguous-macro -Wno-deprecated-declarations"; }; };
+		EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297C5225C954E600F890AE /* pa_mac_core_blocking.c */; settings = {COMPILER_FLAGS = "-Wno-shorten-64-to-32 -Wno-deprecated-declarations"; }; };
 		EA297CEF25C95E2500F890AE /* pa_unix_util.h in Headers */ = {isa = PBXBuildFile; fileRef = EA297CE325C95E2400F890AE /* pa_unix_util.h */; };
 		EA297CF025C95E2500F890AE /* pa_unix_util.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE425C95E2400F890AE /* pa_unix_util.c */; };
 		EA297CF125C95E2500F890AE /* pa_unix_hostapis.c in Sources */ = {isa = PBXBuildFile; fileRef = EA297CE525C95E2400F890AE /* pa_unix_hostapis.c */; };

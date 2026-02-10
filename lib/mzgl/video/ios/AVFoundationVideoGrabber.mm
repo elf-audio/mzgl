@@ -10,6 +10,8 @@
 #import <CoreVideo/CoreVideo.h>
 #import <CoreMedia/CoreMedia.h>
 
+#import "mzgl_platform.h"
+
 @interface iOSVideoGrabber : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate> {
 @public
 	CGImageRef currentFrame;
@@ -84,10 +86,14 @@ iOSVideoGrabber *grabber;
 }
 
 - (BOOL)initCapture:(int)framerate capWidth:(int)w capHeight:(int)h {
+	
+	CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
+	// TODO: Replace with AVCaptureDeviceDiscovery instead
 	NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+	CLANG_IGNORE_WARNINGS_END
 
 	if ([devices count] > 0) {
-		if (deviceID > [devices count] - 1) deviceID = [devices count] - 1;
+		if (deviceID > [devices count] - 1) deviceID = static_cast<int>([devices count]) - 1;
 
 		// We set the device
 		device = [devices objectAtIndex:deviceID];
@@ -186,7 +192,9 @@ iOSVideoGrabber *grabber;
 		// In this example we set a min frame duration of 1/10 seconds so a maximum framerate of 10fps. We say that
 		// we are not able to process more than 10 frames per second.
 		// Called after added to captureSession
-
+		
+		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
+		// TODO : All this is deprecated nad needs rework
 		if (IS_IOS_7_OR_LATER == false) {
 			if (IS_IOS_6_OR_LATER) {
 #	ifdef __IPHONE_6_0
@@ -201,6 +209,7 @@ iOSVideoGrabber *grabber;
 				[captureOutput setMinFrameDuration:CMTimeMake(1, framerate)];
 			}
 		}
+		CLANG_IGNORE_WARNINGS_END
 		// We start the capture Session
 		[self.captureSession commitConfiguration];
 		[self.captureSession startRunning];
@@ -259,7 +268,19 @@ iOSVideoGrabber *grabber;
 
 - (std::vector<std::string>)listDevices {
 	std::vector<std::string> deviceNames;
+	
+	CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
+	// TODO: Fix deprecation here
+	/*
+	 Replace is of the form:
+	 AVCaptureDeviceDiscoverySession *session = [AVCaptureDeviceDiscoverySession
+		 discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+							   mediaType:AVMediaTypeVideo
+								position:AVCaptureDevicePositionUnspecified];
+	 NSArray<AVCaptureDevice *> *devices = session.devices;
+	 */
 	NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+	CLANG_IGNORE_WARNINGS_END
 	int i			 = 0;
 	for (AVCaptureDevice *captureDevice in devices) {
 		deviceNames.push_back([captureDevice.localizedName UTF8String]);

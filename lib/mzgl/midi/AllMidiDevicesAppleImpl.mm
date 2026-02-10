@@ -344,6 +344,7 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 		case kMIDIMsgThruConnectionsChanged:
 		case kMIDIMsgSerialPortOwnerChanged:
 		case kMIDIMsgIOError: break;
+		default:break;
 	}
 }
 

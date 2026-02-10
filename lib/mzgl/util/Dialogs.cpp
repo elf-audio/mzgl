@@ -776,7 +776,7 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 	UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.sourceType				= UIImagePickerControllerSourceTypePhotoLibrary;
 	picker.mediaTypes				= [[NSArray alloc] initWithObjects:(NSString *) kUTTypeImage, nil];
-	picker.delegate					= bgpd;
+	picker.delegate					= (id <UINavigationControllerDelegate, UIImagePickerControllerDelegate>)bgpd;
 
 	[bgpd setCompletionCallback:completionCallback];
 	[getTopController(app) presentViewController:picker animated:YES completion:^ {}];
@@ -961,7 +961,7 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	decisionHandler(WKNavigationActionPolicyCancel);
 
 #	if TARGET_OS_IOS
-	[[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+	[[UIApplication sharedApplication] openURL:navigationAction.request.URL options:@{} completionHandler:nil];
 	NSLog(@"%@", navigationAction.request.URL);
 #	else
 	[[NSWorkspace sharedWorkspace] openURL:navigationAction.request.URL];
@@ -1049,7 +1049,6 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 #endif
 
 #if TARGET_OS_IOS
-	NSString *str = [NSString stringWithUTF8String:message.c_str()];
 	NSURL *URL	  = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
 
 	UIActivityViewController *activityViewController =
@@ -1063,8 +1062,11 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 	//if iPad
 	else {
 		// Change Rect to position Popover
+		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
+		// TODO: Replace this with the new style UIViewController presentation
 		UIPopoverController *popup =
 			[[UIPopoverController alloc] initWithContentViewController:activityViewController];
+		CLANG_IGNORE_WARNINGS_END
 
 		[popup
 

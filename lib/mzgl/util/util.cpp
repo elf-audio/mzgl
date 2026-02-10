@@ -153,12 +153,16 @@ void deleteOrTrash(const std::string &path) {
 #ifdef __APPLE__
 	if ([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)]) {
 		NSError *error = nil;
-		BOOL success   = [[NSFileManager defaultManager]
-				trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-			  resultingItemURL:nil
-						 error:&error];
-		if (!success || error) {
-			NSLog(@ "Error moving file to trash: %@", error);
+		if (@available(iOS 11.0, *)) {
+			BOOL success   = [[NSFileManager defaultManager]
+							  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+							  resultingItemURL:nil
+							  error:&error];
+			if (!success || error) {
+				NSLog(@ "Error moving file to trash: %@", error);
+				stdDeleteFn();
+			}
+		} else {
 			stdDeleteFn();
 		}
 	} else {

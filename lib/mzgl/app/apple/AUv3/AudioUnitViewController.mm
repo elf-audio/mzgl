@@ -129,7 +129,9 @@ using namespace std;
 #	if MZGL_IOS
 		auto ed = [glView getEventDispatcher];
 		if (ed != nullptr && ed->hasSetup()) {
+			CLANG_IGNORE_WARNINGS_BEGIN("-Wnonnull")
 			[vc viewWillTransitionToSize:self.view.window.frame.size withTransitionCoordinator:nil];
+			CLANG_IGNORE_WARNINGS_END
 		}
 #	endif
 

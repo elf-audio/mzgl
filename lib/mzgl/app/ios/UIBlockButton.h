@@ -8,7 +8,7 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-typedef void (^ActionBlock)();
+typedef void (^ActionBlock)(void);
 
 @interface UIBlockButton : UIButton {
 	ActionBlock _actionBlock;

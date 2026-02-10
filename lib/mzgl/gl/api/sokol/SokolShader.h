@@ -86,7 +86,7 @@ public:
 	}
 
 	template <typename T>
-	void uniformArray(const std::string &_name, const T *data, int count) {
+	void uniformArray(const std::string &_name, const T *data, size_t count) {
 		auto *ptr = uniformLocation(_name);
 
 		// TODO: Remove me!

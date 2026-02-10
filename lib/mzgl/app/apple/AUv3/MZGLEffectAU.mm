@@ -221,9 +221,11 @@ struct Blocks {
 	//	__weak __typeof__(self) weakSelf = self;
 	plugin->getPresetManager()->getUserPresetNamesCallback = [weakSelf]() -> vector<string> {
 		vector<string> names;
-		int numPresets = static_cast<int>([[weakSelf userPresets] count]);
-		for (int i = 0; i < numPresets; i++) {
-			names.push_back([[[[weakSelf userPresets] objectAtIndex:i] name] UTF8String]);
+		if (@available(iOS 13.0, *)) {
+			int numPresets = static_cast<int>([[weakSelf userPresets] count]);
+			for (int i = 0; i < numPresets; i++) {
+				names.push_back([[[[weakSelf userPresets] objectAtIndex:i] name] UTF8String]);
+			}
 		}
 		return names;
 	};
@@ -494,13 +496,15 @@ struct Blocks {
 		// set custom preset as current
 		_currentPreset = currentPreset;
 		NSError *err   = nil;
-		id state	   = [self presetStateFor:currentPreset error:&err];
-		if (err) {
-			AULog(@"Got error: %@", err);
-			return;
-		}
-		if (state != nil) {
-			[self setFullState:state];
+		if (@available(iOS 13.0, *)) {
+			id state	   = [self presetStateFor:currentPreset error:&err];
+			if (err) {
+				AULog(@"Got error: %@", err);
+				return;
+			}
+			if (state != nil) {
+				[self setFullState:state];
+			}
 		}
 		AULog(@"currentPreset Custom: %ld, %@\n", (long) _currentPreset.number, _currentPreset.name);
 	} else {

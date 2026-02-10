@@ -371,13 +371,12 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 		geom.cols.insert(geom.cols.end(), numVerts, color);
 
 		for (int i = 0; i < numVerts; i += 2) {
-			geom.indices.push_back(startIndex + i);
-			geom.indices.push_back(startIndex + (i + 2) % numVerts);
-			geom.indices.push_back(startIndex + (i + 1) % numVerts);
-
-			geom.indices.push_back(startIndex + (i + 2) % numVerts);
-			geom.indices.push_back(startIndex + (i + 3) % numVerts);
-			geom.indices.push_back(startIndex + (i + 1) % numVerts);
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + i));
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + (i + 2) % numVerts));
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + (i + 1) % numVerts));
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + (i + 2) % numVerts));
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + (i + 3) % numVerts));
+			geom.indices.push_back(static_cast<glm::uint32>(startIndex + (i + 1) % numVerts));
 		}
 	}
 }
@@ -395,9 +394,9 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 		auto start = geom.verts.size();
 		geom.verts.insert(geom.verts.end(), rrv.begin(), rrv.end());
 		for (unsigned int i = 0; i < rrv.size() - 2; i++) {
-			geom.indices.push_back(start);
-			geom.indices.push_back(start + i + 1);
-			geom.indices.push_back(start + i + 2);
+			geom.indices.push_back(static_cast<glm::uint32_t>(start));
+			geom.indices.push_back(static_cast<glm::uint32_t>(start + i + 1));
+			geom.indices.push_back(static_cast<glm::uint32_t>(start + i + 2));
 		}
 		if (isDoingGradient) {
 			geom.cols.reserve(geom.cols.size() + rrv.size());
@@ -481,7 +480,7 @@ VboRef Drawer::createVbo(bool ignoreColor, bool addNormalizedTexCoords) {
 	return vbo;
 }
 void Drawer::addGeometry(Geometry &_geom) {
-	int firstIndex = geom.verts.size();
+	auto firstIndex = geom.verts.size();
 	geom.verts.insert(geom.verts.end(), _geom.verts.begin(), _geom.verts.end());
 	geom.cols.insert(geom.cols.end(), _geom.cols.begin(), _geom.cols.end());
 
@@ -491,11 +490,11 @@ void Drawer::addGeometry(Geometry &_geom) {
 	//	geom.indices.insert(geom.indices.end(), ind.begin(), ind.end());
 
 	// new way
-	int startPos = geom.indices.size();
+	auto startPos = geom.indices.size();
 	// this might speed up the insert
 	geom.indices.reserve(geom.indices.size() + _geom.indices.size());
 	geom.indices.insert(geom.indices.end(), _geom.indices.begin(), _geom.indices.end());
-	for (int i = startPos; i < geom.indices.size(); i++) {
+	for (size_t i = startPos; i < geom.indices.size(); i++) {
 		geom.indices[i] += firstIndex;
 	}
 }
@@ -525,12 +524,12 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, boo
 	getPerfectRoundedRectVerts(r, radius, rrv, tl, tr, br, bl);
 
 	if (filled) {
-		unsigned int start = geom.verts.size();
+		auto start = geom.verts.size();
 		geom.verts.insert(geom.verts.end(), rrv.begin(), rrv.end());
 		for (unsigned int i = 0; i < rrv.size() - 2; i++) {
-			geom.indices.push_back(start);
-			geom.indices.push_back(start + i + 1);
-			geom.indices.push_back(start + i + 2);
+			geom.indices.push_back(static_cast<glm::uint32_t>(start));
+			geom.indices.push_back(static_cast<glm::uint32_t>(start + i + 1));
+			geom.indices.push_back(static_cast<glm::uint32_t>(start + i + 2));
 		}
 		if (isDoingGradient) {
 			geom.cols.reserve(geom.cols.size() + rrv.size());
