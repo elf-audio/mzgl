@@ -112,6 +112,8 @@ set(MZGL_SOURCES
     lib/mzgl/util/TaskRunner.cpp
     lib/mzgl/util/TaskRunner.h
     lib/mzgl/util/mzAssert.cpp
+    lib/mzgl/util/pathUtil.h
+    lib/mzgl/util/pathUtil.cpp
     lib/mzgl/util/stringUtil.cpp
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/audio/juce/JuceAudioSystem.cpp
@@ -418,7 +420,10 @@ if(NOT ANDROID)
 
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
   # add_subdirectory("lib/RtMidi" "rtmidi-build")
-  if(NOT APPLE) # we just link the framework I think
+  if(APPLE)
+    set_source_files_properties(lib/rtmidi/RtMidi.cpp
+                                PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
+  else()
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)

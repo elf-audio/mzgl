@@ -150,5 +150,5 @@ void DateTime::setFromTimestamp(long timestamp) {
 
 int DateTime::daysSinceEpoch() const {
 	DateTime dt(year, month, day);
-	return dt.timestamp() / (24 * 60 * 60);
+	return static_cast<int>(dt.timestamp() / (24 * 60 * 60));
 }

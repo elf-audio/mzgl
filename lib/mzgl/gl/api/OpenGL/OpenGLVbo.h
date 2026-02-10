@@ -85,7 +85,7 @@ public:
 		glBindVertexArray(vertexArrayObject);
 
 		buff.dimensions = sizeof(T) / 4;
-		buff.size		= v.size();
+		buff.size		= static_cast<uint32_t>(v.size());
 		glGenBuffers(1, &buff.id);
 		glBindBuffer(GL_ARRAY_BUFFER, buff.id);
 		glBufferData(GL_ARRAY_BUFFER, buff.size * sizeof(T), v.data(), GL_STATIC_DRAW);
@@ -159,7 +159,7 @@ public:
 		if (indexBuffer.id != 0) glDeleteBuffers(1, &indexBuffer.id);
 
 		glBindVertexArray(vertexArrayObject);
-		indexBuffer.size = indices.size();
+		indexBuffer.size = static_cast<uint32_t>(indices.size());
 
 		glGenBuffers(1, &indexBuffer.id);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
@@ -243,9 +243,9 @@ public:
 		auto glMode = primitiveTypeToGLMode(mode);
 		if (instances > 1) {
 			if (indexBuffer.valid()) {
-				glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, instances);
+				glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(instances));
 			} else {
-				glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, instances);
+				glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, static_cast<GLsizei>(instances));
 			}
 		} else {
 			if (indexBuffer.valid()) {

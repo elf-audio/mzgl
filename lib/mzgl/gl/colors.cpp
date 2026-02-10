@@ -142,7 +142,7 @@ std::optional<glm::vec4> rgbColor(std::string colourString) {
 	auto start = colourString.find("rgb(");
 	auto end   = colourString.find(")");
 
-	if (start == std::string::npos && end == std::string::npos || start >= end) {
+	if ((start == std::string::npos && end == std::string::npos) || start >= end) {
 		return std::nullopt;
 	}
 
@@ -161,7 +161,7 @@ std::optional<glm::vec4> rgbaColor(std::string colourString) {
 	auto start = colourString.find("rgba(");
 	auto end   = colourString.find(")");
 
-	if (start == std::string::npos && end == std::string::npos || start >= end) {
+	if ((start == std::string::npos && end == std::string::npos) || start >= end) {
 		Log::e() << "Bad RGBA string format (" << colourString << ")";
 		return std::nullopt;
 	}

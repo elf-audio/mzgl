@@ -61,7 +61,7 @@
 
 	if (self != nil) {
 #if !MZGL_IOS
-		[self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 #endif
 		self.UIDelegate			= self;
 		self.navigationDelegate = self;

@@ -116,8 +116,6 @@ void AllMidiDevicesAppleImpl::autoPoll() {
 #ifdef DEBUG
 		setThreadName("AllMidiIns::portScanner");
 #endif
-		std::atomic<bool> doneScanning = true;
-		auto *ptr					   = &doneScanning;
 		while (running) {
 			[[NSOperationQueue mainQueue] addOperationWithBlock:^{
 			  if (running) scanForDevices();
@@ -346,6 +344,7 @@ void AllMidiDevicesAppleImpl::midiNotify(const MIDINotification *notification) {
 		case kMIDIMsgThruConnectionsChanged:
 		case kMIDIMsgSerialPortOwnerChanged:
 		case kMIDIMsgIOError: break;
+		default:break;
 	}
 }
 
@@ -415,7 +414,7 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 		request->data = sysexData.back().second.data();
 		memcpy((void *) request->data, (void *) bytes.data(), bytes.size());
 
-		request->bytesToSend	  = bytes.size();
+		request->bytesToSend	  = static_cast<UInt32>(bytes.size());
 		request->completionProc	  = &cleanupSysex;
 		request->completionRefCon = this;
 		request->complete		  = false;

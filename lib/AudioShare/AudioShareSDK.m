@@ -4,6 +4,7 @@
 #import "AudioShareSDK.h"
 #import <MobileCoreServices/UTCoreTypes.h>
 #import <AudioToolbox/AudioToolbox.h>
+#include "mzgl_platform.h"
 
 #define BM_CLIPBOARD_CHUNK_SIZE (5 * 1024 * 1024)
 
@@ -33,7 +34,9 @@
         [application openURL:URL options:@{}
            completionHandler:nil];
     } else {
+		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
         [application openURL:URL];
+		CLANG_IGNORE_WARNINGS_END
     }
 }
 

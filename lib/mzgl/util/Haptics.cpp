@@ -32,23 +32,7 @@ public:
 
 - (id)init {
 	self = [super init];
-
-	AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-
-	// in order to have haptics on iOS...
-	// you have to do something like this in your audio system - make sure you do
-	// it after all your other AVAudioSession configuration or it may not work.
-	//	NSError * err = nil;
-	//	if (@available(iOS 13.0, *)) {
-	//		[audioSession setAllowHapticsAndSystemSoundsDuringRecording:YES error:&err];
-	//		if(err != nil) {
-	//			NSLog(@"Haptics couldn't be enabled because %@", err);
-	//			err = nil;
-	//		}
-	//	}
-	//
-
-	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init]; //WithStyle:UIImpactFeedbackStyleLight];
+	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];
 	[feedbackGenerator prepare];
 	return self;
 }

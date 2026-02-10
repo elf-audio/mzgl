@@ -125,7 +125,7 @@ void UndoManager::endGesture() {
 	}
 	auto group = gestureGroup;
 	gestureGroup = nullptr;
-	if (!dynamic_pointer_cast<GroupUndoable>(group)->empty()) {
+	if (!std::dynamic_pointer_cast<GroupUndoable>(group)->empty()) {
 		commit(group);
 	} else {
 		// Notify even if gesture was empty, in case state needs updating
@@ -141,7 +141,7 @@ void UndoManager::endGesture() {
 void UndoManager::commit(UndoableRef item) {
 	if (gestureGroup != nullptr) {
 		item->redo();
-		dynamic_pointer_cast<GroupUndoable>(gestureGroup)->addStep(item);
+		std::dynamic_pointer_cast<GroupUndoable>(gestureGroup)->addStep(item);
 		return;
 	}
 

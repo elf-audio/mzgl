@@ -1,7 +1,11 @@
 //
 // Created by Marek Bereza on 10/05/2024.
 //
+
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wshorten-64-to-32")
 #include "SokolVbo.h"
+CLANG_IGNORE_WARNINGS_END
 #include "Graphics.h"
 #include "SokolPipeline.h"
 #include "SokolAPI.h"
@@ -109,5 +113,5 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	int numVerts = positionBuffer.size;
 	if (indexBuffer.valid()) numVerts = indexBuffer.size;
 	shader->applyUniforms();
-	sg_draw(0, numVerts, numInstances);
+	sg_draw(0, numVerts, static_cast<int>(numInstances));
 }

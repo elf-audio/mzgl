@@ -1,7 +1,10 @@
 #include "Graphics.h"
 #include "SokolPipeline.h"
 #include "SokolAPI.h"
+#include "mzgl_platform.h"
+CLANG_IGNORE_WARNINGS_BEGIN("-Wshorten-64-to-32")
 #include "SokolShader.h"
+CLANG_IGNORE_WARNINGS_END
 
 SokolShader::SokolShader(Graphics &g, const std::string &shaderName)
 	: Shader(g) {
@@ -34,7 +37,7 @@ PipelineRef SokolShader::getPipeline(const std::vector<sg_vertex_format> &attrs,
 	// make a unique number to use as a key based on incoming parameters
 	// (there will be at most 5-6 attributes)
 
-	int index = attrs.size() + usingIndices * 16 + static_cast<int>(g.getBlendMode()) * 32 + g.isBlending() * 64
+	int index = static_cast<int>(attrs.size()) + usingIndices * 16 + static_cast<int>(g.getBlendMode()) * 32 + g.isBlending() * 64
 				+ static_cast<int>(mode) * 128;
 
 	if (pipelines.find(index) == pipelines.end()) {

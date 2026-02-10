@@ -21,6 +21,7 @@
 
 #include "filesystem.h"
 #include "mainThread.h"
+#include "pathUtil.h"
 
 namespace unit_test::dialogs {
 
@@ -775,7 +776,7 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 	UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.sourceType				= UIImagePickerControllerSourceTypePhotoLibrary;
 	picker.mediaTypes				= [[NSArray alloc] initWithObjects:(NSString *) kUTTypeImage, nil];
-	picker.delegate					= bgpd;
+	picker.delegate					= (id <UINavigationControllerDelegate, UIImagePickerControllerDelegate>)bgpd;
 
 	[bgpd setCompletionCallback:completionCallback];
 	[getTopController(app) presentViewController:picker animated:YES completion:^ {}];
@@ -872,7 +873,6 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	[getTopController(app) presentViewController:targetController animated:YES completion:nil];
 #	else // mac
 	dispatch_async(dispatch_get_main_queue(), ^{
-	  NSWindow *win	   = (__bridge NSWindow *) app.windowHandle;
 	  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
 	  NSView *containerView = [[NSView alloc] initWithFrame:rootView.bounds];
@@ -961,7 +961,7 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	decisionHandler(WKNavigationActionPolicyCancel);
 
 #	if TARGET_OS_IOS
-	[[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+	[[UIApplication sharedApplication] openURL:navigationAction.request.URL options:@{} completionHandler:nil];
 	NSLog(@"%@", navigationAction.request.URL);
 #	else
 	[[NSWorkspace sharedWorkspace] openURL:navigationAction.request.URL];
@@ -1049,7 +1049,6 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 #endif
 
 #if TARGET_OS_IOS
-	NSString *str = [NSString stringWithUTF8String:message.c_str()];
 	NSURL *URL	  = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
 
 	UIActivityViewController *activityViewController =
@@ -1063,8 +1062,11 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 	//if iPad
 	else {
 		// Change Rect to position Popover
+		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
+		// TODO: Replace this with the new style UIViewController presentation
 		UIPopoverController *popup =
 			[[UIPopoverController alloc] initWithContentViewController:activityViewController];
+		CLANG_IGNORE_WARNINGS_END
 
 		[popup
 
@@ -1080,9 +1082,9 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 
 	std::string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
-	fs::ifstream src(fs::u8path(path), std::ios::binary);
+	fs::ifstream src(u8path(path), std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
-	fs::ofstream dst(fs::u8path(destPath), std::ios::binary);
+	fs::ofstream dst(u8path(destPath), std::ios::binary);
 
 	dst << src.rdbuf();
 #endif
@@ -1365,7 +1367,7 @@ void Dialogs::textboxWithSegmented(std::string title,
 				  txt = [[label stringValue] UTF8String];
 			  }
 			  app.main.runOnMainThread(true, [txt, returnCode, selectedSegment, completionCallback]() {
-				  completionCallback(txt, selectedSegment, returnCode == NSAlertFirstButtonReturn);
+				  completionCallback(txt, static_cast<int>(selectedSegment), returnCode == NSAlertFirstButtonReturn);
 			  });
 		  };
 #		ifndef MZGLAU

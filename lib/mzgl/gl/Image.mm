@@ -70,6 +70,7 @@ bool Image::save(
 	else if (bytesPerChannel == 1) info = kCGBitmapByteOrderDefault | alpha;
 	else if (bytesPerChannel == 2) info = kCGBitmapByteOrder16Host | alpha;
 	else if (bytesPerChannel == 4) info = kCGBitmapByteOrder32Host | alpha;
+	else info = kCGBitmapByteOrderDefault | alpha;
 
 	CGImageRef img = CGImageCreate(width, // width
 								   height, // height

@@ -72,6 +72,8 @@
 #	include <sys/stat.h>
 #endif
 
+#include "pathUtil.h"
+
 void setThreadName(const std::string &name) {
 #if defined(__APPLE__)
 	pthread_setname_np(name.c_str());
@@ -151,12 +153,16 @@ void deleteOrTrash(const std::string &path) {
 #ifdef __APPLE__
 	if ([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)]) {
 		NSError *error = nil;
-		BOOL success   = [[NSFileManager defaultManager]
-				trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-			  resultingItemURL:nil
-						 error:&error];
-		if (!success || error) {
-			NSLog(@ "Error moving file to trash: %@", error);
+		if (@available(iOS 11.0, *)) {
+			BOOL success   = [[NSFileManager defaultManager]
+							  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+							  resultingItemURL:nil
+							  error:&error];
+			if (!success || error) {
+				NSLog(@ "Error moving file to trash: %@", error);
+				stdDeleteFn();
+			}
+		} else {
 			stdDeleteFn();
 		}
 	} else {
@@ -406,16 +412,13 @@ void setDataPath(const std::string &path) {
 	dataPathOverride	 = path;
 }
 
-static fs::path getVSTBundlePath() {
 #ifdef _WIN32
+static fs::path getVSTBundlePath() {
 	auto path			  = getDLLPath();
 	const auto parentPath = std::string {".."};
 	return fs::canonical(path / parentPath / parentPath / parentPath);
-#else
-	// FIXME: This needs to be implemented for other platforms
-	return "";
-#endif
 }
+#endif
 
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
 std::string dataPath(const std::string &path, const std::string &appBundleId) {
@@ -504,12 +507,15 @@ int64_t getAvailableMemory() {
 #ifdef __ANDROID__
 	return androidGetAvailableMemory();
 #endif
+
+	CLANG_IGNORE_WARNINGS_BEGIN("-Wunreachable-code")
 	static bool alreadyWarnedAboutGetAvailableMemory = false;
 	if (!alreadyWarnedAboutGetAvailableMemory) {
 		alreadyWarnedAboutGetAvailableMemory = true;
 		Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
 	}
 	return -1;
+	CLANG_IGNORE_WARNINGS_END
 }
 
 std::string nowAsString() {
@@ -1001,7 +1007,7 @@ void hideMouse() {
 }
 
 bool readFile(const std::string &filename, std::vector<unsigned char> &outData) {
-	fs::ifstream strm(fs::u8path(filename), std::ios_base::binary);
+	fs::ifstream strm(u8path(filename), std::ios_base::binary);
 	if (!strm) {
 		printf("cannot open file with path '%s'\n", filename.c_str());
 		return false;
@@ -1018,7 +1024,7 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData) 
 }
 
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data) {
-	fs::ofstream outfile(fs::u8path(path), std::ios::out | std::ios::binary);
+	fs::ofstream outfile(u8path(path), std::ios::out | std::ios::binary);
 	if (outfile.fail()) return false;
 	outfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 	if (outfile.fail()) return false;
@@ -1179,7 +1185,7 @@ bool writeStringToFileAtomically(const std::string &pathUtf8, const std::string 
 }
 
 bool writeStringToFile(const std::string &path, const std::string &data) {
-	fs::ofstream outfile(fs::u8path(path), std::ios::out);
+	fs::ofstream outfile(u8path(path), std::ios::out);
 	if (outfile.fail()) {
 		Log::e() << "writeStringToFile() open failed: " << strerror(errno) << path;
 		return false;
@@ -1197,7 +1203,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 	return true;
 }
 bool readStringFromFile(const std::string &path, std::string &outStr) {
-	fs::ifstream t(fs::u8path(path));
+	fs::ifstream t(u8path(path));
 	if (t.fail()) {
 		Log::e() << "failed to open file at " << path;
 		return false;

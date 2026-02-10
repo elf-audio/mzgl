@@ -41,7 +41,7 @@ EAGLContext *context = nil;
 		self.preferredFramesPerSecond = 60.f;
 		mzView						  = [[MZGLKitView alloc] initWithApp:_app andGraphics:_graphics];
 		self.view					  = mzView;
-		GLKView *v					  = self.view;
+		GLKView *v = (GLKView *)self.view;
 
 		_app->g.setAntialiasing = [v](bool a) {
 			if (a) {
