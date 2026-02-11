@@ -294,7 +294,7 @@ public:
 			listener->indexedVariableOptionsChanged();
 		}
 	}
-	int getNumOptions() const { return options.size(); }
+	int getNumOptions() const { return static_cast<int>(options.size()); }
 	int getValue() const { return value; }
 
 private:

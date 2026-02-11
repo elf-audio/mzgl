@@ -158,9 +158,11 @@ Layer *Layer::addChild(Layer *layer) {
 	layer->parent = this;
 
 	mzAssert(layer != this, "Can't add a layer to itself");
+#ifdef DEBUG
 	for (auto *c: children) {
 		mzAssert(c != layer, "Can't add a layer to the same parent twice");
 	}
+#endif
 
 	children.push_back(layer);
 	return layer;
