@@ -727,7 +727,9 @@ void Dialogs::threeOptionDialog(std::string title,
 	if (img != nil) {
 		// this fixes embedded rotations in the image
 		img		   = [self normalizedImage:img];
+		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
 		NSURL *url = [info objectForKey:UIImagePickerControllerReferenceURL];
+		CLANG_IGNORE_WARNINGS_END
 		if (url == nil) {
 			Log::d() << "UIImagePickerControllerReferenceURL was nil";
 			callback(false, "");

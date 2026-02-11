@@ -23,6 +23,8 @@
 		9CB94F252F39EB4100996766 /* pathUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F202F39EB4100996766 /* pathUtil.h */; };
 		9CB94F262F39EB4100996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
 		9CB94F272F39EB4100996766 /* pathUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F202F39EB4100996766 /* pathUtil.h */; };
+		9CB94F462F3C863200996766 /* className.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F452F3C863200996766 /* className.h */; };
+		9CB94F472F3C863200996766 /* className.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F452F3C863200996766 /* className.h */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -920,6 +922,7 @@
 		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
 		9CB94F202F39EB4100996766 /* pathUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pathUtil.h; sourceTree = "<group>"; };
 		9CB94F212F39EB4100996766 /* pathUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pathUtil.cpp; sourceTree = "<group>"; };
+		9CB94F452F3C863200996766 /* className.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = className.h; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
 		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
@@ -2056,6 +2059,7 @@
 		EA1835E02432C18B00A5C3E8 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				9CB94F452F3C863200996766 /* className.h */,
 				9CB94F202F39EB4100996766 /* pathUtil.h */,
 				9CB94F212F39EB4100996766 /* pathUtil.cpp */,
 				9C038E9D2D538A410047E060 /* Base64.h */,
@@ -3405,6 +3409,7 @@
 				EA234AE824A609CA000F057B /* Yoga-internal.h in Headers */,
 				EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73827E39E6C0081A5CB /* zip.h in Headers */,
+				9CB94F472F3C863200996766 /* className.h in Headers */,
 				EA5D5B232D9A9FE400F19952 /* colors.h in Headers */,
 				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA85564C2E7D5DCB00A515E2 /* CoreAudioSystem.h in Headers */,
@@ -3521,6 +3526,7 @@
 				EA2B832024E7093600EA12BD /* YGFloatOptional.h in Headers */,
 				EA2B832424E7093600EA12BD /* YGValue.h in Headers */,
 				EA297BE525C954CD00F890AE /* PortAudioSystem.h in Headers */,
+				9CB94F462F3C863200996766 /* className.h in Headers */,
 				EA2B832B24E7093600EA12BD /* Layer.h in Headers */,
 				EA2B832D24E7093600EA12BD /* nanovg_gl_utils.h in Headers */,
 				EA71A76727E39E6C0081A5CB /* aesopt.h in Headers */,
