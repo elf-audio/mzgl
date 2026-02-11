@@ -4,6 +4,7 @@
 #include <atomic>
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <string>
 #include "mzAssert.h"
 
