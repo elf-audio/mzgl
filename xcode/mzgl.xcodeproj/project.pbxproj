@@ -342,6 +342,11 @@
 		9C9DC7542DE89CE50070ACAC /* colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA5D5B1F2D9A9FE400F19952 /* colors.cpp */; };
 		9C9DC7552DE89CFB0070ACAC /* FileDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF01F4C2D3ECA1800248121 /* FileDownloader.cpp */; };
 		9C9DC7562DE89D0B0070ACAC /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
+		9CB94FA02F3CAB6B00996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
+		9CB94FA12F3CAB6B00996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
+		9CB94FA22F3CAB7100996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
+		9CB94FA32F3CAB7100996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
+		9CB94FA42F3CAB7100996766 /* pathUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CB94F212F39EB4100996766 /* pathUtil.cpp */; };
 		9CE896C02F277A74005AEDDB /* TaskRunner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA7D710A2E781291002B9465 /* TaskRunner.cpp */; };
 		9CE896C12F277A88005AEDDB /* OpenGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4392E09AE8400DE5361 /* OpenGLShader.cpp */; };
 		9CE896C22F277A88005AEDDB /* OpenGLAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF6F4362E09AE8400DE5361 /* OpenGLAPI.cpp */; };
@@ -1243,10 +1248,10 @@
 		9C04FB952F337D6600DBABAD /* GLRenderMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLRenderMode.h; sourceTree = "<group>"; };
 		9C15AA912CBD64A800388A51 /* search_paths.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = search_paths.xcconfig; path = "../../../cpm-source-cache/iOS/search_paths.xcconfig"; sourceTree = "<group>"; };
 		9C5EF32D2C9C6A7200D282EC /* MidiMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MidiMessage.cpp; sourceTree = "<group>"; };
+		9C62AC272CF777A1008376A8 /* libmzgl-macOS-plugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-macOS-plugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9CB94F202F39EB4100996766 /* pathUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pathUtil.h; sourceTree = "<group>"; };
 		9CB94F212F39EB4100996766 /* pathUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pathUtil.cpp; sourceTree = "<group>"; };
 		9CB94F452F3C863200996766 /* className.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = className.h; sourceTree = "<group>"; };
-		9C62AC272CF777A1008376A8 /* libmzgl-macOS-plugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmzgl-macOS-plugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
 		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
@@ -3867,7 +3872,6 @@
 				EAF6F4982E09AEC200DE5361 /* sokol_log.h in Headers */,
 				EAF6F4992E09AEC200DE5361 /* sokol_gfx.h in Headers */,
 				EAF6F4702E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */,
-				9CB94F252F39EB4100996766 /* pathUtil.h in Headers */,
 				EAF6F4712E09AE8400DE5361 /* SokolVbo.h in Headers */,
 				EAF6F4722E09AE8400DE5361 /* SokolAPI.h in Headers */,
 				EAF6F4732E09AE8400DE5361 /* color.glsl.h in Headers */,
@@ -3938,7 +3942,6 @@
 				EA234AE824A609CA000F057B /* Yoga-internal.h in Headers */,
 				EA5250E62C2C648F00DE5DFC /* WebViewOverlay.h in Headers */,
 				EA71A73827E39E6C0081A5CB /* zip.h in Headers */,
-				9CB94F472F3C863200996766 /* className.h in Headers */,
 				EA5D5B232D9A9FE400F19952 /* colors.h in Headers */,
 				EA297C7725C954E600F890AE /* pa_hostapi.h in Headers */,
 				EA85564C2E7D5DCB00A515E2 /* CoreAudioSystem.h in Headers */,
@@ -4057,7 +4060,6 @@
 				EA2B832024E7093600EA12BD /* YGFloatOptional.h in Headers */,
 				EA2B832424E7093600EA12BD /* YGValue.h in Headers */,
 				EA297BE525C954CD00F890AE /* PortAudioSystem.h in Headers */,
-				9CB94F462F3C863200996766 /* className.h in Headers */,
 				EA2B832B24E7093600EA12BD /* Layer.h in Headers */,
 				EA2B832D24E7093600EA12BD /* nanovg_gl_utils.h in Headers */,
 				EA71A76727E39E6C0081A5CB /* aesopt.h in Headers */,
@@ -4085,7 +4087,6 @@
 				EA71A77527E39E6C0081A5CB /* brg_endian.h in Headers */,
 				EA71A7AF27E39E6C0081A5CB /* unzipper.h in Headers */,
 				EA2B84ED24E7093600EA12BD /* AudioSystem.h in Headers */,
-				9CB94F272F39EB4100996766 /* pathUtil.h in Headers */,
 				EA2B850A24E7093600EA12BD /* mzOpenGL.h in Headers */,
 				EABBA6DD2B4715E100B483CB /* midiMessagePrinting.h in Headers */,
 				EA2B850C24E7093600EA12BD /* LayerExplorer.h in Headers */,
@@ -4430,6 +4431,7 @@
 				9C62ABF12CF777A1008376A8 /* appleMidiUtils.cpp in Sources */,
 				9C62ABF22CF777A1008376A8 /* scales.cpp in Sources */,
 				9C62ABF32CF777A1008376A8 /* prng.c in Sources */,
+				9CB94FA42F3CAB7100996766 /* pathUtil.cpp in Sources */,
 				9C62ABF42CF777A1008376A8 /* Camera.cpp in Sources */,
 				9C62ABF52CF777A1008376A8 /* pa_unix_util.c in Sources */,
 				9C62ABF62CF777A1008376A8 /* YGNode.cpp in Sources */,
@@ -4488,6 +4490,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA35518E25CB05D5003DF2FB /* EventsView.mm in Sources */,
+				9CB94FA02F3CAB6B00996766 /* pathUtil.cpp in Sources */,
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
 				EABBA6D82B4715E100B483CB /* midiMessagePrinting.cpp in Sources */,
@@ -4608,7 +4611,6 @@
 				EA297C7625C954E600F890AE /* pa_converters.c in Sources */,
 				EA71A77C27E39E6C0081A5CB /* pwd2key.c in Sources */,
 				EA183FDF2432C18D00A5C3E8 /* Tween.cpp in Sources */,
-				9CB94F242F39EB4100996766 /* pathUtil.cpp in Sources */,
 				EA297CB025C954E600F890AE /* pa_mac_core_utilities.c in Sources */,
 				EA1840092432C18D00A5C3E8 /* Shader.cpp in Sources */,
 				EA297C7525C954E600F890AE /* pa_cpuload.c in Sources */,
@@ -4707,7 +4709,6 @@
 				EAF6F4A42E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
 				EAF6F4A52E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA1841142432C4A500A5C3E8 /* Image.mm in Sources */,
-				9CB94F222F39EB4100996766 /* pathUtil.cpp in Sources */,
 				EA71A75B27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EA18412D2432C4FF00A5C3E8 /* FileWatcher.cpp in Sources */,
 				EA234AFA24A609CA000F057B /* experiments.cpp in Sources */,
@@ -4720,6 +4721,7 @@
 				EA924369274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA71A73327E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD03BB72980185000D0C04A /* AppleWebView.mm in Sources */,
+				9CB94FA12F3CAB6B00996766 /* pathUtil.cpp in Sources */,
 				EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
 				EAF6737A289BC441001F778D /* stringUtil.cpp in Sources */,
@@ -4841,7 +4843,6 @@
 				EA2B8B0924E7093600EA12BD /* YGNode.cpp in Sources */,
 				EA2B8B0A24E7093600EA12BD /* Midi.cpp in Sources */,
 				EA2B8B0B24E7093600EA12BD /* FileWatcher.cpp in Sources */,
-				9CB94F262F39EB4100996766 /* pathUtil.cpp in Sources */,
 				EAD03BA7297FD9A200D0C04A /* MacWebView.mm in Sources */,
 				EA16DAC625FFABCD001C0460 /* pa_mac_core_utilities.c in Sources */,
 				EA16DAD125FFABDA001C0460 /* pa_allocation.c in Sources */,
@@ -4877,6 +4878,7 @@
 				EA2B8B1F24E7093600EA12BD /* YGStyle.cpp in Sources */,
 				EA924363273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */,
 				EA71A76027E39E6C0081A5CB /* fileenc.c in Sources */,
+				9CB94FA22F3CAB7100996766 /* pathUtil.cpp in Sources */,
 				EA2B8B2024E7093600EA12BD /* RtMidi.cpp in Sources */,
 				EA2B8B2124E7093600EA12BD /* Tween.cpp in Sources */,
 				EA92436A274000E300311C98 /* AllMidiDevices.cpp in Sources */,
@@ -4974,7 +4976,7 @@
 				EAF6F4A62E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
 				EAF6F4A72E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA71A78327E39E6C0081A5CB /* aestab.c in Sources */,
-				9CB94F232F39EB4100996766 /* pathUtil.cpp in Sources */,
+				9CB94FA32F3CAB7100996766 /* pathUtil.cpp in Sources */,
 				EA689474261C633500F76B91 /* Image.mm in Sources */,
 				EA689475261C633500F76B91 /* FileWatcher.cpp in Sources */,
 				EA689476261C633500F76B91 /* experiments.cpp in Sources */,
@@ -5045,6 +5047,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -5066,6 +5069,7 @@
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Release;
 		};
