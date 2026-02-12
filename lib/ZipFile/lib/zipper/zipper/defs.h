@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 #if defined(USE_WINDOWS)
+#    include <windows.h>
 #    include <direct.h>
 #    include <io.h>
 #    include <mbctype.h>
