@@ -1007,7 +1007,7 @@ void hideMouse() {
 }
 
 bool readFile(const std::string &filename, std::vector<unsigned char> &outData) {
-	fs::ifstream strm(u8path(filename), std::ios_base::binary);
+	std::ifstream strm(u8path(filename), std::ios_base::binary);
 	if (!strm) {
 		printf("cannot open file with path '%s'\n", filename.c_str());
 		return false;
@@ -1024,7 +1024,7 @@ bool readFile(const std::string &filename, std::vector<unsigned char> &outData) 
 }
 
 bool writeFile(const std::string &path, const std::vector<unsigned char> &data) {
-	fs::ofstream outfile(u8path(path), std::ios::out | std::ios::binary);
+	std::ofstream outfile(u8path(path), std::ios::out | std::ios::binary);
 	if (outfile.fail()) return false;
 	outfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 	if (outfile.fail()) return false;
@@ -1185,7 +1185,7 @@ bool writeStringToFileAtomically(const std::string &pathUtf8, const std::string 
 }
 
 bool writeStringToFile(const std::string &path, const std::string &data) {
-	fs::ofstream outfile(u8path(path), std::ios::out);
+	std::ofstream outfile(u8path(path), std::ios::out);
 	if (outfile.fail()) {
 		Log::e() << "writeStringToFile() open failed: " << strerror(errno) << path;
 		return false;
@@ -1203,7 +1203,7 @@ bool writeStringToFile(const std::string &path, const std::string &data) {
 	return true;
 }
 bool readStringFromFile(const std::string &path, std::string &outStr) {
-	fs::ifstream t(u8path(path));
+	std::ifstream t(u8path(path));
 	if (t.fail()) {
 		Log::e() << "failed to open file at " << path;
 		return false;

@@ -2098,7 +2098,7 @@ inline std::string decode_url(const std::string &s,
 }
 
 inline void read_file(const std::string &path, std::string &out) {
-  fs::ifstream fs(fs::u8path(path), std::ios_base::binary);
+  std::ifstream fs(fs::path(path), std::ios_base::binary);
   fs.seekg(0, std::ios_base::end);
   auto size = fs.tellg();
   fs.seekg(0);

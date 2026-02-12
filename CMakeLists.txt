@@ -229,10 +229,6 @@ set(HEADERS
     # lib/ghc-filesystem/include
 )
 
-mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/ghc-filesystem")
-mzgl_save_cmake_log_level()
-add_subdirectory(lib/ghc-filesystem EXCLUDE_FROM_ALL)
-mzgl_restore_cmake_log_level()
 # include_directories() list(APPEND HEADERS "${filesystem_SOURCE_DIR}/include")
 set(YOGA_SOURCES
     lib/yoga/Utils.cpp
@@ -399,7 +395,7 @@ if(APPLE)
   add_compile_definitions(SOKOL_METAL)
 endif()
 
-set(MZGL_LIBS ZipFile yoga pu_gixml ghc_filesystem)
+set(MZGL_LIBS ZipFile yoga pu_gixml)
 
 if(WIN32)
   # list(APPEND MZGL_LIBS zlib) target_include_directories(libmzgl PUBLIC

@@ -313,8 +313,8 @@ bool CDirEntry::move(const std::string& from, const std::string& to)
     if (!success)
     {
         {
-            fs::ifstream in(fs::u8path(from));
-            fs::ofstream out(fs::u8path(To));
+            std::ifstream in{fs::path(from)};
+            std::ofstream out{fs::path(To)};
 
             out << in.rdbuf();
 

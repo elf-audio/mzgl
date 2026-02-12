@@ -340,7 +340,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
         {
             fs::path path = *it;
             Timestamp time(path);
-            fs::ifstream input(path, std::ios::binary);
+            std::ifstream input(path, std::ios::binary);
             std::string nameInZip = path.string().substr(path.string().rfind(folderName + CDirEntry::Separator), path.string().size());
             add(input, time.timestamp, nameInZip, flags);
             input.close();
@@ -349,7 +349,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
     else
     {
         Timestamp time(fileOrFolderPath);
-        fs::ifstream input(fs::u8path(fileOrFolderPath.c_str()), std::ios::binary);
+        std::ifstream input(fs::path(fileOrFolderPath.c_str()), std::ios::binary);
         std::string fullFileName;
 
         if (flags & Zipper::SaveHierarchy)

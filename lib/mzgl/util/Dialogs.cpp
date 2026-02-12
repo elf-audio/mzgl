@@ -1084,9 +1084,9 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 
 	std::string destPath = "/Users/marek/Desktop/" + fs::path(path).filename().string();
 	printf("No sharing pane on mac for now - saved to desktop\n");
-	fs::ifstream src(u8path(path), std::ios::binary);
+	std::ifstream src(u8path(path), std::ios::binary);
 	printf("Copying %s to %s\n", path.c_str(), destPath.c_str());
-	fs::ofstream dst(u8path(destPath), std::ios::binary);
+	std::ofstream dst(u8path(destPath), std::ios::binary);
 
 	dst << src.rdbuf();
 #endif

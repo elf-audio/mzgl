@@ -4,7 +4,6 @@ project(ZipFile)
 
 include_directories(
   ../misc
-  ../ghc-filesystem/include
   lib/zipper/zipper
   lib/zipper/minizip
   lib/zipper/

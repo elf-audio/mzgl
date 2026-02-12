@@ -253,7 +253,7 @@ public:
         makedir(parentDirectory(filename));
 
         /* Create the file on disk so we can unzip to it */
-        fs::ofstream output_file(fs::u8path(filename), std::ofstream::binary);
+        std::ofstream output_file(fs::path(filename), std::ofstream::binary);
 
         if (output_file.good())
         {

@@ -53,5 +53,5 @@ Timestamp::Timestamp(const fs::path& filepath)
 
 Timestamp::Timestamp(const std::string& filepath)
 {
-    init(fs::u8path(filepath.c_str()), timestamp);
+    init(fs::path(filepath.c_str()), timestamp);
 }

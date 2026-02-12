@@ -1,26 +1,22 @@
 #pragma once
 
-// ghc filesystem has some warnings we want to suppress for a less noisy build
-#include "DisableAllWarnings.h"
-DISABLE_WARNINGS
-#include <ghc/filesystem.hpp>
-RESTORE_WARNINGS
-
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <ostream>
 
 #if defined(_WIN32) || defined(WIN32)
 
 namespace winfs {
-	using namespace ghc::filesystem;
+	using namespace std::filesystem;
 
 	struct path {
-		ghc::filesystem::path inner;
+		std::filesystem::path inner;
 
 		path() = default;
-		path(const ghc::filesystem::path &p)
+		path(const std::filesystem::path &p)
 			: inner(p) {}
-		path(ghc::filesystem::path &&p)
+		path(std::filesystem::path &&p)
 			: inner(std::move(p)) {}
 		path(const std::string &s)
 			: inner(s) {}
@@ -28,7 +24,7 @@ namespace winfs {
 			: inner(s) {}
 		path(std::string_view sv)
 			: inner(sv) {}
-		path(const ghc::filesystem::directory_entry &entry)
+		path(const std::filesystem::directory_entry &entry)
 			: inner(entry.path()) {}
 
 		path(const path &)			  = default;
@@ -36,9 +32,9 @@ namespace winfs {
 		path &operator=(const path &) = default;
 		path &operator=(path &&)	  = default;
 
-		operator const ghc::filesystem::path &() const { return inner; }
-		operator ghc::filesystem::path &() { return inner; }
-		operator ghc::filesystem::path() const { return inner; }
+		operator const std::filesystem::path &() const { return inner; }
+		operator std::filesystem::path &() { return inner; }
+		operator std::filesystem::path() const { return inner; }
 		operator std::string() const { return inner.string(); }
 		explicit operator std::wstring() const { return inner.wstring(); }
 		explicit operator const char *() const { return inner.string().c_str(); }
@@ -58,7 +54,7 @@ namespace winfs {
 			return *this;
 		}
 
-		path &operator=(const ghc::filesystem::path &p) {
+		path &operator=(const std::filesystem::path &p) {
 			inner = p;
 			return *this;
 		}
@@ -68,14 +64,14 @@ namespace winfs {
 			return *this;
 		}
 
-		path &operator=(const ghc::filesystem::directory_entry &entry) {
+		path &operator=(const std::filesystem::directory_entry &entry) {
 			inner = entry.path();
 			return *this;
 		}
 
 		template <typename Source>
 		path &operator=(const Source &source) {
-			inner = ghc::filesystem::path(source);
+			inner = std::filesystem::path(source);
 			return *this;
 		}
 
@@ -104,9 +100,9 @@ namespace winfs {
 		path stem() const { return path(inner.stem()); }
 		bool empty() const { return inner.empty(); }
 		auto c_str() const { return inner.wstring().c_str(); }
-		bool exists() const { return ghc::filesystem::exists(inner); }
-		bool is_directory() const { return ghc::filesystem::is_directory(inner); }
-		bool is_regular_file() const { return ghc::filesystem::is_regular_file(inner); }
+		bool exists() const { return std::filesystem::exists(inner); }
+		bool is_directory() const { return std::filesystem::is_directory(inner); }
+		bool is_regular_file() const { return std::filesystem::is_regular_file(inner); }
 
 		path &replace_extension(const path &replacement = path()) {
 			inner.replace_extension(replacement.inner);
@@ -147,8 +143,8 @@ namespace winfs {
 		friend path operator/(path &lhs, const std::string &rhs) { return path(lhs.inner / rhs); }
 		friend path operator/(path &lhs, const path &rhs) { return path(lhs.inner / rhs.inner); }
 		friend path operator/(path &lhs, const char *rhs) { return path(lhs.inner / rhs); }
-		friend path operator/(const path &lhs, const ghc::filesystem::path &rhs) { return path(lhs.inner / rhs); }
-		friend path operator/(const ghc::filesystem::path &lhs, const path &rhs) { return path(lhs / rhs.inner); }
+		friend path operator/(const path &lhs, const std::filesystem::path &rhs) { return path(lhs.inner / rhs); }
+		friend path operator/(const std::filesystem::path &lhs, const path &rhs) { return path(lhs / rhs.inner); }
 
 		friend bool operator==(const path &a, const path &b) { return a.inner == b.inner; }
 		friend bool operator!=(const path &a, const path &b) { return a.inner != b.inner; }
@@ -164,31 +160,28 @@ namespace winfs {
 		friend std::ostream &operator<<(std::ostream &os, const path &p) { return os << p.string(); }
 	};
 
-	using ghc::filesystem::absolute;
-	using ghc::filesystem::canonical;
-	using ghc::filesystem::copy;
-	using ghc::filesystem::copy_file;
-	using ghc::filesystem::copy_options;
-	using ghc::filesystem::create_directories;
-	using ghc::filesystem::create_directory;
-	using ghc::filesystem::current_path;
-	using ghc::filesystem::directory_iterator;
-	using ghc::filesystem::exists;
-	using ghc::filesystem::file_size;
-	using ghc::filesystem::file_time_type;
-	using ghc::filesystem::file_type;
-	using ghc::filesystem::ifstream;
-	using ghc::filesystem::is_directory;
-	using ghc::filesystem::is_regular_file;
-	using ghc::filesystem::is_symlink;
-	using ghc::filesystem::last_write_time;
-	using ghc::filesystem::ofstream;
-	using ghc::filesystem::recursive_directory_iterator;
-	using ghc::filesystem::remove;
-	using ghc::filesystem::remove_all;
-	using ghc::filesystem::rename;
-	using ghc::filesystem::status;
-	using ghc::filesystem::u8path;
+	using std::filesystem::absolute;
+	using std::filesystem::canonical;
+	using std::filesystem::copy;
+	using std::filesystem::copy_file;
+	using std::filesystem::copy_options;
+	using std::filesystem::create_directories;
+	using std::filesystem::create_directory;
+	using std::filesystem::current_path;
+	using std::filesystem::directory_iterator;
+	using std::filesystem::exists;
+	using std::filesystem::file_size;
+	using std::filesystem::file_time_type;
+	using std::filesystem::file_type;
+	using std::filesystem::is_directory;
+	using std::filesystem::is_regular_file;
+	using std::filesystem::is_symlink;
+	using std::filesystem::last_write_time;
+	using std::filesystem::recursive_directory_iterator;
+	using std::filesystem::remove;
+	using std::filesystem::remove_all;
+	using std::filesystem::rename;
+	using std::filesystem::status;
 
 } // namespace winfs
 
@@ -196,6 +189,6 @@ namespace fs = winfs;
 
 #else
 
-namespace fs = ghc::filesystem;
+namespace fs = std::filesystem;
 
 #endif

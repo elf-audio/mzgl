@@ -188,7 +188,7 @@ size_t ZipReaderFile::readSome(std::vector<int8_t> &d) {
 
 void ZipReaderFile::extract(const std::string &path) {
 	seek(0);
-	fs::ofstream f(fs::u8path(path), std::ios_base::binary);
+	std::ofstream f(fs::path(path), std::ios_base::binary);
 	std::vector<int8_t> buff(4096);
 	while (1) {
 		auto amountRead = readSome(buff);
