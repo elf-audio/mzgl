@@ -395,7 +395,7 @@ if(APPLE)
   add_compile_definitions(SOKOL_METAL)
 endif()
 
-set(MZGL_LIBS ZipFile yoga pu_gixml)
+set(MZGL_LIBS ZipFile yoga pu_gixml ghc_filesystem concurrentqueue readerwriterqueue)
 
 if(WIN32)
   # list(APPEND MZGL_LIBS zlib) target_include_directories(libmzgl PUBLIC

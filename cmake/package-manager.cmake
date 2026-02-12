@@ -24,6 +24,7 @@ function(mzgl_patch_cmake_version CMAKE_LISTS_PATH)
   endif()
 
   file(READ "${CMAKE_LISTS_PATH}" _cmake_content)
+  set(_original_content "${_cmake_content}")
 
   string(
     REGEX
@@ -35,11 +36,13 @@ function(mzgl_patch_cmake_version CMAKE_LISTS_PATH)
          REPLACE "cmake_policy\\( *VERSION +[0-9]+\\.[0-9]+(\\.[0-9]+)? *\\)"
                  "cmake_policy(VERSION 3.5)" _cmake_content "${_cmake_content}")
 
-  file(WRITE "${CMAKE_LISTS_PATH}" "${_cmake_content}")
-  message(
-    STATUS
-      "Patched ${CMAKE_LISTS_PATH} to use minimum CMake version 3.5 for compatibility."
-  )
+  if(NOT "${_cmake_content}" STREQUAL "${_original_content}")
+    file(WRITE "${CMAKE_LISTS_PATH}" "${_cmake_content}")
+    message(
+      STATUS
+        "Patched ${CMAKE_LISTS_PATH} to use minimum CMake version 3.5 for compatibility."
+    )
+  endif()
 endfunction()
 
 # @brief Write the include paths to a file in cpm-source-cache
@@ -140,7 +143,6 @@ function(mzgl_add_package PACKAGE_NAME)
   mzgl_restore_cmake_log_level()
   mzgl_print_debug_in_grey("      -> Package name is ${CPM_LAST_PACKAGE_NAME}")
 
-  mzgl_add_search_paths("${${CPM_LAST_PACKAGE_NAME}_SOURCE_DIR}")
 endfunction()
 
 function(mzgl_add_named_package PACKAGE_STRING)
