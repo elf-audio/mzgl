@@ -10,4 +10,10 @@ function(mzgl_add_packages)
   include_directories("${fast-poly2tri_DEPS_DIR}")
   mzgl_add_xcode_header_search_path("${fontstash_DEPS_DIR}/src")
   mzgl_add_xcode_header_search_path("${fast-poly2tri_DEPS_DIR}")
+
+  # Packages with CMake targets still need Xcode header search paths
+  # since Xcode's native build doesn't use CMake's target system.
+  mzgl_add_xcode_header_search_path("${concurrentqueue_DEPS_DIR}")
+  mzgl_add_xcode_header_search_path("${readerwriterqueue_DEPS_DIR}")
+  mzgl_add_xcode_header_search_path("${json_DEPS_DIR}/include")
 endfunction()

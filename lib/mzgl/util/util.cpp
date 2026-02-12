@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <iterator>
 #include <thread>
 #include <stdlib.h>
