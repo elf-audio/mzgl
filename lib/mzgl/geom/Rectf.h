@@ -118,8 +118,11 @@ public:
 	void setBottomCentre(float x, float y) {
 		set(x - this->width / 2, y - this->height, this->width, this->height);
 	}
+	void setBottomCentre(glm::vec2 p) { setBottomCentre(p.x, p.y); }
 
 	void setTopCentre(float x, float y) { set(x - this->width / 2, y, this->width, this->height); }
+
+	void setTopCentre(glm::vec2 p) { setTopCentre(p.x, p.y); }
 
 	void scale(float amt) {
 		auto c = centre();

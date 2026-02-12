@@ -726,7 +726,7 @@ void Dialogs::threeOptionDialog(std::string title,
 
 	if (img != nil) {
 		// this fixes embedded rotations in the image
-		img		   = [self normalizedImage:img];
+		img = [self normalizedImage:img];
 		CLANG_IGNORE_WARNINGS_BEGIN("-Wdeprecated-declarations")
 		NSURL *url = [info objectForKey:UIImagePickerControllerReferenceURL];
 		CLANG_IGNORE_WARNINGS_END
@@ -778,7 +778,7 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 	UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.sourceType				= UIImagePickerControllerSourceTypePhotoLibrary;
 	picker.mediaTypes				= [[NSArray alloc] initWithObjects:(NSString *) kUTTypeImage, nil];
-	picker.delegate					= (id <UINavigationControllerDelegate, UIImagePickerControllerDelegate>)bgpd;
+	picker.delegate					= (id<UINavigationControllerDelegate, UIImagePickerControllerDelegate>) bgpd;
 
 	[bgpd setCompletionCallback:completionCallback];
 	[getTopController(app) presentViewController:picker animated:YES completion:^ {}];
@@ -1051,7 +1051,7 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 #endif
 
 #if TARGET_OS_IOS
-	NSURL *URL	  = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
+	NSURL *URL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
 
 	UIActivityViewController *activityViewController =
 		[[UIActivityViewController alloc] initWithActivityItems:@[ URL ] applicationActivities:nil];
@@ -1256,7 +1256,9 @@ void Dialogs::loadFile(std::string msg,
 			  filePath = std::string([[[loadDialog URL] path] UTF8String]);
 		  }
 	  }
-	  completionCallback(filePath, buttonClicked == NSModalResponseOK);
+	  app.main.runOnMainThread(true, [filePath, buttonClicked, completionCallback]() {
+		  completionCallback(filePath, buttonClicked == NSModalResponseOK);
+	  });
 	});
 #	endif
 #elif defined(__ANDROID__)
@@ -1369,7 +1371,8 @@ void Dialogs::textboxWithSegmented(std::string title,
 				  txt = [[label stringValue] UTF8String];
 			  }
 			  app.main.runOnMainThread(true, [txt, returnCode, selectedSegment, completionCallback]() {
-				  completionCallback(txt, static_cast<int>(selectedSegment), returnCode == NSAlertFirstButtonReturn);
+				  completionCallback(
+					  txt, static_cast<int>(selectedSegment), returnCode == NSAlertFirstButtonReturn);
 			  });
 		  };
 #		ifndef MZGLAU
