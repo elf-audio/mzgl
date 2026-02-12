@@ -407,11 +407,8 @@ void FloatBuffer::fadeIn(int length, int numChans, bool smooth) {
 			}
 		}
 	} else {
-		printf(
-			"ERROR: FloatBuffer::fadeIn() - trying to fadeIn(%d, %d) on a sample that is only %lu samples long\n",
-			length,
-			numChans,
-			size());
+		Log::e() << "ERROR: FloatBuffer::fadeIn() - trying to fadeIn(" << length << ", " << numChans
+				 << ") on a sample that is only " << size() << " samples long";
 	}
 }
 
