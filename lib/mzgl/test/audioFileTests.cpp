@@ -5,8 +5,10 @@
 #include <optional>
 #include <iostream>
 #include <sstream>
-#include <unistd.h>
-#include <fcntl.h>
+#ifndef _WIN32
+#	include <unistd.h>
+#	include <fcntl.h>
+#endif
 #include "mzAssert.h"
 
 class StderrScope {
