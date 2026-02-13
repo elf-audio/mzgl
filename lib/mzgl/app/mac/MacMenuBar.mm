@@ -86,9 +86,9 @@ std::shared_ptr<MacMenuItem> MacMenu::addItem(std::string title,
 	id scNS				 = [NSString stringWithUTF8String:shortcut.c_str()];
 	LambdaMenuItem *item = [[LambdaMenuItem alloc] initWithTitle:titleNS keyEquivalent:scNS actionLambda:action];
 	if (modifier == MacMenu::KeyModifier::Shift) {
-		item.keyEquivalentModifierMask = NSEventModifierFlagShift;
+		item.keyEquivalentModifierMask = NSEventModifierFlagCommand | NSEventModifierFlagShift;
 	} else if (modifier == MacMenu::KeyModifier::Alt) {
-		item.keyEquivalentModifierMask = NSEventModifierFlagOption;
+		item.keyEquivalentModifierMask = NSEventModifierFlagCommand | NSEventModifierFlagOption;
 	}
 	[submenus[name] addItem:item];
 
