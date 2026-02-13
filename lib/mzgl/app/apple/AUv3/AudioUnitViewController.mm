@@ -6,20 +6,21 @@
 //  Copyright © 2019 Marek Bereza. All rights reserved.
 //
 
-#if !TARGET_OS_SIMULATOR
-#	import "AudioUnitViewController.h"
-#	import "MZGLEffectAU.h"
-#	include <thread>
+#import "AudioUnitViewController.h"
+#import "MZGLEffectAU.h"
+#include <thread>
 
-#	if MZGL_IOS
-#		import "MZGLKitViewController.h"
-#		import "MZGLKitView.h"
-#	else
-#		import "EventsView.h"
-#	endif
-#	include "Plugin.h"
-#	include "PluginEditor.h"
-#	include "EventDispatcher.h"
+#if MZGL_IOS
+#	import "MZGLKitViewController.h"
+#	import "MZGLKitView.h"
+#else
+#	import "EventsView.h"
+#	import <objc/runtime.h>
+static constexpr auto kAudioUnitKey = "kAudioUnitKey";
+#endif
+#include "Plugin.h"
+#include "PluginEditor.h"
+#include "EventDispatcher.h"
 
 @interface AudioUnitViewController ()
 
@@ -31,9 +32,8 @@ using namespace std;
 #	if MZGL_IOS
 	MZGLKitViewController *vc;
 	MZGLKitView *glView;
-#	else
-
-	EventsView *glView;
+#else
+	MZGLView *glView;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 #	endif
 	MZGLEffectAU *audioUnit;
@@ -55,8 +55,6 @@ using namespace std;
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
-	app.reset();
-	plugin.reset();
 	g.reset();
 }
 #pragma clang diagnostic pop
@@ -96,8 +94,8 @@ using namespace std;
 - (MZGLKitView *)getView {
 	return glView;
 }
-#	else
-- (EventsView *)getView {
+#else
+- (MZGLView *)getView {
 	return glView;
 }
 #	endif
@@ -120,6 +118,10 @@ using namespace std;
 }
 
 - (void)viewDidLayoutSubviews {
+	[self tryToResize];
+}
+
+- (void)viewDidLayout {
 	[self tryToResize];
 }
 
@@ -158,20 +160,30 @@ using namespace std;
 
 - (void)viewWillAppear:(BOOL)animated {
 	if (app == nullptr) {
-		g	   = std::make_shared<Graphics>();
-		plugin = [self getPlugin];
-		app	   = instantiatePluginEditor(*g, plugin);
-#	if MZGL_IOS
+		g = std::make_shared<Graphics>();
+
+#if MZGL_IOS
+		plugin				= [self getPlugin];
+		app					= instantiatePluginEditor(*g, plugin);
 		vc					= [[MZGLKitViewController alloc] initWithApp:app andGraphics:g];
 		app->viewController = (__bridge void *) self;
+		glView				= (MZGLKitView *) vc.view;
+#else
+		MZGLEffectAU *myAU = objc_getAssociatedObject(self, kAudioUnitKey);
+		if (myAU == nil) {
+			NSLog(@"ERROR: No audio unit associated with view controller %p", self);
+			return;
+		}
 
-		glView = (MZGLKitView *) vc.view;
-#	else
+		NSLog(@"MZGL: viewWillAppear for view controller %p, using AU %p", self, myAU);
+		plugin = [myAU getPlugin];
+
+		app				= instantiatePluginEditor(*g, plugin);
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
 #	endif
 		glView.frame = self.view.frame;
-#	if !MZGL_IOS
+#if !MZGL_IOS
 		g->width  = self.view.frame.size.width * 2;
 		g->height = self.view.frame.size.height * 2;
 		eventDispatcher->resized();
@@ -192,34 +204,28 @@ using namespace std;
 }
 
 - (std::shared_ptr<Plugin>)getPlugin {
+#if MZGL_IOS
 	if (plugin == nullptr) {
 		plugin = instantiatePlugin();
 	}
 	return plugin;
-}
-- (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
-	plugin = [self getPlugin];
-	//	audioUnit = [[MZGLEffectAU alloc] initWithPlugin: plugin andComponentDescription:desc error:error];
-	//
-	//	- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
-	//		   andComponentDescription:(AudioComponentDescription)componentDescription
-	//						   options:(AudioComponentInstantiationOptions)options error:(NSError **)outError;
-	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:plugin andComponentDescription:desc error:error];
-	NSLog(@"MZGL: createAudioUnitWithComponentDescription");
-
-	//    if([NSThread isMainThread]) {
-	//        NSLog(@"main thread");
-	//        [self doBoth: audioUnit];
-	//    } else {
-	//        NSLog(@"dispatch");
-	//        dispatch_async(dispatch_get_main_queue(), ^{
-	//            NSLog(@"now on main thread");
-	//            [self doBoth: audioUnit];
-	//        });
-	//    }
-
-	return audioUnit;
-}
-
-@end
+#else
+	return instantiatePlugin();
 #endif
+}
+
+- (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
+#if MZGL_IOS
+	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:[self getPlugin] andComponentDescription:desc error:error];
+	NSLog(@"MZGL: createAudioUnitWithComponentDescription");
+	return audioUnit;
+#else
+	MZGLEffectAU *au = [[MZGLEffectAU alloc] initWithPlugin:instantiatePlugin()
+									andComponentDescription:desc
+													  error:error];
+	NSLog(@"MZGL: createAudioUnitWithComponentDescription - created AU %p for view controller %p", au, self);
+	objc_setAssociatedObject(self, kAudioUnitKey, au, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	return au;
+#endif
+}
+@end

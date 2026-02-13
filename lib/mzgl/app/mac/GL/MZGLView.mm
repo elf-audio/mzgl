@@ -7,6 +7,7 @@
 //
 
 #import "MZGLView.h"
+#import "GLRenderer.h"
 #include "App.h"
 #include "mainThread.h"
 #include "log.h"
@@ -17,64 +18,67 @@
 #include "NSEventDispatcher.h"
 #include "PluginEditor.h"
 #include "Vbo.h"
-#include <mutex>
 
-@implementation MZGLView {
-	CVDisplayLinkRef displayLink;
-	std::mutex evtMutex;
-	bool firstFrame;
-	bool drawing;
-}
+@implementation MZGLView
 
 @synthesize view;
 
-- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+- (id)initWithFrame:(NSRect)frame
+	eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher
+	 withRenderMode:(RenderMode)renderMode {
 	eventDispatcher = evtDispatcher;
 
-	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] = {
-
-		NSOpenGLPFAOpenGLProfile,
-
-		NSOpenGLProfileVersion3_2Core,
-
-		NSOpenGLPFAColorSize,
-		24,
-		NSOpenGLPFAAlphaSize,
-		8,
-		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFADepthSize,
-		32,
-		NSOpenGLPFAAccelerated,
-		NSOpenGLPFASampleBuffers,
-		1,
-		NSOpenGLPFASamples,
-		4,
-		NSOpenGLPFAMultisample,
-		0};
+	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] = {NSOpenGLPFAOpenGLProfile,
+															NSOpenGLProfileVersion3_2Core,
+															NSOpenGLPFAColorSize,
+															24,
+															NSOpenGLPFAAlphaSize,
+															8,
+															NSOpenGLPFADoubleBuffer,
+															NSOpenGLPFADepthSize,
+															32,
+															NSOpenGLPFAAccelerated,
+															NSOpenGLPFASampleBuffers,
+															1,
+															NSOpenGLPFASamples,
+															4,
+															NSOpenGLPFAMultisample,
+															0};
 	NSOpenGLPixelFormat *pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
 
 	self = [super initWithFrame:frame pixelFormat:pixelFormat];
 	if (self != nil) {
 		[self setWantsBestResolutionOpenGLSurface:YES];
 		[self createGLResources];
-		[self createDisplayLink];
-		drawing = true;
 
-		firstFrame = true;
+		if (renderMode == RenderMode::UseRenderTimer) {
+			renderer = std::make_unique<TimerRenderer>(self);
+		} else {
+			renderer = std::make_unique<CVDisplayLinkRenderer>(self);
+		}
+		renderer->start();
 	}
 	return self;
 }
 
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+	return [self initWithFrame:frame eventDispatcher:evtDispatcher withRenderMode:RenderMode::UseCVDisplayLink];
+}
+
 - (void)shutdown {
-	[self lock]; // - marek commented this out on 15/07/22 - may cause problems
-	CVDisplayLinkStop(displayLink);
-	displayLink = NULL;
-	[self unlock];
+	if (renderer) {
+		renderer->stop();
+	}
+}
+
+- (void)makeContextCurrentForCleanup {
+	[[self openGLContext] makeCurrentContext];
 }
 
 - (std::shared_ptr<App>)getApp {
 	return eventDispatcher->app;
 }
+
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher {
 	return eventDispatcher;
 }
@@ -82,41 +86,28 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
-	if (displayLink != NULL) {
-		CVDisplayLinkStop(displayLink);
-		displayLink = NULL;
+	if (renderer) {
+		renderer->stop();
+		renderer.reset();
 	}
-	// can't do this apparently, but clang warns about it.
-	//	[super dealloc];
 }
 #pragma clang diagnostic pop
 
-CVReturn displayCallback(CVDisplayLinkRef displayLink,
-						 const CVTimeStamp *inNow,
-						 const CVTimeStamp *inOutputTime,
-						 CVOptionFlags flagsIn,
-						 CVOptionFlags *flagsOut,
-						 void *displayLinkContext) {
-	MZGLView *view = (__bridge MZGLView *) (displayLinkContext);
+- (void)performRender {
+	[[self openGLContext] makeCurrentContext];
 
-	if (view->drawing) {
-		[view renderForTime:*inOutputTime];
+	if (!eventDispatcher || !renderer || !renderer->isDrawing()) {
+		return;
 	}
-	return kCVReturnSuccess;
-}
 
-- (void)createDisplayLink {
-	CGDirectDisplayID displayID = CGMainDisplayID();
-	CVReturn error				= CVDisplayLinkCreateWithCGDisplay(displayID, &displayLink);
-
-	if (kCVReturnSuccess == error) {
-		// is CFBRidgingRetain ok?
-		CVDisplayLinkSetOutputCallback(displayLink, displayCallback, (__bridge void *) (self));
-		CVDisplayLinkStart(displayLink);
-	} else {
-		NSLog(@"Display Link created with error: %d", error);
-		displayLink = NULL;
+	if (eventDispatcher->app->g.firstFrame) {
+		initMZGL(eventDispatcher->app);
+		eventDispatcher->setup();
+		eventDispatcher->app->g.firstFrame = false;
 	}
+
+	eventDispatcher->runFrame();
+	[[self openGLContext] flushBuffer];
 }
 
 - (void)setWindowSize:(float)x y:(float)y {
@@ -164,33 +155,28 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 											   [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });
 }
 
-- (void)renderForTime:(CVTimeStamp)time {
-	[[self openGLContext] makeCurrentContext];
-	[self lock];
-
-	if (eventDispatcher->app->g.firstFrame) {
-		initMZGL(eventDispatcher->app);
-		eventDispatcher->setup();
-		eventDispatcher->app->g.firstFrame = false;
-	}
-
-	eventDispatcher->runFrame();
-	[self unlock];
-	[[self openGLContext] flushBuffer];
-}
-
 - (void)lock {
-	evtMutex.lock();
+	if (renderer) {
+		renderer->lock();
+	}
 }
+
 - (void)unlock {
-	evtMutex.unlock();
+	if (renderer) {
+		renderer->unlock();
+	}
 }
 
 - (void)disableDrawing {
-	drawing = NO;
+	if (renderer) {
+		renderer->setDrawing(false);
+	}
 }
 
 - (void)enableDrawing {
-	drawing = YES;
+	if (renderer) {
+		renderer->setDrawing(true);
+	}
 }
+
 @end

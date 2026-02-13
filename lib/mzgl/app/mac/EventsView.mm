@@ -21,8 +21,14 @@
 	bool lastOptionState;
 	bool lastCommandState;
 }
-- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+- (id)initWithFrame:(NSRect)frame
+	eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher
+	 withRenderMode:(RenderMode)renderMode {
+#ifdef MZGL_SOKOL_METAL
 	self = [super initWithFrame:frame eventDispatcher:evtDispatcher];
+#else
+	self = [super initWithFrame:frame eventDispatcher:evtDispatcher withRenderMode:renderMode];
+#endif
 	if (self != nil) {
 		dropped			 = false;
 		lastShiftState	 = false;
@@ -33,6 +39,10 @@
 		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 	}
 	return self;
+}
+
+- (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
+	return [self initWithFrame:frame eventDispatcher:evtDispatcher withRenderMode:RenderMode::UseCVDisplayLink];
 }
 
 - (BOOL)mouseDownCanMoveWindow {
@@ -249,9 +259,14 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)shutdown {
-	eventDispatcher->exit();
-	eventDispatcher = nullptr;
+#if defined(MZGL_PLUGIN_VST)
 	[super shutdown];
+	[super makeContextCurrentForCleanup];
+#endif
+	if (eventDispatcher) {
+		eventDispatcher->exit();
+		eventDispatcher = nullptr;
+	}
 }
 
 - (std::shared_ptr<App>)getApp {
