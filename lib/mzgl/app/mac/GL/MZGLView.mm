@@ -20,6 +20,7 @@
 #include <mutex>
 
 @implementation MZGLView {
+	BOOL isShuttingDown;
 	CVDisplayLinkRef displayLink;
 	std::mutex evtMutex;
 	bool firstFrame;
@@ -82,12 +83,18 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
+	isShuttingDown = YES;
+
 	if (displayLink != NULL) {
 		CVDisplayLinkStop(displayLink);
 		displayLink = NULL;
 	}
-	// can't do this apparently, but clang warns about it.
-	//	[super dealloc];
+	[self wait2FramesForShutdown];
+	[super dealloc];
+}
+
+- (void)wait2FramesForShutdown {
+	[NSThread sleepForTimeInterval:0.033];
 }
 #pragma clang diagnostic pop
 
@@ -165,7 +172,20 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 }
 
 - (void)renderForTime:(CVTimeStamp)time {
-	[[self openGLContext] makeCurrentContext];
+	if (isShuttingDown) {
+		return;
+	}
+
+	if (!self || !self.window || !eventDispatcher) {
+		return;
+	}
+
+	NSOpenGLContext *context = [self openGLContext];
+	if (!context) {
+		return;
+	}
+
+	[context makeCurrentContext];
 	[self lock];
 
 	if (eventDispatcher->app->g.firstFrame) {
@@ -176,7 +196,7 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 
 	eventDispatcher->runFrame();
 	[self unlock];
-	[[self openGLContext] flushBuffer];
+	[context flushBuffer];
 }
 
 - (void)lock {
