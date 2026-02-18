@@ -324,7 +324,14 @@ std::string getCommandLineSetting(const std::string &setting, const std::string 
 }
 
 int getCommandLineSetting(const std::string &setting, int defaultValue) {
-	return std::stoi(getCommandLineSetting(setting, std::to_string(defaultValue)));
+	auto str = getCommandLineSetting(setting, std::to_string(defaultValue));
+	try {
+		return std::stoi(str);
+	} catch (const std::exception &e) {
+		Log::e() << "Invalid integer value '" << str << "' for command line setting '" << setting
+				 << "', using default " << defaultValue;
+		return defaultValue;
+	}
 }
 
 float getSeconds() {

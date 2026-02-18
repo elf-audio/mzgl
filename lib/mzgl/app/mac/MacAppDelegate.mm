@@ -78,19 +78,32 @@ void handleTerminateSignal(int signal) {
 
 bool hasTransparentTitleBar = true;
 
+- (NSScreen *)targetScreen {
+	if (hasCommandLineSetting("--screen")) {
+		int screenIndex = getCommandLineSetting("--screen", 0);
+		NSArray<NSScreen *> *screens = [NSScreen screens];
+		if (screenIndex >= 0 && screenIndex < (int) [screens count]) {
+			return screens[screenIndex];
+		}
+		Log::e() << "Requested screen " << screenIndex << " but only " << [screens count]
+				 << " screen(s) available, using main screen";
+	}
+	return [NSScreen mainScreen];
+}
+
 - (NSRect)setupWindow {
-	NSScreen *mainScreen = [NSScreen mainScreen];
+	NSScreen *screen = [self targetScreen];
 
 	float w = app->g.width / app->g.pixelScale;
 	float h = app->g.height / app->g.pixelScale;
 
-	if (h > mainScreen.visibleFrame.size.height * 0.9) {
-		h			  = mainScreen.visibleFrame.size.height * 0.9;
+	if (h > screen.visibleFrame.size.height * 0.9) {
+		h			  = screen.visibleFrame.size.height * 0.9;
 		app->g.height = h * app->g.pixelScale;
 	}
 
-	if (w > mainScreen.visibleFrame.size.width) {
-		w			 = mainScreen.visibleFrame.size.width;
+	if (w > screen.visibleFrame.size.width) {
+		w			 = screen.visibleFrame.size.width;
 		app->g.width = w * app->g.pixelScale;
 	}
 
@@ -100,7 +113,8 @@ bool hasTransparentTitleBar = true;
 		initWithContentRect:windowRect
 				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable | NSWindowStyleMaskClosable
 					backing:NSBackingStoreBuffered
-					  defer:NO];
+					  defer:NO
+					 screen:screen];
 
 	if (hasTransparentTitleBar) {
 		window.titlebarAppearsTransparent = YES;
@@ -128,7 +142,15 @@ bool hasTransparentTitleBar = true;
 	window.delegate = view;
 	[[window contentView] addSubview:view];
 	[window makeKeyAndOrderFront:nil];
-	[window center];
+	// Center on the target screen
+	{
+		NSScreen *screen = [self targetScreen];
+		NSRect screenFrame = screen.visibleFrame;
+		NSRect winFrame = window.frame;
+		CGFloat x = screenFrame.origin.x + (screenFrame.size.width - winFrame.size.width) / 2.0;
+		CGFloat y = screenFrame.origin.y + (screenFrame.size.height - winFrame.size.height) / 2.0;
+		[window setFrameOrigin:NSMakePoint(x, y)];
+	}
 	[window makeMainWindow];
 
 	// this doesn't work - there is no contentViewController
