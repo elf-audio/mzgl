@@ -327,7 +327,8 @@ bool AudioFile::load(std::string path, FloatBuffer &buff, int *outNumChannels, i
 #ifdef __ANDROID__
 	// on some shit android phones, the OS level audio file loading is broken somehow
 	// so if you're loading a wav file, better to stick with dr_wav
-	if (fs::path(toLowerCase(path)).extension() == ".wav") {
+	auto ext = fs::path(toLowerCase(path)).extension().string();
+	if (ext == ".wav" || ext == ".aif" || ext == ".aiff") {
 		return AudioFile_loadDrLib(path, buff, outNumChannels, outSampleRate, 0);
 	}
 	return AudioFileAndroid_load(path, buff, outNumChannels, outSampleRate, 0);
@@ -343,7 +344,7 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	// check to see if Dr Lib fails on AAC and if it does, send it to NDK decoder and see if that works.
 	// (e.g. do a test with an AAC renamed to MP3
 
-	if (ext == ".wav" || ext == ".flac" || ext == ".mp3") {
+	if (ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aif" || ext == ".aiff") {
 		// if it's a wav file, use dr wav
 		Log::d() << "USING drlib decoding " << path;
 		int outSampleRate	= 0;
