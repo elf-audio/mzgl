@@ -283,6 +283,7 @@ std::shared_ptr<App> androidGetApp() {
  * Return 1 if you handle an event, 0 if you don't.
  */
 static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *event) {
+	if (!eventDispatcher || !eventDispatcher->app) return 0;
 	// converted from Java in openframeworks android
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t action = AMotionEvent_getAction(event);

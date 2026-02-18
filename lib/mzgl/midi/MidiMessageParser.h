@@ -20,5 +20,6 @@ private:
 	void emitCurrent(uint64_t timestamp);
 
 	std::vector<unsigned char> currentData;
+	MidiByte runningStatus = 0;
 	std::function<void(const MidiData &data)> dataReadyCallback;
 };

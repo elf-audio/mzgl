@@ -96,6 +96,88 @@ SCENARIO("Delimits multiple note ons off properly", "[midi-parser]") {
 	}
 }
 
+SCENARIO("Running status is handled correctly for simultaneous note-ons", "[midi-parser]") {
+	GIVEN("Three note-on events with running status (no repeated status byte)") {
+		// This is what Android delivers when 3 notes are pressed simultaneously:
+		// First note has status byte, subsequent notes omit it (running status)
+		const std::vector<MidiMessageParser::MidiByte> runningStatusData {
+			0x90, 0x3C, 0x7F, // note on C4
+			0x3E, 0x7F,       // note on D4 (running status - no 0x90)
+			0x40, 0x7F,       // note on E4 (running status - no 0x90)
+		};
+
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3C, 0x7F},
+			{0x90, 0x3E, 0x7F},
+			{0x90, 0x40, 0x7F},
+		};
+
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+
+		WHEN("The data is parsed in one chunk") {
+			parser.parse(runningStatusData, 666, 0, 0);
+			THEN("All three note-on messages should be emitted") {
+				REQUIRE(messageCounter == 3);
+			}
+		}
+	}
+}
+
+SCENARIO("Running status works across separate parse calls", "[midi-parser]") {
+	GIVEN("Note events split across multiple parse calls with running status") {
+		int messageCounter = 0;
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3C, 0x7F},
+			{0x90, 0x3E, 0x7F},
+		};
+
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+
+		WHEN("First message has status, second uses running status in separate call") {
+			parser.parse({0x90, 0x3C, 0x7F}, 666, 0, 0);
+			parser.parse({0x3E, 0x7F}, 666, 0, 0);
+			THEN("Both messages should be emitted with the correct status byte") {
+				REQUIRE(messageCounter == 2);
+			}
+		}
+	}
+}
+
+SCENARIO("Running status does not apply after system messages", "[midi-parser]") {
+	GIVEN("A note-on followed by a clock then running status data") {
+		int messageCounter = 0;
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3C, 0x7F},
+			{0xF8},
+			{0x90, 0x3E, 0x7F},
+		};
+
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+
+		WHEN("Clock interrupts running status") {
+			// running status should still work because system realtime
+			// messages don't cancel running status per MIDI spec
+			parser.parse({0x90, 0x3C, 0x7F, 0xF8, 0x3E, 0x7F}, 666, 0, 0);
+			THEN("All three messages should be emitted") {
+				REQUIRE(messageCounter == 3);
+			}
+		}
+	}
+}
+
 SCENARIO("Midi messages for aftertouch are valid with channels", "[midi-parser]") {
 	GIVEN("Some midi data and a midi message") {
 		for (int channel = 0; channel < 15; ++channel) {
