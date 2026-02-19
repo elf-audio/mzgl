@@ -11,6 +11,16 @@
 #include "log.h"
 #include "mzAssert.h"
 
+#ifdef DEBUG
+void Layer::assertNotIterating(const char *operation) {
+	if (iteratingDepth > 0) {
+		Log::e() << "Layer '" << name << "': " << operation
+				 << " called while iterating children! This will invalidate iterators.";
+		mzAssert(false, "Layer tree modified while iterating children");
+	}
+}
+#endif
+
 void setLayerSize(std::vector<Layer *> layers, float width, float height) {
 	setLayerSize(layers, vec2(width, height));
 }
@@ -61,6 +71,9 @@ Layer::~Layer() {
 			++it;
 		}
 	}
+	if (g.keyboardFocusedLayer == this) {
+		g.keyboardFocusedLayer = nullptr;
+	}
 }
 
 std::string Layer::toString() const {
@@ -90,13 +103,23 @@ void Layer::__draw() {
 		g.pushMatrix();
 		draw();
 		g.translate(x, y);
-		for (auto *c: children)
-			c->_draw();
+		{
+#ifdef DEBUG
+			ScopedIterationGuard guard(*this);
+#endif
+			for (auto *c: children)
+				c->_draw();
+		}
 		g.popMatrix();
 	} else {
 		draw();
-		for (auto *c: children)
-			c->_draw();
+		{
+#ifdef DEBUG
+			ScopedIterationGuard guard(*this);
+#endif
+			for (auto *c: children)
+				c->_draw();
+		}
 	}
 }
 
@@ -121,8 +144,13 @@ bool Layer::isVisible() const {
 }
 void Layer::layoutSelfAndChildren() {
 	doLayout();
-	for (auto *c: children) {
-		c->layoutSelfAndChildren();
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto *c: children) {
+			c->layoutSelfAndChildren();
+		}
 	}
 }
 
@@ -159,6 +187,7 @@ Layer *Layer::addChild(Layer *layer) {
 
 	mzAssert(layer != this, "Can't add a layer to itself");
 #ifdef DEBUG
+	assertNotIterating("addChild");
 	for (auto *c: children) {
 		mzAssert(c != layer, "Can't add a layer to the same parent twice");
 	}
@@ -178,6 +207,9 @@ bool Layer::removeFromParent() {
 }
 
 bool Layer::removeChild(Layer *layer) {
+#ifdef DEBUG
+	assertNotIterating("removeChild");
+#endif
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i] == layer) {
 			children[i]->parent = nullptr;
@@ -205,9 +237,14 @@ bool Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		if ((*it)->_mouseScrolled(xx, yy, scrollX, scrollY)) {
-			return true;
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto it = children.rbegin(); it != children.rend(); it++) {
+			if ((*it)->_mouseScrolled(xx, yy, scrollX, scrollY)) {
+				return true;
+			}
 		}
 	}
 
@@ -228,9 +265,14 @@ bool Layer::_mouseZoomed(float x, float y, float zoom) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		if ((*it)->_mouseZoomed(xx, yy, zoom)) {
-			return true;
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto it = children.rbegin(); it != children.rend(); it++) {
+			if ((*it)->_mouseZoomed(xx, yy, zoom)) {
+				return true;
+			}
 		}
 	}
 
@@ -247,8 +289,13 @@ void Layer::_touchOver(float x, float y) {
 	float yy = y;
 	transformMouse(xx, yy);
 
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		(*it)->_touchOver(xx, yy);
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto it = children.rbegin(); it != children.rend(); it++) {
+			(*it)->_touchOver(xx, yy);
+		}
 	}
 
 	if (interactive) {
@@ -292,9 +339,14 @@ bool Layer::_touchDown(float x, float y, int id) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		if ((*it)->_touchDown(xx, yy, id)) {
-			return true;
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto it = children.rbegin(); it != children.rend(); it++) {
+			if ((*it)->_touchDown(xx, yy, id)) {
+				return true;
+			}
 		}
 	}
 
@@ -306,13 +358,21 @@ bool Layer::_touchDown(float x, float y, int id) {
 }
 
 void Layer::_updateDeprecated() {
-	for (auto *c: children) {
-		c->_updateDeprecated();
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto *c: children) {
+			c->_updateDeprecated();
+		}
 	}
 	updateDeprecated();
 }
 
 void Layer::sendToBack(Layer *child) {
+#ifdef DEBUG
+	if (child != nullptr) assertNotIterating("sendToBack");
+#endif
 	if (child == nullptr) {
 		Layer *parent = this->getParent();
 		if (parent != nullptr) {
@@ -333,6 +393,9 @@ void Layer::sendToBack(Layer *child) {
 }
 
 void Layer::sendToFront(Layer *child) {
+#ifdef DEBUG
+	if (child != nullptr) assertNotIterating("sendToFront");
+#endif
 	if (child == nullptr) {
 		Layer *p = this->getParent();
 		if (p != nullptr) {
@@ -473,6 +536,9 @@ void Layer::transferFocus(Layer *fromLayer, Layer *toLayer) {
 }
 
 void Layer::clear() {
+#ifdef DEBUG
+	assertNotIterating("clear");
+#endif
 	if (!g.focusedLayers.empty()) {
 		for (auto *ch: children) {
 			auto it = std::find_if(
@@ -577,9 +643,14 @@ Layer *Layer::getChild(const std::string &_name) {
 bool Layer::_keyDown(int key) {
 	if (!visible) return false;
 
-	for (auto it = children.rbegin(); it != children.rend(); it++) {
-		if ((*it)->_keyDown(key)) {
-			return true;
+	{
+#ifdef DEBUG
+		ScopedIterationGuard guard(*this);
+#endif
+		for (auto it = children.rbegin(); it != children.rend(); it++) {
+			if ((*it)->_keyDown(key)) {
+				return true;
+			}
 		}
 	}
 

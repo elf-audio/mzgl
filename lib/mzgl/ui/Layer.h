@@ -173,6 +173,20 @@ private:
 	Layer *parent = nullptr;
 	std::vector<Layer *> children;
 
+#ifdef DEBUG
+	int iteratingDepth = 0;
+	void assertNotIterating(const char *operation);
+
+	struct ScopedIterationGuard {
+		Layer &layer;
+		ScopedIterationGuard(Layer &l)
+			: layer(l) {
+			layer.iteratingDepth++;
+		}
+		~ScopedIterationGuard() { layer.iteratingDepth--; }
+	};
+#endif
+
 	void pushMask();
 	void popMask();
 	// this gets abused because its not
