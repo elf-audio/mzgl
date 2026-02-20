@@ -59,7 +59,9 @@ void iOSWebView::show(const std::string &_path,
 
 	  [((__bridge UIViewController *) app->viewController) presentViewController:targetController
 																		animated:YES
-																	  completion:nil];
+																	  completion:^{
+																		[targetController.view.window makeKeyWindow];
+																	  }];
 
 	  viewController = (__bridge void *) targetController;
 	});

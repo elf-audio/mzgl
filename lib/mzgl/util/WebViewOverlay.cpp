@@ -112,12 +112,16 @@ private:
 		// Create slide-out animation
 		NSRect endFrame = webView.frame;
 		endFrame.origin.y -= webView.bounds.size.height;
+		NSView *rootView = webView.superview;
 
 		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
 		  context.duration		 = 0.5;
 		  webView.animator.frame = endFrame;
 		}
-			completionHandler:^{ [webView removeFromSuperview]; }];
+			completionHandler:^{
+			  [webView removeFromSuperview];
+			  [rootView.window makeFirstResponder:rootView];
+			}];
 	}
 };
 #	endif

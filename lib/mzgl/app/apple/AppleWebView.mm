@@ -106,7 +106,7 @@
 }
 
 - (BOOL)becomeFirstResponder {
-	return YES;
+	return [super becomeFirstResponder];
 }
 
 - (BOOL)isOpaque {
