@@ -1324,7 +1324,7 @@ std::string generateUUID() {
 
 bool isTabletDevice() {
 #if defined(__APPLE__) && TARGET_OS_IOS
-	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
+	return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
 #elif defined(__ANDROID__)
 	// TODO: don't know how to detect if its a tablet on android
 	// but maybe something to do with screen resolution and aspect ratio

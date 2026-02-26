@@ -1058,7 +1058,7 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 
 	UIViewController *vc = getTopController(app);
 
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 		[vc presentViewController:activityViewController animated:YES completion:^{ completionCallback(true); }];
 	}
 	//if iPad

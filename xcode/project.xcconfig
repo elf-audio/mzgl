@@ -12,9 +12,6 @@
 ///////////////////////////////////////////////////////
 
 
-GCC_PREPROCESSOR_DEFINITIONS[config=Debug]=DEBUG=1
-
-
 // HEADERS
 HEADERS_COMMON = 									\
 		$(MZGLROOT)/lib/mzgl/**						\

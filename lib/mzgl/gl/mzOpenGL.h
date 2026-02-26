@@ -1,6 +1,12 @@
 
 
 #ifdef __APPLE__
+#	ifndef GL_SILENCE_DEPRECATION
+#		define GL_SILENCE_DEPRECATION
+#	endif
+#	ifndef GLES_SILENCE_DEPRECATION
+#		define GLES_SILENCE_DEPRECATION
+#	endif
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
 #		include <OpenGLES/ES3/gl.h>
