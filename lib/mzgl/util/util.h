@@ -101,8 +101,6 @@ bool copyDir(const std::string &source, const std::string &destination, std::str
 void deleteOrTrash(const std::string &path);
 
 void setWindowSize(int w, int h);
-void setWindowTitle(const std::string &title);
-
 // on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
 // this is only for internal, it's so

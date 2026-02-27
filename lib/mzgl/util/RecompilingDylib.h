@@ -138,10 +138,10 @@ private:
 			printf("Error compiling %s\n", cppFile.c_str());
 			printf("%s\n", res.c_str());
 			lastErrorStr = res;
-			setWindowTitle(hFileName + " ☠\uFE0F❌☠\uFE0F");
+			//			setWindowTitle(hFileName + " ☠\uFE0F❌☠\uFE0F");
 			return "";
 		}
-		setWindowTitle(hFileName + "OK"); //\uD83C\uDD97");
+		//		setWindowTitle(hFileName + "OK"); //\uD83C\uDD97");
 		cmd = "g++ -dynamiclib -g -undefined dynamic_lookup -o " + dylibPath + " " + objFile;
 		execute(cmd);
 		return dylibPath;

@@ -44,6 +44,7 @@ endif()
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(MZGL_SOURCES
+    lib/mzgl/App.cpp
     lib/mzgl/animation/Tween.cpp
     lib/mzgl/audio/AudioSystem.cpp
     lib/mzgl/geom/Rectf.cpp

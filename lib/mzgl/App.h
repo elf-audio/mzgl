@@ -107,6 +107,8 @@ public:
 
 	MainThreadRunner main;
 
+	void setWindowTitle(const std::string &title);
+
 	void updateInternal() { main.pollMainThreadQueue(); }
 };
 
