@@ -87,6 +87,13 @@ public:
 		audioFormat.mBytesPerPacket	  = audioFormat.mFramesPerPacket * audioFormat.mBytesPerFrame;
 	}
 
+	[[nodiscard]] bool getFrameCount(SInt64 &frameCount) {
+		UInt32 propertySize = sizeof(frameCount);
+		return checkStatus(
+			ExtAudioFileGetProperty(file, kExtAudioFileProperty_FileLengthFrames, &propertySize, &frameCount),
+			"getting frame count");
+	}
+
 	[[nodiscard]] bool applyReadFormat(AudioStreamBasicDescription &audioFormat) {
 		return checkStatus(
 			ExtAudioFileSetProperty(
@@ -200,6 +207,17 @@ bool loadAudioFile(
 	if (!file.getInputFormat(inputFormat)) {
 		Log::d() << "Couldn't get input format for " << path;
 		return false;
+	}
+
+	SInt64 frameCount = 0;
+	if (file.getFrameCount(frameCount) && frameCount == 0) {
+		if (outNumChannels != nullptr) {
+			*outNumChannels = (unsigned) inputFormat.mChannelsPerFrame;
+		}
+		if (outSampleRate != nullptr) {
+			*outSampleRate = inputFormat.mSampleRate;
+		}
+		return true;
 	}
 
 	AudioStreamBasicDescription audioFormat;
