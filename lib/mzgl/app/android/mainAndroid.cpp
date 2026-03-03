@@ -250,6 +250,8 @@ public:
 			case APP_CMD_DESTROY:
 				LOGE("APP_CMD_DESTROY");
 				eventDispatcher->exit();
+				eventDispatcher = nullptr;
+				app				= nullptr;
 				break;
 
 			case APP_CMD_LOW_MEMORY:
@@ -384,6 +386,11 @@ android_app *getAndroidAppPtr() {
 }
 
 void android_main(android_app *state) {
+	// Reset globals from any previous activity lifecycle
+	eventDispatcher = nullptr;
+	app				= nullptr;
+	engine			= nullptr;
+
 	engine				= std::make_shared<RenderEngine>(state);
 	state->userData		= engine.get();
 	state->onAppCmd		= RenderEngine::handleCmdStatic;
