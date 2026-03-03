@@ -27,24 +27,22 @@
 #	define MZGL_LINUX 1
 #endif
 
-#if __has_builtin(__builtin_available)
+#if defined(__APPLE__) && __has_builtin(__builtin_available)
 #	define IS_ON_IOS_VERSION_OR_LATER(version) __builtin_available(iOS version, *)
 #else
 #	define IS_ON_IOS_VERSION_OR_LATER(version) false
 #endif
 
 #ifdef __clang__
-#define CLANG_PRAGMA(x) _Pragma(#x)
-#define CLANG_IGNORE_WARNINGS_BEGIN(warning) \
-	CLANG_PRAGMA(clang diagnostic push) \
-	CLANG_PRAGMA(clang diagnostic ignored warning)
-#define CLANG_IGNORE_ADDITONAL_WARNING(warning) \
-	CLANG_PRAGMA(clang diagnostic ignored warning)
-#define CLANG_IGNORE_WARNINGS_END \
-	CLANG_PRAGMA(clang diagnostic pop)
+#	define CLANG_PRAGMA(x) _Pragma(#x)
+#	define CLANG_IGNORE_WARNINGS_BEGIN(warning)                                                                  \
+		CLANG_PRAGMA(clang diagnostic push)                                                                       \
+		CLANG_PRAGMA(clang diagnostic ignored warning)
+#	define CLANG_IGNORE_ADDITONAL_WARNING(warning) CLANG_PRAGMA(clang diagnostic ignored warning)
+#	define CLANG_IGNORE_WARNINGS_END				CLANG_PRAGMA(clang diagnostic pop)
 #else
-#define CLANG_IGNORE_WARNINGS_BEGIN(warning)
-#define CLANG_IGNORE_WARNING(warning)
-#define CLANG_IGNORE_ADDITONAL_WARNING(warning)
-#define CLANG_IGNORE_WARNINGS_END
+#	define CLANG_IGNORE_WARNINGS_BEGIN(warning)
+#	define CLANG_IGNORE_WARNING(warning)
+#	define CLANG_IGNORE_ADDITONAL_WARNING(warning)
+#	define CLANG_IGNORE_WARNINGS_END
 #endif
