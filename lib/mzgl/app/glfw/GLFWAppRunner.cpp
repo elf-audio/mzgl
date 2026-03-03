@@ -66,7 +66,6 @@ int convertGlfwKeyToMzgl(int key) {
 		case GLFW_KEY_DELETE: return MZ_KEY_DELETE;
 		case GLFW_KEY_TAB: return MZ_KEY_TAB;
 		case GLFW_KEY_ESCAPE: return MZ_KEY_ESCAPE;
-		//case: MZ_KEY_SHIFT_TAB;
 		case MZ_KEY_RETURN:
 		case GLFW_KEY_ENTER: return MZ_KEY_RETURN;
 		case GLFW_KEY_RIGHT_SHIFT:
@@ -83,6 +82,10 @@ int convertGlfwKeyToMzgl(int key) {
 	}
 }
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_TAB && (mods & GLFW_MOD_SHIFT)) {
+		windowEventHandler.key(getEventDispatcher(window), MZ_KEY_SHIFT_TAB, action);
+		return;
+	}
 	key = convertGlfwKeyToMzgl(key);
 	windowEventHandler.key(getEventDispatcher(window), key, action);
 }
