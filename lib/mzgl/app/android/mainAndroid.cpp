@@ -252,6 +252,7 @@ public:
 				eventDispatcher->exit();
 				eventDispatcher = nullptr;
 				app				= nullptr;
+				graphics.destroyResources();
 				break;
 
 			case APP_CMD_LOW_MEMORY:

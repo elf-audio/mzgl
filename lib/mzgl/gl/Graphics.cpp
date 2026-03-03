@@ -607,3 +607,23 @@ void Graphics::clearUpResources() {
 	Log::d() << "done cleaning up GL resources";
 #endif
 }
+
+void Graphics::destroyResources() {
+#ifdef __ANDROID__
+	Log::d() << "destroying GL resources";
+	drawerVbo = nullptr;
+	nothingShader		= nullptr;
+	colorShader			= nullptr;
+	colorTextureShader	= nullptr;
+	texShader			= nullptr;
+	fontShader			= nullptr;
+	deallocateFont();
+	currShader = nullptr;
+
+	Vbo::vbos.clear();
+	Texture::textures.clear();
+	Font::fonts.clear();
+	Shader::shaders.clear();
+	Log::d() << "done destroying GL resources";
+#endif
+}

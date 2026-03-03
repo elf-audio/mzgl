@@ -63,6 +63,7 @@ public:
 	// you need to delete all opengl resources
 	// and recreate them when the app is foregrounded again.
 	void clearUpResources();
+	void destroyResources();
 
 	int width			 = 0;
 	int height			 = 0;
