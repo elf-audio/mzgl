@@ -161,8 +161,6 @@ public:
 
 	[[nodiscard]] Rectf thisAsRect() const;
 
-	// Queue an action to run after the current child iteration completes.
-	// Use this to safely mutate the layer tree from within draw/touch/event handlers.
 	void deferAction(std::function<void()> fn);
 
 protected:
