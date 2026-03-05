@@ -15,7 +15,7 @@ public:
 	}
 	void draw() override {
 		if (mousedOverName.empty()) return;
-		sendToFront();
+		if (!isInFront()) getParent()->deferAction([this]() { sendToFront(); });
 		ScopedAlphaBlend b(g, true);
 		g.setColor(1);
 

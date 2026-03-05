@@ -21,6 +21,18 @@ void Layer::assertNotIterating(const char *operation) {
 }
 #endif
 
+void Layer::deferAction(std::function<void()> fn) {
+	deferredActions.push_back(std::move(fn));
+}
+
+void Layer::drainDeferredActions() {
+	while (!deferredActions.empty()) {
+		auto actions = std::move(deferredActions);
+		for (auto &fn: actions)
+			fn();
+	}
+}
+
 void setLayerSize(std::vector<Layer *> layers, float width, float height) {
 	setLayerSize(layers, vec2(width, height));
 }
@@ -110,6 +122,7 @@ void Layer::__draw() {
 			for (auto *c: children)
 				c->drawSelfAndChildren();
 		}
+		drainDeferredActions();
 		g.popMatrix();
 	} else {
 		draw();
@@ -120,6 +133,7 @@ void Layer::__draw() {
 			for (auto *c: children)
 				c->drawSelfAndChildren();
 		}
+		drainDeferredActions();
 	}
 }
 
@@ -152,6 +166,7 @@ void Layer::layoutSelfAndChildren() {
 			c->layoutSelfAndChildren();
 		}
 	}
+	drainDeferredActions();
 }
 
 bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) const {
@@ -187,7 +202,7 @@ Layer *Layer::addChild(Layer *layer) {
 
 	mzAssert(layer != this, "Can't add a layer to itself");
 #ifdef DEBUG
-	//	assertNotIterating("addChild");
+	assertNotIterating("addChild");
 	for (auto *c: children) {
 		mzAssert(c != layer, "Can't add a layer to the same parent twice");
 	}
@@ -208,7 +223,7 @@ bool Layer::removeFromParent() {
 
 bool Layer::removeChild(Layer *layer) {
 #ifdef DEBUG
-//	assertNotIterating("removeChild");
+	assertNotIterating("removeChild");
 #endif
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i] == layer) {
@@ -237,16 +252,20 @@ bool Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
+	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_mouseScrolled(xx, yy, scrollX, scrollY)) {
-				return true;
+				childHandled = true;
+				break;
 			}
 		}
 	}
+	drainDeferredActions();
+	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
 		return mouseScrolled(x, y, scrollX, scrollY);
@@ -265,16 +284,20 @@ bool Layer::_mouseZoomed(float x, float y, float zoom) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
+	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_mouseZoomed(xx, yy, zoom)) {
-				return true;
+				childHandled = true;
+				break;
 			}
 		}
 	}
+	drainDeferredActions();
+	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
 		return mouseZoomed(x, y, zoom);
@@ -297,6 +320,7 @@ void Layer::_touchOver(float x, float y) {
 			(*it)->_touchOver(xx, yy);
 		}
 	}
+	drainDeferredActions();
 
 	if (interactive) {
 		touchOver(x, y);
@@ -339,16 +363,20 @@ bool Layer::_touchDown(float x, float y, int id) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
+	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_touchDown(xx, yy, id)) {
-				return true;
+				childHandled = true;
+				break;
 			}
 		}
 	}
+	drainDeferredActions();
+	if (childHandled) return true;
 
 	if (interactive && (inside(x, y) || receivesTouchesOutside)) {
 		g.focusedLayers[id] = this;
@@ -366,6 +394,7 @@ void Layer::_updateDeprecated() {
 			c->_updateDeprecated();
 		}
 	}
+	drainDeferredActions();
 	updateDeprecated();
 }
 
@@ -394,7 +423,7 @@ void Layer::sendToBack(Layer *child) {
 
 void Layer::sendToFront(Layer *child) {
 #ifdef DEBUG
-//	if (child != nullptr) assertNotIterating("sendToFront");
+	if (child != nullptr) assertNotIterating("sendToFront");
 #endif
 	if (child == nullptr) {
 		Layer *p = this->getParent();
@@ -643,16 +672,20 @@ Layer *Layer::getChild(const std::string &_name) {
 bool Layer::_keyDown(int key) {
 	if (!visible) return false;
 
+	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_keyDown(key)) {
-				return true;
+				childHandled = true;
+				break;
 			}
 		}
 	}
+	drainDeferredActions();
+	if (childHandled) return true;
 
 	if (visible && keyDown(key)) {
 		g.keyboardFocusedLayer = this;
