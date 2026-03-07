@@ -250,9 +250,6 @@ public:
 			case APP_CMD_DESTROY:
 				LOGE("APP_CMD_DESTROY");
 				eventDispatcher->exit();
-				eventDispatcher = nullptr;
-				app				= nullptr;
-				graphics.destroyResources();
 				break;
 
 			case APP_CMD_LOW_MEMORY:
@@ -387,10 +384,15 @@ android_app *getAndroidAppPtr() {
 }
 
 void android_main(android_app *state) {
-	// Reset globals from any previous activity lifecycle
+	// Reset globals from any previous activity lifecycle.
+	// Do NOT move destruction into APP_CMD_DESTROY — the audio thread
+	// and other background threads may still be accessing App state
+	// at that point. Deferring cleanup to here (start of next lifecycle)
+	// or process death ensures no use-after-free on background threads.
 	eventDispatcher = nullptr;
 	app				= nullptr;
 	engine			= nullptr;
+	graphics.destroyResources();
 
 	engine				= std::make_shared<RenderEngine>(state);
 	state->userData		= engine.get();
