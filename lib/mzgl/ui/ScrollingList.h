@@ -52,7 +52,7 @@ public:
 	int getSelectedIndex() const { return selectedIndex; }
 	float getContentHeight() { return content->height; }
 	//	void draw() override;
-	virtual void _draw() override;
+	virtual void drawSelfAndChildren() override;
 	void updateDeprecated() override;
 	bool empty() const { return items.empty(); }
 

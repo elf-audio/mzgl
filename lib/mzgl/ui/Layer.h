@@ -74,8 +74,8 @@ public:
 
 	bool isVisible() const;
 	// called by api, do not use
-	virtual void _draw();
-	void __draw();
+	virtual void drawSelfAndChildren();
+
 	void layoutSelfAndChildren();
 	void _touchOver(float x, float y);
 	void _touchUp(float x, float y, int id);
@@ -170,6 +170,7 @@ protected:
 	Graphics &g;
 
 private:
+	void __draw();
 	Layer *parent = nullptr;
 	std::vector<Layer *> children;
 

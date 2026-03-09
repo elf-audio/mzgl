@@ -88,11 +88,11 @@ public:
 		}
 	}
 
-	void _draw() override {
+	void drawSelfAndChildren() override {
 		canSelect = !isAnimating();
 		// you only want to draw the temp layers over the content if you're popping
 		if (isPopping) {
-			ScrollingList::_draw();
+			ScrollingList::drawSelfAndChildren();
 			float xx = easeOutCubic(animationAmt) * width;
 			g.setColor(bgColor);
 
@@ -101,7 +101,7 @@ public:
 			g.drawRect(r);
 		}
 		drawTempLayers();
-		if (!isPopping) ScrollingList::_draw();
+		if (!isPopping) ScrollingList::drawSelfAndChildren();
 	}
 
 	void updateDeprecated() override {
@@ -154,7 +154,7 @@ private:
 				for (int i = 0; i < layersToRemove.size(); i++) {
 					// if on-screen...
 					if (true) {
-						layersToRemove[i]->_draw();
+						layersToRemove[i]->drawSelfAndChildren();
 					}
 				}
 			}

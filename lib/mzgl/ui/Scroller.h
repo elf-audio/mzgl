@@ -35,7 +35,7 @@ public:
 
 	// call this if you want to force a different height than the actual contents.
 	void setContentHeight(float contentHeight);
-	virtual void _draw() override;
+	virtual void drawSelfAndChildren() override;
 	vec4 color {1.f, 1.f, 1.f, 1.f};
 
 protected:

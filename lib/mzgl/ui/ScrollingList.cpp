@@ -162,7 +162,7 @@ void ScrollingList::updateItems() {
 	}
 }
 
-void ScrollingList::_draw() {
+void ScrollingList::drawSelfAndChildren() {
 	maskOn();
 
 	// draw the bg in the coord space of content
@@ -203,7 +203,7 @@ void ScrollingList::_draw() {
 		vbo->draw(g);
 
 		for (int i = from; i < to; i++) {
-			content->getChild(i)->_draw();
+			content->getChild(i)->drawSelfAndChildren();
 		}
 	}
 

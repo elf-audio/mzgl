@@ -116,7 +116,7 @@ public:
 
 	void draw() {
 		app->draw();
-		app->root->_draw();
+		app->root->drawSelfAndChildren();
 		app->drawAfterUI();
 	}
 

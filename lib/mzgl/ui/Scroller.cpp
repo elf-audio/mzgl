@@ -65,9 +65,9 @@ void Scroller::draw() {
 	g.drawRect(*this);
 }
 
-void Scroller::_draw() {
+void Scroller::drawSelfAndChildren() {
 	if (!visible) return;
-	Layer::_draw();
+	Layer::drawSelfAndChildren();
 	if (drawingScrollbar) {
 		drawScrollbar();
 	}

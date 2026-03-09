@@ -108,7 +108,7 @@ void Layer::__draw() {
 			ScopedIterationGuard guard(*this);
 #endif
 			for (auto *c: children)
-				c->_draw();
+				c->drawSelfAndChildren();
 		}
 		g.popMatrix();
 	} else {
@@ -118,12 +118,12 @@ void Layer::__draw() {
 			ScopedIterationGuard guard(*this);
 #endif
 			for (auto *c: children)
-				c->_draw();
+				c->drawSelfAndChildren();
 		}
 	}
 }
 
-void Layer::_draw() {
+void Layer::drawSelfAndChildren() {
 	if (!visible) return;
 
 	if (clipToBounds) {
