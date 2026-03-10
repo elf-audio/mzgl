@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 struct SpeexResamplerState_;
 typedef struct SpeexResamplerState_ SpeexResamplerState;
