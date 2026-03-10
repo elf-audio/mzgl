@@ -10,6 +10,7 @@
 #include "stringUtil.h"
 #include "log.h"
 #include "mzAssert.h"
+#include "RootLayer.h"
 
 #ifdef DEBUG
 void Layer::assertNotIterating(const char *operation) {
@@ -21,21 +22,10 @@ void Layer::assertNotIterating(const char *operation) {
 }
 #endif
 
-void Layer::deferAction(std::function<void()> fn) {
-	deferredActions.push_back(std::move(fn));
-}
-
-void Layer::drainDeferredActions() {
-	while (!deferredActions.empty()) {
-		auto actions = std::move(deferredActions);
-		for (auto &fn: actions)
-			fn();
-	}
-}
-
 void setLayerSize(std::vector<Layer *> layers, float width, float height) {
 	setLayerSize(layers, vec2(width, height));
 }
+
 void setLayerSize(std::vector<Layer *> layers, float sz) {
 	setLayerSize(layers, vec2(sz, sz));
 }
@@ -110,7 +100,7 @@ void Layer::popMask() {
 }
 
 // this draws regardless of mask
-void Layer::__draw() {
+void Layer::drawInternal() {
 	if (x != 0 || y != 0) {
 		g.pushMatrix();
 		draw();
@@ -122,7 +112,7 @@ void Layer::__draw() {
 			for (auto *c: children)
 				c->drawSelfAndChildren();
 		}
-		drainDeferredActions();
+
 		g.popMatrix();
 	} else {
 		draw();
@@ -133,7 +123,6 @@ void Layer::__draw() {
 			for (auto *c: children)
 				c->drawSelfAndChildren();
 		}
-		drainDeferredActions();
 	}
 }
 
@@ -142,10 +131,10 @@ void Layer::drawSelfAndChildren() {
 
 	if (clipToBounds) {
 		pushMask();
-		__draw();
+		drawInternal();
 		popMask();
 	} else {
-		__draw();
+		drawInternal();
 	}
 }
 
@@ -166,7 +155,6 @@ void Layer::layoutSelfAndChildren() {
 			c->layoutSelfAndChildren();
 		}
 	}
-	drainDeferredActions();
 }
 
 bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) const {
@@ -264,7 +252,7 @@ bool Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
 			}
 		}
 	}
-	drainDeferredActions();
+
 	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
@@ -296,7 +284,7 @@ bool Layer::_mouseZoomed(float x, float y, float zoom) {
 			}
 		}
 	}
-	drainDeferredActions();
+
 	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
@@ -320,7 +308,6 @@ void Layer::_touchOver(float x, float y) {
 			(*it)->_touchOver(xx, yy);
 		}
 	}
-	drainDeferredActions();
 
 	if (interactive) {
 		touchOver(x, y);
@@ -375,7 +362,7 @@ bool Layer::_touchDown(float x, float y, int id) {
 			}
 		}
 	}
-	drainDeferredActions();
+
 	if (childHandled) return true;
 
 	if (interactive && (inside(x, y) || receivesTouchesOutside)) {
@@ -394,7 +381,7 @@ void Layer::_updateDeprecated() {
 			c->_updateDeprecated();
 		}
 	}
-	drainDeferredActions();
+
 	updateDeprecated();
 }
 
@@ -684,7 +671,7 @@ bool Layer::_keyDown(int key) {
 			}
 		}
 	}
-	drainDeferredActions();
+
 	if (childHandled) return true;
 
 	if (visible && keyDown(key)) {

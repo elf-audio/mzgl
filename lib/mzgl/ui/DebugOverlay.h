@@ -3,6 +3,8 @@
 
 #include "Layer.h"
 #include "mzgl_platform.h"
+#include "RootLayer.h"
+
 #ifndef MZGL_WIN
 #	include <cxxabi.h>
 #endif
@@ -15,7 +17,9 @@ public:
 	}
 	void draw() override {
 		if (mousedOverName.empty()) return;
-		if (!isInFront()) getParent()->deferAction([this]() { sendToFront(); });
+		if (!isInFront()) {
+			g.addDeferredAction([this]() { sendToFront(); });
+		}
 		ScopedAlphaBlend b(g, true);
 		g.setColor(1);
 

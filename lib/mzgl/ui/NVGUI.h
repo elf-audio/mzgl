@@ -385,8 +385,7 @@ namespace NVGUI {
 				originalPosition = position();
 				auto pos		 = getAbsolutePosition();
 				originalParent	 = getParent();
-
-				getParent()->deferAction([this, pos]() {
+				g.addDeferredAction([this, pos]() {
 					removeFromParent();
 					underlay->addChild(this);
 					position(pos);
