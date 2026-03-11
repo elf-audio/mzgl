@@ -718,6 +718,8 @@
 		EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
 		EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
 		EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
+		EA9D45EA2F616471008E70F6 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9D45E92F616471008E70F6 /* App.cpp */; };
+		EA9D45EB2F616471008E70F6 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9D45E92F616471008E70F6 /* App.cpp */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -1268,6 +1270,7 @@
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
 		EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedMask.cpp; sourceTree = "<group>"; };
 		EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedMask.h; sourceTree = "<group>"; };
+		EA9D45E92F616471008E70F6 /* App.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = App.cpp; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAA9BE5D2A30E180008BFEF4 /* Listenable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Listenable.h; sourceTree = "<group>"; };
@@ -1921,6 +1924,7 @@
 				EA18359B2432C18B00A5C3E8 /* music */,
 				EA1836012432C18B00A5C3E8 /* mzgl_platform.h */,
 				EA18360A2432C18B00A5C3E8 /* App.h */,
+				EA9D45E92F616471008E70F6 /* App.cpp */,
 				EA64AD6F26A182B3001427AD /* WebViewApp.h */,
 				EA18360B2432C18B00A5C3E8 /* mzgl.pch */,
 				EA1836192432C18B00A5C3E8 /* geom */,
@@ -3906,6 +3910,7 @@
 				EA183FF52432C18D00A5C3E8 /* RoundedRect.cpp in Sources */,
 				EA5250E22C2C644800DE5DFC /* NSBlockButton.m in Sources */,
 				EA183FF42432C18D00A5C3E8 /* Rectf.cpp in Sources */,
+				EA9D45EA2F616471008E70F6 /* App.cpp in Sources */,
 				EA71A74E27E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA924368274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA234AF624A609CA000F057B /* YGStyle.cpp in Sources */,
@@ -4191,6 +4196,7 @@
 				EA2B8B2924E7093600EA12BD /* YGValue.cpp in Sources */,
 				EA7B45A92B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA71A73E27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
+				EA9D45EB2F616471008E70F6 /* App.cpp in Sources */,
 				EA2B8B2A24E7093600EA12BD /* Image.cpp in Sources */,
 				EA2B8B2B24E7093600EA12BD /* DateTime.cpp in Sources */,
 				EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */,
