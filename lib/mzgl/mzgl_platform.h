@@ -27,6 +27,10 @@
 #	define MZGL_LINUX 1
 #endif
 
+#ifndef __has_builtin
+#	define __has_builtin(x) 0
+#endif
+
 #if defined(__APPLE__) && __has_builtin(__builtin_available)
 #	define IS_ON_IOS_VERSION_OR_LATER(version) __builtin_available(iOS version, *)
 #else
