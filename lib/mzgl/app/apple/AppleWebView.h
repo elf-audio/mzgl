@@ -21,11 +21,20 @@
 #include <functional>
 
 @interface AppleWebView : WKWebView <WKScriptMessageHandler, WKUIDelegate, WKNavigationDelegate>
+@property (nonatomic) BOOL keepNavigationInternal;
 - (id)initWithFrame:(CGRect)frame
 	 loadedCallback:(std::function<void()>)loadedCallback
 		 jsCallback:(std::function<void(const std::string &)>)jsCb
 	  closeCallback:(std::function<void()>)closeCallback
 				url:(NSString *)url;
+
+- (id)initWithFrame:(CGRect)frame
+	 loadedCallback:(std::function<void()>)loadedCallback
+		 jsCallback:(std::function<void(const std::string &)>)jsCb
+	  closeCallback:(std::function<void()>)closeCallback
+				url:(NSString *)url
+		htmlContent:(NSString *)htmlContent
+			baseURL:(NSString *)baseURL;
 
 - (void)callJS:(NSString *)jsString;
 @end
