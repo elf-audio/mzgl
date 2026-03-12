@@ -18,11 +18,15 @@ public:
 		std::string path;
 		int offset;
 		int size;
+		int compressedSize;
+		int compression; // 0 = STORE, 8 = DEFLATE
 		bool valid;
-		Entry(const std::string &path, int offset, int size)
+		Entry(const std::string &path, int offset, int size, int compressedSize = 0, int compression = 0)
 			: path(path)
 			, offset(offset)
 			, size(size)
+			, compressedSize(compressedSize)
+			, compression(compression)
 			, valid(true) {}
 		Entry()
 			: valid(false) {}
@@ -57,4 +61,9 @@ public:
 private:
 	size_t readSome(std::vector<int8_t> &d);
 	std::ifstream zip;
+
+	// For DEFLATE-compressed entries, we decompress into memory
+	std::vector<int8_t> decompressedData;
+	int memPos = 0;
+	bool isDeflate = false;
 };

@@ -1,6 +1,7 @@
 #include "ZipReader.h"
 #include <string.h>
 #include <cstring>
+#include "zlib.h"
 
 struct ZipEndOfCD {
 	int32_t signature; // 0x50, 0x4b, 0x05, 0x06
@@ -142,10 +143,57 @@ ZipReaderFile::ZipReaderFile(const std::string &zipPath, const ZipReader::Entry 
 
 	fileStart = entry.offset + 30 + fnExtraLength[0] + fnExtraLength[1];
 	fileSize  = entry.size;
-	zip.seekg(fileStart);
+
+	if (entry.compression == 8) {
+		// DEFLATE: read compressed data and inflate into memory
+		isDeflate		= true;
+		int compSize	= entry.compressedSize;
+		auto compressed = std::vector<int8_t>(compSize);
+		zip.seekg(fileStart);
+		zip.read((char *) compressed.data(), compSize);
+
+		decompressedData.resize(fileSize);
+
+		z_stream strm {};
+		strm.next_in   = reinterpret_cast<Bytef *>(compressed.data());
+		strm.avail_in  = compSize;
+		strm.next_out  = reinterpret_cast<Bytef *>(decompressedData.data());
+		strm.avail_out = fileSize;
+
+		// -MAX_WBITS for raw deflate (no zlib/gzip header)
+		if (inflateInit2(&strm, -MAX_WBITS) != Z_OK) {
+			throw std::runtime_error("inflateInit2 failed");
+		}
+
+		int ret = inflate(&strm, Z_FINISH);
+		inflateEnd(&strm);
+
+		if (ret != Z_STREAM_END) {
+			throw std::runtime_error("Failed to inflate zip entry: " + entry.path);
+		}
+
+		memPos = 0;
+		zip.close();
+	} else {
+		zip.seekg(fileStart);
+	}
 }
 
 bool ZipReaderFile::seek(int offset, SeekOrigin origin) {
+	if (isDeflate) {
+		if (origin == SeekOrigin::Start) {
+			if (offset < 0 || offset >= fileSize) return false;
+			memPos = offset;
+		} else if (origin == SeekOrigin::Current) {
+			int newPos = memPos + offset;
+			if (newPos < 0 || newPos >= fileSize) return false;
+			memPos = newPos;
+		} else {
+			throw std::runtime_error("Unknown seek origin in ZipReader");
+		}
+		return true;
+	}
+
 	if (origin == SeekOrigin::Start) {
 		if (offset < 0 || offset >= fileSize) return false;
 		zip.seekg(fileStart + offset);
@@ -161,6 +209,15 @@ bool ZipReaderFile::seek(int offset, SeekOrigin origin) {
 }
 
 size_t ZipReaderFile::read(int8_t *d, size_t sz) {
+	if (isDeflate) {
+		if (memPos >= fileSize) return 0;
+		size_t available = fileSize - memPos;
+		size_t toRead	 = std::min(sz, available);
+		memcpy(d, decompressedData.data() + memPos, toRead);
+		memPos += (int) toRead;
+		return toRead;
+	}
+
 	int pos = (int) zip.tellg() - fileStart;
 	if (fileSize - pos >= sz) {
 		zip.read((char *) d, sz);
@@ -261,7 +318,8 @@ std::vector<ZipReader::Entry> readCD(std::ifstream &zip, const ZipEndOfCD &endOf
 		//		fn[fnLength] = 0;
 		//		memcpy(fn, fileNamePtr, fnLength);
 		//		printf("Compression used: %d\n", ent->compression);
-		entries.emplace_back(ent.filename, ent.localHeaderOffset, ent.uncompressedSize);
+		entries.emplace_back(
+			ent.filename, ent.localHeaderOffset, ent.uncompressedSize, ent.compressedSize, ent.compression);
 
 		offset += ent.getTotalLength();
 	}
