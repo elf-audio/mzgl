@@ -78,13 +78,10 @@ struct Blocks {
 }
 
 //
-#if !TARGET_OS_IOS
-
 - (NSArray<NSNumber *> *)channelCapabilities {
 	NSArray *carray = @[ @2, @2 ];
 	return carray;
 }
-#endif
 // TODO: Ensure lifecycle of Effect is same as AudioUnit
 // TODO: Mono + Stereo support at least
 // TODO: Check multiple instances
