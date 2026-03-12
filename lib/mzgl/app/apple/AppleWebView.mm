@@ -18,6 +18,7 @@
 	std::function<void(const std::string &)> jsCallback;
 	std::function<void()> closeCallback;
 	std::function<void()> loadedCallback;
+	BOOL hasLoadedInitialPage;
 }
 
 - (void)callJS:(NSString *)jsString {
@@ -29,6 +30,7 @@
 		   }];
 }
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+	hasLoadedInitialPage = YES;
 	if (loadedCallback) {
 		loadedCallback();
 
@@ -42,9 +44,26 @@
 		 jsCallback:(std::function<void(const std::string &)>)jsCb
 	  closeCallback:(std::function<void()>)closeCb
 				url:(NSString *)url {
+	return [self initWithFrame:frame
+				loadedCallback:loadedCb
+					jsCallback:jsCb
+				 closeCallback:closeCb
+						   url:url
+				   htmlContent:nil
+					   baseURL:nil];
+}
+
+- (id)initWithFrame:(CGRect)frame
+	 loadedCallback:(std::function<void()>)loadedCb
+		 jsCallback:(std::function<void(const std::string &)>)jsCb
+	  closeCallback:(std::function<void()>)closeCb
+				url:(NSString *)url
+		htmlContent:(NSString *)htmlContent
+			baseURL:(NSString *)baseURL {
 	loadedCallback				   = loadedCb;
 	jsCallback					   = jsCb;
 	closeCallback				   = closeCb;
+	hasLoadedInitialPage		   = NO;
 	WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
 
 	[config.userContentController addScriptMessageHandler:self name:@"closeWindow"];
@@ -65,7 +84,12 @@
 #endif
 		self.UIDelegate			= self;
 		self.navigationDelegate = self;
-		if ([url rangeOfString:@"http"].location != NSNotFound) {
+		
+		// If HTML content is provided, load it with the base URL
+		if (htmlContent != nil && baseURL != nil) {
+			NSLog(@"Loading HTML with base URL: %@", baseURL);
+			[self loadHTMLString:htmlContent baseURL:[NSURL URLWithString:baseURL]];
+		} else if ([url rangeOfString:@"http"].location != NSNotFound) {
 			NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
 			[self loadRequest:request];
 		} else {
@@ -122,7 +146,21 @@
 	decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 					decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 	NSLog(@"Navigation action: %@", navigationAction.request.URL);
-	NSURL *url		= navigationAction.request.URL;
+	NSURL *url = navigationAction.request.URL;
+
+	// Allow the initial page load (needed for loadHTMLString:baseURL: with https base URL)
+	if (!hasLoadedInitialPage) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+		return;
+	}
+
+	// When keepNavigationInternal is set, all navigation stays in the webview
+	if (self.keepNavigationInternal) {
+		decisionHandler(WKNavigationActionPolicyAllow);
+		return;
+	}
+
+	// Default: file/localhost allowed, everything else opens in system browser
 	BOOL isInternal = [url.scheme isEqual:@"file"] || [url.host isEqual:@"localhost"];
 
 	if (!isInternal) {
