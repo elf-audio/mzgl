@@ -524,7 +524,7 @@ std::wstring windowsGetPathForTemporaryFile(std::wstring fileName) {
 	const auto len {GetTempPath(MAX_PATH, buffer)};
 	assert(len != 0);
 	std::wstring tempDir;
-	for (int i = 0; i < len; i++) {
+	for (decltype(len) i = 0; i < len; i++) {
 		tempDir += buffer[i];
 	}
 	return tempDir + L"\\" + fileName;

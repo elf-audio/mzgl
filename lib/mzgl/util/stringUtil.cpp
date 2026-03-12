@@ -273,11 +273,11 @@ float stringToFloat(const std::string &conversion,
 			}
 		}
 		return result;
-	} catch (const std::runtime_error &e) {
+	} catch (const std::runtime_error &) {
 		error = "caused a NaN";
-	} catch (const std::invalid_argument &e) {
+	} catch (const std::invalid_argument &) {
 		error = "caused invalid argument";
-	} catch (const std::out_of_range &e) {
+	} catch (const std::out_of_range &) {
 		error = "out of range argument";
 	} catch (...) {
 		error = "unknown error";
@@ -305,11 +305,11 @@ double stringToDouble(const std::string &conversion,
 			}
 		}
 		return result;
-	} catch (const std::runtime_error &e) {
+	} catch (const std::runtime_error &) {
 		error = "caused a NaN";
-	} catch (const std::invalid_argument &e) {
+	} catch (const std::invalid_argument &) {
 		error = "caused invalid argument";
-	} catch (const std::out_of_range &e) {
+	} catch (const std::out_of_range &) {
 		error = "out of range argument";
 	} catch (...) {
 		error = "unknown error";

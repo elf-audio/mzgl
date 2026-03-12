@@ -757,7 +757,7 @@ void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &o
 	try {
 		outputLeft	= at(left[0]) * inverseCoefficient + at(left[1]) * coefficient;
 		outputRight = at(right[0]) * inverseCoefficient + at(right[1]) * coefficient;
-	} catch (std::out_of_range const &exc) {
+	} catch (std::out_of_range const &) {
 		assert(false);
 		outputLeft	= 0.f;
 		outputRight = 0.f;

@@ -124,7 +124,7 @@ int getScaled(int pos, int scale) {
 		}
 		return octave * 12 + note;
 	}
-#pragma warning not sure what this does
+// not sure what this does
 	return pos;
 }
 

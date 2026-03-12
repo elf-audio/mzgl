@@ -327,7 +327,7 @@ int getCommandLineSetting(const std::string &setting, int defaultValue) {
 	auto str = getCommandLineSetting(setting, std::to_string(defaultValue));
 	try {
 		return std::stoi(str);
-	} catch (const std::exception &e) {
+	} catch (const std::exception &) {
 		Log::e() << "Invalid integer value '" << str << "' for command line setting '" << setting
 				 << "', using default " << defaultValue;
 		return defaultValue;

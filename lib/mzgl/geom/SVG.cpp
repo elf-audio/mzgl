@@ -6,7 +6,9 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#define NOMINMAX // Avoids name conflicts on Windows
+#ifndef NOMINMAX
+#	define NOMINMAX // Avoids name conflicts on Windows
+#endif
 
 #include "SVG.h"
 #include "DisableAllWarnings.h"
