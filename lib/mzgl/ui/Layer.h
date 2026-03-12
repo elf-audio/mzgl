@@ -20,7 +20,7 @@ public:
 	bool interactive = false;
 	bool visible	 = true;
 
-	Layer(Graphics &g, const std::string &name = "");
+	explicit Layer(Graphics &g, const std::string &name = "");
 	Layer(Graphics &g, const std::vector<Layer *> &children);
 	Layer(Graphics &g, const std::string &name, const std::vector<Layer *> &children);
 
@@ -44,7 +44,7 @@ public:
 	void sendToFront(Layer *child = nullptr);
 	void sendToBack(Layer *child = nullptr);
 
-	bool isInFront() const;
+	[[nodiscard]] bool isInFront() const;
 	// override for when ui needs to be rebuilt
 	virtual void doLayout() {}
 
@@ -72,31 +72,31 @@ public:
 	// doesn't find one
 	Layer *getChild(const std::string &name);
 
-	bool isVisible() const;
+	[[nodiscard]] bool isVisible() const;
 	// called by api, do not use
 	virtual void drawSelfAndChildren();
 
 	void layoutSelfAndChildren();
-	void _touchOver(float x, float y);
-	void _touchUp(float x, float y, int id);
-	void _touchMoved(float x, float y, int id);
-	bool _touchDown(float x, float y, int id);
-	bool _mouseScrolled(float x, float y, float scrollX, float scrollY);
-	bool _mouseZoomed(float x, float y, float zoom);
-	bool _keyDown(int key);
-	bool _keyUp(int key);
+	virtual void _touchOver(float x, float y);
+	virtual void _touchUp(float x, float y, int id);
+	virtual void _touchMoved(float x, float y, int id);
+	virtual bool _touchDown(float x, float y, int id);
+	virtual bool _mouseScrolled(float x, float y, float scrollX, float scrollY);
+	virtual bool _mouseZoomed(float x, float y, float zoom);
+	virtual bool _keyDown(int key);
+	virtual bool _keyUp(int key);
 	void _updateDeprecated();
 
-	Layer *getParent() const;
+	[[nodiscard]] Layer *getParent() const;
 	Layer *getRoot();
 
-	glm::vec2 getAbsolutePosition() const;
-	Rectf getAbsoluteRect() const;
+	[[nodiscard]] glm::vec2 getAbsolutePosition() const;
+	[[nodiscard]] Rectf getAbsoluteRect() const;
 
-	glm::vec2 getAbsolutePosition(glm::vec2 p) const;
-	Rectf getAbsoluteRect(const Rectf &r) const;
+	[[nodiscard]] glm::vec2 getAbsolutePosition(glm::vec2 p) const;
+	[[nodiscard]] Rectf getAbsoluteRect(const Rectf &r) const;
 	void setAbsolutePosition(glm::vec2 p);
-	glm::vec2 getLocalPosition(glm::vec2 pp) const;
+	[[nodiscard]] glm::vec2 getLocalPosition(glm::vec2 pp) const;
 
 	// rather than absolute coords, this tries to give you the rect
 	// relative to an ancestor. If it can't find the ancestor, it will return false
@@ -133,9 +133,9 @@ public:
 	Graphics &getGraphics() { return g; }
 
 	auto begin() { return std::begin(children); }
-	auto begin() const { return std::begin(children); }
+	[[nodiscard]] auto begin() const { return std::begin(children); }
 	auto end() { return std::end(children); }
-	auto end() const { return std::end(children); }
+	[[nodiscard]] auto end() const { return std::end(children); }
 
 	template <class T>
 	std::vector<T *> collectChildrenOfType(bool recursive = false) {
@@ -170,7 +170,7 @@ protected:
 	Graphics &g;
 
 private:
-	void __draw();
+	void drawInternal();
 	Layer *parent = nullptr;
 	std::vector<Layer *> children;
 
@@ -180,7 +180,7 @@ private:
 
 	struct ScopedIterationGuard {
 		Layer &layer;
-		ScopedIterationGuard(Layer &l)
+		explicit ScopedIterationGuard(Layer &l)
 			: layer(l) {
 			layer.iteratingDepth++;
 		}
@@ -201,9 +201,9 @@ private:
 
 class ColouredRectLayer : public Layer {
 public:
-	ColouredRectLayer(Graphics &g)
+	explicit ColouredRectLayer(Graphics &g)
 		: Layer(g) {}
-	vec4 color;
+	vec4 color {0};
 	void draw() override {
 		if (color.a == 0) return;
 		g.setColor(color);

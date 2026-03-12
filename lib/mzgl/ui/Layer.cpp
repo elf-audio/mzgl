@@ -10,6 +10,7 @@
 #include "stringUtil.h"
 #include "log.h"
 #include "mzAssert.h"
+#include "RootLayer.h"
 
 #ifdef DEBUG
 void Layer::assertNotIterating(const char *operation) {
@@ -24,6 +25,7 @@ void Layer::assertNotIterating(const char *operation) {
 void setLayerSize(std::vector<Layer *> layers, float width, float height) {
 	setLayerSize(layers, vec2(width, height));
 }
+
 void setLayerSize(std::vector<Layer *> layers, float sz) {
 	setLayerSize(layers, vec2(sz, sz));
 }
@@ -98,7 +100,7 @@ void Layer::popMask() {
 }
 
 // this draws regardless of mask
-void Layer::__draw() {
+void Layer::drawInternal() {
 	if (x != 0 || y != 0) {
 		g.pushMatrix();
 		draw();
@@ -110,6 +112,7 @@ void Layer::__draw() {
 			for (auto *c: children)
 				c->drawSelfAndChildren();
 		}
+
 		g.popMatrix();
 	} else {
 		draw();
@@ -128,10 +131,10 @@ void Layer::drawSelfAndChildren() {
 
 	if (clipToBounds) {
 		pushMask();
-		__draw();
+		drawInternal();
 		popMask();
 	} else {
-		__draw();
+		drawInternal();
 	}
 }
 
@@ -187,7 +190,7 @@ Layer *Layer::addChild(Layer *layer) {
 
 	mzAssert(layer != this, "Can't add a layer to itself");
 #ifdef DEBUG
-	//	assertNotIterating("addChild");
+	assertNotIterating("addChild");
 	for (auto *c: children) {
 		mzAssert(c != layer, "Can't add a layer to the same parent twice");
 	}
@@ -208,7 +211,7 @@ bool Layer::removeFromParent() {
 
 bool Layer::removeChild(Layer *layer) {
 #ifdef DEBUG
-//	assertNotIterating("removeChild");
+	assertNotIterating("removeChild");
 #endif
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i] == layer) {
@@ -366,6 +369,7 @@ void Layer::_updateDeprecated() {
 			c->_updateDeprecated();
 		}
 	}
+
 	updateDeprecated();
 }
 
@@ -394,7 +398,7 @@ void Layer::sendToBack(Layer *child) {
 
 void Layer::sendToFront(Layer *child) {
 #ifdef DEBUG
-//	if (child != nullptr) assertNotIterating("sendToFront");
+	if (child != nullptr) assertNotIterating("sendToFront");
 #endif
 	if (child == nullptr) {
 		Layer *p = this->getParent();

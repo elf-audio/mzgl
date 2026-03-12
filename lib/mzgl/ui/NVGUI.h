@@ -385,14 +385,13 @@ namespace NVGUI {
 				originalPosition = position();
 				auto pos		 = getAbsolutePosition();
 				originalParent	 = getParent();
-
-				removeFromParent();
-				underlay->addChild(this);
-				position(pos);
-
-				underlay->start();
-
-				sendToFront();
+				g.addDeferredAction([this, pos]() {
+					removeFromParent();
+					underlay->addChild(this);
+					position(pos);
+					underlay->start();
+					sendToFront();
+				});
 				startedSelecting = false;
 			} else {
 				if (brokenOut) {
