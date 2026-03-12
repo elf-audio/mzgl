@@ -1,5 +1,6 @@
 #include "DesktopWindowEventHandler.h"
 #include "EventDispatcher.h"
+#include "Graphics.h"
 #include <GLFW/glfw3.h>
 
 #ifdef _WIN32
@@ -7,6 +8,14 @@ static constexpr auto SCROLL_SPEED {5};
 #else
 static constexpr auto SCROLL_SPEED {1};
 #endif
+
+static int glfwButtonToTouchId(int button) {
+	switch (button) {
+		case GLFW_MOUSE_BUTTON_RIGHT: return RightMouseButton;
+		case GLFW_MOUSE_BUTTON_MIDDLE: return MiddleMouseButton;
+		default: return button;
+	}
+}
 
 auto DesktopWindowEventHandler::isAnyMouseButtonDown() const -> bool {
 	for (const auto b: buttons_) {
@@ -33,7 +42,7 @@ auto DesktopWindowEventHandler::cursorPos(EventDispatcher *eventDispatcher, floa
 	}
 	for (int i = 0; i < buttons_.size(); i++) {
 		if (buttons_[i]) {
-			eventDispatcher->touchMoved(mouseX_, mouseY_, i);
+			eventDispatcher->touchMoved(mouseX_, mouseY_, glfwButtonToTouchId(i));
 		}
 	}
 }
@@ -84,9 +93,10 @@ auto DesktopWindowEventHandler::keyUp(EventDispatcher *eventDispatcher, int key)
 }
 
 auto DesktopWindowEventHandler::mouseButton(EventDispatcher *eventDispatcher, int button, int action) -> void {
+	const auto touchId = glfwButtonToTouchId(button);
 	if (action == GLFW_PRESS) {
 		buttons_[button] = true;
-		eventDispatcher->touchDown(mouseX_, mouseY_, button);
+		eventDispatcher->touchDown(mouseX_, mouseY_, touchId);
 		return;
 	}
 	// Check if we are aware of any mouse button being down at this point.
@@ -97,7 +107,7 @@ auto DesktopWindowEventHandler::mouseButton(EventDispatcher *eventDispatcher, in
 	// outside the bounds of the child window, but then released while
 	// the cursor is inside the child window.
 	if (isAnyMouseButtonDown()) {
-		eventDispatcher->touchUp(mouseX_, mouseY_, button);
+		eventDispatcher->touchUp(mouseX_, mouseY_, touchId);
 	}
 	buttons_[button] = false;
 }
