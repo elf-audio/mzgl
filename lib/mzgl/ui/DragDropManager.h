@@ -9,6 +9,8 @@
 #pragma once
 
 #include "DrawingFunction.h"
+#include "mzAssert.h"
+#include <memory>
 
 // this is what your dragger should inherit from
 class Dragger {
@@ -99,7 +101,8 @@ template <class T>
 class DropTarget : public Layer {
 public:
 	DropTarget(Graphics &g)
-		: Layer(g) {}
+		: Layer(g)
+		, lifeToken(std::make_shared<char>()) {}
 
 	// called when a T is dragged into this drop target
 	virtual void draggedIn(std::shared_ptr<T> dragger) {}
@@ -115,6 +118,14 @@ public:
 
 	// gets called when all drags are finished
 	virtual void dragsEnded() {}
+
+	// when this DropTarget is destroyed, lifeToken dies and
+	// DragDropManager's weak_ptr to it expires automatically.
+	// This is to fix a bug on android that I haven't been able
+	// to crack - I put this in on 12/03/26 so if the bug is
+	// still there on subsequent versions, pls remove lifeToken
+	// related code below.
+	std::shared_ptr<void> lifeToken;
 };
 
 template <class T>
@@ -129,10 +140,13 @@ public:
 		, dragRoot(dragRoot) {}
 
 	// add all your targets ahead of time
-	void addTarget(DropTarget<T> *target) { dropTargets.push_back(target); }
+	void addTarget(DropTarget<T> *target) {
+		purgeDeadTargets();
+		dropTargets.push_back({target, target->lifeToken});
+	}
 	void removeTarget(DropTarget<T> *target) {
 		for (auto it = dropTargets.begin(); it != dropTargets.end(); it++) {
-			if (*it == target) {
+			if (it->target == target) {
 				dropTargets.erase(it);
 				break;
 			}
@@ -235,15 +249,19 @@ public:
 			if (d->isActive()) {
 				auto currPos = d->touchPos();
 
-				for (auto *target: dropTargets) {
+				for (auto &entry: dropTargets) {
+					if (entry.life.expired()) {
+						mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
+						continue;
+					}
 					Rectf r;
 
-					if (target->getRectRelativeTo(dragRoot, r)) {
+					if (entry.target->getRectRelativeTo(dragRoot, r)) {
 						bool wasInside = r.inside(prevPos);
 						bool isInside  = r.inside(currPos);
 
-						if (isInside && !wasInside) target->draggedIn(d);
-						else if (!isInside && wasInside) target->draggedOut(d);
+						if (isInside && !wasInside) entry.target->draggedIn(d);
+						else if (!isInside && wasInside) entry.target->draggedOut(d);
 					}
 				}
 			}
@@ -257,11 +275,15 @@ public:
 			// make sure we've reached the drag threshold
 			if (draggers[id]->isActive()) {
 				auto touch = draggers[id]->touchPos();
-				for (auto *t: dropTargets) {
+				for (auto &entry: dropTargets) {
+					if (entry.life.expired()) {
+						mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
+						continue;
+					}
 					Rectf r;
-					if (t->getRectRelativeTo(dragRoot, r)) {
+					if (entry.target->getRectRelativeTo(dragRoot, r)) {
 						if (r.inside(touch)) {
-							t->dropped(draggers[id]);
+							entry.target->dropped(draggers[id]);
 						}
 					}
 				}
@@ -289,20 +311,40 @@ public:
 private:
 	bool dragsStartedCalled = false;
 
+	void purgeDeadTargets() {
+		dropTargets.erase(std::remove_if(dropTargets.begin(),
+										 dropTargets.end(),
+										 [](const TargetEntry &e) { return e.life.expired(); }),
+						  dropTargets.end());
+	}
+
 	void callDragsStarted() {
 		dragsStartedCalled = true;
-		for (auto *d: dropTargets) {
-			d->dragsStarted();
+		for (auto &entry: dropTargets) {
+			if (entry.life.expired()) {
+				mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
+				continue;
+			}
+			entry.target->dragsStarted();
 		}
 	}
 
 	void callDragsEnded() {
 		dragsStartedCalled = false;
-		for (auto *d: dropTargets) {
-			d->dragsEnded();
+		for (auto &entry: dropTargets) {
+			if (entry.life.expired()) {
+				mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
+				continue;
+			}
+			entry.target->dragsEnded();
 		}
 	}
 
+	struct TargetEntry {
+		DropTarget<T> *target;
+		std::weak_ptr<void> life;
+	};
+
 	Layer *dragRoot = nullptr;
-	std::vector<DropTarget<T> *> dropTargets;
+	std::vector<TargetEntry> dropTargets;
 };
