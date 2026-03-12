@@ -240,20 +240,16 @@ bool Layer::_mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_mouseScrolled(xx, yy, scrollX, scrollY)) {
-				childHandled = true;
-				break;
+				return true;
 			}
 		}
 	}
-
-	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
 		return mouseScrolled(x, y, scrollX, scrollY);
@@ -272,20 +268,16 @@ bool Layer::_mouseZoomed(float x, float y, float zoom) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_mouseZoomed(xx, yy, zoom)) {
-				childHandled = true;
-				break;
+				return true;
 			}
 		}
 	}
-
-	if (childHandled) return true;
 
 	if (interactive && inside(x, y)) {
 		return mouseZoomed(x, y, zoom);
@@ -350,20 +342,16 @@ bool Layer::_touchDown(float x, float y, int id) {
 	// that aren't inside the bounds
 	if (clipToBounds && !inside(x, y)) return false;
 
-	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_touchDown(xx, yy, id)) {
-				childHandled = true;
-				break;
+				return true;
 			}
 		}
 	}
-
-	if (childHandled) return true;
 
 	if (interactive && (inside(x, y) || receivesTouchesOutside)) {
 		g.focusedLayers[id] = this;
@@ -659,20 +647,16 @@ Layer *Layer::getChild(const std::string &_name) {
 bool Layer::_keyDown(int key) {
 	if (!visible) return false;
 
-	bool childHandled = false;
 	{
 #ifdef DEBUG
 		ScopedIterationGuard guard(*this);
 #endif
 		for (auto it = children.rbegin(); it != children.rend(); it++) {
 			if ((*it)->_keyDown(key)) {
-				childHandled = true;
-				break;
+				return true;
 			}
 		}
 	}
-
-	if (childHandled) return true;
 
 	if (visible && keyDown(key)) {
 		g.keyboardFocusedLayer = this;
