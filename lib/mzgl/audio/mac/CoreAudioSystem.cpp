@@ -14,7 +14,7 @@
 CoreAudioSystem::CoreAudioSystem() {
 	deviceListener = std::make_unique<CoreAudioDeviceListener>([this]() {
 		if (verbose) {
-			Log::d() << "CoreAudio: Device list changed, rescanning ports";
+			Log::v() << "CoreAudio: Device list changed, rescanning ports";
 		}
 		rescanPorts();
 		deviceChanges.notify([](auto &&listener) { listener->audioDeviceChanged(); });
@@ -147,13 +147,13 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	updateChannelCount(numOutChannels, outputPort, outputPorts);
 
 	if (verbose) {
-		Log::d() << "CORE AUDIO STARTUP:";
-		Log::d() << "  Input Port: " << (inputPort.has_value() ? inputPort->name : "none");
-		Log::d() << "  Output Port: " << (outputPort.has_value() ? outputPort->name : "none");
-		Log::d() << "  Sample Rate: " << sampleRate;
-		Log::d() << "  Buffer Size: " << bufferSize;
-		Log::d() << "  In Channels: " << numInChannels << "(" << originalInChannels << ")";
-		Log::d() << "  Out Channels: " << numOutChannels << "(" << originalOutChannels << ")";
+		Log::v() << "CORE AUDIO STARTUP:";
+		Log::v() << "  Input Port: " << (inputPort.has_value() ? inputPort->name : "none");
+		Log::v() << "  Output Port: " << (outputPort.has_value() ? outputPort->name : "none");
+		Log::v() << "  Sample Rate: " << sampleRate;
+		Log::v() << "  Buffer Size: " << bufferSize;
+		Log::v() << "  In Channels: " << numInChannels << "(" << originalInChannels << ")";
+		Log::v() << "  Out Channels: " << numOutChannels << "(" << originalOutChannels << ")";
 	}
 
 	mzAssert(inputPort.has_value() && outputPort.has_value());
@@ -176,7 +176,7 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 
 	auto sampleRateChangedCallback = [this]() {
 		if (verbose) {
-			Log::d() << "CoreAudio: Sample rate changed externally, updating state";
+			Log::v() << "CoreAudio: Sample rate changed externally, updating state";
 		}
 		updateRunningParameters();
 		restart();
@@ -185,7 +185,7 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 
 	auto bufferSizeChangedCallback = [this]() {
 		if (verbose) {
-			Log::d() << "CoreAudio: Buffer size changed externally, updating state";
+			Log::v() << "CoreAudio: Buffer size changed externally, updating state";
 		}
 		updateRunningParameters();
 		restart();
@@ -554,14 +554,14 @@ void CoreAudioSystem::rescanPorts() {
 }
 
 void CoreAudioSystem::printDeviceList() const {
-	Log::d() << "CoreAudioSystem: Input Devices:";
+	Log::v() << "CoreAudioSystem: Input Devices:";
 	for (const auto &port: inputPorts) {
-		Log::d() << port.toString();
+		Log::v() << port.toString();
 	}
 
-	Log::d() << "CoreAudioSystem: Output Devices:";
+	Log::v() << "CoreAudioSystem: Output Devices:";
 	for (const auto &port: outputPorts) {
-		Log::d() << port.toString();
+		Log::v() << port.toString();
 	}
 }
 

@@ -69,7 +69,7 @@ static int getAnsiColorCode(Log::LogLevel level) {
 	}
 }
 Log::Logger::~Logger() {
-	if (static_cast<int>(level) < userLogLevel || logIsDisabled()) {
+	if (static_cast<int>(level) < static_cast<int>(userLogLevel) || logIsDisabled()) {
 		return;
 	}
 	msg << std::endl;
@@ -109,11 +109,10 @@ Log::Logger::~Logger() {
 		logStream << std::string("[") << levelName << "] " << msg.str();
 	}
 
-	if (listeners.size() > 0) {
-		std::string m = "[" + levelName + "] " + msg.str();
-		for (auto *l: listeners) {
-			l->stringLogged(m);
-		}
+	if (listeners.empty()) return;
+	std::string m = "[" + levelName + "] " + msg.str();
+	for (auto *l: listeners) {
+		l->stringLogged(m);
 	}
 }
 

@@ -174,11 +174,11 @@ bool MainThreadRunner::isIdle(const std::atomic<uint32_t> &pending, const std::a
 void MainThreadRunner::requestStop(std::optional<std::chrono::milliseconds> timeout) {
 	State expected = State::Running;
 	if (state.compare_exchange_strong(expected, State::Stopping, std::memory_order_acq_rel)) {
-		Log::d() << "Main thread runner marked as stopping";
+		Log::v() << "Main thread runner marked as stopping";
 	}
 
 	if (!timeout.has_value()) {
-		Log::d() << "Main thread runner waiting indefinitely for jobs to finish";
+		Log::v() << "Main thread runner waiting indefinitely for jobs to finish";
 		if (isMainThread()) {
 			while (!isIdle(pending, inCallback)) {
 				pollInternal();
@@ -190,7 +190,7 @@ void MainThreadRunner::requestStop(std::optional<std::chrono::milliseconds> time
 		std::unique_lock<std::mutex> lk(waitMx);
 		waitCv.wait(lk, [&]() { return isIdle(pending, inCallback); });
 		state.store(State::Stopped, std::memory_order_release);
-		Log::d() << "Main thread runner is finished";
+		Log::v() << "Main thread runner is finished";
 		return;
 	}
 
@@ -218,10 +218,10 @@ void MainThreadRunner::requestStop(std::optional<std::chrono::milliseconds> time
 			return;
 		}
 		state.store(State::Stopped, std::memory_order_release);
-		Log::d() << "Main thread runner has finished";
+		Log::v() << "Main thread runner has finished";
 		return;
 	}
-	Log::d() << "Stopping main thread. We are not on the real \"main\"";
+	Log::v() << "Stopping main thread. We are not on the real \"main\"";
 
 	std::unique_lock<std::mutex> lk(waitMx);
 	bool graceful = waitCv.wait_until(lk, deadline, [&] { return isIdle(pending, inCallback); });
@@ -229,7 +229,7 @@ void MainThreadRunner::requestStop(std::optional<std::chrono::milliseconds> time
 
 	if (graceful) {
 		state.store(State::Stopped, std::memory_order_release);
-		Log::d() << "Main thread runner was stopped";
+		Log::v() << "Main thread runner was stopped";
 		return;
 	}
 

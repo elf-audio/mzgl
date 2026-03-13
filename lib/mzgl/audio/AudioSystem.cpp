@@ -109,7 +109,7 @@ bool _AudioSystem::setOutputByName(const std::string &name) {
 	return false;
 }
 double _AudioSystem::getOutputLatency() {
-	Log::e() << "Error: AudioSystem::getLatency() not implemented!";
+	Log::v() << "Error: AudioSystem::getLatency() not implemented!";
 	return 0.0;
 }
 

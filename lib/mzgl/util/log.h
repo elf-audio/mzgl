@@ -30,7 +30,7 @@
 #endif
 class LogListener {
 public:
-	virtual ~LogListener() {}
+	virtual ~LogListener() = default;
 	virtual void stringLogged(const std::string &m) = 0;
 };
 
@@ -38,8 +38,8 @@ namespace Log {
 	enum class LogLevel { Verbose = 1, Debug, Info, Warning, Error };
 	class Logger {
 	public:
-		static constexpr int userLogLevel = 1;
-		Logger() {}
+		static constexpr auto userLogLevel = LogLevel::Debug;
+		Logger() = default;
 		template <class T>
 		Logger &operator<<(const T &value) {
 			msg << value;
@@ -72,7 +72,7 @@ namespace Log {
 
 	class v : public Logger {
 	public:
-		virtual ~v() {
+		~v() override {
 			level	  = LogLevel::Verbose;
 			levelName = "verbose";
 		}
@@ -80,7 +80,7 @@ namespace Log {
 
 	class d : public Logger {
 	public:
-		virtual ~d() {
+		~d() override {
 			level	  = LogLevel::Debug;
 			levelName = "debug";
 		}
@@ -88,21 +88,21 @@ namespace Log {
 
 	class i : public Logger {
 	public:
-		virtual ~i() {
+		~i() override {
 			level	  = LogLevel::Info;
 			levelName = "info";
 		}
 	};
 	class w : public Logger {
 	public:
-		virtual ~w() {
+		~w() override {
 			level	  = LogLevel::Warning;
 			levelName = "warning";
 		}
 	};
 	class e : public Logger {
 	public:
-		virtual ~e() {
+		~e() override {
 			level	  = LogLevel::Error;
 			levelName = "error";
 		}
@@ -119,8 +119,8 @@ void iosLog(std::string msg);
 class LogCapturer : public LogListener {
 public:
 	LogCapturer() { Log::Logger::addListener(this); }
-	~LogCapturer() { Log::Logger::removeListener(this); }
-	virtual void stringLogged(const std::string &m) { lines.push_back(m); }
+	~LogCapturer() override { Log::Logger::removeListener(this); }
+	void stringLogged(const std::string &m) override { lines.push_back(m); }
 
 	std::list<std::string> lines;
 };
