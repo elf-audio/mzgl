@@ -25,6 +25,8 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <optional>
 #include <stdlib.h>
 #include <stdio.h>
+#include <thread>
+#include <chrono>
 #include "filesystem.h"
 #include "DesktopWindowEventHandler.h"
 #include "DesktopWindowFileDragHandler.h"
@@ -301,16 +303,23 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			[buffer commit];
 		}
 #else
-		eventDispatcher->runFrame();
+		// When minimized, skip rendering to avoid memory leak and "not responding" state.
+		// Just poll events and sleep briefly to keep the app responsive without burning CPU/RAM.
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+			glfwPollEvents();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		} else {
+			eventDispatcher->runFrame();
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+			glfwSwapBuffers(window);
+			glfwPollEvents();
 
-		// While resizing glfwPollEvents blocks until user finishes action, so we can dispatch event here
-		// This is optimization to avoid dispatching from every resize callback, which can be overkill
-		if (framebuferResized) {
-			getEventDispatcher(window)->resized();
-			framebuferResized = false;
+			// While resizing glfwPollEvents blocks until user finishes action, so we can dispatch event here
+			// This is optimization to avoid dispatching from every resize callback, which can be overkill
+			if (framebuferResized) {
+				getEventDispatcher(window)->resized();
+				framebuferResized = false;
+			}
 		}
 #endif
 	}
