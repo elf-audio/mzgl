@@ -220,6 +220,9 @@ void notifyFileDownloadStarted(const std::string &url) {
 		Log::d() << "Failed to find download for " << url << " during start notification";
 		return;
 	}
+	if (iter->second.downloadStarting != nullptr) {
+		iter->second.downloadStarting();
+	}
 }
 
 void notifyFileDownloadComplete(const std::string &url, const std::string &path) {
@@ -778,7 +781,7 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLBleMidiManager_midiReceived(
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_fileDownloadStarted(JNIEnv *env, jobject thiz, jstring url) {
-	androidGetApp()->main.runOnMainThread(
+	androidGetApp()->main.runOnMainThread(true,
 		[download = jstringToString(env, url)]() { notifyFileDownloadStarted(download); });
 }
 
