@@ -437,6 +437,10 @@
 		EA3551B525CB201F003DF2FB /* MZGLView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA3551B325CB201F003DF2FB /* MZGLView.h */; };
 		EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA3551B425CB201F003DF2FB /* MZGLView.mm */; };
 		EA3551BF25CB2028003DF2FB /* MZMGLKView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA3551BB25CB2028003DF2FB /* MZMGLKView.h */; };
+		EA40437B2F5F1C8500D70301 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA40437A2F5F1C8500D70301 /* App.cpp */; };
+		EA40437C2F5F1C8500D70301 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA40437A2F5F1C8500D70301 /* App.cpp */; };
+		EA40437D2F5F1C8500D70301 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA40437A2F5F1C8500D70301 /* App.cpp */; };
+		EA40437E2F5F1C8500D70301 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA40437A2F5F1C8500D70301 /* App.cpp */; };
 		EA4B48FC24588303000E79BF /* mainiOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C82432C18B00A5C3E8 /* mainiOS.mm */; };
 		EA5250E02C2C644800DE5DFC /* NSBlockButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */; };
 		EA5250E12C2C644800DE5DFC /* NSBlockButton.h in Headers */ = {isa = PBXBuildFile; fileRef = EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */; };
@@ -1148,6 +1152,7 @@
 		EA3551BC25CB2028003DF2FB /* MZMGLKViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZMGLKViewController.h; sourceTree = "<group>"; };
 		EA3551BD25CB2028003DF2FB /* MZMGLKView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKView.mm; sourceTree = "<group>"; };
 		EA3551BE25CB2028003DF2FB /* MZMGLKViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMGLKViewController.mm; sourceTree = "<group>"; };
+		EA40437A2F5F1C8500D70301 /* App.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = App.cpp; sourceTree = "<group>"; };
 		EA5250DE2C2C644800DE5DFC /* NSBlockButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBlockButton.h; sourceTree = "<group>"; };
 		EA5250DF2C2C644800DE5DFC /* NSBlockButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBlockButton.m; sourceTree = "<group>"; };
 		EA5250E42C2C648F00DE5DFC /* WebViewOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewOverlay.h; sourceTree = "<group>"; };
@@ -1924,7 +1929,7 @@
 				EA18359B2432C18B00A5C3E8 /* music */,
 				EA1836012432C18B00A5C3E8 /* mzgl_platform.h */,
 				EA18360A2432C18B00A5C3E8 /* App.h */,
-				EA9D45E92F616471008E70F6 /* App.cpp */,
+				EA40437A2F5F1C8500D70301 /* App.cpp */,
 				EA64AD6F26A182B3001427AD /* WebViewApp.h */,
 				EA18360B2432C18B00A5C3E8 /* mzgl.pch */,
 				EA1836192432C18B00A5C3E8 /* geom */,
@@ -3910,7 +3915,7 @@
 				EA183FF52432C18D00A5C3E8 /* RoundedRect.cpp in Sources */,
 				EA5250E22C2C644800DE5DFC /* NSBlockButton.m in Sources */,
 				EA183FF42432C18D00A5C3E8 /* Rectf.cpp in Sources */,
-				EA9D45EA2F616471008E70F6 /* App.cpp in Sources */,
+				EA40437C2F5F1C8500D70301 /* App.cpp in Sources */,
 				EA71A74E27E39E6C0081A5CB /* aeskey.c in Sources */,
 				EA924368274000E300311C98 /* AllMidiDevices.cpp in Sources */,
 				EA234AF624A609CA000F057B /* YGStyle.cpp in Sources */,
@@ -3996,6 +4001,7 @@
 				EA1841372432C52300A5C3E8 /* scales.cpp in Sources */,
 				EA71A7A527E39E6C0081A5CB /* unzipper.cpp in Sources */,
 				EA1841132432C4A500A5C3E8 /* Fbo.cpp in Sources */,
+				EA40437D2F5F1C8500D70301 /* App.cpp in Sources */,
 				EAD82ECA269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA1840FC2432C3F700A5C3E8 /* AudioSystemIOS.mm in Sources */,
 				EA234AF724A609CA000F057B /* YGStyle.cpp in Sources */,
@@ -4196,7 +4202,7 @@
 				EA2B8B2924E7093600EA12BD /* YGValue.cpp in Sources */,
 				EA7B45A92B19FA8800F19B8D /* ScopedUrl.cpp in Sources */,
 				EA71A73E27E39E6C0081A5CB /* ioapi_mem.c in Sources */,
-				EA9D45EB2F616471008E70F6 /* App.cpp in Sources */,
+				EA40437E2F5F1C8500D70301 /* App.cpp in Sources */,
 				EA2B8B2A24E7093600EA12BD /* Image.cpp in Sources */,
 				EA2B8B2B24E7093600EA12BD /* DateTime.cpp in Sources */,
 				EA71A72E27E39E6B0081A5CB /* ioapi.c in Sources */,
@@ -4263,6 +4269,7 @@
 				EA689468261C633500F76B91 /* Fbo.cpp in Sources */,
 				EAD82ECC269CA19400861BE3 /* Dialogs.cpp in Sources */,
 				EA689469261C633500F76B91 /* AudioSystemIOS.mm in Sources */,
+				EA40437B2F5F1C8500D70301 /* App.cpp in Sources */,
 				EA68946A261C633500F76B91 /* YGStyle.cpp in Sources */,
 				EA68946B261C633500F76B91 /* nanovg.cpp in Sources */,
 				EA68946C261C633500F76B91 /* Vbo.cpp in Sources */,

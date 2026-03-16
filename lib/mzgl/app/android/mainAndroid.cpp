@@ -250,9 +250,9 @@ public:
 			case APP_CMD_DESTROY:
 				LOGE("APP_CMD_DESTROY");
 				eventDispatcher->exit();
-				eventDispatcher = nullptr;
-				app				= nullptr;
-				graphics.destroyResources();
+				//				eventDispatcher = nullptr;
+				//				app				= nullptr;
+				//				graphics.destroyResources();
 				break;
 
 			case APP_CMD_LOW_MEMORY:
