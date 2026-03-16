@@ -18,6 +18,7 @@
 #include <mach/mach_time.h>
 #include "FloatBuffer.h"
 #include "Midi.h"
+#include "mzgl_platform.h"
 
 using namespace std;
 static int instanceNumber = 0;
@@ -340,7 +341,7 @@ struct Blocks {
 	  }
 	};
 
-	self.maximumFramesToRender = 1024;
+	self.maximumFramesToRender = 4096;
 
 	self.currentPreset = _factoryPresets.firstObject;
 }
@@ -494,7 +495,7 @@ struct Blocks {
 		_currentPreset = currentPreset;
 		NSError *err   = nil;
 		if (@available(iOS 13.0, *)) {
-			id state	   = [self presetStateFor:currentPreset error:&err];
+			id state = [self presetStateFor:currentPreset error:&err];
 			if (err) {
 				AULog(@"Got error: %@", err);
 				return;
@@ -539,6 +540,16 @@ struct Blocks {
 - (AUAudioUnitBusArray *)outputBusses {
 	return _outputBusArray;
 }
+
+// Reject unsupported formats at the bus level so auval doesn't try to render with them.
+#if MZGL_MAC
+- (BOOL)shouldChangeToFormat:(AVAudioFormat *)format forBus:(AUAudioUnitBus *)bus {
+	if (format.sampleRate > 96000.0) {
+		return NO;
+	}
+	return [super shouldChangeToFormat:format forBus:bus];
+}
+#endif
 
 // Allocate resources required to render.
 // Subclassers should call the superclass implementation.
