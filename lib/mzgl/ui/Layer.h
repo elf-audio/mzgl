@@ -13,6 +13,18 @@
 #include "Font.h"
 #include <functional>
 
+struct LayerAction {
+	struct Param {
+		std::string name;
+		std::string type; // "int", "float", "string", "bool"
+		bool required = true;
+		std::string description;
+	};
+	std::string name;
+	std::string description;
+	std::vector<Param> params;
+};
+
 class Layer : public Rectf {
 public:
 	std::string name;
@@ -160,6 +172,15 @@ public:
 	}
 
 	[[nodiscard]] Rectf thisAsRect() const;
+
+	// Override in complex interactive layers to describe available actions.
+	// Used by test server and accessibility.
+	virtual std::vector<LayerAction> getAvailableActions() const { return {}; }
+
+	// Invoke a named action with string parameters. Returns true on success.
+	virtual bool invokeAction(const std::string &actionName, const std::map<std::string, std::string> &params) {
+		return false;
+	}
 
 protected:
 	void transformMouse(float &x, float &y);
