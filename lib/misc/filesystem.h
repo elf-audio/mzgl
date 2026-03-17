@@ -10,6 +10,12 @@
 namespace winfs {
 	using namespace std::filesystem;
 
+	// Convert a u8string (std::string in C++17, std::u8string in C++20) to std::string
+	template <typename T>
+	inline std::string u8ToStdString(const T &s) {
+		return std::string(reinterpret_cast<const char *>(s.data()), s.size());
+	}
+
 	struct path {
 		std::filesystem::path inner;
 
@@ -19,11 +25,11 @@ namespace winfs {
 		path(std::filesystem::path &&p)
 			: inner(std::move(p)) {}
 		path(const std::string &s)
-			: inner(s) {}
+			: inner(std::filesystem::u8path(s)) {}
 		path(const char *s)
-			: inner(s) {}
+			: inner(std::filesystem::u8path(s)) {}
 		path(std::string_view sv)
-			: inner(sv) {}
+			: inner(std::filesystem::u8path(sv)) {}
 		path(const std::filesystem::directory_entry &entry)
 			: inner(entry.path()) {}
 
@@ -35,17 +41,18 @@ namespace winfs {
 		operator const std::filesystem::path &() const { return inner; }
 		operator std::filesystem::path &() { return inner; }
 		operator std::filesystem::path() const { return inner; }
-		operator std::string() const { return inner.string(); }
+		operator std::string() const { return u8ToStdString(inner.u8string()); }
 		explicit operator std::wstring() const { return inner.wstring(); }
-		explicit operator const char *() const { return inner.string().c_str(); }
+		// NOTE: returns dangling pointer to temporary - pre-existing issue
+		explicit operator const char *() const { return u8ToStdString(inner.u8string()).c_str(); }
 
 		path &operator+=(const std::string &str) {
-			inner += str;
+			inner += std::filesystem::u8path(str);
 			return *this;
 		}
 
 		path &operator+=(const char *str) {
-			inner += str;
+			inner += std::filesystem::u8path(str);
 			return *this;
 		}
 
@@ -60,7 +67,7 @@ namespace winfs {
 		}
 
 		path &operator=(const std::string &s) {
-			inner = s;
+			inner = std::filesystem::u8path(s);
 			return *this;
 		}
 
@@ -81,18 +88,18 @@ namespace winfs {
 		}
 
 		path &operator=(const char *s) {
-			inner = s;
+			inner = std::filesystem::u8path(s);
 			return *this;
 		}
 
 		path &operator=(std::string_view sv) {
-			inner = sv;
+			inner = std::filesystem::u8path(sv);
 			return *this;
 		}
 
-		std::string string() const { return inner.string(); }
+		std::string string() const { return u8ToStdString(inner.u8string()); }
 		std::wstring wstring() const { return inner.wstring(); }
-		std::string generic_string() const { return inner.generic_string(); }
+		std::string generic_string() const { return u8ToStdString(inner.generic_u8string()); }
 		std::u8string u8string() const { return inner.u8string(); }
 		path filename() const { return path(inner.filename()); }
 		path parent_path() const { return path(inner.parent_path()); }
@@ -116,46 +123,46 @@ namespace winfs {
 		}
 
 		path &replace_extension(const std::string &replacement) {
-			inner.replace_extension(replacement);
+			inner.replace_extension(std::filesystem::u8path(replacement));
 			return *this;
 		}
 
 		path replace_extension(const std::string &replacement) const {
 			path result = *this;
-			result.inner.replace_extension(replacement);
+			result.inner.replace_extension(std::filesystem::u8path(replacement));
 			return result;
 		}
 
 		path &replace_extension(const char *replacement) {
-			inner.replace_extension(replacement);
+			inner.replace_extension(std::filesystem::u8path(replacement));
 			return *this;
 		}
 
 		path replace_extension(const char *replacement) const {
 			path result = *this;
-			result.inner.replace_extension(replacement);
+			result.inner.replace_extension(std::filesystem::u8path(replacement));
 			return result;
 		}
 
-		friend path operator/(const path &lhs, const std::string &rhs) { return path(lhs.inner / rhs); }
+		friend path operator/(const path &lhs, const std::string &rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
 		friend path operator/(const path &lhs, const path &rhs) { return path(lhs.inner / rhs.inner); }
-		friend path operator/(const path &lhs, const char *rhs) { return path(lhs.inner / rhs); }
-		friend path operator/(path &lhs, const std::string &rhs) { return path(lhs.inner / rhs); }
+		friend path operator/(const path &lhs, const char *rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
+		friend path operator/(path &lhs, const std::string &rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
 		friend path operator/(path &lhs, const path &rhs) { return path(lhs.inner / rhs.inner); }
-		friend path operator/(path &lhs, const char *rhs) { return path(lhs.inner / rhs); }
+		friend path operator/(path &lhs, const char *rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
 		friend path operator/(const path &lhs, const std::filesystem::path &rhs) { return path(lhs.inner / rhs); }
 		friend path operator/(const std::filesystem::path &lhs, const path &rhs) { return path(lhs / rhs.inner); }
 
 		friend bool operator==(const path &a, const path &b) { return a.inner == b.inner; }
 		friend bool operator!=(const path &a, const path &b) { return a.inner != b.inner; }
-		friend bool operator==(const path &lhs, const char *rhs) { return lhs.inner == rhs; }
-		friend bool operator==(const char *lhs, const path &rhs) { return lhs == rhs.inner; }
-		friend bool operator==(const path &lhs, const std::string &rhs) { return lhs.inner == rhs; }
-		friend bool operator==(const std::string &lhs, const path &rhs) { return lhs == rhs.inner; }
-		friend bool operator!=(const path &lhs, const char *rhs) { return lhs.inner != rhs; }
-		friend bool operator!=(const char *lhs, const path &rhs) { return lhs != rhs.inner; }
-		friend bool operator!=(const path &lhs, const std::string &rhs) { return lhs.inner != rhs; }
-		friend bool operator!=(const std::string &lhs, const path &rhs) { return lhs != rhs.inner; }
+		friend bool operator==(const path &lhs, const char *rhs) { return lhs.inner == std::filesystem::u8path(rhs); }
+		friend bool operator==(const char *lhs, const path &rhs) { return std::filesystem::u8path(lhs) == rhs.inner; }
+		friend bool operator==(const path &lhs, const std::string &rhs) { return lhs.inner == std::filesystem::u8path(rhs); }
+		friend bool operator==(const std::string &lhs, const path &rhs) { return std::filesystem::u8path(lhs) == rhs.inner; }
+		friend bool operator!=(const path &lhs, const char *rhs) { return lhs.inner != std::filesystem::u8path(rhs); }
+		friend bool operator!=(const char *lhs, const path &rhs) { return std::filesystem::u8path(lhs) != rhs.inner; }
+		friend bool operator!=(const path &lhs, const std::string &rhs) { return lhs.inner != std::filesystem::u8path(rhs); }
+		friend bool operator!=(const std::string &lhs, const path &rhs) { return std::filesystem::u8path(lhs) != rhs.inner; }
 
 		friend std::ostream &operator<<(std::ostream &os, const path &p) { return os << p.string(); }
 	};
