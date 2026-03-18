@@ -59,10 +59,10 @@ void Rectf::setFromCentre(float cx, float cy, float w, float h) {
 	height = h;
 }
 void Rectf::alignToPixels() {
-	x	   = (int) x;
-	y	   = (int) y;
-	width  = (int) width;
-	height = (int) height;
+	x	   = std::round(x);
+	y	   = std::round(y);
+	width  = std::round(width);
+	height = std::round(height);
 }
 
 std::pair<Rectf, Rectf> Rectf::splitVertical(float division) const {
