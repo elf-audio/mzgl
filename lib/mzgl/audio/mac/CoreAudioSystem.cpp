@@ -388,7 +388,9 @@ void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
 	try {
 		checkDeviceAvailability();
 		setupState(numInChannels, numOutChannels);
-		createInputAudioUnit();
+		if (numInChannels > 0) {
+			createInputAudioUnit();
+		}
 		createOutputAudioUnit();
 	} catch (...) {
 		Log::e() << "CoreAudioSystem setup failed";
