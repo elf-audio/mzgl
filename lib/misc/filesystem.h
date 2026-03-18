@@ -16,6 +16,19 @@ namespace winfs {
 		return std::string(reinterpret_cast<const char *>(s.data()), s.size());
 	}
 
+	// C++20-safe replacement for std::filesystem::u8path (deprecated in C++20)
+	inline std::filesystem::path fromUtf8(const char *s, size_t len) {
+#if __cplusplus > 201703L || (defined(_MSVC_LANG) && _MSVC_LANG > 201703L)
+		return std::filesystem::path(std::u8string_view(reinterpret_cast<const char8_t *>(s), len));
+#else
+		return std::filesystem::u8path(s, s + len);
+#endif
+	}
+
+	inline std::filesystem::path fromUtf8(const std::string &s) { return fromUtf8(s.data(), s.size()); }
+	inline std::filesystem::path fromUtf8(const char *s) { return fromUtf8(s, std::char_traits<char>::length(s)); }
+	inline std::filesystem::path fromUtf8(std::string_view sv) { return fromUtf8(sv.data(), sv.size()); }
+
 	struct path {
 		std::filesystem::path inner;
 
@@ -25,11 +38,11 @@ namespace winfs {
 		path(std::filesystem::path &&p)
 			: inner(std::move(p)) {}
 		path(const std::string &s)
-			: inner(std::filesystem::u8path(s)) {}
+			: inner(fromUtf8(s)) {}
 		path(const char *s)
-			: inner(std::filesystem::u8path(s)) {}
+			: inner(fromUtf8(s)) {}
 		path(std::string_view sv)
-			: inner(std::filesystem::u8path(sv)) {}
+			: inner(fromUtf8(sv)) {}
 		path(const std::filesystem::directory_entry &entry)
 			: inner(entry.path()) {}
 
@@ -47,12 +60,12 @@ namespace winfs {
 		explicit operator const char *() const { return u8ToStdString(inner.u8string()).c_str(); }
 
 		path &operator+=(const std::string &str) {
-			inner += std::filesystem::u8path(str);
+			inner += fromUtf8(str);
 			return *this;
 		}
 
 		path &operator+=(const char *str) {
-			inner += std::filesystem::u8path(str);
+			inner += fromUtf8(str);
 			return *this;
 		}
 
@@ -67,7 +80,7 @@ namespace winfs {
 		}
 
 		path &operator=(const std::string &s) {
-			inner = std::filesystem::u8path(s);
+			inner = fromUtf8(s);
 			return *this;
 		}
 
@@ -88,12 +101,12 @@ namespace winfs {
 		}
 
 		path &operator=(const char *s) {
-			inner = std::filesystem::u8path(s);
+			inner = fromUtf8(s);
 			return *this;
 		}
 
 		path &operator=(std::string_view sv) {
-			inner = std::filesystem::u8path(sv);
+			inner = fromUtf8(sv);
 			return *this;
 		}
 
@@ -123,46 +136,46 @@ namespace winfs {
 		}
 
 		path &replace_extension(const std::string &replacement) {
-			inner.replace_extension(std::filesystem::u8path(replacement));
+			inner.replace_extension(fromUtf8(replacement));
 			return *this;
 		}
 
 		path replace_extension(const std::string &replacement) const {
 			path result = *this;
-			result.inner.replace_extension(std::filesystem::u8path(replacement));
+			result.inner.replace_extension(fromUtf8(replacement));
 			return result;
 		}
 
 		path &replace_extension(const char *replacement) {
-			inner.replace_extension(std::filesystem::u8path(replacement));
+			inner.replace_extension(fromUtf8(replacement));
 			return *this;
 		}
 
 		path replace_extension(const char *replacement) const {
 			path result = *this;
-			result.inner.replace_extension(std::filesystem::u8path(replacement));
+			result.inner.replace_extension(fromUtf8(replacement));
 			return result;
 		}
 
-		friend path operator/(const path &lhs, const std::string &rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
+		friend path operator/(const path &lhs, const std::string &rhs) { return path(lhs.inner / fromUtf8(rhs)); }
 		friend path operator/(const path &lhs, const path &rhs) { return path(lhs.inner / rhs.inner); }
-		friend path operator/(const path &lhs, const char *rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
-		friend path operator/(path &lhs, const std::string &rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
+		friend path operator/(const path &lhs, const char *rhs) { return path(lhs.inner / fromUtf8(rhs)); }
+		friend path operator/(path &lhs, const std::string &rhs) { return path(lhs.inner / fromUtf8(rhs)); }
 		friend path operator/(path &lhs, const path &rhs) { return path(lhs.inner / rhs.inner); }
-		friend path operator/(path &lhs, const char *rhs) { return path(lhs.inner / std::filesystem::u8path(rhs)); }
+		friend path operator/(path &lhs, const char *rhs) { return path(lhs.inner / fromUtf8(rhs)); }
 		friend path operator/(const path &lhs, const std::filesystem::path &rhs) { return path(lhs.inner / rhs); }
 		friend path operator/(const std::filesystem::path &lhs, const path &rhs) { return path(lhs / rhs.inner); }
 
 		friend bool operator==(const path &a, const path &b) { return a.inner == b.inner; }
 		friend bool operator!=(const path &a, const path &b) { return a.inner != b.inner; }
-		friend bool operator==(const path &lhs, const char *rhs) { return lhs.inner == std::filesystem::u8path(rhs); }
-		friend bool operator==(const char *lhs, const path &rhs) { return std::filesystem::u8path(lhs) == rhs.inner; }
-		friend bool operator==(const path &lhs, const std::string &rhs) { return lhs.inner == std::filesystem::u8path(rhs); }
-		friend bool operator==(const std::string &lhs, const path &rhs) { return std::filesystem::u8path(lhs) == rhs.inner; }
-		friend bool operator!=(const path &lhs, const char *rhs) { return lhs.inner != std::filesystem::u8path(rhs); }
-		friend bool operator!=(const char *lhs, const path &rhs) { return std::filesystem::u8path(lhs) != rhs.inner; }
-		friend bool operator!=(const path &lhs, const std::string &rhs) { return lhs.inner != std::filesystem::u8path(rhs); }
-		friend bool operator!=(const std::string &lhs, const path &rhs) { return std::filesystem::u8path(lhs) != rhs.inner; }
+		friend bool operator==(const path &lhs, const char *rhs) { return lhs.inner == fromUtf8(rhs); }
+		friend bool operator==(const char *lhs, const path &rhs) { return fromUtf8(lhs) == rhs.inner; }
+		friend bool operator==(const path &lhs, const std::string &rhs) { return lhs.inner == fromUtf8(rhs); }
+		friend bool operator==(const std::string &lhs, const path &rhs) { return fromUtf8(lhs) == rhs.inner; }
+		friend bool operator!=(const path &lhs, const char *rhs) { return lhs.inner != fromUtf8(rhs); }
+		friend bool operator!=(const char *lhs, const path &rhs) { return fromUtf8(lhs) != rhs.inner; }
+		friend bool operator!=(const path &lhs, const std::string &rhs) { return lhs.inner != fromUtf8(rhs); }
+		friend bool operator!=(const std::string &lhs, const path &rhs) { return fromUtf8(lhs) != rhs.inner; }
 
 		friend std::ostream &operator<<(std::ostream &os, const path &p) { return os << p.string(); }
 	};
