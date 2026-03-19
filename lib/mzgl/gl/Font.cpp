@@ -114,8 +114,8 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 		Log::e() << "Could not create stash.";
 		return false;
 	}
-	// have to make some memory here that will be freed by fontstash
-	unsigned char *d = new unsigned char[data.size()];
+	// have to use malloc here because fontstash frees with free()
+	unsigned char *d = static_cast<unsigned char *>(malloc(data.size()));
 	memcpy(d, data.data(), data.size());
 	fontNormal = fonsAddFontMem(fs, "sans", d, static_cast<int>(data.size()), 1);
 	if (fontNormal == FONS_INVALID) {
