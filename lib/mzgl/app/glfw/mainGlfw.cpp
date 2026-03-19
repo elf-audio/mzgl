@@ -37,13 +37,27 @@ static std::string getCrashLogPath() {
 	return "crash.log";
 }
 
+static std::string getVersionString() {
+	std::string ver;
+#ifdef KOALA_VERSION
+	ver += " v" KOALA_VERSION;
+#endif
+#ifdef KOALA_BUILD_NUMBER
+	ver += " (build " KOALA_BUILD_NUMBER ")";
+#endif
+#ifdef KOALA_GIT_HASH
+	ver += " [" KOALA_GIT_HASH "]";
+#endif
+	return ver;
+}
+
 static void writeCrashLog(const std::string &msg) {
 	try {
 		std::ofstream f(getCrashLogPath(), std::ios::app);
 		std::time_t t = std::time(nullptr);
 		char timeBuf[64];
 		std::strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", std::localtime(&t));
-		f << "[" << timeBuf << "] " << msg << "\n";
+		f << "[" << timeBuf << "]" << getVersionString() << " " << msg << "\n";
 	} catch (...) {
 	}
 }
@@ -120,7 +134,7 @@ static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 
 		char buf[256];
 		snprintf(buf, sizeof(buf), "0x%08lX (%s)", code, getExceptionName(code).c_str());
-		f << "[" << timeBuf << "] Unhandled exception, code: " << buf << "\n";
+		f << "[" << timeBuf << "]" << getVersionString() << " Unhandled exception, code: " << buf << "\n";
 
 		snprintf(buf, sizeof(buf), "  Instruction address: 0x%llX",
 				 reinterpret_cast<DWORD64>(info->ExceptionRecord->ExceptionAddress));
@@ -182,7 +196,7 @@ int main(int argc, char *argv[]) {
 			std::time_t t = std::time(nullptr);
 			char timeBuf[64];
 			std::strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", std::localtime(&t));
-			f << "[" << timeBuf << "] Unhandled C++ exception: " << e.what() << "\n";
+			f << "[" << timeBuf << "]" << getVersionString() << " Unhandled C++ exception: " << e.what() << "\n";
 #ifdef _WIN32
 			MEMORYSTATUSEX mem;
 			mem.dwLength = sizeof(mem);
