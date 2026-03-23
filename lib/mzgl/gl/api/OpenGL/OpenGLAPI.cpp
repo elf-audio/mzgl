@@ -78,12 +78,14 @@ void OpenGLAPI::loadDefaultShaders() {
 	g.colorShader		 = nullptr;
 	g.colorTextureShader = nullptr;
 	g.fontShader		 = nullptr;
+	g.colorFontShader	 = nullptr;
 	g.texShader			 = nullptr;
 
 	g.nothingShader		 = loadDefaultShader(g, nothingVertSrc, nothingFragSrc);
 	g.colorShader		 = loadDefaultShader(g, colorVertSrc, colorFragSrc);
 	g.colorTextureShader = loadDefaultShader(g, colorTextureVertSrc, colorTextureFragSrc);
 	g.fontShader		 = loadDefaultShader(g, fontVertSrc, fontFragSrc);
+	g.colorFontShader	 = loadDefaultShader(g, colorFontVertSrc, colorFontFragSrc);
 	g.texShader			 = loadDefaultShader(g, texVertSrc, texFragSrc);
 }
 

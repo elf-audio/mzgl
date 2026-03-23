@@ -34,6 +34,35 @@ void main() {
 }
 );
 
+std::string colorFontVertSrc = OPENGL_STRINGIFY(
+uniform mat4 mvp;
+
+in vec4 Position;
+in vec2 TexCoord;
+in vec4 Color;
+
+out vec2 texCoordV;
+out lowp vec4 colorV;
+
+void main() {
+	texCoordV	= TexCoord;
+	colorV		= Color;
+	gl_Position = mvp * Position;
+}
+);
+std::string colorFontFragSrc = OPENGL_STRINGIFY(
+
+in vec2 texCoordV;
+in lowp vec4 colorV;
+out vec4 fragColor;
+uniform sampler2D myTextureSampler;
+
+void main() {
+    fragColor = colorV;
+    fragColor.a *= texture(myTextureSampler, texCoordV).a;
+}
+);
+
 std::string nothingVertSrc = OPENGL_STRINGIFY(
 uniform mat4 mvp;
 

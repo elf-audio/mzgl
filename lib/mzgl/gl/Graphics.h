@@ -109,6 +109,7 @@ public:
 	ShaderRef colorTextureShader;
 	ShaderRef texShader;
 	ShaderRef fontShader;
+	ShaderRef colorFontShader;
 
 	void loadDefaultShaders();
 

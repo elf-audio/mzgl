@@ -353,7 +353,8 @@ set(SHADER_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/color.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorTexture.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/tex.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorFont.glsl")
 
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")

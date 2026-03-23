@@ -13,6 +13,7 @@ void SokolAPI::loadDefaultShaders() {
 	g.colorTextureShader = createDefaultShader("colorTexture", &g, this);
 	g.texShader			 = createDefaultShader("tex", &g, this);
 	g.fontShader		 = createDefaultShader("font", &g, this);
+	g.colorFontShader	 = createDefaultShader("colorFont", &g, this);
 }
 
 void SokolAPI::maskOn(const Rectf &r) {

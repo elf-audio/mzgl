@@ -617,6 +617,7 @@ void Graphics::destroyResources() {
 	colorTextureShader	= nullptr;
 	texShader			= nullptr;
 	fontShader			= nullptr;
+	colorFontShader		= nullptr;
 	deallocateFont();
 	currShader = nullptr;
 

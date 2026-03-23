@@ -17,6 +17,9 @@ namespace tex_shader {
 namespace font_shader {
 #include "font.glsl.h"
 };
+namespace colorFont_shader {
+#include "colorFont.glsl.h"
+};
 
 // USER SHADERS ///////////////////////////////////////////////
 //namespace flanger_shader {
@@ -45,4 +48,8 @@ void registerShaders(SokolShaderRegistry &registry) {
 							&font_shader::font_shader_desc,
 							&font_shader::font_uniformblock_size,
 							&font_shader::font_uniform_offset, &font_shader::font_attr_slot);
+	registry.registerShader("colorFont",
+							&colorFont_shader::colorFont_shader_desc,
+							&colorFont_shader::colorFont_uniformblock_size,
+							&colorFont_shader::colorFont_uniform_offset, &colorFont_shader::colorFont_attr_slot);
 }
