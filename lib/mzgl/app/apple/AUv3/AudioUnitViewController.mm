@@ -51,15 +51,15 @@ using namespace std;
 	return self;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
 	app.reset();
 	plugin.reset();
 	g.reset();
 }
-#pragma clang diagnostic pop
+#	pragma clang diagnostic pop
 
 - (void)setup {
 	app		  = nullptr;
@@ -78,7 +78,14 @@ using namespace std;
 	////        [self addGLView];
 	////        [self connectViewToAU];
 	//#else
-	[self setPreferredContentSize:CGSizeMake(500, 800)];
+#	if MZGL_IOS
+	float w = 500;
+	float h = 800;
+#	else
+	float w = 900;
+	float h = 400;
+#	endif
+	[self setPreferredContentSize:CGSizeMake(w, h)];
 	//#endif
 }
 #	if !MZGL_IOS
@@ -170,6 +177,13 @@ using namespace std;
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
 #	endif
+		app->viewHandle = (__bridge void *) glView;
+
+		__unsafe_unretained AudioUnitViewController *vc = self;
+		app->requestResize								= [vc](float w, float h) {
+			 dispatch_async(dispatch_get_main_queue(), ^{ [vc setPreferredContentSize:CGSizeMake(w, h)]; });
+		};
+
 		glView.frame = self.view.frame;
 #	if !MZGL_IOS
 		g->width  = self.view.frame.size.width * 2;

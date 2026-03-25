@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 #include "Texture.h"
 #include "Font.h"
@@ -106,6 +107,10 @@ public:
 	void *viewHandle		 = nullptr;
 
 	MainThreadRunner main;
+
+	// Plugin hosts can set this to handle resize requests from the app layer.
+	// Parameters are the requested width and height in points.
+	std::function<void(float, float)> requestResize;
 
 	void setWindowTitle(const std::string &title);
 
