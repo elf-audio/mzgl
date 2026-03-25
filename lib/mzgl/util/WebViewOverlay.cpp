@@ -155,19 +155,25 @@ private:
 		}];
 	}
 	void close() {
-		// Create slide-out animation
-		NSRect endFrame = webView.frame;
-		endFrame.origin.y -= webView.bounds.size.height;
-		NSView *rootView = webView.superview;
+		// Capture and nil out webView before the async animation completion,
+		// since the impl may be destroyed before the animation finishes.
+		AppleWebView *wv = webView;
+		NSView *rootView = wv.superview;
+		webView = nil;
 
-		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-		  context.duration		 = 0.5;
-		  webView.animator.frame = endFrame;
+		if (wv) {
+			NSRect endFrame = wv.frame;
+			endFrame.origin.y -= wv.bounds.size.height;
+
+			[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+			  context.duration	   = 0.5;
+			  wv.animator.frame = endFrame;
+			}
+				completionHandler:^{
+				  [wv removeFromSuperview];
+				  [rootView.window makeFirstResponder:rootView];
+				}];
 		}
-			completionHandler:^{
-			  [webView removeFromSuperview];
-			  [rootView.window makeFirstResponder:rootView];
-			}];
 		if (closeCallback) closeCallback();
 	}
 };
