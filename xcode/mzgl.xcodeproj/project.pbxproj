@@ -708,6 +708,8 @@
 		EA924369274000E300311C98 /* AllMidiDevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA924367274000E300311C98 /* AllMidiDevices.cpp */; };
 		EA92436A274000E300311C98 /* AllMidiDevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA924367274000E300311C98 /* AllMidiDevices.cpp */; };
 		EA92436B274000E300311C98 /* AllMidiDevices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA924367274000E300311C98 /* AllMidiDevices.cpp */; };
+		EA96993A2F73EFC100D515B0 /* colorFont.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9699392F73EFC100D515B0 /* colorFont.glsl.h */; };
+		EA96993B2F73EFC100D515B0 /* colorFont.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9699392F73EFC100D515B0 /* colorFont.glsl.h */; };
 		EA99490424730DB8004D0DB7 /* nanovg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA99490324730DB7004D0DB7 /* nanovg.cpp */; };
 		EA99490524730DB8004D0DB7 /* nanovg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA99490324730DB7004D0DB7 /* nanovg.cpp */; };
 		EA99491524754329004D0DB7 /* FloatBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1835E92432C18B00A5C3E8 /* FloatBuffer.cpp */; };
@@ -722,8 +724,6 @@
 		EA9C32F3299FC45D000C1DD2 /* ScopedMask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */; };
 		EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
 		EA9C32F5299FC45D000C1DD2 /* ScopedMask.h in Headers */ = {isa = PBXBuildFile; fileRef = EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */; };
-		EA9D45EA2F616471008E70F6 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9D45E92F616471008E70F6 /* App.cpp */; };
-		EA9D45EB2F616471008E70F6 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA9D45E92F616471008E70F6 /* App.cpp */; };
 		EAA44CD4267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD5267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
 		EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAA44CD3267A2BE50014C203 /* Haptics.cpp */; };
@@ -1272,10 +1272,10 @@
 		EA924360273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesAppleImpl.h; sourceTree = "<group>"; };
 		EA924367274000E300311C98 /* AllMidiDevices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AllMidiDevices.cpp; sourceTree = "<group>"; };
 		EA92436C27400D8800311C98 /* AllMidiDevicesImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesImpl.h; sourceTree = "<group>"; };
+		EA9699392F73EFC100D515B0 /* colorFont.glsl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = colorFont.glsl.h; path = ../lib/mzgl/gl/api/sokol/xcodeShaders/colorFont.glsl.h; sourceTree = SOURCE_ROOT; };
 		EA99490324730DB7004D0DB7 /* nanovg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nanovg.cpp; sourceTree = "<group>"; };
 		EA9C32EE299FC45D000C1DD2 /* ScopedMask.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScopedMask.cpp; sourceTree = "<group>"; };
 		EA9C32EF299FC45D000C1DD2 /* ScopedMask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopedMask.h; sourceTree = "<group>"; };
-		EA9D45E92F616471008E70F6 /* App.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = App.cpp; sourceTree = "<group>"; };
 		EAA44CD2267A2BCB0014C203 /* Haptics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Haptics.h; sourceTree = "<group>"; };
 		EAA44CD3267A2BE50014C203 /* Haptics.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = Haptics.cpp; sourceTree = "<group>"; };
 		EAA9BE5D2A30E180008BFEF4 /* Listenable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Listenable.h; sourceTree = "<group>"; };
@@ -3252,6 +3252,7 @@
 		EAF6F4502E09AE8400DE5361 /* xcodeShaders */ = {
 			isa = PBXGroup;
 			children = (
+				EA9699392F73EFC100D515B0 /* colorFont.glsl.h */,
 				EAF6F4492E09AE8400DE5361 /* color.glsl.h */,
 				EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */,
 				EAF6F44B2E09AE8400DE5361 /* font.glsl.h */,
@@ -3462,6 +3463,7 @@
 				EA183F972432C18D00A5C3E8 /* DrawingFunction.h in Headers */,
 				EA759B3F2715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
 				EA297C7C25C954E600F890AE /* pa_dither.h in Headers */,
+				EA96993B2F73EFC100D515B0 /* colorFont.glsl.h in Headers */,
 				EA183FEE2432C18D00A5C3E8 /* LineEquation.h in Headers */,
 				EA297C7925C954E600F890AE /* pa_process.h in Headers */,
 				EA297C6425C954E600F890AE /* pa_linux_alsa.h in Headers */,
@@ -3674,6 +3676,7 @@
 				EA2B89C124E7093600EA12BD /* MZGLKitView.h in Headers */,
 				EA2B89C824E7093600EA12BD /* experiments.h in Headers */,
 				EA71A70727E39E6B0081A5CB /* ZipStreamer.h in Headers */,
+				EA96993A2F73EFC100D515B0 /* colorFont.glsl.h in Headers */,
 				EA2B89ED24E7093600EA12BD /* YGEnums.h in Headers */,
 				EA2B8A4824E7093600EA12BD /* BitUtils.h in Headers */,
 				EA2B8A4D24E7093600EA12BD /* SVG.h in Headers */,
