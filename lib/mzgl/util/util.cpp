@@ -1311,7 +1311,12 @@ std::string generateUUID() {
 	return uuid::generate_uuid_v4();
 #endif
 }
-
+bool isIPad() {
+#if defined(__APPLE__) && TARGET_OS_IOS
+	return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
+#endif
+	return false;
+}
 bool isTabletDevice() {
 #if defined(__APPLE__) && TARGET_OS_IOS
 	return [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
