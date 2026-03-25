@@ -129,7 +129,15 @@ public:
 			webView.keepNavigationInternal = keep ? YES : NO;
 		}
 	}
-	~MacWebViewOverlayImpl() override = default;
+	~MacWebViewOverlayImpl() override {
+		AppleWebView *wv = webView;
+		webView = nil;
+		if (wv) {
+			dispatch_async(dispatch_get_main_queue(), ^{
+			  [wv removeFromSuperview];
+			});
+		}
+	}
 
 private:
 	void animateIn() {
