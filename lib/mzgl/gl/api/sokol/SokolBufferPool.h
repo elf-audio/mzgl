@@ -13,8 +13,10 @@ public:
 	};
 
 	// Get a buffer that can hold at least `size` bytes. May return a recycled buffer.
+	// Returns {.capacity = 0} for oversized requests that can't be pooled.
 	PooledBuffer acquire(int size, bool isIndex) {
 		int bucket = bucketFor(size);
+		if (bucket < 0) return {}; // too large to pool
 		auto &freeList = isIndex ? indexFreeLists[bucket] : vertexFreeLists[bucket];
 		if (!freeList.empty()) {
 			auto buf = freeList.back();
@@ -38,7 +40,12 @@ public:
 	// Return a buffer to the pool for reuse.
 	void release(PooledBuffer buf, bool isIndex) {
 		if (buf.buffer.id == 0) return;
-		int bucket	 = bucketFor(buf.capacity);
+		int bucket = bucketFor(buf.capacity);
+		if (bucket < 0) {
+			// Oversized buffer can't be pooled, just destroy it
+			sg_destroy_buffer(buf.buffer);
+			return;
+		}
 		auto &freeList = isIndex ? indexFreeLists[bucket] : vertexFreeLists[bucket];
 		freeList.push_back(buf);
 		pooledCount++;
@@ -60,11 +67,11 @@ private:
 	static int bucketSize(int bucket) { return 64 << bucket; }
 
 	static int bucketFor(int size) {
-		// Find smallest bucket that fits
+		// Find smallest bucket that fits. Returns -1 if too large to pool.
 		for (int i = 0; i < NUM_BUCKETS; i++) {
 			if (bucketSize(i) >= size) return i;
 		}
-		return NUM_BUCKETS - 1;
+		return -1;
 	}
 
 	std::array<std::vector<PooledBuffer>, NUM_BUCKETS> vertexFreeLists;

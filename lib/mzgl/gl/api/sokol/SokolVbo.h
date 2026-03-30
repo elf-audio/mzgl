@@ -39,10 +39,20 @@ public:
 				deallocate();
 				pool = bufPool;
 				if (pool) {
-					auto pb		   = pool->acquire(dataSize, isIndex);
-					buffer		   = pb.buffer;
-					pooledCapacity = pb.capacity;
-					sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
+					auto pb = pool->acquire(dataSize, isIndex);
+					if (pb.capacity > 0) {
+						buffer		   = pb.buffer;
+						pooledCapacity = pb.capacity;
+						sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
+					} else {
+						// Too large to pool, create unpooled
+						pool = nullptr;
+						sg_buffer_desc desc = {};
+						desc.data			= {v.data(), (size_t) dataSize};
+						if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+						buffer		   = sg_make_buffer(desc);
+						pooledCapacity = 0;
+					}
 				} else {
 					// Fallback: create immutable buffer (no pool available)
 					sg_buffer_desc desc = {};
