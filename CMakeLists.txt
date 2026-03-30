@@ -169,10 +169,10 @@ if(USING_SOKOL)
   list(
     APPEND
     MZGL_SOURCES
-    lib/mzgl/gl/api/Sokol/SokolAPI.cpp
-    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
-    lib/mzgl/gl/api/Sokol/SokolVbo.cpp
-    lib/mzgl/gl/api/Sokol/SokolShader.cpp
+    lib/mzgl/gl/api/sokol/SokolAPI.cpp
+    lib/mzgl/gl/api/sokol/SokolImplementation.cpp
+    lib/mzgl/gl/api/sokol/SokolVbo.cpp
+    lib/mzgl/gl/api/sokol/SokolShader.cpp
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/app/mac/Metal/MZMetalView.mm
     >
@@ -296,7 +296,7 @@ if(APPLE)
     lib/mzgl/util/log.cpp
     lib/mzgl/util/WebViewOverlay.cpp
     lib/mzgl/net/netUtil.cpp
-    lib/mzgl/gl/api/Sokol/SokolImplementation.cpp
+    lib/mzgl/gl/api/sokol/SokolImplementation.cpp
     lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
@@ -355,12 +355,12 @@ target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 # COMPILE SOKOL SHADERS List of shader files
 set(SHADER_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/nothing.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/color.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorTexture.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/tex.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/font.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/shaders/colorFont.glsl")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/nothing.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/color.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorTexture.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/tex.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/font.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorFont.glsl")
 
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")
@@ -400,7 +400,7 @@ if(USING_SOKOL)
     target_include_directories(
       libmzgl
       PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/xcodeShaders")
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
   endif()
 
   add_compile_definitions(MZGL_SOKOL)

@@ -52,6 +52,8 @@ public:
 	}
 
 	~SokolBufferPool() {
+		// If sokol is already shut down, all GPU resources are already released.
+		if (!sg_isvalid()) return;
 		for (auto &list : vertexFreeLists)
 			for (auto &b : list) sg_destroy_buffer(b.buffer);
 		for (auto &list : indexFreeLists)
