@@ -41,7 +41,6 @@ PipelineRef SokolShader::getPipeline(const std::vector<sg_vertex_format> &attrs,
 				+ static_cast<int>(mode) * 128;
 
 	if (pipelines.find(index) == pipelines.end()) {
-		printf("creating pipeline %d (%s)\n", index, name.c_str());
 		auto pipeline =
 			Pipeline::create(shd, attrs, usingIndices, g.isBlending(), g.getBlendMode(), mode, isInstancing);
 		pipelines[index] = pipeline;

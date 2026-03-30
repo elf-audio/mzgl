@@ -4,7 +4,9 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "SokolShader.h"
+#include "SokolBufferPool.h"
 #include "Vbo.h"
+
 class Graphics;
 class Shader;
 class SokolVbo : public Vbo {
@@ -15,29 +17,56 @@ public:
 
 	class Buffer {
 	public:
-		sg_buffer buffer {.id = 0};
+		sg_buffer buffer = {};
+		int size		 = 0;
+		int unitSize	 = 0;
 
-		int size	 = 0;
-		int unitSize = 0;
+		SokolBufferPool *pool  = nullptr;
+		int pooledCapacity	   = 0;
+		bool isIndex		   = false;
+
 		template <typename T>
-		void set(const std::vector<T> &v) {
-			deallocate();
-			//        sg_update_buffer(vbuf_col, sg_range{colors.data(), colors.size() * sizeof(vec4)});
-			sg_buffer_desc desc = {.data = sg_range {v.data(), v.size() * sizeof(T)}};
+		void set(const std::vector<T> &v, SokolBufferPool *bufPool = nullptr) {
+			bool wasIndex = isIndex;
+			isIndex		  = std::is_integral_v<T>;
 
-			if constexpr (std::is_integral_v<T>) {
-				desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+			int dataSize = (int) (v.size() * sizeof(T));
+
+			// If we have a pooled buffer that's big enough, reuse it
+			if (pool && buffer.id != 0 && pooledCapacity >= dataSize && wasIndex == isIndex) {
+				sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
+			} else {
+				deallocate();
+				pool = bufPool;
+				if (pool) {
+					auto pb = pool->acquire(dataSize, isIndex);
+					if (pb.capacity > 0) {
+						buffer		   = pb.buffer;
+						pooledCapacity = pb.capacity;
+						sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
+					} else {
+						// Too large to pool, create unpooled
+						pool = nullptr;
+						sg_buffer_desc desc = {};
+						desc.data			= {v.data(), (size_t) dataSize};
+						if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+						buffer		   = sg_make_buffer(desc);
+						pooledCapacity = 0;
+					}
+				} else {
+					// Fallback: create immutable buffer (no pool available)
+					sg_buffer_desc desc = {};
+					desc.data			= {v.data(), (size_t) dataSize};
+					if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+					buffer		   = sg_make_buffer(desc);
+					pooledCapacity = 0;
+				}
 			}
-
-			buffer = sg_make_buffer(desc);
-
-			size	 = v.size();
+			size	 = (int) v.size();
 			unitSize = sizeof(T);
 		}
 
 		sg_vertex_format getFormat() const {
-			// no int index yet.
-
 			switch (unitSize) {
 				case 4: return SG_VERTEXFORMAT_FLOAT;
 				case 8: return SG_VERTEXFORMAT_FLOAT2;
@@ -72,40 +101,42 @@ public:
 		instanceIndexBuffer.deallocate();
 	}
 
+	void setPool(SokolBufferPool *p) { pool = p; }
+
 	Vbo &setVertices(const std::vector<vec2> &verts) override {
-		// TODO: remove me
 		if (verts.size() == 0) return *this;
-		positionBuffer.set(verts);
+		positionBuffer.set(verts, pool);
 		return *this;
 	}
 	Vbo &setVertices(const std::vector<vec3> &verts) override {
-		positionBuffer.set(verts);
+		positionBuffer.set(verts, pool);
 		return *this;
 	}
 	Vbo &setVertices(const std::vector<vec4> &verts) override {
-		positionBuffer.set(verts);
+		positionBuffer.set(verts, pool);
 		return *this;
 	}
 	Vbo &setTexCoords(const std::vector<glm::vec2> &texCoords) override {
-		texCoordBuffer.set(texCoords);
+		texCoordBuffer.set(texCoords, pool);
 		return *this;
 	}
 	Vbo &setColors(const std::vector<glm::vec4> &colors) override {
-		colorBuffer.set(colors);
+		colorBuffer.set(colors, pool);
 		return *this;
 	}
 
 	Vbo &setNormals(const std::vector<glm::vec3> &normals) override {
-		normalBuffer.set(normals);
+		normalBuffer.set(normals, pool);
 		return *this;
 	}
 
 	Vbo &setIndices(const std::vector<uint32_t> &indices) override {
-		// TODO: remove me
 		if (indices.size() == 0) return *this;
-		indexBuffer.set(indices);
+		indexBuffer.set(indices, pool);
 		return *this;
 	}
+
+	SokolBufferPool *pool = nullptr;
 
 private:
 	SokolShader *getShader(Graphics &g) const;

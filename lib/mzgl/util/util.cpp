@@ -939,7 +939,11 @@ void saveFileDialog(const std::string &msg,
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
 	ofn.lStructSize	  = sizeof(OPENFILENAME);
+#ifdef MZGL_SOKOL
+	HWND hwnd		  = GetActiveWindow();
+#else
 	HWND hwnd		  = WindowFromDC(wglGetCurrentDC());
+#endif
 	ofn.hwndOwner	  = hwnd;
 	ofn.hInstance	  = GetModuleHandle(0);
 	ofn.nMaxFileTitle = 31;

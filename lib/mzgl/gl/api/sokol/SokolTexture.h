@@ -46,24 +46,39 @@ public:
 	sg_filter magFilter {SG_FILTER_LINEAR};
 
 	void allocate(const unsigned char *data, int w, int h, Texture::PixelFormat fmt) override {
-		sg_range dataRange = {
-			.ptr  = data,
-			.size = static_cast<size_t>(w * h * 4),
-		};
-		sg_image_desc imageDesc = {.width = w, .height = h, .data.subimage[0][0] = dataRange};
-		image					= sg_make_image(imageDesc);
+		// Sokol/D3D11 only supports RGBA8 textures - convert RGB to RGBA if needed
+		const unsigned char *pixelData = data;
+		std::vector<unsigned char> rgbaData;
+		if (fmt == Texture::PixelFormat::RGB) {
+			rgbaData.resize(w * h * 4);
+			for (int i = 0; i < w * h; i++) {
+				rgbaData[i * 4 + 0] = data[i * 3 + 0];
+				rgbaData[i * 4 + 1] = data[i * 3 + 1];
+				rgbaData[i * 4 + 2] = data[i * 3 + 2];
+				rgbaData[i * 4 + 3] = 255;
+			}
+			pixelData = rgbaData.data();
+		}
+		sg_range dataRange		= {};
+		dataRange.ptr			= pixelData;
+		dataRange.size			= static_cast<size_t>(w * h * 4);
+		sg_image_desc imageDesc = {};
+		imageDesc.width			= w;
+		imageDesc.height		= h;
+		imageDesc.pixel_format	= SG_PIXELFORMAT_RGBA8;
+		imageDesc.data.subimage[0][0] = dataRange;
+		image = sg_make_image(imageDesc);
 	}
 	void createMipMaps() override {}
 	void bind() override {
 		bound = true;
 		if (sampler.id == 0) {
-			sg_sampler_desc samplerDesc = {
-				.min_filter = minFilter,
-				.mag_filter = magFilter,
-				.wrap_u		= xWrap,
-				.wrap_v		= yWrap,
-			};
-			sampler = api.createOrReuseSampler(samplerDesc);
+			sg_sampler_desc samplerDesc = {};
+			samplerDesc.min_filter		= minFilter;
+			samplerDesc.mag_filter		= magFilter;
+			samplerDesc.wrap_u			= xWrap;
+			samplerDesc.wrap_v			= yWrap;
+			sampler						= api.createOrReuseSampler(samplerDesc);
 		}
 
 		api.setBoundTexture(image, sampler);
@@ -90,6 +105,6 @@ private:
 		}
 	}
 	bool bound = false;
-	sg_image image;
-	sg_sampler sampler;
+	sg_image image	   = {};
+	sg_sampler sampler = {};
 };

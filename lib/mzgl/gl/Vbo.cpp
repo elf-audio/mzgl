@@ -15,8 +15,9 @@
 #include "log.h"
 #include "Geometry.h"
 
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 #	include "SokolVbo.h"
+#	include "SokolAPI.h"
 #else
 #	include "OpenGLVbo.h"
 #endif
@@ -26,8 +27,18 @@ std::vector<Vbo *> Vbo::vbos;
 #endif
 
 VboRef Vbo::create() {
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	return VboRef(new SokolVbo());
+#else
+	return VboRef(new OpenGLVbo());
+#endif
+}
+
+VboRef Vbo::createFromPool(Graphics &g) {
+#ifdef MZGL_SOKOL
+	auto vbo = new SokolVbo();
+	vbo->setPool(&dynamic_cast<SokolAPI &>(g.getAPI()).getBufferPool());
+	return VboRef(vbo);
 #else
 	return VboRef(new OpenGLVbo());
 #endif

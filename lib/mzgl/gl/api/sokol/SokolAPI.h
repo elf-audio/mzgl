@@ -5,6 +5,7 @@
 #include "sokol_gfx.h"
 #include "SokolShaderRegistry.h"
 #include "SokolSamplerRegistry.h"
+#include "SokolBufferPool.h"
 
 class SokolAPI : public GraphicsAPI {
 public:
@@ -42,7 +43,7 @@ public:
 
 	void readScreenPixels(std::vector<uint8_t> &outData, const Rectf &r) override {}
 	void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) override {
-		auto vbo = Vbo::create();
+		auto vbo = Vbo::createFromPool(g);
 		vbo->setVertices(verts);
 		vbo->draw(g, type);
 	}
@@ -55,6 +56,7 @@ public:
 	}
 
 	SokolShaderRegistry &getShaderRegistry() { return shaderRegistry; }
+	SokolBufferPool &getBufferPool() { return bufferPool; }
 
 private:
 	static ShaderRef createDefaultShader(const std::string &name, Graphics *g, SokolAPI *api) {
@@ -64,6 +66,7 @@ private:
 	}
 	SokolShaderRegistry shaderRegistry;
 	SokolSamplerRegistry samplerRegistry;
+	SokolBufferPool bufferPool;
 
 	void loadDefaultShaders();
 

@@ -10,7 +10,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 #	include "MZMetalView.h"
 #	define GL_VIEW_CLASS MZMetalView
 #else
