@@ -17,9 +17,10 @@
 #	endif
 #elif defined(_WIN32)
 #	include <Windows.h>
-
-#	include "glew.h"
-#	include "glfw3native.h"
+#	ifndef MZGL_SOKOL
+#		include "glew.h"
+#		include "glfw3native.h"
+#	endif
 
 #else
 

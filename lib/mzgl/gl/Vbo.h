@@ -37,6 +37,10 @@ public:
 
 	static VboRef create();
 
+	// Creates a VBO backed by a buffer pool for efficient reuse.
+	// Use this for temporary VBOs that are created and destroyed every frame.
+	static VboRef createFromPool(Graphics &g);
+
 	virtual ~Vbo();
 
 	virtual Vbo &setVertices(const std::vector<vec2> &verts) = 0;

@@ -9,11 +9,17 @@ CLANG_IGNORE_WARNINGS_END
 #include "Graphics.h"
 #include "SokolPipeline.h"
 #include "SokolAPI.h"
+#include "mzAssert.h"
 
 void SokolVbo::Buffer::deallocate() {
 	if (valid()) {
-		sg_destroy_buffer(buffer);
-		buffer.id = 0;
+		if (pool) {
+			pool->release({buffer, pooledCapacity}, isIndex);
+		} else {
+			sg_destroy_buffer(buffer);
+		}
+		buffer.id	   = 0;
+		pooledCapacity = 0;
 	}
 }
 SokolShader *SokolVbo::getShader(Graphics &g) const {
@@ -60,8 +66,9 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 		return;
 	}
 	// vbo chooses the shader
-	sg_bindings bindings = {.vertex_buffers[0] = positionBuffer.buffer};
-	int nextPos			 = 1;
+	sg_bindings bindings		= {};
+	bindings.vertex_buffers[0]	= positionBuffer.buffer;
+	int nextPos					= 1;
 
 	if (colorBuffer.valid()) {
 		bindings.vertex_buffers[nextPos] = colorBuffer.buffer;
@@ -100,8 +107,9 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	auto *api = static_cast<SokolAPI *>(&g.getAPI());
 
 	auto tex = api->getBoundTexture();
-
 	if (tex.id != 0) {
+		mzAssert(texCoordBuffer.valid(),
+				 "Texture is bound but VBO has no tex coords - did you forget to unbind a texture?");
 		bindings.fs.images[0]	= tex;
 		auto sampler			= api->getSampler();
 		bindings.fs.samplers[0] = sampler;

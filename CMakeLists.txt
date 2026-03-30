@@ -143,7 +143,6 @@ if(NOT ANDROID)
   list(
     APPEND
     MZGL_SOURCES
-    lib/glew/src/glew.c
     lib/mzgl/app/glfw/GLFWAppRunner.cpp
     lib/mzgl/app/glfw/DesktopWindowEventHandler.h
     lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
@@ -161,6 +160,9 @@ if(NOT ANDROID)
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Mac.cpp
     lib/mzgl/app/glfw/GLFWOS_Mac.cpp
     >)
+  if(NOT USING_SOKOL OR NOT WIN32)
+    list(APPEND MZGL_SOURCES lib/glew/src/glew.c)
+  endif()
 endif()
 
 if(USING_SOKOL)
@@ -173,6 +175,9 @@ if(USING_SOKOL)
     lib/mzgl/gl/api/Sokol/SokolShader.cpp
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/app/mac/Metal/MZMetalView.mm
+    >
+    $<$<PLATFORM_ID:Windows>:
+    lib/mzgl/app/win64/D3D11Context.cpp
     >)
 else()
   list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
@@ -195,6 +200,7 @@ set(HEADERS
     lib/mzgl/app/mac/GL
     lib/mzgl/app/mac/Metal
     lib/mzgl/app/glfw
+    lib/mzgl/app/win64
     lib/mzgl/app/web
     lib/mzgl/audio
     lib/mzgl/audio/mac
@@ -361,40 +367,48 @@ set(SOKOL_SHDC "sokol-shdc")
 
 if(USING_SOKOL)
 
-  # Process each shader file
-  foreach(SHADER_SOURCE ${SHADER_SOURCES})
-    # Create a corresponding header file name
-    get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
-    set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
+  find_program(SOKOL_SHDC_FOUND ${SOKOL_SHDC})
+  if(SOKOL_SHDC_FOUND)
+    # Process each shader file
+    foreach(SHADER_SOURCE ${SHADER_SOURCES})
+      # Create a corresponding header file name
+      get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
+      set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
 
-    # Custom command that runs sokol-shdc for each shader
-    add_custom_command(
-      OUTPUT ${SHADER_HEADER}
-      COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output
-              ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
-      DEPENDS ${SHADER_SOURCE}
-      COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
-      VERBATIM)
+      # Custom command that runs sokol-shdc for each shader
+      add_custom_command(
+        OUTPUT ${SHADER_HEADER}
+        COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output
+                ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
+        DEPENDS ${SHADER_SOURCE}
+        COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
+        VERBATIM)
 
-    # Append the output header to a list of all generated headers
-    list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
-  endforeach()
+      # Append the output header to a list of all generated headers
+      list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
+    endforeach()
 
-  # Custom target that depends on all generated shader headers
-  add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
+    # Custom target that depends on all generated shader headers
+    add_custom_target(CompileShaders ALL DEPENDS ${GENERATED_SHADER_HEADERS})
 
-  # Ensure your main application depends on this custom target
-  add_dependencies(libmzgl CompileShaders)
+    # Ensure your main application depends on this custom target
+    add_dependencies(libmzgl CompileShaders)
 
-  target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  else()
+    message(STATUS "sokol-shdc not found, using pre-compiled shader headers")
+    target_include_directories(
+      libmzgl
+      PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/Sokol/xcodeShaders")
+  endif()
 
-  # uncomment to turn on sokol
-  add_compile_definitions(MZGL_SOKOL_METAL)
-endif()
-
-if(APPLE)
-  # choose the sokol backend for platform
-  add_compile_definitions(SOKOL_METAL)
+  add_compile_definitions(MZGL_SOKOL)
+  if(APPLE)
+    add_compile_definitions(SOKOL_METAL)
+  elseif(WIN32)
+    add_compile_definitions(SOKOL_D3D11)
+  endif()
 endif()
 
 set(MZGL_LIBS ZipFile yoga pu_gixml concurrentqueue readerwriterqueue)
@@ -421,7 +435,7 @@ if(NOT ANDROID)
   if(APPLE)
     set_source_files_properties(lib/rtmidi/RtMidi.cpp
                                 PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
-  else()
+  elseif(NOT USING_SOKOL)
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)
@@ -488,17 +502,24 @@ elseif(APPLE)
 
 elseif(WIN32)
 
-  add_compile_definitions(_WIN32_WINNT=0x0601 GLEW_STATIC)
-  add_compile_definitions(__WINDOWS_MM__)
+  add_compile_definitions(_WIN32_WINNT=0x0601 __WINDOWS_MM__)
+  if(NOT USING_SOKOL)
+    add_compile_definitions(GLEW_STATIC)
+  endif()
 
   list(
     APPEND
     MZGL_LIBS
     ${GLFW_LIBRARIES}
-    ${OPENGL_gl_LIBRARY}
     winmm
     dsound
     ole32)
+
+  if(USING_SOKOL)
+    list(APPEND MZGL_LIBS d3d11 dxgi dxguid)
+  else()
+    list(APPEND MZGL_LIBS ${OPENGL_gl_LIBRARY})
+  endif()
 
 elseif(LINUX)
   add_compile_definitions(__LINUX_ALSA__)

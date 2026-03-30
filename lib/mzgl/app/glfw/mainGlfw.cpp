@@ -168,8 +168,8 @@ static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 	}
 
 	showCrashDialog("Koala - Crash",
-					"Koala crashed unexpectedly. A crash log has been written to your Koala documents folder "
-					"(crash.log).\n\nPlease send this file to koala.helpdesk@gmail.com");
+					"Koala crashed unexpectedly. A crash log has been written to:\n" + getCrashLogPath()
+					+ "\n\nPlease send this file to koala.helpdesk@gmail.com");
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -215,12 +215,11 @@ int main(int argc, char *argv[]) {
 		}
 		showCrashDialog("Koala - Error",
 						std::string("Koala crashed: ") + e.what()
-							+ "\n\nA crash log has been written to your Koala documents folder (crash.log).");
+							+ "\n\nA crash log has been written to:\n" + getCrashLogPath());
 	} catch (...) {
 		writeCrashLog("Unknown unhandled exception");
 		showCrashDialog("Koala - Error",
-						"Koala crashed unexpectedly.\n\nA crash log has been written to your Koala documents "
-						"folder (crash.log).");
+						"Koala crashed unexpectedly.\n\nA crash log has been written to:\n" + getCrashLogPath());
 	}
 	return 0;
 }

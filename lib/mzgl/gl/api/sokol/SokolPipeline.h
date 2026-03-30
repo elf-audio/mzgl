@@ -29,15 +29,15 @@ private:
 			 Graphics::BlendMode blendMode,
 			 sg_primitive_type mode,
 			 bool isInstancing) {
-		pipelineDesc = {
-			.index_type		= usingIndices ? SG_INDEXTYPE_UINT32 : SG_INDEXTYPE_NONE,
-			.primitive_type = mode,
-			.shader			= shd,
-			.sample_count	= 4,
-		};
+		pipelineDesc				= {};
+		pipelineDesc.shader			= shd;
+		pipelineDesc.index_type		= usingIndices ? SG_INDEXTYPE_UINT32 : SG_INDEXTYPE_NONE;
+		pipelineDesc.primitive_type = mode;
+		pipelineDesc.sample_count	= sg_query_desc().environment.defaults.sample_count;
 
-		for (int i = 0; i < attrs.size(); i++) {
-			pipelineDesc.layout.attrs[i] = {.format = attrs[i], .buffer_index = i};
+		for (int i = 0; i < (int) attrs.size(); i++) {
+			pipelineDesc.layout.attrs[i].format		  = attrs[i];
+			pipelineDesc.layout.attrs[i].buffer_index = i;
 		}
 		if (isInstancing) {
 			int instanceIndexBuffer									   = static_cast<int>(attrs.size()) - 1;
@@ -45,9 +45,7 @@ private:
 			pipelineDesc.layout.buffers[instanceIndexBuffer].step_rate = 1;
 		}
 		if (blending) {
-			pipelineDesc.colors[0].blend = (sg_blend_state) {
-				.enabled = true,
-			};
+			pipelineDesc.colors[0].blend.enabled = true;
 
 			if (blendMode == Graphics::BlendMode::Additive) {
 				pipelineDesc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_ONE;

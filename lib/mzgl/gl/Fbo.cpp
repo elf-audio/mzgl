@@ -6,6 +6,8 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+#ifndef MZGL_SOKOL
+
 #include "Fbo.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Graphics.h"
@@ -224,3 +226,5 @@ void Fbo::deallocate() {
 	width  = 0;
 	height = 0;
 }
+
+#endif // !MZGL_SOKOL

@@ -31,7 +31,9 @@ CLANG_IGNORE_WARNINGS_END
 
 #include "filesystem.h"
 using namespace std;
-#include "OpenGLShader.h"
+#ifndef MZGL_SOKOL
+#	include "OpenGLShader.h"
+#endif
 
 #ifdef __ANDROID__
 vector<Font *> Font::fonts;
@@ -59,7 +61,7 @@ vector<Font *> Font::fonts;
  (Changing GL_RED internal format for GL_R8 - seems to work on both mac and iOS)
  */
 
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 #	include "sokolFontstash.h"
 
 #else
@@ -102,7 +104,7 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 
 	clear();
 	this->size = size / 2.f;
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	GetError();
@@ -138,7 +140,7 @@ bool Font::load(Graphics &g, string path, float size) {
 	clear();
 
 	this->size = size / 2.f;
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
@@ -164,7 +166,7 @@ bool Font::load(Graphics &g, string path, float size) {
 }
 
 TextureRef Font::getAtlasTexture(Graphics &g) {
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	sokolFONScontext *sg = (sokolFONScontext *) (fs->params.userPtr);
 	return Texture::create(g, sg->tex.id, sg->width, sg->height);
 #else
@@ -274,7 +276,7 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 
 	auto shader = g.fontShader;
 
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 #else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 
@@ -419,7 +421,7 @@ Font::~Font() {
 }
 
 void Font::clear() {
-#if !defined(MZGL_SOKOL_METAL)
+#if !defined(MZGL_SOKOL)
 	if (fs) {
 		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 

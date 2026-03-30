@@ -31,7 +31,7 @@ void SokolAPI::maskOff() {
 }
 
 void SokolAPI::clear(vec4 c) {
-	auto vbo = Vbo::create();
+	auto vbo = Vbo::createFromPool(g);
 	g.setBlending(false);
 	g.setColor(c.r, c.g, c.b, c.a);
 	vbo->setVertices({{0, 0}, {g.width, 0}, {g.width, g.height}, {0, g.height}});

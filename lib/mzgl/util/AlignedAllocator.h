@@ -187,7 +187,12 @@ operator!= (const AlignedAllocator<T,TAlign>&, const AlignedAllocator<U, UAlign>
 template <class T>
 struct AlignedAllocator {
 	typedef T value_type;
-	std::size_t alignment = 32; // Adjust this value according to your requirements
+	static constexpr std::size_t alignment = 32;
+
+	AlignedAllocator() noexcept = default;
+
+	template <class U>
+	AlignedAllocator(const AlignedAllocator<U> &) noexcept {}
 
 	T *allocate(std::size_t num) {
 		void *ptr = nullptr;
@@ -200,11 +205,20 @@ struct AlignedAllocator {
 		return reinterpret_cast<T *>(ptr);
 	}
 
-	void deallocate(T *p, std::size_t num) {
+	void deallocate(T *p, std::size_t) noexcept {
 #if _WIN32
 		_aligned_free(p);
 #else
 		free(p);
 #endif
+	}
+
+	template <class U>
+	bool operator==(const AlignedAllocator<U> &) const noexcept {
+		return true;
+	}
+	template <class U>
+	bool operator!=(const AlignedAllocator<U> &) const noexcept {
+		return false;
 	}
 };

@@ -20,7 +20,7 @@ std::vector<Texture *> Texture::textures;
 
 #include "Image.h"
 
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 #	include "SokolTexture.h"
 #	define TEXTURE_CLASS SokolTexture
 #else

@@ -79,7 +79,7 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 		t.push_back(glm::vec2(tcoords[i * 2], tcoords[i * 2 + 1]));
 	}
 
-	auto vbo = Vbo::create();
+	auto vbo = Vbo::createFromPool(g);
 	vbo->setVertices(v);
 	vbo->setTexCoords(t);
 

@@ -13,7 +13,9 @@
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#	include <glew.h>
+#	ifndef MZGL_SOKOL
+#		include <glew.h>
+#	endif
 #endif // _WIN32 /////////////////////////////////////////////
 
 #ifdef __linux__ /////////////////////////////////////////////
@@ -33,6 +35,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "util.h"
 #include "log.h"
 #include "GLFWOS.h"
+
+#if defined(MZGL_SOKOL) && defined(_WIN32)
+#	include "D3D11Context.h"
+#	include "sokol_gfx.h"
+#	include "sokol_log.h"
+#endif
 
 #if defined(WIN32) || defined(__linux__)
 void quitApplication() {
@@ -106,8 +114,9 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 
 void window_size_callback(GLFWwindow *window, int width, int height) {
 	auto &g = getGraphics(window);
+#ifndef MZGL_SOKOL
 	glViewport(0, 0, width, height);
-
+#endif
 	g.width	 = width;
 	g.height = height;
 
@@ -157,7 +166,6 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	}
 
 	graphics.pixelScale = 1.0f; // actually we don't need any scaling, this is legacy code for compatibility
-	glfwWindowHint(GLFW_SAMPLES, 16);
 
 #ifdef METAL_BACKEND
 
@@ -169,7 +177,11 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
+#elif defined(MZGL_SOKOL) && defined(_WIN32)
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
 #else
+	glfwWindowHint(GLFW_SAMPLES, 16);
 
 #	ifdef UNIT_TEST
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -272,6 +284,104 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	setCallbacks();
 
+#if defined(MZGL_SOKOL) && defined(_WIN32)
+	// D3D11 + Sokol backend for Windows
+	D3D11Context d3d11;
+	{
+		HWND hwnd = (HWND) os::getNativeWindowHandle(window);
+		if (!d3d11.init(hwnd, graphics.width, graphics.height)) {
+			Log::e() << "Failed to initialize D3D11";
+			glfwDestroyWindow(window);
+			glfwTerminate();
+			exit(EXIT_FAILURE);
+		}
+
+		sg_desc desc		  = {};
+		desc.environment	  = {};
+		desc.logger.func	  = slog_func;
+		desc.buffer_pool_size = 4096;
+		desc.shader_pool_size = 128;
+
+		desc.environment.defaults.sample_count = d3d11.getSampleCount();
+		desc.environment.defaults.color_format = SG_PIXELFORMAT_BGRA8;
+		desc.environment.defaults.depth_format = SG_PIXELFORMAT_NONE;
+
+		desc.environment.d3d11.device		  = d3d11.getDevice();
+		desc.environment.d3d11.device_context = d3d11.getDeviceContext();
+
+		sg_setup(desc);
+
+		// Force NVIDIA driver to fully initialize by creating and destroying a dummy texture
+		uint32_t white = 0xFFFFFFFF;
+		sg_image_desc dummyDesc = {};
+		dummyDesc.width			= 1;
+		dummyDesc.height		= 1;
+		dummyDesc.pixel_format	= SG_PIXELFORMAT_RGBA8;
+		dummyDesc.data.subimage[0][0] = {&white, sizeof(white)};
+		sg_image dummyImg = sg_make_image(dummyDesc);
+		sg_destroy_image(dummyImg);
+	}
+
+	// Helper to build the sokol swapchain pass struct
+	auto makePass = [&]() {
+		sg_pass pass						 = {};
+		pass.action.colors[0].load_action	 = SG_LOADACTION_CLEAR;
+		pass.action.colors[0].clear_value	 = {0.f, 0.f, 0.f, 1.f};
+		pass.swapchain.width				 = graphics.width;
+		pass.swapchain.height		= graphics.height;
+		pass.swapchain.sample_count = d3d11.getSampleCount();
+		pass.swapchain.color_format = SG_PIXELFORMAT_BGRA8;
+		pass.swapchain.depth_format = SG_PIXELFORMAT_NONE;
+		if (d3d11.getSampleCount() > 1) {
+			pass.swapchain.d3d11.render_view  = d3d11.getMSAARenderTargetView();
+			pass.swapchain.d3d11.resolve_view = d3d11.getRenderTargetView();
+		} else {
+			pass.swapchain.d3d11.render_view = d3d11.getRenderTargetView();
+		}
+		pass.swapchain.d3d11.depth_stencil_view = d3d11.getDepthStencilView();
+		return pass;
+	};
+
+	// Warm up the D3D11 driver with a dummy frame before creating resources
+	sg_begin_pass(makePass());
+	sg_end_pass();
+	sg_commit();
+	d3d11.present();
+
+	initMZGL(app);
+	bool needsSetup = true;
+
+	while (!glfwWindowShouldClose(window)) {
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+			glfwPollEvents();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+
+		if (framebuferResized) {
+			d3d11.resize(graphics.width, graphics.height);
+			eventDispatcher->resized();
+			framebuferResized = false;
+		}
+
+		sg_begin_pass(makePass());
+		if (needsSetup) {
+			eventDispatcher->setup();
+			needsSetup = false;
+		}
+		eventDispatcher->runFrame();
+		sg_end_pass();
+		sg_commit();
+
+		d3d11.present();
+
+		glfwPollEvents();
+	}
+
+	sg_shutdown();
+	d3d11.shutdown();
+
+#else
 	// NOTE: OpenGL error checks have been omitted for brevity
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
@@ -284,7 +394,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	eventDispatcher->setup();
 
 	while (!glfwWindowShouldClose(window)) {
-#ifdef METAL_BACKEND
+#	ifdef METAL_BACKEND
 		@autoreleasepool {
 			color.red = (color.red > 1.0) ? 0 : color.red + 0.01;
 
@@ -302,7 +412,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			[buffer presentDrawable:surface];
 			[buffer commit];
 		}
-#else
+#	else
 		// When minimized, skip rendering to avoid memory leak and "not responding" state.
 		// Just poll events and sleep briefly to keep the app responsive without burning CPU/RAM.
 		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
@@ -312,17 +422,17 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			eventDispatcher->runFrame();
 
 			glfwSwapBuffers(window);
+
 			glfwPollEvents();
 
-			// While resizing glfwPollEvents blocks until user finishes action, so we can dispatch event here
-			// This is optimization to avoid dispatching from every resize callback, which can be overkill
 			if (framebuferResized) {
 				getEventDispatcher(window)->resized();
 				framebuferResized = false;
 			}
 		}
-#endif
+#	endif
 	}
+#endif
 
 	eventDispatcher->exit();
 

@@ -12,14 +12,14 @@
 #include "OpenGLShader.h"
 
 ShaderRef Shader::create(Graphics &g) {
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	return std::shared_ptr<Shader>(new SokolShader(g));
 #else
 	return std::shared_ptr<Shader>(new OpenGLShader(g));
 #endif
 }
 ShaderRef Shader::create(Graphics &g, std::string name) {
-#ifdef MZGL_SOKOL_METAL
+#ifdef MZGL_SOKOL
 	return std::shared_ptr<Shader>(new SokolShader(g, name));
 #else
 	return std::shared_ptr<Shader>(new OpenGLShader(g, name));

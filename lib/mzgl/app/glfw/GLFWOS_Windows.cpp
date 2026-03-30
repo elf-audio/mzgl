@@ -1,5 +1,7 @@
 #include "GLFWOS.h"
-#include <glew.h>
+#ifndef MZGL_SOKOL
+#	include <glew.h>
+#endif
 #include "glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_NATIVE_INCLUDE_NONE
@@ -30,8 +32,10 @@ namespace os {
 	}
 
 	auto initializeGLContext() -> void {
+#ifndef MZGL_SOKOL
 		glewInit();
 		glEnable(GL_MULTISAMPLE);
+#endif
 	}
 
 	auto setWindowSize(GLFWwindow *window, int width, int height) -> void {

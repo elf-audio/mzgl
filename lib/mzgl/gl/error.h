@@ -7,7 +7,7 @@
 #pragma once
 // take out underscores to reenable proper erroring
 
-#if defined(DEBUG) && !defined(MZGL_SOKOL_METAL)
+#if defined(DEBUG) && !defined(MZGL_SOKOL)
 
 #	include <stdlib.h>
 #	include <assert.h>
