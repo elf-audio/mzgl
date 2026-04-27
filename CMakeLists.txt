@@ -367,7 +367,15 @@ set(SOKOL_SHDC "sokol-shdc")
 
 if(USING_SOKOL)
 
-  find_program(SOKOL_SHDC_FOUND ${SOKOL_SHDC})
+  # MZGL_USE_PRECOMPILED_SOKOL_SHADERS lets parent projects skip shader
+  # regeneration entirely and use the checked-in xcodeShaders/ headers.
+  # Useful when only a newer sokol-shdc is available, since the existing
+  # mzgl shaders predate the layout(binding=X) requirement.
+  if(MZGL_USE_PRECOMPILED_SOKOL_SHADERS)
+    set(SOKOL_SHDC_FOUND OFF CACHE INTERNAL "" FORCE)
+  else()
+    find_program(SOKOL_SHDC_FOUND ${SOKOL_SHDC})
+  endif()
   if(SOKOL_SHDC_FOUND)
     # Process each shader file
     foreach(SHADER_SOURCE ${SHADER_SOURCES})
