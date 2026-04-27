@@ -30,6 +30,7 @@
 		lastControlState = false;
 		lastOptionState	 = false;
 		lastCommandState = false;
+		_handlesKeyboard = YES;
 		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
 	}
 	return self;
@@ -40,11 +41,11 @@
 }
 
 - (BOOL)acceptsFirstResponder {
-	return YES;
+	return _handlesKeyboard;
 }
 
 - (BOOL)becomeFirstResponder {
-	return YES;
+	return _handlesKeyboard;
 }
 
 // this is for vst so the window becomes focused and accepts
@@ -75,6 +76,10 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)flagsChanged:(NSEvent *)event {
+	if (!_handlesKeyboard) {
+		[super flagsChanged:event];
+		return;
+	}
 	if ((event.modifierFlags & NSEventModifierFlagShift) && !lastShiftState) {
 		lastShiftState = true;
 
@@ -121,11 +126,19 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)keyDown:(NSEvent *)event {
+	if (!_handlesKeyboard) {
+		[super keyDown:event];
+		return;
+	}
 	auto keyCode = nsEventToKey(event);
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyDown(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)keyUp:(NSEvent *)event {
+	if (!_handlesKeyboard) {
+		[super keyUp:event];
+		return;
+	}
 	auto keyCode = nsEventToKey(event);
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyUp(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);

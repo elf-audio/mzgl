@@ -21,4 +21,9 @@
 @interface EventsView : GL_VIEW_CLASS <NSWindowDelegate>
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher;
 - (void)shutdown;
+
+// When YES (default), the view becomes first responder and consumes key events.
+// Set to NO when embedded in a plugin host (e.g. Ableton Live) where the host
+// owns keyboard shortcuts and the plugin shouldn't steal them.
+@property (nonatomic, assign) BOOL handlesKeyboard;
 @end
