@@ -144,10 +144,10 @@ int nsEventToKey(NSEvent *evt) {
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (vec2)transformMouse:(NSEvent *)event {
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= 2; //eventDispatcher->app->g.pixelScale;
-	float x				= event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+	NSPoint localPoint	= [self convertPoint:event.locationInWindow fromView:nil];
+	float pixelScale	= eventDispatcher->app->g.pixelScale;
+	float x				= localPoint.x * pixelScale;
+	float y				= (self.bounds.size.height - localPoint.y) * pixelScale;
 	return vec2(x, y);
 }
 - (void)mouseMoved:(NSEvent *)event {
@@ -248,11 +248,11 @@ int nsEventToKey(NSEvent *evt) {
 
 	if (event.phase == NSEventPhaseChanged) {
 		float zoom			= event.magnification;
+		NSPoint localPoint	= [self convertPoint:event.locationInWindow fromView:nil];
 		float pixelScale	= eventDispatcher->app->g.pixelScale;
-		auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
 
-		float x = event.locationInWindow.x * pixelScale;
-		float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+		float x = localPoint.x * pixelScale;
+		float y = (self.bounds.size.height - localPoint.y) * pixelScale;
 
 		auto evtDispatcher = eventDispatcher;
 

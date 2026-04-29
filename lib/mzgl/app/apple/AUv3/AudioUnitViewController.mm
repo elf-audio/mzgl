@@ -130,15 +130,27 @@ using namespace std;
 	[self tryToResize];
 }
 
+- (void)viewDidLayout {
+	[self tryToResize];
+}
+
 - (void)tryToResize {
 	if (self.view.window != nil && glView != nil) {
-		glView.frame = self.view.frame;
+		glView.frame = self.view.bounds;
 #	if MZGL_IOS
 		auto ed = [glView getEventDispatcher];
 		if (ed != nullptr && ed->hasSetup()) {
 			CLANG_IGNORE_WARNINGS_BEGIN("-Wnonnull")
 			[vc viewWillTransitionToSize:self.view.window.frame.size withTransitionCoordinator:nil];
 			CLANG_IGNORE_WARNINGS_END
+		}
+#	else
+		if (g != nullptr && eventDispatcher != nullptr) {
+			float pixelScale = self.view.window.backingScaleFactor;
+			g->width  = self.view.bounds.size.width * pixelScale;
+			g->height = self.view.bounds.size.height * pixelScale;
+			g->pixelScale = pixelScale;
+			eventDispatcher->resized();
 		}
 #	endif
 
@@ -175,7 +187,7 @@ using namespace std;
 		glView = (MZGLKitView *) vc.view;
 #	else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
-		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView			= [[EventsView alloc] initWithFrame:self.view.bounds eventDispatcher:eventDispatcher];
 #	endif
 		app->viewHandle = (__bridge void *) glView;
 
@@ -184,10 +196,11 @@ using namespace std;
 			 dispatch_async(dispatch_get_main_queue(), ^{ [vc setPreferredContentSize:CGSizeMake(w, h)]; });
 		};
 
-		glView.frame = self.view.frame;
+		glView.frame = self.view.bounds;
 #	if !MZGL_IOS
-		g->width  = self.view.frame.size.width * 2;
-		g->height = self.view.frame.size.height * 2;
+		glView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+		g->width  = self.view.bounds.size.width * 2;
+		g->height = self.view.bounds.size.height * 2;
 		eventDispatcher->resized();
 #	endif
 		[self addGLView];
