@@ -221,7 +221,18 @@ public:
 
 	VboRef drawerVbo;
 
+	void addDeferredAction(std::function<void()> fn) { deferredActions.push_back(std::move(fn)); }
+	void drainDeferredActions() {
+		while (!deferredActions.empty()) {
+			auto actions = std::move(deferredActions);
+			for (auto &fn: actions)
+				fn();
+		}
+	}
+
 private:
+	std::vector<std::function<void()>> deferredActions;
+
 	BlendMode blendMode = BlendMode::Alpha;
 
 	bool blendingEnabled = false;
