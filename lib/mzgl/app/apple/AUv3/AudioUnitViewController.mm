@@ -188,6 +188,8 @@ using namespace std;
 #	else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.bounds eventDispatcher:eventDispatcher];
+		// Hosts (Logic, Live, etc.) own keyboard shortcuts on desktop — don't steal them.
+		glView.handlesKeyboard = NO;
 #	endif
 		app->viewHandle = (__bridge void *) glView;
 

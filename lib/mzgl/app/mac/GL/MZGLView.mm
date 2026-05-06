@@ -193,4 +193,23 @@ CVReturn displayCallback(CVDisplayLinkRef displayLink,
 - (void)enableDrawing {
 	drawing = YES;
 }
+
+// AppKit propagates these to every NSView in the hierarchy when the host
+// window enters/leaves a live resize. While resizing, the main thread runs
+// -[NSOpenGLContext update] (via geometryInWindowDidChange) which races the
+// display-link thread's GL calls and crashes inside the Apple GL→Metal
+// renderer. Stop the display link for the duration of the drag.
+- (void)viewWillStartLiveResize {
+	[super viewWillStartLiveResize];
+	drawing = NO;
+	// Wait for any in-flight renderForTime to finish so the GL context is
+	// idle before AppKit starts mutating it.
+	[self lock];
+	[self unlock];
+}
+
+- (void)viewDidEndLiveResize {
+	[super viewDidEndLiveResize];
+	drawing = YES;
+}
 @end
