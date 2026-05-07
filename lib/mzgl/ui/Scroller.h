@@ -6,6 +6,8 @@
 
 #pragma once
 #include "Layer.h"
+#include <deque>
+#include <utility>
 class Scroller : public Layer {
 public:
 	Scroller(Graphics &g);
@@ -43,7 +45,15 @@ protected:
 	Layer *content;
 	bool scrolling = false;
 	glm::vec2 lastTouch {0, 0};
+	// px / sec
 	glm::vec2 contentVelocity {0, 0};
 	bool contentHeightExplicitlySet = false;
 	float scrollbarActivityAmt		= 0;
+
+	// (time, content->y) samples for release-velocity estimation
+	std::deque<std::pair<double, float>> velocitySamples;
+
+	// drag anchor — finger position is mapped through the rubber-band from this anchor
+	float dragAnchorContentY = 0.f;
+	float dragAnchorTouchY	 = 0.f;
 };
