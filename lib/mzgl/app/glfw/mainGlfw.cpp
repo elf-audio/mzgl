@@ -140,6 +140,23 @@ static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 				 reinterpret_cast<DWORD64>(info->ExceptionRecord->ExceptionAddress));
 		f << buf << "\n";
 
+		{
+			HMODULE hModule = nullptr;
+			GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+							   | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+							   reinterpret_cast<LPCSTR>(info->ExceptionRecord->ExceptionAddress),
+							   &hModule);
+			if (hModule) {
+				char modName[MAX_PATH] = {};
+				GetModuleFileNameA(hModule, modName, MAX_PATH);
+				snprintf(buf, sizeof(buf), "  Module: %s (base: 0x%llX)",
+						 modName, reinterpret_cast<DWORD64>(hModule));
+			} else {
+				snprintf(buf, sizeof(buf), "  Module: unknown (base: unknown)");
+			}
+			f << buf << "\n";
+		}
+
 		if (code == EXCEPTION_ACCESS_VIOLATION || code == EXCEPTION_IN_PAGE_ERROR) {
 			auto accessType = info->ExceptionRecord->ExceptionInformation[0];
 			auto targetAddr = info->ExceptionRecord->ExceptionInformation[1];
