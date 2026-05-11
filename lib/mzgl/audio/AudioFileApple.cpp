@@ -263,19 +263,150 @@ bool AudioFile::load(std::string path, Int16Buffer &buff, int *outNumChannels, i
 }
 
 namespace {
+	// Pick a SampleFormat that matches the file's native PCM bit depth.
+	// Returns std::nullopt if the file is non-PCM (mp3/m4a/aac/etc) or
+	// uses an unsupported PCM layout — caller falls back to F32 then.
+	std::optional<SampleFormat> nativeFormatFor(const AudioStreamBasicDescription &fmt) {
+		if (fmt.mFormatID != kAudioFormatLinearPCM) return std::nullopt;
+		const bool isFloat	= (fmt.mFormatFlags & kLinearPCMFormatFlagIsFloat) != 0;
+		const bool isInt	= (fmt.mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) != 0;
+		const UInt32 bits	= fmt.mBitsPerChannel;
+		if (isFloat && bits == 32) return SampleFormat::F32;
+		if (isInt && bits == 8) return SampleFormat::I8;
+		if (isInt && bits == 16) return SampleFormat::I16;
+		if (isInt && bits == 24) return SampleFormat::I24;
+		// 32-bit int is uncommon; promote to F32 to keep dynamic range.
+		return std::nullopt;
+	}
+
+	void fillNativePCMReadFormat(AudioStreamBasicDescription &out,
+								 SampleFormat fmt,
+								 Float64 sampleRate,
+								 UInt32 numberOfChannels) {
+		out				 = {};
+		out.mSampleRate	 = sampleRate;
+		out.mFormatID	 = kAudioFormatLinearPCM;
+		out.mChannelsPerFrame = numberOfChannels;
+		switch (fmt) {
+			case SampleFormat::I8:
+				out.mFormatFlags  = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+				out.mBitsPerChannel = 8;
+				break;
+			case SampleFormat::I16:
+				out.mFormatFlags  = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+				out.mBitsPerChannel = 16;
+				break;
+			case SampleFormat::I24:
+				out.mFormatFlags  = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+				out.mBitsPerChannel = 24;
+				break;
+			case SampleFormat::F32:
+				out.mFormatFlags  = kLinearPCMFormatFlagIsFloat | kAudioFormatFlagIsPacked;
+				out.mBitsPerChannel = 32;
+				break;
+		}
+		out.mBytesPerFrame	 = numberOfChannels * (out.mBitsPerChannel / 8);
+		out.mFramesPerPacket = 1;
+		out.mBytesPerPacket	 = out.mBytesPerFrame;
+	}
+
 	AudioFile::LoadedAudio loadInto(const std::string &path, std::optional<int> resampleTo) {
 		AudioFile::LoadedAudio out;
-		FloatBuffer tmp;
-		const bool ok = loadAudioFile<FloatBuffer>(
-			path, tmp, resampleTo, &out.numChannels, &out.sampleRate);
-		if (!ok) {
-			out.result.addIssue("Failed to load audio file: " + path);
+
+		const std::string resolvedPath = checkItsNotAnMp4PretendingToBeAnMp3(path);
+		if (!fs::exists(fs::path {resolvedPath})) {
+			out.result.addIssue("Path does not exist: " + resolvedPath);
 			return out;
 		}
-		if (resampleTo.has_value()) {
-			out.sampleRate = *resampleTo;
+
+		Url url {resolvedPath};
+		AudioFileRef file;
+		if (!file.open(url)) {
+			out.result.addIssue("Couldn't open " + resolvedPath);
+			return out;
 		}
-		out.data = SampleData(std::move(tmp));
+
+		AudioStreamBasicDescription inputFormat;
+		if (!file.getInputFormat(inputFormat)) {
+			out.result.addIssue("Couldn't read input format for " + resolvedPath);
+			return out;
+		}
+
+		out.numChannels = static_cast<int>(inputFormat.mChannelsPerFrame);
+		out.sampleRate	= resampleTo.value_or(static_cast<int>(inputFormat.mSampleRate));
+
+		SInt64 frameCount = 0;
+		if (file.getFrameCount(frameCount) && frameCount == 0) {
+			return out;
+		}
+
+		// Resampled loads always go through float. For non-resampled PCM
+		// loads, request the native bit depth so we can hold the source
+		// data in its on-disk format and skip the float blow-up.
+		const std::optional<SampleFormat> targetFmt =
+			resampleTo.has_value() ? std::nullopt : nativeFormatFor(inputFormat);
+
+		if (!targetFmt.has_value()) {
+			AudioStreamBasicDescription audioFormat;
+			file.getReadFormat(audioFormat,
+							   resampleTo.value_or(inputFormat.mSampleRate),
+							   inputFormat.mChannelsPerFrame);
+
+			if (!file.applyReadFormat(audioFormat)) {
+				out.result.addIssue("Could not prepare the read format for " + resolvedPath);
+				return out;
+			}
+			FloatBuffer tmp;
+			if (!file.read(audioFormat, tmp)) {
+				out.result.addIssue("Failed to read audio file " + resolvedPath);
+				return out;
+			}
+			out.data = SampleData(std::move(tmp));
+			return out;
+		}
+
+		AudioStreamBasicDescription audioFormat;
+		fillNativePCMReadFormat(
+			audioFormat, *targetFmt, inputFormat.mSampleRate, inputFormat.mChannelsPerFrame);
+
+		if (!file.applyReadFormat(audioFormat)) {
+			// Native format not honored by the converter — fall back to f32.
+			AudioStreamBasicDescription fallback;
+			file.getReadFormat(fallback, inputFormat.mSampleRate, inputFormat.mChannelsPerFrame);
+			if (!file.applyReadFormat(fallback)) {
+				out.result.addIssue("Could not prepare any read format for " + resolvedPath);
+				return out;
+			}
+			FloatBuffer tmp;
+			if (!file.read(fallback, tmp)) {
+				out.result.addIssue("Failed to read audio file " + resolvedPath);
+				return out;
+			}
+			out.data = SampleData(std::move(tmp));
+			return out;
+		}
+
+		std::vector<uint8_t> rawBytes;
+		static constexpr UInt32 chunkBytes = 32 * 1024;
+		std::vector<uint8_t> chunk(chunkBytes, 0);
+		AudioBufferList convertedData;
+		convertedData.mNumberBuffers			  = 1;
+		convertedData.mBuffers[0].mNumberChannels = audioFormat.mChannelsPerFrame;
+		while (true) {
+			UInt32 frames = chunkBytes / audioFormat.mBytesPerFrame;
+			convertedData.mBuffers[0].mDataByteSize = chunkBytes;
+			convertedData.mBuffers[0].mData			= chunk.data();
+			auto err = ExtAudioFileRead(file.file, &frames, &convertedData);
+			if (err != noErr) {
+				out.result.addIssue("Read failed at packet for " + resolvedPath);
+				return out;
+			}
+			if (frames == 0) break;
+			const size_t bytesProduced = frames * audioFormat.mBytesPerFrame;
+			rawBytes.insert(rawBytes.end(), chunk.begin(), chunk.begin() + bytesProduced);
+		}
+
+		out.data = SampleData(std::move(rawBytes), *targetFmt);
 		return out;
 	}
 }
