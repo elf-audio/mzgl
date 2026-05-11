@@ -368,3 +368,31 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 	return AudioFile_loadDrLib(path, buff, outNumChannels, &outSampleRate, newSampleRate);
 #endif
 }
+
+namespace {
+	AudioFile::LoadedAudio loadInto(const std::string &path, std::optional<int> resampleTo) {
+		AudioFile::LoadedAudio out;
+		FloatBuffer tmp;
+		bool ok;
+		if (resampleTo.has_value()) {
+			ok = AudioFile::loadResampled(path, tmp, *resampleTo, &out.numChannels);
+			if (ok) out.sampleRate = *resampleTo;
+		} else {
+			ok = AudioFile::load(path, tmp, &out.numChannels, &out.sampleRate);
+		}
+		if (!ok) {
+			out.result.addIssue("Failed to load audio file: " + path);
+			return out;
+		}
+		out.data = SampleData(std::move(tmp));
+		return out;
+	}
+}
+
+AudioFile::LoadedAudio AudioFile::load(const std::string &path) {
+	return loadInto(path, std::nullopt);
+}
+
+AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path, int desiredSampleRate) {
+	return loadInto(path, desiredSampleRate);
+}
