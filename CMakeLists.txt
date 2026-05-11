@@ -95,6 +95,8 @@ set(MZGL_SOURCES
     lib/mzgl/ui/FlexboxLayout.cpp
     lib/mzgl/util/Base64.cpp
     lib/mzgl/util/Base64.h
+    lib/mzgl/util/CrashHandler.cpp
+    lib/mzgl/util/CrashHandler.h
     lib/mzgl/util/DateTime.cpp
     lib/mzgl/util/UndoManager.cpp
     lib/mzgl/util/Dialogs.cpp
