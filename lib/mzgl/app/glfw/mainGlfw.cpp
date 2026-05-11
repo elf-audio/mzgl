@@ -14,11 +14,11 @@
 #	pragma comment(lib, "comctl32.lib")
 #	pragma comment(lib, "winhttp.lib")
 
-// Crash-report upload endpoint. Token is a shared secret with receive.php — change both sides
-// together if rotating. Exposed in the binary, so this only blocks casual abuse.
+// Crash-report upload endpoint. Token is the shared secret with receive.php — change both
+// sides together if rotating. Exposed in the binary, so this only blocks casual abuse.
 #	define KOALA_CRASH_HOST	 L"dev.koalasampler.com"
 #	define KOALA_CRASH_PATH	 L"/win-crash/receive.php"
-#	define KOALA_CRASH_TOKEN L"CHANGE_ME_TOKEN_HERE"
+#	define KOALA_CRASH_TOKEN L"7168-029f-479f-b85b-fe1c"
 
 inline void AttachOrAllocConsoleForLogs(bool alloc_if_needed = false) {
 	if (AttachConsole(ATTACH_PARENT_PROCESS) || (alloc_if_needed && AllocConsole())) {
@@ -82,9 +82,49 @@ static std::wstring utf8ToWide(const std::string &s) {
 }
 
 static void revealInExplorer(const std::string &filePath) {
-	std::wstring w = utf8ToWide(filePath);
+	std::wstring w	  = utf8ToWide(filePath);
 	std::wstring args = L"/select,\"" + w + L"\"";
 	ShellExecuteW(nullptr, L"open", L"explorer.exe", args.c_str(), nullptr, SW_SHOWNORMAL);
+}
+
+static void showUploadFailedDialog(const std::string &logPath, DWORD status) {
+	char head[256];
+	if (status == 0) {
+		snprintf(head, sizeof(head),
+				 "Couldn't reach the server. Please check your internet connection, or email the log "
+				 "to koala.helpdesk@elf-audio.com.");
+	} else {
+		snprintf(head, sizeof(head),
+				 "Upload failed (HTTP %lu). Sorry - please email the log to koala.helpdesk@elf-audio.com.",
+				 status);
+	}
+	std::string content	  = std::string(head) + "\n\nLog file:\n" + logPath;
+	std::wstring wContent = utf8ToWide(content);
+
+	enum : int { BTN_OPEN = 2001 };
+	const TASKDIALOG_BUTTON buttons[] = {
+		{BTN_OPEN, L"Show crash log\nOpen the folder containing crash.log"},
+	};
+
+	TASKDIALOGCONFIG cfg   = {};
+	cfg.cbSize			   = sizeof(cfg);
+	cfg.dwFlags			   = TDF_USE_COMMAND_LINKS | TDF_ALLOW_DIALOG_CANCELLATION;
+	cfg.pszWindowTitle	   = L"Koala";
+	cfg.pszMainIcon		   = TD_WARNING_ICON;
+	cfg.pszMainInstruction = L"Couldn't send crash report";
+	cfg.pszContent		   = wContent.c_str();
+	cfg.pButtons		   = buttons;
+	cfg.cButtons		   = ARRAYSIZE(buttons);
+	cfg.dwCommonButtons	   = TDCBF_CLOSE_BUTTON;
+
+	int pressed = 0;
+	if (FAILED(TaskDialogIndirect(&cfg, &pressed, nullptr, nullptr))) {
+		MessageBoxA(nullptr, content.c_str(), "Koala", MB_OK | MB_ICONWARNING);
+		return;
+	}
+	if (pressed == BTN_OPEN) {
+		revealInExplorer(logPath);
+	}
 }
 
 // returns HTTP status code, or 0 on transport failure
@@ -147,14 +187,13 @@ static DWORD uploadCrashReport(const std::string &logPath) {
 
 static void showCrashDialog(const std::string &title, const std::string &message) {
 #ifdef _WIN32
-	std::string logPath = getCrashLogPath();
+	std::string logPath	  = getCrashLogPath();
 	std::wstring wTitle	  = utf8ToWide(title);
 	std::wstring wMessage = utf8ToWide(message);
 
-	enum : int { BTN_OPEN = 1001, BTN_SEND = 1002 };
+	enum : int { BTN_SEND = 1002 };
 	const TASKDIALOG_BUTTON buttons[] = {
-		{BTN_OPEN, L"Show crash log\nOpen the folder containing crash.log"},
-		{BTN_SEND, L"Send crash report\nUpload crash.log to the developer"},
+		{BTN_SEND, L"Send crash report\nUpload the crash log so we can fix it"},
 	};
 
 	TASKDIALOGCONFIG cfg	  = {};
@@ -176,20 +215,12 @@ static void showCrashDialog(const std::string &title, const std::string &message
 		return;
 	}
 
-	if (pressed == BTN_OPEN) {
-		revealInExplorer(logPath);
-	} else if (pressed == BTN_SEND) {
+	if (pressed == BTN_SEND) {
 		DWORD status = uploadCrashReport(logPath);
 		if (status == 200) {
 			MessageBoxA(nullptr, "Crash report sent. Thank you!", "Koala", MB_OK | MB_ICONINFORMATION);
 		} else {
-			char msg[128];
-			if (status == 0) {
-				snprintf(msg, sizeof(msg), "Couldn't reach the server. Please check your internet connection.");
-			} else {
-				snprintf(msg, sizeof(msg), "Upload failed (HTTP %lu). Sorry — please email the log instead.", status);
-			}
-			MessageBoxA(nullptr, msg, "Koala", MB_OK | MB_ICONWARNING);
+			showUploadFailedDialog(logPath, status);
 		}
 	}
 #elif defined(__linux__)
@@ -312,7 +343,7 @@ static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 	}
 
 	showCrashDialog("Koala - Crash",
-					"Sorry — Koala crashed. A crash log has been saved.");
+					"Sorry - Koala crashed.");
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -362,7 +393,7 @@ int main(int argc, char *argv[]) {
 	} catch (...) {
 		writeCrashLog("Unknown unhandled exception");
 		showCrashDialog("Koala - Error",
-						"Sorry — Koala crashed. A crash log has been saved.");
+						"Sorry - Koala crashed.");
 	}
 	return 0;
 }
