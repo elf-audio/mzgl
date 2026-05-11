@@ -340,11 +340,15 @@ namespace {
 			return out;
 		}
 
-		// Resampled loads always go through float. For non-resampled PCM
-		// loads, request the native bit depth so we can hold the source
-		// data in its on-disk format and skip the float blow-up.
+		// Resampled loads always go through float. But if the caller
+		// asked to resample to the same rate the file is already at (e.g.
+		// dragging a 48 kHz wav into a 48 kHz engine), treat it as a
+		// no-op and keep the native bit depth.
+		const bool noResampleNeeded =
+			!resampleTo.has_value()
+			|| static_cast<int>(inputFormat.mSampleRate) == *resampleTo;
 		const std::optional<SampleFormat> targetFmt =
-			resampleTo.has_value() ? std::nullopt : nativeFormatFor(inputFormat);
+			noResampleNeeded ? nativeFormatFor(inputFormat) : std::nullopt;
 
 		if (!targetFmt.has_value()) {
 			AudioStreamBasicDescription audioFormat;
