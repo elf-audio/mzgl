@@ -13,6 +13,12 @@
 #include "stringUtil.h"
 #include "Listenable.h"
 
+struct AudioHostApi {
+	int typeId = -1;
+	std::string name;
+	bool isValid() const { return typeId != -1; }
+};
+
 struct AudioPort {
 	int portId		   = -1;
 	int numInChannels  = 0;
@@ -104,6 +110,12 @@ public:
 
 	virtual float getSampleRate() const { return sampleRate; }
 	virtual int getBufferSize() const { return bufferSize; }
+
+	virtual std::vector<AudioHostApi> getAvailableHostApis() { return {}; }
+	virtual AudioHostApi getHostApi() { return {}; }
+	virtual void setHostApiByTypeId(int typeId) {}
+	virtual std::vector<double> getAvailableSampleRates() { return {}; }
+	virtual std::vector<int> getAvailableBufferSizes() { return {}; }
 	void bufferSizeChangedBySystem(int size);
 
 	void addSampleRateChangeListener(SampleRateChangeListener *listener);

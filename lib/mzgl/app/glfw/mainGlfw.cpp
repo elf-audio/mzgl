@@ -8,7 +8,17 @@
 #	include <windows.h>
 #	include <shlobj.h>
 #	include <dbghelp.h>
+#	include <commctrl.h>
+#	include <winhttp.h>
 #	pragma comment(lib, "dbghelp.lib")
+#	pragma comment(lib, "comctl32.lib")
+#	pragma comment(lib, "winhttp.lib")
+
+// Crash-report upload endpoint. Token is a shared secret with receive.php — change both sides
+// together if rotating. Exposed in the binary, so this only blocks casual abuse.
+#	define KOALA_CRASH_HOST	 L"dev.koalasampler.com"
+#	define KOALA_CRASH_PATH	 L"/win-crash/receive.php"
+#	define KOALA_CRASH_TOKEN L"CHANGE_ME_TOKEN_HERE"
 
 inline void AttachOrAllocConsoleForLogs(bool alloc_if_needed = false) {
 	if (AttachConsole(ATTACH_PARENT_PROCESS) || (alloc_if_needed && AllocConsole())) {
@@ -62,9 +72,126 @@ static void writeCrashLog(const std::string &msg) {
 	}
 }
 
+#ifdef _WIN32
+static std::wstring utf8ToWide(const std::string &s) {
+	if (s.empty()) return {};
+	int n = MultiByteToWideChar(CP_UTF8, 0, s.data(), (int) s.size(), nullptr, 0);
+	std::wstring w(n, L'\0');
+	MultiByteToWideChar(CP_UTF8, 0, s.data(), (int) s.size(), w.data(), n);
+	return w;
+}
+
+static void revealInExplorer(const std::string &filePath) {
+	std::wstring w = utf8ToWide(filePath);
+	std::wstring args = L"/select,\"" + w + L"\"";
+	ShellExecuteW(nullptr, L"open", L"explorer.exe", args.c_str(), nullptr, SW_SHOWNORMAL);
+}
+
+// returns HTTP status code, or 0 on transport failure
+static DWORD uploadCrashReport(const std::string &logPath) {
+	std::ifstream f(logPath, std::ios::binary | std::ios::ate);
+	if (!f) return 0;
+	auto sz = f.tellg();
+	if (sz <= 0 || sz > 1024 * 1024) return 0; // mirror server cap
+	f.seekg(0);
+	std::string body((size_t) sz, '\0');
+	f.read(body.data(), sz);
+	f.close();
+
+	DWORD status = 0;
+	HINTERNET hSession = WinHttpOpen(L"Koala/1.0",
+									 WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+									 WINHTTP_NO_PROXY_NAME,
+									 WINHTTP_NO_PROXY_BYPASS,
+									 0);
+	if (!hSession) return 0;
+
+	HINTERNET hConnect = WinHttpConnect(hSession, KOALA_CRASH_HOST, INTERNET_DEFAULT_HTTPS_PORT, 0);
+	HINTERNET hRequest = nullptr;
+	if (hConnect) {
+		hRequest = WinHttpOpenRequest(hConnect,
+									  L"POST",
+									  KOALA_CRASH_PATH,
+									  nullptr,
+									  WINHTTP_NO_REFERER,
+									  WINHTTP_DEFAULT_ACCEPT_TYPES,
+									  WINHTTP_FLAG_SECURE);
+	}
+	if (hRequest) {
+		const wchar_t *headers = L"Content-Type: text/plain; charset=utf-8\r\n"
+								 L"X-Koala-Token: " KOALA_CRASH_TOKEN L"\r\n";
+		if (WinHttpSendRequest(hRequest,
+							   headers,
+							   (DWORD) -1L,
+							   (LPVOID) body.data(),
+							   (DWORD) body.size(),
+							   (DWORD) body.size(),
+							   0)
+			&& WinHttpReceiveResponse(hRequest, nullptr)) {
+			DWORD len = sizeof(status);
+			WinHttpQueryHeaders(hRequest,
+								WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+								WINHTTP_HEADER_NAME_BY_INDEX,
+								&status,
+								&len,
+								WINHTTP_NO_HEADER_INDEX);
+		}
+	}
+
+	if (hRequest) WinHttpCloseHandle(hRequest);
+	if (hConnect) WinHttpCloseHandle(hConnect);
+	WinHttpCloseHandle(hSession);
+	return status;
+}
+#endif
+
 static void showCrashDialog(const std::string &title, const std::string &message) {
 #ifdef _WIN32
-	MessageBoxA(nullptr, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+	std::string logPath = getCrashLogPath();
+	std::wstring wTitle	  = utf8ToWide(title);
+	std::wstring wMessage = utf8ToWide(message);
+
+	enum : int { BTN_OPEN = 1001, BTN_SEND = 1002 };
+	const TASKDIALOG_BUTTON buttons[] = {
+		{BTN_OPEN, L"Show crash log\nOpen the folder containing crash.log"},
+		{BTN_SEND, L"Send crash report\nUpload crash.log to the developer"},
+	};
+
+	TASKDIALOGCONFIG cfg	  = {};
+	cfg.cbSize				  = sizeof(cfg);
+	cfg.dwFlags				  = TDF_USE_COMMAND_LINKS | TDF_ALLOW_DIALOG_CANCELLATION;
+	cfg.pszWindowTitle		  = wTitle.c_str();
+	cfg.pszMainIcon			  = TD_ERROR_ICON;
+	cfg.pszMainInstruction	  = L"Koala crashed";
+	cfg.pszContent			  = wMessage.c_str();
+	cfg.pButtons			  = buttons;
+	cfg.cButtons			  = ARRAYSIZE(buttons);
+	cfg.dwCommonButtons		  = TDCBF_CLOSE_BUTTON;
+	cfg.nDefaultButton		  = BTN_SEND;
+
+	int pressed = 0;
+	if (FAILED(TaskDialogIndirect(&cfg, &pressed, nullptr, nullptr))) {
+		// fall back to a plain message box if TaskDialog isn't available
+		MessageBoxA(nullptr, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	if (pressed == BTN_OPEN) {
+		revealInExplorer(logPath);
+	} else if (pressed == BTN_SEND) {
+		DWORD status = uploadCrashReport(logPath);
+		if (status == 200) {
+			MessageBoxA(nullptr, "Crash report sent. Thank you!", "Koala", MB_OK | MB_ICONINFORMATION);
+		} else {
+			char msg[128];
+			if (status == 0) {
+				snprintf(msg, sizeof(msg), "Couldn't reach the server. Please check your internet connection.");
+			} else {
+				snprintf(msg, sizeof(msg), "Upload failed (HTTP %lu). Sorry — please email the log instead.", status);
+			}
+			MessageBoxA(nullptr, msg, "Koala", MB_OK | MB_ICONWARNING);
+		}
+	}
 #elif defined(__linux__)
 	std::string cmd = "zenity --error --title=\"" + title + "\" --text=\"" + message + "\" 2>/dev/null";
 	if (system(cmd.c_str()) != 0) {
@@ -185,8 +312,7 @@ static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
 	}
 
 	showCrashDialog("Koala - Crash",
-					"Koala crashed unexpectedly. A crash log has been written to:\n" + getCrashLogPath()
-					+ "\n\nPlease send this file to koala.helpdesk@gmail.com");
+					"Sorry — Koala crashed. A crash log has been saved.");
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
@@ -232,11 +358,11 @@ int main(int argc, char *argv[]) {
 		}
 		showCrashDialog("Koala - Error",
 						std::string("Koala crashed: ") + e.what()
-							+ "\n\nA crash log has been written to:\n" + getCrashLogPath());
+							+ "\n\nA crash log has been saved.");
 	} catch (...) {
 		writeCrashLog("Unknown unhandled exception");
 		showCrashDialog("Koala - Error",
-						"Koala crashed unexpectedly.\n\nA crash log has been written to:\n" + getCrashLogPath());
+						"Sorry — Koala crashed. A crash log has been saved.");
 	}
 	return 0;
 }

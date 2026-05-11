@@ -15,6 +15,7 @@
 #ifdef __linux__
 #	include "pa_linux_alsa.h"
 #endif
+#include <algorithm>
 
 using namespace std;
 
@@ -38,6 +39,13 @@ PortAudioSystem::PortAudioSystem() {
 	if (!checkPaError(err, "Intializing port audio")) {
 		throw std::runtime_error("dang! portaudio not working");
 	}
+#ifdef _WIN32
+	// Default to WASAPI on Windows for lowest latency
+	auto wasapiIndex = Pa_HostApiTypeIdToHostApiIndex(paWASAPI);
+	if (wasapiIndex >= 0) {
+		hostApiTypeId = paWASAPI;
+	}
+#endif
 	rescanPorts();
 }
 
@@ -45,15 +53,21 @@ PortAudioSystem::~PortAudioSystem() {
 	if (verbose) {
 		Log::e() << "Tearing down PortAudioSystem";
 	}
-	if (isRunning()) {
-		stop();
-	}
-	if (stream != nullptr && !Pa_IsStreamStopped(stream)) {
-		auto err = Pa_StopStream(stream);
-		checkPaError(err, "stopping");
-	}
+	closeStream();
 	auto err = Pa_Terminate();
 	checkPaError(err, "terminating");
+}
+
+void PortAudioSystem::closeStream() {
+	if (stream != nullptr) {
+		if (!Pa_IsStreamStopped(stream)) {
+			auto err = Pa_StopStream(stream);
+			checkPaError(err, "stopping stream");
+		}
+		auto err = Pa_CloseStream(stream);
+		checkPaError(err, "closing stream");
+		stream = nullptr;
+	}
 }
 
 double PortAudioSystem::getNanoSecondsAtBufferBegin() {
@@ -190,8 +204,37 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 	}
 
 	if (setupFinished) {
-		sampleRate = 0; // reset sample rate to port-default
+		sampleRate = 0; // reset sample rate to port-default (uses output's default first)
 		configureStream();
+
+		// for input changes, retry once with the input's own native sample rate
+		// — the most common failure is shared-mode WASAPI mix-format mismatch
+		if (!isOutput && streamConfigStatus_ != StreamConfigurationStatus::OK
+			&& inPort.defaultSampleRate > 0) {
+			sampleRate = inPort.defaultSampleRate;
+			configureStream();
+		}
+
+		// still failing? try switching the output to the same device as the input
+		// — duplex interfaces (USB audio etc.) always agree with themselves
+		if (!isOutput && streamConfigStatus_ != StreamConfigurationStatus::OK) {
+			AudioPort matchedOut;
+			if (inPort.numOutChannels > 0) {
+				matchedOut = inPort;
+			} else {
+				for (const auto &p: ports) {
+					if (p.numOutChannels > 0 && p.name == inPort.name) {
+						matchedOut = p;
+						break;
+					}
+				}
+			}
+			if (matchedOut.isValid()) {
+				outPort	   = matchedOut;
+				sampleRate = 0;
+				configureStream();
+			}
+		}
 
 		// fallback to no-input
 		if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
@@ -242,6 +285,8 @@ void PortAudioSystem::configureStream() {
 		Log::d() << "PortAudioSystem::configureStream()";
 	}
 
+	closeStream();
+
 	numInChannels  = isInPortDummy ? 0 : desiredNumInChannels;
 	numOutChannels = desiredNumOutChannels;
 
@@ -249,15 +294,28 @@ void PortAudioSystem::configureStream() {
 	rescanPorts();
 	PaStreamParameters inputParameters, outputParameters;
 
+	// determine default devices for the selected host API
+	int defaultInputDeviceId  = Pa_GetDefaultInputDevice();
+	int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
+	if (hostApiTypeId >= 0) {
+		auto apiIndex = Pa_HostApiTypeIdToHostApiIndex(static_cast<PaHostApiTypeId>(hostApiTypeId));
+		if (apiIndex >= 0) {
+			auto *apiInfo		  = Pa_GetHostApiInfo(apiIndex);
+			defaultInputDeviceId  = apiInfo->defaultInputDevice;
+			defaultOutputDeviceId = apiInfo->defaultOutputDevice;
+		}
+	}
+
 	if (this->numInChannels > 0) {
 		if (!inPort.isValid()) {
-			inPort		  = getPort(Pa_GetDefaultInputDevice());
+			inPort		  = getPort(defaultInputDeviceId);
 			isInPortDummy = false;
 		}
 		inputParameters.device = inPort.portId;
 		if (inputParameters.device == paNoDevice) {
 			Log::e() << "Error: No default input device.";
 			numInChannels = 0;
+			setNoInputPort();
 			//return;
 		} else {
 			numInChannels					 = min(inPort.numInChannels, numInChannels);
@@ -272,7 +330,7 @@ void PortAudioSystem::configureStream() {
 
 	if (this->numOutChannels > 0) {
 		if (!outPort.isValid()) {
-			outPort = getPort(Pa_GetDefaultOutputDevice());
+			outPort = getPort(defaultOutputDeviceId);
 		}
 
 		outputParameters.device = outPort.portId;
@@ -351,6 +409,7 @@ void PortAudioSystem::configureStream() {
 	}
 }
 void PortAudioSystem::start() {
+	if (stream == nullptr) return;
 	auto err = Pa_StartStream(stream);
 	checkPaError(err, "start stream");
 	Log::d() << to_string(getOutputLatency() * 1000.0, 0)
@@ -358,11 +417,13 @@ void PortAudioSystem::start() {
 }
 
 void PortAudioSystem::stop() {
+	if (stream == nullptr) return;
 	auto err = Pa_StopStream(stream);
 	checkPaError(err, "stop stream");
 }
 
 bool PortAudioSystem::isRunning() {
+	if (stream == nullptr) return false;
 	if (verbose) {
 		Log::d() << "PortAudioSystem::isRunning()" << Pa_IsStreamActive(stream);
 	}
@@ -410,33 +471,36 @@ void PortAudioSystem::rescanPorts() {
 	int defaultInputDeviceId  = Pa_GetDefaultInputDevice();
 	int defaultOutputDeviceId = Pa_GetDefaultOutputDevice();
 
+	// if we have a selected host API, use its defaults
+	int selectedApiIndex = -1;
+	if (hostApiTypeId >= 0) {
+		selectedApiIndex = Pa_HostApiTypeIdToHostApiIndex(static_cast<PaHostApiTypeId>(hostApiTypeId));
+		if (selectedApiIndex >= 0) {
+			auto *apiInfo		  = Pa_GetHostApiInfo(selectedApiIndex);
+			defaultInputDeviceId  = apiInfo->defaultInputDevice;
+			defaultOutputDeviceId = apiInfo->defaultOutputDevice;
+		}
+	}
+
 	int numDevices = Pa_GetDeviceCount();
 	if (numDevices < 0) {
 		Log::e() << "Couldn't get number of devices from PortAudio! - count was " << numDevices;
 		return;
 	}
-	//	Log::d() << "Found " << numDevices << " devices";
-	const vector<double> standardSampleRates = {
-
-		//8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
-
-		44100.0,
-		48000.0,
-
-		//88200.0, 96000.0, 192000.0,
-	};
 
 	for (int i = 0; i < numDevices; i++) {
 		auto dev = Pa_GetDeviceInfo(i);
+
+		// filter by host API if one is selected
+		if (selectedApiIndex >= 0 && dev->hostApi != selectedApiIndex) {
+			continue;
+		}
 
 		AudioPort port;
 		port.portId			= i;
 		port.name			= dev->name;
 		port.numInChannels	= dev->maxInputChannels;
 		port.numOutChannels = dev->maxOutputChannels;
-
-		//		Log::d() << "Found port " << port.name << " with " << port.numInChannels << " in channels and "
-		//				 << port.numOutChannels << " out channels";
 
 		if (i == defaultInputDeviceId) {
 			port.isDefaultInput = true;
@@ -446,33 +510,6 @@ void PortAudioSystem::rescanPorts() {
 		}
 
 		port.defaultSampleRate = dev->defaultSampleRate;
-
-		/*
-        for(const auto sr : standardSampleRates) {
-            PaStreamParameters inputParameters, outputParameters;
-            inputParameters.device = i;
-            inputParameters.channelCount = dev->maxInputChannels;
-            inputParameters.sampleFormat = paFloat32;
-            inputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
-            inputParameters.hostApiSpecificStreamInfo = NULL;
-
-            outputParameters.device = i;
-            outputParameters.channelCount = dev->maxOutputChannels;
-            outputParameters.sampleFormat = paFloat32;
-            outputParameters.suggestedLatency = 0; // ignored by Pa_IsFormatSupported()
-            outputParameters.hostApiSpecificStreamInfo = NULL;
-            auto *ins = &inputParameters;
-            auto *outs = &outputParameters;
-            if(ins->channelCount==0) ins = nullptr;
-            if(outs->channelCount==0) outs = nullptr;
-            auto err = Pa_IsFormatSupported( ins, outs, sr );
-            if( err == paFormatIsSupported ) {
-                port.supportedSampleRates.push_back(sr);
-            } else {
-                Log::e() << "Got error in rescanPorts() " << Pa_GetErrorText(err);
-            }
-        }
-        */
 
 		ports.emplace_back(port);
 	}
@@ -495,4 +532,142 @@ double PortAudioSystem::getOutputLatency() {
 
 double PortAudioSystem::getHostTime() {
 	return hostTime;
+}
+
+void PortAudioSystem::setSampleRate(float sr) {
+	bool wasRunning = isRunning();
+	closeStream();
+	this->sampleRate = sr;
+	configureStream();
+	if (wasRunning && streamConfigStatus_ == StreamConfigurationStatus::OK) {
+		start();
+	}
+	notifySampleRateChanged();
+}
+
+void PortAudioSystem::setBufferSize(int size) {
+	bool wasRunning = isRunning();
+	closeStream();
+	this->bufferSize = size;
+	configureStream();
+	if (wasRunning && streamConfigStatus_ == StreamConfigurationStatus::OK) {
+		start();
+	}
+}
+
+#ifdef _WIN32
+static std::string stripWindowsPrefix(const char *name) {
+	std::string s = name ? name : "";
+	const std::string prefix = "Windows ";
+	if (s.rfind(prefix, 0) == 0) s.erase(0, prefix.size());
+	return s;
+}
+
+static bool isUserFacingHostApi(PaHostApiTypeId type) {
+	return type == paWASAPI || type == paASIO || type == paDirectSound;
+}
+#endif
+
+vector<AudioHostApi> PortAudioSystem::getAvailableHostApis() {
+	vector<AudioHostApi> apis;
+	int count = Pa_GetHostApiCount();
+	for (int i = 0; i < count; i++) {
+		auto *info = Pa_GetHostApiInfo(i);
+		if (info == nullptr || info->deviceCount <= 0) continue;
+#ifdef _WIN32
+		if (!isUserFacingHostApi(info->type)) continue;
+#endif
+		AudioHostApi api;
+		api.typeId = info->type;
+#ifdef _WIN32
+		api.name = stripWindowsPrefix(info->name);
+#else
+		api.name = info->name ? info->name : "";
+#endif
+		apis.push_back(api);
+	}
+	return apis;
+}
+
+AudioHostApi PortAudioSystem::getHostApi() {
+	if (hostApiTypeId >= 0) {
+		auto apiIndex = Pa_HostApiTypeIdToHostApiIndex(static_cast<PaHostApiTypeId>(hostApiTypeId));
+		if (apiIndex >= 0) {
+			auto *info = Pa_GetHostApiInfo(apiIndex);
+			AudioHostApi api;
+			api.typeId = info->type;
+#ifdef _WIN32
+			api.name = stripWindowsPrefix(info->name);
+#else
+			api.name = info->name ? info->name : "";
+#endif
+			return api;
+		}
+	}
+	return {};
+}
+
+void PortAudioSystem::setHostApiByTypeId(int typeId) {
+	if (typeId == hostApiTypeId) return;
+
+	bool wasRunning = isRunning();
+	closeStream();
+
+	hostApiTypeId = typeId;
+
+	// invalidate current ports so configureStream picks new defaults
+	inPort	= AudioPort();
+	outPort = AudioPort();
+	isInPortDummy = false;
+	sampleRate	  = 0;
+
+	if (setupFinished) {
+		configureStream();
+		if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+			setNoInputPort();
+			configureStream();
+		}
+		if (wasRunning && streamConfigStatus_ == StreamConfigurationStatus::OK) {
+			start();
+		}
+	}
+
+	notifySampleRateChanged();
+}
+
+vector<double> PortAudioSystem::getAvailableSampleRates() {
+	const vector<double> candidates = {22050.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0};
+	vector<double> supported;
+
+	// check against current output device
+	int devId = outPort.isValid() ? outPort.portId : Pa_GetDefaultOutputDevice();
+	if (devId == paNoDevice) return {44100.0, 48000.0};
+
+	auto *devInfo = Pa_GetDeviceInfo(devId);
+	if (devInfo == nullptr) return {44100.0, 48000.0};
+
+	for (auto sr: candidates) {
+		PaStreamParameters params;
+		params.device					  = devId;
+		params.channelCount				  = min(devInfo->maxOutputChannels, 2);
+		params.sampleFormat				  = paFloat32;
+		params.suggestedLatency			  = 0;
+		params.hostApiSpecificStreamInfo = nullptr;
+
+		if (params.channelCount > 0) {
+			auto err = Pa_IsFormatSupported(nullptr, &params, sr);
+			if (err == paFormatIsSupported) {
+				supported.push_back(sr);
+			}
+		}
+	}
+
+	if (supported.empty()) {
+		supported = {44100.0, 48000.0};
+	}
+	return supported;
+}
+
+vector<int> PortAudioSystem::getAvailableBufferSizes() {
+	return {64, 128, 256, 512, 1024, 2048, 4096};
 }

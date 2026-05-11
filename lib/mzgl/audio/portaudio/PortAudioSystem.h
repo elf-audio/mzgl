@@ -44,6 +44,15 @@ public:
 
 	double getHostTime();
 
+	void setSampleRate(float sampleRate) override;
+	void setBufferSize(int size) override;
+
+	std::vector<AudioHostApi> getAvailableHostApis() override;
+	AudioHostApi getHostApi() override;
+	void setHostApiByTypeId(int typeId) override;
+	std::vector<double> getAvailableSampleRates() override;
+	std::vector<int> getAvailableBufferSizes() override;
+
 	// The time when the first sample of the input buffer was captured at the ADC input
 	double inputTime = 0;
 
@@ -62,6 +71,7 @@ private:
 	bool isInPortDummy = false;
 
 	void configureStream();
+	void closeStream();
 	bool setIOPort(const AudioPort &audioPort, bool isOutput);
 
 	bool verbose = false;
@@ -70,6 +80,9 @@ private:
 	PaStream *stream = nullptr;
 
 	std::vector<AudioPort> ports;
+
+	// the selected host API type id, -1 means use system default
+	int hostApiTypeId = -1;
 
 	// don't hold onto this port for too long
 	AudioPort getPort(int dev);
