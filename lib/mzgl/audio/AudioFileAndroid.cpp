@@ -91,6 +91,179 @@ int getFirstAudioTrackId(AMediaExtractor *extractor) {
 #endif
 
 #ifdef __ANDROID__
+// Streams the NDK MediaCodec output (s16) into a SampleData of format
+// I16. Lossy codecs (AAC/m4a) have no native bit depth above 16-bit
+// anyway, so this matches what the drlib mp3 path does.
+// If desiredSampleRate is zero, no resampling is done.
+bool AudioFileAndroid_loadNative(std::string path,
+								 SampleData &outData,
+								 int *outNumChannels,
+								 int *outSampleRate,
+								 const int desiredSampleRate = 0) {
+	Log::d() << "Using NDK decoder (native I16 path)";
+
+	FILE *fp = fopen(path.c_str(), "rb");
+	if (fp == nullptr) {
+		Log::e() << "Can't open file " << path;
+		return false;
+	}
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	AMediaExtractor *extractor = AMediaExtractor_new();
+	auto amresult			   = AMediaExtractor_setDataSourceFd(extractor, fileno(fp), 0, size);
+	if (amresult != AMEDIA_OK) {
+		Log::e() << "Error setting extractor data source, err " << amresult;
+		AMediaExtractor_delete(extractor);
+		return false;
+	}
+
+	int firstAudioTrackId = getFirstAudioTrackId(extractor);
+	if (firstAudioTrackId == -1) {
+		AMediaExtractor_delete(extractor);
+		return false;
+	}
+
+	AMediaFormat *format = AMediaExtractor_getTrackFormat(extractor, firstAudioTrackId);
+
+	int32_t originalSampleRate;
+	if (!AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, &originalSampleRate)) {
+		AMediaFormat_delete(format);
+		AMediaExtractor_delete(extractor);
+		return false;
+	}
+
+	int32_t fileChannelCount;
+	if (!AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &fileChannelCount)
+		|| (fileChannelCount != 1 && fileChannelCount != 2)) {
+		AMediaFormat_delete(format);
+		AMediaExtractor_delete(extractor);
+		return false;
+	}
+	*outNumChannels = fileChannelCount;
+
+	const char *mimeType;
+	if (!AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mimeType)) {
+		AMediaFormat_delete(format);
+		AMediaExtractor_delete(extractor);
+		return false;
+	}
+
+	AMediaCodec *codec = AMediaCodec_createDecoderByType(mimeType);
+	AMediaExtractor_selectTrack(extractor, firstAudioTrackId);
+	AMediaCodec_configure(codec, format, nullptr, nullptr, 0);
+	AMediaCodec_start(codec);
+
+	bool isExtracting = true;
+	bool isDecoding	  = true;
+
+	Resampler resampler;
+	bool isResampling = false;
+
+	auto configureResampler = [&](int inRate) {
+		if (desiredSampleRate == 0) {
+			*outSampleRate = inRate;
+			isResampling   = false;
+			return;
+		}
+		*outSampleRate = desiredSampleRate;
+		isResampling   = desiredSampleRate != inRate;
+		if (isResampling) {
+			resampler.init(fileChannelCount, inRate, desiredSampleRate, RESAMPLING_QUALITY);
+		}
+	};
+	configureResampler(originalSampleRate);
+
+	outData = SampleData(std::vector<uint8_t> {}, SampleFormat::I16);
+
+	// Scratch for resampling chunks: keep small and reused per output buffer.
+	std::vector<float> fChunk;
+	std::vector<float> resampledChunk;
+
+	int decoderChannelCount = fileChannelCount;
+	while (isExtracting || isDecoding) {
+		if (isExtracting) {
+			ssize_t inputIndex = AMediaCodec_dequeueInputBuffer(codec, 2000);
+			if (inputIndex >= 0) {
+				size_t inputSize;
+				uint8_t *inputBuffer = AMediaCodec_getInputBuffer(codec, inputIndex, &inputSize);
+				ssize_t sampleSize	 = AMediaExtractor_readSampleData(extractor, inputBuffer, inputSize);
+				auto pts			 = AMediaExtractor_getSampleTime(extractor);
+				if (sampleSize > 0) {
+					AMediaCodec_queueInputBuffer(codec, inputIndex, 0, sampleSize, pts, 0);
+					AMediaExtractor_advance(extractor);
+				} else {
+					isExtracting = false;
+					AMediaCodec_queueInputBuffer(
+						codec, inputIndex, 0, 0, pts, AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM);
+				}
+			}
+		}
+
+		if (isDecoding) {
+			AMediaCodecBufferInfo info;
+			ssize_t outputIndex = AMediaCodec_dequeueOutputBuffer(codec, &info, 0);
+			if (outputIndex >= 0) {
+				if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) {
+					isDecoding = false;
+				} else {
+					size_t outputSize;
+					uint8_t *outputBuffer = AMediaCodec_getOutputBuffer(codec, outputIndex, &outputSize);
+					int16_t *outBuff	  = (int16_t *) outputBuffer;
+					int numSamples		  = info.size / 2;
+
+					int sampleAdvance = 1;
+					if (fileChannelCount == 1 && decoderChannelCount == 2) {
+						numSamples /= 2;
+						sampleAdvance = 2;
+					}
+
+					if (!isResampling) {
+						// Append the s16 chunk straight into the I16 SampleData.
+						const size_t startBytes = outData.byteSize();
+						const size_t addBytes	= numSamples * sizeof(int16_t);
+						outData.resize(outData.size() + numSamples);
+						int16_t *dst = reinterpret_cast<int16_t *>(outData.bytes() + startBytes);
+						if (sampleAdvance == 1) {
+							std::memcpy(dst, outBuff, addBytes);
+						} else {
+							for (int i = 0; i < numSamples; ++i) dst[i] = outBuff[i * sampleAdvance];
+						}
+					} else {
+						fChunk.resize(numSamples);
+						constexpr float sint16ToFloat = (1.0f / 32768.0f);
+						for (int i = 0; i < numSamples; ++i)
+							fChunk[i] = static_cast<float>(outBuff[i * sampleAdvance]) * sint16ToFloat;
+						resampler.process(fChunk, resampledChunk);
+						const size_t startIdx = outData.size();
+						outData.resize(startIdx + resampledChunk.size());
+						for (size_t i = 0; i < resampledChunk.size(); ++i)
+							outData.assignValue(startIdx + i, resampledChunk[i]);
+					}
+
+					AMediaCodec_releaseOutputBuffer(codec, outputIndex, false);
+				}
+			} else if (outputIndex == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
+				format			 = AMediaCodec_getOutputFormat(codec);
+				int32_t newRate	 = 0;
+				int32_t newChans = 0;
+				if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, &newChans))
+					decoderChannelCount = newChans;
+				if (AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, &newRate))
+					originalSampleRate = newRate;
+				configureResampler(originalSampleRate);
+			}
+		}
+	}
+
+	AMediaFormat_delete(format);
+	AMediaCodec_delete(codec);
+	AMediaExtractor_delete(extractor);
+	fclose(fp);
+	return true;
+}
+
 // if desiredSampleRate is zero, no resampling is done
 bool AudioFileAndroid_load(std::string path,
 						   FloatBuffer &buff,
@@ -491,19 +664,14 @@ namespace {
 			out = AudioFile::LoadedAudio {};
 		}
 
-		FloatBuffer tmp;
-		bool ok;
-		if (resampleTo.has_value()) {
-			ok = AudioFile::loadResampled(path, tmp, *resampleTo, &out.numChannels);
-			if (ok) out.sampleRate = *resampleTo;
-		} else {
-			ok = AudioFile::load(path, tmp, &out.numChannels, &out.sampleRate);
-		}
-		if (!ok) {
-			out.result.addIssue("Failed to load audio file: " + path);
+		// AAC / m4a / anything else handled by the NDK extractor goes
+		// through here. NDK decoder emits s16, so we stream straight into
+		// an I16 SampleData (resampling-aware) and skip the float blow-up.
+		const int targetSR = resampleTo.value_or(0);
+		if (AudioFileAndroid_loadNative(path, out.data, &out.numChannels, &out.sampleRate, targetSR)) {
 			return out;
 		}
-		out.data = SampleData(std::move(tmp));
+		out.result.addIssue("Failed to load audio file: " + path);
 		return out;
 #else
 		if (!drLibStreamLoadNative(path, out, resampleTo)) {
