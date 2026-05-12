@@ -340,15 +340,14 @@ namespace {
 			return out;
 		}
 
-		// Resampled loads always go through float. But if the caller
-		// asked to resample to the same rate the file is already at (e.g.
-		// dragging a 48 kHz wav into a 48 kHz engine), treat it as a
-		// no-op and keep the native bit depth.
-		const bool noResampleNeeded =
-			!resampleTo.has_value()
-			|| static_cast<int>(inputFormat.mSampleRate) == *resampleTo;
-		const std::optional<SampleFormat> targetFmt =
-			noResampleNeeded ? nativeFormatFor(inputFormat) : std::nullopt;
+		// For PCM sources we can keep the on-disk bit depth even when
+		// resampling: ExtAudioFile's client format combines a target
+		// sample rate with a target encoding and streams the conversion
+		// in chunks via the resampler. So a 1 GB 16-bit @44.1k file
+		// resampled to 48k peaks at the final 16-bit destination plus a
+		// 32 KB scratch chunk, not a multi-GB float intermediate.
+		// Non-PCM sources (mp3/m4a/...) still fall back to float.
+		const std::optional<SampleFormat> targetFmt = nativeFormatFor(inputFormat);
 
 		if (!targetFmt.has_value()) {
 			AudioStreamBasicDescription audioFormat;
@@ -369,9 +368,11 @@ namespace {
 			return out;
 		}
 
+		const Float64 targetSampleRate =
+			resampleTo.has_value() ? static_cast<Float64>(*resampleTo) : inputFormat.mSampleRate;
 		AudioStreamBasicDescription audioFormat;
 		fillNativePCMReadFormat(
-			audioFormat, *targetFmt, inputFormat.mSampleRate, inputFormat.mChannelsPerFrame);
+			audioFormat, *targetFmt, targetSampleRate, inputFormat.mChannelsPerFrame);
 
 		if (!file.applyReadFormat(audioFormat)) {
 			// Native format not honored by the converter — fall back to f32.
