@@ -263,20 +263,61 @@ bool AudioFile::load(std::string path, Int16Buffer &buff, int *outNumChannels, i
 }
 
 namespace {
-	// Pick a SampleFormat that matches the file's native PCM bit depth.
-	// Returns std::nullopt if the file is non-PCM (mp3/m4a/aac/etc) or
-	// uses an unsupported PCM layout — caller falls back to F32 then.
-	std::optional<SampleFormat> nativeFormatFor(const AudioStreamBasicDescription &fmt) {
-		if (fmt.mFormatID != kAudioFormatLinearPCM) return std::nullopt;
-		const bool isFloat	= (fmt.mFormatFlags & kLinearPCMFormatFlagIsFloat) != 0;
-		const bool isInt	= (fmt.mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) != 0;
-		const UInt32 bits	= fmt.mBitsPerChannel;
-		if (isFloat && bits == 32) return SampleFormat::F32;
-		if (isInt && bits == 8) return SampleFormat::I8;
-		if (isInt && bits == 16) return SampleFormat::I16;
-		if (isInt && bits == 24) return SampleFormat::I24;
-		// 32-bit int is uncommon; promote to F32 to keep dynamic range.
-		return std::nullopt;
+	SampleFormat formatForBits(UInt32 bits, SampleFormat fallback = SampleFormat::I24) {
+		switch (bits) {
+			case 8: return SampleFormat::I8;
+			case 16: return SampleFormat::I16;
+			case 24: return SampleFormat::I24;
+			case 32: return SampleFormat::F32;
+		}
+		return fallback;
+	}
+
+	// Pick the SampleFormat to keep this source in on the way into koala.
+	//
+	//   PCM (wav/aif):    follow the on-disk bit depth verbatim.
+	//   FLAC:             follow the source bit depth (16 or 24 typical).
+	//   ALAC:             follow the AppleLossless source-bit-depth flag.
+	//   mp3 / AAC / etc:  lossy codecs have no native bit depth; clamp to
+	//                     I16 since their effective SNR doesn't exceed it.
+	//   Anything else:    I24 (headroom-preserving default).
+	SampleFormat nativeFormatFor(const AudioStreamBasicDescription &fmt) {
+		if (fmt.mFormatID == kAudioFormatLinearPCM) {
+			const bool isFloat = (fmt.mFormatFlags & kLinearPCMFormatFlagIsFloat) != 0;
+			const bool isInt   = (fmt.mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) != 0;
+			if (isFloat && fmt.mBitsPerChannel == 32) return SampleFormat::F32;
+			if (isInt) return formatForBits(fmt.mBitsPerChannel);
+			return SampleFormat::I24;
+		}
+
+		if (fmt.mFormatID == kAudioFormatFLAC) {
+			return formatForBits(fmt.mBitsPerChannel);
+		}
+
+		if (fmt.mFormatID == kAudioFormatAppleLossless) {
+			switch (fmt.mFormatFlags) {
+				case kAppleLosslessFormatFlag_16BitSourceData: return SampleFormat::I16;
+				case kAppleLosslessFormatFlag_20BitSourceData: return SampleFormat::I24;
+				case kAppleLosslessFormatFlag_24BitSourceData: return SampleFormat::I24;
+				case kAppleLosslessFormatFlag_32BitSourceData: return SampleFormat::F32;
+			}
+			return SampleFormat::I24;
+		}
+
+		switch (fmt.mFormatID) {
+			case kAudioFormatMPEGLayer1:
+			case kAudioFormatMPEGLayer2:
+			case kAudioFormatMPEGLayer3:
+			case kAudioFormatMPEG4AAC:
+			case kAudioFormatMPEG4AAC_HE:
+			case kAudioFormatMPEG4AAC_HE_V2:
+			case kAudioFormatMPEG4AAC_LD:
+			case kAudioFormatMPEG4AAC_ELD:
+			case kAudioFormatMPEG4AAC_ELD_SBR:
+			case kAudioFormatMPEG4AAC_ELD_V2: return SampleFormat::I16;
+		}
+
+		return SampleFormat::I24;
 	}
 
 	void fillNativePCMReadFormat(AudioStreamBasicDescription &out,
@@ -340,39 +381,23 @@ namespace {
 			return out;
 		}
 
-		// For PCM sources we can keep the on-disk bit depth even when
-		// resampling: ExtAudioFile's client format combines a target
-		// sample rate with a target encoding and streams the conversion
-		// in chunks via the resampler. So a 1 GB 16-bit @44.1k file
-		// resampled to 48k peaks at the final 16-bit destination plus a
-		// 32 KB scratch chunk, not a multi-GB float intermediate.
-		// Non-PCM sources (mp3/m4a/...) still fall back to float.
-		const std::optional<SampleFormat> targetFmt = nativeFormatFor(inputFormat);
-
-		if (!targetFmt.has_value()) {
-			AudioStreamBasicDescription audioFormat;
-			file.getReadFormat(audioFormat,
-							   resampleTo.value_or(inputFormat.mSampleRate),
-							   inputFormat.mChannelsPerFrame);
-
-			if (!file.applyReadFormat(audioFormat)) {
-				out.result.addIssue("Could not prepare the read format for " + resolvedPath);
-				return out;
-			}
-			FloatBuffer tmp;
-			if (!file.read(audioFormat, tmp)) {
-				out.result.addIssue("Failed to read audio file " + resolvedPath);
-				return out;
-			}
-			out.data = SampleData(std::move(tmp));
-			return out;
-		}
+		// Pick a target SampleFormat for the on-disk source. PCM files
+		// keep their bit depth, FLAC/ALAC follow their source-bit-depth
+		// flag, mp3/AAC clamp to I16 (lossy, no benefit going wider),
+		// anything weird falls to I24 for headroom.
+		//
+		// ExtAudioFile's client format combines a target sample rate
+		// with a target encoding and streams the conversion in chunks
+		// via the resampler. So a 1 GB 16-bit @44.1k file resampled to
+		// 48k peaks at the final 16-bit destination plus a 32 KB scratch
+		// chunk, not a multi-GB float intermediate.
+		const SampleFormat targetFmt = nativeFormatFor(inputFormat);
 
 		const Float64 targetSampleRate =
 			resampleTo.has_value() ? static_cast<Float64>(*resampleTo) : inputFormat.mSampleRate;
 		AudioStreamBasicDescription audioFormat;
 		fillNativePCMReadFormat(
-			audioFormat, *targetFmt, targetSampleRate, inputFormat.mChannelsPerFrame);
+			audioFormat, targetFmt, targetSampleRate, inputFormat.mChannelsPerFrame);
 
 		if (!file.applyReadFormat(audioFormat)) {
 			// Native format not honored by the converter — fall back to f32.
@@ -411,7 +436,7 @@ namespace {
 			rawBytes.insert(rawBytes.end(), chunk.begin(), chunk.begin() + bytesProduced);
 		}
 
-		out.data = SampleData(std::move(rawBytes), *targetFmt);
+		out.data = SampleData(std::move(rawBytes), targetFmt);
 		return out;
 	}
 }
