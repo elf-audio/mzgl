@@ -220,8 +220,21 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	if (content->height <= height) {
 		return true;
 	}
-	// add to velocity (px/sec) so rapid wheel events accumulate.
-	contentVelocity.y += scrollY * 80.f;
-	contentVelocity.y = std::clamp(contentVelocity.y, -8000.f, 8000.f);
+	// Direct position update — trackpad/wheel deltas already encode finger motion + OS momentum.
+	// Accumulating into velocity caused trailing decay even when fingers rested motionless.
+	contentVelocity.y = 0.f;
+
+	float maxY = 0.f;
+	float minY = (height - content->height);
+
+	float rawY = content->y + scrollY * 8.f;
+
+	if (rawY > maxY) {
+		content->y = maxY + rubberBandOffset(rawY - maxY, height);
+	} else if (rawY < minY) {
+		content->y = minY - rubberBandOffset(minY - rawY, height);
+	} else {
+		content->y = rawY;
+	}
 	return true;
 }
