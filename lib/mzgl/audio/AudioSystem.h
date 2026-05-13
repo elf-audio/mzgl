@@ -13,9 +13,31 @@
 #include "stringUtil.h"
 #include "Listenable.h"
 
+// Backend-agnostic identifier for audio host APIs. Stable across versions so
+// it can be persisted in settings; PortAudio's PaHostApiTypeId is mapped onto
+// this in PortAudioSystem.
+enum class HostApi {
+	Unknown,
+	MME,
+	DirectSound,
+	ASIO,
+	SoundManager,
+	CoreAudio,
+	OSS,
+	ALSA,
+	AL,
+	BeOS,
+	WDMKS,
+	JACK,
+	WASAPI,
+	AudioScienceHPI,
+	AudioIO,
+};
+
 struct AudioHostApi {
-	int typeId = -1;
-	std::string name;
+	HostApi kind = HostApi::Unknown;
+	int typeId	 = -1; // backend-specific id (PaHostApiTypeId on Windows)
+	std::string name;  // display name
 	bool isValid() const { return typeId != -1; }
 };
 
@@ -113,7 +135,7 @@ public:
 
 	virtual std::vector<AudioHostApi> getAvailableHostApis() { return {}; }
 	virtual AudioHostApi getHostApi() { return {}; }
-	virtual void setHostApiByTypeId(int typeId) {}
+	virtual void setHostApi(HostApi kind) {}
 	virtual std::vector<double> getAvailableSampleRates() { return {}; }
 	virtual std::vector<int> getAvailableBufferSizes() { return {}; }
 	void bufferSizeChangedBySystem(int size);

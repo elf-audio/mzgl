@@ -49,7 +49,7 @@ public:
 
 	std::vector<AudioHostApi> getAvailableHostApis() override;
 	AudioHostApi getHostApi() override;
-	void setHostApiByTypeId(int typeId) override;
+	void setHostApi(HostApi kind) override;
 	std::vector<double> getAvailableSampleRates() override;
 	std::vector<int> getAvailableBufferSizes() override;
 

@@ -275,6 +275,26 @@ void PortAudioSystem::setup(int numIns, int numOuts) {
 		configureStream();
 	}
 
+	// last resort: the selected host API's default devices may be unusable
+	// (e.g. WASAPI reporting paNoDevice for defaultOutputDevice on a fresh
+	// install). Drop the host API preference and let PortAudio pick — this
+	// gives us a working stream out of the box; the user can switch host API
+	// later from the audio settings page.
+	if (streamConfigStatus_ != StreamConfigurationStatus::OK && hostApiTypeId >= 0) {
+		Log::e() << "PortAudioSystem: configured host API can't open a stream; "
+					"falling back to PortAudio's default host API.";
+		hostApiTypeId = -1;
+		inPort		  = AudioPort();
+		outPort		  = AudioPort();
+		isInPortDummy = false;
+		sampleRate	  = 0;
+		configureStream();
+		if (streamConfigStatus_ != StreamConfigurationStatus::OK) {
+			setNoInputPort();
+			configureStream();
+		}
+	}
+
 	// however configureStream might fail at that point, but number of desired channels is already set
 	// so mark that setup finished, upper layer shall check for errors and decide what to do next
 	setupFinished = true;
@@ -555,9 +575,49 @@ void PortAudioSystem::setBufferSize(int size) {
 	}
 }
 
+static HostApi paTypeToHostApi(PaHostApiTypeId t) {
+	switch (t) {
+		case paMME: return HostApi::MME;
+		case paDirectSound: return HostApi::DirectSound;
+		case paASIO: return HostApi::ASIO;
+		case paSoundManager: return HostApi::SoundManager;
+		case paCoreAudio: return HostApi::CoreAudio;
+		case paOSS: return HostApi::OSS;
+		case paALSA: return HostApi::ALSA;
+		case paAL: return HostApi::AL;
+		case paBeOS: return HostApi::BeOS;
+		case paWDMKS: return HostApi::WDMKS;
+		case paJACK: return HostApi::JACK;
+		case paWASAPI: return HostApi::WASAPI;
+		case paAudioScienceHPI: return HostApi::AudioScienceHPI;
+		default: return HostApi::Unknown;
+	}
+}
+
+static int hostApiToPaType(HostApi k) {
+	switch (k) {
+		case HostApi::MME: return paMME;
+		case HostApi::DirectSound: return paDirectSound;
+		case HostApi::ASIO: return paASIO;
+		case HostApi::SoundManager: return paSoundManager;
+		case HostApi::CoreAudio: return paCoreAudio;
+		case HostApi::OSS: return paOSS;
+		case HostApi::ALSA: return paALSA;
+		case HostApi::AL: return paAL;
+		case HostApi::BeOS: return paBeOS;
+		case HostApi::WDMKS: return paWDMKS;
+		case HostApi::JACK: return paJACK;
+		case HostApi::WASAPI: return paWASAPI;
+		case HostApi::AudioScienceHPI: return paAudioScienceHPI;
+		case HostApi::Unknown:
+		case HostApi::AudioIO: return -1;
+	}
+	return -1;
+}
+
 #ifdef _WIN32
 static std::string stripWindowsPrefix(const char *name) {
-	std::string s = name ? name : "";
+	std::string s			 = name ? name : "";
 	const std::string prefix = "Windows ";
 	if (s.rfind(prefix, 0) == 0) s.erase(0, prefix.size());
 	return s;
@@ -568,6 +628,18 @@ static bool isUserFacingHostApi(PaHostApiTypeId type) {
 }
 #endif
 
+static AudioHostApi makeAudioHostApi(const PaHostApiInfo *info) {
+	AudioHostApi api;
+	api.typeId = info->type;
+	api.kind   = paTypeToHostApi(static_cast<PaHostApiTypeId>(info->type));
+#ifdef _WIN32
+	api.name = stripWindowsPrefix(info->name);
+#else
+	api.name = info->name ? info->name : "";
+#endif
+	return api;
+}
+
 vector<AudioHostApi> PortAudioSystem::getAvailableHostApis() {
 	vector<AudioHostApi> apis;
 	int count = Pa_GetHostApiCount();
@@ -575,16 +647,9 @@ vector<AudioHostApi> PortAudioSystem::getAvailableHostApis() {
 		auto *info = Pa_GetHostApiInfo(i);
 		if (info == nullptr || info->deviceCount <= 0) continue;
 #ifdef _WIN32
-		if (!isUserFacingHostApi(info->type)) continue;
+		if (!isUserFacingHostApi(static_cast<PaHostApiTypeId>(info->type))) continue;
 #endif
-		AudioHostApi api;
-		api.typeId = info->type;
-#ifdef _WIN32
-		api.name = stripWindowsPrefix(info->name);
-#else
-		api.name = info->name ? info->name : "";
-#endif
-		apis.push_back(api);
+		apis.push_back(makeAudioHostApi(info));
 	}
 	return apis;
 }
@@ -593,21 +658,15 @@ AudioHostApi PortAudioSystem::getHostApi() {
 	if (hostApiTypeId >= 0) {
 		auto apiIndex = Pa_HostApiTypeIdToHostApiIndex(static_cast<PaHostApiTypeId>(hostApiTypeId));
 		if (apiIndex >= 0) {
-			auto *info = Pa_GetHostApiInfo(apiIndex);
-			AudioHostApi api;
-			api.typeId = info->type;
-#ifdef _WIN32
-			api.name = stripWindowsPrefix(info->name);
-#else
-			api.name = info->name ? info->name : "";
-#endif
-			return api;
+			return makeAudioHostApi(Pa_GetHostApiInfo(apiIndex));
 		}
 	}
 	return {};
 }
 
-void PortAudioSystem::setHostApiByTypeId(int typeId) {
+void PortAudioSystem::setHostApi(HostApi kind) {
+	int typeId = hostApiToPaType(kind);
+	if (typeId < 0) return;
 	if (typeId == hostApiTypeId) return;
 
 	bool wasRunning = isRunning();
