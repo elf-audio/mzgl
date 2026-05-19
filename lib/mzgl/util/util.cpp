@@ -494,36 +494,41 @@ void setDocsPath(const std::string &path) {
 #endif
 
 int64_t getAvailableMemory() {
-#ifdef __APPLE__
-#	if TARGET_OS_IOS
+#if defined(__APPLE__) && TARGET_OS_IOS
 	if (@available(iOS 13.0, *)) {
 		return os_proc_available_memory();
 	}
-#	else
+	return -1;
+#elif defined(__APPLE__)
 	int request[] = {CTL_HW, HW_MEMSIZE};
 	unsigned long long memory;
 	auto memoryLength = sizeof(memory);
 
 	if (sysctl(request, 2, &memory, &memoryLength, nullptr, 0) == 0) {
 		return static_cast<int64_t>(memory);
-	} else {
-		Log::e() << "Failed to query available memory";
 	}
+	Log::e() << "Failed to query available memory";
 	return -1;
-#	endif
-#endif
-#ifdef __ANDROID__
+#elif defined(__ANDROID__)
 	return androidGetAvailableMemory();
-#endif
-
-	CLANG_IGNORE_WARNINGS_BEGIN("-Wunreachable-code")
+#elif defined(_WIN32)
+	MEMORYSTATUSEX status {};
+	status.dwLength = sizeof(status);
+	if (GlobalMemoryStatusEx(&status)) {
+		// Smaller of free physical RAM and free address space — the real
+		// ceiling on what this process can still allocate.
+		return static_cast<int64_t>(std::min(status.ullAvailPhys, status.ullAvailVirtual));
+	}
+	Log::e() << "Failed to query available memory";
+	return -1;
+#else
 	static bool alreadyWarnedAboutGetAvailableMemory = false;
 	if (!alreadyWarnedAboutGetAvailableMemory) {
 		alreadyWarnedAboutGetAvailableMemory = true;
 		Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
 	}
 	return -1;
-	CLANG_IGNORE_WARNINGS_END
+#endif
 }
 
 std::string nowAsString() {
