@@ -42,7 +42,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #	include "sokol_log.h"
 #endif
 
-#if defined(WIN32) || defined(__linux__)
+#if defined(_WIN32) || defined(__linux__)
 void quitApplication() {
 	glfwTerminate();
 }

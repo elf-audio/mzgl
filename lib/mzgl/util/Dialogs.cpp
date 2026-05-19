@@ -1273,7 +1273,7 @@ void Dialogs::chooseFolder(std::string msg, std::function<void(std::string, bool
 
 	linuxChooseFolderDialog(msg, completionCallback);
 
-#elif (WIN32)
+#elif defined(_WIN32)
 	windowsChooseEntryDialog(static_cast<HWND>(app.nativeWindowHandle), false, msg, completionCallback);
 #elif defined(__APPLE__)
 #	if TARGET_OS_IOS
