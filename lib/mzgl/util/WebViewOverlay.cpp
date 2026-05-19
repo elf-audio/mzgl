@@ -6,8 +6,8 @@
 
 class WebViewOverlayImpl {
 public:
-	WebViewOverlayImpl(App &app, 
-					   const std::string &url, 
+	WebViewOverlayImpl(App &app,
+					   const std::string &url,
 					   std::function<void(const std::string &)> jsCallback,
 					   const std::string &htmlContent)
 		: app(app)
@@ -105,7 +105,7 @@ public:
 
 		  NSString *nsUrl = [NSString stringWithUTF8String:url.c_str()];
 		  NSString *nsHtml = this->htmlContent.empty() ? nil : [NSString stringWithUTF8String:this->htmlContent.c_str()];
-		  
+
 		  webView = [[AppleWebView alloc] initWithFrame:rootView.bounds
 							 loadedCallback:[]() {}
 								 jsCallback:jsCallback

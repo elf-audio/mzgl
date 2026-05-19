@@ -172,6 +172,21 @@
 	}
 }
 
+// target="_blank" links and JS window.open() requests come through this UI delegate
+// callback. Without an implementation WKWebView silently drops them — which is why
+// in-page "terms" / "privacy policy" links appeared dead. Hand the URL to the system
+// default browser and return nil so the WebView doesn't try to open a new sub-view.
+- (WKWebView *)webView:(WKWebView *)webView
+	createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration
+			   forNavigationAction:(WKNavigationAction *)navigationAction
+					windowFeatures:(WKWindowFeatures *)windowFeatures {
+	NSURL *url = navigationAction.request.URL;
+	if (url) {
+		launchUrl([[url absoluteString] UTF8String]);
+	}
+	return nil;
+}
+
 - (void)userContentController:(nonnull WKUserContentController *)userContentController
 	  didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
 	if ([message.name isEqual:@"closeWindow"] || [message.body isEqual:@"close"]) {
