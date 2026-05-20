@@ -16,6 +16,7 @@
  */
 
 #pragma once
+#include <ctime>
 #include <string>
 
 class DateTime {
@@ -36,8 +37,8 @@ public:
 	void fromSql(std::string sql);
 	int getDayOfWeek() const;
 	void addDays(int numDays);
-	void setFromTimestamp(long timestamp);
-	long timestamp() const;
+	void setFromTimestamp(std::time_t timestamp);
+	std::time_t timestamp() const;
 	static bool isLeapYear(int year);
 	int daysSinceEpoch() const;
 	static std::string monthName(int monthIndex); // 1 is January
@@ -45,5 +46,7 @@ public:
 	static int daysInMonth(int month, bool leapYear); // 1 indexed
 	std::string timestampString() const;
 
-	bool operator<(const DateTime &other) const { return timestamp() < other.timestamp(); }
+	bool operator<(const DateTime &other) const {
+		return timestamp() < other.timestamp();
+	}
 };

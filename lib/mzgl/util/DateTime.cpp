@@ -119,7 +119,7 @@ int DateTime::daysInMonth(int month, bool leapYear) { // 1 indexed
 	}
 }
 
-long DateTime::timestamp() const {
+std::time_t DateTime::timestamp() const {
 	struct tm ptm;
 	memset(&ptm, 0, sizeof(struct tm));
 	ptm.tm_sec	= sec;
@@ -133,11 +133,11 @@ long DateTime::timestamp() const {
 }
 
 void DateTime::addDays(int days) {
-	long inc = days * 24 * 60 * 60;
+	std::time_t inc = static_cast<std::time_t>(days) * 24 * 60 * 60;
 	setFromTimestamp(timestamp() + inc);
 }
 
-void DateTime::setFromTimestamp(long timestamp) {
+void DateTime::setFromTimestamp(std::time_t timestamp) {
 	time_t time		 = timestamp;
 	struct tm *tinfo = gmtime(&time);
 	year			 = tinfo->tm_year + 1900;
