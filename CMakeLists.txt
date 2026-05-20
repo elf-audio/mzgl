@@ -523,7 +523,11 @@ elseif(WIN32)
     ${GLFW_LIBRARIES}
     winmm
     dsound
-    ole32)
+    ole32
+    # Media Foundation - used for AAC/m4a/wma decoding via IMFSourceReader
+    mfplat
+    mfreadwrite
+    mfuuid)
 
   if(USING_SOKOL)
     list(APPEND MZGL_LIBS d3d11 dxgi dxguid)
