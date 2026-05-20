@@ -9,7 +9,6 @@
 #pragma once
 
 #include "DrawingFunction.h"
-#include "mzAssert.h"
 #include <memory>
 
 // this is what your dragger should inherit from
@@ -249,11 +248,13 @@ public:
 			if (d->isActive()) {
 				auto currPos = d->touchPos();
 
-				for (auto &entry: dropTargets) {
-					if (entry.life.expired()) {
-						mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
-						continue;
-					}
+				// iterate a copy: a draggedIn/draggedOut callback may add or
+				// remove drop targets, which would otherwise invalidate this loop
+				auto targets = dropTargets;
+				for (auto &entry: targets) {
+					// target may have been destroyed by an earlier callback
+					// in this same iteration - skip it safely
+					if (entry.life.expired()) continue;
 					Rectf r;
 
 					if (entry.target->getRectRelativeTo(dragRoot, r)) {
@@ -275,11 +276,15 @@ public:
 			// make sure we've reached the drag threshold
 			if (draggers[id]->isActive()) {
 				auto touch = draggers[id]->touchPos();
-				for (auto &entry: dropTargets) {
-					if (entry.life.expired()) {
-						mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
-						continue;
-					}
+				// iterate a copy: a dropped() callback may add or remove drop
+				// targets (e.g. dropping a pad on the trash deletes a pad whose
+				// editor owns a DropTarget), which would otherwise invalidate
+				// this loop and read freed memory.
+				auto targets = dropTargets;
+				for (auto &entry: targets) {
+					// target may have been destroyed by an earlier callback
+					// in this same iteration - skip it safely
+					if (entry.life.expired()) continue;
 					Rectf r;
 					if (entry.target->getRectRelativeTo(dragRoot, r)) {
 						if (r.inside(touch)) {
@@ -320,22 +325,20 @@ private:
 
 	void callDragsStarted() {
 		dragsStartedCalled = true;
-		for (auto &entry: dropTargets) {
-			if (entry.life.expired()) {
-				mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
-				continue;
-			}
+		// iterate a copy in case a callback adds or removes a drop target
+		auto targets = dropTargets;
+		for (auto &entry: targets) {
+			if (entry.life.expired()) continue;
 			entry.target->dragsStarted();
 		}
 	}
 
 	void callDragsEnded() {
 		dragsStartedCalled = false;
-		for (auto &entry: dropTargets) {
-			if (entry.life.expired()) {
-				mzAssert(false, "DragDropManager: drop target was destroyed without being removed");
-				continue;
-			}
+		// iterate a copy in case a callback adds or removes a drop target
+		auto targets = dropTargets;
+		for (auto &entry: targets) {
+			if (entry.life.expired()) continue;
 			entry.target->dragsEnded();
 		}
 	}
