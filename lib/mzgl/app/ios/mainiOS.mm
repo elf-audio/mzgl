@@ -9,8 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "iOSAppDelegate.h"
 #include "log.h"
+#include "util.h"
 int main(int argc, char *argv[]) {
 	NSString *appDelegateClassName;
+
+	loadCommandLineArgs(argc, const_cast<const char **>(argv));
 
 	@autoreleasepool {
 		// Setup code that might create autoreleased objects goes here.
