@@ -84,11 +84,17 @@ inline ThreadPool::~ThreadPool() {
 }
 
 inline void ThreadPool::stop() {
-	if (stopped.load()) {
-		return;
+	{
+		// Set `stopped` under queue_mutex so it's serialized with the worker's
+		// predicate check inside condition.wait(). Without the lock there is a
+		// window between a worker evaluating the predicate and entering wait()
+		// where notify_all() reaches no one and the worker sleeps forever.
+		std::unique_lock<std::mutex> lock(queue_mutex);
+		if (stopped.load()) {
+			return;
+		}
+		stopped.store(true);
 	}
-
-	stopped.store(true);
 	condition.notify_all();
 
 	for (std::thread &worker: workers) {
