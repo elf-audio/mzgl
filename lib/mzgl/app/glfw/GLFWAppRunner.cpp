@@ -419,6 +419,15 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			glfwPollEvents();
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		} else {
+#	ifdef _WIN32
+			// VST3 plugin editors that host their own OpenGL view (Cardinal,
+			// JUCE-OpenGL plugins, etc.) call wglMakeCurrent inside their
+			// WM_PAINT to bind their own context, and never restore ours. Once
+			// that happens every subsequent Koala GL call goes to the wrong
+			// context and Koala renders black. Re-binding our context every
+			// frame is cheap and immune to whatever the plugin does.
+			glfwMakeContextCurrent(window);
+#	endif
 			eventDispatcher->runFrame();
 
 			glfwSwapBuffers(window);
