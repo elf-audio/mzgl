@@ -108,27 +108,61 @@ static Texture::PixelFormat numChansToPixelFormat(int numChans) {
 
 bool Texture::loadFromPixels(
 	std::vector<uint8_t> &outData, int w, int h, int numChans, int bytesPerChan, bool isFloat) {
-	if (w == 0 || h == 0) {
+	if (w <= 0 || h <= 0) {
 		Log::e() << "Texture::loadFromPixels() : image dims 0";
+		return false;
+	}
+	if (numChans < 1 || numChans > 4) {
+		Log::e() << "Texture::loadFromPixels() : unsupported channel count: " << numChans;
 		return false;
 	}
 	if (bytesPerChan == 2) {
 		Log::d() << "Texture only supports 8-bit textures, this is 16 - we converting to 8";
-		int npix	 = w * h * numChans;
+		size_t npix	 = static_cast<size_t>(w) * static_cast<size_t>(h) * static_cast<size_t>(numChans);
 		uint16_t *sh = (uint16_t *) outData.data();
-		for (int i = 0; i < npix; i++) {
+		for (size_t i = 0; i < npix; i++) {
 			outData[i] = sh[i] / 256;
 		}
 		outData.resize(outData.size() / 2);
 	}
 	mzAssert(!isFloat);
 
+	// Verify the pixel buffer is big enough for the declared dimensions before
+	// we hand the pointer to glTexImage2D; the GPU driver reads w*h*numChans
+	// bytes off the pointer with no further bounds checks, so an undersized
+	// buffer (corrupt PNG, channel count mismatch, etc.) faults inside the
+	// driver — matching the win-crash 5ae344c1 GPU-driver cluster.
+	const size_t expected = static_cast<size_t>(w) * static_cast<size_t>(h) * static_cast<size_t>(numChans);
+	if (outData.size() < expected) {
+		Log::e() << "Texture::loadFromPixels() : buffer too small for "
+				 << w << "x" << h << "x" << numChans << " (have " << outData.size()
+				 << " bytes, need " << expected << ")";
+		return false;
+	}
+
 	if (numChans == 1) {
+		// Y -> RGB
 		outData.resize(3 * outData.size());
 		for (int i = w * h - 1; i >= 0; --i) {
 			outData[i * 3 + 2] = outData[i * 3 + 1] = outData[i * 3] = outData[i];
 		}
 		numChans = 3;
+	} else if (numChans == 2) {
+		// YA -> RGBA. Without this branch the old code fell through to an
+		// mzAssert (no-op in release) and uploaded w*h*2 bytes while telling
+		// the driver the texture was RGBA (w*h*4) — read-past-buffer in the
+		// driver.
+		std::vector<uint8_t> rgba(static_cast<size_t>(w) * static_cast<size_t>(h) * 4);
+		for (int i = 0; i < w * h; ++i) {
+			uint8_t y			= outData[i * 2];
+			uint8_t a			= outData[i * 2 + 1];
+			rgba[i * 4 + 0]		= y;
+			rgba[i * 4 + 1]		= y;
+			rgba[i * 4 + 2]		= y;
+			rgba[i * 4 + 3]		= a;
+		}
+		outData	 = std::move(rgba);
+		numChans = 4;
 	}
 
 	mzAssert(numChans == 3 || numChans == 4);

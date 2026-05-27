@@ -432,6 +432,32 @@ static fs::path getVSTBundlePath() {
 #endif
 
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
+
+#if defined(_WIN32) && !defined(MZGL_PLUGIN_VST)
+// Cache the data folder resolved relative to Koala.exe so it survives any CWD
+// change (file dialogs without OFN_NOCHANGEDIR / FOS_NOCHANGEDIR, launches from
+// shortcuts without "Start in" set, etc.). Previously this used "../data/" off
+// the process CWD and crashed deep inside SVG loading when CWD wasn't bin\.
+static const std::string &windowsExeDataRoot() {
+	static const std::string root = [] {
+		wchar_t buf[MAX_PATH];
+		DWORD n = GetModuleFileNameW(nullptr, buf, MAX_PATH);
+		if (n == 0 || n >= MAX_PATH) {
+			return std::string("../data");
+		}
+		try {
+			fs::path exe(buf);
+			// bin\Koala.exe -> bin\..\data == <install>\data
+			fs::path data = exe.parent_path().parent_path() / "data";
+			return data.string();
+		} catch (...) {
+			return std::string("../data");
+		}
+	}();
+	return root;
+}
+#endif
+
 std::string dataPath(const std::string &path, const std::string &appBundleId) {
 	// it's an absolute path, don't do anything to it
 	if (!path.empty() && path[0] == '/') return path;
@@ -470,7 +496,7 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #elif defined(__RPI)
 	return "../data/" + path;
 #elif defined(_WIN32)
-	return "../data/" + path;
+	return windowsExeDataRoot() + "/" + path;
 #else
 	return "../data/" + path;
 #endif
@@ -974,7 +1000,9 @@ void saveFileDialog(const std::string &msg,
 
 	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";
 	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
-	ofn.Flags		= OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
+	// OFN_NOCHANGEDIR: without this, the dialog moves the process CWD to the
+	// selected folder, which breaks every later relative-path data load.
+	ofn.Flags		= OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
 	ofn.lpstrTitle	= L"Select Output File";
 
 	if (GetSaveFileNameW(&ofn)) {

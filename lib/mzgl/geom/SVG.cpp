@@ -690,22 +690,27 @@ void SVGDoc::parse(const pu_gi::xml_node &n, int depth) {
 }
 
 void SVGDoc::scale(float s) {
+	if (!rootGroup) return;
 	rootGroup->scale(s);
 	width *= s;
 	height *= s;
 }
 void SVGDoc::scale(float w, float h) {
+	if (!rootGroup) return;
 	rootGroup->scale(w, h);
 	width *= w;
 	height *= h;
 }
 void SVGDoc::mirrorX() {
+	if (!rootGroup) return;
 	rootGroup->mirrorX();
 }
 void SVGDoc::mirrorY() {
+	if (!rootGroup) return;
 	rootGroup->mirrorY();
 }
 void SVGDoc::rotate(float theta) {
+	if (!rootGroup) return;
 	rootGroup->rotate(theta);
 }
 
@@ -714,6 +719,7 @@ void SVGDoc::rotate(float theta) {
 
 #endif
 void SVGDoc::translate(float x, float y) {
+	if (!rootGroup) return;
 	rootGroup->translate(x, y);
 }
 

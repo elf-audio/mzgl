@@ -423,7 +423,10 @@ void windowsChooseEntryDialog(HWND parent,
 	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd)))) {
 		DWORD dwOptions;
 		if (SUCCEEDED(pfd->GetOptions(&dwOptions))) {
-			pfd->SetOptions(dwOptions | (isFile ? (FOS_FORCEFILESYSTEM | FOS_FILEMUSTEXIST) : FOS_PICKFOLDERS));
+			// FOS_NOCHANGEDIR: without this, the dialog moves the process CWD to
+			// the selected folder, which breaks every later relative-path data load.
+			pfd->SetOptions(dwOptions | FOS_NOCHANGEDIR
+							| (isFile ? (FOS_FORCEFILESYSTEM | FOS_FILEMUSTEXIST) : FOS_PICKFOLDERS));
 		}
 		if (SUCCEEDED(pfd->Show(NULL))) {
 			IShellItem *psi;

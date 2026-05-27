@@ -43,9 +43,19 @@ bool Image::load(const string &path,
 	unsigned char *image = stbi_load(path.c_str(), &outWidth, &outHeight, &outNumChannels, STBI_default);
 	if (image == nullptr) return false;
 	outBytesPerChannel = 1;
-	//    printf("%d %d %d\n", outWidth, outHeight, outNumChannels);
-	outData.resize(outWidth * outHeight * outNumChannels);
-	memcpy(outData.data(), image, outWidth * outHeight * outNumChannels);
+	// Defend against int overflow on a malformed PNG with huge declared
+	// dimensions. `outWidth * outHeight * outNumChannels` in plain `int` wraps
+	// past ~2.1 GB, leaving outData smaller than the texture upload below
+	// expects and crashing the GPU driver inside glTexImage2D.
+	if (outWidth <= 0 || outHeight <= 0 || outNumChannels <= 0 || outNumChannels > 4) {
+		stbi_image_free(image);
+		return false;
+	}
+	const size_t totalBytes = static_cast<size_t>(outWidth)
+							  * static_cast<size_t>(outHeight)
+							  * static_cast<size_t>(outNumChannels);
+	outData.resize(totalBytes);
+	memcpy(outData.data(), image, totalBytes);
 	stbi_image_free(image);
 	return true;
 }

@@ -88,7 +88,9 @@ VboRef SvgVbo::createVboFromStringWithWidth(const std::string &svgCode, float wi
 
 VboRef SvgVbo::createVboFromStringWithScale(const std::string &svgCode, float scale, bool ignoreColor) {
 	SVGDoc doc;
-	doc.loadFromString(svgCode);
+	if (!doc.loadFromString(svgCode)) {
+		return nullptr;
+	}
 	return vboFromDocWithScale(doc, scale, ignoreColor);
 }
 
@@ -97,7 +99,9 @@ VboRef SvgVbo::createVboFromStringWithWidthAndHeight(const std::string &svgCode,
 													 float height,
 													 bool ignoreColor) {
 	SVGDoc doc;
-	doc.loadFromString(svgCode);
+	if (!doc.loadFromString(svgCode)) {
+		return nullptr;
+	}
 	return vboFromDocWithWidthAndHeight(doc, width, height, ignoreColor);
 }
 
