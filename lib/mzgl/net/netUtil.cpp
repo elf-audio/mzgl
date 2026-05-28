@@ -16,6 +16,24 @@
 #	include <Foundation/Foundation.h>
 #endif
 
+#if defined(__linux__)
+#	include <array>
+#	include <cstdio>
+#endif
+
+#ifdef _WIN32
+#	ifndef WIN32_LEAN_AND_MEAN
+#		define WIN32_LEAN_AND_MEAN
+#	endif
+#	ifndef NOMINMAX
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#	include <winhttp.h>
+#	include "winUtil.h"
+#	pragma comment(lib, "winhttp.lib")
+#endif
+
 std::string downloadUrl(std::string url) {
 #ifdef __APPLE__
 	// the URL to save
@@ -38,6 +56,93 @@ std::string downloadUrl(std::string url) {
 		throw DownloadError(url, "Couldn't convert NSData to string in downloadUrl");
 	}
 	return [str UTF8String];
+#elif defined(_WIN32)
+	std::wstring wurl = n2w(url);
+	URL_COMPONENTSW comps {};
+	comps.dwStructSize		= sizeof(comps);
+	wchar_t host[256]		= {};
+	wchar_t path[2048]		= {};
+	comps.lpszHostName		= host;
+	comps.dwHostNameLength	= ARRAYSIZE(host);
+	comps.lpszUrlPath		= path;
+	comps.dwUrlPathLength	= ARRAYSIZE(path);
+	if (!WinHttpCrackUrl(wurl.c_str(), 0, 0, &comps)) {
+		throw DownloadError(url, "Could not parse URL");
+	}
+
+	HINTERNET hSession = WinHttpOpen(
+		L"mzgl/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+	if (!hSession) throw DownloadError(url, "WinHttpOpen failed");
+
+	HINTERNET hConnect = WinHttpConnect(hSession, host, comps.nPort, 0);
+	HINTERNET hRequest = nullptr;
+	if (hConnect) {
+		DWORD flags = (comps.nScheme == INTERNET_SCHEME_HTTPS) ? WINHTTP_FLAG_SECURE : 0;
+		hRequest	= WinHttpOpenRequest(
+			   hConnect, L"GET", path, nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, flags);
+	}
+
+	std::string body;
+	std::string errMsg;
+	DWORD status = 0;
+	if (hRequest
+		&& WinHttpSendRequest(
+			hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)
+		&& WinHttpReceiveResponse(hRequest, nullptr)) {
+		DWORD len = sizeof(status);
+		WinHttpQueryHeaders(hRequest,
+							WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+							WINHTTP_HEADER_NAME_BY_INDEX,
+							&status,
+							&len,
+							WINHTTP_NO_HEADER_INDEX);
+		if (status == 200) {
+			DWORD avail = 0;
+			while (WinHttpQueryDataAvailable(hRequest, &avail) && avail > 0) {
+				std::string chunk(avail, '\0');
+				DWORD read = 0;
+				if (!WinHttpReadData(hRequest, chunk.data(), avail, &read)) break;
+				body.append(chunk.data(), read);
+			}
+		} else {
+			errMsg = "HTTP " + std::to_string(status);
+		}
+	} else {
+		errMsg = "WinHTTP request failed: " + std::to_string(GetLastError());
+	}
+
+	if (hRequest) WinHttpCloseHandle(hRequest);
+	if (hConnect) WinHttpCloseHandle(hConnect);
+	WinHttpCloseHandle(hSession);
+
+	if (!errMsg.empty()) throw DownloadError(url, errMsg);
+	return body;
+#elif defined(__linux__)
+	// curl ships on every distro Koala targets (ubuntu, raspbian). popen avoids
+	// pulling libcurl as a build dep for the handful of HTTP calls we make.
+	// Single-quote the URL and escape any embedded single quotes so a hostile
+	// URL can't break out of the shell argument.
+	std::string quoted = "'";
+	for (char c: url) {
+		if (c == '\'') quoted += "'\\''";
+		else quoted += c;
+	}
+	quoted += "'";
+	std::string cmd = "curl -sSfL --max-time 10 " + quoted;
+
+	FILE *pipe = popen(cmd.c_str(), "r");
+	if (!pipe) throw DownloadError(url, "popen failed");
+
+	std::string body;
+	std::array<char, 4096> buf {};
+	while (size_t n = fread(buf.data(), 1, buf.size(), pipe)) {
+		body.append(buf.data(), n);
+	}
+	int rc = pclose(pipe);
+	if (rc != 0) {
+		throw DownloadError(url, "curl exited " + std::to_string(rc));
+	}
+	return body;
 #else
 	Log::e() << "No implementation of downloadUrl yet";
 	return "";

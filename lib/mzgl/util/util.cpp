@@ -53,6 +53,7 @@
 #	include <direct.h>
 #	define _WIN32_DCOM
 #	include <shlobj.h>
+#	include <shellapi.h>
 #	include <tchar.h>
 #	include <ShObjIdl_core.h>
 #	include <locale>
@@ -859,6 +860,16 @@ void launchUrl(const std::string &url) {
 	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:urlStr]];
 #elif MZGL_ANDROID
 	androidLaunchUrl(url);
+#elif defined(_WIN32)
+	ShellExecuteW(nullptr, L"open", n2w(url).c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+#elif defined(__linux__)
+	std::string quoted = "'";
+	for (char c: url) {
+		if (c == '\'') quoted += "'\\''";
+		else quoted += c;
+	}
+	quoted += "'";
+	(void) std::system(("xdg-open " + quoted + " >/dev/null 2>&1 &").c_str());
 #else
 	Log::e() << "Launch url not implemented";
 #endif
