@@ -18,11 +18,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(cmake/mzgl.cmake)
 
-# CPMAddPackage("gh:yhirose/cpp-httplib#412ab5f")
-
-# CPMAddPackage( NAME nlohmann_json VERSION 3.9.1 OPTIONS "JSON_BuildTests OFF"
-# )
-
 if(CMAKE_BUILD_TYPE MATCHES DEBUG)
   add_compile_definitions(DEBUG=1)
 
@@ -370,11 +365,13 @@ set(SOKOL_SHDC "sokol-shdc")
 if(USING_SOKOL)
 
   # MZGL_USE_PRECOMPILED_SOKOL_SHADERS lets parent projects skip shader
-  # regeneration entirely and use the checked-in xcodeShaders/ headers.
-  # Useful when only a newer sokol-shdc is available, since the existing
-  # mzgl shaders predate the layout(binding=X) requirement.
+  # regeneration entirely and use the checked-in xcodeShaders/ headers. Useful
+  # when only a newer sokol-shdc is available, since the existing mzgl shaders
+  # predate the layout(binding=X) requirement.
   if(MZGL_USE_PRECOMPILED_SOKOL_SHADERS)
-    set(SOKOL_SHDC_FOUND OFF CACHE INTERNAL "" FORCE)
+    set(SOKOL_SHDC_FOUND
+        OFF
+        CACHE INTERNAL "" FORCE)
   else()
     find_program(SOKOL_SHDC_FOUND ${SOKOL_SHDC})
   endif()
@@ -409,8 +406,7 @@ if(USING_SOKOL)
     message(STATUS "sokol-shdc not found, using pre-compiled shader headers")
     target_include_directories(
       libmzgl
-      PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
+      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
   endif()
 
   add_compile_definitions(MZGL_SOKOL)
@@ -592,15 +588,47 @@ if(NOT ANDROID
    AND NOT IOS)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
   mzgl_save_cmake_log_level()
+  # PortAudio's CMakeLists declares cmake_minimum_required() below 3.10, which
+  # CMake flags as a deprecation warning. Silence it only while PortAudio is
+  # configured, then restore the previous setting.
+  set(_mzgl_pa_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
+  set(CMAKE_WARN_DEPRECATED
+      OFF
+      CACHE BOOL "" FORCE)
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
   add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
+  unset(CMAKE_POLICY_VERSION_MINIMUM)
+  if(_mzgl_pa_warn_deprecated STREQUAL "")
+    unset(CMAKE_WARN_DEPRECATED CACHE)
+  else()
+    set(CMAKE_WARN_DEPRECATED
+        "${_mzgl_pa_warn_deprecated}"
+        CACHE BOOL "" FORCE)
+  endif()
   list(APPEND MZGL_LIBS PortAudio)
   mzgl_restore_cmake_log_level()
 endif()
 if(WIN32)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
   mzgl_save_cmake_log_level()
-  set(PA_USE_ASIO ON CACHE BOOL "Enable PortAudio ASIO support" FORCE)
+  set(PA_USE_ASIO
+      ON
+      CACHE BOOL "Enable PortAudio ASIO support" FORCE)
+  # See note above: silence PortAudio's pre-3.10 cmake_minimum_required warning.
+  set(_mzgl_pa_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
+  set(CMAKE_WARN_DEPRECATED
+      OFF
+      CACHE BOOL "" FORCE)
+  set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
   add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
+  unset(CMAKE_POLICY_VERSION_MINIMUM)
+  if(_mzgl_pa_warn_deprecated STREQUAL "")
+    unset(CMAKE_WARN_DEPRECATED CACHE)
+  else()
+    set(CMAKE_WARN_DEPRECATED
+        "${_mzgl_pa_warn_deprecated}"
+        CACHE BOOL "" FORCE)
+  endif()
   list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
   mzgl_restore_cmake_log_level()
 endif()
