@@ -81,13 +81,11 @@ private:
 	void roundedRectVerts(const Rectf &r,
 						  float radius,
 						  std::vector<glm::vec2> &outVerts,
-						  std::vector<glm::vec2> &cache,
+						  const std::vector<glm::vec2> &cache,
 						  bool tl,
 						  bool tr,
 						  bool br,
 						  bool bl);
-
-	void createRoundedRectCache(std::vector<glm::vec2> &cache, int numSteps);
 	bool isDoingGradient = false;
 	vec4 lookupGradient(vec2 pos);
 

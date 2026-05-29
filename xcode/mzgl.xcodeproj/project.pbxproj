@@ -698,6 +698,12 @@
 		EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
 		EA8CD3722811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
 		EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */; };
+		EA8CFCF62FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */; };
+		EA8CFCF72FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */; };
+		EA8CFCF82FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */; };
+		EA8CFCF92FC99FEE003EAA41 /* ShapeLUT.h in Headers */ = {isa = PBXBuildFile; fileRef = EA8CFCF42FC99FEE003EAA41 /* ShapeLUT.h */; };
+		EA8CFCFA2FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */; };
+		EA8CFCFB2FC99FEE003EAA41 /* ShapeLUT.h in Headers */ = {isa = PBXBuildFile; fileRef = EA8CFCF42FC99FEE003EAA41 /* ShapeLUT.h */; };
 		EA924361273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA92435F273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm */; };
 		EA924362273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA92435F273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm */; };
 		EA924363273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA92435F273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm */; };
@@ -1267,6 +1273,8 @@
 		EA85564A2E7D5DCB00A515E2 /* CoreAudioSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CoreAudioSystem.cpp; sourceTree = "<group>"; };
 		EA8CD36F2811A30D00CD1200 /* ReorderableGrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReorderableGrid.cpp; sourceTree = "<group>"; };
 		EA8CD3742811A3FA00CD1200 /* ReorderableItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReorderableItem.h; sourceTree = "<group>"; };
+		EA8CFCF42FC99FEE003EAA41 /* ShapeLUT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShapeLUT.h; sourceTree = "<group>"; };
+		EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShapeLUT.cpp; sourceTree = "<group>"; };
 		EA90051826AAB62C00F8634F /* PluginParameter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PluginParameter.h; sourceTree = "<group>"; };
 		EA92435F273FFC7C00311C98 /* AllMidiDevicesAppleImpl.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AllMidiDevicesAppleImpl.mm; sourceTree = "<group>"; };
 		EA924360273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AllMidiDevicesAppleImpl.h; sourceTree = "<group>"; };
@@ -2257,6 +2265,8 @@
 		EA18362B2432C18B00A5C3E8 /* drawing */ = {
 			isa = PBXGroup;
 			children = (
+				EA8CFCF42FC99FEE003EAA41 /* ShapeLUT.h */,
+				EA8CFCF52FC99FEE003EAA41 /* ShapeLUT.cpp */,
 				EA18362C2432C18B00A5C3E8 /* MitredLine.cpp */,
 				EA18362D2432C18B00A5C3E8 /* MitredLine.h */,
 				EA18362E2432C18B00A5C3E8 /* Drawer.cpp */,
@@ -3469,6 +3479,7 @@
 				EA297C6425C954E600F890AE /* pa_linux_alsa.h in Headers */,
 				EA183FC32432C18D00A5C3E8 /* DateTime.h in Headers */,
 				EA183FDC2432C18D00A5C3E8 /* mzgl_platform.h in Headers */,
+				EA8CFCF92FC99FEE003EAA41 /* ShapeLUT.h in Headers */,
 				EA183F952432C18D00A5C3E8 /* Layout.h in Headers */,
 				EA1840442432C18D00A5C3E8 /* AudioShareSDK.h in Headers */,
 				EA183FF02432C18D00A5C3E8 /* Rectf.h in Headers */,
@@ -3561,6 +3572,7 @@
 				EA759B402715A4DC0065B4D9 /* HierarchicalScrollingList.h in Headers */,
 				EA924366273FFC7C00311C98 /* AllMidiDevicesAppleImpl.h in Headers */,
 				EA2B84BA24E7093600EA12BD /* Draggable.h in Headers */,
+				EA8CFCFB2FC99FEE003EAA41 /* ShapeLUT.h in Headers */,
 				9C038EA12D538A410047E060 /* Base64.h in Headers */,
 				EA71A77527E39E6C0081A5CB /* brg_endian.h in Headers */,
 				EA71A7AF27E39E6C0081A5CB /* unzipper.h in Headers */,
@@ -3834,6 +3846,7 @@
 				EA297C7E25C954E600F890AE /* pa_ringbuffer.c in Sources */,
 				EA297CB125C954E600F890AE /* pa_mac_core_blocking.c in Sources */,
 				EA71A78827E39E6C0081A5CB /* entropy.c in Sources */,
+				EA8CFCF82FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */,
 				EA8CD3702811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EA18400C2432C18D00A5C3E8 /* Vbo.cpp in Sources */,
 				EA3551B625CB201F003DF2FB /* MZGLView.mm in Sources */,
@@ -4025,6 +4038,7 @@
 				EA4B48FC24588303000E79BF /* mainiOS.mm in Sources */,
 				EA234B1924A63513000F057B /* FlexboxLayout.cpp in Sources */,
 				EAF6F4A42E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
+				EA8CFCF72FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */,
 				EAF6F4A52E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA1841142432C4A500A5C3E8 /* Image.mm in Sources */,
 				9CB94F222F39EB4100996766 /* pathUtil.cpp in Sources */,
@@ -4171,6 +4185,7 @@
 				EA2B8B1324E7093600EA12BD /* ScrollingList.cpp in Sources */,
 				EA71FEEB27F33B310005C47A /* ZipReader.cpp in Sources */,
 				9C5EF3302C9C6A7200D282EC /* MidiMessage.cpp in Sources */,
+				EA8CFCFA2FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */,
 				EAF6737B289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */,
 				EA71A7A227E39E6C0081A5CB /* tools.cpp in Sources */,
@@ -4293,6 +4308,7 @@
 				EA689473261C633500F76B91 /* FlexboxLayout.cpp in Sources */,
 				EA71A75D27E39E6C0081A5CB /* aescrypt.c in Sources */,
 				EAF6F4A62E09B1FA00DE5361 /* OpenGLAPI.cpp in Sources */,
+				EA8CFCF62FC99FEE003EAA41 /* ShapeLUT.cpp in Sources */,
 				EAF6F4A72E09B1FA00DE5361 /* OpenGLShader.cpp in Sources */,
 				EA71A78327E39E6C0081A5CB /* aestab.c in Sources */,
 				9CB94F232F39EB4100996766 /* pathUtil.cpp in Sources */,

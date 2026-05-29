@@ -9,8 +9,8 @@
 #include "RoundedRect.h"
 #include "maths.h"
 #include "Graphics.h"
-#include "MitredLine.h"
 #include "Drawer.h"
+#include "ShapeLUT.h"
 using namespace std;
 
 vector<glm::vec2> roundedRectCache;
@@ -23,36 +23,19 @@ void createRoundedRectCache(vector<glm::vec2> &cache, int numSteps) {
 }
 
 VboRef makeRoundedRectVbo(const Rectf &r, float radius, bool solid, float strokeWeight) {
-	vector<glm::vec2> verts;
-	getRoundedRectVerts(r, radius, verts);
-
+	Drawer d;
+	d.setColor(1);
 	if (solid) {
-		Drawer d;
-		d.setColor(1);
-		d.drawTriangleFan(verts);
-		return d.createVbo();
-
+		d.fill();
 	} else {
-		auto m = Vbo::create();
-		MitredLine lineDrawer;
-
-		verts.pop_back();
-		lineDrawer.thickness = strokeWeight;
-
-		vector<vec2> vs;
-		vector<uint32_t> indices;
-
-		lineDrawer.getVerts(verts, vs, indices, MitredLine::OpenOrClosed::Closed);
-
-		m->setVertices(vs);
-		m->setIndices(indices);
-
-		m->setMode(Vbo::PrimitiveType::TriangleStrip);
-		return m;
+		d.noFill();
+		d.setStrokeWeight(strokeWeight);
 	}
+	d.drawRoundedRect(r, radius);
+	return d.createVbo();
 }
 
-void roundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &outVerts, vector<glm::vec2> &cache) {
+void roundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> &outVerts, const vector<glm::vec2> &cache) {
 	// top left
 	auto t = r.tl();
 
@@ -89,7 +72,6 @@ void getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> 
 		outVerts.push_back(r.bl());
 
 	} else {
-		vector<glm::vec2> cache;
 		float pixelsPerStep = 8;
 		float ang			= pixelsPerStep / 2.f / radius;
 		if (ang > 1) {
@@ -103,8 +85,8 @@ void getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> 
 		float step	   = asin(ang) / 2.f;
 		float numSteps = M_PI * 2.f / step;
 
-		//		printf("num steps: %.0f\n", numSteps);
-		createRoundedRectCache(cache, numSteps);
+		// precomputed quarter-arc points - no trig per draw (see ShapeLUT)
+		const auto &cache = roundedRectCornerLUT((int) std::ceil(numSteps));
 		roundedRectVerts(r, radius, outVerts, cache);
 	}
 }
@@ -133,7 +115,7 @@ void RoundedRect::fill(Graphics &g, const Rectf &r, float radius) {
 void RoundedRect::stroke(Graphics &g, const Rectf &r, float radius, float strokeWeight) {
 	if (mesh == nullptr || r != oldRect || oldSolid || radius != oldRadius || strokeWeight != oldStrokeWeight) {
 		oldRect			= r;
-		oldSolid		= true;
+		oldSolid		= false;
 		oldRadius		= radius;
 		oldStrokeWeight = strokeWeight;
 		mesh			= makeRoundedRectVbo(r, radius, false, strokeWeight);

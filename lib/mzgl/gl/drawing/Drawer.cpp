@@ -2,6 +2,7 @@
 
 #include "Drawer.h"
 #include "RoundedRect.h"
+#include "ShapeLUT.h"
 #include "maths.h"
 #include "mzAssert.h"
 #include "log.h"
@@ -23,6 +24,12 @@ float calcAngleStep(float radius) {
 	//		printf("numStepsMax %f calcedNumSteps %f\n", numStepsMax, calcedNumSteps);
 	//	}
 	return std::max(arcBasedAngle, maxStepsAngle); // Choose the larger of the two
+}
+
+// number of segments to tessellate a circle of the given radius into,
+// using the same arc-length heuristic as calcAngleStep()
+static int calcCircleSegments(float radius) {
+	return (int) std::ceil(Maths::TWO_PI / calcAngleStep(radius));
 }
 
 void Drawer::setColor(const glm::vec4 &c) {
@@ -342,26 +349,16 @@ void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
 
 void Drawer::drawCircle(glm::vec2 c, float r) {
 	auto startIndex = geom.verts.size();
-	float angleStep = calcAngleStep(r);
 
-	// number of points around the circle (matches old `th < TWO_PI` loop count)
-	int numSteps = static_cast<int>(std::ceil(Maths::TWO_PI / angleStep));
-
-	// incremental rotation: rotate a unit vector by angleStep each step
-	// instead of calling cos/sin per vertex (two trig calls total)
-	const float cosStep = cos(angleStep);
-	const float sinStep = sin(angleStep);
-	float x = 1.f;
-	float y = 0.f;
+	// precomputed unit-circle points - no trig per draw (see ShapeLUT)
+	const auto &unit = unitCircleLUT(calcCircleSegments(r));
+	const int numSteps = (int) unit.size();
 
 	if (filled) {
 		geom.verts.reserve(geom.verts.size() + numSteps);
 		geom.indices.reserve(geom.indices.size() + (numSteps - 2) * 3);
 		for (int i = 0; i < numSteps; i++) {
-			geom.verts.push_back({c.x + x * r, c.y + y * r});
-			float nx = x * cosStep - y * sinStep;
-			y		 = x * sinStep + y * cosStep;
-			x		 = nx;
+			geom.verts.push_back({c.x + unit[i].x * r, c.y + unit[i].y * r});
 		}
 
 		auto numVerts = geom.verts.size() - startIndex;
@@ -378,11 +375,8 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 		geom.verts.reserve(geom.verts.size() + numSteps * 2);
 		geom.indices.reserve(geom.indices.size() + numSteps * 6);
 		for (int i = 0; i < numSteps; i++) {
-			geom.verts.push_back({c.x + x * outer, c.y + y * outer});
-			geom.verts.push_back({c.x + x * inner, c.y + y * inner});
-			float nx = x * cosStep - y * sinStep;
-			y		 = x * sinStep + y * cosStep;
-			x		 = nx;
+			geom.verts.push_back({c.x + unit[i].x * outer, c.y + unit[i].y * outer});
+			geom.verts.push_back({c.x + unit[i].x * inner, c.y + unit[i].y * inner});
 		}
 
 		auto numVerts = geom.verts.size() - startIndex;
@@ -440,16 +434,19 @@ void Drawer::drawCircleShadow(const vec2 &c, float r, float shadowRadius) {
 	float outerRadius = r + shadowRadius;
 	vec4 zeroAlpha	  = color;
 	zeroAlpha.a		  = 0;
-	float angleStep	  = calcAngleStep(r);
-	for (float th = 0; th <= Maths::TWO_PI; th += angleStep) {
-		vec2 angs {cos(th), sin(th)};
-		verts.push_back(c + angs * r);
-		verts.push_back(c + angs * outerRadius);
+	const auto &unit = unitCircleLUT(calcCircleSegments(r));
+	const int numSteps = (int) unit.size();
+	verts.reserve((numSteps + 1) * 2);
+	cols.reserve((numSteps + 1) * 2);
+	for (int i = 0; i < numSteps; i++) {
+		verts.push_back(c + unit[i] * r);
+		verts.push_back(c + unit[i] * outerRadius);
 		cols.push_back(color);
 		cols.push_back(zeroAlpha);
 	}
-	verts.push_back(verts[0]);
-	verts.push_back(verts[1]);
+	// close the ring back to the first point
+	verts.push_back(c + unit[0] * r);
+	verts.push_back(c + unit[0] * outerRadius);
 	cols.push_back(color);
 	cols.push_back(zeroAlpha);
 	drawTriangleStrip(verts, cols);
@@ -520,7 +517,6 @@ void Drawer::addGeometry(Geometry &_geom) {
 
 void Drawer::getPerfectRoundedRectVerts(
 	const Rectf &r, float radius, vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl) {
-	vector<glm::vec2> cache;
 	float pixelsPerStep = 2;
 	float ang			= pixelsPerStep / 2.f / radius;
 	if (ang > 1) {
@@ -533,7 +529,8 @@ void Drawer::getPerfectRoundedRectVerts(
 	float step	   = asin(pixelsPerStep / 2.f / radius) / 2.f;
 	float numSteps = Maths::TWO_PI / step;
 
-	createRoundedRectCache(cache, numSteps);
+	// precomputed quarter-arc points - no trig per draw (see ShapeLUT)
+	const auto &cache = roundedRectCornerLUT((int) std::ceil(numSteps));
 	roundedRectVerts(r, radius, outVerts, cache, tl, tr, br, bl);
 }
 
@@ -570,7 +567,7 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius, bool tl, bool tr, boo
 void Drawer::roundedRectVerts(const Rectf &r,
 							  float radius,
 							  vector<glm::vec2> &outVerts,
-							  vector<glm::vec2> &cache,
+							  const vector<glm::vec2> &cache,
 							  bool tl,
 							  bool tr,
 							  bool br,
@@ -619,12 +616,4 @@ void Drawer::roundedRectVerts(const Rectf &r,
 
 	// close the shape
 	outVerts.push_back(r.tl() + cache[0] * radius);
-}
-
-void Drawer::createRoundedRectCache(vector<glm::vec2> &cache, int numSteps) {
-	cache.resize(numSteps); //20
-	for (int i = 0; i < cache.size(); i++) {
-		float phi = mapf(i, 0, cache.size(), Maths::PI, Maths::PI + Maths::PI / 2.0);
-		cache[i]  = glm::vec2(1.f + (float) cos(phi), 1.f + (float) sin(phi));
-	}
 }

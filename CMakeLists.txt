@@ -62,6 +62,7 @@ set(MZGL_SOURCES
     lib/mzgl/gl/ScopedMask.cpp
     lib/mzgl/gl/drawing/Drawer.cpp
     lib/mzgl/gl/drawing/MitredLine.cpp
+    lib/mzgl/gl/drawing/ShapeLUT.cpp
     lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/midi/MidiMessage.cpp
