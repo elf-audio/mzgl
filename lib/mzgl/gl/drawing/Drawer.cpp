@@ -343,9 +343,25 @@ void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
 void Drawer::drawCircle(glm::vec2 c, float r) {
 	auto startIndex = geom.verts.size();
 	float angleStep = calcAngleStep(r);
+
+	// number of points around the circle (matches old `th < TWO_PI` loop count)
+	int numSteps = static_cast<int>(std::ceil(Maths::TWO_PI / angleStep));
+
+	// incremental rotation: rotate a unit vector by angleStep each step
+	// instead of calling cos/sin per vertex (two trig calls total)
+	const float cosStep = cos(angleStep);
+	const float sinStep = sin(angleStep);
+	float x = 1.f;
+	float y = 0.f;
+
 	if (filled) {
-		for (float th = 0; th < Maths::TWO_PI; th += angleStep) {
-			geom.verts.push_back({c.x + cos(th) * r, c.y + sin(th) * r});
+		geom.verts.reserve(geom.verts.size() + numSteps);
+		geom.indices.reserve(geom.indices.size() + (numSteps - 2) * 3);
+		for (int i = 0; i < numSteps; i++) {
+			geom.verts.push_back({c.x + x * r, c.y + y * r});
+			float nx = x * cosStep - y * sinStep;
+			y		 = x * sinStep + y * cosStep;
+			x		 = nx;
 		}
 
 		auto numVerts = geom.verts.size() - startIndex;
@@ -359,11 +375,14 @@ void Drawer::drawCircle(glm::vec2 c, float r) {
 		float sw	= strokeWeight * 0.5;
 		float inner = r - sw;
 		float outer = r + sw;
-		for (float th = 0; th < Maths::TWO_PI; th += angleStep) {
-			float x = cos(th);
-			float y = sin(th);
+		geom.verts.reserve(geom.verts.size() + numSteps * 2);
+		geom.indices.reserve(geom.indices.size() + numSteps * 6);
+		for (int i = 0; i < numSteps; i++) {
 			geom.verts.push_back({c.x + x * outer, c.y + y * outer});
 			geom.verts.push_back({c.x + x * inner, c.y + y * inner});
+			float nx = x * cosStep - y * sinStep;
+			y		 = x * sinStep + y * cosStep;
+			x		 = nx;
 		}
 
 		auto numVerts = geom.verts.size() - startIndex;
