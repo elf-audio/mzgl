@@ -92,15 +92,21 @@ public:
 		} else {
 			mzAssert(0);
 		}
-#ifdef __ANDROID__ // this might be necessary for all platforms
+		// Non-RGBA rows aren't guaranteed to be 4-aligned. Intel iGPU drivers
+		// overread the buffer in glTexImage2D when alignment is the default 4
+		// and the row stride isn't a multiple of 4 — drop to 1 across the call.
 		// https://stackoverflow.com/questions/58925604/glteximage2d-crashing-program
-		// -- it's to do with rows being aligned - so if each row isn't aligned to 4 it needs this.
+		GLint prevUnpackAlignment = 4;
 		if (type != GL_RGBA) {
+			glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		}
-#endif
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, type, GL_UNSIGNED_BYTE, data);
+
+		if (type != GL_RGBA) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
