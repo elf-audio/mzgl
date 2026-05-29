@@ -61,3 +61,7 @@ const std::vector<glm::vec2> &roundedRectCornerLUT(int minSteps) {
 	}();
 	return lut.pick(minSteps);
 }
+
+int roundedRectCornerSteps(float radius, float pixelsPerStep) {
+	return (int) std::ceil(8.f * kPi * radius / pixelsPerStep);
+}

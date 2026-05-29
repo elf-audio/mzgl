@@ -29,3 +29,9 @@ const std::vector<glm::vec2> &unitCircleLUT(int minSegments);
 // roundedRectVerts() can consume it unchanged.
 // Returns a table with >= minSteps points.
 const std::vector<glm::vec2> &roundedRectCornerLUT(int minSteps);
+
+// How many points to tessellate one rounded-rect corner of the given radius,
+// targeting ~pixelsPerStep pixels per segment. Trig-free (small-angle form of
+// the old 2*PI / (asin(pixelsPerStep/2/radius)/2)) - the result is bucketed by
+// roundedRectCornerLUT anyway, so the approximation is harmless.
+int roundedRectCornerSteps(float radius, float pixelsPerStep);

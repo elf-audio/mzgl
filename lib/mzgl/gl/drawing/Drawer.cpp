@@ -518,19 +518,16 @@ void Drawer::addGeometry(Geometry &_geom) {
 void Drawer::getPerfectRoundedRectVerts(
 	const Rectf &r, float radius, vector<glm::vec2> &outVerts, bool tl, bool tr, bool br, bool bl) {
 	float pixelsPerStep = 2;
-	float ang			= pixelsPerStep / 2.f / radius;
-	if (ang > 1) {
+	if (pixelsPerStep / 2.f / radius > 1) {
 		outVerts.push_back(r.tl());
 		outVerts.push_back(r.tr());
 		outVerts.push_back(r.br());
 		outVerts.push_back(r.bl());
 		return;
 	}
-	float step	   = asin(pixelsPerStep / 2.f / radius) / 2.f;
-	float numSteps = Maths::TWO_PI / step;
 
 	// precomputed quarter-arc points - no trig per draw (see ShapeLUT)
-	const auto &cache = roundedRectCornerLUT((int) std::ceil(numSteps));
+	const auto &cache = roundedRectCornerLUT(roundedRectCornerSteps(radius, pixelsPerStep));
 	roundedRectVerts(r, radius, outVerts, cache, tl, tr, br, bl);
 }
 

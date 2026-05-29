@@ -73,8 +73,7 @@ void getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> 
 
 	} else {
 		float pixelsPerStep = 8;
-		float ang			= pixelsPerStep / 2.f / radius;
-		if (ang > 1) {
+		if (pixelsPerStep / 2.f / radius > 1) {
 			outVerts.push_back(r.tl());
 			outVerts.push_back(r.tr());
 			outVerts.push_back(r.br());
@@ -82,11 +81,8 @@ void getPerfectRoundedRectVerts(const Rectf &r, float radius, vector<glm::vec2> 
 			return;
 		}
 
-		float step	   = asin(ang) / 2.f;
-		float numSteps = M_PI * 2.f / step;
-
 		// precomputed quarter-arc points - no trig per draw (see ShapeLUT)
-		const auto &cache = roundedRectCornerLUT((int) std::ceil(numSteps));
+		const auto &cache = roundedRectCornerLUT(roundedRectCornerSteps(radius, pixelsPerStep));
 		roundedRectVerts(r, radius, outVerts, cache);
 	}
 }
