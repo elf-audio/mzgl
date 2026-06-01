@@ -43,8 +43,8 @@ SCENARIO("AudioFile::load fails gracefully when allocations would fail",
 		THEN("the load reports failure") {
 			REQUIRE_FALSE(static_cast<bool>(loaded));
 		}
-		THEN("the LoadedAudio is flagged as out-of-memory") {
-			REQUIRE(loaded.outOfMemory);
+		THEN("the LoadedAudio's failureFlags has the OutOfMemory bit set") {
+			REQUIRE((loaded.failureFlags & AudioFile::LoadFailureFlag::OutOfMemory) != 0);
 		}
 		THEN("no audio data is returned") {
 			REQUIRE(loaded.data.empty());
@@ -81,8 +81,8 @@ SCENARIO("AudioFile::loadResampled fails gracefully when allocations would fail"
 		THEN("the load reports failure") {
 			REQUIRE_FALSE(static_cast<bool>(loaded));
 		}
-		THEN("the LoadedAudio is flagged as out-of-memory") {
-			REQUIRE(loaded.outOfMemory);
+		THEN("the LoadedAudio's failureFlags has the OutOfMemory bit set") {
+			REQUIRE((loaded.failureFlags & AudioFile::LoadFailureFlag::OutOfMemory) != 0);
 		}
 		THEN("no audio data is returned") {
 			REQUIRE(loaded.data.empty());

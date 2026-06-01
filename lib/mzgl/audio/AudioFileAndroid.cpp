@@ -682,10 +682,46 @@ namespace {
 	}
 }
 
-AudioFile::LoadedAudio AudioFile::load(const std::string &path) {
-	return loadInto(path, std::nullopt);
+namespace {
+	void tryAddIssue(AudioFile::LoadedAudio &out, const char *prefix, const std::string &path) {
+		try {
+			out.result.addIssue(std::string(prefix) + path);
+		} catch (const std::bad_alloc &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::OutOfMemory;
+		} catch (...) {
+			// best-effort
+		}
+	}
+
+	AudioFile::LoadedAudio loadAndCatch(const std::string &path, std::optional<int> resampleTo) noexcept {
+		AudioFile::LoadedAudio out;
+		try {
+			return loadInto(path, resampleTo);
+		} catch (const std::bad_alloc &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::OutOfMemory;
+			tryAddIssue(out, "Out of memory loading ", path);
+		} catch (const std::filesystem::filesystem_error &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::FilesystemError;
+			tryAddIssue(out, "Filesystem error loading ", path);
+		} catch (const std::system_error &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::SystemError;
+			tryAddIssue(out, "System error loading ", path);
+		} catch (const std::exception &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::Exception;
+			tryAddIssue(out, "Exception loading ", path);
+		} catch (...) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::Unknown;
+			tryAddIssue(out, "Unknown error loading ", path);
+		}
+		return out;
+	}
+} // namespace
+
+AudioFile::LoadedAudio AudioFile::load(const std::string &path) noexcept {
+	return loadAndCatch(path, std::nullopt);
 }
 
-AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path, int desiredSampleRate) {
-	return loadInto(path, desiredSampleRate);
+AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path,
+												int desiredSampleRate) noexcept {
+	return loadAndCatch(path, desiredSampleRate);
 }

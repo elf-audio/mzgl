@@ -438,32 +438,50 @@ namespace {
 	}
 }
 
-AudioFile::LoadedAudio AudioFile::load(const std::string &path) {
-	try {
-		return loadInto(path, std::nullopt);
-	} catch (const std::bad_alloc &) {
-		AudioFile::LoadedAudio out;
-		out.outOfMemory = true;
+namespace {
+	// Best-effort issue add for the noexcept loaders. The message itself
+	// requires allocation, so if we're already in OOM territory the call
+	// may fail — in that case we OR LoadFailureFlag::OutOfMemory into the
+	// result so operator bool still reports failure.
+	void tryAddIssue(AudioFile::LoadedAudio &out, const char *prefix, const std::string &path) {
 		try {
-			out.result.addIssue("Out of memory loading " + path);
+			out.result.addIssue(std::string(prefix) + path);
 		} catch (const std::bad_alloc &) {
-			// Still OOM; outOfMemory flag is the reliable signal.
+			out.failureFlags |= AudioFile::LoadFailureFlag::OutOfMemory;
+		} catch (...) {
+			// best-effort
+		}
+	}
+
+	AudioFile::LoadedAudio loadAndCatch(const std::string &path, std::optional<int> resampleTo) noexcept {
+		AudioFile::LoadedAudio out;
+		try {
+			return loadInto(path, resampleTo);
+		} catch (const std::bad_alloc &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::OutOfMemory;
+			tryAddIssue(out, "Out of memory loading ", path);
+		} catch (const std::filesystem::filesystem_error &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::FilesystemError;
+			tryAddIssue(out, "Filesystem error loading ", path);
+		} catch (const std::system_error &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::SystemError;
+			tryAddIssue(out, "System error loading ", path);
+		} catch (const std::exception &) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::Exception;
+			tryAddIssue(out, "Exception loading ", path);
+		} catch (...) {
+			out.failureFlags |= AudioFile::LoadFailureFlag::Unknown;
+			tryAddIssue(out, "Unknown error loading ", path);
 		}
 		return out;
 	}
+} // namespace
+
+AudioFile::LoadedAudio AudioFile::load(const std::string &path) noexcept {
+	return loadAndCatch(path, std::nullopt);
 }
 
-AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path, int desiredSampleRate) {
-	try {
-		return loadInto(path, desiredSampleRate);
-	} catch (const std::bad_alloc &) {
-		AudioFile::LoadedAudio out;
-		out.outOfMemory = true;
-		try {
-			out.result.addIssue("Out of memory loading " + path);
-		} catch (const std::bad_alloc &) {
-			// Still OOM; outOfMemory flag is the reliable signal.
-		}
-		return out;
-	}
+AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path,
+												int desiredSampleRate) noexcept {
+	return loadAndCatch(path, desiredSampleRate);
 }

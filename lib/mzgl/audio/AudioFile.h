@@ -14,6 +14,20 @@
 #include "SampleData.h"
 
 namespace AudioFile {
+	// Bitmask flags describing which exception path the noexcept loader
+	// caught. Multiple flags can be set on the same LoadedAudio if both
+	// the load itself and the subsequent issue-allocation failed (e.g.
+	// FilesystemError | OutOfMemory). LoadedAudio::operator bool returns
+	// false whenever any bit is set, regardless of result.success().
+	namespace LoadFailureFlag {
+		constexpr int None			  = 0;
+		constexpr int OutOfMemory	  = 1 << 0; // std::bad_alloc
+		constexpr int FilesystemError = 1 << 1; // std::filesystem::filesystem_error
+		constexpr int SystemError	  = 1 << 2; // std::system_error
+		constexpr int Exception		  = 1 << 3; // any other std::exception
+		constexpr int Unknown		  = 1 << 4; // non-std exception
+	} // namespace LoadFailureFlag
+
 	// New API: returns the loaded audio (or an error list) by value.
 	// SampleData is moved out via RVO so there are no big copies.
 	struct LoadedAudio {
@@ -21,15 +35,14 @@ namespace AudioFile {
 		int numChannels = 1;
 		int sampleRate	= 0;
 		Result result;
-		// Set when the loader could not even allocate enough memory to
-		// populate `result` with a descriptive issue. operator bool
-		// returns false in that case regardless of `result.success()`.
-		bool outOfMemory = false;
-		explicit operator bool() const noexcept { return !outOfMemory && result.success(); }
+		int failureFlags = LoadFailureFlag::None;
+		explicit operator bool() const noexcept {
+			return failureFlags == LoadFailureFlag::None && result.success();
+		}
 	};
 
-	LoadedAudio load(const std::string &path);
-	LoadedAudio loadResampled(const std::string &path, int desiredSampleRate);
+	LoadedAudio load(const std::string &path) noexcept;
+	LoadedAudio loadResampled(const std::string &path, int desiredSampleRate) noexcept;
 
 	// Legacy out-param overloads. Existing call sites still use these.
 	// May throw std::bad_alloc on OOM.
