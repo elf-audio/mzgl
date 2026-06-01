@@ -284,17 +284,14 @@ namespace {
 	SampleFormat nativeFormatFor(const AudioStreamBasicDescription &fmt) {
 		if (fmt.mFormatID == kAudioFormatLinearPCM) {
 			const bool isFloat = (fmt.mFormatFlags & kLinearPCMFormatFlagIsFloat) != 0;
-			const bool isInt   = (fmt.mFormatFlags & kLinearPCMFormatFlagIsSignedInteger) != 0;
 			if (isFloat && fmt.mBitsPerChannel == 32) return SampleFormat::F32;
-			if (isInt) return formatForBits(fmt.mBitsPerChannel);
-			return SampleFormat::I24;
-		}
-
-		if (fmt.mFormatID == kAudioFormatFLAC) {
 			return formatForBits(fmt.mBitsPerChannel);
 		}
 
-		if (fmt.mFormatID == kAudioFormatAppleLossless) {
+		// FLAC and ALAC both communicate source bit depth via mFormatFlags
+		// using the kAppleLosslessFormatFlag_* enum, not via mBitsPerChannel
+		// (which CoreAudio reports as 0 for both compressed-lossless formats).
+		if (fmt.mFormatID == kAudioFormatFLAC || fmt.mFormatID == kAudioFormatAppleLossless) {
 			switch (fmt.mFormatFlags) {
 				case kAppleLosslessFormatFlag_16BitSourceData: return SampleFormat::I16;
 				case kAppleLosslessFormatFlag_20BitSourceData: return SampleFormat::I24;
