@@ -439,9 +439,31 @@ namespace {
 }
 
 AudioFile::LoadedAudio AudioFile::load(const std::string &path) {
-	return loadInto(path, std::nullopt);
+	try {
+		return loadInto(path, std::nullopt);
+	} catch (const std::bad_alloc &) {
+		AudioFile::LoadedAudio out;
+		out.outOfMemory = true;
+		try {
+			out.result.addIssue("Out of memory loading " + path);
+		} catch (const std::bad_alloc &) {
+			// Still OOM; outOfMemory flag is the reliable signal.
+		}
+		return out;
+	}
 }
 
 AudioFile::LoadedAudio AudioFile::loadResampled(const std::string &path, int desiredSampleRate) {
-	return loadInto(path, desiredSampleRate);
+	try {
+		return loadInto(path, desiredSampleRate);
+	} catch (const std::bad_alloc &) {
+		AudioFile::LoadedAudio out;
+		out.outOfMemory = true;
+		try {
+			out.result.addIssue("Out of memory loading " + path);
+		} catch (const std::bad_alloc &) {
+			// Still OOM; outOfMemory flag is the reliable signal.
+		}
+		return out;
+	}
 }

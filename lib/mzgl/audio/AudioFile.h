@@ -21,7 +21,11 @@ namespace AudioFile {
 		int numChannels = 1;
 		int sampleRate	= 0;
 		Result result;
-		explicit operator bool() const noexcept { return result.success(); }
+		// Set when the loader could not even allocate enough memory to
+		// populate `result` with a descriptive issue. operator bool
+		// returns false in that case regardless of `result.success()`.
+		bool outOfMemory = false;
+		explicit operator bool() const noexcept { return !outOfMemory && result.success(); }
 	};
 
 	LoadedAudio load(const std::string &path);
