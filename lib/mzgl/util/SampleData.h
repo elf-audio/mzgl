@@ -74,13 +74,15 @@ public:
 
 	void clear() noexcept { raw.clear(); }
 
-	void resize(size_t numSamples, float defaultValue = 0.f) {
+	void resize(size_t numSamples, std::optional<float> defaultValue = std::nullopt) {
 		const int bps = bytesPerSample();
 		const size_t oldBytes = raw.size();
 		raw.resize(numSamples * bps);
-		if (defaultValue != 0.f && raw.size() > oldBytes) {
+		if (defaultValue && raw.size() > oldBytes) {
 			const size_t startIdx = oldBytes / bps;
-			for (size_t i = startIdx; i < numSamples; ++i) assignValue(static_cast<int>(i), defaultValue);
+			for (size_t i = startIdx; i < numSamples; ++i) {
+				assignValue(static_cast<int>(i), *defaultValue);
+			}
 		}
 	}
 
