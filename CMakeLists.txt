@@ -119,6 +119,7 @@ set(MZGL_SOURCES
     lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
     lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
     lib/mzgl/audio/AudioFileApple.cpp
+    lib/mzgl/audio/AudioFileDrLib.cpp
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
     lib/mzgl/app/mac/MacAppDelegate.mm
@@ -302,6 +303,7 @@ else()
   list(APPEND MZGL_SOURCES lib/misc/speex_resampler.cpp)
   list(APPEND MZGL_SOURCES lib/mzgl/audio/Resampler.cpp)
   list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileAndroid.cpp)
+  list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileDrLib.cpp)
 endif()
 
 if(ANDROID)

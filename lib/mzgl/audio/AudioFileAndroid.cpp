@@ -18,6 +18,7 @@
 #include "util/log.h"
 #include "log.h"
 
+#include "AudioFileDrLib.h"
 #include "Resampler.h"
 #include "DrAudioFileReader.h"
 
@@ -543,111 +544,6 @@ bool AudioFile::loadResampled(std::string path, FloatBuffer &buff, int newSample
 }
 
 namespace {
-	// Per-sample float -> native-format scalar writes via SampleData's
-	// runtime-branching assignValue. This is hot per chunk but the chunk
-	// size keeps the branch predictable.
-	void writeFloatChunkIntoSampleData(SampleData &out, size_t startIdx, const std::vector<float> &chunk) {
-		for (size_t i = 0; i < chunk.size(); ++i) {
-			out.assignValue(startIdx + i, chunk[i]);
-		}
-	}
-
-	// Bytes -> floats, format-aware. Used to feed the resampler from a
-	// native-format chunk.
-	void nativeChunkToFloat(const std::vector<uint8_t> &bytes,
-							SampleFormat fmt,
-							std::vector<float> &outFloats) {
-		const int bps  = bytesPerSample(fmt);
-		const size_t n = bytes.size() / bps;
-		outFloats.resize(n);
-		switch (fmt) {
-			case SampleFormat::I8: {
-				const int8_t *p = reinterpret_cast<const int8_t *>(bytes.data());
-				for (size_t i = 0; i < n; ++i) outFloats[i] = p[i] * (1.f / 128.f);
-				break;
-			}
-			case SampleFormat::I16: {
-				const int16_t *p = reinterpret_cast<const int16_t *>(bytes.data());
-				for (size_t i = 0; i < n; ++i) outFloats[i] = p[i] * (1.f / 32768.f);
-				break;
-			}
-			case SampleFormat::I24: {
-				const uint8_t *p = bytes.data();
-				for (size_t i = 0; i < n; ++i) {
-					const uint8_t *q = p + i * 3;
-					int32_t v		 = (int32_t(int8_t(q[2])) << 16) | (int32_t(q[1]) << 8) | int32_t(q[0]);
-					outFloats[i]	 = v * (1.f / 8388608.f);
-				}
-				break;
-			}
-			case SampleFormat::F32: {
-				const float *p = reinterpret_cast<const float *>(bytes.data());
-				std::memcpy(outFloats.data(), p, n * sizeof(float));
-				break;
-			}
-		}
-	}
-
-	// Stream a drlib-backed reader into a SampleData of its native bit
-	// depth, optionally resampling chunk-by-chunk via the Resampler. Peak
-	// memory is the final destination buffer + ~16 KB of float scratch,
-	// regardless of total file size.
-	bool drLibStreamLoadNative(const std::string &path,
-							   AudioFile::LoadedAudio &out,
-							   std::optional<int> resampleTo) {
-		DrAudioFileReader reader;
-		if (!reader.open(path)) {
-			out.result.addIssue("Can't open file " + path);
-			return false;
-		}
-
-		const int chans			   = reader.getNumChannels();
-		const int originalSR	   = reader.getSampleRate();
-		const SampleFormat fmt	   = reader.getNativeFormat();
-		const int targetSR		   = resampleTo.value_or(originalSR);
-		const bool isResampling	   = resampleTo.has_value() && targetSR != originalSR;
-
-		out.numChannels = chans;
-		out.sampleRate	= targetSR;
-		out.data		= SampleData(std::vector<uint8_t> {}, fmt);
-
-		Resampler resampler;
-		if (isResampling) {
-			resampler.init(chans, originalSR, targetSR, RESAMPLING_QUALITY);
-		}
-
-		constexpr size_t framesPerChunk = 1024;
-		std::vector<uint8_t> nativeChunk;
-		std::vector<float> floatChunk;
-		std::vector<float> resampledChunk;
-
-		while (true) {
-			const uint32_t framesRead = reader.readNative(nativeChunk, framesPerChunk);
-			if (framesRead == 0) break;
-
-			if (!isResampling) {
-				// Append raw bytes verbatim — no conversion at all.
-				const size_t startBytes	 = out.data.byteSize();
-				const size_t addBytes	 = nativeChunk.size();
-				const size_t totalBytes	 = startBytes + addBytes;
-				const size_t newSamples	 = totalBytes / bytesPerSample(fmt);
-				out.data.resize(newSamples);
-				std::memcpy(out.data.bytes() + startBytes, nativeChunk.data(), addBytes);
-			} else {
-				nativeChunkToFloat(nativeChunk, fmt, floatChunk);
-				resampler.process(floatChunk, resampledChunk);
-				const size_t startIdx = out.data.size();
-				out.data.resize(startIdx + resampledChunk.size());
-				writeFloatChunkIntoSampleData(out.data, startIdx, resampledChunk);
-			}
-
-			if (framesRead < framesPerChunk) break;
-		}
-
-		reader.close();
-		return true;
-	}
-
 	AudioFile::LoadedAudio loadInto(const std::string &path, std::optional<int> resampleTo) {
 		AudioFile::LoadedAudio out;
 #ifdef __ANDROID__
@@ -657,7 +553,7 @@ namespace {
 		// produces F32.
 		const std::string ext = toLowerCase(fs::path(path).extension().string());
 		if (ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aif" || ext == ".aiff") {
-			if (drLibStreamLoadNative(path, out, resampleTo)) {
+			if (AudioFile::drLibStreamLoad(path, out, resampleTo)) {
 				return out;
 			}
 			// Reset and fall through to NDK fallback.
@@ -674,7 +570,7 @@ namespace {
 		out.result.addIssue("Failed to load audio file: " + path);
 		return out;
 #else
-		if (!drLibStreamLoadNative(path, out, resampleTo)) {
+		if (!AudioFile::drLibStreamLoad(path, out, resampleTo)) {
 			out.result.addIssue("Failed to load audio file: " + path);
 		}
 		return out;

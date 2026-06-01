@@ -44,6 +44,15 @@ namespace AudioFile {
 	LoadedAudio load(const std::string &path) noexcept;
 	LoadedAudio loadResampled(const std::string &path, int desiredSampleRate) noexcept;
 
+	// Same contract as load / loadResampled but always routes through the
+	// dr_libs decoder path (dr_wav / dr_flac / dr_mp3 + AIFF reader). On
+	// Linux, Windows, and Android this is what load() does for those
+	// formats anyway; on Apple it's a distinct alternative useful for
+	// testing parity. Formats not handled by dr_libs (mp4/aac/alac) fail.
+	LoadedAudio loadViaDrLib(const std::string &path) noexcept;
+	LoadedAudio loadResampledViaDrLib(const std::string &path,
+									  int desiredSampleRate) noexcept;
+
 	// Legacy out-param overloads. Existing call sites still use these.
 	// May throw std::bad_alloc on OOM.
 	bool load(std::string path, FloatBuffer &buff, int *outNumChannels, int *outSampleRate = nullptr);
