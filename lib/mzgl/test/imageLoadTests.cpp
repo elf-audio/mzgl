@@ -16,21 +16,6 @@
 
 namespace {
 
-struct TempTestDir {
-	fs::path path;
-	explicit TempTestDir(const std::string &name)
-		: path(fs::temp_directory_path() / ("koala-test-" + name)) {
-		std::error_code ec;
-		fs::remove_all(path, ec);
-		fs::create_directories(path);
-	}
-	~TempTestDir() {
-		std::error_code ec;
-		fs::remove_all(path, ec);
-	}
-	std::string getPath() const { return path.string(); }
-};
-
 void writeBytes(const std::string &path, const std::vector<uint8_t> &bytes) {
 	std::ofstream f(path, std::ios::binary);
 	f.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());

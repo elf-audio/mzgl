@@ -25,6 +25,14 @@
 		9CB94F272F39EB4100996766 /* pathUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F202F39EB4100996766 /* pathUtil.h */; };
 		9CB94F462F3C863200996766 /* className.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F452F3C863200996766 /* className.h */; };
 		9CB94F472F3C863200996766 /* className.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CB94F452F3C863200996766 /* className.h */; };
+		9CF60A702FCF13DD0015A21A /* SampleFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6E2FCF13DD0015A21A /* SampleFormat.h */; };
+		9CF60A712FCF13DD0015A21A /* Result.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6C2FCF13DD0015A21A /* Result.h */; };
+		9CF60A722FCF13DD0015A21A /* SampleReaders.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6F2FCF13DD0015A21A /* SampleReaders.h */; };
+		9CF60A732FCF13DD0015A21A /* SampleData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6D2FCF13DD0015A21A /* SampleData.h */; };
+		9CF60A742FCF13DD0015A21A /* SampleFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6E2FCF13DD0015A21A /* SampleFormat.h */; };
+		9CF60A752FCF13DD0015A21A /* Result.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6C2FCF13DD0015A21A /* Result.h */; };
+		9CF60A762FCF13DD0015A21A /* SampleReaders.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6F2FCF13DD0015A21A /* SampleReaders.h */; };
+		9CF60A772FCF13DD0015A21A /* SampleData.h in Headers */ = {isa = PBXBuildFile; fileRef = 9CF60A6D2FCF13DD0015A21A /* SampleData.h */; };
 		EA0F866928749570008D2F57 /* MacFilePickerDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EACF1E432863532B0086EE11 /* MacFilePickerDelegate.mm */; };
 		EA15B27C291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
 		EA15B27D291D49E70051570A /* UndoManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA15B27A291D49E70051570A /* UndoManager.cpp */; };
@@ -935,6 +943,10 @@
 		9CB94F202F39EB4100996766 /* pathUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pathUtil.h; sourceTree = "<group>"; };
 		9CB94F212F39EB4100996766 /* pathUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pathUtil.cpp; sourceTree = "<group>"; };
 		9CB94F452F3C863200996766 /* className.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = className.h; sourceTree = "<group>"; };
+		9CF60A6C2FCF13DD0015A21A /* Result.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Result.h; sourceTree = "<group>"; };
+		9CF60A6D2FCF13DD0015A21A /* SampleData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleData.h; sourceTree = "<group>"; };
+		9CF60A6E2FCF13DD0015A21A /* SampleFormat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleFormat.h; sourceTree = "<group>"; };
+		9CF60A6F2FCF13DD0015A21A /* SampleReaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleReaders.h; sourceTree = "<group>"; };
 		EA056A71269DFF1300494C85 /* Geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Geometry.h; sourceTree = "<group>"; };
 		EA15B27A291D49E70051570A /* UndoManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UndoManager.cpp; sourceTree = "<group>"; };
 		EA15B27B291D49E70051570A /* UndoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UndoManager.h; sourceTree = "<group>"; };
@@ -2076,6 +2088,10 @@
 		EA1835E02432C18B00A5C3E8 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				9CF60A6C2FCF13DD0015A21A /* Result.h */,
+				9CF60A6D2FCF13DD0015A21A /* SampleData.h */,
+				9CF60A6E2FCF13DD0015A21A /* SampleFormat.h */,
+				9CF60A6F2FCF13DD0015A21A /* SampleReaders.h */,
 				9CB94F452F3C863200996766 /* className.h */,
 				9CB94F202F39EB4100996766 /* pathUtil.h */,
 				9CB94F212F39EB4100996766 /* pathUtil.cpp */,
@@ -3391,6 +3407,10 @@
 				EA35518D25CB05D5003DF2FB /* EventsView.h in Headers */,
 				EA71A79827E39E6C0081A5CB /* CDirEntry.h in Headers */,
 				EA183FEA2432C18D00A5C3E8 /* AudioSystem.h in Headers */,
+				9CF60A702FCF13DD0015A21A /* SampleFormat.h in Headers */,
+				9CF60A712FCF13DD0015A21A /* Result.h in Headers */,
+				9CF60A722FCF13DD0015A21A /* SampleReaders.h in Headers */,
+				9CF60A732FCF13DD0015A21A /* SampleData.h in Headers */,
 				EAD03BBA2980185000D0C04A /* AppleWebView.h in Headers */,
 				EA71A73A27E39E6C0081A5CB /* unzip.h in Headers */,
 				EA9C32F4299FC45D000C1DD2 /* ScopedMask.h in Headers */,
@@ -3690,6 +3710,10 @@
 				EA71A70727E39E6B0081A5CB /* ZipStreamer.h in Headers */,
 				EA96993A2F73EFC100D515B0 /* colorFont.glsl.h in Headers */,
 				EA2B89ED24E7093600EA12BD /* YGEnums.h in Headers */,
+				9CF60A742FCF13DD0015A21A /* SampleFormat.h in Headers */,
+				9CF60A752FCF13DD0015A21A /* Result.h in Headers */,
+				9CF60A762FCF13DD0015A21A /* SampleReaders.h in Headers */,
+				9CF60A772FCF13DD0015A21A /* SampleData.h in Headers */,
 				EA2B8A4824E7093600EA12BD /* BitUtils.h in Headers */,
 				EA2B8A4D24E7093600EA12BD /* SVG.h in Headers */,
 				EAF01F4F2D3ECA1800248121 /* FileDownloader.h in Headers */,
