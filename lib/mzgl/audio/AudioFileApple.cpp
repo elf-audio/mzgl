@@ -433,6 +433,17 @@ namespace {
 			rawBytes.insert(rawBytes.end(), chunk.begin(), chunk.begin() + bytesProduced);
 		}
 
+		// WAV 8-bit PCM is unsigned (offset binary, mid = 128) by spec, but
+		// CoreAudio's ExtAudioFile does NOT honour kAudioFormatFlagIsSignedInteger
+		// on 8-bit destinations — it hands back the raw unsigned bytes. Flip
+		// each byte's MSB to put it into signed-i8 representation that matches
+		// I8Reader's expectation of `int8 * (1/128)`.
+		if (targetFmt == SampleFormat::I8) {
+			for (size_t i = 0; i < rawBytes.size(); ++i) {
+				rawBytes[i] ^= 0x80;
+			}
+		}
+
 		out.data = SampleData(std::move(rawBytes), targetFmt);
 		return out;
 	}
