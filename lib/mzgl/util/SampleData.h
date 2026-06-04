@@ -27,6 +27,15 @@
 
 class SampleData {
 public:
+	// Tail-pad: every non-empty `raw` ends with this many zero bytes that
+	// are NOT part of the logical sample data. They exist so I24 readers
+	// (and any future reader that wants unaligned word loads) can do a
+	// 4-byte load at the position of the last sample without reading off
+	// the end of the heap allocation. byteSize() / size() / empty() all
+	// subtract the pad — callers continue to see only the logical bytes.
+	// Cost: 4 bytes per SampleData regardless of length. Negligible.
+	static constexpr size_t kTailPad = 4;
+
 	SampleData() = default;
 
 	SampleData(const SampleData &) = default;
@@ -37,63 +46,79 @@ public:
 	// Construct from a typed buffer. Adopts the format the buffer was
 	// already in; raw bytes are copied verbatim.
 	explicit SampleData(const FloatBuffer &src) {
-		format = SampleFormat::F32;
-		raw.resize(src.size() * sizeof(float));
+		format				 = SampleFormat::F32;
+		const size_t logical = src.size() * sizeof(float);
+		raw.resize(logical + kTailPad, 0);
 		if (!src.empty()) {
-			std::memcpy(raw.data(), src.data(), raw.size());
+			std::memcpy(raw.data(), src.data(), logical);
 		}
 	}
 
 	explicit SampleData(FloatBuffer &&src) {
-		format = SampleFormat::F32;
-		raw.resize(src.size() * sizeof(float));
+		format				 = SampleFormat::F32;
+		const size_t logical = src.size() * sizeof(float);
+		raw.resize(logical + kTailPad, 0);
 		if (!src.empty()) {
-			std::memcpy(raw.data(), src.data(), raw.size());
+			std::memcpy(raw.data(), src.data(), logical);
 		}
 	}
 
 	explicit SampleData(const Int16Buffer &src) {
-		format = SampleFormat::I16;
-		raw.resize(src.d.size() * sizeof(int16_t));
+		format				 = SampleFormat::I16;
+		const size_t logical = src.d.size() * sizeof(int16_t);
+		raw.resize(logical + kTailPad, 0);
 		if (!src.d.empty()) {
-			std::memcpy(raw.data(), src.d.data(), raw.size());
+			std::memcpy(raw.data(), src.d.data(), logical);
 		}
 	}
 
-	// Construct from raw bytes already in a particular format.
+	// Construct from raw bytes already in a particular format. We always
+	// re-pad after the move so the tail-pad invariant holds regardless of
+	// what the caller passed.
 	SampleData(std::vector<uint8_t> &&bytes, SampleFormat fmt)
 		: raw(std::move(bytes))
-		, format(fmt) {}
+		, format(fmt) {
+		raw.resize(raw.size() + kTailPad, 0);
+	}
 
 	SampleFormat getFormat() const noexcept { return format; }
 	int bytesPerSample() const noexcept { return ::bytesPerSample(format); }
 
 	// Logical sample count (numFrames * numChannels).
-	size_t size() const noexcept { return raw.empty() ? 0 : raw.size() / bytesPerSample(); }
-	bool empty() const noexcept { return raw.empty(); }
+	size_t size() const noexcept {
+		return raw.size() > kTailPad ? (raw.size() - kTailPad) / bytesPerSample() : 0;
+	}
+	bool empty() const noexcept { return raw.size() <= kTailPad; }
 
 	void clear() noexcept { raw.clear(); }
 
 	void resize(size_t numSamples, std::optional<float> defaultValue = std::nullopt) {
-		const int bps = bytesPerSample();
-		const size_t oldBytes = raw.size();
-		raw.resize(numSamples * bps);
-		if (defaultValue && raw.size() > oldBytes) {
-			const size_t startIdx = oldBytes / bps;
+		const int bps			= bytesPerSample();
+		const size_t oldLogical = (raw.size() > kTailPad) ? raw.size() - kTailPad : 0;
+		const size_t newLogical = numSamples * bps;
+		raw.resize(newLogical + kTailPad, 0);
+		// Re-zero the pad in case we shrank into where the pad used to be.
+		std::memset(raw.data() + newLogical, 0, kTailPad);
+		if (defaultValue && newLogical > oldLogical) {
+			const size_t startIdx = oldLogical / bps;
 			for (size_t i = startIdx; i < numSamples; ++i) {
 				assignValue(static_cast<int>(i), *defaultValue);
 			}
 		}
 	}
 
-	void reserve(size_t numSamples) { raw.reserve(numSamples * bytesPerSample()); }
-	size_t capacity() const noexcept { return raw.capacity() / bytesPerSample(); }
+	void reserve(size_t numSamples) { raw.reserve(numSamples * bytesPerSample() + kTailPad); }
+	size_t capacity() const noexcept {
+		return raw.capacity() > kTailPad ? (raw.capacity() - kTailPad) / bytesPerSample() : 0;
+	}
 
 	// Raw byte access. For serialization or when the caller already
 	// knows the format and wants typed access via the helpers below.
 	uint8_t *bytes() noexcept { return raw.data(); }
 	const uint8_t *bytes() const noexcept { return raw.data(); }
-	size_t byteSize() const noexcept { return raw.size(); }
+	size_t byteSize() const noexcept {
+		return raw.size() > kTailPad ? raw.size() - kTailPad : 0;
+	}
 
 	// Typed pointer accessors. Caller is responsible for matching format.
 	const int8_t *asI8() const noexcept { return reinterpret_cast<const int8_t *>(raw.data()); }
@@ -114,11 +139,7 @@ public:
 		switch (format) {
 			case SampleFormat::I8: return asI8()[i] * (1.f / 128.f);
 			case SampleFormat::I16: return asI16()[i] * (1.f / 32768.f);
-			case SampleFormat::I24: {
-				const uint8_t *p = asI24() + i * 3;
-				int32_t v = (int32_t(int8_t(p[2])) << 16) | (int32_t(p[1]) << 8) | int32_t(p[0]);
-				return v * (1.f / 8388608.f);
-			}
+			case SampleFormat::I24: return decodeI24(asI24() + i * 3);
 			case SampleFormat::F32: return asF32()[i];
 		}
 		return 0.f;
@@ -166,7 +187,11 @@ public:
 			format = other.format;
 		}
 		if (format == other.format) {
-			raw.insert(raw.end(), other.raw.begin(), other.raw.end());
+			const size_t ourLogical	  = byteSize();
+			const size_t otherLogical = other.byteSize();
+			raw.resize(ourLogical + otherLogical + kTailPad, 0);
+			std::memcpy(raw.data() + ourLogical, other.raw.data(), otherLogical);
+			std::memset(raw.data() + ourLogical + otherLogical, 0, kTailPad);
 			return;
 		}
 		const size_t startIdx = size();
@@ -180,9 +205,11 @@ public:
 		if (other.empty()) return;
 		if (raw.empty()) format = SampleFormat::F32;
 		if (format == SampleFormat::F32) {
-			const size_t startBytes = raw.size();
-			raw.resize(startBytes + other.size() * sizeof(float));
-			std::memcpy(raw.data() + startBytes, other.data(), other.size() * sizeof(float));
+			const size_t ourLogical = byteSize();
+			const size_t addBytes	= other.size() * sizeof(float);
+			raw.resize(ourLogical + addBytes + kTailPad, 0);
+			std::memcpy(raw.data() + ourLogical, other.data(), addBytes);
+			std::memset(raw.data() + ourLogical + addBytes, 0, kTailPad);
 			return;
 		}
 		const size_t startIdx = size();
@@ -193,11 +220,13 @@ public:
 	// Splice [startSample, endSample) into a new SampleData, same format.
 	SampleData splice(int startSample, int endSample) const {
 		SampleData out;
-		out.format = format;
-		const int bps = bytesPerSample();
-		const auto first = raw.begin() + startSample * bps;
-		const auto last = raw.begin() + endSample * bps;
-		out.raw.insert(out.raw.end(), first, last);
+		out.format			 = format;
+		const int bps		 = bytesPerSample();
+		const size_t logical = static_cast<size_t>(endSample - startSample) * bps;
+		out.raw.resize(logical + kTailPad, 0);
+		if (logical > 0) {
+			std::memcpy(out.raw.data(), raw.data() + startSample * bps, logical);
+		}
 		return out;
 	}
 

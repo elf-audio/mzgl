@@ -38,9 +38,7 @@ namespace sample_readers {
 		return s.asI16()[i] * (1.f / 32768.f);
 	}
 	inline float read_i24(const SampleData &s, int i) noexcept {
-		const uint8_t *p = s.asI24() + i * 3;
-		int32_t v		 = (int32_t(int8_t(p[2])) << 16) | (int32_t(p[1]) << 8) | int32_t(p[0]);
-		return v * (1.f / 8388608.f);
+		return decodeI24(s.asI24() + i * 3);
 	}
 	inline float read_f32(const SampleData &s, int i) noexcept { return s.asF32()[i]; }
 
