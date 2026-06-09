@@ -1,13 +1,17 @@
 #pragma once
 // MZGL_IOS, MZGL_MAC, MZGL_WIN, MZGL_ANDROID, MZGL_LINUX
 
-#define MZGL_IOS	 0
-#define MZGL_MAC	 0
-#define MZGL_WIN	 0
-#define MZGL_ANDROID 0
-#define MZGL_LINUX	 0
+#define MZGL_IOS		0
+#define MZGL_MAC		0
+#define MZGL_WIN		0
+#define MZGL_ANDROID	0
+#define MZGL_LINUX		0
+#define MZGL_EMSCRIPTEN 0
 
-#ifdef __APPLE__
+#if defined(__EMSCRIPTEN__)
+#	undef MZGL_EMSCRIPTEN
+#	define MZGL_EMSCRIPTEN 1
+#elif defined(__APPLE__)
 #	include <TargetConditionals.h>
 #	if TARGET_OS_IOS
 #		undef MZGL_IOS

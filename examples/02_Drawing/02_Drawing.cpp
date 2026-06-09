@@ -82,25 +82,34 @@ public:
 		// yellow
 		g.setColor(1, 1, 0);
 
-		// prepare some vertices
-		std::vector<vec2> verts;
-		// the centre of the triangle fan
-		verts.emplace_back(0.f, 0.f);
+		// the centre of the fan
+		vec2 fanCentre {0.f, 0.f};
 
 		// go around the circle varying the radius
+		std::vector<vec2> ring;
 		for (float angle = 0.f; angle <= M_PI * 2.02; angle += M_PI / 64.f) {
 			float radius = 100 + std::sin(angle * 8.f + g.currFrameTime * 4) * 30 * sin(g.currFrameTime * 2.f);
 			float x		 = radius * cos(angle);
 			float y		 = radius * sin(angle);
-			verts.emplace_back(x, y);
+			ring.emplace_back(x, y);
+		}
+
+		// Expand the fan into an explicit triangle list. (Triangle-fan isn't a
+		// portable primitive - the Sokol/WebGL backend doesn't support it.)
+		std::vector<vec2> verts;
+		verts.reserve((ring.size() - 1) * 3);
+		for (size_t i = 0; i + 1 < ring.size(); i++) {
+			verts.push_back(fanCentre);
+			verts.push_back(ring[i]);
+			verts.push_back(ring[i + 1]);
 		}
 
 		g.pushMatrix();
 		// move to the bottom right corner of the screen
 		g.translate(g.width * 0.75, g.height * 0.75);
 
-		// draw the verts as a triangle fan
-		g.drawVerts(verts, Vbo::PrimitiveType::TriangleFan);
+		// draw the verts as triangles
+		g.drawVerts(verts, Vbo::PrimitiveType::Triangles);
 		g.popMatrix();
 	}
 };

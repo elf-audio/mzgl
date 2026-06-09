@@ -98,8 +98,18 @@ int main(int argc, char *argv[]) {
 #endif
 
 	try {
+#ifdef __EMSCRIPTEN__
+		// On the web, run() returns immediately after registering the
+		// requestAnimationFrame main loop, but that loop keeps referencing the
+		// runner (eventDispatcher, graphics). Heap-allocate and intentionally
+		// leak it so it outlives this function - the process lives as long as
+		// the page does.
+		auto *app = new GLFWAppRunner();
+		app->run(argc, argv);
+#else
 		GLFWAppRunner app;
 		app.run(argc, argv);
+#endif
 #ifdef _WIN32
 	} catch (const std::exception &e) {
 		mzgl::CrashInfo ci {};

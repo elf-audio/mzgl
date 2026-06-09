@@ -22,6 +22,9 @@
 #		include "glfw3native.h"
 #	endif
 
+#elif defined(__EMSCRIPTEN__)
+#	include <GLES3/gl3.h>
+
 #else
 
 #	if __ANDROID_API__ >= 24

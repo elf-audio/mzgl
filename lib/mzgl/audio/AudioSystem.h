@@ -186,6 +186,8 @@ public:
 #	include "AudioSystemIOS.h"
 #elif MZGL_MAC
 #	include "CoreAudioSystem.h"
+#elif MZGL_EMSCRIPTEN
+// no audio backend on the web build
 #elif !MZGL_ANDROID && !MZGL_MAC
 #	include "PortAudioSystem.h"
 #endif

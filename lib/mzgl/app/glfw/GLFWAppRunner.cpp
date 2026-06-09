@@ -42,6 +42,13 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #	include "sokol_log.h"
 #endif
 
+#if defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
+#	include "sokol_gfx.h"
+#	include "sokol_log.h"
+#	include <emscripten/emscripten.h>
+#	include <emscripten/html5.h>
+#endif
+
 #if defined(_WIN32) || defined(__linux__)
 void quitApplication() {
 	glfwTerminate();
@@ -60,6 +67,48 @@ Graphics &getGraphics(GLFWwindow *window) {
 	auto *app = (GLFWAppRunner *) glfwGetWindowUserPointer(window);
 	return app->graphics;
 }
+
+#if defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
+// The browser owns the run loop, so we can't block in a while(). Instead we
+// hand a per-frame callback to emscripten_set_main_loop and keep the runner
+// state in a static pointer for the (argument-less) C callback to reach.
+static GLFWAppRunner *gEmscriptenRunner = nullptr;
+
+static void emscriptenMainLoop() {
+	auto *self = gEmscriptenRunner;
+	if (self == nullptr) return;
+
+	if (framebuferResized) {
+		self->eventDispatcher->resized();
+		framebuferResized = false;
+	}
+
+	// The emscripten GLFW port keeps resetting the canvas drawing-buffer size,
+	// so re-assert it each frame to match our framebuffer.
+	{
+		int cw = 0, ch = 0;
+		emscripten_get_canvas_element_size("#canvas", &cw, &ch);
+		if (cw != self->graphics.width || ch != self->graphics.height) {
+			emscripten_set_canvas_element_size(
+				"#canvas", self->graphics.width, self->graphics.height);
+		}
+	}
+
+	sg_pass pass				  = {};
+	pass.swapchain.width		  = self->graphics.width;
+	pass.swapchain.height		  = self->graphics.height;
+	pass.swapchain.sample_count	  = 4; // matches sg_setup + GLFW_SAMPLES
+	pass.swapchain.gl.framebuffer = 0; // WebGL default framebuffer
+
+	sg_begin_pass(pass);
+	self->eventDispatcher->runFrame();
+	sg_end_pass();
+	sg_commit();
+
+	glfwSwapBuffers(self->window);
+	glfwPollEvents();
+}
+#endif
 
 static void error_callback(int error, const char *description) {
 	// fprintf(stderr, "Error: %s\n", description);
@@ -179,6 +228,15 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 #elif defined(MZGL_SOKOL) && defined(_WIN32)
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+#elif defined(__EMSCRIPTEN__)
+	// WebGL2 == GLES3. Request 4x MSAA on the default framebuffer (the browser
+	// resolves it); sokol pipelines + the swapchain pass must agree on the
+	// sample count (see sg_setup and emscriptenMainLoop below).
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 #else
 	glfwWindowHint(GLFW_SAMPLES, 16);
@@ -380,6 +438,34 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	sg_shutdown();
 	d3d11.shutdown();
+
+#elif defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
+	// GLES3 (WebGL2) + Sokol backend for the browser.
+	glfwMakeContextCurrent(window);
+
+	// GLFW reports the requested window size, but the emscripten GLFW port does
+	// not keep the actual <canvas> drawing buffer matched to it. Set it here so
+	// the GL viewport, ortho projection and canvas all agree on the first frame
+	// (the main loop re-asserts it thereafter).
+	emscripten_set_canvas_element_size("#canvas", graphics.width, graphics.height);
+
+	{
+		sg_desc desc						   = {};
+		desc.logger.func					   = slog_func;
+		desc.buffer_pool_size				   = 4096;
+		desc.shader_pool_size				   = 128;
+		desc.environment.defaults.sample_count = 4; // 4x MSAA (matches GLFW_SAMPLES)
+		sg_setup(desc);
+	}
+
+	initMZGL(app);
+	eventDispatcher->setup();
+
+	gEmscriptenRunner = this;
+	// fps=0 -> drive from requestAnimationFrame. simulate_infinite_loop=false so
+	// run()/main() return normally; emscripten keeps the runtime alive because a
+	// main loop is registered (EXIT_RUNTIME defaults to 0).
+	emscripten_set_main_loop(emscriptenMainLoop, 0, false);
 
 #else
 	// NOTE: OpenGL error checks have been omitted for brevity
