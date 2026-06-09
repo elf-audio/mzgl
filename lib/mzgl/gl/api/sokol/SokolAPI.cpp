@@ -17,16 +17,19 @@ void SokolAPI::loadDefaultShaders() {
 }
 
 void SokolAPI::maskOn(const Rectf &r) {
-	maskIsOn   = true;
-	maskRect   = r;
-	float mult = 1.f / g.pixelScale;
-	sg_apply_scissor_rectf(r.x * mult, r.y * mult, r.width * mult, r.height * mult, true);
+	maskIsOn = true;
+	maskRect = r;
+	// g.width/g.height and the whole UI coordinate space are already in
+	// framebuffer pixels (MacAppDelegate sets g.width = points * pixelScale,
+	// matching the Metal drawableSize). sokol's scissor is also in framebuffer
+	// pixels with origin_top_left=true, so the mask rect maps 1:1 - no scaling
+	// and no y-flip. The old `* (1/pixelScale)` shrank it to the top-left
+	// quarter on retina (harmless on Windows where pixelScale == 1).
+	sg_apply_scissor_rectf(r.x, r.y, r.width, r.height, true);
 }
 void SokolAPI::maskOff() {
-	maskRect   = Rectf(0, 0, g.width, g.height);
-	float mult = 1.f / g.pixelScale;
-
-	sg_apply_scissor_rect(0, 0, g.width * mult, g.height * mult, true);
+	maskRect = Rectf(0, 0, g.width, g.height);
+	sg_apply_scissor_rect(0, 0, g.width, g.height, true);
 	maskIsOn = false;
 }
 

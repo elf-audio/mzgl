@@ -46,6 +46,9 @@ public:
 	sg_filter magFilter {SG_FILTER_LINEAR};
 
 	void allocate(const unsigned char *data, int w, int h, Texture::PixelFormat fmt) override {
+		this->width	 = w;
+		this->height = h;
+
 		// Sokol/D3D11 only supports RGBA8 textures - convert RGB to RGBA if needed
 		const unsigned char *pixelData = data;
 		std::vector<unsigned char> rgbaData;
