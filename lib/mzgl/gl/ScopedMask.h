@@ -13,7 +13,7 @@
 struct ScopedMask {
 	// you can initialize with empty constructor
 	// so there's no mask actually happening
-	// this is handy when you want conditinal masks
+	// this is handy when you want conditional masks
 	ScopedMask() { masking = false; }
 	ScopedMask(Graphics &g, const Rectf &r) { startMask(g, r); }
 

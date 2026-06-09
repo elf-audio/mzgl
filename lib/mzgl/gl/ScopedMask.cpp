@@ -19,4 +19,7 @@ void ScopedMask::stopMask() {
 	} else {
 		graphics->maskOff();
 	}
+
+	masking			  = false;
+	scissorWasEnabled = false;
 }

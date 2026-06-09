@@ -29,8 +29,8 @@ void SokolAPI::maskOn(const Rectf &r) {
 }
 void SokolAPI::maskOff() {
 	maskRect = Rectf(0, 0, g.width, g.height);
-	sg_apply_scissor_rect(0, 0, g.width, g.height, true);
 	maskIsOn = false;
+	sg_apply_scissor_rect(0, 0, g.width, g.height, true);
 }
 
 void SokolAPI::clear(vec4 c) {

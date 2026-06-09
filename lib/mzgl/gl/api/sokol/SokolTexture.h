@@ -46,8 +46,14 @@ public:
 	sg_filter magFilter {SG_FILTER_LINEAR};
 
 	void allocate(const unsigned char *data, int w, int h, Texture::PixelFormat fmt) override {
+		// Free any previous image (allocate may be called again to re-upload/resize).
+		if (owns && image.id != 0) {
+			sg_destroy_image(image);
+			image = {};
+		}
 		this->width	 = w;
 		this->height = h;
+		owns		 = true; // we created the image below; free it in deallocateImage (mirrors OpenGLTexture)
 
 		// Sokol/D3D11 only supports RGBA8 textures - convert RGB to RGBA if needed
 		const unsigned char *pixelData = data;
@@ -102,10 +108,15 @@ public:
 
 private:
 	void deallocateImage() {
-		if (sampler.id != 0) {
-			sg_destroy_sampler(sampler);
-			sampler.id = 0;
+		// Destroy our own image (allocate() made it via sg_make_image). Do NOT destroy
+		// the sampler: it's owned and shared/reused by SokolSamplerRegistry, so freeing
+		// it here leaves every other texture with the same desc (e.g. the font atlas)
+		// bound to a dead sampler -> VALIDATE_ABND_FS_SMP_EXISTS abort in sg_apply_bindings.
+		if (owns && image.id != 0) {
+			sg_destroy_image(image);
 		}
+		image	= {};
+		sampler = {0};
 	}
 	bool bound = false;
 	sg_image image	   = {};
