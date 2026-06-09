@@ -8,6 +8,7 @@
 
 #include "filesystem.h"
 #include <stdexcept>
+#include <algorithm>
 
 namespace zipper {
 
@@ -342,6 +343,10 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
             Timestamp time(path);
             std::ifstream input(path, std::ios::binary);
             std::string nameInZip = path.string().substr(path.string().rfind(folderName + CDirEntry::Separator), path.string().size());
+            // ZIP entry names must use '/' as the separator (APPNOTE.TXT 4.4.17).
+            // On Windows path.string() yields backslashes, so normalize them or
+            // readers that look entries up by forward-slash paths won't find them.
+            std::replace(nameInZip.begin(), nameInZip.end(), '\\', '/');
             add(input, time.timestamp, nameInZip, flags);
             input.close();
         }
@@ -361,6 +366,7 @@ bool Zipper::add(const std::string& fileOrFolderPath, Zipper::zipFlags flags)
             fullFileName = fileNameFromPath(fileOrFolderPath);
         }
 
+        std::replace(fullFileName.begin(), fullFileName.end(), '\\', '/');
         add(input, time.timestamp, fullFileName, flags);
 
         input.close();
