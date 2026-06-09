@@ -180,6 +180,11 @@ namespace winfs {
 		friend std::ostream &operator<<(std::ostream &os, const path &p) { return os << p.string(); }
 	};
 
+	inline path temp_directory_path() { return path(std::filesystem::temp_directory_path()); }
+	inline path temp_directory_path(std::error_code &ec) {
+		return path(std::filesystem::temp_directory_path(ec));
+	}
+
 	using std::filesystem::absolute;
 	using std::filesystem::canonical;
 	using std::filesystem::copy;
