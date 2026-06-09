@@ -172,16 +172,40 @@ SCENARIO_METHOD(AudioFileDrLibFixture, "loadViaDrLib handles MP3", "[audio-file-
 }
 
 SCENARIO_METHOD(AudioFileDrLibFixture,
-				"loadViaDrLib fails on .m4a containers (dr_libs doesn't decode AAC or ALAC)",
+				"loadViaDrLib on .m4a (AAC/ALAC) follows platform codec support",
 				"[audio-file-load-drlib]") {
+	// DrAudioFileReader is not dr_libs-only: on Windows it hands m4a/aac
+	// containers to Media Foundation, which decodes AAC and ALAC. On other
+	// platforms dr_libs has no decoder for them and there is no fallback, so
+	// the open fails. Assert the real per-platform contract rather than a
+	// single hard-coded outcome.
 	for (const auto &fileName : std::vector<std::string> {"sine440_aac.m4a", "sine440_alac.m4a"}) {
 		GIVEN("the path to " + fileName) {
 			auto loaded = AudioFile::loadViaDrLib(basicAudioPath(fileName).string());
 
-			THEN("the load reports failure") { REQUIRE_FALSE(static_cast<bool>(loaded)); }
+#ifdef _WIN32
+			// On Windows m4a/aac/alac is decoded by Media Foundation.
+			THEN("the load succeeds (decoded via Media Foundation)") {
+				REQUIRE(static_cast<bool>(loaded));
+			}
+			THEN("channel count is 1") { REQUIRE(loaded.numChannels == 1); }
+			THEN("sample rate is the source rate") {
+				REQUIRE(loaded.sampleRate == sourceSampleRate);
+			}
+			THEN("the data contains audio content") {
+				REQUIRE(anySampleExceeds(loaded.data, silentSampleFloor));
+			}
+			THEN("lossy m4a is decoded to I16 (bounded memory, matches other platforms)") {
+				REQUIRE(loaded.data.getFormat() == SampleFormat::I16);
+			}
+#else
+			THEN("the load reports failure (no AAC/ALAC decoder available)") {
+				REQUIRE_FALSE(static_cast<bool>(loaded));
+			}
 			THEN("at least one issue is recorded") {
 				REQUIRE_FALSE(loaded.result.issues.empty());
 			}
+#endif
 		}
 	}
 }
