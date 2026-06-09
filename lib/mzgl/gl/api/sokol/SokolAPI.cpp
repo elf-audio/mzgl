@@ -32,10 +32,15 @@ void SokolAPI::maskOff() {
 
 void SokolAPI::clear(vec4 c) {
 	auto vbo = Vbo::createFromPool(g);
+	// Draw the clear quad with blending off, but restore the caller's blend
+	// state afterwards - otherwise every shape drawn after clear() loses
+	// blending (real GL clear() doesn't touch blend state).
+	const bool wasBlending = g.isBlending();
 	g.setBlending(false);
 	g.setColor(c.r, c.g, c.b, c.a);
 	vbo->setVertices({{0, 0}, {g.width, 0}, {g.width, g.height}, {0, g.height}});
 	vbo->setIndices({0, 1, 2, 0, 2, 3});
 	vbo->draw(g);
+	g.setBlending(wasBlending);
 }
 
