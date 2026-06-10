@@ -411,11 +411,23 @@ if(USING_SOKOL)
     add_dependencies(libmzgl CompileShaders)
 
     target_include_directories(libmzgl PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    # libmzgl_unit_test compiles the same sokol sources (SokolAPI.cpp ->
+    # SokolDefaultShaders.h -> *.glsl.h), so it needs the generated headers too.
+    if(TARGET libmzgl_unit_test)
+      add_dependencies(libmzgl_unit_test CompileShaders)
+      target_include_directories(libmzgl_unit_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
   else()
     message(STATUS "sokol-shdc not found, using pre-compiled shader headers")
     target_include_directories(
       libmzgl
       PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
+    # Same precompiled headers for the unit-test build of mzgl.
+    if(TARGET libmzgl_unit_test)
+      target_include_directories(
+        libmzgl_unit_test
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
+    endif()
   endif()
 
   add_compile_definitions(MZGL_SOKOL)
