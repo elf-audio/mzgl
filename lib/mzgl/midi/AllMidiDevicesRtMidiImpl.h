@@ -92,9 +92,19 @@ private:
 					// new midi port!
 					auto m = std::make_shared<MidiIn>();
 					Log::d() << "Added port " << names[i] << " must properly debug this with lots of devices!!";
+					// Record the port first so we don't rescan/retry it every poll.
 					midiIns[names[i]] = m;
-					m->open(i);
-					m->addListener(this);
+					// Opening a MIDI input can throw (e.g. on Windows MM the port is
+					// exclusive and already held by another process/instance). Don't let
+					// that take down the whole app - just skip this port and carry on.
+					try {
+						m->open(i);
+						m->addListener(this);
+					} catch (const std::exception &e) {
+						Log::e() << "Failed to open MIDI input port '" << names[i] << "': " << e.what();
+					} catch (...) {
+						Log::e() << "Failed to open MIDI input port '" << names[i] << "'";
+					}
 				}
 			}
 

@@ -13,6 +13,10 @@ public:
 
 	virtual ~GraphicsAPI()									 = default;
 	virtual void init()										 = 0;
+
+	// Human-readable name of the active graphics backend, e.g. "OpenGL" or "Sokol (D3D11)"
+	[[nodiscard]] virtual std::string getBackendName() const = 0;
+
 	virtual void setBlending(bool shouldBlend)				 = 0;
 	virtual void setBlendMode(Graphics::BlendMode blendMode) = 0;
 	virtual void clear(vec4 c)								 = 0;

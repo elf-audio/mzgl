@@ -239,7 +239,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
 #else
-	glfwWindowHint(GLFW_SAMPLES, 16);
+	glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA to match the D3D11/Sokol path
 
 #	ifdef UNIT_TEST
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -347,7 +347,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	D3D11Context d3d11;
 	{
 		HWND hwnd = (HWND) os::getNativeWindowHandle(window);
-		if (!d3d11.init(hwnd, graphics.width, graphics.height)) {
+		// 4x MSAA to match the OpenGL path's multisampling (the GL backend uses
+		// GLFW_SAMPLES). D3D11 guarantees 4x support; the swapchain stays 1x and
+		// sokol resolves the MSAA render target into it at end-of-pass.
+		if (!d3d11.init(hwnd, graphics.width, graphics.height, 4)) {
 			Log::e() << "Failed to initialize D3D11";
 			glfwDestroyWindow(window);
 			glfwTerminate();

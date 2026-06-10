@@ -9,6 +9,8 @@ public:
 
 	void init() override;
 
+	[[nodiscard]] std::string getBackendName() const override { return "OpenGL"; }
+
 	void setBlending(bool shouldBlend) override;
 
 	void drawVerts(const std::vector<glm::vec2> &verts, Vbo::PrimitiveType type) override;

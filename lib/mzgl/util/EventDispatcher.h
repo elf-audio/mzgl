@@ -9,6 +9,11 @@
 #pragma once
 #include "WebViewApp.h"
 #include "ScopedUrl.h"
+#include "util.h"
+#include "GraphicsAPI.h"
+#include <chrono>
+#include <cstdint>
+#include <cstdio>
 
 class EventDispatcher {
 public:
@@ -147,7 +152,66 @@ public:
 		app->g.frameDelta	 = s - app->g.currFrameTime;
 		app->g.currFrameTime = s;
 		app->g.frameNum++;
-		draw();
+
+		if (perfEnabled) {
+			auto _t0   = std::chrono::steady_clock::now();
+			draw();
+			auto _t1   = std::chrono::steady_clock::now();
+			double ms  = std::chrono::duration<double, std::milli>(_t1 - _t0).count();
+			perfRecord(ms, s);
+		} else {
+			draw();
+		}
+	}
+
+	// --- draw-call perf instrumentation (enabled with --perf-log) ---
+	// Times just the draw() call (UI render command submission, excludes vsync/swap)
+	// and prints a one-line summary once per second to stdout for offline parsing.
+	bool perfEnabled		= hasCommandLineFlag("--perf-log");
+	bool perfStarted		= false;
+	double perfRunStart		= 0.0;
+	double perfWindowStart	= 0.0;
+	uint64_t perfFramesWindow = 0;
+	double perfMsWindow		= 0.0;
+	double perfMinWindow	= 1e30;
+	double perfMaxWindow	= 0.0;
+
+	void perfRecord(double drawMs, double now) {
+		if (!perfStarted) {
+			perfStarted		= true;
+			perfRunStart	= now;
+			perfWindowStart = now;
+			printf("[PERF] backend=%s draw-call timing started\n",
+				   app->g.getAPI().getBackendName().c_str());
+			fflush(stdout);
+		}
+		perfFramesWindow++;
+		perfMsWindow += drawMs;
+		if (drawMs < perfMinWindow) perfMinWindow = drawMs;
+		if (drawMs > perfMaxWindow) perfMaxWindow = drawMs;
+
+		double winElapsed = now - perfWindowStart;
+		if (winElapsed >= 1.0) {
+			double avg = perfMsWindow / static_cast<double>(perfFramesWindow);
+			double fps = static_cast<double>(perfFramesWindow) / winElapsed;
+			// draw_load_pct = fraction of one CPU core spent in draw() (avg_ms * fps / 10)
+			printf("[PERF] t=%6.2f backend=%s fps=%5.1f frames=%llu "
+				   "draw_avg_ms=%.4f draw_min_ms=%.4f draw_max_ms=%.4f draw_load_pct=%.2f\n",
+				   now - perfRunStart,
+				   app->g.getAPI().getBackendName().c_str(),
+				   fps,
+				   static_cast<unsigned long long>(perfFramesWindow),
+				   avg,
+				   perfMinWindow,
+				   perfMaxWindow,
+				   avg * fps / 10.0);
+			fflush(stdout);
+			perfFramesWindow = 0;
+			perfMsWindow	 = 0.0;
+			perfMinWindow	 = 1e30;
+			perfMaxWindow	 = 0.0;
+			perfWindowStart	 = now;
+		}
 	}
 
 	virtual void receivedJSMessage(const std::string &key, const std::string &value) {

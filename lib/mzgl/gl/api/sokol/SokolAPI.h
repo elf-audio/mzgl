@@ -14,6 +14,20 @@ public:
 
 	void init() override { loadDefaultShaders(); }
 
+	[[nodiscard]] std::string getBackendName() const override {
+		switch (sg_query_backend()) {
+			case SG_BACKEND_GLCORE33: return "Sokol (OpenGL Core 3.3)";
+			case SG_BACKEND_GLES3: return "Sokol (GLES3)";
+			case SG_BACKEND_D3D11: return "Sokol (D3D11)";
+			case SG_BACKEND_METAL_IOS: return "Sokol (Metal iOS)";
+			case SG_BACKEND_METAL_MACOS: return "Sokol (Metal macOS)";
+			case SG_BACKEND_METAL_SIMULATOR: return "Sokol (Metal Simulator)";
+			case SG_BACKEND_WGPU: return "Sokol (WebGPU)";
+			case SG_BACKEND_DUMMY: return "Sokol (Dummy)";
+		}
+		return "Sokol (unknown)";
+	}
+
 	void setBoundTexture(sg_image boundTex, sg_sampler sampler) {
 		boundTexture = boundTex;
 		boundSampler = sampler;
