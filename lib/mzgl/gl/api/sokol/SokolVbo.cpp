@@ -15,7 +15,10 @@ void SokolVbo::Buffer::deallocate() {
 	if (valid()) {
 		if (pool) {
 			pool->release({buffer, pooledCapacity}, isIndex);
-		} else {
+		} else if (sg_isvalid()) {
+			// Skip when sokol is already shut down (layer/Vbo teardown can run
+			// after sg_shutdown) - the buffer is already freed, and calling
+			// sg_destroy_buffer on a dead context dereferences freed state.
 			sg_destroy_buffer(buffer);
 		}
 		buffer.id	   = 0;

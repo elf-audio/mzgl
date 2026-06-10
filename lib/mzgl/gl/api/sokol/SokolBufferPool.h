@@ -53,8 +53,9 @@ public:
 		if (buf.buffer.id == 0) return;
 		int bucket = bucketFor(buf.capacity);
 		if (bucket < 0) {
-			// Oversized buffer can't be pooled, just destroy it
-			sg_destroy_buffer(buf.buffer);
+			// Oversized buffer can't be pooled, just destroy it (unless sokol is
+			// already shut down, in which case all GPU resources are gone).
+			if (sg_isvalid()) sg_destroy_buffer(buf.buffer);
 			return;
 		}
 		auto &pending = isIndex ? indexPendingLists[bucket] : vertexPendingLists[bucket];

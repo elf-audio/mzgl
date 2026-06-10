@@ -48,7 +48,7 @@ public:
 	void allocate(const unsigned char *data, int w, int h, Texture::PixelFormat fmt) override {
 		// Free any previous image (allocate may be called again to re-upload/resize).
 		if (owns && image.id != 0) {
-			sg_destroy_image(image);
+			if (sg_isvalid()) sg_destroy_image(image);
 			image = {};
 		}
 		this->width	 = w;
@@ -113,7 +113,8 @@ private:
 		// it here leaves every other texture with the same desc (e.g. the font atlas)
 		// bound to a dead sampler -> VALIDATE_ABND_FS_SMP_EXISTS abort in sg_apply_bindings.
 		if (owns && image.id != 0) {
-			sg_destroy_image(image);
+			// Guard against teardown after sg_shutdown (see SokolVbo::deallocate).
+			if (sg_isvalid()) sg_destroy_image(image);
 		}
 		image	= {};
 		sampler = {0};

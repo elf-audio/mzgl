@@ -90,7 +90,7 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 
 static void sokolFons__renderDelete(void *userPtr) {
 	sokolFONScontext *sfons = (sokolFONScontext *) userPtr;
-	if (sfons->tex.id != SG_INVALID_ID) {
+	if (sfons->tex.id != SG_INVALID_ID && sg_isvalid()) {
 		sg_destroy_image(sfons->tex);
 		sfons->tex.id = SG_INVALID_ID;
 	}
