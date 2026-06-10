@@ -376,7 +376,11 @@ if(USING_SOKOL)
         OFF
         CACHE INTERNAL "" FORCE)
   else()
-    find_program(SOKOL_SHDC_FOUND ${SOKOL_SHDC})
+    # Also search the common user-local install dir; CI runners often don't have
+    # ~/.local/bin on PATH even when sokol-shdc is installed for the user.
+    find_program(SOKOL_SHDC_FOUND
+      NAMES ${SOKOL_SHDC}
+      HINTS "$ENV{USERPROFILE}/.local/bin" "$ENV{HOME}/.local/bin")
   endif()
   if(SOKOL_SHDC_FOUND)
     # Process each shader file
@@ -385,10 +389,12 @@ if(USING_SOKOL)
       get_filename_component(SHADER_NAME ${SHADER_SOURCE} NAME_WE)
       set(SHADER_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${SHADER_NAME}.glsl.h")
 
-      # Custom command that runs sokol-shdc for each shader
+      # Custom command that runs sokol-shdc for each shader. Use the full path
+      # resolved by find_program (SOKOL_SHDC_FOUND) rather than the bare name, so
+      # the build doesn't depend on sokol-shdc being on PATH at build time.
       add_custom_command(
         OUTPUT ${SHADER_HEADER}
-        COMMAND ${SOKOL_SHDC} --reflection --input ${SHADER_SOURCE} --output
+        COMMAND ${SOKOL_SHDC_FOUND} --reflection --input ${SHADER_SOURCE} --output
                 ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
         DEPENDS ${SHADER_SOURCE}
         COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
