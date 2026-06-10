@@ -268,31 +268,34 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	//	} else {
 	//		Log::d() << "OpenGL Version: unknown";
 	//	}
-	int requestedWidth	= -1;
-	int requestedHeight = -1;
-
-	GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-	if (primaryMonitor != nullptr) {
-		const GLFWvidmode *currentVideoMode = glfwGetVideoMode(primaryMonitor);
-		if (currentVideoMode != nullptr) {
-			float h =
-				(currentVideoMode->height) * 0.8; // make it 0.9 of max height, so there is room for decorations
-			float w			= h * 0.54; // set width as 0.54 of height, that looks OK
-			requestedHeight = (int) h;
-			requestedWidth	= (int) w;
-			if (requestedWidth > currentVideoMode->width) {
-				requestedWidth = currentVideoMode->width; // clamp in case of pivoted monitor
-			}
-		}
-	}
-
 	// Note that graphics object is not fully functional here
 	// as we need to update width/height later on.
 	app = instantiateApp(graphics);
 
-	if (requestedWidth != -1) {
-		graphics.width	= requestedWidth;
-		graphics.height = requestedHeight;
+	// Window size policy is like macOS (see MacAppDelegate's setupWindow): start
+	// from the app-requested size set in run.cpp's instantiateApp() rather than
+	// deriving it from the monitor. If it doesn't fit, scale it down uniformly so
+	// the original aspect ratio is preserved (leaving room for decorations).
+	GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
+	if (primaryMonitor != nullptr) {
+		const GLFWvidmode *currentVideoMode = glfwGetVideoMode(primaryMonitor);
+		if (currentVideoMode != nullptr) {
+			float maxHeight = currentVideoMode->height * 0.9f; // room for decorations
+			float maxWidth	= currentVideoMode->width;
+			float scale		= 1.0f;
+			if (graphics.height > maxHeight) {
+				float s = maxHeight / graphics.height;
+				if (s < scale) scale = s;
+			}
+			if (graphics.width > maxWidth) {
+				float s = maxWidth / graphics.width;
+				if (s < scale) scale = s;
+			}
+			if (scale < 1.0f) {
+				graphics.width	= (int) (graphics.width * scale);
+				graphics.height = (int) (graphics.height * scale);
+			}
+		}
 	}
 
 	Log::d() << "Request window " << (graphics.width) << " x " << (graphics.height);
