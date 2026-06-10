@@ -60,7 +60,7 @@ namespace {
 		}
 	}
 
-	void tryAddIssue(AudioFile::LoadedAudio &out, const char *prefix, const std::string &path) {
+	void drLibTryAddIssue(AudioFile::LoadedAudio &out, const char *prefix, const std::string &path) {
 		try {
 			out.result.addIssue(std::string(prefix) + path);
 		} catch (const std::bad_alloc &) {
@@ -79,19 +79,19 @@ namespace {
 			return out;
 		} catch (const std::bad_alloc &) {
 			out.failureFlags |= AudioFile::LoadFailureFlag::OutOfMemory;
-			tryAddIssue(out, "Out of memory loading ", path);
+			drLibTryAddIssue(out, "Out of memory loading ", path);
 		} catch (const std::filesystem::filesystem_error &) {
 			out.failureFlags |= AudioFile::LoadFailureFlag::FilesystemError;
-			tryAddIssue(out, "Filesystem error loading ", path);
+			drLibTryAddIssue(out, "Filesystem error loading ", path);
 		} catch (const std::system_error &) {
 			out.failureFlags |= AudioFile::LoadFailureFlag::SystemError;
-			tryAddIssue(out, "System error loading ", path);
+			drLibTryAddIssue(out, "System error loading ", path);
 		} catch (const std::exception &) {
 			out.failureFlags |= AudioFile::LoadFailureFlag::Exception;
-			tryAddIssue(out, "Exception loading ", path);
+			drLibTryAddIssue(out, "Exception loading ", path);
 		} catch (...) {
 			out.failureFlags |= AudioFile::LoadFailureFlag::Unknown;
-			tryAddIssue(out, "Unknown error loading ", path);
+			drLibTryAddIssue(out, "Unknown error loading ", path);
 		}
 		return out;
 	}
