@@ -14,7 +14,6 @@ public:
 
 	void addContent(Layer *layer);
 	void clear() override;
-	void updateDeprecated() override;
 
 	void draw() override;
 
@@ -41,8 +40,12 @@ public:
 	vec4 color {1.f, 1.f, 1.f, 1.f};
 
 protected:
+	// once-per-frame scroll physics, driven by the ScopedUpdater below
+	virtual void onUpdate();
+
 	void drawScrollbar();
 	Layer *content;
+	ScopedUpdater updater {g, [this] { onUpdate(); }};
 	bool scrolling = false;
 	glm::vec2 lastTouch {0, 0};
 	// px / sec

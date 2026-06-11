@@ -53,7 +53,6 @@ public:
 	float getContentHeight() { return content->height; }
 	//	void draw() override;
 	virtual void drawSelfAndChildren() override;
-	void updateDeprecated() override;
 	bool empty() const { return items.empty(); }
 
 	virtual bool keyDown(int key) override;
@@ -62,6 +61,7 @@ public:
 	auto end() { return items.end(); }
 
 protected:
+	void onUpdate() override;
 	int selectedIndex = -1;
 	void focus(int index);
 	void touchHeld();

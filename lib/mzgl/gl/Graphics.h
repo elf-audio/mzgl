@@ -50,6 +50,7 @@ class ScopedAlphaBlend;
 class ScopedNoFill;
 class ScopedTranslate;
 class ScopedTransform;
+class ScopedUpdater;
 class GraphicsAPI;
 class OpenGLAPI;
 class Graphics {
@@ -215,6 +216,13 @@ public:
 
 	Layer *keyboardFocusedLayer = nullptr;
 
+	// anything that wants a callback once per frame holds a ScopedUpdater
+	// (see bottom of this file) - this replaces walking the whole layer
+	// tree every frame. Needs to be here so it's not static.
+	void registerUpdater(ScopedUpdater *updater);
+	void unregisterUpdater(ScopedUpdater *updater);
+	void runRegisteredUpdaters();
+
 	// OpenGL only
 	int32_t getDefaultFrameBufferId();
 	GraphicsAPI &getAPI() { return *api; }
@@ -222,6 +230,11 @@ public:
 	VboRef drawerVbo;
 
 private:
+	// see registerUpdater() - entries are nulled rather than erased
+	// while runRegisteredUpdaters() is iterating, then swept afterwards.
+	std::vector<ScopedUpdater *> updaters;
+	bool iteratingUpdaters = false;
+
 	BlendMode blendMode = BlendMode::Alpha;
 
 	bool blendingEnabled = false;
@@ -237,6 +250,31 @@ private:
 	friend class ScopedTranslate;
 
 	std::unique_ptr<GraphicsAPI> api;
+};
+
+// RAII once-per-frame callback. Hold one of these (e.g. as a member) and
+// fn gets called every frame until it goes out of scope. This is how
+// layers animate themselves - instead of a virtual update on Layer that
+// requires traversing the whole tree, anything that can see a Graphics
+// can have one of these.
+class ScopedUpdater {
+public:
+	ScopedUpdater(Graphics &g, std::function<void()> fn)
+		: g(g)
+		, fn(std::move(fn)) {
+		g.registerUpdater(this);
+	}
+	~ScopedUpdater() { g.unregisterUpdater(this); }
+
+	ScopedUpdater(const ScopedUpdater &)			= delete;
+	ScopedUpdater &operator=(const ScopedUpdater &) = delete;
+	ScopedUpdater(ScopedUpdater &&)					= delete;
+	ScopedUpdater &operator=(ScopedUpdater &&)		= delete;
+
+private:
+	friend class Graphics;
+	Graphics &g;
+	std::function<void()> fn;
 };
 
 template <Graphics::BlendMode newBlendMode>

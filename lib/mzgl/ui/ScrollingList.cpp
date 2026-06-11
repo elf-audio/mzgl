@@ -61,8 +61,8 @@ void ScrollingList::touchHeld() {
 	}
 }
 
-void ScrollingList::updateDeprecated() {
-	Scroller::updateDeprecated();
+void ScrollingList::onUpdate() {
+	Scroller::onUpdate();
 	if (emptyMessageLayer != nullptr) {
 		emptyMessageLayer->visible = empty();
 	}

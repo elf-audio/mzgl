@@ -60,7 +60,7 @@ void Scroller::clear() {
 	content->height = 0;
 }
 
-void Scroller::updateDeprecated() {
+void Scroller::onUpdate() {
 	double dt = std::clamp(static_cast<double>(g.frameDelta), 0.0, kMaxDt);
 
 	if (scrolling) {

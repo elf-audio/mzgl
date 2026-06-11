@@ -16,6 +16,7 @@
 #include "MitredLine.h"
 #include "Drawer.h"
 #include <utility>
+#include <algorithm>
 #include "GraphicsAPI.h"
 
 #include <array>
@@ -569,6 +570,34 @@ Graphics::Graphics() {
 #else
 	api = std::make_unique<OpenGLAPI>(*this);
 #endif
+}
+
+void Graphics::registerUpdater(ScopedUpdater *updater) {
+	updaters.push_back(updater);
+}
+
+void Graphics::unregisterUpdater(ScopedUpdater *updater) {
+	auto it = std::find(updaters.begin(), updaters.end(), updater);
+	if (it == updaters.end()) return;
+	if (iteratingUpdaters) {
+		// can't erase mid-iteration, runRegisteredUpdaters() sweeps nulls
+		*it = nullptr;
+	} else {
+		updaters.erase(it);
+	}
+}
+
+void Graphics::runRegisteredUpdaters() {
+	iteratingUpdaters = true;
+	// index loop because an updater can create new ones,
+	// which are appended and run this same frame
+	for (size_t i = 0; i < updaters.size(); i++) {
+		if (updaters[i] != nullptr) {
+			updaters[i]->fn();
+		}
+	}
+	iteratingUpdaters = false;
+	updaters.erase(std::remove(updaters.begin(), updaters.end(), nullptr), updaters.end());
 }
 
 int32_t Graphics::getDefaultFrameBufferId() {
