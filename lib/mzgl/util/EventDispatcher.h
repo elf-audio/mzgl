@@ -15,6 +15,19 @@
 #include <cstdint>
 #include <cstdio>
 
+#if defined(__APPLE__)
+#include <mach/mach.h>
+// Resident memory (phys_footprint) in MB, or -1 on failure. Apple-only.
+static inline double mzPhysFootprintMB() {
+	task_vm_info_data_t info;
+	mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
+	if (task_info(mach_task_self(), TASK_VM_INFO, (task_info_t) &info, &count) != KERN_SUCCESS) {
+		return -1.0;
+	}
+	return static_cast<double>(info.phys_footprint) / (1024.0 * 1024.0);
+}
+#endif
+
 class EventDispatcher {
 public:
 	EventDispatcher(std::shared_ptr<App> app) { this->app = app; }
@@ -194,9 +207,13 @@ public:
 		if (winElapsed >= 1.0) {
 			double avg = perfMsWindow / static_cast<double>(perfFramesWindow);
 			double fps = static_cast<double>(perfFramesWindow) / winElapsed;
+			double rssMB = -1.0;
+#if defined(__APPLE__)
+			rssMB = mzPhysFootprintMB();
+#endif
 			// draw_load_pct = fraction of one CPU core spent in draw() (avg_ms * fps / 10)
 			printf("[PERF] t=%6.2f backend=%s fps=%5.1f frames=%llu "
-				   "draw_avg_ms=%.4f draw_min_ms=%.4f draw_max_ms=%.4f draw_load_pct=%.2f\n",
+				   "draw_avg_ms=%.4f draw_min_ms=%.4f draw_max_ms=%.4f draw_load_pct=%.2f rss_mb=%.1f\n",
 				   now - perfRunStart,
 				   app->g.getAPI().getBackendName().c_str(),
 				   fps,
@@ -204,7 +221,8 @@ public:
 				   avg,
 				   perfMinWindow,
 				   perfMaxWindow,
-				   avg * fps / 10.0);
+				   avg * fps / 10.0,
+				   rssMB);
 			fflush(stdout);
 			perfFramesWindow = 0;
 			perfMsWindow	 = 0.0;

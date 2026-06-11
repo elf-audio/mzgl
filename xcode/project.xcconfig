@@ -39,8 +39,8 @@ HEADER_SEARCH_PATHS[sdk=iphoneos*] = $(inherited) lib/LibTorch-Lite/install/incl
 
 // LINKER
 FRAMEWORKS_COMMON =  -framework WebKit -framework StoreKit -framework CoreMIDI -framework CoreMedia -framework Accelerate -framework AVFoundation -framework AudioToolbox -framework ImageIO -framework CoreGraphics
-FRAMEWORKS_MAC = -framework CoreAudio -framework CoreVideo -framework Cocoa -framework OpenGL
-FRAMEWORKS_IOS = -framework SystemConfiguration -framework UIKit -framework QuartzCore -framework Security -framework MobileCoreServices -framework NetworkExtension -framework GLKit -framework OpenGLES -framework CoreAudioKit
+FRAMEWORKS_MAC = -framework CoreAudio -framework CoreVideo -framework Cocoa -framework OpenGL -framework Metal -framework MetalKit
+FRAMEWORKS_IOS = -framework SystemConfiguration -framework UIKit -framework QuartzCore -framework Security -framework MobileCoreServices -framework NetworkExtension -framework GLKit -framework OpenGLES -framework CoreAudioKit -framework Metal -framework MetalKit
 
 FRAMEWORK_SEARCH_PATHS = 
 

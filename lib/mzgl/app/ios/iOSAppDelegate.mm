@@ -30,7 +30,7 @@ void quitApplication() {
 	std::shared_ptr<App> app;
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<Graphics> g;
-	MZGLKitViewController *mzViewController;
+	MZRootViewController *mzViewController;
 }
 @end
 
@@ -132,7 +132,7 @@ public:
 		app = std::make_shared<ErrorApp>(*g, e.what());
 	}
 
-	mzViewController		  = [[MZGLKitViewController alloc] initWithApp:app andGraphics:g];
+	mzViewController		  = [[MZRootViewController alloc] initWithApp:app andGraphics:g];
 	window.rootViewController = mzViewController;
 	app->viewController		  = (__bridge void *) mzViewController;
 	app->windowHandle		  = (__bridge void *) window;

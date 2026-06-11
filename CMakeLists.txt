@@ -395,7 +395,7 @@ if(USING_SOKOL)
       add_custom_command(
         OUTPUT ${SHADER_HEADER}
         COMMAND ${SOKOL_SHDC_FOUND} --reflection --input ${SHADER_SOURCE} --output
-                ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos
+                ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos:metal_ios
         DEPENDS ${SHADER_SOURCE}
         COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
         VERBATIM)

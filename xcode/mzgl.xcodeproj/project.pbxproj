@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FEEDFACE000000000000A002 /* MZMetalView.mm in Sources */ = {isa = PBXBuildFile; fileRef = FEEDFACE000000000000A001 /* MZMetalView.mm */; };
+		FEEDFACE000000000000A003 /* MZMetalView.mm in Sources */ = {isa = PBXBuildFile; fileRef = FEEDFACE000000000000A001 /* MZMetalView.mm */; };
 		9C038E9F2D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
 		9C038EA02D538A410047E060 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C038E9E2D538A410047E060 /* Base64.cpp */; };
 		9C038EA12D538A410047E060 /* Base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C038E9D2D538A410047E060 /* Base64.h */; };
@@ -936,6 +938,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FEEDFACE000000000000A001 /* MZMetalView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = MZMetalView.mm; path = ../lib/mzgl/app/mac/Metal/MZMetalView.mm; sourceTree = SOURCE_ROOT; };
 		9C038E9B2D5388C70047E060 /* ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ios.xcconfig; sourceTree = "<group>"; };
 		9C038E9C2D5388C70047E060 /* mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = mac.xcconfig; sourceTree = "<group>"; };
 		9C038E9D2D538A410047E060 /* Base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Base64.h; sourceTree = "<group>"; };
@@ -3849,6 +3852,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEEDFACE000000000000A002 /* MZMetalView.mm in Sources */,
 				EA35518E25CB05D5003DF2FB /* EventsView.mm in Sources */,
 				EA71A75227E39E6C0081A5CB /* hmac.c in Sources */,
 				EA1840032432C18D00A5C3E8 /* Image.mm in Sources */,
@@ -4120,6 +4124,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEEDFACE000000000000A003 /* MZMetalView.mm in Sources */,
 				EAA44CD6267A2BE50014C203 /* Haptics.cpp in Sources */,
 				EADA5B2B2A138E36000DCE7B /* netUtil.cpp in Sources */,
 				EA2B8ACE24E7093600EA12BD /* Image.mm in Sources */,

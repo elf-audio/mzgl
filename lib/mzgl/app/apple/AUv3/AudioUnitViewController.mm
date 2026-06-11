@@ -29,8 +29,8 @@ using namespace std;
 
 @implementation AudioUnitViewController {
 #	if MZGL_IOS
-	MZGLKitViewController *vc;
-	MZGLKitView *glView;
+	MZRootViewController *vc;
+	EventsView *glView;
 #	else
 
 	EventsView *glView;
@@ -93,7 +93,7 @@ using namespace std;
 #	endif
 
 #	if MZGL_IOS
-- (MZGLKitView *)getView {
+- (EventsView *)getView {
 	return glView;
 }
 #	else
@@ -162,10 +162,10 @@ using namespace std;
 		plugin = [self getPlugin];
 		app	   = instantiatePluginEditor(*g, plugin);
 #	if MZGL_IOS
-		vc					= [[MZGLKitViewController alloc] initWithApp:app andGraphics:g];
+		vc					= [[MZRootViewController alloc] initWithApp:app andGraphics:g];
 		app->viewController = (__bridge void *) self;
 
-		glView = (MZGLKitView *) vc.view;
+		glView = (EventsView *) vc.view;
 #	else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
