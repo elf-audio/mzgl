@@ -116,7 +116,7 @@ public:
 
 	void updateDeprecated() {
 		app->updateDeprecated();
-		app->root->_updateDeprecated();
+		app->g.runRegisteredUpdaters();
 	}
 
 	void draw() {

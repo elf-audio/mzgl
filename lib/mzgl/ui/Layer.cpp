@@ -357,18 +357,6 @@ bool Layer::_touchDown(float x, float y, int id) {
 	return false;
 }
 
-void Layer::_updateDeprecated() {
-	{
-#ifdef DEBUG
-		ScopedIterationGuard guard(*this);
-#endif
-		for (auto *c: children) {
-			c->_updateDeprecated();
-		}
-	}
-	updateDeprecated();
-}
-
 void Layer::sendToBack(Layer *child) {
 #ifdef DEBUG
 	if (child != nullptr) assertNotIterating("sendToBack");

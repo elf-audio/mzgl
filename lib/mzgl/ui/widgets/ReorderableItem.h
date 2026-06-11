@@ -38,7 +38,8 @@ public:
 		}
 		return -1;
 	}
-	void updateDeprecated() override {
+	// once-per-frame snap-back animation, driven by the ScopedUpdater below
+	virtual void onUpdate() {
 		if (!dragging && !atOriginalPosition()) {
 			x = x * 0.8 + targetRect.x * 0.2;
 			y = y * 0.8 + targetRect.y * 0.2;
@@ -67,4 +68,7 @@ public:
 	bool dragging = false;
 	int touchId	  = -1;
 	vec2 touchStart;
+
+private:
+	ScopedUpdater updater {g, [this] { onUpdate(); }};
 };
