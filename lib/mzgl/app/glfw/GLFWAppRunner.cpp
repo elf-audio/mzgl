@@ -39,12 +39,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #if defined(MZGL_SOKOL) && defined(_WIN32)
 #	include "D3D11Context.h"
 #	include "sokol_gfx.h"
-#	include "sokol_log.h"
+#	include "SokolSetup.h"
 #endif
 
 #if defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
 #	include "sokol_gfx.h"
-#	include "sokol_log.h"
+#	include "SokolSetup.h"
 #	include <emscripten/emscripten.h>
 #	include <emscripten/html5.h>
 #endif
@@ -97,7 +97,7 @@ static void emscriptenMainLoop() {
 	sg_pass pass				  = {};
 	pass.swapchain.width		  = self->graphics.width;
 	pass.swapchain.height		  = self->graphics.height;
-	pass.swapchain.sample_count	  = 4; // matches sg_setup + GLFW_SAMPLES
+	pass.swapchain.sample_count	  = mzglSokolSampleCount; // matches sg_setup + GLFW_SAMPLES
 	pass.swapchain.gl.framebuffer = 0; // WebGL default framebuffer
 
 	sg_begin_pass(pass);
@@ -236,10 +236,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4); // must match mzglSokolSampleCount (SokolSetup.h)
 
 #else
-	glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA to match the D3D11/Sokol path
+	glfwWindowHint(GLFW_SAMPLES, 4); // 4x MSAA, matching mzglSokolSampleCount on the sokol backends
 
 #	ifdef UNIT_TEST
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -350,30 +350,23 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	D3D11Context d3d11;
 	{
 		HWND hwnd = (HWND) os::getNativeWindowHandle(window);
-		// 4x MSAA to match the OpenGL path's multisampling (the GL backend uses
+		// MSAA to match the OpenGL path's multisampling (the GL backend uses
 		// GLFW_SAMPLES). D3D11 guarantees 4x support; the swapchain stays 1x and
 		// sokol resolves the MSAA render target into it at end-of-pass.
-		if (!d3d11.init(hwnd, graphics.width, graphics.height, 4)) {
+		if (!d3d11.init(hwnd, graphics.width, graphics.height, mzglSokolSampleCount)) {
 			Log::e() << "Failed to initialize D3D11";
 			glfwDestroyWindow(window);
 			glfwTerminate();
 			exit(EXIT_FAILURE);
 		}
 
-		sg_desc desc		  = {};
-		desc.environment	  = {};
-		desc.logger.func	  = slog_func;
-		desc.buffer_pool_size = 4096;
-		desc.shader_pool_size = 128;
-
-		desc.environment.defaults.sample_count = d3d11.getSampleCount();
-		desc.environment.defaults.color_format = SG_PIXELFORMAT_BGRA8;
-		desc.environment.defaults.depth_format = SG_PIXELFORMAT_NONE;
-
-		desc.environment.d3d11.device		  = d3d11.getDevice();
-		desc.environment.d3d11.device_context = d3d11.getDeviceContext();
-
-		sg_setup(desc);
+		sg_environment env		  = {};
+		env.defaults.sample_count = d3d11.getSampleCount();
+		env.defaults.color_format = SG_PIXELFORMAT_BGRA8;
+		env.defaults.depth_format = SG_PIXELFORMAT_NONE;
+		env.d3d11.device		  = d3d11.getDevice();
+		env.d3d11.device_context  = d3d11.getDeviceContext();
+		mzglSokolSetup(env);
 
 		// Force NVIDIA driver to fully initialize by creating and destroying a dummy texture
 		uint32_t white = 0xFFFFFFFF;
@@ -456,12 +449,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	emscripten_set_canvas_element_size("#canvas", graphics.width, graphics.height);
 
 	{
-		sg_desc desc						   = {};
-		desc.logger.func					   = slog_func;
-		desc.buffer_pool_size				   = 4096;
-		desc.shader_pool_size				   = 128;
-		desc.environment.defaults.sample_count = 4; // 4x MSAA (matches GLFW_SAMPLES)
-		sg_setup(desc);
+		sg_environment env		  = {};
+		env.defaults.sample_count = mzglSokolSampleCount; // matches GLFW_SAMPLES
+		mzglSokolSetup(env);
 	}
 
 	initMZGL(app);

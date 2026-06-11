@@ -838,6 +838,7 @@
 		EAF6F46B2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */; };
 		EAF6F46C2E09AE8400DE5361 /* SokolShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4582E09AE8400DE5361 /* SokolShader.h */; };
 		EAF6F46D2E09AE8400DE5361 /* SokolPipeline.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */; };
+		EAF6F4B12E09AE8400DE5361 /* SokolSetup.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4B02E09AE8400DE5361 /* SokolSetup.h */; };
 		EAF6F46E2E09AE8400DE5361 /* OpenGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */; };
 		EAF6F46F2E09AE8400DE5361 /* sokolFontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */; };
 		EAF6F4702E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */; };
@@ -871,6 +872,7 @@
 		EAF6F48C2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F44A2E09AE8400DE5361 /* colorTexture.glsl.h */; };
 		EAF6F48D2E09AE8400DE5361 /* SokolShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4582E09AE8400DE5361 /* SokolShader.h */; };
 		EAF6F48E2E09AE8400DE5361 /* SokolPipeline.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */; };
+		EAF6F4B22E09AE8400DE5361 /* SokolSetup.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4B02E09AE8400DE5361 /* SokolSetup.h */; };
 		EAF6F48F2E09AE8400DE5361 /* OpenGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4382E09AE8400DE5361 /* OpenGLShader.h */; };
 		EAF6F4902E09AE8400DE5361 /* sokolFontstash.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */; };
 		EAF6F4912E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */ = {isa = PBXBuildFile; fileRef = EAF6F4372E09AE8400DE5361 /* OpenGLDefaultShaders.h */; };
@@ -1815,6 +1817,7 @@
 		EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sokolFontstash.h; sourceTree = "<group>"; };
 		EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = SokolImplementation.cpp; sourceTree = "<group>"; };
 		EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolPipeline.h; sourceTree = "<group>"; };
+		EAF6F4B02E09AE8400DE5361 /* SokolSetup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolSetup.h; sourceTree = "<group>"; };
 		EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolSamplerRegistry.h; sourceTree = "<group>"; };
 		EAF6F4582E09AE8400DE5361 /* SokolShader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SokolShader.h; sourceTree = "<group>"; };
 		EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SokolShader.cpp; sourceTree = "<group>"; };
@@ -3302,6 +3305,7 @@
 				EAF6F4542E09AE8400DE5361 /* sokolFontstash.h */,
 				EAF6F4552E09AE8400DE5361 /* SokolImplementation.cpp */,
 				EAF6F4562E09AE8400DE5361 /* SokolPipeline.h */,
+				EAF6F4B02E09AE8400DE5361 /* SokolSetup.h */,
 				EAF6F4572E09AE8400DE5361 /* SokolSamplerRegistry.h */,
 				EAF6F4582E09AE8400DE5361 /* SokolShader.h */,
 				EAF6F4592E09AE8400DE5361 /* SokolShader.cpp */,
@@ -3369,6 +3373,7 @@
 				EAF6F46B2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */,
 				EAF6F46C2E09AE8400DE5361 /* SokolShader.h in Headers */,
 				EAF6F46D2E09AE8400DE5361 /* SokolPipeline.h in Headers */,
+				EAF6F4B12E09AE8400DE5361 /* SokolSetup.h in Headers */,
 				EAF6F46E2E09AE8400DE5361 /* OpenGLShader.h in Headers */,
 				EAF6F46F2E09AE8400DE5361 /* sokolFontstash.h in Headers */,
 				EAF6F4982E09AEC200DE5361 /* sokol_log.h in Headers */,
@@ -3655,6 +3660,7 @@
 				EAF6F48C2E09AE8400DE5361 /* colorTexture.glsl.h in Headers */,
 				EAF6F48D2E09AE8400DE5361 /* SokolShader.h in Headers */,
 				EAF6F48E2E09AE8400DE5361 /* SokolPipeline.h in Headers */,
+				EAF6F4B22E09AE8400DE5361 /* SokolSetup.h in Headers */,
 				EAF6F48F2E09AE8400DE5361 /* OpenGLShader.h in Headers */,
 				EAF6F4902E09AE8400DE5361 /* sokolFontstash.h in Headers */,
 				EAF6F4912E09AE8400DE5361 /* OpenGLDefaultShaders.h in Headers */,

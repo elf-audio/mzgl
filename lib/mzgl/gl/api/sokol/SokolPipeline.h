@@ -1,6 +1,7 @@
 #pragma once
 #include "Graphics.h"
 #include "sokol_gfx.h"
+#include "log.h"
 #include <memory>
 #include <vector>
 class Pipeline;
@@ -19,7 +20,28 @@ public:
 			new Pipeline(shd, attrs, usingIndices, blending, blendMode, mode, isInstancing));
 	}
 
-	void apply() { sg_apply_pipeline(pipeline); }
+	// sg_isvalid() guard: the layer tree can outlive sg_shutdown() on close,
+	// so don't touch a dead context.
+	~Pipeline() {
+		if (sg_isvalid() && pipeline.id != SG_INVALID_ID) {
+			sg_destroy_pipeline(pipeline);
+		}
+	}
+
+	void apply() {
+		// In release builds sokol's validation layer is compiled out, so
+		// applying a dead/invalid handle is a null deref inside
+		// sg_apply_pipeline rather than an error - skip the draw instead.
+		if (sg_query_pipeline_state(pipeline) != SG_RESOURCESTATE_VALID) {
+			if (!warnedInvalid) {
+				warnedInvalid = true;
+				Log::e() << "Pipeline::apply(): pipeline handle " << pipeline.id
+						 << " is invalid - skipping draws for this pipeline";
+			}
+			return;
+		}
+		sg_apply_pipeline(pipeline);
+	}
 
 private:
 	Pipeline(sg_shader shd,
@@ -56,7 +78,11 @@ private:
 			}
 		}
 		pipeline = sg_make_pipeline(pipelineDesc);
+		if (pipeline.id == SG_INVALID_ID) {
+			Log::e() << "sg_make_pipeline failed - pipeline pool exhausted?";
+		}
 	}
 	sg_pipeline pipeline;
 	sg_pipeline_desc pipelineDesc;
+	bool warnedInvalid = false;
 };

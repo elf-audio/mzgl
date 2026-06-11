@@ -1,13 +1,12 @@
 #import "MZMetalView.h"
 #include "sokol_gfx.h"
 #include "EventDispatcher.h"
-#include "sokol_log.h"
+#include "SokolSetup.h"
 
 @implementation MZMetalView {
 	sg_pass_action pass_action;
 }
 
-static int sample_count				= 4;
 static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
@@ -15,7 +14,7 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 	self			= [super initWithFrame:frame device:MTLCreateSystemDefaultDevice()];
 	if (self != nil) {
 		self.delegate = self;
-		[self setSampleCount:(NSUInteger) sample_count];
+		[self setSampleCount:(NSUInteger) mzglSokolSampleCount];
 		[self setDevice:MTLCreateSystemDefaultDevice()];
 		self.preferredFramesPerSecond = 60;
 
@@ -34,14 +33,7 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 		//		[self.layer setMagnificationFilter:kCAFilterNearest];
 
 		// setup sokol
-		sg_desc desc = {
-			.environment	  = osx_environment(self),
-			.logger.func	  = slog_func,
-			.buffer_pool_size = 4096, // default is 128, // 1024 * 16, // DUBIOUS - do we really need so many?
-			.shader_pool_size = 128,
-		};
-
-		sg_setup(desc);
+		mzglSokolSetup(osx_environment(self));
 	}
 	return self;
 }
@@ -63,7 +55,7 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 sg_environment osx_environment(MTKView *mtkView) {
 	return (sg_environment) {.defaults =
 								 {
-									 .sample_count = sample_count,
+									 .sample_count = mzglSokolSampleCount,
 									 .color_format = SG_PIXELFORMAT_BGRA8,
 									 .depth_format = depth_format,
 								 },
@@ -75,7 +67,7 @@ sg_environment osx_environment(MTKView *mtkView) {
 sg_swapchain osx_swapchain(MTKView *mtkView) {
 	return (sg_swapchain) {.width		 = (int) [mtkView drawableSize].width,
 						   .height		 = (int) [mtkView drawableSize].height,
-						   .sample_count = sample_count,
+						   .sample_count = mzglSokolSampleCount,
 						   .color_format = SG_PIXELFORMAT_BGRA8,
 						   .depth_format = depth_format,
 						   .metal		 = {

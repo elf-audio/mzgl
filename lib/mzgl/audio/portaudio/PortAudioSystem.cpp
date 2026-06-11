@@ -16,8 +16,27 @@
 #	include "pa_linux_alsa.h"
 #endif
 #include <algorithm>
+#include <cstdio>
 
 using namespace std;
+
+#ifdef _WIN32
+#	include <excpt.h>
+// Pa_Initialize()'s ASIO host-api setup LoadLibrary()s every registered ASIO
+// driver in-process to query it, so a broken third-party driver (e.g. the
+// FlexASIO crash-loop seen in June 2026 crash reports) can fault before the UI
+// even appears. Isolate the call under SEH so the caller can log a diagnostic
+// instead of Koala dying silently at startup. Kept free of C++ objects:
+// __try can't share a frame with unwinding (C2712).
+static PaError paInitializeGuarded(unsigned long *sehCode) noexcept {
+	__try {
+		return Pa_Initialize();
+	} __except (EXCEPTION_EXECUTE_HANDLER) {
+		*sehCode = GetExceptionCode();
+		return paInternalError;
+	}
+}
+#endif
 
 bool PortAudioSystem::checkPaError(PaError err, string msg) {
 	if (err != paNoError) {
@@ -35,7 +54,19 @@ PortAudioSystem::PortAudioSystem() {
 		Log::d() << "PortAudioSystem()";
 		printf("PortAudioSystem()\n");
 	}
+#ifdef _WIN32
+	unsigned long sehCode = 0;
+	auto err			  = paInitializeGuarded(&sehCode);
+	if (sehCode != 0) {
+		char codeStr[32];
+		snprintf(codeStr, sizeof(codeStr), "0x%08lX", sehCode);
+		Log::e() << "Caught SEH exception " << codeStr
+				 << " inside Pa_Initialize() - a third-party audio driver (probably an ASIO driver) "
+					"crashed while being enumerated";
+	}
+#else
 	auto err = Pa_Initialize();
+#endif
 	if (!checkPaError(err, "Intializing port audio")) {
 		throw std::runtime_error("dang! portaudio not working");
 	}

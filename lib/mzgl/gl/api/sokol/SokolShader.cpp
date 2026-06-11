@@ -12,6 +12,9 @@ SokolShader::SokolShader(Graphics &g, const std::string &shaderName)
 	auto *api = static_cast<SokolAPI *>(&g.getAPI());
 	def		  = api->getShaderDef(shaderName);
 	shd		  = sg_make_shader(def->descFunc(sg_query_backend()));
+	if (shd.id == SG_INVALID_ID) {
+		Log::e() << "sg_make_shader failed for '" << shaderName << "' - shader pool exhausted?";
+	}
 	vertUniforms.resize(def->uniformblockSizeFunc(SG_SHADERSTAGE_VS, "vertParams"), 0);
 	fragUniforms.resize(def->uniformblockSizeFunc(SG_SHADERSTAGE_FS, "fragParams"), 0);
 
@@ -21,6 +24,15 @@ SokolShader::SokolShader(Graphics &g, const std::string &shaderName)
 	colorUniformOffset = uniformLocation("color");
 	mvpUniformOffset   = uniformLocation("mvp");
 	mzAssert(mvpUniformOffset != nullptr, "mvp uniform not found in shader");
+}
+
+SokolShader::~SokolShader() {
+	// destroy the pipelines first - they reference the shader
+	pipelines.clear();
+	// sg_isvalid() guard: the layer tree can outlive sg_shutdown() on close
+	if (sg_isvalid() && shd.id != SG_INVALID_ID) {
+		sg_destroy_shader(shd);
+	}
 }
 
 void SokolShader::begin() {

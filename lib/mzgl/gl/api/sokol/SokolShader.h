@@ -17,6 +17,7 @@ class ShaderDef;
 class SokolShader : public Shader {
 public:
 	SokolShader(Graphics &g, const std::string &shaderName = "nothing");
+	~SokolShader() override;
 
 	void begin() override;
 	void end() override;
