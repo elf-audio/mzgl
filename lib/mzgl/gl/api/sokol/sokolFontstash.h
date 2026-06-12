@@ -45,6 +45,18 @@ static int sokolFons__renderCreate(void *userPtr, int width, int height) {
 }
 
 static int sokolFons__renderResize(void *userPtr, int width, int height) {
+	sokolFONScontext *gl = (sokolFONScontext *) userPtr;
+	// Atlas grew: fontstash asks us to make a bigger texture. The old image is
+	// still live here - destroy it first, otherwise we leak one sokol image slot
+	// per atlas growth (512->1024->2048...). The wrapper TextureRef we made for it
+	// has owns=false so it won't free it either. Leaked slots eventually exhaust
+	// the image pool -> sg_make_image returns SG_INVALID_ID -> glyphs/icons bind a
+	// dead texture and render as solid (black) rects. renderCreate asserts the
+	// handle is invalid, so we must clear it before delegating.
+	if (gl->tex.id != SG_INVALID_ID && sg_isvalid()) {
+		sg_destroy_image(gl->tex);
+	}
+	gl->tex = (sg_image) {SG_INVALID_ID};
 	return sokolFons__renderCreate(userPtr, width, height);
 }
 
