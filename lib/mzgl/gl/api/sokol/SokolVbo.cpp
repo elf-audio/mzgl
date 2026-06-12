@@ -31,6 +31,14 @@ SokolShader *SokolVbo::getShader(Graphics &g) const {
 	}
 	if (colorBuffer.valid()) {
 		if (texCoordBuffer.valid()) {
+			// colorFontShader and colorTextureShader share the same vertex layout
+			// (pos+texcoord+color) so the auto-pick can't tell them apart. They
+			// differ in the fragment stage: colorFont treats the texture as an R8
+			// alpha mask (a *= tex.r), colorTexture multiplies rgba. Honour an
+			// explicitly-bound colorFontShader, else assume a real texture.
+			if (g.currShader == g.colorFontShader.get()) {
+				return dynamic_cast<SokolShader *>(g.colorFontShader.get());
+			}
 			return dynamic_cast<SokolShader *>(g.colorTextureShader.get());
 		}
 		return dynamic_cast<SokolShader *>(g.colorShader.get());
