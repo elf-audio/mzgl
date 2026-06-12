@@ -31,6 +31,14 @@ SokolShader *SokolVbo::getShader(Graphics &g) const {
 	}
 	if (colorBuffer.valid()) {
 		if (texCoordBuffer.valid()) {
+			// colorFontShader and colorTextureShader share the same vertex layout
+			// (pos+texcoord+color) so the auto-pick can't tell them apart. They
+			// differ in the fragment stage: colorFont treats the texture as an R8
+			// alpha mask (a *= tex.r), colorTexture multiplies rgba. Honour an
+			// explicitly-bound colorFontShader, else assume a real texture.
+			if (g.currShader == g.colorFontShader.get()) {
+				return dynamic_cast<SokolShader *>(g.colorFontShader.get());
+			}
 			return dynamic_cast<SokolShader *>(g.colorTextureShader.get());
 		}
 		return dynamic_cast<SokolShader *>(g.colorShader.get());
@@ -73,15 +81,22 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	bindings.vertex_buffers[0]	= positionBuffer.buffer;
 	int nextPos					= 1;
 
-	if (colorBuffer.valid()) {
-		bindings.vertex_buffers[nextPos] = colorBuffer.buffer;
-		attrs.push_back(colorBuffer.getFormat());
-		nextPos++;
-	}
-
+	// Order matters: each buffer at slot i feeds the shader attribute at location
+	// i (SokolPipeline sets buffer_index = i). Every shader declares its vertex
+	// attributes as Position, then TexCoord, then Color, so texcoords must be
+	// bound before colors. Binding color first swaps the two for the color+
+	// texcoord shaders (colorFont/colorTexture): TexCoord then reads colour data
+	// and samples a constant atlas texel - e.g. grid keyboard note names render
+	// as solid black rects.
 	if (texCoordBuffer.valid()) {
 		bindings.vertex_buffers[nextPos] = texCoordBuffer.buffer;
 		attrs.push_back(texCoordBuffer.getFormat());
+		nextPos++;
+	}
+
+	if (colorBuffer.valid()) {
+		bindings.vertex_buffers[nextPos] = colorBuffer.buffer;
+		attrs.push_back(colorBuffer.getFormat());
 		nextPos++;
 	}
 
