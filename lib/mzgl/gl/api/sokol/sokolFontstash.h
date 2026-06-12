@@ -56,7 +56,7 @@ static int sokolFons__renderResize(void *userPtr, int width, int height) {
 	if (gl->tex.id != SG_INVALID_ID && sg_isvalid()) {
 		sg_destroy_image(gl->tex);
 	}
-	gl->tex = (sg_image) {SG_INVALID_ID};
+	gl->tex = sg_image {SG_INVALID_ID};
 	return sokolFons__renderCreate(userPtr, width, height);
 }
 
