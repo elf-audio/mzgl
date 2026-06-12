@@ -662,8 +662,30 @@ target_link_libraries(libmzgl ${MZGL_LIBS})
 if(NOT ANDROID)
   target_link_libraries(libmzgl_unit_test ${MZGL_LIBS})
   if(APPLE)
-    target_link_libraries(libmzgl_unit_test
-                          "-framework CoreVideo -framework WebKit")
+    # Mirror the Apple frameworks linked into libmzgl above. Targets that link
+    # libmzgl_unit_test (the tests and koala-headless binaries) need the same
+    # set - in particular Metal/MetalKit, since the sokol/Metal backend compiles
+    # MZMetalView (MTKView, MTLCreateSystemDefaultDevice) into this lib. Without
+    # them the macOS test/headless link fails with undefined Metal symbols.
+    target_link_libraries(
+      libmzgl_unit_test
+      "-framework OpenGL"
+      "-framework Metal"
+      "-framework MetalKit"
+      "-framework Accelerate"
+      "-framework AppKit"
+      "-framework StoreKit"
+      "-framework CoreVideo"
+      "-framework CoreMidi"
+      "-framework CoreAudio"
+      "-framework AVFoundation"
+      "-framework CoreMedia"
+      "-framework WebKit"
+      "-framework AudioUnit"
+      "-framework CoreAudioKit"
+      "-framework UniformTypeIdentifiers"
+      "-framework AudioToolbox"
+      "-framework IOKit")
   endif()
 endif()
 
