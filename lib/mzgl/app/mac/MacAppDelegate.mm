@@ -7,6 +7,7 @@
 //
 
 #import "MacAppDelegate.h"
+#import <MetalKit/MetalKit.h>
 #import "EventsView.h"
 #include "mainThread.h"
 #include "MacMenuBar.h"
@@ -38,6 +39,7 @@ void handleTerminateSignal(int signal) {
 	std::shared_ptr<App> app;
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
+	id backgroundActivity;
 }
 @end
 
@@ -163,6 +165,40 @@ bool hasTransparentTitleBar = true;
 											 selector:@selector(screenDidChange:)
 												 name:NSWindowDidChangeScreenNotification
 											   object:window];
+
+	// When driving the app over the test server, force a draw every frame even
+	// when the window is occluded/backgrounded. MTKView normally pauses drawing
+	// in that state, which stalls the main-thread queue (runOnMainThreadAndWait
+	// is drained inside the frame loop) and hangs every test-server request.
+	if (hasCommandLineFlag("--start-test-server") || hasCommandLineFlag("--server")) {
+		// Stop App Nap from throttling our run loop / draw timer while the app
+		// is backgrounded - otherwise test-server requests stall for seconds.
+		backgroundActivity =
+			[[[NSProcessInfo processInfo] beginActivityWithOptions:NSActivityUserInitiated
+															reason:@"koala test server"] retain];
+
+		// Keep the window on top and on every Space so it is never occluded.
+		// MTKView pauses drawing when its window is hidden/occluded, which stalls
+		// the main-thread queue (drained inside the frame loop) and means there
+		// is no valid drawable to screenshot. This lets the harness drive and
+		// capture the UI without having to bring the app to the foreground.
+		window.level			 = NSFloatingWindowLevel;
+		window.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
+									| NSWindowCollectionBehaviorStationary;
+		[window orderFrontRegardless];
+
+		// Capture the view (lives for the app lifetime) rather than self, to
+		// avoid a retain cycle. This file is compiled without ARC, so no __weak.
+		id drawView		   = view;
+		NSTimer *drawTimer = [NSTimer timerWithTimeInterval:1.0 / 60.0
+													repeats:YES
+													  block:^(NSTimer *_Nonnull timer) {
+														if ([drawView isKindOfClass:[MTKView class]]) {
+															[(MTKView *) drawView draw];
+														}
+													  }];
+		[[NSRunLoop mainRunLoop] addTimer:drawTimer forMode:NSRunLoopCommonModes];
+	}
 }
 
 - (void)about:(id)event {

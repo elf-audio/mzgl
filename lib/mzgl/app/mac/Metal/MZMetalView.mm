@@ -2,9 +2,16 @@
 #include "sokol_gfx.h"
 #include "EventDispatcher.h"
 #include "SokolSetup.h"
+#include "Image.h"
+#include <mutex>
+#include <string>
 
 @implementation MZMetalView {
 	sg_pass_action pass_action;
+	id<MTLCommandQueue> captureQueue;
+	std::mutex screenshotMutex;
+	std::string screenshotPath;
+	bool screenshotPending;
 }
 
 static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
@@ -29,13 +36,84 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 		self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 		[self setDrawableSize:[self convertSizeToBacking:frame.size]];
 
+		// Allow the drawable texture to be used as a blit source so we can read
+		// it back for screenshots (saveScreen). Without this the drawable is
+		// framebuffer-only and the blit below is invalid.
+		self.framebufferOnly = NO;
+		captureQueue		 = [self.device newCommandQueue];
+		screenshotPending	 = false;
+
 		// TODO: this might be why it looks a bit crispy, try linear?
 		//		[self.layer setMagnificationFilter:kCAFilterNearest];
 
 		// setup sokol
 		mzglSokolSetup(osx_environment(self));
+
+		// Install the deferred screenshot hook. Graphics::saveScreen() (and the
+		// WS test server's save-screen action) just flag a request here; the
+		// actual readback happens at the end of the next frame in drawInMTKView,
+		// where a fully-rendered drawable exists - reading it synchronously from
+		// the render thread would otherwise deadlock or capture an empty frame.
+		// Plain pointer capture: this is a C++ lambda (not an ObjC block) in an
+		// MRC file, so it does not retain self - no retain cycle. The view lives
+		// for the app's lifetime, alongside the Graphics that owns this lambda.
+		MZMetalView *rawSelf = self;
+		eventDispatcher->app->g.deferredSaveScreen = [rawSelf](const std::string &path) -> bool {
+			if (rawSelf == nil) return false;
+			std::lock_guard<std::mutex> lock(rawSelf->screenshotMutex);
+			rawSelf->screenshotPath	   = path;
+			rawSelf->screenshotPending = true;
+			return true;
+		};
 	}
 	return self;
+}
+
+- (void)captureScreenshotIfRequested {
+	std::string path;
+	{
+		std::lock_guard<std::mutex> lock(screenshotMutex);
+		if (!screenshotPending) return;
+		screenshotPending = false;
+		path			  = screenshotPath;
+	}
+
+	id<CAMetalDrawable> drawable = self.currentDrawable;
+	if (drawable == nil) return;
+	id<MTLTexture> tex = drawable.texture;
+
+	NSUInteger w		   = tex.width;
+	NSUInteger h		   = tex.height;
+	NSUInteger bytesPerRow = w * 4;
+	id<MTLBuffer> buffer   = [self.device newBufferWithLength:bytesPerRow * h
+													 options:MTLResourceStorageModeShared];
+
+	id<MTLCommandBuffer> cmd	  = [captureQueue commandBuffer];
+	id<MTLBlitCommandEncoder> blit = [cmd blitCommandEncoder];
+	[blit copyFromTexture:tex
+				 sourceSlice:0
+				 sourceLevel:0
+				sourceOrigin:MTLOriginMake(0, 0, 0)
+				  sourceSize:MTLSizeMake(w, h, 1)
+					toBuffer:buffer
+		   destinationOffset:0
+	  destinationBytesPerRow:bytesPerRow
+	destinationBytesPerImage:bytesPerRow * h];
+	[blit endEncoding];
+	[cmd commit];
+	[cmd waitUntilCompleted];
+
+	// Drawable is BGRA8; convert to RGBA and force opaque. Metal's drawable
+	// origin is top-left so no vertical flip is needed (unlike the GL path).
+	const uint8_t *src = (const uint8_t *) buffer.contents;
+	std::vector<uint8_t> rgba(w * h * 4);
+	for (NSUInteger i = 0; i < w * h; i++) {
+		rgba[i * 4 + 0] = src[i * 4 + 2];
+		rgba[i * 4 + 1] = src[i * 4 + 1];
+		rgba[i * 4 + 2] = src[i * 4 + 0];
+		rgba[i * 4 + 3] = 255;
+	}
+	Image::save(path, rgba.data(), (int) w, (int) h, 4, 1, false);
 }
 
 - (void)disableDrawing {
@@ -91,6 +169,8 @@ sg_swapchain osx_swapchain(MTKView *mtkView) {
 		eventDispatcher->runFrame();
 		sg_end_pass();
 		sg_commit();
+
+		[self captureScreenshotIfRequested];
 	}
 }
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {

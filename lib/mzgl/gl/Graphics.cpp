@@ -532,6 +532,12 @@ void Graphics::drawTextHorizontallyCentred(const std::string &text, glm::vec2 c)
 }
 
 void Graphics::saveScreen(std::string pngPath) {
+	// On Metal/sokol the synchronous readScreenPixels path is a no-op (the
+	// drawable is read back asynchronously by the render view instead).
+	if (deferredSaveScreen && deferredSaveScreen(pngPath)) {
+		return;
+	}
+
 	ImageRef img = Image::create(width, height, 4);
 
 	api->readScreenPixels(img->data, Rectf(0, 0, width, height));

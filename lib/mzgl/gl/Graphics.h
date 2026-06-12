@@ -81,6 +81,12 @@ public:
 	void setHexColor(int hex, float a = 1.f);
 	void saveScreen(std::string pngPath);
 
+	// On Metal the default framebuffer can't be read back synchronously the way
+	// glReadPixels allows, so the platform render view installs this hook to grab
+	// the next fully-rendered frame and write it to a PNG. Returns true if it
+	// handled the request, in which case saveScreen() skips the GL readback path.
+	std::function<bool(const std::string &)> deferredSaveScreen;
+
 	std::function<void(bool)> setAntialiasing = [](bool) {};
 
 	enum class BlendMode {
