@@ -1,6 +1,7 @@
 #pragma once
 #include "Graphics.h"
 #include "sokol_gfx.h"
+#include "SokolVertexAttr.h"
 #include "log.h"
 #include <memory>
 #include <vector>
@@ -10,14 +11,12 @@ using PipelineRef = std::shared_ptr<Pipeline>;
 class Pipeline {
 public:
 	static PipelineRef create(sg_shader shd,
-							  const std::vector<sg_vertex_format> &attrs,
+							  const std::vector<SokolVertexAttr> &attrs,
 							  bool usingIndices,
 							  bool blending,
 							  Graphics::BlendMode blendMode,
-							  sg_primitive_type mode,
-							  bool isInstancing) {
-		return std::shared_ptr<Pipeline>(
-			new Pipeline(shd, attrs, usingIndices, blending, blendMode, mode, isInstancing));
+							  sg_primitive_type mode) {
+		return std::shared_ptr<Pipeline>(new Pipeline(shd, attrs, usingIndices, blending, blendMode, mode));
 	}
 
 	// sg_isvalid() guard: the layer tree can outlive sg_shutdown() on close,
@@ -45,26 +44,27 @@ public:
 
 private:
 	Pipeline(sg_shader shd,
-			 const std::vector<sg_vertex_format> &attrs,
+			 const std::vector<SokolVertexAttr> &attrs,
 			 bool usingIndices,
 			 bool blending,
 			 Graphics::BlendMode blendMode,
-			 sg_primitive_type mode,
-			 bool isInstancing) {
+			 sg_primitive_type mode) {
 		pipelineDesc				= {};
 		pipelineDesc.shader			= shd;
 		pipelineDesc.index_type		= usingIndices ? SG_INDEXTYPE_UINT32 : SG_INDEXTYPE_NONE;
 		pipelineDesc.primitive_type = mode;
 		pipelineDesc.sample_count	= sg_query_desc().environment.defaults.sample_count;
 
-		for (int i = 0; i < (int) attrs.size(); i++) {
-			pipelineDesc.layout.attrs[i].format		  = attrs[i];
-			pipelineDesc.layout.attrs[i].buffer_index = i;
-		}
-		if (isInstancing) {
-			int instanceIndexBuffer									   = static_cast<int>(attrs.size()) - 1;
-			pipelineDesc.layout.buffers[instanceIndexBuffer].step_func = SG_VERTEXSTEP_PER_INSTANCE;
-			pipelineDesc.layout.buffers[instanceIndexBuffer].step_rate = 1;
+		// Each attribute is placed at the shader location resolved by name (a.location)
+		// and reads from its own vertex-buffer slot (a.bufferSlot). This decouples the
+		// order buffers are bound from the order attributes are declared in the shader.
+		for (const auto &a: attrs) {
+			pipelineDesc.layout.attrs[a.location].format	   = a.format;
+			pipelineDesc.layout.attrs[a.location].buffer_index = a.bufferSlot;
+			if (a.perInstance) {
+				pipelineDesc.layout.buffers[a.bufferSlot].step_func = SG_VERTEXSTEP_PER_INSTANCE;
+				pipelineDesc.layout.buffers[a.bufferSlot].step_rate = 1;
+			}
 		}
 		if (blending) {
 			pipelineDesc.colors[0].blend.enabled = true;
