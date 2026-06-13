@@ -70,41 +70,34 @@ static sg_primitive_type primitiveTypeToSokolMode(Vbo::PrimitiveType mode) {
 void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) {
 	auto shader = getShader(g);
 
-	std::vector<sg_vertex_format> attrs = {positionBuffer.getFormat()};
-
 	if (!positionBuffer.valid()) {
 		printf("position buffer not valid\n");
 		return;
 	}
-	// vbo chooses the shader
-	sg_bindings bindings		= {};
-	bindings.vertex_buffers[0]	= positionBuffer.buffer;
-	int nextPos					= 1;
 
-	// Order matters: each buffer at slot i feeds the shader attribute at location
-	// i (SokolPipeline sets buffer_index = i). Every shader declares its vertex
-	// attributes as Position, then TexCoord, then Color, so texcoords must be
-	// bound before colors. Binding color first swaps the two for the color+
-	// texcoord shaders (colorFont/colorTexture): TexCoord then reads colour data
-	// and samples a constant atlas texel - e.g. grid keyboard note names render
-	// as solid black rects.
-	if (texCoordBuffer.valid()) {
-		bindings.vertex_buffers[nextPos] = texCoordBuffer.buffer;
-		attrs.push_back(texCoordBuffer.getFormat());
-		nextPos++;
-	}
+	sg_bindings bindings = {};
+	std::vector<SokolVertexAttr> attrs;
+	int slot = 0;
 
-	if (colorBuffer.valid()) {
-		bindings.vertex_buffers[nextPos] = colorBuffer.buffer;
-		attrs.push_back(colorBuffer.getFormat());
-		nextPos++;
-	}
+	// Bind each vertex buffer to the shader attribute location resolved BY NAME
+	// from the shader's reflection (attrSlot), rather than assuming buffer slot i
+	// feeds attribute location i. This makes the order attributes are declared in
+	// the .glsl irrelevant: shaders that list Color before TexCoord (fx sliders,
+	// piano roll notes) and ones that list TexCoord before Color (font atlas) both
+	// bind correctly. Relying on order silently swaps attributes when they differ.
+	auto bindAttr = [&](Buffer &buf, const char *attrName, bool perInstance = false) {
+		if (!buf.valid()) return;
+		int location = shader->attrSlot(attrName);
+		if (location < 0) return; // shader doesn't declare this attribute
+		bindings.vertex_buffers[slot] = buf.buffer;
+		attrs.push_back({location, buf.getFormat(), slot, perInstance});
+		slot++;
+	};
 
-	if (normalBuffer.valid()) {
-		bindings.vertex_buffers[nextPos] = normalBuffer.buffer;
-		attrs.push_back(normalBuffer.getFormat());
-		nextPos++;
-	}
+	bindAttr(positionBuffer, "Position");
+	bindAttr(colorBuffer, "Color");
+	bindAttr(texCoordBuffer, "TexCoord");
+	bindAttr(normalBuffer, "Normal");
 
 	if (indexBuffer.valid()) {
 		bindings.index_buffer = indexBuffer.buffer;
@@ -118,10 +111,9 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 			}
 			instanceIndexBuffer.set(counter);
 		}
-		attrs.push_back(instanceIndexBuffer.getFormat());
-		bindings.vertex_buffers[nextPos] = instanceIndexBuffer.buffer;
-		nextPos++;
+		bindAttr(instanceIndexBuffer, "InstanceID", true);
 	}
+
 	auto *api = static_cast<SokolAPI *>(&g.getAPI());
 
 	auto tex = api->getBoundTexture();
@@ -132,7 +124,7 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 		auto sampler			= api->getSampler();
 		bindings.fs.samplers[0] = sampler;
 	}
-	shader->getPipeline(attrs, indexBuffer.valid(), primitiveTypeToSokolMode(mode), numInstances > 1)->apply();
+	shader->getPipeline(attrs, indexBuffer.valid(), primitiveTypeToSokolMode(mode))->apply();
 
 	sg_apply_bindings(bindings);
 

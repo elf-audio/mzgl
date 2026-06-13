@@ -3,10 +3,12 @@
 #include <glm/glm.hpp>
 using namespace glm;
 #include "sokol_gfx.h"
+#include "SokolVertexAttr.h"
 #include <map>
 #include <memory>
 #include <string>
 #include <cstring>
+#include <vector>
 #include "Shader.h"
 class Graphics;
 
@@ -100,12 +102,16 @@ public:
 		memcpy(ptr, data, sizeof(T) * count);
 	}
 
-	std::map<int, PipelineRef> pipelines;
+	std::map<size_t, PipelineRef> pipelines;
 
-	PipelineRef getPipeline(const std::vector<sg_vertex_format> &attrs,
+	// Shader attribute location for a vertex attribute by name (e.g. "Position",
+	// "Color", "TexCoord"), from the sokol-shdc reflection. Returns -1 if the
+	// shader doesn't use that attribute.
+	int attrSlot(const std::string &attrName) const;
+
+	PipelineRef getPipeline(const std::vector<SokolVertexAttr> &attrs,
 							bool usingIndices,
-							sg_primitive_type mode,
-							bool isInstancing);
+							sg_primitive_type mode);
 	std::vector<uint8_t> vertUniforms;
 	std::vector<uint8_t> fragUniforms;
 	std::string name;

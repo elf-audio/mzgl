@@ -42,23 +42,35 @@ void SokolShader::end() {
 	g.currShader = nullptr;
 }
 
-PipelineRef SokolShader::getPipeline(const std::vector<sg_vertex_format> &attrs,
+int SokolShader::attrSlot(const std::string &attrName) const {
+	return def->attrSlotFunc(attrName.c_str());
+}
+
+PipelineRef SokolShader::getPipeline(const std::vector<SokolVertexAttr> &attrs,
 									 bool usingIndices,
-									 sg_primitive_type mode,
-									 bool isInstancing) {
-	// make a unique number to use as a key based on incoming parameters
-	// (there will be at most 5-6 attributes)
+									 sg_primitive_type mode) {
+	// Cache key hashes the full attribute layout (location/format/slot/step) plus
+	// the index/blend/primitive state, so different attribute sets for the same
+	// shader get distinct pipelines.
+	size_t key = 0;
+	auto mix   = [&key](size_t v) { key = key * 1000003u ^ v; };
+	for (const auto &a: attrs) {
+		mix(static_cast<size_t>(a.location));
+		mix(static_cast<size_t>(a.format));
+		mix(static_cast<size_t>(a.bufferSlot));
+		mix(a.perInstance ? 1u : 0u);
+	}
+	mix(usingIndices ? 1u : 0u);
+	mix(static_cast<size_t>(g.getBlendMode()));
+	mix(g.isBlending() ? 1u : 0u);
+	mix(static_cast<size_t>(mode));
 
-	int index = static_cast<int>(attrs.size()) + usingIndices * 16 + static_cast<int>(g.getBlendMode()) * 32 + g.isBlending() * 64
-				+ static_cast<int>(mode) * 128;
-
-	if (pipelines.find(index) == pipelines.end()) {
-		auto pipeline =
-			Pipeline::create(shd, attrs, usingIndices, g.isBlending(), g.getBlendMode(), mode, isInstancing);
-		pipelines[index] = pipeline;
+	if (pipelines.find(key) == pipelines.end()) {
+		auto pipeline = Pipeline::create(shd, attrs, usingIndices, g.isBlending(), g.getBlendMode(), mode);
+		pipelines[key] = pipeline;
 		return pipeline;
 	}
-	return pipelines[index];
+	return pipelines[key];
 }
 uint8_t *SokolShader::uniformLocation(const std::string &name) {
 	int offset = def->uniformOffsetFunc(SG_SHADERSTAGE_VS, "vertParams", name.c_str());
