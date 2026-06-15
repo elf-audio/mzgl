@@ -320,71 +320,85 @@ void notifyJSCallbacks(const std::string &jsValue) {
 	}
 }
 
-bool androidEncodeAAC(const std::string &pathToOutput,
-					  const FloatBuffer &inputBuffer,
-					  int numChannels,
-					  int sampleRate) {
+void *androidAACEncoderCreate(const std::string &pathToOutput, int numChannels, int sampleRate, int bitrateKbps) {
 	ScopedJni scp;
 	jmethodID methodID = scp.getMethodID("getAACEncoder", "()Lcom/elf/aacencoder/Encoder;");
 	JNIEnv *jni		   = scp.j();
-	bool success	   = false;
 
 	jobject aacEncoder = jni->CallObjectMethod(getAndroidAppPtr()->activity->clazz, methodID);
-	if (aacEncoder != nullptr) {
-		jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
-		jmethodID initMethodID = jni->GetMethodID(aacEncoderClazz, "initialize", "(Ljava/lang/String;II)Z");
-		jmethodID feedMethodID = jni->GetMethodID(aacEncoderClazz, "feed", "(Ljava/nio/ByteBuffer;I)Z");
-		jmethodID doneMethodID = jni->GetMethodID(aacEncoderClazz, "done", "()V");
-		jobject nativeBuffer   = nullptr;
-		jstring path		   = jni->NewStringUTF(pathToOutput.c_str());
+	if (aacEncoder == nullptr) return nullptr;
 
-		jboolean initOK = jni->CallBooleanMethod(aacEncoder, initMethodID, path, numChannels, sampleRate);
-		if (initOK == JNI_TRUE) {
-			// unfortunately android AAC encoder needs signed int 16 sample as input
-			// create reasonably large buffer
+	jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
+	jmethodID initMethodID = jni->GetMethodID(aacEncoderClazz, "initialize", "(Ljava/lang/String;III)Z");
+	jstring path		   = jni->NewStringUTF(pathToOutput.c_str());
 
-			uint32_t numberOfPCMSamples = inputBuffer.size();
-			uint32_t shortBuffSize =
-				(numberOfPCMSamples > PCM_OUT_BUFF_SIZE) ? PCM_OUT_BUFF_SIZE : numberOfPCMSamples;
-			uint32_t byteBuffSize = shortBuffSize * 2;
+	jboolean initOK = jni->CallBooleanMethod(aacEncoder, initMethodID, path, numChannels, sampleRate, bitrateKbps);
+	jni->DeleteLocalRef(path);
 
-			auto *byteBuffer = new uint8_t[byteBuffSize];
-			nativeBuffer	 = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
+	void *handle = nullptr;
+	if (initOK == JNI_TRUE) {
+		// Promote to a global ref so the encoder survives across feed() calls.
+		handle = jni->NewGlobalRef(aacEncoder);
+	}
+	jni->DeleteLocalRef(aacEncoder);
+	return handle;
+}
 
-			uint32_t dataLeft = (nativeBuffer != nullptr) ? numberOfPCMSamples : 0;
+bool androidAACEncoderFeed(void *handle, const int16_t *samples, int numSamples) {
+	if (handle == nullptr || numSamples <= 0) return handle != nullptr;
+	ScopedJni scp;
+	JNIEnv *jni		   = scp.j();
+	jobject aacEncoder = static_cast<jobject>(handle);
 
-			int inputBuffPos = 0;
-			jboolean feedOK	 = JNI_FALSE;
+	jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
+	jmethodID feedMethodID = jni->GetMethodID(aacEncoderClazz, "feed", "(Ljava/nio/ByteBuffer;I)Z");
 
-			while (dataLeft > 0) {
-				uint32_t samplesToCopy = (dataLeft > shortBuffSize) ? shortBuffSize : dataLeft;
-				uint32_t outBufPos	   = 0;
-				for (int i = 0; i < samplesToCopy; i++) {
-					auto signedSample =
-						(int16_t) (inputBuffer[inputBuffPos++] * 32767.f); // mind the endian, which must be LE
-					byteBuffer[outBufPos++] = (uint8_t) signedSample;
-					byteBuffer[outBufPos++] = (uint8_t) (signedSample >> 8);
-				}
-				dataLeft -= samplesToCopy;
+	// Java feed() needs little-endian int16 bytes; chunk through a bounded
+	// direct buffer so we never allocate the whole recording at once.
+	const uint32_t maxSamplesPerChunk = PCM_OUT_BUFF_SIZE;
+	const uint32_t totalSamples		  = static_cast<uint32_t>(numSamples);
+	const uint32_t chunkSamples		  = (totalSamples < maxSamplesPerChunk) ? totalSamples : maxSamplesPerChunk;
+	const uint32_t byteBuffSize		  = chunkSamples * 2;
 
-				feedOK = jni->CallBooleanMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
-				if (feedOK != JNI_TRUE) {
-					break;
-				}
-			}
-			jni->CallVoidMethod(aacEncoder, doneMethodID);
-
-			if (nativeBuffer != nullptr) {
-				jni->DeleteLocalRef(nativeBuffer);
-			}
-
-			success = (feedOK == JNI_TRUE);
-		}
-		jni->DeleteLocalRef(path);
-		jni->DeleteLocalRef(aacEncoder);
+	auto *byteBuffer	= new uint8_t[byteBuffSize];
+	jobject nativeBuffer = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
+	if (nativeBuffer == nullptr) {
+		delete[] byteBuffer;
+		return false;
 	}
 
-	return success;
+	jboolean feedOK	  = JNI_TRUE;
+	uint32_t dataLeft = static_cast<uint32_t>(numSamples);
+	int inputPos	  = 0;
+	while (dataLeft > 0 && feedOK == JNI_TRUE) {
+		const uint32_t samplesToCopy = (dataLeft < chunkSamples) ? dataLeft : chunkSamples;
+		uint32_t outPos				 = 0;
+		for (uint32_t i = 0; i < samplesToCopy; ++i) {
+			const int16_t s		  = samples[inputPos++];
+			byteBuffer[outPos++] = static_cast<uint8_t>(s);
+			byteBuffer[outPos++] = static_cast<uint8_t>(s >> 8);
+		}
+		dataLeft -= samplesToCopy;
+		feedOK = jni->CallBooleanMethod(aacEncoder, feedMethodID, nativeBuffer, samplesToCopy * 2);
+	}
+
+	jni->DeleteLocalRef(nativeBuffer);
+	delete[] byteBuffer;
+	return feedOK == JNI_TRUE;
+}
+
+bool androidAACEncoderFinish(void *handle) {
+	if (handle == nullptr) return false;
+	ScopedJni scp;
+	JNIEnv *jni		   = scp.j();
+	jobject aacEncoder = static_cast<jobject>(handle);
+
+	jclass aacEncoderClazz = jni->GetObjectClass(aacEncoder);
+	jmethodID doneMethodID = jni->GetMethodID(aacEncoderClazz, "done", "()V");
+	jni->CallVoidMethod(aacEncoder, doneMethodID);
+
+	jni->DeleteGlobalRef(aacEncoder);
+	return true;
 }
 
 void androidAlertDialog(const std::string &title, const std::string &message) {

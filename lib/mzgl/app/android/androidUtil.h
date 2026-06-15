@@ -116,7 +116,12 @@ void androidDownloadFile(const std::string &url,
 
 void androidCancelFileDownload(const std::string &url);
 
-bool androidEncodeAAC(const std::string &pathToOutput, const FloatBuffer &buff, int numChannels, int sampleRate);
+// Streaming AAC encoder lifecycle, driven from AACFileEncoder (lib/opt). The
+// returned handle is an opaque JNI global ref to a com.elf.aacencoder.Encoder;
+// feed it interleaved little-endian int16 PCM and finish it exactly once.
+void *androidAACEncoderCreate(const std::string &pathToOutput, int numChannels, int sampleRate, int bitrateKbps);
+bool androidAACEncoderFeed(void *handle, const int16_t *samples, int numSamples);
+bool androidAACEncoderFinish(void *handle);
 
 std::string getAndroidTempDir();
 
