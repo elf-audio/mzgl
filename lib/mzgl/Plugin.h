@@ -208,13 +208,19 @@ public:
 			if (paramChanged) paramChanged(i, val);
 		}
 	}
+	
+	enum class ParameterUpdateType {
+		TouchDown,
+		ValueChanged,
+		TouchUp,
+	};
 
-	std::function<void(unsigned int, float)> sendUpdatedParameterToHost;
+	std::function<void(unsigned int, float, ParameterUpdateType)> sendUpdatedParameterToHost;
 
-	void updateHostParameter(unsigned int i, float val) {
+	void updateHostParameter(unsigned int i, float val, ParameterUpdateType change) {
 		params[i]->set(val);
 		if (sendUpdatedParameterToHost) {
-			sendUpdatedParameterToHost(i, val);
+			sendUpdatedParameterToHost(i, val, change);
 		} else {
 			Log::d() << "error sendUpdatedParameterToHost not implemented";
 		}
