@@ -36,6 +36,14 @@ using namespace std;
 
 - (void)dealloc {
     NSLog(@"Tearing down MZGLKitView");
+    // Tear the C++ objects down in an explicit, safe order (app -> graphics).
+    // Otherwise ARC's .cxx_destruct destroys the ivars in reverse declaration
+    // order, freeing `graphics` before `app`; ~App then deletes its Layer tree,
+    // and ~Layer dereferences the (now dangling) Graphics& -> crash. This path
+    // matters for teardowns that don't go through the view controller's
+    // deleteCppObjects (e.g. AUv3 extension scene invalidation). Idempotent:
+    // resetting already-null shared_ptrs is a no-op.
+    [self deleteCppObjects];
 }
 
 - (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
@@ -176,6 +184,14 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
 
 - (void)dealloc {
     NSLog(@"Tearing down MZMetaliOSView");
+    // Tear the C++ objects down in an explicit, safe order (app -> graphics).
+    // Otherwise ARC's .cxx_destruct destroys the ivars in reverse declaration
+    // order, freeing `graphics` before `app`; ~App then deletes its Layer tree,
+    // and ~Layer dereferences the (now dangling) Graphics& -> crash. This path
+    // matters for teardowns that don't go through the view controller's
+    // deleteCppObjects (e.g. AUv3 extension scene invalidation). Idempotent:
+    // resetting already-null shared_ptrs is a no-op.
+    [self deleteCppObjects];
 }
 
 - (void)drawInMTKView:(nonnull MTKView *)view {
