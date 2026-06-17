@@ -1,20 +1,3 @@
-set(GLOBAL_HEADER_SEARCH_PATHS
-    ""
-    CACHE STRING "Global header search paths" FORCE)
-
-# @brief Append the cached header search paths
-#
-# Writes a xcode compatible file to include from
-#
-# @param PATH the path write
-function(mzgl_add_xcode_header_search_path PATH)
-  set(CURRENT_LIST "${GLOBAL_HEADER_SEARCH_PATHS}")
-  list(APPEND CURRENT_LIST "${PATH}")
-  set(GLOBAL_HEADER_SEARCH_PATHS
-      "${CURRENT_LIST}"
-      CACHE STRING "Global header search paths" FORCE)
-endfunction()
-
 function(mzgl_patch_cmake_version CMAKE_LISTS_PATH)
   if(NOT EXISTS "${CMAKE_LISTS_PATH}")
     message(
@@ -45,20 +28,6 @@ function(mzgl_patch_cmake_version CMAKE_LISTS_PATH)
   endif()
 endfunction()
 
-# @brief Write the include paths to a file in cpm-source-cache
-#
-# Writes a xcode compatible file to include from
-#
-# @param PATH the path write
-function(mzgl_write_header_search_paths)
-  set(CURRENT_LIST "${GLOBAL_HEADER_SEARCH_PATHS}")
-  list(REMOVE_DUPLICATES CURRENT_LIST)
-  file(WRITE "${XCODE_HEADER_PATH_FILE}" "")
-  foreach(HEADER_SEARCH_PATH IN LISTS CURRENT_LIST)
-    file(APPEND "${XCODE_HEADER_PATH_FILE}"
-         "HEADER_SEARCH_PATHS = $(inherited) ${HEADER_SEARCH_PATH}\n")
-  endforeach()
-endfunction()
 
 # @brief Recursively add to the search paths
 #
@@ -116,7 +85,6 @@ function(mzgl_add_search_paths ROOTPATH)
 
   foreach(DIR IN LISTS INCLUDE_DIRECTORIES_LIST)
     mzgl_print_debug_in_grey("            -> ${DIR}")
-    mzgl_add_xcode_header_search_path(${DIR})
   endforeach()
 endfunction()
 

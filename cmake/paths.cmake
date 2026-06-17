@@ -1,8 +1,16 @@
 function(mzgl_detect_cpm_root_dir)
   if(NOT DEFINED CPM_ROOT_DIR OR "${CPM_ROOT_DIR}" STREQUAL "")
-    message(STATUS "CPM_ROOT_DIR Not set, detected cpm-source-cache")
+    # Default the CPM cache root to ~/.cpm: shared across build dirs and outside
+    # the repo. $ENV{HOME} on Unix/macOS, $ENV{USERPROFILE} on Windows. Callers can
+    # still override CPM_ROOT_DIR (CMakePresets / -D); this is only the fallback,
+    # used e.g. by scripts/gen-xcode.sh which doesn't go through a preset.
+    set(_cpm_home "$ENV{HOME}")
+    if(NOT _cpm_home)
+      set(_cpm_home "$ENV{USERPROFILE}")
+    endif()
+    message(STATUS "CPM_ROOT_DIR not set, defaulting to ${_cpm_home}/.cpm")
     set(CPM_ROOT_DIR
-        "cpm-source-cache"
+        "${_cpm_home}/.cpm"
         CACHE PATH "Path to the CPM root directory")
   endif()
 endfunction()

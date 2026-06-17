@@ -129,7 +129,10 @@
 #   command.
 #
 
-cmake_minimum_required(VERSION 3.8.0)
+# Range form (<min>...<max>) keeps the original 3.8 floor but tells CMake the file
+# works with policies up to 3.31, silencing the "Compatibility with CMake < 3.10
+# will be removed" deprecation warning that otherwise fires on every try_compile.
+cmake_minimum_required(VERSION 3.8.0...3.31)
 
 # CMake invokes the toolchain file twice during the first build, but only once during subsequent rebuilds.
 if(DEFINED ENV{_IOS_TOOLCHAIN_HAS_RUN})

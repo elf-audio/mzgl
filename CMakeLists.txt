@@ -30,8 +30,14 @@ if(NOT ANDROID
   set(LINUX TRUE)
 endif()
 
+# iOS detection. The old check `if(DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL
+# "OS64")` double-expanded ${PLATFORM} (to e.g. `if(DEFINED OS64 AND ...)`), so
+# IOS stayed FALSE under the iOS toolchain and desktop-only deps (GLFW, PortAudio,
+# RtMidi) were wrongly built for iOS. Detect via the toolchain's CMAKE_SYSTEM_NAME
+# or the ios-cmake PLATFORM value (OS64 / OS64COMBINED / SIMULATOR*).
 set(IOS FALSE)
-if(DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL "OS64")
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS"
+   OR PLATFORM MATCHES "^(OS|OS64|OS64COMBINED|SIMULATOR|SIMULATOR64|SIMULATORARM64)$")
   set(IOS TRUE)
 endif()
 
@@ -53,6 +59,9 @@ set(MZGL_SOURCES
     lib/mzgl/gl/Font.cpp
     lib/mzgl/gl/Graphics.cpp
     lib/mzgl/gl/colors.cpp
+    # Image-win.cpp carries the stb_image implementation (used by Image.cpp's
+    # loadPngFromData on every platform); it also defines Image::load/save, but
+    # those are #if'd out on Apple where Image.mm (ImageIO) provides them.
     lib/mzgl/gl/Image-win.cpp
     lib/mzgl/gl/Image.cpp
     lib/mzgl/gl/Shader.cpp
@@ -138,7 +147,42 @@ set(MZGL_SOURCES
     lib/mzgl/app/web/MacWebView.mm
     lib/mzgl/app/web/MZWebView.cpp
     >)
-if(NOT ANDROID)
+
+# iOS-only app/audio sources. The Darwin block above is shared with macOS and
+# provides the apple-common pieces (CoreMIDI, AudioFileApple, WKWebView, AUv3);
+# the mac-only files in it self-guard out on iOS. These are the UIKit/CoreAudio
+# implementations mzgl needs to actually run on iOS, which previously only the
+# hand-tooled mzgl.xcodeproj built.
+if(IOS)
+  list(APPEND MZGL_SOURCES
+       lib/mzgl/audio/iOS/AudioSystemIOS.mm
+       lib/mzgl/app/ios/mainiOS.mm
+       lib/mzgl/app/ios/iOSAppDelegate.mm
+       lib/mzgl/app/ios/MZGLKitView.mm
+       lib/mzgl/app/ios/MZGLKitViewController.mm
+       lib/mzgl/app/ios/TextboxSegmentedViewController.m
+       lib/mzgl/app/ios/UIBlockButton.m
+       lib/AudioShare/AudioShareSDK.m
+       # Apple-shared sources from the $<PLATFORM_ID:Darwin> block above (which is
+       # FALSE on iOS); the mac-only files in that block are correctly omitted.
+       lib/mzgl/audio/AudioFileApple.cpp
+       # dr_libs-based loader (loadViaDrLib/loadResampledViaDrLib): cross-platform,
+       # in the Darwin block for macOS and the non-Apple branch for desktop, but the
+       # iOS block must add it explicitly (the unit tests exercise it on iOS too).
+       lib/mzgl/audio/AudioFileDrLib.cpp
+       lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
+       lib/mzgl/midi/appleMidiUtils.cpp
+       # MZGLWebView.mm / app/web/MacWebView.mm are AppKit (macOS-only); iOS uses
+       # AppleWebView (UIKit) on top of the cross-platform MZWebView base.
+       lib/mzgl/app/apple/AppleWebView.mm
+       lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
+       lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
+       lib/mzgl/app/web/MZWebView.cpp)
+endif()
+
+if(NOT ANDROID AND NOT IOS)
+  # GLFW desktop app-runner + glew. Not used on iOS (which runs via app/ios/
+  # mainiOS.mm); glfw3.h pulls in OpenGL/gl.h which doesn't exist on iOS.
   list(
     APPEND
     MZGL_SOURCES
@@ -278,6 +322,15 @@ mzgl_restore_cmake_log_level()
 # Apple platforms have a special audio file reader
 if(APPLE)
 
+  # Image::load/save use ImageIO/CoreGraphics on Apple (Image.mm), matching the
+  # hand-tooled Xcode projects; every other platform uses the stb_image fallback
+  # (Image-win.cpp, added in the else branch below). Image.mm is compiled with ARC
+  # (it creates autoreleased NSString/NSURL); on iOS the target is ARC-wide already,
+  # the per-file flag makes macOS match.
+  list(APPEND MZGL_SOURCES lib/mzgl/gl/Image.mm)
+  set_source_files_properties(lib/mzgl/gl/Image.mm
+                              PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+
   # force ARC - we were doing this but it breaks GLFW at the moment because it
   # isn't ARC compatible yet, so we're just selectively compiling with arc for
   # MZGLEffectAU below instead. add_compile_options(-fobjc-arc)
@@ -311,7 +364,12 @@ if(ANDROID)
        lib/mzgl/app/android/androidUtil.cpp
        lib/mzgl/midi/AllMidiDevicesAndroidImpl.cpp)
 else()
-  list(APPEND MZGL_SOURCES lib/mzgl/audio/portaudio/PortAudioSystem.cpp)
+  # iOS uses AudioSystemIOS (CoreAudio via AVAudioSession), not PortAudio. Building
+  # PortAudioSystem.cpp on iOS both pulls in the (absent) PortAudio lib and makes
+  # its `typedef PortAudioSystem AudioSystem` collide with AudioSystemIOS's.
+  if(NOT IOS)
+    list(APPEND MZGL_SOURCES lib/mzgl/audio/portaudio/PortAudioSystem.cpp)
+  endif()
 
   if(APPLE)
     if(NOT IOS)
@@ -339,6 +397,13 @@ if(LINUX)
   list(APPEND MZGL_SOURCES
        # lib/mzgl/app/linux/mainLinux.cpp
        lib/mzgl/util/linuxUtil.cpp)
+endif()
+
+# iOS-only header search paths: the app/ios UIKit views (included from e.g.
+# util/Dialogs.cpp) and the AudioShare SDK (included from app/ios/iOSAppDelegate.mm).
+# The hand-tooled project exposed AudioShare via $(MZGLROOT)/lib/AudioShare.
+if(IOS)
+  list(APPEND HEADERS lib/AudioShare lib/mzgl/app/ios)
 endif()
 
 add_library(
@@ -506,26 +571,56 @@ if(ANDROID)
     mediandk)
 
 elseif(APPLE)
-  add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
-  target_link_libraries(
-    libmzgl
-    "-framework OpenGL"
-    "-framework Metal"
-    "-framework MetalKit"
-    "-framework Accelerate"
-    "-framework AppKit"
-    "-framework StoreKit"
-    "-framework CoreVideo"
-    "-framework CoreMidi"
-    "-framework CoreAudio"
-    "-framework AVFoundation"
-    "-framework CoreMedia"
-    "-framework WebKit"
-    "-framework AudioUnit"
-    "-framework CoreAudioKit"
-    "-framework UniformTypeIdentifiers"
-    "-framework AudioToolbox"
-    "-framework IOKit")
+  if(IOS)
+    # iOS frameworks: no OpenGL (uses Metal via sokol), no AppKit/IOKit/AudioUnit
+    # (macOS-only); UIKit replaces AppKit.
+    add_compile_definitions(GLES_SILENCE_DEPRECATION GL_SILENCE_DEPRECATION)
+    target_link_libraries(
+      libmzgl
+      "-framework UIKit"
+      "-framework GLKit"
+      "-framework Metal"
+      "-framework MetalKit"
+      "-framework Accelerate"
+      "-framework StoreKit"
+      "-framework CoreVideo"
+      "-framework CoreMidi"
+      "-framework CoreAudio"
+      "-framework AVFoundation"
+      "-framework CoreMedia"
+      "-framework WebKit"
+      "-framework CoreAudioKit"
+      "-framework UniformTypeIdentifiers"
+      "-framework AudioToolbox"
+      "-framework QuartzCore"
+      "-framework CoreGraphics"
+      "-framework ImageIO"
+      "-framework Foundation")
+  else()
+    add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
+    target_link_libraries(
+      libmzgl
+      "-framework OpenGL"
+      "-framework Metal"
+      "-framework MetalKit"
+      "-framework Accelerate"
+      "-framework AppKit"
+      "-framework StoreKit"
+      "-framework CoreVideo"
+      "-framework CoreMidi"
+      "-framework CoreAudio"
+      "-framework AVFoundation"
+      "-framework CoreMedia"
+      "-framework WebKit"
+      "-framework AudioUnit"
+      "-framework CoreAudioKit"
+      "-framework UniformTypeIdentifiers"
+      "-framework AudioToolbox"
+      # ImageIO + CoreGraphics back Image::load/save (Image.mm) on macOS.
+      "-framework ImageIO"
+      "-framework CoreGraphics"
+      "-framework IOKit")
+  endif()
 
 elseif(WIN32)
 
@@ -661,7 +756,7 @@ target_link_libraries(libmzgl ${MZGL_LIBS})
 
 if(NOT ANDROID)
   target_link_libraries(libmzgl_unit_test ${MZGL_LIBS})
-  if(APPLE)
+  if(APPLE AND NOT IOS)
     # Mirror the Apple frameworks linked into libmzgl above. Targets that link
     # libmzgl_unit_test (the tests and koala-headless binaries) need the same
     # set - in particular Metal/MetalKit, since the sokol/Metal backend compiles
@@ -685,6 +780,9 @@ if(NOT ANDROID)
       "-framework CoreAudioKit"
       "-framework UniformTypeIdentifiers"
       "-framework AudioToolbox"
+      # ImageIO + CoreGraphics back Image::load/save (Image.mm) on macOS.
+      "-framework ImageIO"
+      "-framework CoreGraphics"
       "-framework IOKit")
   endif()
 endif()

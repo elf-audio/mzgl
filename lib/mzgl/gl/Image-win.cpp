@@ -10,11 +10,20 @@
 
 #include <cstring>
 //#include "picopng.hpp"
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 
+// The stb_image READ implementation is compiled on every platform: Image.cpp's
+// loadPngFromData() (PNG-from-memory) uses stbi_* everywhere, including Apple.
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include "stb_image_write.h"
+
+// Image::load/save (from a file path) use stb_image here on non-Apple platforms.
+// On Apple they are provided by Image.mm via ImageIO/CoreGraphics, so this file
+// must NOT also define them there (it would be a duplicate symbol). The stb write
+// implementation is likewise only needed for the stb-based save below.
+#if !defined(__APPLE__)
+
+#	define STB_IMAGE_WRITE_IMPLEMENTATION
+#	include "stb_image_write.h"
 
 using namespace std;
 
@@ -59,3 +68,5 @@ bool Image::load(const string &path,
 	stbi_image_free(image);
 	return true;
 }
+
+#endif // !defined(__APPLE__)

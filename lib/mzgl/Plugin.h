@@ -182,7 +182,12 @@ public:
 		midiOutMessages.emplace_back(outputNo, m, delay);
 	};
 
-#if TARGET_OS_IOS
+	// Available on every Apple AUv3 build (macOS as well as iOS): the macOS AUv3 is
+	// also an AudioUnit that can send MIDI to its host. The body is platform-neutral
+	// (a std::function callback set by the AU implementation), and KoalaMidiSystem
+	// calls it under #ifdef MZGL_PLUGIN, so a macOS-only TARGET_OS_IOS guard would
+	// leave the macOS AUv3 referencing a missing member.
+#if TARGET_OS_IOS || TARGET_OS_OSX
 	std::function<void(const MidiMessage &, std::optional<uint64_t> timestampInNanoSeconds)>
 		onSendMidiToAudioUnitHost;
 	void sendMidiToAudioUnitHost(const MidiMessage &m, std::optional<uint64_t> timestampInNanoSeconds) {
