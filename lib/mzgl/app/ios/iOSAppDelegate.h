@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#include <GLKit/GLKit.h>
 @interface iOSAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property(strong, nonatomic) UIWindow *window;

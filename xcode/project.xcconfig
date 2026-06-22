@@ -48,6 +48,10 @@ OTHER_LDFLAGS[sdk=macosx*][config=Debug] = -all_load $(FRAMEWORKS_COMMON) $(FRAM
 OTHER_LDFLAGS[sdk=macosx*][config=Release] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_MAC)
 
 OTHER_LDFLAGS[sdk=iphoneos*] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_IOS)
+// The simulator needs the same frameworks as device (notably MetalKit, for the
+// MTKView-based Metal backend). Without this it only got frameworks from the
+// pbxproj link phase, which lacks MetalKit -> undefined MTKView symbols.
+OTHER_LDFLAGS[sdk=iphonesimulator*] = $(FRAMEWORKS_COMMON) $(FRAMEWORKS_IOS)
 
 CLANG_CXX_LANGUAGE_STANDARD = c++20
 CLANG_CXX_LIBRARY = libc++

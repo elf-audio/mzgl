@@ -7,9 +7,7 @@
 //
 
 #import "iOSAppDelegate.h"
-#import <GLKit/GLKit.h>
-//#import "MZGLKitView.h"
-#import "MZGLKitViewController.h"
+#import "MZMetaliOSViewController.h"
 #include "App.h"
 #include "EventDispatcher.h"
 #include "AudioShareSDK.h"

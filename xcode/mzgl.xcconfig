@@ -24,9 +24,11 @@ HEADER_SEARCH_PATHS = 						\
 			../lib/mzgl/app/mac/Metal
 OTHER_CFLAGS = -DSOKOL_METAL
 // Sokol/Metal is the default graphics backend on Apple platforms (toggle
-// MZGL_SOKOL per-sdk here). macOS -> Metal, iOS device -> Metal.
+// MZGL_SOKOL per-sdk here). macOS -> Metal, iOS device -> Metal, iOS simulator
+// -> Metal. There is no longer an OpenGL/GLKit backend on Apple.
 OTHER_CFLAGS[sdk=macosx*] = -D__MACOSX_CORE__ -DSOKOL_METAL -DMZGL_SOKOL
 OTHER_CFLAGS[sdk=iphoneos*] = -DSOKOL_METAL -DMZGL_SOKOL
+OTHER_CFLAGS[sdk=iphonesimulator*] = -DSOKOL_METAL -DMZGL_SOKOL
 
 PA_FLAGS = PA_LITTLE_ENDIAN STDC_HEADERS=1 HAVE_SYS_TYPES_H=1 HAVE_SYS_STAT_H=1 HAVE_STDLIB_H=1 HAVE_STRING_H=1 HAVE_MEMORY_H=1 HAVE_STRINGS_H=1 HAVE_INTTYPES_H=1 HAVE_STDINT_H=1 HAVE_UNISTD_H=1 HAVE_DLFCN_H=1 SIZEOF_SHORT=2 SIZEOF_INT=4 SIZEOF_LONG=8 HAVE_CLOCK_GETTIME=1 HAVE_NANOSLEEP=1 PA_USE_COREAUDIO=1
 

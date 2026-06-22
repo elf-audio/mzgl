@@ -12,7 +12,7 @@
 #	include <thread>
 
 #	if MZGL_IOS
-#		import "MZGLKitViewController.h"
+#		import "MZMetaliOSViewController.h"
 #		import "MZGLKitView.h"
 #	else
 #		import "EventsView.h"
