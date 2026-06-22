@@ -12,102 +12,10 @@
 #include "mzgl/util/log.h"
 #include "Vbo.h"
 #include "PluginEditor.h"
-#ifdef MZGL_SOKOL
-#	include "sokol_gfx.h"
-#	include "SokolSetup.h"
-#endif
+#include "sokol_gfx.h"
+#include "SokolSetup.h"
 using namespace std;
 
-#pragma mark - MZGLKitView (GL render base)
-
-@implementation MZGLKitView {
-    bool firstFrame;
-}
-
-- (void) deleteCppObjects {
-    app = nullptr;
-    eventDispatcher = nullptr;
-    graphics = nullptr;
-}
-
-- (std::shared_ptr<App>)getApp {
-    return app;
-}
-
-- (void)dealloc {
-    NSLog(@"Tearing down MZGLKitView");
-    // Tear the C++ objects down in an explicit, safe order (app -> graphics).
-    // Otherwise ARC's .cxx_destruct destroys the ivars in reverse declaration
-    // order, freeing `graphics` before `app`; ~App then deletes its Layer tree,
-    // and ~Layer dereferences the (now dangling) Graphics& -> crash. This path
-    // matters for teardowns that don't go through the view controller's
-    // deleteCppObjects (e.g. AUv3 extension scene invalidation). Idempotent:
-    // resetting already-null shared_ptrs is a no-op.
-    [self deleteCppObjects];
-}
-
-- (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
-    self = [super init];
-    if (self != nil) {
-        app = _app;
-        graphics = _graphics;
-
-        eventDispatcher = std::make_shared<EventDispatcher>(app);
-
-        firstFrame = true;
-    }
-    return self;
-}
-
-- (void)drawRect:(CGRect)rect {
-    if (firstFrame) {
-        app->g.pixelScale = [[UIScreen mainScreen] nativeScale];
-        //NSRect r = [[UIScreen mainScreen] nativeBounds];
-
-        initMZGL(app);
-
-        app->g.width  = rect.size.width * app->g.pixelScale;
-        app->g.height = rect.size.height * app->g.pixelScale;
-
-        if (app->g.width == 0 || app->g.height == 0) {
-            app->g.width  = 100;
-            app->g.height = 100;
-            printf("ERROR: WIDTH OR HEIGHT is ZERO\n");
-        }
-
-        eventDispatcher->setup();
-
-        firstFrame = false;
-    }
-    eventDispatcher->runFrame();
-}
-
-- (std::shared_ptr<EventDispatcher>)getEventDispatcher {
-    return eventDispatcher;
-}
-
-- (BOOL)handleNormalOpen:(NSURL *)url {
-    NSLog(@"Standard open");
-
-    NSString *path = url.path;
-
-    std::function<void()> deleter = []() {};
-    // see if we need a scoped security url
-    if (![[NSFileManager defaultManager] isReadableFileAtPath:path]) {
-        NSLog(@"Using security scoped url\n");
-        [url startAccessingSecurityScopedResource];
-
-        deleter = [url]() {
-            NSLog(@"Releasing security scoped url\n");
-            [url stopAccessingSecurityScopedResource];
-        };
-    }
-
-    return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
-}
-@end
-
-#ifdef MZGL_SOKOL
 #pragma mark - MZMetaliOSView (Metal render base)
 
 @implementation MZMetaliOSView {
@@ -244,7 +152,6 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
     return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
 }
 @end
-#endif
 
 #pragma mark - EventsView (shared interaction handling)
 
@@ -285,7 +192,7 @@ int uikeyToMz(UIKey *key) {
 }
 
 // The drag/drop UIDropInteractionDelegate methods are implemented as a category
-// on MZGLKitView (in the app target) and inherited here through the render base.
+// on EventsView (in the app target).
 API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate>
 @end
 
@@ -307,10 +214,6 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate>
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    //    GLKViewController *ctrl = (__bridge GLKViewController *)app->viewController;
-    //    NSLog(@"%d", ctrl.paused);
-    //    if(ctrl.paused) ctrl.paused = NO;
-
     for (UITouch *touch in touches) {
         int touchIndex = 0;
         while ([[activeTouches allValues] containsObject:[NSNumber numberWithInt:touchIndex]]) {

@@ -81,7 +81,7 @@
 		EA183FA32432C18D00A5C3E8 /* AVFoundationVideoGrabber.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835BF2432C18B00A5C3E8 /* AVFoundationVideoGrabber.h */; };
 		EA183FA52432C18D00A5C3E8 /* PluginEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835C12432C18B00A5C3E8 /* PluginEditor.h */; };
 		EA183FAA2432C18D00A5C3E8 /* MZGLKitView.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835C92432C18B00A5C3E8 /* MZGLKitView.h */; };
-		EA183FAD2432C18D00A5C3E8 /* MZGLKitViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835CC2432C18B00A5C3E8 /* MZGLKitViewController.h */; };
+		EA183FAD2432C18D00A5C3E8 /* MZMetaliOSViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835CC2432C18B00A5C3E8 /* MZMetaliOSViewController.h */; };
 		EA183FAE2432C18D00A5C3E8 /* TextConsole.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835CE2432C18B00A5C3E8 /* TextConsole.mm */; };
 		EA183FAF2432C18D00A5C3E8 /* LayerExplorer.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835CF2432C18B00A5C3E8 /* LayerExplorer.mm */; };
 		EA183FB02432C18D00A5C3E8 /* MacMenuBar.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D02432C18B00A5C3E8 /* MacMenuBar.h */; };
@@ -163,7 +163,7 @@
 		EA1840112432C18D00A5C3E8 /* Image.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836422432C18B00A5C3E8 /* Image.h */; };
 		EA1840442432C18D00A5C3E8 /* AudioShareSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836912432C18B00A5C3E8 /* AudioShareSDK.h */; };
 		EA1840F32432C36300A5C3E8 /* MZGLKitView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C62432C18B00A5C3E8 /* MZGLKitView.mm */; };
-		EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */; };
+		EA1840F42432C36300A5C3E8 /* MZMetaliOSViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZMetaliOSViewController.mm */; };
 		EA1840F62432C36300A5C3E8 /* iOSAppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835CA2432C18B00A5C3E8 /* iOSAppDelegate.mm */; };
 		EA1840F72432C38500A5C3E8 /* AudioShareSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = EA1836902432C18B00A5C3E8 /* AudioShareSDK.m */; };
 		EA1840FB2432C3DB00A5C3E8 /* AVFoundationVideoGrabber.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C02432C18B00A5C3E8 /* AVFoundationVideoGrabber.mm */; };
@@ -342,7 +342,7 @@
 		EA2B875224E7093600EA12BD /* SvgVbo.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1836332432C18B00A5C3E8 /* SvgVbo.h */; };
 		EA2B875A24E7093600EA12BD /* maths.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E72432C18B00A5C3E8 /* maths.h */; };
 		EA2B879324E7093600EA12BD /* nanovg_gl.h in Headers */ = {isa = PBXBuildFile; fileRef = EA7855622472DBF40072FD05 /* nanovg_gl.h */; };
-		EA2B879524E7093600EA12BD /* MZGLKitViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835CC2432C18B00A5C3E8 /* MZGLKitViewController.h */; };
+		EA2B879524E7093600EA12BD /* MZMetaliOSViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835CC2432C18B00A5C3E8 /* MZMetaliOSViewController.h */; };
 		EA2B87C924E7093600EA12BD /* RecompilingDylib.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835E22432C18B00A5C3E8 /* RecompilingDylib.h */; };
 		EA2B87D924E7093600EA12BD /* MacMenuBar.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835D02432C18B00A5C3E8 /* MacMenuBar.h */; };
 		EA2B87E224E7093600EA12BD /* RootLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = EA1835BB2432C18B00A5C3E8 /* RootLayer.h */; };
@@ -512,7 +512,7 @@
 		EA689477261C633500F76B91 /* MZGLKitView.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C62432C18B00A5C3E8 /* MZGLKitView.mm */; };
 		EA68947B261C633500F76B91 /* Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA18363C2432C18B00A5C3E8 /* Graphics.cpp */; };
 		EA68947E261C633500F76B91 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AE424A609CA000F057B /* event.cpp */; };
-		EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */; };
+		EA689481261C633500F76B91 /* MZMetaliOSViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EA1835C72432C18B00A5C3E8 /* MZMetaliOSViewController.mm */; };
 		EA689485261C633500F76B91 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234AD124A609CA000F057B /* Yoga.cpp */; };
 		EA689486261C633500F76B91 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA234ACE24A609CA000F057B /* YGLayout.cpp */; };
 		EA689487261C633500F76B91 /* Tween.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EA1836052432C18B00A5C3E8 /* Tween.cpp */; };
@@ -988,12 +988,12 @@
 		EA1835C02432C18B00A5C3E8 /* AVFoundationVideoGrabber.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFoundationVideoGrabber.mm; sourceTree = "<group>"; };
 		EA1835C12432C18B00A5C3E8 /* PluginEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginEditor.h; sourceTree = "<group>"; };
 		EA1835C62432C18B00A5C3E8 /* MZGLKitView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLKitView.mm; sourceTree = "<group>"; };
-		EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZGLKitViewController.mm; sourceTree = "<group>"; };
+		EA1835C72432C18B00A5C3E8 /* MZMetaliOSViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MZMetaliOSViewController.mm; sourceTree = "<group>"; };
 		EA1835C82432C18B00A5C3E8 /* mainiOS.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = mainiOS.mm; sourceTree = "<group>"; };
 		EA1835C92432C18B00A5C3E8 /* MZGLKitView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLKitView.h; sourceTree = "<group>"; };
 		EA1835CA2432C18B00A5C3E8 /* iOSAppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = iOSAppDelegate.mm; sourceTree = "<group>"; };
 		EA1835CB2432C18B00A5C3E8 /* iOSAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iOSAppDelegate.h; sourceTree = "<group>"; };
-		EA1835CC2432C18B00A5C3E8 /* MZGLKitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZGLKitViewController.h; sourceTree = "<group>"; };
+		EA1835CC2432C18B00A5C3E8 /* MZMetaliOSViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MZMetaliOSViewController.h; sourceTree = "<group>"; };
 		EA1835CE2432C18B00A5C3E8 /* TextConsole.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TextConsole.mm; sourceTree = "<group>"; };
 		EA1835CF2432C18B00A5C3E8 /* LayerExplorer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LayerExplorer.mm; sourceTree = "<group>"; };
 		EA1835D02432C18B00A5C3E8 /* MacMenuBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MacMenuBar.h; sourceTree = "<group>"; };
@@ -2058,8 +2058,8 @@
 				EAE94826274C0BF300718B53 /* UIBlockButton.m */,
 				EA1835C92432C18B00A5C3E8 /* MZGLKitView.h */,
 				EA1835C62432C18B00A5C3E8 /* MZGLKitView.mm */,
-				EA1835CC2432C18B00A5C3E8 /* MZGLKitViewController.h */,
-				EA1835C72432C18B00A5C3E8 /* MZGLKitViewController.mm */,
+				EA1835CC2432C18B00A5C3E8 /* MZMetaliOSViewController.h */,
+				EA1835C72432C18B00A5C3E8 /* MZMetaliOSViewController.mm */,
 				EA1835CB2432C18B00A5C3E8 /* iOSAppDelegate.h */,
 				EA1835CA2432C18B00A5C3E8 /* iOSAppDelegate.mm */,
 			);
@@ -3479,7 +3479,7 @@
 				EA3551B525CB201F003DF2FB /* MZGLView.h in Headers */,
 				EA297C8525C954E600F890AE /* pa_endianness.h in Headers */,
 				EA7855662472DBF40072FD05 /* nanovg_gl.h in Headers */,
-				EA183FAD2432C18D00A5C3E8 /* MZGLKitViewController.h in Headers */,
+				EA183FAD2432C18D00A5C3E8 /* MZMetaliOSViewController.h in Headers */,
 				EA71A72627E39E6B0081A5CB /* iowin32.h in Headers */,
 				EA183FBF2432C18D00A5C3E8 /* RecompilingDylib.h in Headers */,
 				EA183FB02432C18D00A5C3E8 /* MacMenuBar.h in Headers */,
@@ -3670,7 +3670,7 @@
 				EAF6F4922E09AE8400DE5361 /* SokolVbo.h in Headers */,
 				EAF6F4932E09AE8400DE5361 /* SokolAPI.h in Headers */,
 				EAF6F4942E09AE8400DE5361 /* color.glsl.h in Headers */,
-				EA2B879524E7093600EA12BD /* MZGLKitViewController.h in Headers */,
+				EA2B879524E7093600EA12BD /* MZMetaliOSViewController.h in Headers */,
 				EACA2609275F4F4E00B3DE68 /* FlatSet.h in Headers */,
 				EA2B87C924E7093600EA12BD /* RecompilingDylib.h in Headers */,
 				EA71A77B27E39E6C0081A5CB /* aes.h in Headers */,
@@ -4089,7 +4089,7 @@
 				EA71A73327E39E6C0081A5CB /* ioapi_buf.c in Sources */,
 				EAD03BB72980185000D0C04A /* AppleWebView.mm in Sources */,
 				EA8CD3712811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
-				EA1840F42432C36300A5C3E8 /* MZGLKitViewController.mm in Sources */,
+				EA1840F42432C36300A5C3E8 /* MZMetaliOSViewController.mm in Sources */,
 				EAF6737A289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA234AF524A609CA000F057B /* Yoga.cpp in Sources */,
 				EA234AF124A609CA000F057B /* YGLayout.cpp in Sources */,
@@ -4357,7 +4357,7 @@
 				EA71A76D27E39E6C0081A5CB /* sha1.c in Sources */,
 				EA8CD3732811A30D00CD1200 /* ReorderableGrid.cpp in Sources */,
 				EAD03BB92980185000D0C04A /* AppleWebView.mm in Sources */,
-				EA689481261C633500F76B91 /* MZGLKitViewController.mm in Sources */,
+				EA689481261C633500F76B91 /* MZMetaliOSViewController.mm in Sources */,
 				EA689485261C633500F76B91 /* Yoga.cpp in Sources */,
 				EAF6737C289BC441001F778D /* stringUtil.cpp in Sources */,
 				EA71A7B727E39E6C0081A5CB /* ZipStreamer.cpp in Sources */,
