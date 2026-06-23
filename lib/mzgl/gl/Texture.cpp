@@ -186,7 +186,12 @@ void Texture::draw(float x, float y, float width, float height) {
 	vbo->setVertices(verts);
 	vbo->setTexCoords(texCoords);
 
-	bind();
+	// Scoped bind so the global texture-binding state is left clean. The Sokol backend
+	// tracks the bound texture globally and asserts if a later VBO without tex coords
+	// (e.g. drawRoundedRect) is drawn while a texture is still bound; without unbinding,
+	// any tex->draw() leaks its binding into the next non-textured draw and aborts.
+	// (The font renderer binds the same way; on GL the unbind is a harmless reset.)
+	TextureBinding binding(*this);
 	g.texShader->begin();
 	vbo->draw(g);
 }

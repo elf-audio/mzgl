@@ -89,6 +89,13 @@ public:
 		tex->bind();
 	}
 
+	// Bind a texture we don't hold a TextureRef to (e.g. from inside Texture::draw,
+	// where only `this` is available). The aliasing shared_ptr stores the pointer
+	// without managing its lifetime, so the dtor's unbind() still runs but nothing
+	// gets freed.
+	TextureBinding(Texture &tex)
+		: TextureBinding(TextureRef(TextureRef {}, &tex)) {}
+
 	~TextureBinding() { tex->unbind(); }
 
 private:
