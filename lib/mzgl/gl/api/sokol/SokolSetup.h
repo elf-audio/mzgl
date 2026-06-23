@@ -13,6 +13,9 @@ constexpr int mzglSokolSampleCount = 4;
 // so the logger and pool sizes only live in one place - callers just supply
 // the backend-specific sg_environment.
 inline void mzglSokolSetup(const sg_environment &environment) {
+	// one global instance of sokol 
+	if (sg_isvalid()) return;
+
 	sg_desc desc			= {};
 	desc.environment		= environment;
 	desc.logger.func		= slog_func;
