@@ -134,9 +134,8 @@ bool Texture::loadFromPixels(
 	// driver — matching the win-crash 5ae344c1 GPU-driver cluster.
 	const size_t expected = static_cast<size_t>(w) * static_cast<size_t>(h) * static_cast<size_t>(numChans);
 	if (outData.size() < expected) {
-		Log::e() << "Texture::loadFromPixels() : buffer too small for "
-				 << w << "x" << h << "x" << numChans << " (have " << outData.size()
-				 << " bytes, need " << expected << ")";
+		Log::e() << "Texture::loadFromPixels() : buffer too small for " << w << "x" << h << "x" << numChans
+				 << " (have " << outData.size() << " bytes, need " << expected << ")";
 		return false;
 	}
 
@@ -154,12 +153,12 @@ bool Texture::loadFromPixels(
 		// driver.
 		std::vector<uint8_t> rgba(static_cast<size_t>(w) * static_cast<size_t>(h) * 4);
 		for (int i = 0; i < w * h; ++i) {
-			uint8_t y			= outData[i * 2];
-			uint8_t a			= outData[i * 2 + 1];
-			rgba[i * 4 + 0]		= y;
-			rgba[i * 4 + 1]		= y;
-			rgba[i * 4 + 2]		= y;
-			rgba[i * 4 + 3]		= a;
+			uint8_t y		= outData[i * 2];
+			uint8_t a		= outData[i * 2 + 1];
+			rgba[i * 4 + 0] = y;
+			rgba[i * 4 + 1] = y;
+			rgba[i * 4 + 2] = y;
+			rgba[i * 4 + 3] = a;
 		}
 		outData	 = std::move(rgba);
 		numChans = 4;
@@ -186,11 +185,6 @@ void Texture::draw(float x, float y, float width, float height) {
 	vbo->setVertices(verts);
 	vbo->setTexCoords(texCoords);
 
-	// Scoped bind so the global texture-binding state is left clean. The Sokol backend
-	// tracks the bound texture globally and asserts if a later VBO without tex coords
-	// (e.g. drawRoundedRect) is drawn while a texture is still bound; without unbinding,
-	// any tex->draw() leaks its binding into the next non-textured draw and aborts.
-	// (The font renderer binds the same way; on GL the unbind is a harmless reset.)
 	TextureBinding binding(*this);
 	g.texShader->begin();
 	vbo->draw(g);
