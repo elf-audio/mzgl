@@ -7953,6 +7953,7 @@ static drflac* drflac_open_with_metadata_private(drflac_read_proc onRead, drflac
 #ifndef DR_FLAC_NO_STDIO
 #include <stdio.h>
 #include <wchar.h>      /* For wcslen(), wcsrtombs() */
+#include "filesystem.h" /* winfs::fromUtf8 for UTF-8 path opening on Windows */
 
 /* drflac_result_from_errno() is only used for fopen() and wfopen() so putting it inside DR_WAV_NO_STDIO for now. If something else needs this later we can move it out. */
 #include <errno.h>
@@ -8374,8 +8375,8 @@ static drflac_result drflac_fopen(FILE** ppFile, const char* pFilePath, const ch
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
     err = _wfopen_s(ppFile,
-        (const wchar_t*)(utf8::utf8to16(std::string(pFilePath)).c_str()),
-        (const wchar_t*)(utf8::utf8to16(std::string(pOpenMode)).c_str()));
+        winfs::fromUtf8(pFilePath).wstring().c_str(),
+        winfs::fromUtf8(pOpenMode).wstring().c_str());
 
     if (err != 0) {
         return drflac_result_from_errno(err);

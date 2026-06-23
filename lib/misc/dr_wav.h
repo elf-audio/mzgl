@@ -963,7 +963,7 @@ DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8* a, const char* b);
 #ifndef DR_WAV_NO_STDIO
 #include <stdio.h>
 #include <wchar.h>
-//#include <filesystem.h>
+#include "filesystem.h" /* winfs::fromUtf8 for UTF-8 path opening on Windows */
 #endif
 
 /* Standard library stuff. */
@@ -2910,8 +2910,8 @@ DRWAV_PRIVATE drwav_result drwav_fopen(FILE** ppFile, const char* pFilePath, con
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
     err = _wfopen_s(ppFile,
-        (const wchar_t*)(utf8::utf8to16(std::string(pFilePath)).c_str()),
-        (const wchar_t*)(utf8::utf8to16(std::string(pOpenMode)).c_str()));
+        winfs::fromUtf8(pFilePath).wstring().c_str(),
+        winfs::fromUtf8(pOpenMode).wstring().c_str());
 
     if (err != 0) {
         return drwav_result_from_errno(err);

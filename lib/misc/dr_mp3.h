@@ -2918,6 +2918,7 @@ DRMP3_API drmp3_bool32 drmp3_init_memory(drmp3* pMP3, const void* pData, size_t 
 #ifndef DR_MP3_NO_STDIO
 #include <stdio.h>
 #include <wchar.h>      /* For wcslen(), wcsrtombs() */
+#include "filesystem.h" /* winfs::fromUtf8 for UTF-8 path opening on Windows */
 
 /* drmp3_result_from_errno() is only used inside DR_MP3_NO_STDIO for now. Move this out if it's ever used elsewhere. */
 #include <errno.h>
@@ -3339,8 +3340,8 @@ static drmp3_result drmp3_fopen(FILE** ppFile, const char* pFilePath, const char
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
     err = _wfopen_s(ppFile,
-        (const wchar_t*)(utf8::utf8to16(std::string(pFilePath)).c_str()),
-        (const wchar_t*)(utf8::utf8to16(std::string(pOpenMode)).c_str()));
+        winfs::fromUtf8(pFilePath).wstring().c_str(),
+        winfs::fromUtf8(pOpenMode).wstring().c_str());
 
     if (err != 0) {
         return drmp3_result_from_errno(err);
