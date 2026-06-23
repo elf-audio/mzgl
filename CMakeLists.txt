@@ -159,7 +159,7 @@ if(IOS)
        lib/mzgl/app/ios/mainiOS.mm
        lib/mzgl/app/ios/iOSAppDelegate.mm
        lib/mzgl/app/ios/MZGLKitView.mm
-       lib/mzgl/app/ios/MZGLKitViewController.mm
+       lib/mzgl/app/ios/MZMetaliOSViewController.mm
        lib/mzgl/app/ios/TextboxSegmentedViewController.m
        lib/mzgl/app/ios/UIBlockButton.m
        lib/AudioShare/AudioShareSDK.m
