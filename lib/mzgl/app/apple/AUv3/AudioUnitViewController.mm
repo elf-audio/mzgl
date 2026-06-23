@@ -66,20 +66,8 @@ using namespace std;
 	plugin	  = nullptr;
 	audioUnit = nil;
 	g		  = nullptr;
-	//#if !TARGET_OS_IOS
-	//        auto &g = appHolder.g;
-	//        appHolder.app = std::shared_ptr<App>(instantiateApp(g));
-	//        self.view = [[NSView alloc] initWithFrame: CGRectMake(0, 0, g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-	//        [self setPreferredContentSize: CGSizeMake(g.width/(float)g.pixelScale, g.height/(float)g.pixelScale)];
-	//        appHolder.eventDispatcher = std::make_shared<EventDispatcher>(appHolder.app);
-	//        glView = [[MZGLView alloc] initWithFrame: self.view.frame eventDispatcher: appHolder.eventDispatcher.get()];
-	//
-	//
-	////        [self addGLView];
-	////        [self connectViewToAU];
-	//#else
-	[self setPreferredContentSize:CGSizeMake(500, 800)];
-	//#endif
+
+ 	[self setPreferredContentSize:CGSizeMake(500, 800)];
 }
 #	if !MZGL_IOS
 
@@ -199,24 +187,9 @@ using namespace std;
 }
 - (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error {
 	plugin = [self getPlugin];
-	//	audioUnit = [[MZGLEffectAU alloc] initWithPlugin: plugin andComponentDescription:desc error:error];
-	//
-	//	- (instancetype)initWithPlugin: (std::shared_ptr<Plugin>) _plugin
-	//		   andComponentDescription:(AudioComponentDescription)componentDescription
-	//						   options:(AudioComponentInstantiationOptions)options error:(NSError **)outError;
 	audioUnit = [[MZGLEffectAU alloc] initWithPlugin:plugin andComponentDescription:desc error:error];
 	NSLog(@"MZGL: createAudioUnitWithComponentDescription");
 
-	//    if([NSThread isMainThread]) {
-	//        NSLog(@"main thread");
-	//        [self doBoth: audioUnit];
-	//    } else {
-	//        NSLog(@"dispatch");
-	//        dispatch_async(dispatch_get_main_queue(), ^{
-	//            NSLog(@"now on main thread");
-	//            [self doBoth: audioUnit];
-	//        });
-	//    }
 
 	return audioUnit;
 }
