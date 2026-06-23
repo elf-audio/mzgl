@@ -1,12 +1,25 @@
 function(mzgl_detect_cpm_root_dir)
   if(NOT DEFINED CPM_ROOT_DIR OR "${CPM_ROOT_DIR}" STREQUAL "")
     # Default the CPM cache root to ~/.cpm: shared across build dirs and outside
-    # the repo. $ENV{HOME} on Unix/macOS, $ENV{USERPROFILE} on Windows. Callers can
-    # still override CPM_ROOT_DIR (CMakePresets / -D); this is only the fallback,
-    # used e.g. by scripts/gen-xcode.sh which doesn't go through a preset.
+    # the repo. $ENV{HOME} on Unix/macOS, $ENV{USERPROFILE} on Windows. This is the
+    # normal path for the desktop/iOS/macOS presets and scripts/gen-xcode.sh; callers
+    # can still override CPM_ROOT_DIR with -D (Android sets it to the repo-relative
+    # "cpm-source-cache"). We resolve HOME here in CMake rather than via a preset
+    # "$env{HOME}" macro because some IDEs (CLion) mis-expand that macro to a RELATIVE
+    # path, which mzgl_cpm_cache_dir() then anchors under CMAKE_SOURCE_DIR - creating
+    # the cache inside the repo (e.g. <repo>/Users/<name>/.cpm) instead of in $HOME.
     set(_cpm_home "$ENV{HOME}")
     if(NOT _cpm_home)
       set(_cpm_home "$ENV{USERPROFILE}")
+    endif()
+    # Must be absolute: a relative/empty home would silently nest the cache in the repo
+    # (the relative branch of mzgl_cpm_cache_dir is reserved for the intentional Android
+    # "cpm-source-cache"). Fail loudly rather than scatter a bogus ~ dir into the tree.
+    if(NOT _cpm_home OR NOT IS_ABSOLUTE "${_cpm_home}")
+      message(FATAL_ERROR
+        "Cannot locate a home directory for the CPM cache (HOME/USERPROFILE is unset "
+        "or not absolute; got '${_cpm_home}'). Pass an absolute path explicitly, e.g. "
+        "-DCPM_ROOT_DIR=\"$ENV{HOME}/.cpm\".")
     endif()
     message(STATUS "CPM_ROOT_DIR not set, defaulting to ${_cpm_home}/.cpm")
     set(CPM_ROOT_DIR
