@@ -124,6 +124,32 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 }
 
 - (void)windowResized:(NSNotification *)notification {
+	NSWindow *window = notification.object;
+
+	Graphics &g = eventDispatcher->app->g;
+	g.width		= window.contentLayoutRect.size.width;
+	g.height	= window.contentLayoutRect.size.height;
+
+	bool hasTransparentTitleBar = true;
+
+	if (hasTransparentTitleBar) {
+		g.width	 = window.frame.size.width;
+		g.height = window.frame.size.height;
+	}
+	g.pixelScale = [window backingScaleFactor];
+
+	// Resize the view in points; MTKView (autoResizeDrawable) updates its
+	// drawableSize to points * backingScaleFactor, which osx_swapchain reads.
+	auto f		  = self.frame;
+	f.size.width  = g.width;
+	f.size.height = g.height;
+	self.frame	  = f;
+
+	g.width *= 2;
+	g.height *= 2;
+
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });
 }
 
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher {
@@ -133,9 +159,9 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 sg_environment osx_environment(MTKView *mtkView) {
 	return (sg_environment) {.defaults =
 								 {
-									 .sample_count = mzglSokolSampleCount,
 									 .color_format = SG_PIXELFORMAT_BGRA8,
 									 .depth_format = depth_format,
+								     .sample_count = mzglSokolSampleCount,
 								 },
 							 .metal = {
 								 .device = (__bridge const void *) mtkView.device,
