@@ -104,17 +104,15 @@ static void sokolFons__renderDelete(void *userPtr) {
 	sokolFONScontext *sfons = (sokolFONScontext *) userPtr;
 	if (sfons->tex.id != SG_INVALID_ID && sg_isvalid()) {
 		sg_destroy_image(sfons->tex);
-		sfons->tex.id = SG_INVALID_ID;
 	}
+	delete sfons;
 }
 
 FONS_DEF FONScontext *sokolFonsCreate(Graphics &g, int width, int height, int flags) {
 	FONSparams params;
-	sokolFONScontext *gl;
 
-	gl = (sokolFONScontext *) malloc(sizeof(sokolFONScontext));
-	memset(gl, 0, sizeof(sokolFONScontext));
-	gl->g = &g;
+	sokolFONScontext *gl = new sokolFONScontext();
+	gl->g				 = &g;
 	memset(&params, 0, sizeof(params));
 
 	params.width		= width;
