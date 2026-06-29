@@ -19,7 +19,7 @@ inline void mzglSokolSetup(const sg_environment &environment) {
 	sg_desc desc			= {};
 	desc.environment		= environment;
 	desc.logger.func		= slog_func;
-	desc.buffer_pool_size	= 4096; // sokol default is 128
+	desc.buffer_pool_size	= 8192; // sokol default is 128
 	desc.shader_pool_size	= 128; // sokol default is 32
 	desc.pipeline_pool_size = 512; // sokol default of 64 is too small (one pipeline per shader/blend/primitive combo)
 	desc.image_pool_size	= 256; // sokol default of 128 is too small - font atlases, AUv3 plugin icons,

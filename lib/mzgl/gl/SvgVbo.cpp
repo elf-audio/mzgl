@@ -132,9 +132,8 @@ void SvgVbo::loadFromSvg(SVGDoc &svg, bool ignoreColor) {
 
 	svg.getTriangles(geometry.verts, geometry.cols, geometry.indices);
 
-	vbo->setVertices(geometry.verts);
-	if (!ignoreColor) vbo->setColors(geometry.cols);
-	vbo->setIndices(geometry.indices);
+	if (ignoreColor) geometry.cols.clear();
+	vbo->setGeometry(geometry);
 }
 SvgVbo::SvgVbo(const string &svgString, bool mustBeTrue, float scale, bool ignoreColor) {
 	SVGDoc svg;

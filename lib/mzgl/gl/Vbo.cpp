@@ -57,19 +57,6 @@ Vbo &Vbo::setGeometry(const Geometry &geom) {
 	return *this;
 }
 
-#ifdef DO_DRAW_STATS
-int Vbo::numDrawnVerts		 = 0;
-int Vbo::numDrawCalls		 = 0;
-static int currNumDrawnVerts = 0;
-static int currNumDrawCalls	 = 0;
-#endif
-
-void Vbo::resetDrawStats() {
-	numDrawnVerts	  = currNumDrawnVerts;
-	numDrawCalls	  = currNumDrawCalls;
-	currNumDrawnVerts = 0;
-	currNumDrawCalls  = 0;
-}
 
 Vbo::Vbo() {
 #ifdef __ANDROID__
@@ -93,10 +80,6 @@ void Vbo::draw(Graphics &g, vec2 offset) {
 }
 
 void Vbo::draw(Graphics &g, PrimitiveType _mode, size_t instances) {
-#ifdef DO_DRAW_STATS
-	currNumDrawnVerts += getNumVerts();
-	currNumDrawCalls++;
-#endif
 	if (_mode != PrimitiveType::None) {
 		mode = _mode;
 	}

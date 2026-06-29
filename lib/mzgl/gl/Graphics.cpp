@@ -487,12 +487,11 @@ void Graphics::drawShape(const std::vector<vec2> &shape) {
 	if (isFilling()) {
 		Triangulator t;
 		std::vector<std::vector<vec2>> verts = {shape};
-		std::vector<vec2> outs;
-		std::vector<unsigned int> indices;
-		t.triangulate(verts, outs, indices);
+		Geometry geom;
+		t.triangulate(verts, geom.verts, geom.indices);
 		VboRef vbo = Vbo::create();
-		vbo->setVertices(outs);
-		vbo->setIndices(indices);
+
+		vbo->setGeometry(geom);
 		vbo->draw(*this, Vbo::PrimitiveType::Triangles);
 	} else {
 		auto verts = shape;

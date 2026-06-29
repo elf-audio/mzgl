@@ -473,13 +473,9 @@ void Drawer::drawRoundedRectShadow(const Rectf &r, float radius, float shadow) {
 
 void Drawer::commit(VboRef vbo, bool ignoreColor, bool addNormalizedTexCoords) {
 	if (geom.verts.size() > 0) {
-		vbo->setVertices(geom.verts);
-		if (!ignoreColor) vbo->setColors(geom.cols);
-		vbo->setIndices(geom.indices);
-		if (addNormalizedTexCoords) {
-			geom.calculateNormalizedTexCoords();
-			vbo->setTexCoords(geom.texCoords);
-		}
+		if (addNormalizedTexCoords) geom.calculateNormalizedTexCoords();
+		if (ignoreColor) geom.cols.clear();
+		vbo->setGeometry(geom);
 		vbo->setMode(Vbo::PrimitiveType::Triangles);
 	}
 	geom.clear();

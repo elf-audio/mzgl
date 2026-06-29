@@ -12,7 +12,7 @@ class Shader;
 class SokolVbo : public Vbo {
 public:
 	~SokolVbo() override = default;
-	
+
 	void clear() {}
 
 	class Buffer {
@@ -21,9 +21,9 @@ public:
 		int size		 = 0;
 		int unitSize	 = 0;
 
-		SokolBufferPool *pool  = nullptr;
-		int pooledCapacity	   = 0;
-		bool isIndex		   = false;
+		SokolBufferPool *pool = nullptr;
+		int pooledCapacity	  = 0;
+		bool isIndex		  = false;
 
 		template <typename T>
 		void set(const std::vector<T> &v, SokolBufferPool *bufPool = nullptr) {
@@ -46,7 +46,7 @@ public:
 						sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
 					} else {
 						// Too large to pool, create unpooled
-						pool = nullptr;
+						pool				= nullptr;
 						sg_buffer_desc desc = {};
 						desc.data			= {v.data(), (size_t) dataSize};
 						if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
@@ -84,21 +84,47 @@ public:
 	Buffer positionBuffer;
 	Buffer colorBuffer;
 	Buffer texCoordBuffer;
-	Buffer normalBuffer;
 	Buffer indexBuffer;
 
 	Buffer instanceIndexBuffer;
 
-	size_t getNumVerts() override { return positionBuffer.valid() && positionBuffer.size; }
+	// Interleaved single-buffer path, built by setGeometry(). Holds pos(+col+uv)
+	// packed per-vertex in one buffer; the index buffer stays separate (indexBuffer).
+	// When `interleaved` is true the per-attribute Buffers above are unused.
+	struct Interleaved {
+		sg_buffer buffer = {};
+		int vertCount	 = 0;
+		int strideBytes	 = 0;
+		int colOffset	 = -1; // byte offset within vertex, -1 if absent
+		int uvOffset	 = -1;
+		bool valid() const { return buffer.id != 0; }
+		void deallocate() {
+			if (buffer.id != 0) {
+				if (sg_isvalid()) sg_destroy_buffer(buffer);
+				buffer.id = 0;
+			}
+		}
+		~Interleaved() { deallocate(); }
+	};
+	Interleaved il;
+	bool interleaved = false;
+
+	size_t getNumVerts() override {
+		if (interleaved) return il.vertCount;
+		return positionBuffer.valid() && positionBuffer.size;
+	}
 	void draw_(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1) override;
+
+	Vbo &setGeometry(const Geometry &geom) override;
 
 	void deallocate() override {
 		positionBuffer.deallocate();
 		colorBuffer.deallocate();
 		texCoordBuffer.deallocate();
-		normalBuffer.deallocate();
 		indexBuffer.deallocate();
 		instanceIndexBuffer.deallocate();
+		il.deallocate();
+		interleaved = false;
 	}
 
 	void setPool(SokolBufferPool *p) { pool = p; }
@@ -125,11 +151,6 @@ public:
 		return *this;
 	}
 
-	Vbo &setNormals(const std::vector<glm::vec3> &normals) override {
-		normalBuffer.set(normals, pool);
-		return *this;
-	}
-
 	Vbo &setIndices(const std::vector<uint32_t> &indices) override {
 		if (indices.size() == 0) return *this;
 		indexBuffer.set(indices, pool);
@@ -140,4 +161,5 @@ public:
 
 private:
 	SokolShader *getShader(Graphics &g) const;
+	void drawInterleaved(Graphics &g, PrimitiveType mode, size_t numInstances);
 };

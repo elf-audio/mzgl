@@ -61,6 +61,13 @@ private:
 		for (const auto &a: attrs) {
 			pipelineDesc.layout.attrs[a.location].format	   = a.format;
 			pipelineDesc.layout.attrs[a.location].buffer_index = a.bufferSlot;
+			pipelineDesc.layout.attrs[a.location].offset	   = a.offset;
+			// For interleaved buffers several attrs share a slot and must declare
+			// the stride explicitly; for the one-buffer-per-attr case stride stays
+			// 0 and sokol computes it from the (single) attr's format.
+			if (a.bufferStride > 0) {
+				pipelineDesc.layout.buffers[a.bufferSlot].stride = a.bufferStride;
+			}
 			if (a.perInstance) {
 				pipelineDesc.layout.buffers[a.bufferSlot].step_func = SG_VERTEXSTEP_PER_INSTANCE;
 				pipelineDesc.layout.buffers[a.bufferSlot].step_rate = 1;

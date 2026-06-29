@@ -10,6 +10,7 @@ CLANG_IGNORE_WARNINGS_END
 #include "SokolPipeline.h"
 #include "SokolAPI.h"
 #include "mzAssert.h"
+#include "Geometry.h"
 
 void SokolVbo::Buffer::deallocate() {
 	if (valid()) {
@@ -68,6 +69,11 @@ static sg_primitive_type primitiveTypeToSokolMode(Vbo::PrimitiveType mode) {
 }
 
 void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) {
+	if (interleaved) {
+		drawInterleaved(g, mode, numInstances);
+		return;
+	}
+
 	auto shader = getShader(g);
 
 	if (!positionBuffer.valid()) {
@@ -97,7 +103,6 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	bindAttr(positionBuffer, "Position");
 	bindAttr(colorBuffer, "Color");
 	bindAttr(texCoordBuffer, "TexCoord");
-	bindAttr(normalBuffer, "Normal");
 
 	if (indexBuffer.valid()) {
 		bindings.index_buffer = indexBuffer.buffer;
@@ -130,6 +135,148 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 
 	int numVerts = positionBuffer.size;
 	if (indexBuffer.valid()) numVerts = indexBuffer.size;
+	shader->applyUniforms();
+	sg_draw(0, numVerts, static_cast<int>(numInstances));
+}
+
+// Pack all vertex attributes into a single interleaved buffer (pos[+col][+uv]).
+// The index buffer stays separate. This trades 2-3 sokol buffers per VBO for 1
+// (+1 index), cutting the live-buffer count that fills sokol's global pool.
+Vbo &SokolVbo::setGeometry(const Geometry &geom) {
+	// setGeometry owns all vertex attributes. Free any per-attribute buffers a
+	// previous setVertices/setColors/etc may have created so they don't linger
+	// alongside the interleaved buffer (draw_ would ignore them and they'd leak).
+	positionBuffer.deallocate();
+	colorBuffer.deallocate();
+	texCoordBuffer.deallocate();
+
+	il.deallocate();
+	interleaved = false;
+
+	const int n = (int) geom.verts.size();
+	if (n == 0) {
+		indexBuffer.deallocate();
+		return *this;
+	}
+
+	const bool hasCol = geom.cols.size() == (size_t) n;
+	const bool hasUv  = geom.texCoords.size() == (size_t) n;
+
+	const int floatsPerVert = 2 + (hasCol ? 4 : 0) + (hasUv ? 2 : 0);
+	il.strideBytes			= floatsPerVert * (int) sizeof(float);
+	int off					= 2;
+	il.colOffset			= hasCol ? off * (int) sizeof(float) : -1;
+	if (hasCol) off += 4;
+	il.uvOffset = hasUv ? off * (int) sizeof(float) : -1;
+	if (hasUv) off += 2;
+	il.vertCount = n;
+
+	std::vector<float> packed((size_t) floatsPerVert * n);
+	for (int i = 0; i < n; i++) {
+		float *d = packed.data() + (size_t) i * floatsPerVert;
+		*d++	 = geom.verts[i].x;
+		*d++	 = geom.verts[i].y;
+		if (hasCol) {
+			*d++ = geom.cols[i].x;
+			*d++ = geom.cols[i].y;
+			*d++ = geom.cols[i].z;
+			*d++ = geom.cols[i].w;
+		}
+		if (hasUv) {
+			*d++ = geom.texCoords[i].x;
+			*d++ = geom.texCoords[i].y;
+		}
+	}
+
+	sg_buffer_desc desc = {};
+	desc.data			= {packed.data(), packed.size() * sizeof(float)};
+	il.buffer			= sg_make_buffer(desc);
+	interleaved			= true;
+
+	if (!geom.indices.empty()) {
+		indexBuffer.set(geom.indices, nullptr);
+	} else {
+		indexBuffer.deallocate();
+	}
+	return *this;
+}
+
+void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) {
+	if (!il.valid()) return;
+
+	const bool hasCol = il.colOffset >= 0;
+	const bool hasUv  = il.uvOffset >= 0;
+
+	// Mirror getShader()'s auto-pick, but keyed on the interleaved presence flags
+	// rather than the (unused) per-attribute buffers.
+	SokolShader *shader = nullptr;
+	if (g.currShader && !g.currShader->isDefaultShader) {
+		shader = dynamic_cast<SokolShader *>(g.currShader);
+	} else if (hasCol && hasUv) {
+		shader = dynamic_cast<SokolShader *>(
+			g.currShader == g.colorFontShader.get() ? g.colorFontShader.get() : g.colorTextureShader.get());
+	} else if (hasCol) {
+		shader = dynamic_cast<SokolShader *>(g.colorShader.get());
+	} else if (hasUv) {
+		shader = dynamic_cast<SokolShader *>(g.currShader == g.fontShader.get() ? g.fontShader.get()
+																				 : g.texShader.get());
+	} else {
+		shader = dynamic_cast<SokolShader *>(g.nothingShader.get());
+	}
+
+	sg_bindings bindings	   = {};
+	bindings.vertex_buffers[0] = il.buffer;
+
+	std::vector<SokolVertexAttr> attrs;
+	auto add = [&](const char *name, sg_vertex_format fmt, int offset) {
+		int loc = shader->attrSlot(name);
+		if (loc < 0) return;
+		SokolVertexAttr a;
+		a.location	   = loc;
+		a.format	   = fmt;
+		a.bufferSlot   = 0;
+		a.offset	   = offset;
+		a.bufferStride = il.strideBytes;
+		attrs.push_back(a);
+	};
+	add("Position", SG_VERTEXFORMAT_FLOAT2, 0);
+	if (hasCol) add("Color", SG_VERTEXFORMAT_FLOAT4, il.colOffset);
+	if (hasUv) add("TexCoord", SG_VERTEXFORMAT_FLOAT2, il.uvOffset);
+
+	// Per-instance attribute lives in its own buffer (slot 1), stepped per instance.
+	if (numInstances > 1) {
+		if (!instanceIndexBuffer.valid() || (size_t) instanceIndexBuffer.size != numInstances) {
+			std::vector<float> counter;
+			counter.reserve(numInstances);
+			for (size_t i = 0; i < numInstances; i++)
+				counter.emplace_back((float) i);
+			instanceIndexBuffer.set(counter);
+		}
+		int loc = shader->attrSlot("InstanceID");
+		if (loc >= 0) {
+			bindings.vertex_buffers[1] = instanceIndexBuffer.buffer;
+			SokolVertexAttr a;
+			a.location	  = loc;
+			a.format	  = SG_VERTEXFORMAT_FLOAT;
+			a.bufferSlot  = 1;
+			a.perInstance = true;
+			attrs.push_back(a);
+		}
+	}
+
+	if (indexBuffer.valid()) bindings.index_buffer = indexBuffer.buffer;
+
+	auto *api = static_cast<SokolAPI *>(&g.getAPI());
+	auto tex  = api->getBoundTexture();
+	if (tex.id != 0) {
+		mzAssert(hasUv, "Texture is bound but interleaved VBO has no tex coords");
+		bindings.fs.images[0]	= tex;
+		bindings.fs.samplers[0] = api->getSampler();
+	}
+
+	shader->getPipeline(attrs, indexBuffer.valid(), primitiveTypeToSokolMode(mode))->apply();
+	sg_apply_bindings(bindings);
+	int numVerts = indexBuffer.valid() ? indexBuffer.size : il.vertCount;
 	shader->applyUniforms();
 	sg_draw(0, numVerts, static_cast<int>(numInstances));
 }

@@ -59,6 +59,8 @@ PipelineRef SokolShader::getPipeline(const std::vector<SokolVertexAttr> &attrs,
 		mix(static_cast<size_t>(a.format));
 		mix(static_cast<size_t>(a.bufferSlot));
 		mix(a.perInstance ? 1u : 0u);
+		mix(static_cast<size_t>(a.offset));
+		mix(static_cast<size_t>(a.bufferStride));
 	}
 	mix(usingIndices ? 1u : 0u);
 	mix(static_cast<size_t>(g.getBlendMode()));

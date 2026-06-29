@@ -148,9 +148,7 @@ public:
 	bool hasCalledSetup = false;
 
 	void runFrame() {
-#ifdef DO_DRAW_STATS
-		Vbo::resetDrawStats();
-#endif
+
 		app->g.setupView();
 		app->updateInternal();
 

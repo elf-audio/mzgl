@@ -75,7 +75,6 @@ public:
 	Buffer vertexBuffer;
 	Buffer colorbuffer;
 	Buffer texCoordBuffer;
-	Buffer normalBuffer;
 	Buffer indexBuffer;
 
 	template <class T>
@@ -125,7 +124,6 @@ public:
 		vertexBuffer.deallocate();
 		colorbuffer.deallocate();
 		texCoordBuffer.deallocate();
-		normalBuffer.deallocate();
 		indexBuffer.deallocate();
 		if (vertexArrayObject != 0) glDeleteVertexArrays(1, &vertexArrayObject);
 		vertexArrayObject = 0;
@@ -149,10 +147,6 @@ public:
 	}
 	Vbo &setTexCoords(const std::vector<vec2> &tcs) override {
 		setBuffer(texCoordBuffer, tcs);
-		return *this;
-	}
-	Vbo &setNormals(const std::vector<vec3> &norms) override {
-		setBuffer(normalBuffer, norms);
 		return *this;
 	}
 	Vbo &setIndices(const std::vector<unsigned int> &indices) override {
@@ -235,7 +229,6 @@ public:
 		BufferBinding vertexBinding(vertexBuffer, shader->positionAttribute);
 		BufferBinding colorBinding(colorbuffer, shader->colorAttribute);
 		BufferBinding texCoordBinding(texCoordBuffer, shader->texCoordAttribute);
-		BufferBinding normalBinding(normalBuffer, shader->normAttribute);
 		if (indexBuffer.valid()) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.id);
 		}
