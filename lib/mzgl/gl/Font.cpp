@@ -421,17 +421,18 @@ Font::~Font() {
 }
 
 void Font::clear() {
-#if !defined(MZGL_SOKOL)
 	if (fs) {
+#if defined(MZGL_SOKOL)
+		sokolFonsDelete(fs);
+#else
 		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
-
 		gl->TCOORD_ATTRIB = 0;
 		gl->VERTEX_ATTRIB = 0;
 
 		glfonsDelete(fs);
+#endif
 		fs = nullptr;
 	}
-#endif
 }
 
 Font::Font() {
