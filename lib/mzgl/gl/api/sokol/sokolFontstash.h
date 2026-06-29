@@ -75,18 +75,19 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 		sfons->lastFrameNumUpdated = g.getFrameNum();
 		sfons->dirty			   = false;
 
-		sg_image_data imgData;
-		memset(&imgData, 0, sizeof(imgData));
+		sg_image_data imgData		= {};
 		imgData.subimage[0][0].ptr	= sfons->data;
 		imgData.subimage[0][0].size = (size_t) (sfons->width * sfons->height);
 		sg_update_image(sfons->tex, &imgData);
 	}
 
 	std::vector<glm::vec2> v;
+	v.reserve(nverts);
 	for (int i = 0; i < nverts; i++) {
 		v.push_back(glm::vec2(verts[i * 2], verts[i * 2 + 1]));
 	}
 	std::vector<glm::vec2> t;
+	t.reserve(nverts);
 	for (int i = 0; i < nverts; i++) {
 		t.push_back(glm::vec2(tcoords[i * 2], tcoords[i * 2 + 1]));
 	}
