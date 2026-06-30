@@ -31,6 +31,12 @@ public:
 
 class MacMenuItem {
 public:
+	MacMenuItem() = default;
+	~MacMenuItem();
+
+	MacMenuItem(const MacMenuItem &)			= delete;
+	MacMenuItem &operator=(const MacMenuItem &) = delete;
+
 	void setEnabled(bool enabled);
 	bool isEnabled() const;
 	void *getNativeMenuItem();
