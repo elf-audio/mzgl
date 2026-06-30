@@ -40,6 +40,9 @@ void handleTerminateSignal(int signal) {
 	std::shared_ptr<EventDispatcher> eventDispatcher;
 	NSWindow *window;
 	id backgroundActivity;
+	// URLs that arrive (custom scheme / universal link) before the
+	// eventDispatcher exists at cold launch — flushed once it's ready.
+	std::vector<std::string> pendingUrls;
 }
 @end
 
@@ -251,11 +254,41 @@ bool hasTransparentTitleBar = true;
 			[self makeWindow];
 		}
 	}
+
+	// Flush any URLs that arrived before the eventDispatcher existed.
+	for (auto &u: pendingUrls) {
+		eventDispatcher->openUrl(ScopedUrl::create(u));
+	}
+	pendingUrls.clear();
 }
+// Dispatch a URL now if the app is ready, otherwise queue it until
+// applicationDidFinishLaunching has created the eventDispatcher. Without this,
+// a custom-scheme / universal link that cold-launches the app derefs a null
+// eventDispatcher and crashes.
+- (void)handleIncomingUrl:(const std::string &)url {
+	if (eventDispatcher) {
+		eventDispatcher->openUrl(ScopedUrl::create(url));
+	} else {
+		pendingUrls.push_back(url);
+	}
+}
+
 - (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls {
 	if ([urls count] > 0) {
-		eventDispatcher->openUrl(ScopedUrl::create([[urls[0] absoluteString] UTF8String]));
+		[self handleIncomingUrl:std::string([[urls[0] absoluteString] UTF8String])];
 	}
+}
+
+// Universal Links (e.g. https://koalaver.se/verify/<token>) routed through the
+// same openUrl() path as custom schemes.
+- (BOOL)application:(NSApplication *)application
+	continueUserActivity:(NSUserActivity *)userActivity
+	  restorationHandler:(void (^)(NSArray<id<NSUserActivityRestoring>> *))restorationHandler {
+	if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && userActivity.webpageURL) {
+		[self handleIncomingUrl:std::string([[userActivity.webpageURL absoluteString] UTF8String])];
+		return YES;
+	}
+	return NO;
 }
 
 - (void)screenDidChange:(NSNotification *)notification {

@@ -87,6 +87,21 @@ void quitApplication() {
 	return NO;
 }
 
+// Universal Links (e.g. https://koalaver.se/verify/<token>) arrive here both at
+// cold launch and while running. The https URL is routed through the same
+// openUrl() path as custom schemes.
+- (BOOL)application:(UIApplication *)application
+	continueUserActivity:(NSUserActivity *)userActivity
+	  restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *))restorationHandler {
+	if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && userActivity.webpageURL) {
+		auto eventDispatcher = [mzViewController getEventDispatcher];
+		std::string url		 = [[userActivity.webpageURL absoluteString] UTF8String];
+		eventDispatcher->openUrl(ScopedUrl::create(url));
+		return YES;
+	}
+	return NO;
+}
+
 class ErrorApp : public App {
 public:
 	std::string msg;
