@@ -134,5 +134,15 @@ void *MacMenuItem::getNativeMenuItem() {
 }
 
 void MacMenuItem::setNativeMenuItem(void *item) {
+	if (nativeMenuItem != nullptr) {
+		CFRelease(nativeMenuItem);
+	}
 	nativeMenuItem = item;
+}
+
+MacMenuItem::~MacMenuItem() {
+	if (nativeMenuItem != nullptr) {
+		CFRelease(nativeMenuItem);
+		nativeMenuItem = nullptr;
+	}
 }

@@ -754,37 +754,38 @@ std::string getPlatformName() {
 }
 uint64_t getStorageRemainingInBytes() {
 #ifdef __APPLE__
+	@autoreleasepool {
+		NSURL *fileURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
+																 inDomains:NSUserDomainMask] lastObject];
 
-	NSURL *fileURL = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory
-															 inDomains:NSUserDomainMask] lastObject];
+		NSError *error = nil;
 
-	NSError *error = nil;
-
-	if (@available(macOS 10.13, iOS 11, *)) {
-		// on mac, the NSURLVolumeAvailableCapacityForImportantUsageKey is more accurate
-		// but it spits out loads of garbage to the console, so for now just using
-		// the less accurate version so I can read logs.
+		if (@available(macOS 10.13, iOS 11, *)) {
+			// on mac, the NSURLVolumeAvailableCapacityForImportantUsageKey is more accurate
+			// but it spits out loads of garbage to the console, so for now just using
+			// the less accurate version so I can read logs.
 #	if TARGET_OS_IOS
-		auto flag = NSURLVolumeAvailableCapacityForImportantUsageKey;
+			auto flag = NSURLVolumeAvailableCapacityForImportantUsageKey;
 #	else
-		auto flag = NSURLVolumeAvailableCapacityKey;
+			auto flag = NSURLVolumeAvailableCapacityKey;
 #	endif
-		NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
+			NSDictionary *results = [fileURL resourceValuesForKeys:@[ flag ] error:&error];
 
-		if (!results) {
-			NSLog(@ "Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
+			if (!results) {
+				NSLog(@ "Error retrieving resource keys: %@\n%@", [error localizedDescription], [error userInfo]);
 
-			return 1000000000;
-			//		abort();
+				return 1000000000;
+				//		abort();
+			}
+
+			NSNumber *n = results[flag];
+
+			return n.longLongValue;
+		} else {
+			// Fallback on earlier versions
+			Log::e() << "There's somethign wrong in getStorageRemainingInBytes()";
+			return 1024 * 1024 * 1024;
 		}
-
-		NSNumber *n = results[flag];
-
-		return n.longLongValue;
-	} else {
-		// Fallback on earlier versions
-		Log::e() << "There's somethign wrong in getStorageRemainingInBytes()";
-		return 1024 * 1024 * 1024;
 	}
 
 #elif defined(__ANDROID__)
