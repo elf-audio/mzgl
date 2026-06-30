@@ -32,13 +32,18 @@ std::string stringFromOSStatus(OSStatus status) {
 
 class Url {
 public:
-	explicit Url(const std::string &path)
-		: url {CFURLCreateWithFileSystemPath(
-			  kCFAllocatorDefault,
-			  CFStringCreateWithCString(kCFAllocatorDefault, path.c_str(), kCFStringEncodingUTF8),
-			  kCFURLPOSIXPathStyle,
-			  false)} {}
-	~Url() { CFRelease(url); }
+	explicit Url(const std::string &path) {
+		CFStringRef str = CFStringCreateWithCString(kCFAllocatorDefault, path.c_str(), kCFStringEncodingUTF8);
+		url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, str, kCFURLPOSIXPathStyle, false);
+        if (str != nullptr){
+            CFRelease(str);
+        }
+	}
+	~Url() {
+        if (url != nullptr) {
+            CFRelease(url);
+        }
+	}
 
 	CFURLRef url;
 };
