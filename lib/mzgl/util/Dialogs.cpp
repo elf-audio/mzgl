@@ -1,5 +1,6 @@
 #include "Dialogs.h"
 #include "App.h"
+#include "ScopedUrl.h"
 #include "log.h"
 
 #ifdef __APPLE__
@@ -814,6 +815,56 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 #	endif
 #endif
 
+#ifdef __APPLE__
+// Navigation delegate for the in-app web view: lets normal http(s) links load in
+// place, but intercepts koala:// links (e.g. an "Open in Koala" button) and routes
+// them to the app IN-PROCESS via App::openUrl. Handling them here avoids the system
+// routing the scheme to some other installed koala bundle.
+@interface KoalaSchemeNavDelegate : NSObject <WKNavigationDelegate> {
+@public
+	App *app;
+}
+@end
+@implementation KoalaSchemeNavDelegate
+// Dismisses the web view overlay this web view lives in.
+- (void)dismissWebView:(WKWebView *)webView {
+#	if TARGET_OS_IOS
+	UIResponder *r = webView;
+	while (r != nil && ![r isKindOfClass:[UIViewController class]]) {
+		r = r.nextResponder;
+	}
+	if ([r isKindOfClass:[UIViewController class]]) {
+		[(UIViewController *) r dismissViewControllerAnimated:YES completion:nil];
+	}
+#	else
+	// On mac the web view sits inside a container view added to the root view.
+	[webView.superview removeFromSuperview];
+#	endif
+}
+
+- (void)webView:(WKWebView *)webView
+	decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
+					decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+	NSURL *u = navigationAction.request.URL;
+	if (u != nil && [u.scheme isEqualToString:@"koala"]) {
+		decisionHandler(WKNavigationActionPolicyCancel);
+		// "Open in Koala" on a sample: close the web view, then let the app import
+		// it (download happens asynchronously). Other koala:// actions keep the
+		// web view open.
+		if ([u.host isEqualToString:@"koalaverse"] && [u.path hasPrefix:@"/sample"]) {
+			[self dismissWebView:webView];
+		}
+		if (app != nullptr) {
+			app->openUrl(ScopedUrl::create(std::string([[u absoluteString] UTF8String])));
+		}
+		return;
+	}
+	decisionHandler(WKNavigationActionPolicyAllow);
+}
+@end
+static KoalaSchemeNavDelegate *koalaSchemeNavDelegate = nil;
+#endif
+
 void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
@@ -831,7 +882,14 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	};
 
 #	if TARGET_OS_IOS
-	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+	WKWebViewConfiguration *wvConfig = [[WKWebViewConfiguration alloc] init];
+	// Appends a marker to the User-Agent so koalaver.se can tell it's being shown
+	// inside Koala (e.g. to show the "Open in Koala" button).
+	wvConfig.applicationNameForUserAgent = @"KoalaApp";
+	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200) configuration:wvConfig];
+	koalaSchemeNavDelegate		= [[KoalaSchemeNavDelegate alloc] init];
+	koalaSchemeNavDelegate->app = &app;
+	wv.navigationDelegate		= koalaSchemeNavDelegate;
 	NSURL *URL		  = createURLFromString(url);
 	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
@@ -890,7 +948,12 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
 
 	  // Instantiate WKWebView on the main thread
-	  WKWebView *webView	   = [[WKWebView alloc] initWithFrame:wvRect];
+	  WKWebViewConfiguration *wvConfig = [[WKWebViewConfiguration alloc] init];
+	  wvConfig.applicationNameForUserAgent = @"KoalaApp";
+	  WKWebView *webView	   = [[WKWebView alloc] initWithFrame:wvRect configuration:wvConfig];
+	  koalaSchemeNavDelegate	  = [[KoalaSchemeNavDelegate alloc] init];
+	  koalaSchemeNavDelegate->app = &app;
+	  webView.navigationDelegate  = koalaSchemeNavDelegate;
 	  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
 	  // Load content on the main thread but asynchronously to avoid blocking the UI
