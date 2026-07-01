@@ -95,6 +95,7 @@ void androidFileDialog(std::string copyToPath,
 					   std::function<void(std::string resultingPath, bool success)> completionCallback);
 
 void androidLaunchUrl(const std::string &url);
+void androidLaunchUrlInWebView(const std::string &url);
 
 void androidDisplayHtml(const std::string &html);
 

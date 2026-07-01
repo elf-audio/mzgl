@@ -163,6 +163,10 @@ void androidLaunchUrl(const std::string &url) {
 	callJNI("launchUrl", url);
 }
 
+void androidLaunchUrlInWebView(const std::string &url) {
+	callJNI("launchUrlInWebView", url);
+}
+
 void androidDisplayHtml(const std::string &html) {
 	callJNI("displayHtml", html);
 }

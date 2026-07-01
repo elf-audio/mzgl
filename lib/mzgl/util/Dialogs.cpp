@@ -1004,6 +1004,8 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	  }];
 	});
 #	endif
+#elif defined(__ANDROID__)
+	androidLaunchUrlInWebView(url);
 #else
 	launchUrl(url);
 #endif
