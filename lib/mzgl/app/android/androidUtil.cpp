@@ -5,6 +5,8 @@
 #include <util/log.h>
 #include "util.h"
 #include "mainThread.h"
+#include "App.h"
+#include "TextInput.h"
 
 #define PCM_OUT_BUFF_SIZE (32 * 1024)
 
@@ -506,6 +508,14 @@ void androidNumberboxDialog(const std::string &title,
 	callJNI("numberboxDialog", title, msg, initialValue);
 }
 
+void androidShowKeyboard(const std::string &text) {
+	callJNI("showKeyboard", text);
+}
+
+void androidHideKeyboard() {
+	callJNI("hideKeyboard");
+}
+
 string jstringToString(JNIEnv *jni, jstring text) {
 	const char *nativeString = jni->GetStringUTFChars(text, nullptr);
 	string s				 = string(nativeString);
@@ -846,6 +856,28 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_onJavascript(JNIEnv *env, jobje
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_okPressed(JNIEnv *, jobject) {
 	androidGetApp()->main.runOnMainThread([]() { android_statics.okPressed(); });
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_keyboardInsertText(JNIEnv *env, jobject, jstring text) {
+	std::string s = jstringToString(env, text);
+	androidGetApp()->main.runOnMainThread([s]() {
+		auto app = androidGetApp();
+		if (app && app->g.textInputReceiver) app->g.textInputReceiver->insertText(s);
+	});
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_keyboardDeleteBackward(JNIEnv *, jobject) {
+	androidGetApp()->main.runOnMainThread([]() {
+		auto app = androidGetApp();
+		if (app && app->g.textInputReceiver) app->g.textInputReceiver->deleteBackward();
+	});
+}
+
+JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_keyboardDone(JNIEnv *, jobject) {
+	androidGetApp()->main.runOnMainThread([]() {
+		auto app = androidGetApp();
+		if (app && app->g.textInputReceiver) app->g.textInputReceiver->onTextDone();
+	});
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_cancelPressed(JNIEnv *, jobject) {

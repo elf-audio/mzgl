@@ -1,7 +1,18 @@
 #include "ScrollingList.h"
 #include "log.h"
+#include <algorithm>
+#include <cctype>
 
 using namespace std;
+
+static bool containsCaseInsensitive(const std::string &haystack, const std::string &needle) {
+	if (needle.empty()) return true;
+	auto it = std::search(
+		haystack.begin(), haystack.end(), needle.begin(), needle.end(), [](char a, char b) {
+			return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
+		});
+	return it != haystack.end();
+}
 
 void ScrollingList::doLayout() {
 	updateItems();
@@ -16,6 +27,11 @@ void ScrollingList::doLayout() {
 ScrollingList::ScrollingList(Graphics &g, float itemHeight)
 	: Scroller(g)
 	, itemHeight(itemHeight) {
+	// default: case-insensitive substring match on the item's name. Override to
+	// search other fields / your own datatype.
+	searchMatches = [](const std::shared_ptr<ScrollingListItem> &item, const std::string &query) {
+		return containsCaseInsensitive(item->name, query);
+	};
 }
 std::shared_ptr<ScrollingListItem> ScrollingList::getItem(int index) {
 	if (index < 0 || index >= items.size()) return nullptr;
@@ -27,9 +43,28 @@ shared_ptr<ScrollingListItem> ScrollingList::getSelectedItem() {
 }
 
 void ScrollingList::setItems(const vector<shared_ptr<ScrollingListItem>> &items) {
-	this->items = items;
+	allItems = items;
+	applyFilter();
+}
+
+void ScrollingList::setSearchQuery(const std::string &query) {
+	if (searchQuery == query) return;
+	searchQuery = query;
+	applyFilter();
+}
+
+void ScrollingList::applyFilter() {
+	if (searchQuery.empty() || !searchMatches) {
+		items = allItems;
+	} else {
+		items.clear();
+		for (auto &item: allItems) {
+			if (searchMatches(item, searchQuery)) items.push_back(item);
+		}
+	}
 	updateItems();
 	unselect();
+	content->y = topLimit(); // show results from the top
 }
 
 void ScrollingList::setEmptyMessage(Layer *eml) {

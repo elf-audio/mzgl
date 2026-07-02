@@ -301,15 +301,21 @@ void Scroller::setContentHeight(float contentHeight) {
 	contentHeightExplicitlySet = true;
 }
 bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
-	if (content->height <= height) {
+	// nothing to scroll and nothing to reveal → ignore
+	if (content->height <= height && !revealHeader) {
 		return true;
 	}
 	// Direct position update — trackpad/wheel deltas already encode finger motion + OS momentum.
 	// Accumulating into velocity caused trailing decay even when fingers rested motionless.
 	contentVelocity.y = 0.f;
 
-	float maxY = topLimit();
-	float minY = (height - content->height);
+	// A wheel/trackpad has no discrete release event, so (unlike touch) it can't
+	// rely on touchUp to pin the reveal header. Let it scroll straight into the
+	// reveal zone (ceiling = fully-open header), then pin/unpin as the offset
+	// crosses the same half-header threshold touchUp uses. The resting position
+	// is still governed by onUpdate via topLimit(): unpinned springs back to 0.
+	float maxY = revealHeader ? revealHeaderHeight : topLimit();
+	float minY = (content->height > height) ? (height - content->height) : 0.f;
 
 	float rawY = content->y + scrollY * 8.f;
 
@@ -319,6 +325,16 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 		content->y = minY - rubberBandOffset(minY - rawY, height);
 	} else {
 		content->y = rawY;
+	}
+
+	if (revealHeader) {
+		float threshold = revealHeaderHeight * 0.5f;
+		if (!revealPinned && content->y >= threshold) {
+			setRevealPinned(true);
+		} else if (revealPinned && content->y < threshold && revealCollapseOnScroll
+				   && revealCollapseOnScroll()) {
+			setRevealPinned(false);
+		}
 	}
 	return true;
 }

@@ -26,6 +26,19 @@ public:
 	// only for row types that are deletable
 	std::function<void(std::shared_ptr<ScrollingListItem>)> itemDeleted;
 	void setItems(const std::vector<std::shared_ptr<ScrollingListItem>> &items);
+
+	// ---- search / filtering (datatype-agnostic) ----------------------------
+	// setItems() stores the full set; the visible rows are re-derived from the
+	// current query via searchMatches. Works for any item type — subclass
+	// ScrollingListItem to carry your data and (optionally) override
+	// searchMatches to match whatever fields you like.
+	void setSearchQuery(const std::string &query);
+	const std::string &getSearchQuery() const { return searchQuery; }
+	// how one item is tested against the (non-empty) query. Default:
+	// case-insensitive substring match on item->name.
+	std::function<bool(const std::shared_ptr<ScrollingListItem> &item, const std::string &query)>
+		searchMatches;
+
 	void unselect();
 	std::shared_ptr<ScrollingListItem> getSelectedItem();
 	std::shared_ptr<ScrollingListItem> getItem(int index);
@@ -81,7 +94,10 @@ protected:
 	std::vector<ScrollingListItemView *> collapsingCells;
 
 private:
-	std::vector<std::shared_ptr<ScrollingListItem>> items;
+	std::vector<std::shared_ptr<ScrollingListItem>> allItems; // full, unfiltered set
+	std::vector<std::shared_ptr<ScrollingListItem>> items;	  // currently visible (filtered)
+	std::string searchQuery;
+	void applyFilter(); // rebuild `items` from allItems + searchQuery, then relayout
 	Layer *emptyMessageLayer = nullptr;
 	Drawer d;
 };

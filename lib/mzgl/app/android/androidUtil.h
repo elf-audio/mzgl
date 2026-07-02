@@ -232,6 +232,12 @@ std::string callJNIForString(const std::string &methodName, const std::string &a
 
 std::string jstringToString(JNIEnv *jni, jstring text);
 
+// Software keyboard (backs Graphics::showKeyboard/hideKeyboard on Android via a
+// hidden EditText in MZGLActivity that mirrors its text back to the focused
+// TextInputReceiver).
+void androidShowKeyboard(const std::string &text);
+void androidHideKeyboard();
+
 class ScopedJni {
 public:
 	ScopedJni() {

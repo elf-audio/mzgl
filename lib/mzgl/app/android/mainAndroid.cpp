@@ -6,6 +6,7 @@
 #include <util/log.h>
 #include "Graphics.h"
 #include "androidUtil.h"
+#include "TextInput.h"
 #include "Shader.h"
 #include "Texture.h"
 
@@ -144,6 +145,11 @@ public:
 			eglSwapBuffers(display, surface);
 
 			eventDispatcher->setup();
+			// route Graphics::showKeyboard/hideKeyboard to the Android soft keyboard
+			graphics.onShowKeyboard = [](TextInputReceiver *r) {
+				androidShowKeyboard(r ? r->getText() : std::string());
+			};
+			graphics.onHideKeyboard = []() { androidHideKeyboard(); };
 			firstFrameAlreadyRendered = true;
 		}
 
