@@ -31,6 +31,16 @@ void Graphics::init() {
 
 Graphics::~Graphics() = default;
 
+void Graphics::showKeyboard(TextInputReceiver *receiver) {
+	textInputReceiver = receiver;
+	if (onShowKeyboard) onShowKeyboard(receiver);
+}
+
+void Graphics::hideKeyboard() {
+	if (onHideKeyboard) onHideKeyboard();
+	textInputReceiver = nullptr;
+}
+
 void Graphics::setBlending(bool shouldBlend) {
 	// blend mode is already the same, jump out.
 	if (shouldBlend == blendingEnabled) return;

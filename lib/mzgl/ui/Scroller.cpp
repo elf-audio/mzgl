@@ -34,6 +34,55 @@ Scroller::Scroller(Graphics &g)
 	addChild(content);
 	clipToBounds = true;
 }
+
+void Scroller::setPullToRevealHeader(Layer *header, float headerHeight) {
+	if (revealHeader && revealHeader != header) {
+		removeChild(revealHeader);
+		delete revealHeader;
+	}
+	revealHeader	   = header;
+	revealHeaderHeight = headerHeight;
+	revealPinned	   = false;
+	revealSettling	   = false;
+	revealAmt		   = 0.f;
+	if (revealHeader) {
+		revealHeader->visible = false;
+		// added last → hit-tested first (reverse child order) and, for plain
+		// Scrollers, drawn on top. Owned by the Layer child list from here.
+		addChild(revealHeader);
+	}
+}
+
+void Scroller::setRevealPinned(bool pinned) {
+	if (!revealHeader || pinned == revealPinned) return;
+	revealPinned   = pinned;
+	revealSettling = true; // animate content->y to the new top limit
+	if (pinned) {
+		if (onRevealPinned) onRevealPinned();
+	} else {
+		if (onRevealUnpinned) onRevealUnpinned();
+	}
+}
+
+void Scroller::updateReveal() {
+	if (!revealHeader) return;
+	revealAmt = revealPinned ? revealHeaderHeight
+							 : std::clamp(content->y, 0.f, revealHeaderHeight);
+	// position in scroller-local space: slides down from just above the top
+	revealHeader->set(0.f, revealAmt - revealHeaderHeight, width, revealHeaderHeight);
+	revealHeader->visible = revealAmt > 0.5f;
+}
+
+void Scroller::drawRevealHeader() {
+	// For subclasses (e.g. ScrollingList) whose custom drawSelfAndChildren does
+	// not traverse children — draw the header child explicitly. Plain Scrollers
+	// draw it via the normal child traversal instead.
+	if (!revealHeader) return;
+	updateReveal();
+	if (!revealHeader->visible) return;
+	ScopedTranslate t(g, x, y);
+	revealHeader->draw();
+}
 void Scroller::contentUpdated() {
 	if (!contentHeightExplicitlySet) {
 		Layer *lastVisibleChild = nullptr;
@@ -68,8 +117,24 @@ void Scroller::onUpdate() {
 		return;
 	}
 
+	// pull-to-reveal: after pin/unpin, spring content->y to the new top limit.
+	// (A plain over-scroll spring only engages outside [minY,maxY]; a partial
+	// pull that pins lands *inside* the range, so it needs an explicit snap.)
+	if (revealSettling) {
+		float target = topLimit();
+		float disp	 = content->y - target;
+		contentVelocity.y += (-kSpringK * disp - kSpringC * contentVelocity.y) * static_cast<float>(dt);
+		content->y += contentVelocity.y * static_cast<float>(dt);
+		if (std::abs(disp) < 0.5f && std::abs(contentVelocity.y) < 1.0f) {
+			content->y		  = target;
+			contentVelocity.y = 0.f;
+			revealSettling	  = false;
+		}
+		return;
+	}
+
 	// allowed range for content->y (top-anchored).
-	float maxY = 0.f;
+	float maxY = topLimit();
 	float minY = (content->height > height) ? (height - content->height) : 0.f;
 
 	bool overTop = content->y > maxY;
@@ -107,7 +172,8 @@ void Scroller::draw() {
 
 void Scroller::drawSelfAndChildren() {
 	if (!visible) return;
-	Layer::drawSelfAndChildren();
+	if (revealHeader) updateReveal(); // position the header child before it's drawn
+	Layer::drawSelfAndChildren();	  // draws content + the header child (clipped to bounds)
 	if (drawingScrollbar) {
 		drawScrollbar();
 	}
@@ -168,12 +234,17 @@ void Scroller::touchUp(float x, float y, int id) {
 		}
 	}
 	velocitySamples.clear();
+
+	// pull-to-reveal: pinned it open if pulled far enough, else it springs back.
+	if (revealHeader && !revealPinned && content->y >= revealHeaderHeight * 0.5f) {
+		setRevealPinned(true);
+	}
 }
 
 void Scroller::touchMoved(float x, float y, int id) {
 	if (!scrolling) return;
 
-	float maxY = 0.f;
+	float maxY = topLimit();
 	float minY = (content->height > height) ? (height - content->height) : 0.f;
 
 	// raw position if no rubber band (finger 1:1).
@@ -197,7 +268,20 @@ void Scroller::touchMoved(float x, float y, int id) {
 }
 
 bool Scroller::touchDown(float x, float y, int id) {
+	// (A touch on the revealed header is handled by the header child itself —
+	// it's added last so the layer system routes touches to it first.)
+	revealSettling = false; // user grabbed the list — cancel any pin/unpin snap
+
 	if (inside(x, y)) {
+		// scroll-to-dismiss: touching the list body drops the keyboard while
+		// leaving the search bar pinned with its text (iOS Messages/Safari feel).
+		if (g.textInputReceiver != nullptr) g.hideKeyboard();
+		// If the header has nothing worth keeping (empty search), un-pin so it
+		// scrolls out of view with the list instead of staying stuck at the top.
+		if (revealPinned && revealCollapseOnScroll && revealCollapseOnScroll()) {
+			revealPinned = false; // no settle spring — let it track the scroll and ease off
+			if (onRevealUnpinned) onRevealUnpinned();
+		}
 		lastTouch		  = glm::vec2(x, y);
 		scrolling		  = true;
 		contentVelocity.y = 0.f;
@@ -224,7 +308,7 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	// Accumulating into velocity caused trailing decay even when fingers rested motionless.
 	contentVelocity.y = 0.f;
 
-	float maxY = 0.f;
+	float maxY = topLimit();
 	float minY = (height - content->height);
 
 	float rawY = content->y + scrollY * 8.f;

@@ -214,6 +214,11 @@ void ScrollingList::drawSelfAndChildren() {
 		ScopedTranslate scp(g, x, y);
 		emptyMessageLayer->draw();
 	}
+	if (revealHeader) {
+		// pull-to-reveal header, drawn last so it sits above the list (still
+		// inside this list's clip mask so its hidden portion is clipped).
+		drawRevealHeader();
+	}
 	maskOff();
 }
 

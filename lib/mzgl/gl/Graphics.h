@@ -45,6 +45,7 @@
 
 class Layer;
 class App;
+class TextInputReceiver;
 
 class ScopedAlphaBlend;
 class ScopedNoFill;
@@ -221,6 +222,23 @@ public:
 	std::map<int, Layer *> focusedLayers;
 
 	Layer *keyboardFocusedLayer = nullptr;
+
+	// --- text input / software keyboard -------------------------------------
+	// The currently-focused text field, or null. Platform key/IME code delivers
+	// typed text here via EventDispatcher::textInput()/textSetString()/etc.
+	TextInputReceiver *textInputReceiver = nullptr;
+
+	// Installed by the platform layer at startup. onShowKeyboard raises the OS
+	// software keyboard (iOS/Android) and seeds it from the receiver; platforms
+	// with an always-present hardware keyboard (mac/desktop) leave these null
+	// and simply route key events to textInputReceiver.
+	std::function<void(TextInputReceiver *)> onShowKeyboard;
+	std::function<void()> onHideKeyboard;
+
+	// Focus a text field and (on mobile) raise the software keyboard.
+	void showKeyboard(TextInputReceiver *receiver);
+	// Unfocus the current field and dismiss the software keyboard.
+	void hideKeyboard();
 
 	// anything that wants a callback once per frame holds a ScopedUpdater
 	// (see bottom of this file) - this replaces walking the whole layer

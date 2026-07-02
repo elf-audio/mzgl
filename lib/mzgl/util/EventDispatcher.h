@@ -11,9 +11,11 @@
 #include "ScopedUrl.h"
 #include "util.h"
 #include "GraphicsAPI.h"
+#include "TextInput.h"
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <string>
 
 #if defined(__APPLE__)
 #include <mach/mach.h>
@@ -49,6 +51,23 @@ public:
 			return;
 		}
 		app->keyUp(key);
+	}
+
+	// TEXT INPUT — routed to the currently-focused text field
+	// (app->g.textInputReceiver), set via Graphics::showKeyboard().
+	// setString: native buffer authoritative (iOS/Android). insert/backspace:
+	// hardware-keyboard char events (mac/glfw). done: return/enter.
+	void textInput(const std::string &utf8) {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->insertText(utf8);
+	}
+	void textBackspace() {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->deleteBackward();
+	}
+	void textSetString(const std::string &utf8) {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->setText(utf8);
+	}
+	void textDone() {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->onTextDone();
 	}
 
 	void iosViewWillPause(bool pausing) { app->iosViewWillPause(pausing); }

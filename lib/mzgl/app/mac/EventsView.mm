@@ -130,6 +130,27 @@ int nsEventToKey(NSEvent *evt) {
 		[super keyDown:event];
 		return;
 	}
+	// If a text field is focused, route keystrokes to it as text instead of
+	// dispatching them as app hotkeys.
+	if (eventDispatcher->app->g.textInputReceiver != nullptr) {
+		NSString *chars = [event characters];
+		std::string s	= chars ? std::string([chars UTF8String]) : std::string();
+		unichar first	= [chars length] > 0 ? [chars characterAtIndex:0] : 0;
+		eventDispatcher->app->main.runOnMainThread(true, [self, s, first]() {
+			Graphics &g = eventDispatcher->app->g;
+			if (g.textInputReceiver == nullptr) return;
+			if (first == 8 || first == 127) { // backspace / delete
+				eventDispatcher->textBackspace();
+			} else if (first == 13 || first == 10 || first == 3) { // return / newline / enter
+				eventDispatcher->textDone();
+			} else if (first == 27) { // escape
+				g.hideKeyboard();
+			} else if (!s.empty() && (unsigned char) s[0] >= 32) {
+				eventDispatcher->textInput(s);
+			}
+		});
+		return;
+	}
 	auto keyCode = nsEventToKey(event);
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyDown(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);

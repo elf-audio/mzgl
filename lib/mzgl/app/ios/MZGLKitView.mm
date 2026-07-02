@@ -9,6 +9,7 @@
 #import "MZGLKitView.h"
 #include "App.h"
 #include "EventDispatcher.h"
+#include "mzgl/util/TextInput.h"
 #include "mzgl/util/log.h"
 #include "Vbo.h"
 #include "PluginEditor.h"
@@ -193,11 +194,16 @@ int uikeyToMz(UIKey *key) {
 
 // The drag/drop UIDropInteractionDelegate methods are implemented as a category
 // on EventsView (in the app target).
-API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate>
+API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITextFieldDelegate>
 @end
 
 @implementation EventsView {
     NSMutableDictionary *activeTouches;
+    // Invisible input sink: the Metal view can't host a visible UITextField, so
+    // we park a real one off-screen. iOS owns the text buffer (giving us
+    // autocorrect / predictive / dictation / IME for free); MZGL mirrors its
+    // .text on every change and draws the field itself. See setupTextInput.
+    UITextField *hiddenTextField;
 }
 
 - (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
@@ -209,8 +215,53 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate>
         if (@available(iOS 11, *)) {
             [self addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
         }
+        [self setupTextInput];
     }
     return self;
+}
+
+- (void)setupTextInput {
+    hiddenTextField = [[UITextField alloc] initWithFrame:CGRectMake(-100, -100, 1, 1)];
+    hiddenTextField.delegate               = self;
+    hiddenTextField.autocorrectionType     = UITextAutocorrectionTypeNo;
+    hiddenTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    hiddenTextField.returnKeyType          = UIReturnKeySearch;
+    // Not hidden=YES (a hidden field can't become first responder) — off-screen.
+    hiddenTextField.hidden = NO;
+    [self addSubview:hiddenTextField];
+    [hiddenTextField addTarget:self
+                        action:@selector(textFieldChanged:)
+              forControlEvents:UIControlEventEditingChanged];
+
+    // Bridge Graphics::showKeyboard()/hideKeyboard() to the hidden field.
+    __weak EventsView *weakSelf = self;
+    app->g.onShowKeyboard = [weakSelf](TextInputReceiver *r) {
+        std::string cur = r ? r->getText() : std::string();
+        dispatch_async(dispatch_get_main_queue(), ^{
+          EventsView *s = weakSelf;
+          if (s == nil) return;
+          s->hiddenTextField.text = [NSString stringWithUTF8String:cur.c_str()];
+          [s->hiddenTextField becomeFirstResponder];
+        });
+    };
+    app->g.onHideKeyboard = [weakSelf]() {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          EventsView *s = weakSelf;
+          if (s == nil) return;
+          [s->hiddenTextField resignFirstResponder];
+        });
+    };
+}
+
+- (void)textFieldChanged:(UITextField *)tf {
+    std::string s = tf.text ? std::string([tf.text UTF8String]) : std::string();
+    eventDispatcher->textSetString(s);
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    eventDispatcher->textDone();
+    [textField resignFirstResponder];
+    return YES;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

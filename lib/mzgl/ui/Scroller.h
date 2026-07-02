@@ -7,6 +7,7 @@
 #pragma once
 #include "Layer.h"
 #include <deque>
+#include <functional>
 #include <utility>
 class Scroller : public Layer {
 public:
@@ -14,6 +15,29 @@ public:
 
 	void addContent(Layer *layer);
 	void clear() override;
+
+	// ---- pull-to-reveal header (opt-in) ------------------------------------
+	// Give the scroller a header layer that sits hidden just above the top and
+	// is revealed by over-pulling the list downward (the classic mobile
+	// pull-to-search gesture). Pull past ~half the header height and release to
+	// "pin" it open; a smaller pull springs back and re-hides it. The Scroller
+	// takes ownership of `header`, and draws + hit-tests it itself (it is not a
+	// normal child), so this works for any Scroller subclass (e.g.
+	// ScrollingList) without touching that subclass's own draw/touch logic.
+	void setPullToRevealHeader(Layer *header, float headerHeight);
+	void setRevealHeaderHeight(float headerHeight) { revealHeaderHeight = headerHeight; }
+	Layer *getRevealHeader() const { return revealHeader; }
+	bool isRevealPinned() const { return revealPinned; }
+	void setRevealPinned(bool pinned);
+
+	// fired when the header pins open (e.g. to focus a search field) / unpins.
+	std::function<void()> onRevealPinned;
+	std::function<void()> onRevealUnpinned;
+
+	// Optional: return true if a pinned header should collapse (un-pin and
+	// scroll away with the list) when the user starts scrolling. e.g. a search
+	// field returns true when empty — no query to keep, so let it scroll off.
+	std::function<bool()> revealCollapseOnScroll;
 
 	void draw() override;
 
@@ -59,4 +83,18 @@ protected:
 	// drag anchor — finger position is mapped through the rubber-band from this anchor
 	float dragAnchorContentY = 0.f;
 	float dragAnchorTouchY	 = 0.f;
+
+	// ---- pull-to-reveal state ----------------------------------------------
+	// revealHeader is a normal interactive child (added last, so the layer
+	// system routes touches to it before the list content / cells behind it).
+	Layer *revealHeader		 = nullptr;
+	float revealHeaderHeight = 0.f;
+	float revealAmt			 = 0.f; // 0..revealHeaderHeight currently on-screen
+	bool revealPinned		 = false;
+	bool revealSettling		 = false; // animating content->y to the top limit
+
+	// resting top offset for content->y: 0 normally, headerHeight when pinned.
+	float topLimit() const { return revealPinned ? revealHeaderHeight : 0.f; }
+	void updateReveal();	 // recompute revealAmt + position the header child
+	void drawRevealHeader(); // draw header explicitly (subclasses with custom draw)
 };

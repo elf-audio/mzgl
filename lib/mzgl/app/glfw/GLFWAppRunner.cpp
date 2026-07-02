@@ -141,12 +141,52 @@ int convertGlfwKeyToMzgl(int key) {
 	}
 }
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	// If a text field is focused, editing keys go to it (printable characters
+	// arrive separately via char_callback).
+	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && getGraphics(window).textInputReceiver != nullptr) {
+		auto *ed = getEventDispatcher(window);
+		if (key == GLFW_KEY_BACKSPACE || key == GLFW_KEY_DELETE) {
+			ed->textBackspace();
+			return;
+		}
+		if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
+			ed->textDone();
+			return;
+		}
+		if (key == GLFW_KEY_ESCAPE) {
+			getGraphics(window).hideKeyboard();
+			return;
+		}
+	}
 	if (key == GLFW_KEY_TAB && (mods & GLFW_MOD_SHIFT)) {
 		windowEventHandler.key(getEventDispatcher(window), MZ_KEY_SHIFT_TAB, action);
 		return;
 	}
 	key = convertGlfwKeyToMzgl(key);
 	windowEventHandler.key(getEventDispatcher(window), key, action);
+}
+
+// Unicode text entry (respects keyboard layout / IME). Only delivered while a
+// text field is focused; printable input only — editing keys come via key_callback.
+static void char_callback(GLFWwindow *window, unsigned int codepoint) {
+	if (getGraphics(window).textInputReceiver == nullptr) return;
+	std::string utf8;
+	if (codepoint < 0x80) {
+		utf8 += static_cast<char>(codepoint);
+	} else if (codepoint < 0x800) {
+		utf8 += static_cast<char>(0xC0 | (codepoint >> 6));
+		utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	} else if (codepoint < 0x10000) {
+		utf8 += static_cast<char>(0xE0 | (codepoint >> 12));
+		utf8 += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+		utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	} else {
+		utf8 += static_cast<char>(0xF0 | (codepoint >> 18));
+		utf8 += static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F));
+		utf8 += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+		utf8 += static_cast<char>(0x80 | (codepoint & 0x3F));
+	}
+	getEventDispatcher(window)->textInput(utf8);
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
@@ -191,6 +231,7 @@ void GLFWAppRunner::setCallbacks() {
 		printf("ERROR! window not initialized yet!\n");
 	}
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCharCallback(window, char_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
 	glfwSetScrollCallback(window, scroll_callback);
