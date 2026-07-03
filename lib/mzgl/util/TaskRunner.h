@@ -13,7 +13,7 @@
 #include <thread>
 #include "log.h"
 #include "mainThread.h"
-#include "concurrentqueue.h"
+#include "blockingconcurrentqueue.h"
 
 using namespace std::chrono_literals;
 
@@ -55,7 +55,7 @@ private:
 
 	enum class State : uint8_t { Running, Stopping, Stopped };
 	std::atomic<State> state {State::Running};
-	moodycamel::ConcurrentQueue<TaskSpec> taskQueue;
+	moodycamel::BlockingConcurrentQueue<TaskSpec> taskQueue;
 	std::list<std::shared_ptr<Task>> tasks;
 	std::future<void> fut;
 	std::atomic<bool> synchronous {false};

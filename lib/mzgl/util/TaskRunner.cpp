@@ -19,12 +19,15 @@ void TaskRunner::createFuture() {
 
 		TaskSpec spec;
 		while (!shouldStop.load(std::memory_order_acquire)) {
-			clearAnyDoneTasks();
-
-			while (taskQueue.try_dequeue(spec)) {
+			// block until work arrives; the timeout bounds shutdown latency
+			// and lets finished tasks get cleaned up while idle
+			if (taskQueue.wait_dequeue_timed(spec, std::chrono::milliseconds(100))) {
 				tasks.emplace_back(std::make_unique<Task>(std::move(spec)));
+				while (taskQueue.try_dequeue(spec)) {
+					tasks.emplace_back(std::make_unique<Task>(std::move(spec)));
+				}
 			}
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
+			clearAnyDoneTasks();
 		}
 
 		while (taskQueue.try_dequeue(spec)) {
