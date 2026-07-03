@@ -91,6 +91,8 @@ public:
 	[[nodiscard]] uint8_t getStatus() const;
 	[[nodiscard]] std::vector<uint8_t> getBytes() const;
 	[[nodiscard]] float getPitchBend() const;
+	// True for a pitch-bend message resting at centre (raw 14-bit within ±5 of 8192).
+	[[nodiscard]] bool isPitchBendCentre() const;
 	[[nodiscard]] int getSongPositionInMidiBeats() const;
 	[[nodiscard]] double getSongPositionInQuarterNotes() const;
 	[[nodiscard]] double getSongPosition() const;

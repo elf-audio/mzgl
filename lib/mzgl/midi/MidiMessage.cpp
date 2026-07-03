@@ -211,6 +211,26 @@ float MidiMessage::getPitchBend() const {
 	return static_cast<float>(pitchBendValue - 8192) / 8192.0f;
 }
 
+bool MidiMessage::isPitchBendCentre() const {
+	if (!isPitchBend()) {
+		return false;
+	}
+
+	auto lsb = midiBytes[1];
+	auto msb = midiBytes[2];
+
+	if (!lsb.has_value() || !msb.has_value()) {
+		return false;
+	}
+
+	// Treat a small band around the 14-bit centre (8192) as centred — spring-loaded
+	// pitch wheels don't always settle back on exactly 8192.
+	constexpr int centre	= 8192;
+	constexpr int tolerance = 5;
+	auto raw				= static_cast<int>((*msb << 7) | *lsb);
+	return raw >= centre - tolerance && raw <= centre + tolerance;
+}
+
 int MidiMessage::getSongPositionInMidiBeats() const {
 	if (!isSongPositionPointer()) {
 		return -1;
