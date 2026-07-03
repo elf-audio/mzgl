@@ -102,8 +102,6 @@ public:
 		memcpy(ptr, data, sizeof(T) * count);
 	}
 
-	std::map<size_t, PipelineRef> pipelines;
-
 	// Shader attribute location for a vertex attribute by name (e.g. "Position",
 	// "Color", "TexCoord"), from the sokol-shdc reflection. Returns -1 if the
 	// shader doesn't use that attribute.
@@ -119,6 +117,10 @@ public:
 private:
 	uint8_t *uniformLocation(const std::string &name);
 	std::shared_ptr<ShaderDef> def;
+
+	// points at this shader's entry in the process-global shader cache
+	// (see SokolShader.cpp); opaque here as the entry type is internal
+	void *sharedEntry = nullptr;
 
 	sg_range vertParamRange;
 	sg_range fragParamRange;

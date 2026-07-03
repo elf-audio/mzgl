@@ -11,6 +11,85 @@ CLANG_IGNORE_WARNINGS_END
 #include "SokolAPI.h"
 #include "mzAssert.h"
 #include "Geometry.h"
+#include <chrono>
+#include <mutex>
+#include <unordered_set>
+
+// Global registry of lazily-backed buffers, swept from a sokol commit listener:
+// GPU buffers unused for kLazyMaxAgeMs get destroyed (their CPU copy is kept, so
+// they're recreated transparently on the next draw). This bounds sokol
+// buffer-pool slot usage to roughly "what's been on screen recently".
+namespace {
+	constexpr int64_t kLazyMaxAgeMs		 = 4000;
+	constexpr int64_t kLazySweepEveryMs	 = 1000;
+
+	struct LazySweep {
+		std::mutex mut;
+		std::unordered_set<SokolLazyBuffer *> buffers;
+		bool listenerAttached = false;
+		sg_commit_listener listener {};
+		int64_t lastSweepMs = 0;
+
+		static LazySweep &instance() {
+			// Deliberately leaked: Vbos owned by globals/statics unregister from
+			// their exit-time destructors, which must not touch a destroyed mutex.
+			static LazySweep *s = new LazySweep();
+			return *s;
+		}
+
+		static int64_t now() {
+			return std::chrono::duration_cast<std::chrono::milliseconds>(
+					   std::chrono::steady_clock::now().time_since_epoch())
+				.count();
+		}
+
+		void add(SokolLazyBuffer *b) {
+			std::lock_guard<std::mutex> l(mut);
+			buffers.insert(b);
+			if (!listenerAttached && sg_isvalid()) {
+				listener.func	   = [](void *ud) { static_cast<LazySweep *>(ud)->sweep(); };
+				listener.user_data = this;
+				sg_add_commit_listener(listener);
+				listenerAttached = true;
+			}
+		}
+
+		void remove(SokolLazyBuffer *b) {
+			std::lock_guard<std::mutex> l(mut);
+			buffers.erase(b);
+		}
+
+		void sweep() {
+			if (!SokolLazyBuffer::lazyModeEnabled()) return;
+			auto t = now();
+			if (t - lastSweepMs < kLazySweepEveryMs) return;
+			lastSweepMs = t;
+			std::lock_guard<std::mutex> l(mut);
+			for (auto *b: buffers)
+				b->evictIfUnusedSince(t - kLazyMaxAgeMs);
+		}
+	};
+} // namespace
+
+SokolLazyBuffer::~SokolLazyBuffer() {
+	unregisterLazy();
+}
+
+void SokolLazyBuffer::registerLazy() {
+	if (lazyRegistered) return;
+	lazyRegistered = true;
+	LazySweep::instance().add(this);
+}
+
+void SokolLazyBuffer::unregisterLazy() {
+	if (!lazyRegistered) return;
+	lazyRegistered = false;
+	LazySweep::instance().remove(this);
+}
+
+int64_t SokolLazyBuffer::nowMs() {
+	return LazySweep::now();
+}
 
 void SokolVbo::Buffer::deallocate() {
 	if (valid()) {
@@ -21,17 +100,19 @@ void SokolVbo::Buffer::deallocate() {
 			// after sg_shutdown) - the buffer is already freed, and calling
 			// sg_destroy_buffer on a dead context dereferences freed state.
 			sg_destroy_buffer(buffer);
+			SokolBufferTracker::untrack(buffer);
 		}
 		buffer.id	   = 0;
 		pooledCapacity = 0;
 	}
+	cpuData.clear();
 }
 SokolShader *SokolVbo::getShader(Graphics &g) const {
 	if (g.currShader && !g.currShader->isDefaultShader) {
 		return dynamic_cast<SokolShader *>(g.currShader);
 	}
-	if (colorBuffer.valid()) {
-		if (texCoordBuffer.valid()) {
+	if (colorBuffer.present()) {
+		if (texCoordBuffer.present()) {
 			// colorFontShader and colorTextureShader share the same vertex layout
 			// (pos+texcoord+color) so the auto-pick can't tell them apart. They
 			// differ in the fragment stage: colorFont treats the texture as an R8
@@ -45,7 +126,7 @@ SokolShader *SokolVbo::getShader(Graphics &g) const {
 		return dynamic_cast<SokolShader *>(g.colorShader.get());
 	}
 
-	if (texCoordBuffer.valid()) {
+	if (texCoordBuffer.present()) {
 		if (g.currShader == g.fontShader.get()) {
 			return dynamic_cast<SokolShader *>(g.fontShader.get());
 		}
@@ -76,7 +157,7 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 
 	auto shader = getShader(g);
 
-	if (!positionBuffer.valid()) {
+	if (!positionBuffer.present()) {
 		printf("position buffer not valid\n");
 		return;
 	}
@@ -92,10 +173,12 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	// piano roll notes) and ones that list TexCoord before Color (font atlas) both
 	// bind correctly. Relying on order silently swaps attributes when they differ.
 	auto bindAttr = [&](Buffer &buf, const char *attrName, bool perInstance = false) {
+		buf.ensure(); // lazily (re)create the GPU buffer if it was evicted or never made
 		if (!buf.valid()) return;
 		int location = shader->attrSlot(attrName);
 		if (location < 0) return; // shader doesn't declare this attribute
 		bindings.vertex_buffers[slot] = buf.buffer;
+		SokolBufferTracker::touch(buf.buffer);
 		attrs.push_back({location, buf.getFormat(), slot, perInstance});
 		slot++;
 	};
@@ -104,8 +187,10 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 	bindAttr(colorBuffer, "Color");
 	bindAttr(texCoordBuffer, "TexCoord");
 
+	indexBuffer.ensure();
 	if (indexBuffer.valid()) {
 		bindings.index_buffer = indexBuffer.buffer;
+		SokolBufferTracker::touch(indexBuffer.buffer);
 	}
 
 	if (numInstances > 1) {
@@ -123,7 +208,7 @@ void SokolVbo::draw_(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) 
 
 	auto tex = api->getBoundTexture();
 	if (tex.id != 0) {
-		mzAssert(texCoordBuffer.valid(),
+		mzAssert(texCoordBuffer.present(),
 				 "Texture is bound but VBO has no tex coords - did you forget to unbind a texture?");
 		bindings.fs.images[0]	= tex;
 		auto sampler			= api->getSampler();
@@ -150,11 +235,12 @@ Vbo &SokolVbo::setGeometry(const Geometry &geom) {
 	colorBuffer.deallocate();
 	texCoordBuffer.deallocate();
 
-	il.deallocate();
-	interleaved = false;
-
+	// note: il is NOT deallocated here - setPooled() reuses it in place for
+	// per-frame pooled VBOs; setLazy() deallocates before replacing.
 	const int n = (int) geom.verts.size();
 	if (n == 0) {
+		il.deallocate();
+		interleaved = false;
 		indexBuffer.deallocate();
 		return *this;
 	}
@@ -188,13 +274,17 @@ Vbo &SokolVbo::setGeometry(const Geometry &geom) {
 		}
 	}
 
-	sg_buffer_desc desc = {};
-	desc.data			= {packed.data(), packed.size() * sizeof(float)};
-	il.buffer			= sg_make_buffer(desc);
-	interleaved			= true;
+	if (pool) {
+		// pooled (per-frame) VBOs stream into a recycled buffer instead of
+		// creating/destroying an immutable one every set
+		il.setPooled(packed.data(), packed.size() * sizeof(float), pool);
+	} else {
+		il.setLazy(packed.data(), packed.size() * sizeof(float));
+	}
+	interleaved = true;
 
 	if (!geom.indices.empty()) {
-		indexBuffer.set(geom.indices, nullptr);
+		indexBuffer.set(geom.indices, pool);
 	} else {
 		indexBuffer.deallocate();
 	}
@@ -202,6 +292,7 @@ Vbo &SokolVbo::setGeometry(const Geometry &geom) {
 }
 
 void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numInstances) {
+	il.ensure();
 	if (!il.valid()) return;
 
 	const bool hasCol = il.colOffset >= 0;
@@ -226,6 +317,7 @@ void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numI
 
 	sg_bindings bindings	   = {};
 	bindings.vertex_buffers[0] = il.buffer;
+	SokolBufferTracker::touch(il.buffer);
 
 	std::vector<SokolVertexAttr> attrs;
 	auto add = [&](const char *name, sg_vertex_format fmt, int offset) {
@@ -245,16 +337,18 @@ void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numI
 
 	// Per-instance attribute lives in its own buffer (slot 1), stepped per instance.
 	if (numInstances > 1) {
-		if (!instanceIndexBuffer.valid() || (size_t) instanceIndexBuffer.size != numInstances) {
+		if (!instanceIndexBuffer.present() || (size_t) instanceIndexBuffer.size != numInstances) {
 			std::vector<float> counter;
 			counter.reserve(numInstances);
 			for (size_t i = 0; i < numInstances; i++)
 				counter.emplace_back((float) i);
 			instanceIndexBuffer.set(counter);
 		}
+		instanceIndexBuffer.ensure();
 		int loc = shader->attrSlot("InstanceID");
 		if (loc >= 0) {
 			bindings.vertex_buffers[1] = instanceIndexBuffer.buffer;
+			SokolBufferTracker::touch(instanceIndexBuffer.buffer);
 			SokolVertexAttr a;
 			a.location	  = loc;
 			a.format	  = SG_VERTEXFORMAT_FLOAT;
@@ -264,7 +358,11 @@ void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numI
 		}
 	}
 
-	if (indexBuffer.valid()) bindings.index_buffer = indexBuffer.buffer;
+	indexBuffer.ensure();
+	if (indexBuffer.valid()) {
+		bindings.index_buffer = indexBuffer.buffer;
+		SokolBufferTracker::touch(indexBuffer.buffer);
+	}
 
 	auto *api = static_cast<SokolAPI *>(&g.getAPI());
 	auto tex  = api->getBoundTexture();

@@ -215,6 +215,7 @@ if(USING_SOKOL)
     lib/mzgl/gl/api/sokol/SokolAPI.cpp
     lib/mzgl/gl/api/sokol/SokolImplementation.cpp
     lib/mzgl/gl/api/sokol/SokolVbo.cpp
+    lib/mzgl/gl/api/sokol/SokolBufferTracker.cpp
     lib/mzgl/gl/api/sokol/SokolShader.cpp
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/app/mac/Metal/MZMetalView.mm

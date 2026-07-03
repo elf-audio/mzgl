@@ -3910,6 +3910,10 @@ SOKOL_GFX_API_DECL sg_resource_state sg_query_sampler_state(sg_sampler smp);
 SOKOL_GFX_API_DECL sg_resource_state sg_query_shader_state(sg_shader shd);
 SOKOL_GFX_API_DECL sg_resource_state sg_query_pipeline_state(sg_pipeline pip);
 SOKOL_GFX_API_DECL sg_resource_state sg_query_attachments_state(sg_attachments atts);
+// MZGL DEBUG: live (allocated) slot counts per resource pool. Temporary instrumentation.
+SOKOL_GFX_API_DECL int sg_dbg_live_images(void);
+SOKOL_GFX_API_DECL int sg_dbg_live_samplers(void);
+SOKOL_GFX_API_DECL int sg_dbg_live_buffers(void);
 // get runtime information about a resource
 SOKOL_GFX_API_DECL sg_buffer_info sg_query_buffer_info(sg_buffer buf);
 SOKOL_GFX_API_DECL sg_image_info sg_query_image_info(sg_image img);
@@ -17562,6 +17566,20 @@ SOKOL_API_IMPL sg_resource_state sg_query_attachments_state(sg_attachments atts_
     _sg_attachments_t* atts = _sg_lookup_attachments(&_sg.pools, atts_id.id);
     sg_resource_state res = atts ? atts->slot.state : SG_RESOURCESTATE_INVALID;
     return res;
+}
+
+// MZGL DEBUG: pool->size is num+1 (slot 0 reserved); queue_top = free slots. Live = (size-1) - free.
+SOKOL_API_IMPL int sg_dbg_live_images(void) {
+    if (!_sg.valid) return 0;
+    return (_sg.pools.image_pool.size - 1) - _sg.pools.image_pool.queue_top;
+}
+SOKOL_API_IMPL int sg_dbg_live_samplers(void) {
+    if (!_sg.valid) return 0;
+    return (_sg.pools.sampler_pool.size - 1) - _sg.pools.sampler_pool.queue_top;
+}
+SOKOL_API_IMPL int sg_dbg_live_buffers(void) {
+    if (!_sg.valid) return 0;
+    return (_sg.pools.buffer_pool.size - 1) - _sg.pools.buffer_pool.queue_top;
 }
 
 SOKOL_API_IMPL sg_buffer sg_make_buffer(const sg_buffer_desc* desc) {

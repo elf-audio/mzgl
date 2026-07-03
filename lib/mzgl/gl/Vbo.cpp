@@ -26,6 +26,22 @@
 std::vector<Vbo *> Vbo::vbos;
 #endif
 
+void setVboLazyUploadEnabled(bool enabled) {
+#ifdef MZGL_SOKOL
+	SokolLazyBuffer::setLazyModeEnabled(enabled);
+#else
+	(void) enabled;
+#endif
+}
+
+bool isVboLazyUploadEnabled() {
+#ifdef MZGL_SOKOL
+	return SokolLazyBuffer::lazyModeEnabled();
+#else
+	return false;
+#endif
+}
+
 VboRef Vbo::create() {
 #ifdef MZGL_SOKOL
 	return VboRef(new SokolVbo());

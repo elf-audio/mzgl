@@ -23,6 +23,16 @@ using VboRef = std::shared_ptr<Vbo>;
 class Graphics;
 class Geometry;
 
+// Global switch for deferred (lazy) GPU-buffer upload, OFF by default (data
+// uploads immediately at set time). When enabled, vertex data is kept CPU-side
+// and only uploaded when a Vbo is first drawn, and GPU buffers idle for a few
+// seconds are evicted (recreated transparently on the next draw) - useful when
+// many plugin instances share sokol's global buffer pool. Sokol builds only -
+// a no-op on OpenGL. Toggle at startup; flipping mid-run is safe but only
+// affects data set from then on.
+void setVboLazyUploadEnabled(bool enabled);
+bool isVboLazyUploadEnabled();
+
 class Vbo {
 public:
 	enum class PrimitiveType {

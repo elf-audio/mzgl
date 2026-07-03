@@ -1,5 +1,7 @@
 #pragma once
 #include "sokol_gfx.h"
+#include "SokolBufferTracker.h"
+#include "log.h"
 #include <vector>
 #include <array>
 
@@ -22,6 +24,12 @@ public:
 		int capacity	 = 0; // allocated size in bytes
 	};
 
+	// free-list entry: a recyclable buffer plus the frame it went idle
+	struct AgedBuffer {
+		PooledBuffer pb;
+		int64_t freedAt = 0;
+	};
+
 	// Get a buffer that can hold at least `size` bytes. May return a recycled buffer.
 	// Returns {.capacity = 0} for oversized requests that can't be pooled.
 	PooledBuffer acquire(int size, bool isIndex) {
@@ -30,7 +38,7 @@ public:
 		if (bucket < 0) return {}; // too large to pool
 		auto &freeList = isIndex ? indexFreeLists[bucket] : vertexFreeLists[bucket];
 		if (!freeList.empty()) {
-			auto buf = freeList.back();
+			auto buf = freeList.back().pb;
 			freeList.pop_back();
 			pooledCount--;
 			return buf;
@@ -43,6 +51,7 @@ public:
 		if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
 		PooledBuffer pb;
 		pb.buffer	= sg_make_buffer(desc);
+		SokolBufferTracker::track(pb.buffer, capacity, true);
 		pb.capacity = capacity;
 		totalCreated++;
 		return pb;
@@ -56,6 +65,7 @@ public:
 			// Oversized buffer can't be pooled, just destroy it (unless sokol is
 			// already shut down, in which case all GPU resources are gone).
 			if (sg_isvalid()) sg_destroy_buffer(buf.buffer);
+			SokolBufferTracker::untrack(buf.buffer);
 			return;
 		}
 		auto &pending = isIndex ? indexPendingLists[bucket] : vertexPendingLists[bucket];
@@ -66,21 +76,59 @@ public:
 	// so they can be acquired and updated again. Driven by sg_commit (see
 	// ensureCommitListener) rather than called manually, so every platform
 	// (Metal, D3D11) gets the same behaviour with no render-loop changes.
+	// Free-list buffers that stay idle for kMaxIdleFrames get destroyed, so a
+	// text-heavy screen's one-off spike doesn't hold pool slots forever.
 	void endFrame() {
+		frameCounter++;
 		for (int b = 0; b < NUM_BUCKETS; b++) {
 			auto &fv = vertexFreeLists[b];
 			auto &pv = vertexPendingLists[b];
 			pooledCount += static_cast<int>(pv.size());
-			fv.insert(fv.end(), pv.begin(), pv.end());
+			for (auto &p: pv)
+				fv.push_back({p, frameCounter});
 			pv.clear();
 
 			auto &fi = indexFreeLists[b];
 			auto &pi = indexPendingLists[b];
 			pooledCount += static_cast<int>(pi.size());
-			fi.insert(fi.end(), pi.begin(), pi.end());
+			for (auto &p: pi)
+				fi.push_back({p, frameCounter});
 			pi.clear();
 		}
+
+		// age out idle free-list buffers (oldest are at the front - acquire pops
+		// from the back, release appends to the back, so fronts go stale first)
+		if (sg_isvalid()) {
+			for (int b = 0; b < NUM_BUCKETS; b++) {
+				for (auto *freeList: {&vertexFreeLists[b], &indexFreeLists[b]}) {
+					while (!freeList->empty()
+						   && frameCounter - freeList->front().freedAt > kMaxIdleFrames) {
+						sg_destroy_buffer(freeList->front().pb.buffer);
+						SokolBufferTracker::untrack(freeList->front().pb.buffer);
+						freeList->erase(freeList->begin());
+						pooledCount--;
+					}
+				}
+			}
+		}
+
+#ifdef DEBUG
+		// TEXPOOL DEBUG: temporary. Reads sokol's image pool directly, so it counts
+		// EVERY live image (textures, font atlas, render targets, swapchain), peak too.
+		int liveImg = sg_dbg_live_images();
+		if (liveImg > g_texPeak) g_texPeak = liveImg;
+		if (++g_texLogCounter >= 120) {
+			g_texLogCounter = 0;
+			Log::d() << "[TEXPOOL] live_images=" << liveImg << " peak=" << g_texPeak
+					 << " live_samplers=" << sg_dbg_live_samplers()
+					 << " live_buffers=" << sg_dbg_live_buffers();
+		}
+#endif
 	}
+
+	// TEXPOOL DEBUG: shared across pools (process-wide image pool is global).
+	static inline int g_texPeak		  = 0;
+	static inline int g_texLogCounter = 0;
 
 	~SokolBufferPool() {
 		// If sokol is already shut down, all GPU resources are already released.
@@ -89,14 +137,16 @@ public:
 			sg_remove_commit_listener(commitListener);
 			commitListenerAttached = false;
 		}
-		auto destroyAll = [](auto &lists) {
-			for (auto &list : lists)
-				for (auto &b : list) sg_destroy_buffer(b.buffer);
+		auto destroy = [](sg_buffer b) {
+			sg_destroy_buffer(b);
+			SokolBufferTracker::untrack(b);
 		};
-		destroyAll(vertexFreeLists);
-		destroyAll(indexFreeLists);
-		destroyAll(vertexPendingLists);
-		destroyAll(indexPendingLists);
+		for (auto *lists: {&vertexFreeLists, &indexFreeLists})
+			for (auto &list: *lists)
+				for (auto &b: list) destroy(b.pb.buffer);
+		for (auto *lists: {&vertexPendingLists, &indexPendingLists})
+			for (auto &list: *lists)
+				for (auto &b: list) destroy(b.buffer);
 	}
 
 	int pooledCount	 = 0;
@@ -126,8 +176,13 @@ private:
 		commitListenerAttached = true;
 	}
 
-	std::array<std::vector<PooledBuffer>, NUM_BUCKETS> vertexFreeLists;
-	std::array<std::vector<PooledBuffer>, NUM_BUCKETS> indexFreeLists;
+	// ~10 seconds at 60fps: long enough that flicking between screens doesn't
+	// churn create/destroy, short enough that a one-off spike frees its slots.
+	static constexpr int64_t kMaxIdleFrames = 600;
+	int64_t frameCounter					= 0;
+
+	std::array<std::vector<AgedBuffer>, NUM_BUCKETS> vertexFreeLists;
+	std::array<std::vector<AgedBuffer>, NUM_BUCKETS> indexFreeLists;
 	std::array<std::vector<PooledBuffer>, NUM_BUCKETS> vertexPendingLists;
 	std::array<std::vector<PooledBuffer>, NUM_BUCKETS> indexPendingLists;
 

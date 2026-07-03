@@ -5,17 +5,52 @@
 #include <vector>
 #include "SokolShader.h"
 #include "SokolBufferPool.h"
+#include "SokolBufferTracker.h"
 #include "Vbo.h"
 
 class Graphics;
 class Shader;
+
+// Base for lazily-backed sokol buffers. The GPU buffer is only created when
+// the buffer is first bound for a draw (ensure()), from a retained CPU copy,
+// and is destroyed again after going unused for a few seconds (a sweep runs
+// from a sokol commit listener). This keeps sokol's process-global buffer-pool
+// slot usage proportional to what's actually being drawn, not to every Vbo the
+// UI has ever created - crucial when many plugin instances share one process.
+class SokolLazyBuffer {
+public:
+	virtual ~SokolLazyBuffer();
+	// Destroy the GPU buffer if it hasn't been drawn since `cutoffMs`
+	// (steady-clock ms). CPU data is kept so ensure() can recreate it.
+	virtual void evictIfUnusedSince(int64_t cutoffMs) = 0;
+
+	// Global switch for the lazy scheme, OFF by default (buffers upload to the
+	// GPU immediately at set time). When on, unpooled buffers defer GPU-buffer
+	// creation to first draw and an idle-eviction sweep frees ones unused for a
+	// few seconds - useful when many plugin instances share sokol's global
+	// buffer pool. Buffers deferred while it was on keep working - they still
+	// create themselves on first draw. Toggle at startup; flipping mid-run is
+	// safe but only affects buffers set from then on.
+	static void setLazyModeEnabled(bool enabled) { lazyModeOn = enabled; }
+	static bool lazyModeEnabled() { return lazyModeOn; }
+
+protected:
+	void registerLazy();   // idempotent, adds to the global sweep registry
+	void unregisterLazy(); // called from destructor
+	static int64_t nowMs();
+
+private:
+	static inline bool lazyModeOn = false;
+	bool lazyRegistered			  = false;
+};
+
 class SokolVbo : public Vbo {
 public:
 	~SokolVbo() override = default;
 
 	void clear() {}
 
-	class Buffer {
+	class Buffer : public SokolLazyBuffer {
 	public:
 		sg_buffer buffer = {};
 		int size		 = 0;
@@ -24,6 +59,11 @@ public:
 		SokolBufferPool *pool = nullptr;
 		int pooledCapacity	  = 0;
 		bool isIndex		  = false;
+
+		// CPU copy retained for lazily (re)creating the GPU buffer at draw time.
+		// Only used on the unpooled path; pooled (stream) buffers never populate it.
+		std::vector<uint8_t> cpuData;
+		int64_t lastUsedMs = 0;
 
 		template <typename T>
 		void set(const std::vector<T> &v, SokolBufferPool *bufPool = nullptr) {
@@ -45,25 +85,53 @@ public:
 						pooledCapacity = pb.capacity;
 						sg_update_buffer(buffer, {v.data(), (size_t) dataSize});
 					} else {
-						// Too large to pool, create unpooled
-						pool				= nullptr;
-						sg_buffer_desc desc = {};
-						desc.data			= {v.data(), (size_t) dataSize};
-						if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
-						buffer		   = sg_make_buffer(desc);
-						pooledCapacity = 0;
+						// Too large to pool - fall through to the lazy unpooled path
+						pool = nullptr;
+						setLazy(v.data(), dataSize);
 					}
 				} else {
-					// Fallback: create immutable buffer (no pool available)
-					sg_buffer_desc desc = {};
-					desc.data			= {v.data(), (size_t) dataSize};
-					if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
-					buffer		   = sg_make_buffer(desc);
-					pooledCapacity = 0;
+					setLazy(v.data(), dataSize);
 				}
 			}
 			size	 = (int) v.size();
 			unitSize = sizeof(T);
+		}
+
+		// Retain the data CPU-side; GPU buffer is created on first draw (ensure()).
+		// With lazy mode off, uploads immediately instead (pre-lazy behaviour).
+		void setLazy(const void *data, int dataSize) {
+			pooledCapacity = 0;
+			if (!lazyModeEnabled()) {
+				cpuData.clear();
+				sg_buffer_desc desc = {};
+				desc.data			= {data, (size_t) dataSize};
+				if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+				buffer = sg_make_buffer(desc);
+				SokolBufferTracker::track(buffer, dataSize, false);
+				return;
+			}
+			cpuData.assign((const uint8_t *) data, (const uint8_t *) data + dataSize);
+			registerLazy();
+		}
+
+		// Create the GPU buffer from cpuData if it doesn't exist. Call before binding.
+		void ensure() {
+			if (cpuData.empty()) return;
+			lastUsedMs = nowMs();
+			if (buffer.id != 0) return;
+			sg_buffer_desc desc = {};
+			desc.data			= {cpuData.data(), cpuData.size()};
+			if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+			buffer = sg_make_buffer(desc);
+			SokolBufferTracker::track(buffer, (int) cpuData.size(), false);
+		}
+
+		void evictIfUnusedSince(int64_t cutoffMs) override {
+			if (buffer.id == 0 || pool != nullptr || cpuData.empty()) return;
+			if (lastUsedMs >= cutoffMs) return;
+			if (sg_isvalid()) sg_destroy_buffer(buffer);
+			SokolBufferTracker::untrack(buffer);
+			buffer.id = 0;
 		}
 
 		sg_vertex_format getFormat() const {
@@ -75,10 +143,18 @@ public:
 				default: return SG_VERTEXFORMAT_INVALID;
 			}
 		}
+		// GPU buffer currently exists (may be false for an evicted lazy buffer)
 		[[nodiscard]] bool valid() const { return buffer.id != 0; }
+		// Buffer conceptually has data (GPU-resident or retained CPU-side)
+		[[nodiscard]] bool present() const { return buffer.id != 0 || !cpuData.empty(); }
 		void deallocate();
 
-		~Buffer() { deallocate(); }
+		~Buffer() override {
+			// unregister before teardown so a concurrent sweep can't touch a
+			// half-destroyed object
+			unregisterLazy();
+			deallocate();
+		}
 	};
 
 	Buffer positionBuffer;
@@ -91,27 +167,99 @@ public:
 	// Interleaved single-buffer path, built by setGeometry(). Holds pos(+col+uv)
 	// packed per-vertex in one buffer; the index buffer stays separate (indexBuffer).
 	// When `interleaved` is true the per-attribute Buffers above are unused.
-	struct Interleaved {
+	// Same lazy scheme as Buffer: data lives in cpuData until first drawn.
+	struct Interleaved : public SokolLazyBuffer {
 		sg_buffer buffer = {};
 		int vertCount	 = 0;
 		int strideBytes	 = 0;
 		int colOffset	 = -1; // byte offset within vertex, -1 if absent
 		int uvOffset	 = -1;
+		std::vector<uint8_t> cpuData;
+		int64_t lastUsedMs	  = 0;
+		SokolBufferPool *pool = nullptr;
+		int pooledCapacity	  = 0;
+
 		bool valid() const { return buffer.id != 0; }
-		void deallocate() {
-			if (buffer.id != 0) {
-				if (sg_isvalid()) sg_destroy_buffer(buffer);
-				buffer.id = 0;
+		bool present() const { return buffer.id != 0 || !cpuData.empty(); }
+
+		void setLazy(const void *data, size_t dataSize) {
+			deallocate();
+			if (!lazyModeEnabled()) {
+				sg_buffer_desc desc = {};
+				desc.data			= {data, dataSize};
+				buffer				= sg_make_buffer(desc);
+				SokolBufferTracker::track(buffer, (int) dataSize, false);
+				return;
+			}
+			cpuData.assign((const uint8_t *) data, (const uint8_t *) data + dataSize);
+			registerLazy();
+		}
+
+		// Stream-buffer path for pooled VBOs that are re-set every frame
+		// (Vbo::createFromPool). Reuses the same pooled buffer in place when it
+		// fits - callers must not set+draw the same Vbo more than once per frame
+		// (sokol allows one sg_update_buffer per buffer per frame).
+		void setPooled(const void *data, size_t dataSize, SokolBufferPool *p) {
+			if (pool && buffer.id != 0 && pooledCapacity >= (int) dataSize) {
+				sg_update_buffer(buffer, {data, dataSize});
+				return;
+			}
+			deallocate();
+			pool	= p;
+			auto pb = p->acquire((int) dataSize, false);
+			if (pb.capacity > 0) {
+				buffer		   = pb.buffer;
+				pooledCapacity = pb.capacity;
+				sg_update_buffer(buffer, {data, dataSize});
+			} else {
+				// too large to pool
+				pool = nullptr;
+				setLazy(data, dataSize);
 			}
 		}
-		~Interleaved() { deallocate(); }
+
+		void ensure() {
+			if (cpuData.empty()) return;
+			lastUsedMs = nowMs();
+			if (buffer.id != 0) return;
+			sg_buffer_desc desc = {};
+			desc.data			= {cpuData.data(), cpuData.size()};
+			buffer				= sg_make_buffer(desc);
+			SokolBufferTracker::track(buffer, (int) cpuData.size(), false);
+		}
+
+		void evictIfUnusedSince(int64_t cutoffMs) override {
+			if (buffer.id == 0 || pool != nullptr || cpuData.empty()) return;
+			if (lastUsedMs >= cutoffMs) return;
+			if (sg_isvalid()) sg_destroy_buffer(buffer);
+			SokolBufferTracker::untrack(buffer);
+			buffer.id = 0;
+		}
+
+		void deallocate() {
+			if (buffer.id != 0) {
+				if (pool) {
+					pool->release({buffer, pooledCapacity}, false);
+				} else {
+					if (sg_isvalid()) sg_destroy_buffer(buffer);
+					SokolBufferTracker::untrack(buffer);
+				}
+				buffer.id	   = 0;
+				pooledCapacity = 0;
+			}
+			cpuData.clear();
+		}
+		~Interleaved() override {
+			unregisterLazy();
+			deallocate();
+		}
 	};
 	Interleaved il;
 	bool interleaved = false;
 
 	size_t getNumVerts() override {
 		if (interleaved) return il.vertCount;
-		return positionBuffer.valid() && positionBuffer.size;
+		return positionBuffer.present() ? positionBuffer.size : 0;
 	}
 	void draw_(Graphics &g, PrimitiveType mode = PrimitiveType::None, size_t instances = 1) override;
 
