@@ -73,8 +73,32 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 
         mzglSokolSetup(ios_environment(self));
+
+        // In an AUv3 extension MTKView pauses its display link when the host
+        // backgrounds (UIApplicationDidEnterBackgroundNotification reaches the
+        // extension) but UIApplicationWillEnterForegroundNotification is never
+        // posted in an extension process, so it stays paused forever. Extensions
+        // get the NSExtensionHost* notifications instead — mirror pause/resume
+        // off those. Harmless in the standalone app: they never fire there.
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(hostDidEnterBackground)
+                                                     name:NSExtensionHostDidEnterBackgroundNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(hostWillEnterForeground)
+                                                     name:NSExtensionHostWillEnterForegroundNotification
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)hostDidEnterBackground {
+    self.paused = YES;
+    [self releaseDrawables];
+}
+
+- (void)hostWillEnterForeground {
+    self.paused = NO;
 }
 
 - (void)deleteCppObjects {
