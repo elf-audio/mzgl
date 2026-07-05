@@ -1,31 +1,59 @@
 #import "MZMetalView.h"
-#include "sokol_gfx.h"
+// This view drives both MTKView-based backends: Sokol (sg_* pass around the
+// frame) and the native Metal backend (MetalAPI begin/endFrame). Exactly one
+// of MZGL_SOKOL / MZGL_METAL is defined per build.
+#ifdef MZGL_SOKOL
+#	include "sokol_gfx.h"
+#	include "SokolSetup.h"
+#else
+#	include "MetalAPI.h"
+#	include "MetalContext.h"
+#	include "Graphics.h"
+#endif
 #include "EventDispatcher.h"
-#include "SokolSetup.h"
 #include "Image.h"
 #include <mutex>
 #include <string>
 
 @implementation MZMetalView {
+#ifdef MZGL_SOKOL
 	sg_pass_action pass_action;
+#endif
 	id<MTLCommandQueue> captureQueue;
 	std::mutex screenshotMutex;
 	std::string screenshotPath;
 	bool screenshotPending;
 }
 
+#ifdef MZGL_SOKOL
 static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
+static const int mzglMTKSampleCount = mzglSokolSampleCount;
+#else
+static const int mzglMTKSampleCount = mzglMetalSampleCount;
+#endif
+
+static id<MTLDevice> mzglViewDevice() {
+#ifdef MZGL_SOKOL
+	return MTLCreateSystemDefaultDevice();
+#else
+	// the native Metal backend keeps one process-global device that all
+	// resources (textures/buffers/pipelines) are created on - the view must
+	// render with the same one
+	return mzglMetal::device();
+#endif
+}
 
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
 	eventDispatcher = evtDispatcher;
-	self			= [super initWithFrame:frame device:MTLCreateSystemDefaultDevice()];
+	self			= [super initWithFrame:frame device:mzglViewDevice()];
 	if (self != nil) {
 		self.delegate = self;
-		[self setSampleCount:(NSUInteger) mzglSokolSampleCount];
-		[self setDevice:MTLCreateSystemDefaultDevice()];
+		[self setSampleCount:(NSUInteger) mzglMTKSampleCount];
+		[self setDevice:mzglViewDevice()];
 		self.preferredFramesPerSecond = 60;
 
 		self.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
+#ifdef MZGL_SOKOL
 		switch (depth_format) {
 			case SG_PIXELFORMAT_DEPTH_STENCIL:
 				[self setDepthStencilPixelFormat:MTLPixelFormatDepth32Float_Stencil8];
@@ -33,6 +61,9 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 			case SG_PIXELFORMAT_DEPTH: [self setDepthStencilPixelFormat:MTLPixelFormatDepth32Float]; break;
 			default: [self setDepthStencilPixelFormat:MTLPixelFormatInvalid]; break;
 		}
+#else
+		[self setDepthStencilPixelFormat:MTLPixelFormatInvalid];
+#endif
 		self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 		[self setDrawableSize:[self convertSizeToBacking:frame.size]];
 
@@ -46,8 +77,10 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 		// TODO: this might be why it looks a bit crispy, try linear?
 		//		[self.layer setMagnificationFilter:kCAFilterNearest];
 
+#ifdef MZGL_SOKOL
 		// setup sokol
 		mzglSokolSetup(osx_environment(self));
+#endif
 
 		// Install the deferred screenshot hook. Graphics::saveScreen() (and the
 		// WS test server's save-screen action) just flag a request here; the
@@ -156,6 +189,7 @@ static sg_pixel_format depth_format = SG_PIXELFORMAT_NONE;
 	return eventDispatcher;
 }
 
+#ifdef MZGL_SOKOL
 sg_environment osx_environment(MTKView *mtkView) {
 	return (sg_environment) {.defaults =
 								 {
@@ -199,6 +233,27 @@ sg_swapchain osx_swapchain(MTKView *mtkView) {
 		[self captureScreenshotIfRequested];
 	}
 }
+#else // MZGL_METAL
+- (void)drawInMTKView:(nonnull MTKView *)view {
+	(void) view;
+	@autoreleasepool {
+		auto &api = static_cast<MetalAPI &>(eventDispatcher->app->g.getAPI());
+		api.beginFrame((__bridge void *) self);
+		if (!api.inFrame()) return; // no drawable this frame
+
+		if (eventDispatcher->app->g.firstFrame) {
+			initMZGL(eventDispatcher->app);
+			eventDispatcher->setup();
+			eventDispatcher->app->g.firstFrame = false;
+		}
+
+		eventDispatcher->runFrame();
+		api.endFrame();
+
+		[self captureScreenshotIfRequested];
+	}
+}
+#endif
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {
 	(void) view;
 	(void) size;

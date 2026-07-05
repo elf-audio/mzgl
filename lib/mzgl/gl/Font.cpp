@@ -31,7 +31,8 @@ CLANG_IGNORE_WARNINGS_END
 
 #include "filesystem.h"
 using namespace std;
-#ifndef MZGL_SOKOL
+#include "backendDefines.h"
+#ifdef MZGL_OPENGL
 #	include "OpenGLShader.h"
 #endif
 
@@ -61,9 +62,10 @@ vector<Font *> Font::fonts;
  (Changing GL_RED internal format for GL_R8 - seems to work on both mac and iOS)
  */
 
-#ifdef MZGL_SOKOL
+#if defined(MZGL_SOKOL)
 #	include "sokolFontstash.h"
-
+#elif defined(MZGL_METAL)
+#	include "metalFontstash.h"
 #else
 #	include "gl3corefontstash.h"
 #endif
@@ -104,8 +106,10 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 
 	clear();
 	this->size = size / 2.f;
-#ifdef MZGL_SOKOL
+#if defined(MZGL_SOKOL)
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#elif defined(MZGL_METAL)
+	fs = metalFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	GetError();
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
@@ -140,8 +144,10 @@ bool Font::load(Graphics &g, string path, float size) {
 	clear();
 
 	this->size = size / 2.f;
-#ifdef MZGL_SOKOL
+#if defined(MZGL_SOKOL)
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#elif defined(MZGL_METAL)
+	fs = metalFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 #endif
@@ -166,9 +172,12 @@ bool Font::load(Graphics &g, string path, float size) {
 }
 
 TextureRef Font::getAtlasTexture(Graphics &g) {
-#ifdef MZGL_SOKOL
+#if defined(MZGL_SOKOL)
 	sokolFONScontext *sg = (sokolFONScontext *) (fs->params.userPtr);
 	return Texture::create(g, sg->tex.id, sg->width, sg->height);
+#elif defined(MZGL_METAL)
+	metalFONScontext *mtl = (metalFONScontext *) (fs->params.userPtr);
+	return Texture::create(g, mtl->textureId, mtl->width, mtl->height);
 #else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 	return Texture::create(g, gl->tex, gl->width, gl->height);
@@ -276,8 +285,7 @@ void Font::draw(Graphics &g, const string &text, float x, float y) {
 
 	auto shader = g.fontShader;
 
-#ifdef MZGL_SOKOL
-#else
+#ifdef MZGL_OPENGL
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 
 	if (gl->VERTEX_ATTRIB == 0) {
@@ -424,6 +432,8 @@ void Font::clear() {
 	if (fs) {
 #if defined(MZGL_SOKOL)
 		sokolFonsDelete(fs);
+#elif defined(MZGL_METAL)
+		metalFonsDelete(fs);
 #else
 		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 		gl->TCOORD_ATTRIB = 0;

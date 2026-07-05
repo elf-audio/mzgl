@@ -15,9 +15,18 @@ class App;
 class Graphics;
 class EventDispatcher;
 
-// Metal root view controller. A plain UIViewController (the MTKView self-drives,
-// so it doesn't need GLKViewController). Replicates the resize / touch-delay /
-// ownership behaviour the app relies on.
+#ifdef MZGL_OPENGL
+
+// OpenGL backend: the root view controller is the GLKViewController-based one.
+#	import "MZGLKitViewController.h"
+typedef MZGLKitViewController MZRootViewController;
+
+#else
+
+// Metal root view controller (Sokol and native Metal backends). A plain
+// UIViewController (the MTKView self-drives, so it doesn't need
+// GLKViewController). Replicates the resize / touch-delay / ownership
+// behaviour the app relies on.
 @interface MZMetaliOSViewController : UIViewController
 - (id)initWithApp:(std::shared_ptr<App>)app andGraphics:(std::shared_ptr<Graphics>)_graphics;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
@@ -26,3 +35,5 @@ class EventDispatcher;
 @end
 
 typedef MZMetaliOSViewController MZRootViewController;
+
+#endif

@@ -573,18 +573,10 @@ void Graphics::clear(float c) {
 void Graphics::clear(float r, float g, float b, float a) {
 	clear({r, g, b, a});
 }
-#ifdef MZGL_SOKOL
-#	include "SokolAPI.h"
-#else
-#	include "OpenGLAPI.h"
-#endif
+#include "GraphicsBackendTypes.h"
 
 Graphics::Graphics() {
-#ifdef MZGL_SOKOL
-	api = std::make_unique<SokolAPI>(*this);
-#else
-	api = std::make_unique<OpenGLAPI>(*this);
-#endif
+	api = std::make_unique<BackendGraphicsAPI>(*this);
 }
 
 void Graphics::registerUpdater(ScopedUpdater *updater) {
@@ -616,7 +608,7 @@ void Graphics::runRegisteredUpdaters() {
 }
 
 int32_t Graphics::getDefaultFrameBufferId() {
-#ifndef MZGL_SOKOL
+#ifdef MZGL_OPENGL
 	if (auto *openGLApi = dynamic_cast<OpenGLAPI *>(api.get())) {
 		return openGLApi->getDefaultFrameBufferId();
 	}
@@ -624,9 +616,6 @@ int32_t Graphics::getDefaultFrameBufferId() {
 	Log::e() << "getDefaultFrameBufferId only works with OpenGL";
 	return 0;
 }
-#ifndef MZGL_SOKOL
-#	include "OpenGLShader.h"
-#endif
 void Graphics::clearUpResources() {
 #ifdef __ANDROID__
 	Log::d() << "cleaning up GL resources";

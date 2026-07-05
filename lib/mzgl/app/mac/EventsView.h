@@ -10,7 +10,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-#ifdef MZGL_SOKOL
+// Render-view base class per graphics backend: the Sokol and native-Metal
+// backends both draw through an MTKView (MZMetalView); OpenGL uses the
+// NSOpenGLView-based MZGLView.
+#if defined(MZGL_SOKOL) || defined(MZGL_METAL)
 #	include "MZMetalView.h"
 #	define GL_VIEW_CLASS MZMetalView
 #else

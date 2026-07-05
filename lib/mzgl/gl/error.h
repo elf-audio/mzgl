@@ -7,7 +7,9 @@
 #pragma once
 // take out underscores to reenable proper erroring
 
-#if defined(DEBUG) && !defined(MZGL_SOKOL)
+#include "backendDefines.h"
+
+#if defined(DEBUG) && defined(MZGL_OPENGL)
 
 #	include <stdlib.h>
 #	include <assert.h>

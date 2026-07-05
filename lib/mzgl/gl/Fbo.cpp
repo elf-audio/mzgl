@@ -6,7 +6,11 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
-#ifndef MZGL_SOKOL
+#include "backendDefines.h"
+
+// FBOs are only implemented on the OpenGL backend (the Sokol and Metal
+// backends have no render-to-texture path yet)
+#ifdef MZGL_OPENGL
 
 #include "Fbo.h"
 #include "glm/gtc/matrix_transform.hpp"
@@ -227,4 +231,4 @@ void Fbo::deallocate() {
 	height = 0;
 }
 
-#endif // !MZGL_SOKOL
+#endif // MZGL_OPENGL

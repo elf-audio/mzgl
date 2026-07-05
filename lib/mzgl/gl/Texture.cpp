@@ -20,13 +20,8 @@ std::vector<Texture *> Texture::textures;
 
 #include "Image.h"
 
-#ifdef MZGL_SOKOL
-#	include "SokolTexture.h"
-#	define TEXTURE_CLASS SokolTexture
-#else
-#	include "OpenGLTexture.h"
-#	define TEXTURE_CLASS OpenGLTexture
-#endif
+#include "GraphicsBackendTypes.h"
+#define TEXTURE_CLASS BackendTexture
 
 Texture::Texture(Graphics &g)
 	: g(g) {

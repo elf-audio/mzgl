@@ -15,12 +15,7 @@
 #include "log.h"
 #include "Geometry.h"
 
-#ifdef MZGL_SOKOL
-#	include "SokolVbo.h"
-#	include "SokolAPI.h"
-#else
-#	include "OpenGLVbo.h"
-#endif
+#include "GraphicsBackendTypes.h"
 
 #ifdef __ANDROID__
 std::vector<Vbo *> Vbo::vbos;
@@ -43,11 +38,7 @@ bool isVboLazyUploadEnabled() {
 }
 
 VboRef Vbo::create() {
-#ifdef MZGL_SOKOL
-	return VboRef(new SokolVbo());
-#else
-	return VboRef(new OpenGLVbo());
-#endif
+	return VboRef(new BackendVbo());
 }
 
 VboRef Vbo::createFromPool(Graphics &g) {
@@ -56,7 +47,9 @@ VboRef Vbo::createFromPool(Graphics &g) {
 	vbo->setPool(&dynamic_cast<SokolAPI &>(g.getAPI()).getBufferPool());
 	return VboRef(vbo);
 #else
-	return VboRef(new OpenGLVbo());
+	// no per-frame buffer pool on the other backends - a plain Vbo behaves
+	// identically, it just re-uploads on update
+	return create();
 #endif
 }
 

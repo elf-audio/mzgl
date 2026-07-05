@@ -1,6 +1,7 @@
 #pragma once
 #include "Vbo.h"
 #include "mzOpenGL.h"
+#include "error.h"
 
 static int primitiveTypeToGLMode(Vbo::PrimitiveType mode) {
 	switch (mode) {

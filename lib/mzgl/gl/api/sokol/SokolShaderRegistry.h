@@ -9,7 +9,15 @@ typedef int (*UniformOffsetFn)(sg_shader_stage stage, const char *ub_name, const
 typedef int (*AttrSlotFn)(const char* attr_name);
 
 class SokolAPI;
+class Graphics;
 void registerShaders(SokolAPI &api);
+
+class SokolShaderRegistry;
+// The shader registry of the active backend. The registry holds sokol-shdc
+// reflection data, which both the Sokol and native Metal backends consume -
+// this accessor lets generated shader-registration code (customShaders.h)
+// work on either. Implemented in SokolAPI.cpp / MetalAPI.mm.
+SokolShaderRegistry &mzglShaderRegistry(Graphics &g);
 
 class ShaderDef {
 public:

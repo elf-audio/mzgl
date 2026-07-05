@@ -2,6 +2,8 @@
 
 #include "mzOpenGL.h"
 #include "Texture.h"
+#include "error.h"
+#include "mzAssert.h"
 
 class OpenGLTexture : public Texture {
 public:

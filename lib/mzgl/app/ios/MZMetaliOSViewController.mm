@@ -6,6 +6,9 @@
 //  Copyright © 2018 Marek Bereza. All rights reserved.
 //
 
+#include "backendDefines.h"
+#ifndef MZGL_OPENGL // Sokol / native Metal backends only
+
 #import "MZMetaliOSViewController.h"
 #include "App.h"
 #include "EventDispatcher.h"
@@ -88,3 +91,5 @@
 	NSLog(@"dealloc MZMetaliOSViewController");
 }
 @end
+
+#endif // !MZGL_OPENGL

@@ -41,6 +41,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "iOS"
   set(IOS TRUE)
 endif()
 
+# Resolve the compile-time graphics backend (OpenGL | Sokol | Metal) into
+# USING_SOKOL / USING_METAL / USING_OPENGL + MZGL_BACKEND_COMPILE_DEFS.
+# Idempotent - parent projects may have included it already.
+include(cmake/GraphicsBackend.cmake)
+add_compile_definitions(${MZGL_BACKEND_COMPILE_DEFS})
+
 # PRINT EVERYTHING!!!
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -136,6 +142,9 @@ set(MZGL_SOURCES
     lib/mzgl/app/mac/EventsView.mm
     lib/mzgl/app/mac/NSBlockButton.m
     lib/mzgl/app/mac/MacFilePickerDelegate.mm
+    # MZGLView (NSOpenGLView) is compiled for every backend: it only renders
+    # under MZGL_OPENGL, but koala's TouchBar category (MZGLView+
+    # TouchBarExtensions.mm) needs the class to exist in all builds.
     lib/mzgl/app/mac/GL/MZGLView.mm
     lib/mzgl/app/mac/LayerExplorer.mm
     lib/mzgl/app/mac/TextConsole.mm
@@ -159,6 +168,7 @@ if(IOS)
        lib/mzgl/app/ios/mainiOS.mm
        lib/mzgl/app/ios/iOSAppDelegate.mm
        lib/mzgl/app/ios/MZGLKitView.mm
+       lib/mzgl/app/ios/MZGLKitViewController.mm
        lib/mzgl/app/ios/MZMetaliOSViewController.mm
        lib/mzgl/app/ios/TextboxSegmentedViewController.m
        lib/mzgl/app/ios/UIBlockButton.m
@@ -203,7 +213,7 @@ if(NOT ANDROID AND NOT IOS)
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Mac.cpp
     lib/mzgl/app/glfw/GLFWOS_Mac.cpp
     >)
-  if(NOT USING_SOKOL OR NOT WIN32)
+  if(USING_OPENGL OR NOT WIN32)
     list(APPEND MZGL_SOURCES lib/glew/src/glew.c)
   endif()
 endif()
@@ -223,6 +233,23 @@ if(USING_SOKOL)
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/win64/D3D11Context.cpp
     >)
+elseif(USING_METAL)
+  list(
+    APPEND
+    MZGL_SOURCES
+    lib/mzgl/gl/api/metal/MetalAPI.mm
+    lib/mzgl/gl/api/metal/MetalShader.mm
+    lib/mzgl/gl/api/metal/MetalVbo.mm
+    lib/mzgl/gl/api/metal/MetalTexture.mm
+    $<$<PLATFORM_ID:Darwin>:
+    lib/mzgl/app/mac/Metal/MZMetalView.mm
+    >)
+  # the Metal backend keeps ObjC objects in C++ members (encoder/pipeline
+  # caches) and relies on ARC for their lifetimes
+  set_source_files_properties(
+    lib/mzgl/gl/api/metal/MetalAPI.mm lib/mzgl/gl/api/metal/MetalShader.mm
+    lib/mzgl/gl/api/metal/MetalVbo.mm lib/mzgl/gl/api/metal/MetalTexture.mm
+    PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 else()
   list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
        lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp)
@@ -258,6 +285,7 @@ set(HEADERS
     lib/mzgl/gl/api
     lib/mzgl/gl/api/OpenGL
     lib/mzgl/gl/api/sokol
+    lib/mzgl/gl/api/metal
     lib/mzgl/gl/drawing
     lib/mzgl/midi
     lib/mzgl/music
@@ -431,7 +459,10 @@ set(SHADER_SOURCES
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")
 
-if(USING_SOKOL)
+# The Metal backend consumes the same sokol-shdc-generated shader headers
+# (the metal_macos/metal_ios MSL variants) as the Sokol backend, so shader
+# compilation runs for both.
+if(USING_SOKOL OR USING_METAL)
 
   # MZGL_USE_PRECOMPILED_SOKOL_SHADERS lets parent projects skip shader
   # regeneration entirely and use the checked-in xcodeShaders/ headers. Useful
@@ -496,12 +527,9 @@ if(USING_SOKOL)
     endif()
   endif()
 
-  add_compile_definitions(MZGL_SOKOL)
-  if(APPLE)
-    add_compile_definitions(SOKOL_METAL)
-  elseif(WIN32)
-    add_compile_definitions(SOKOL_D3D11)
-  endif()
+  # Backend compile definitions (MZGL_SOKOL/SOKOL_METAL etc.) are applied
+  # near the top of this file from MZGL_BACKEND_COMPILE_DEFS - see
+  # cmake/GraphicsBackend.cmake.
 endif()
 
 set(MZGL_LIBS ZipFile yoga pu_gixml concurrentqueue readerwriterqueue)
@@ -528,7 +556,7 @@ if(NOT ANDROID)
   if(APPLE)
     set_source_files_properties(lib/rtmidi/RtMidi.cpp
                                 PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
-  elseif(NOT USING_SOKOL)
+  elseif(USING_OPENGL)
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)
@@ -597,6 +625,12 @@ elseif(APPLE)
       "-framework CoreGraphics"
       "-framework ImageIO"
       "-framework Foundation")
+    if(USING_OPENGL)
+      # The GL backend renders through GLKView/EAGLContext (deprecated but
+      # still shipping); Metal/MetalKit stay linked above for the other
+      # backends and are harmless here.
+      target_link_libraries(libmzgl "-framework OpenGLES")
+    endif()
   else()
     add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
     target_link_libraries(
@@ -626,7 +660,7 @@ elseif(APPLE)
 elseif(WIN32)
 
   add_compile_definitions(_WIN32_WINNT=0x0601 __WINDOWS_MM__)
-  if(NOT USING_SOKOL)
+  if(USING_OPENGL)
     add_compile_definitions(GLEW_STATIC)
   endif()
 

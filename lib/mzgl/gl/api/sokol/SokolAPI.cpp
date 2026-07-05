@@ -6,6 +6,12 @@ CLANG_IGNORE_ADDITONAL_WARNING("-Wmacro-redefined")
 #include "SokolDefaultShaders.h"
 CLANG_IGNORE_WARNINGS_END
 
+// the shader registry of the active backend, for generated shader-registration
+// code (customShaders.h) that must work on both Sokol and Metal
+SokolShaderRegistry &mzglShaderRegistry(Graphics &g) {
+	return static_cast<SokolAPI &>(g.getAPI()).getShaderRegistry();
+}
+
 void SokolAPI::loadDefaultShaders() {
 	registerShaders(shaderRegistry);
 	g.nothingShader		 = createDefaultShader("nothing", &g, this);

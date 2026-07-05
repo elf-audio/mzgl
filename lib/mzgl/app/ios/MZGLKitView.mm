@@ -13,17 +13,121 @@
 #include "mzgl/util/log.h"
 #include "Vbo.h"
 #include "PluginEditor.h"
-#include "sokol_gfx.h"
-#include "SokolSetup.h"
+#if defined(MZGL_SOKOL)
+#	include "sokol_gfx.h"
+#	include "SokolSetup.h"
+#elif defined(MZGL_METAL)
+#	include "MetalAPI.h"
+#	include "MetalContext.h"
+#	include "Graphics.h"
+#endif
 using namespace std;
 
-#pragma mark - MZMetaliOSView (Metal render base)
+#ifdef MZGL_OPENGL
+
+#	pragma mark - MZGLKitView (GL render base)
+
+@implementation MZGLKitView {
+	bool firstFrame;
+}
+
+- (void)deleteCppObjects {
+	app				= nullptr;
+	eventDispatcher = nullptr;
+	graphics		= nullptr;
+}
+
+- (std::shared_ptr<App>)getApp {
+	return app;
+}
+
+- (void)dealloc {
+	NSLog(@"Tearing down MZGLKitView");
+	// Tear the C++ objects down in an explicit, safe order (app -> graphics).
+	// Otherwise ARC's .cxx_destruct destroys the ivars in reverse declaration
+	// order, freeing `graphics` before `app`; ~App then deletes its Layer tree,
+	// and ~Layer dereferences the (now dangling) Graphics& -> crash. This path
+	// matters for teardowns that don't go through the view controller's
+	// deleteCppObjects (e.g. AUv3 extension scene invalidation). Idempotent:
+	// resetting already-null shared_ptrs is a no-op.
+	[self deleteCppObjects];
+}
+
+- (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
+	self = [super init];
+	if (self != nil) {
+		app		 = _app;
+		graphics = _graphics;
+
+		eventDispatcher = std::make_shared<EventDispatcher>(app);
+
+		firstFrame = true;
+	}
+	return self;
+}
+
+- (void)drawRect:(CGRect)rect {
+	// teardown can null the C++ objects while the display link delivers one
+	// more frame (see the Metal base's drawInMTKView guard)
+	if (app == nullptr) return;
+	if (firstFrame) {
+		app->g.pixelScale = [[UIScreen mainScreen] nativeScale];
+
+		initMZGL(app);
+
+		app->g.width  = rect.size.width * app->g.pixelScale;
+		app->g.height = rect.size.height * app->g.pixelScale;
+
+		if (app->g.width == 0 || app->g.height == 0) {
+			app->g.width  = 100;
+			app->g.height = 100;
+			printf("ERROR: WIDTH OR HEIGHT is ZERO\n");
+		}
+
+		eventDispatcher->setup();
+
+		firstFrame = false;
+	}
+	eventDispatcher->runFrame();
+}
+
+- (std::shared_ptr<EventDispatcher>)getEventDispatcher {
+	return eventDispatcher;
+}
+
+- (BOOL)handleNormalOpen:(NSURL *)url {
+	NSLog(@"Standard open");
+
+	NSString *path = url.path;
+
+	std::function<void()> deleter = []() {};
+	// see if we need a scoped security url
+	if (![[NSFileManager defaultManager] isReadableFileAtPath:path]) {
+		NSLog(@"Using security scoped url\n");
+		[url startAccessingSecurityScopedResource];
+
+		deleter = [url]() {
+			NSLog(@"Releasing security scoped url\n");
+			[url stopAccessingSecurityScopedResource];
+		};
+	}
+
+	return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
+}
+@end
+
+#else // MZGL_SOKOL / MZGL_METAL
+
+#	pragma mark - MZMetaliOSView (Metal render base)
 
 @implementation MZMetaliOSView {
     bool firstFrame;
+#	ifdef MZGL_SOKOL
     sg_pass_action pass_action;
+#	endif
 }
 
+#	ifdef MZGL_SOKOL
 static sg_pixel_format ios_depth_format = SG_PIXELFORMAT_NONE;
 
 static sg_environment ios_environment(MTKView *mtkView) {
@@ -51,8 +155,23 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
                           }};
 }
 
+static const int mzglMTKSampleCount = mzglSokolSampleCount;
+
+static id<MTLDevice> mzglViewDevice() {
+	return MTLCreateSystemDefaultDevice();
+}
+#	else // MZGL_METAL
+static const int mzglMTKSampleCount = mzglMetalSampleCount;
+
+static id<MTLDevice> mzglViewDevice() {
+	// the native Metal backend keeps one process-global device that all
+	// resources are created on - the view must render with the same one
+	return mzglMetal::device();
+}
+#	endif
+
 - (id)initWithApp:(std::shared_ptr<App>)_app andGraphics:(std::shared_ptr<Graphics>)_graphics {
-    self = [super initWithFrame:CGRectZero device:MTLCreateSystemDefaultDevice()];
+    self = [super initWithFrame:CGRectZero device:mzglViewDevice()];
     if (self != nil) {
         app             = _app;
         graphics        = _graphics;
@@ -60,9 +179,10 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
         firstFrame      = true;
 
         self.delegate = self;
-        [self setSampleCount:(NSUInteger) mzglSokolSampleCount];
+        [self setSampleCount:(NSUInteger) mzglMTKSampleCount];
         self.preferredFramesPerSecond = 60;
         self.colorPixelFormat         = MTLPixelFormatBGRA8Unorm;
+#	ifdef MZGL_SOKOL
         switch (ios_depth_format) {
             case SG_PIXELFORMAT_DEPTH_STENCIL:
                 [self setDepthStencilPixelFormat:MTLPixelFormatDepth32Float_Stencil8];
@@ -70,9 +190,14 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
             case SG_PIXELFORMAT_DEPTH: [self setDepthStencilPixelFormat:MTLPixelFormatDepth32Float]; break;
             default: [self setDepthStencilPixelFormat:MTLPixelFormatInvalid]; break;
         }
+#	else
+        [self setDepthStencilPixelFormat:MTLPixelFormatInvalid];
+#	endif
         self.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 
+#	ifdef MZGL_SOKOL
         mzglSokolSetup(ios_environment(self));
+#	endif
 
         // In an AUv3 extension MTKView pauses its display link when the host
         // backgrounds (UIApplicationDidEnterBackgroundNotification reaches the
@@ -145,11 +270,19 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
             firstFrame = false;
         }
 
+#	ifdef MZGL_SOKOL
         sg_pass pass = {.action = pass_action, .swapchain = ios_swapchain(self)};
         sg_begin_pass(pass);
         eventDispatcher->runFrame();
         sg_end_pass();
         sg_commit();
+#	else // MZGL_METAL
+        auto &api = static_cast<MetalAPI &>(app->g.getAPI());
+        api.beginFrame((__bridge void *) self);
+        if (!api.inFrame()) return; // no drawable this frame
+        eventDispatcher->runFrame();
+        api.endFrame();
+#	endif
     }
 }
 
@@ -177,6 +310,8 @@ static sg_swapchain ios_swapchain(MTKView *mtkView) {
     return eventDispatcher->openUrl(ScopedUrl::createWithCallback([path UTF8String], deleter));
 }
 @end
+
+#endif // render-base selection
 
 #pragma mark - EventsView (shared interaction handling)
 

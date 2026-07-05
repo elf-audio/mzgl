@@ -8,22 +8,13 @@
 
 #include "Shader.h"
 #include "Graphics.h"
-#include "SokolShader.h"
-#include "OpenGLShader.h"
+#include "GraphicsBackendTypes.h"
 
 ShaderRef Shader::create(Graphics &g) {
-#ifdef MZGL_SOKOL
-	return std::shared_ptr<Shader>(new SokolShader(g));
-#else
-	return std::shared_ptr<Shader>(new OpenGLShader(g));
-#endif
+	return std::shared_ptr<Shader>(new BackendShader(g));
 }
 ShaderRef Shader::create(Graphics &g, std::string name) {
-#ifdef MZGL_SOKOL
-	return std::shared_ptr<Shader>(new SokolShader(g, name));
-#else
-	return std::shared_ptr<Shader>(new OpenGLShader(g, name));
-#endif
+	return std::shared_ptr<Shader>(new BackendShader(g, name));
 }
 
 Shader::Shader(Graphics &g)
