@@ -68,5 +68,10 @@ private:
 	std::vector<AudioPort> inputPorts;
 	std::vector<AudioPort> outputPorts;
 
+	// channel counts as originally requested in setup() - kept so a restart on
+	// another device re-resolves the "all channels" sentinel for that device
+	int requestedInChannels {2};
+	int requestedOutChannels {2};
+
 	bool verbose {false};
 };

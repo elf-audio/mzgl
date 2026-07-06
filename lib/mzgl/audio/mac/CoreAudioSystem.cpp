@@ -146,6 +146,11 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	updateChannelCount(numInChannels, inputPort, inputPorts);
 	updateChannelCount(numOutChannels, outputPort, outputPorts);
 
+	// if the "all channels" sentinel couldn't be resolved (e.g. no port), fall
+	// back to stereo rather than trying to open INT_MAX channels
+	if (numInChannels == std::numeric_limits<int>::max()) numInChannels = 2;
+	if (numOutChannels == std::numeric_limits<int>::max()) numOutChannels = 2;
+
 	if (verbose) {
 		Log::v() << "CORE AUDIO STARTUP:";
 		Log::v() << "  Input Port: " << (inputPort.has_value() ? inputPort->name : "none");
@@ -380,6 +385,9 @@ void CoreAudioSystem::createOutputAudioUnit() {
 }
 
 void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
+	requestedInChannels	 = numInChannels;
+	requestedOutChannels = numOutChannels;
+
 	if (state != nullptr) {
 		Log::d() << "CoreAudioSystem is running, stopping before setup";
 		stop();
@@ -462,11 +470,8 @@ void CoreAudioSystem::restart() {
 		return;
 	}
 
-	auto in	 = state->inChans.load();
-	auto out = state->outChans.load();
-
 	stop();
-	setup(in, out);
+	setup(requestedInChannels, requestedOutChannels);
 	start();
 }
 
