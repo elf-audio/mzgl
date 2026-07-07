@@ -508,6 +508,10 @@ void androidNumberboxDialog(const std::string &title,
 	callJNI("numberboxDialog", title, msg, initialValue);
 }
 
+bool androidSafeInsetsKnown() {
+	return callJNIForInt("safeInsetsKnown") != 0;
+}
+
 void androidShowKeyboard(const std::string &text) {
 	callJNI("showKeyboard", text);
 }

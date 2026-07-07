@@ -144,6 +144,18 @@ public:
 			eventDispatcher->androidDrawLoading();
 			eglSwapBuffers(display, surface);
 
+			// hold the first layout until the system has delivered window
+			// insets (they arrive async on the java UI thread) - otherwise
+			// setup() lays out against zero insets and draws under the
+			// navigation bar. Times out in case a device never delivers them.
+			if (!androidSafeInsetsKnown()) {
+				if (insetsWaitStartTime == 0.f) insetsWaitStartTime = getSeconds();
+				if (getSeconds() - insetsWaitStartTime < 0.5f) {
+					return; // keep showing the loading frame, try again next frame
+				}
+				Log::w() << "Timed out waiting for window insets, laying out without them";
+			}
+
 			eventDispatcher->setup();
 			// route Graphics::showKeyboard/hideKeyboard to the Android soft keyboard
 			graphics.onShowKeyboard = [](TextInputReceiver *r) {
@@ -281,6 +293,7 @@ public:
 	}
 	[[nodiscard]] bool ready() const { return hasFocus; }
 	bool firstFrameAlreadyRendered = false;
+	float insetsWaitStartTime	   = 0.f;
 };
 
 std::shared_ptr<App> androidGetApp() {

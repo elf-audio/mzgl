@@ -238,6 +238,10 @@ std::string jstringToString(JNIEnv *jni, jstring text);
 void androidShowKeyboard(const std::string &text);
 void androidHideKeyboard();
 
+// true once the system has delivered window insets to MZGLActivity for the
+// first time - used to hold the first layout until real inset values exist.
+bool androidSafeInsetsKnown();
+
 class ScopedJni {
 public:
 	ScopedJni() {
