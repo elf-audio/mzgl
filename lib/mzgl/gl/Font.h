@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string>
+#include <functional>
 #include "Texture.h"
 struct FONScontext;
 
@@ -59,6 +60,11 @@ public:
 	float getHeight(const std::string &text) const;
 
 	std::vector<std::string> wrapText(const std::string &text, float width) const;
+
+	// wrap with a custom width-measuring function - doesn't need a loaded font
+	static std::vector<std::string> wrapText(const std::string &text,
+											 float width,
+											 const std::function<float(const std::string &)> &measureWidth);
 
 	TextureRef getAtlasTexture(Graphics &g);
 

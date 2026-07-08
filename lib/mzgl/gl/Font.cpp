@@ -453,12 +453,13 @@ Font::Font() {
 
 #include "stringUtil.h"
 
-static std::pair<std::string, std::string> splitAtWidth(const Font &f, const std::string &word, float width) {
+static std::pair<std::string, std::string> splitAtWidth(
+	const std::function<float(const std::string &)> &measureWidth, const std::string &word, float width) {
 	std::string first  = "";
 	std::string second = "";
 	for (int i = static_cast<int>(word.size()); i > 0; i--) {
 		auto sub = word.substr(0, i);
-		if (f.getWidth(sub) <= width) {
+		if (measureWidth(sub) <= width) {
 			first  = sub;
 			second = word.substr(i);
 			break;
@@ -495,22 +496,48 @@ static std::vector<std::string> tokenize(const std::string &source, const std::s
 	return tokens;
 }
 
-static void addLines(const Font &f, std::vector<std::string> &lines, const std::string &para, float width) {
+// punctuation that should never start a line, e.g. the ")" in "were restored.)"
+static bool isClingingPunctuation(const std::string &token) {
+	static const std::string clingers = ".,:;!?)]}";
+	if (token.empty()) return false;
+	for (char c: token) {
+		if (clingers.find(c) == std::string::npos) return false;
+	}
+	return true;
+}
+
+// merge clinging punctuation into the preceding token so a wrap can't separate them
+static std::vector<std::string> mergeClingingPunctuation(const std::vector<std::string> &tokens) {
+	std::vector<std::string> merged;
+	for (const auto &token: tokens) {
+		if (!merged.empty() && isClingingPunctuation(token) && merged.back() != " " && merged.back() != "\t") {
+			merged.back() += token;
+		} else {
+			merged.push_back(token);
+		}
+	}
+	return merged;
+}
+
+static void addLines(const std::function<float(const std::string &)> &measureWidth,
+					 std::vector<std::string> &lines,
+					 const std::string &para,
+					 float width) {
 	if (para.empty()) lines.push_back("");
 
-	auto words			 = tokenize(para, " \t,./-:");
+	auto words			 = mergeClingingPunctuation(tokenize(para, " \t,./-:"));
 	std::string currLine = "";
 	for (auto it = words.begin(); it != words.end(); it++) {
 		auto lineWithNextWord = currLine + (*it);
-		if (f.getWidth(lineWithNextWord) > width) {
-			if (f.getWidth((*it)) > width) {
+		if (measureWidth(lineWithNextWord) > width) {
+			if (measureWidth((*it)) > width) {
 				// this word is too long for the given paragraph width.
 				// If the string contains one or more '/', work backwards
 				// searching for '/' to find the longest string that will
 				// fit on the line with a '/'
 				// printf("Word too long: %s\n", (*it).c_str());
 				// break the word down
-				auto beforeAfter = splitAtWidth(f, lineWithNextWord, width);
+				auto beforeAfter = splitAtWidth(measureWidth, lineWithNextWord, width);
 				lines.push_back(beforeAfter.first);
 				*it = beforeAfter.second;
 				// printf("first: %s second: %s\n", beforeAfter.first.c_str(), beforeAfter.second.c_str());
@@ -532,12 +559,18 @@ static void addLines(const Font &f, std::vector<std::string> &lines, const std::
 		lines.push_back(currLine);
 	}
 }
-std::vector<std::string> Font::wrapText(const std::string &text, float width) const {
+std::vector<std::string> Font::wrapText(const std::string &text,
+										float width,
+										const std::function<float(const std::string &)> &measureWidth) {
 	std::vector<std::string> lines;
 	auto paragraphs = split(text, "\n", false, true);
 
 	for (auto &para: paragraphs) {
-		addLines(*this, lines, para, width);
+		addLines(measureWidth, lines, para, width);
 	}
 	return lines;
+}
+
+std::vector<std::string> Font::wrapText(const std::string &text, float width) const {
+	return wrapText(text, width, [this](const std::string &s) { return getWidth(s); });
 }
