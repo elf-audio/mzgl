@@ -54,6 +54,11 @@ set(MZGL_SOURCES
     lib/mzgl/App.cpp
     lib/mzgl/animation/Tween.cpp
     lib/mzgl/audio/AudioSystem.cpp
+    # dr_libs-based loader + its resampler: cross-platform, used on every
+    # platform (AudioFileApple/AudioFileAndroid fall back to it too).
+    lib/mzgl/audio/AudioFileDrLib.cpp
+    lib/mzgl/audio/Resampler.cpp
+    lib/misc/speex_resampler.cpp
     lib/mzgl/geom/Rectf.cpp
     lib/mzgl/geom/RoundedRect.cpp
     lib/mzgl/geom/SVG.cpp
@@ -134,7 +139,6 @@ set(MZGL_SOURCES
     lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
     lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
     lib/mzgl/audio/AudioFileApple.cpp
-    lib/mzgl/audio/AudioFileDrLib.cpp
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
     lib/mzgl/app/mac/MacAppDelegate.mm
@@ -176,10 +180,6 @@ if(IOS)
        # Apple-shared sources from the $<PLATFORM_ID:Darwin> block above (which is
        # FALSE on iOS); the mac-only files in that block are correctly omitted.
        lib/mzgl/audio/AudioFileApple.cpp
-       # dr_libs-based loader (loadViaDrLib/loadResampledViaDrLib): cross-platform,
-       # in the Darwin block for macOS and the non-Apple branch for desktop, but the
-       # iOS block must add it explicitly (the unit tests exercise it on iOS too).
-       lib/mzgl/audio/AudioFileDrLib.cpp
        lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
        lib/mzgl/midi/appleMidiUtils.cpp
        # MZGLWebView.mm / app/web/MacWebView.mm are AppKit (macOS-only); iOS uses
@@ -382,10 +382,7 @@ if(APPLE)
     lib/mzgl/util/Haptics.cpp
     PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
 else()
-  list(APPEND MZGL_SOURCES lib/misc/speex_resampler.cpp)
-  list(APPEND MZGL_SOURCES lib/mzgl/audio/Resampler.cpp)
   list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileAndroid.cpp)
-  list(APPEND MZGL_SOURCES lib/mzgl/audio/AudioFileDrLib.cpp)
 endif()
 
 if(ANDROID)
