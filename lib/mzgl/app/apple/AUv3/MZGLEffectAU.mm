@@ -16,6 +16,7 @@
 #include "Plugin.h"
 #include "log.h"
 #include <mach/mach_time.h>
+#include <dispatch/dispatch.h>
 #include "FloatBuffer.h"
 #include "Midi.h"
 
@@ -261,27 +262,21 @@ struct Blocks {
 	_parameterTree = [AUParameterTree createTreeWithChildren:paramList];
 
 	Plugin *eff = plugin.get();
-
-	//
-	//
-	//
-	//
-	//
-	//
-	//	BAAAHHHHHH Again comented this out reference cycle issue?? memory leak?
-	//
-	//
-	//
-	//	__weak __typeof__(self) weakSelf = self;
-	eff->sendUpdatedParameterToHost = [weakSelf](unsigned int i, float f) {
+	eff->sendUpdatedParameterToHost = [weakSelf](unsigned int i, float f, Plugin::ParameterUpdateType updateType) {
+		
 		AUParameter *param = [[weakSelf.parameterTree allParameters] objectAtIndex:i];
-		//		Log::d() << "Sending " << f << " to host";// at " << getSeconds()*1000.f;
-		[param setValue:f];
-		// TODO: atHostTime:0 ?
-		//		AUParameterAutomationEventTypeTouch // down
-		//		AUParameterAutomationEventTypeValue // moved
-		//		AUParameterAutomationEventTypeRelease // up
-		//		[param setValue:f originator: nil atHostTime:0 eventType:(AUParameterAutomationEventType)eventType]);
+
+		switch (updateType) {
+			case  Plugin::ParameterUpdateType::TouchDown:
+				[param setValue:f originator:nil atHostTime:0 eventType:AUParameterAutomationEventTypeTouch];
+				break;
+			case Plugin::ParameterUpdateType::ValueChanged:
+				[param setValue:f originator:nil atHostTime:0 eventType:AUParameterAutomationEventTypeValue];
+				break;
+			case Plugin::ParameterUpdateType::TouchUp:
+				[param setValue:param.value originator:nil atHostTime:0 eventType:AUParameterAutomationEventTypeRelease];
+				break;
+		}
 	};
 	//
 
