@@ -241,10 +241,10 @@ void AudioSystemIOS::configureAudioUnit() {
 		AudioStreamBasicDescription audioFormat = {.mSampleRate		  = sampleRate,
 												   .mFormatID		  = kAudioFormatLinearPCM,
 												   .mFormatFlags	  = kAudioFormatFlagsNativeFloatPacked,
-												   .mFramesPerPacket  = 1,
-												   .mChannelsPerFrame = (UInt32) numOutChannels,
-												   .mBytesPerFrame	  = (UInt32) sizeof(Float32) * numOutChannels,
 												   .mBytesPerPacket	  = (UInt32) sizeof(Float32) * numOutChannels,
+												   .mFramesPerPacket  = 1,
+												   .mBytesPerFrame	  = (UInt32) sizeof(Float32) * numOutChannels,
+												   .mChannelsPerFrame = (UInt32) numOutChannels,
 												   .mBitsPerChannel	  = sizeof(Float32) * 8};
 
 		// Apply format
@@ -284,10 +284,10 @@ void AudioSystemIOS::configureAudioUnit() {
 		AudioStreamBasicDescription audioFormat = {.mSampleRate		  = sampleRate,
 												   .mFormatID		  = kAudioFormatLinearPCM,
 												   .mFormatFlags	  = kAudioFormatFlagsNativeFloatPacked,
-												   .mFramesPerPacket  = 1,
-												   .mChannelsPerFrame = (UInt32) numInChannels,
-												   .mBytesPerFrame	  = (UInt32) sizeof(Float32) * numInChannels,
 												   .mBytesPerPacket	  = (UInt32) sizeof(Float32) * numInChannels,
+												   .mFramesPerPacket  = 1,
+												   .mBytesPerFrame	  = (UInt32) sizeof(Float32) * numInChannels,
+												   .mChannelsPerFrame = (UInt32) numInChannels,
 												   .mBitsPerChannel	  = sizeof(Float32) * 8};
 
 		// Apply format
