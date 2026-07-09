@@ -15,7 +15,13 @@ public:
 
 	virtual void callJs(const std::string &jsString) = 0;
 
+	// set by WebViewOverlay; fired when the overlay is dismissed natively
+	std::function<void()> onClosed;
+
 protected:
+	void notifyClosed() {
+		if (onClosed) onClosed();
+	}
 	const std::string url;
 	std::function<void(const std::string &)> jsCallback;
 	App &app;
@@ -63,7 +69,10 @@ public:
 	~iOSWebViewOverlayImpl() = default;
 
 private:
-	void close() { [targetController dismissViewControllerAnimated:true completion:nil]; }
+	void close() {
+		[targetController dismissViewControllerAnimated:true completion:nil];
+		notifyClosed();
+	}
 };
 
 #	else
@@ -121,6 +130,7 @@ private:
 			completionHandler:^{
 			  [webView removeFromSuperview];
 			  [rootView.window makeFirstResponder:rootView];
+			  notifyClosed();
 			}];
 	}
 };
@@ -172,7 +182,8 @@ private:
 
 WebViewOverlay::WebViewOverlay(App &app,
 							   const std::string &url,
-							   std::function<void(const std::string &)> jsCallback) {
+							   std::function<void(const std::string &)> jsCallback,
+							   std::function<void()> onClosed) {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	impl = std::make_shared<iOSWebViewOverlayImpl>(app, url, jsCallback);
@@ -182,6 +193,7 @@ WebViewOverlay::WebViewOverlay(App &app,
 #elif defined(__ANDROID__)
 	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
 #endif
+	if (impl) impl->onClosed = onClosed;
 }
 
 void WebViewOverlay::callJs(const std::string &jsString) {
