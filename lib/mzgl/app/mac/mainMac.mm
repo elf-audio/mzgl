@@ -16,17 +16,22 @@
 
 Graphics g;
 int main(int argc, const char *argv[]) {
-	[NSApplication sharedApplication];
-	[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-
 	loadCommandLineArgs(argc, argv);
+
+	bool background = hasCommandLineFlag("--background");
+
+	[NSApplication sharedApplication];
+	[NSApp setActivationPolicy:background ? NSApplicationActivationPolicyAccessory
+										  : NSApplicationActivationPolicyRegular];
 
 	auto app = instantiateApp(g);
 	if (app->isHeadless()) {
 		return 0;
 	}
 
-	[NSApp activateIgnoringOtherApps:YES];
+	if (!background) {
+		[NSApp activateIgnoringOtherApps:YES];
+	}
 	id appDelegate = [[MacAppDelegate alloc] initWithApp:app];
 	[NSApp setDelegate:appDelegate];
 

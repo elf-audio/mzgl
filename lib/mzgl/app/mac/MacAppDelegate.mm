@@ -185,7 +185,9 @@ bool hasTransparentTitleBar = true;
 		// the main-thread queue (drained inside the frame loop) and means there
 		// is no valid drawable to screenshot. This lets the harness drive and
 		// capture the UI without having to bring the app to the foreground.
-		window.level			 = NSFloatingWindowLevel;
+		if (!hasCommandLineFlag("--background")) {
+			window.level = NSFloatingWindowLevel;
+		}
 		window.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
 									| NSWindowCollectionBehaviorStationary;
 		[window orderFrontRegardless];
