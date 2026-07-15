@@ -403,6 +403,27 @@ void Layer::sendToFront(Layer *child) {
 	}
 }
 
+int Layer::indexOfChild(const Layer *child) const {
+	for (int i = 0; i < children.size(); i++) {
+		if (children[i] == child) return i;
+	}
+	return -1;
+}
+
+void Layer::moveChildToIndex(Layer *child, int index) {
+#ifdef DEBUG
+	assertNotIterating("moveChildToIndex");
+#endif
+	const int curr = indexOfChild(child);
+	if (curr == -1) {
+		Log::e() << "Couldn't find child in moveChildToIndex " << child->name;
+		return;
+	}
+	children.erase(children.begin() + curr);
+	index = std::max(0, std::min(index, static_cast<int>(children.size())));
+	children.insert(children.begin() + index, child);
+}
+
 Layer *Layer::getParent() const {
 	return parent;
 }

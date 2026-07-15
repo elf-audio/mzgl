@@ -56,6 +56,14 @@ public:
 	void sendToFront(Layer *child = nullptr);
 	void sendToBack(Layer *child = nullptr);
 
+	// draw-order introspection/repair (e.g. restoring a child's position
+	// after a temporary sendToFront). Returns -1 if not a child.
+	[[nodiscard]] int indexOfChild(const Layer *child) const;
+	// moves child to the given index, clamped to the valid range; no-op if
+	// child isn't ours. Must not be called while iterating children (i.e.
+	// not from within draw/touch traversal of this layer's subtree).
+	void moveChildToIndex(Layer *child, int index);
+
 	bool isInFront() const;
 	// override for when ui needs to be rebuilt
 	virtual void doLayout() {}
