@@ -82,12 +82,23 @@ static void sokolFons__renderUpdate(void *userPtr, int *rect, const unsigned cha
 	gl->dirty = true;
 }
 
+static void sokolFons__flushPendingAtlasUpdate(sokolFONScontext *sfons) {
+	Graphics &g = *sfons->g;
+	if (sfons->dirty && sfons->lastFrameNumUpdated != g.getFrameNum() && sg_isvalid()) {
+		sfons->lastFrameNumUpdated = g.getFrameNum();
+		sfons->dirty			   = false;
+
+		sg_image_data imgData		= {};
+		imgData.subimage[0][0].ptr	= sfons->data;
+		imgData.subimage[0][0].size = (size_t) (sfons->width * sfons->height);
+		sg_update_image(sfons->tex, &imgData);
+	}
+}
+
 // Fallback: one pooled VBO per text run (the pre-append behaviour). Used only
 // if the append buffer would overflow this frame.
-static void sokolFons__renderDrawPooled(sokolFONScontext *sfons,
-										const float *verts,
-										const float *tcoords,
-										int nverts) {
+static void
+	sokolFons__renderDrawPooled(sokolFONScontext *sfons, const float *verts, const float *tcoords, int nverts) {
 	Graphics &g = *sfons->g;
 	std::vector<glm::vec2> v;
 	v.reserve(nverts);
@@ -121,15 +132,7 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 	sokolFONScontext *sfons = (sokolFONScontext *) userPtr;
 	Graphics &g				= *sfons->g;
 
-	if (sfons->dirty && sfons->lastFrameNumUpdated != g.getFrameNum()) {
-		sfons->lastFrameNumUpdated = g.getFrameNum();
-		sfons->dirty			   = false;
-
-		sg_image_data imgData		= {};
-		imgData.subimage[0][0].ptr	= sfons->data;
-		imgData.subimage[0][0].size = (size_t) (sfons->width * sfons->height);
-		sg_update_image(sfons->tex, &imgData);
-	}
+	sokolFons__flushPendingAtlasUpdate(sfons);
 
 	sfons->texture->bind();
 
@@ -175,11 +178,11 @@ static void sokolFons__renderDraw(void *userPtr, const float *verts, const float
 	auto *api = static_cast<SokolAPI *>(&g.getAPI());
 	shader->getPipeline(attrs, false, SG_PRIMITIVETYPE_TRIANGLES)->apply();
 
-	sg_bindings bindings		  = {};
-	bindings.vertex_buffers[0]	  = sfons->appendBuf;
+	sg_bindings bindings			  = {};
+	bindings.vertex_buffers[0]		  = sfons->appendBuf;
 	bindings.vertex_buffer_offsets[0] = byteOffset;
-	bindings.fs.images[0]		  = api->getBoundTexture();
-	bindings.fs.samplers[0]		  = api->getSampler();
+	bindings.fs.images[0]			  = api->getBoundTexture();
+	bindings.fs.samplers[0]			  = api->getSampler();
 	sg_apply_bindings(bindings);
 	shader->applyUniforms();
 	sg_draw(0, nverts, 1);
