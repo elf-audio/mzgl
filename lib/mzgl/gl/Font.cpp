@@ -178,6 +178,7 @@ TextureRef Font::getAtlasTexture(Graphics &g) {
 	return Texture::create(g, sg->tex.id, sg->width, sg->height);
 #elif defined(MZGL_METAL)
 	metalFONScontext *mtl = (metalFONScontext *) (fs->params.userPtr);
+	metalFons__flushPendingAtlasUpdate(mtl);
 	return Texture::create(g, mtl->textureId, mtl->width, mtl->height);
 #else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
