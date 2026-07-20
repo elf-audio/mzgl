@@ -65,16 +65,21 @@ static void metalFons__renderUpdate(void *userPtr, int *rect, const unsigned cha
 	ctx->dirty			  = true;
 }
 
+static void metalFons__flushPendingAtlasUpdate(metalFONScontext *ctx) {
+	Graphics &g = *ctx->g;
+	if (ctx->dirty && ctx->lastFrameNumUpdated != g.getFrameNum() && ctx->texture != nullptr) {
+		ctx->lastFrameNumUpdated = g.getFrameNum();
+		ctx->dirty				 = false;
+		static_cast<MetalTexture *>(ctx->texture.get())->updateData(ctx->data);
+	}
+}
+
 static void metalFons__renderDraw(void *userPtr, const float *verts, const float *tcoords, int nverts) {
 	metalFONScontext *ctx = (metalFONScontext *) userPtr;
 	Graphics &g			  = *ctx->g;
 	if (ctx->texture == nullptr) return;
 
-	if (ctx->dirty && ctx->lastFrameNumUpdated != g.getFrameNum()) {
-		ctx->lastFrameNumUpdated = g.getFrameNum();
-		ctx->dirty				 = false;
-		static_cast<MetalTexture *>(ctx->texture.get())->updateData(ctx->data);
-	}
+	metalFons__flushPendingAtlasUpdate(ctx);
 
 	ctx->texture->bind();
 

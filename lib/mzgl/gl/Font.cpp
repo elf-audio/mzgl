@@ -174,9 +174,11 @@ bool Font::load(Graphics &g, string path, float size) {
 TextureRef Font::getAtlasTexture(Graphics &g) {
 #if defined(MZGL_SOKOL)
 	sokolFONScontext *sg = (sokolFONScontext *) (fs->params.userPtr);
+	sokolFons__flushPendingAtlasUpdate(sg);
 	return Texture::create(g, sg->tex.id, sg->width, sg->height);
 #elif defined(MZGL_METAL)
 	metalFONScontext *mtl = (metalFONScontext *) (fs->params.userPtr);
+	metalFons__flushPendingAtlasUpdate(mtl);
 	return Texture::create(g, mtl->textureId, mtl->width, mtl->height);
 #else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
