@@ -477,10 +477,30 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 #elif defined(__APPLE__)
 
 	if (appBundleId.empty()) {
-		NSString *a	  = [[NSBundle mainBundle] resourcePath];
-		std::string s = [a UTF8String];
-		s += "/data/" + path;
-		return s;
+		// Resolved once. Normally the bundle's own data/ folder, but an app
+		// extension (.appex) that doesn't ship its own data/ uses its host
+		// app's copy instead - the appex lives inside the app bundle
+		// (<app>/PlugIns/<name>.appex), which the extension process can read.
+		// This lets an AUv3 share the app's data/ rather than bundling a
+		// duplicate.
+		static const std::string dataRoot = [] {
+			NSBundle *bundle   = [NSBundle mainBundle];
+			const fs::path own = fs::path {[[bundle resourcePath] UTF8String]} / "data";
+			if (![[bundle bundlePath] hasSuffix:@".appex"] || fs::exists(own)) {
+				return own.string();
+			}
+			// <app>/PlugIns/<name>.appex -> <app> on iOS, <app>/Contents on mac
+			const fs::path appRoot =
+				fs::path {[[bundle bundlePath] UTF8String]}.parent_path().parent_path();
+			for (const auto &candidate: {appRoot / "data", appRoot / "Resources" / "data"}) {
+				if (fs::exists(candidate)) {
+					return candidate.string();
+				}
+			}
+			Log::e() << "dataPath(): appex has no data/ and none found in host app bundle";
+			return own.string();
+		}();
+		return dataRoot + "/" + path;
 	} else {
 		Log::e() << "Going for bundle" << appBundleId;
 		NSBundle *pBundle = [NSBundle
