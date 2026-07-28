@@ -178,14 +178,24 @@ int nsEventToKey(NSEvent *evt) {
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 
+// with a transparent titlebar + full-size content view this view extends
+// under the titlebar - clicks there should only drag the window, never
+// reach the app. (drag/up events with no preceding down are ignored by
+// the layer system, so only downs need filtering)
+static BOOL eventIsInTitleBar(NSEvent *event) {
+	return event.locationInWindow.y > NSMaxY(event.window.contentLayoutRect);
+}
+
 /// ----------------
 - (void)mouseDown:(NSEvent *)event {
+	if (eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)rightMouseDown:(NSEvent *)event {
+	if (eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, RightMouseButton); });
@@ -193,6 +203,7 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)otherMouseDown:(NSEvent *)event {
+	if (eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, MiddleMouseButton); });
