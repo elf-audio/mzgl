@@ -64,6 +64,10 @@ public:
 
 	std::size_t size() const;
 
+	// how many of size()'s entries are behind the current position,
+	// i.e. how many times you can press undo right now
+	std::size_t getUndoableCount() const;
+
 	// Memory tracking API
 	size_t getMemoryUsage() const;
 	size_t getMemoryLimit() const;
@@ -72,7 +76,8 @@ public:
 	/**
 	 * You can group multiple commits by sandwiching between
 	 * beginGroup() and endGroup() - so all the commits in between
-	 * act as a single undo-redo step.
+	 * act as a single undo-redo step. Groups nest: only the outermost
+	 * begin/end pair commits the group.
 	 */
 	void beginGroup();
 	void endGroup();
@@ -90,6 +95,7 @@ public:
 
 private:
 	UndoableRef undoGroup	 = nullptr;
+	int groupDepth			 = 0;
 	UndoableRef gestureGroup = nullptr;
 	std::deque<UndoableRef>::iterator undoPos;
 	std::deque<UndoableRef> undoStack;

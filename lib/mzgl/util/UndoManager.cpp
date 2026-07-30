@@ -44,6 +44,11 @@ std::size_t UndoManager::size() const {
 	return undoStack.size();
 }
 
+std::size_t UndoManager::getUndoableCount() const {
+	return static_cast<std::size_t>(
+		std::distance(undoStack.cbegin(), static_cast<std::deque<UndoableRef>::const_iterator>(undoPos)));
+}
+
 void UndoManager::commit(std::function<void()> &&redo, std::function<void()> &&undo, size_t memorySize) {
 	UndoableRef item = std::make_shared<LambdaUndoable>(std::move(redo), std::move(undo), memorySize);
 	commit(item);
@@ -101,14 +106,21 @@ private:
 };
 
 void UndoManager::beginGroup() {
-	mzAssert(undoGroup == nullptr);
-	undoGroup = std::make_shared<GroupUndoable>();
+	// groups nest - only the outermost begin/end pair creates and commits
+	if (groupDepth == 0) {
+		undoGroup = std::make_shared<GroupUndoable>();
+	}
+	groupDepth++;
 }
 
 void UndoManager::endGroup() {
-	auto group = undoGroup;
-	undoGroup  = nullptr;
-	commit(group);
+	mzAssert(groupDepth > 0);
+	groupDepth--;
+	if (groupDepth == 0) {
+		auto group = undoGroup;
+		undoGroup  = nullptr;
+		commit(group);
+	}
 }
 
 void UndoManager::beginGesture() {
