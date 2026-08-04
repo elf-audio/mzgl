@@ -57,6 +57,10 @@
 - (void)viewWillTransitionToSize:(CGSize)size
 	   withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
 	[super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+	[self notifySizeChanged:size];
+}
+
+- (void)notifySizeChanged:(CGSize)size {
 	sizeChangeTriggered = YES;
 	lastSize			= size;
 }

@@ -32,6 +32,7 @@ typedef MZGLKitViewController MZRootViewController;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 - (EventsView *)getView;
 - (void) deleteCppObjects;
+- (void)notifySizeChanged:(CGSize)size;
 @end
 
 typedef MZMetaliOSViewController MZRootViewController;

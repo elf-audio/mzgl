@@ -108,6 +108,10 @@ EAGLContext *context = nil;
 // viewDidLayoutSubviews gets called before doing the work. Problem is
 // viewDidLayoutSubviews gets called a lot so we need to gate it.
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id)coordinator {
+	[self notifySizeChanged:size];
+}
+
+- (void)notifySizeChanged:(CGSize)size {
 	sizeChangeTriggered = YES;
 	lastSize			= size;
 }
