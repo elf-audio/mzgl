@@ -46,7 +46,13 @@ bool mzAssertEnabled();
 
 class MZScopedAssertDisable {
 public:
-	MZScopedAssertDisable() { mzEnableAssert(false); }
+	MZScopedAssertDisable()
+		: wasEnabled(mzAssertEnabled()) {
+		mzEnableAssert(false);
+	}
 
-	~MZScopedAssertDisable() { mzEnableAssert(true); }
+	~MZScopedAssertDisable() { mzEnableAssert(wasEnabled); }
+
+private:
+	bool wasEnabled;
 };
