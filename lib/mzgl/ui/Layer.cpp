@@ -11,6 +11,46 @@
 #include "log.h"
 #include "mzAssert.h"
 
+#ifndef MZGL_LAYER_HIERARCHY_CHECKS
+#define MZGL_LAYER_HIERARCHY_CHECKS 0
+#endif
+
+#if MZGL_LAYER_HIERARCHY_CHECKS
+#include <atomic>
+#include <thread>
+#include <typeinfo>
+
+static std::atomic<size_t> drawThreadHash {0};
+static std::atomic<const Layer *> drawnRoot {nullptr};
+
+static std::string layerIdentity(const Layer *l) {
+	if (l == nullptr) return "null";
+	if (!l->name.empty()) return l->name;
+	return typeid(*l).name();
+}
+
+static void reportHierarchyError(const std::string &what, const std::string &detail) {
+	static std::atomic<int> reportsLeft {20};
+	if (reportsLeft.fetch_sub(1) <= 0) return;
+	Log::e() << "Layer hierarchy error: " << what << " (" << detail << ")";
+	mzAssert(false, "Layer hierarchy error: " + what + " (" + detail + ")");
+}
+
+static void checkMutatedOnDrawThread(const char *op, const Layer *parent, const Layer *child) {
+	auto drawThread = drawThreadHash.load(std::memory_order_relaxed);
+	if (drawThread == 0) return;
+	if (drawThread == std::hash<std::thread::id> {}(std::this_thread::get_id())) return;
+	const Layer *top = parent;
+	while (top->getParent() != nullptr)
+		top = top->getParent();
+	if (top != drawnRoot.load(std::memory_order_relaxed)) return;
+	reportHierarchyError(std::string(op) + " off draw thread",
+						 layerIdentity(parent) + " / " + layerIdentity(child));
+}
+#else
+static inline void checkMutatedOnDrawThread(const char *, const Layer *, const Layer *) {}
+#endif
+
 #ifdef DEBUG
 void Layer::assertNotIterating(const char *operation) {
 	if (iteratingDepth > 0) {
@@ -107,8 +147,15 @@ void Layer::__draw() {
 #ifdef DEBUG
 			ScopedIterationGuard guard(*this);
 #endif
-			for (auto *c: children)
+			for (auto *c: children) {
+#if MZGL_LAYER_HIERARCHY_CHECKS
+				if (c == nullptr) {
+					reportHierarchyError("null child in draw", layerIdentity(this));
+					continue;
+				}
+#endif
 				c->drawSelfAndChildren();
+			}
 		}
 		g.popMatrix();
 	} else {
@@ -117,13 +164,27 @@ void Layer::__draw() {
 #ifdef DEBUG
 			ScopedIterationGuard guard(*this);
 #endif
-			for (auto *c: children)
+			for (auto *c: children) {
+#if MZGL_LAYER_HIERARCHY_CHECKS
+				if (c == nullptr) {
+					reportHierarchyError("null child in draw", layerIdentity(this));
+					continue;
+				}
+#endif
 				c->drawSelfAndChildren();
+			}
 		}
 	}
 }
 
 void Layer::drawSelfAndChildren() {
+#if MZGL_LAYER_HIERARCHY_CHECKS
+	if (parent == nullptr) {
+		drawThreadHash.store(std::hash<std::thread::id> {}(std::this_thread::get_id()),
+							 std::memory_order_relaxed);
+		drawnRoot.store(this, std::memory_order_relaxed);
+	}
+#endif
 	if (!visible) return;
 
 	if (clipToBounds) {
@@ -183,6 +244,8 @@ bool Layer::getRectRelativeTo(const Layer *l, Rectf &r) const {
 Layer *Layer::addChild(Layer *layer) {
 	mzAssert(layer->getParent() == nullptr, "Layer already has a parent");
 
+	checkMutatedOnDrawThread("addChild", this, layer);
+
 	layer->parent = this;
 
 	mzAssert(layer != this, "Can't add a layer to itself");
@@ -210,6 +273,7 @@ bool Layer::removeChild(Layer *layer) {
 #ifdef DEBUG
 //	assertNotIterating("removeChild");
 #endif
+	checkMutatedOnDrawThread("removeChild", this, layer);
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i] == layer) {
 			children[i]->parent = nullptr;
