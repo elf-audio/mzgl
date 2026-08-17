@@ -55,6 +55,13 @@ using namespace std;
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
+#	if !MZGL_IOS
+	glView.paused	= YES;
+	glView.delegate = nil;
+	[glView removeFromSuperview];
+	glView = nil;
+	eventDispatcher.reset();
+#	endif
 	app.reset();
 	plugin.reset();
 	g.reset();
@@ -111,6 +118,19 @@ using namespace std;
 	[self tryToResize];
 }
 
+#	if !MZGL_IOS
+- (void)viewDidLayout {
+	[super viewDidLayout];
+	if (glView == nil || app == nullptr) {
+		return;
+	}
+	glView.frame = self.view.bounds;
+	g->width	 = self.view.bounds.size.width * 2;
+	g->height	 = self.view.bounds.size.height * 2;
+	eventDispatcher->resized();
+}
+#	endif
+
 - (void)tryToResize {
 	if (self.view.window != nil && glView != nil) {
 		glView.frame = self.view.frame;
@@ -157,6 +177,7 @@ using namespace std;
 #	else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 #	endif
 		glView.frame = self.view.frame;
 #	if !MZGL_IOS
