@@ -137,7 +137,13 @@ MetalAPI::MetalAPI(Graphics &g)
 	pimpl->queue  = [pimpl->device newCommandQueue];
 }
 
-MetalAPI::~MetalAPI() = default;
+MetalAPI::~MetalAPI() {
+	if (pimpl && pimpl->queue) {
+		id<MTLCommandBuffer> cb = [pimpl->queue commandBuffer];
+		[cb commit];
+		[cb waitUntilCompleted];
+	}
+}
 
 void MetalAPI::init() {
 	loadDefaultShaders();

@@ -81,8 +81,10 @@ struct Blocks {
 #if !TARGET_OS_IOS
 
 - (NSArray<NSNumber *> *)channelCapabilities {
-	NSArray *carray = @[ @2, @2 ];
-	return carray;
+	if (isInstrument) {
+		return @[ @0, @2 ];
+	}
+	return @[ @2, @2 ];
 }
 #endif
 // TODO: Ensure lifecycle of Effect is same as AudioUnit
@@ -607,7 +609,7 @@ struct Blocks {
 // See the discussion of renderBlock.
 // Partially bridged to the v2 property kAudioUnitProperty_InPlaceProcessing, the v3 property is not settable.
 - (BOOL)canProcessInPlace {
-	return YES;
+	return !isInstrument;
 }
 
 #pragma mark - AUAudioUnit (AUAudioUnitImplementation)
