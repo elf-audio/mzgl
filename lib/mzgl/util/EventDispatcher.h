@@ -142,9 +142,16 @@ public:
 	void setup() {
 		app->setup();
 		hasCalledSetup = true;
+		if (afterSetup) {
+			auto fn = afterSetup;
+			afterSetup = nullptr;
+			fn();
+		}
 	}
 
 	bool hasSetup() { return hasCalledSetup; }
+
+	std::function<void()> afterSetup;
 
 	void updateDeprecated() {
 		app->updateDeprecated();

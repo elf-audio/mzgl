@@ -37,7 +37,7 @@
 }
 
 - (BOOL)mouseDownCanMoveWindow {
-	return YES;
+	return !_embeddedInHost;
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -164,12 +164,15 @@ int nsEventToKey(NSEvent *evt) {
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyUp(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
-- (vec2)transformMouse:(NSEvent *)event {
-	auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-	float pixelScale	= 2; //eventDispatcher->app->g.pixelScale;
-	float x				= event.locationInWindow.x * pixelScale;
-	float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+- (vec2)pixelPointFromWindowPoint:(NSPoint)windowPoint {
+	NSPoint local	 = [self convertPoint:windowPoint fromView:nil];
+	float pixelScale = self.window != nil ? self.window.backingScaleFactor : 1.f;
+	float x			 = local.x * pixelScale;
+	float y			 = (self.bounds.size.height - local.y) * pixelScale;
 	return vec2(x, y);
+}
+- (vec2)transformMouse:(NSEvent *)event {
+	return [self pixelPointFromWindowPoint:event.locationInWindow];
 }
 - (void)mouseMoved:(NSEvent *)event {
 	auto mouse = [self transformMouse:event];
@@ -188,14 +191,14 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 
 /// ----------------
 - (void)mouseDown:(NSEvent *)event {
-	if (eventIsInTitleBar(event)) return;
+	if (!_embeddedInHost && eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)rightMouseDown:(NSEvent *)event {
-	if (eventIsInTitleBar(event)) return;
+	if (!_embeddedInHost && eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, RightMouseButton); });
@@ -203,7 +206,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (void)otherMouseDown:(NSEvent *)event {
-	if (eventIsInTitleBar(event)) return;
+	if (!_embeddedInHost && eventIsInTitleBar(event)) return;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, MiddleMouseButton); });
@@ -279,17 +282,13 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	NSEventDispatcher::instance().dispatch(event, self);
 
 	if (event.phase == NSEventPhaseChanged) {
-		float zoom			= event.magnification;
-		float pixelScale	= eventDispatcher->app->g.pixelScale;
-		auto titleBarHeight = event.window.frame.size.height - event.window.contentView.frame.size.height;
-
-		float x = event.locationInWindow.x * pixelScale;
-		float y = (event.window.frame.size.height - event.locationInWindow.y - titleBarHeight) * pixelScale;
+		float zoom = event.magnification;
+		auto p	   = [self pixelPointFromWindowPoint:event.locationInWindow];
 
 		auto evtDispatcher = eventDispatcher;
 
 		eventDispatcher->app->main.runOnMainThread(
-			true, [x, y, zoom, evtDispatcher]() { evtDispatcher->mouseZoomed(x, y, zoom); });
+			true, [p, zoom, evtDispatcher]() { evtDispatcher->mouseZoomed(p.x, p.y, zoom); });
 	}
 }
 
@@ -333,29 +332,17 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (void)draggingExited:(nullable id<NSDraggingInfo>)sender {
-	auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height
-						  - sender.draggingDestinationWindow.contentView.frame.size.height;
-	float pixelScale = eventDispatcher->app->g.pixelScale;
-
-	float x = sender.draggingLocation.x * pixelScale;
-	float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)
-			  * pixelScale;
-
-	eventDispatcher->app->main.runOnMainThread(true, [self, x, y]() { eventDispatcher->fileDragExited(x, y, 0); });
+	auto p = [self pixelPointFromWindowPoint:sender.draggingLocation];
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [self, p]() { eventDispatcher->fileDragExited(p.x, p.y, 0); });
 }
 
 - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
 	if (sender.draggingSequenceNumber == acceptedDraggingSequenceNo) {
-		auto titleBarHeight = sender.draggingDestinationWindow.frame.size.height
-							  - sender.draggingDestinationWindow.contentView.frame.size.height;
-		float pixelScale = eventDispatcher->app->g.pixelScale;
-
-		float x = sender.draggingLocation.x * pixelScale;
-		float y = (sender.draggingDestinationWindow.frame.size.height - sender.draggingLocation.y - titleBarHeight)
-				  * pixelScale;
+		auto p		  = [self pixelPointFromWindowPoint:sender.draggingLocation];
 		auto numItems = sender.numberOfValidItemsForDrop;
 		eventDispatcher->app->main.runOnMainThread(
-			true, [self, x, y, numItems]() { eventDispatcher->fileDragUpdate(x, y, 0, (int) numItems); });
+			true, [self, p, numItems]() { eventDispatcher->fileDragUpdate(p.x, p.y, 0, (int) numItems); });
 
 		return NSDragOperationCopy;
 	} else {
