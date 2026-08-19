@@ -29,4 +29,10 @@
 // Set to NO when embedded in a plugin host (e.g. Ableton Live) where the host
 // owns keyboard shortcuts and the plugin shouldn't steal them.
 @property (nonatomic, assign) BOOL handlesKeyboard;
+
+// YES when this view is embedded inside a plugin host's window (AUv3 / VST3).
+// In that case the view must not act as a window-drag region and must not
+// filter clicks against the host window's title bar - both of those behaviours
+// only make sense for the standalone app's own borderless window.
+@property (nonatomic, assign) BOOL embeddedInHost;
 @end
