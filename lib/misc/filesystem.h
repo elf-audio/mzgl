@@ -168,6 +168,10 @@ namespace winfs {
 
 		friend bool operator==(const path &a, const path &b) { return a.inner == b.inner; }
 		friend bool operator!=(const path &a, const path &b) { return a.inner != b.inner; }
+		friend bool operator<(const path &a, const path &b) { return a.inner < b.inner; }
+		friend bool operator<=(const path &a, const path &b) { return a.inner <= b.inner; }
+		friend bool operator>(const path &a, const path &b) { return a.inner > b.inner; }
+		friend bool operator>=(const path &a, const path &b) { return a.inner >= b.inner; }
 		friend bool operator==(const path &lhs, const char *rhs) { return lhs.inner == fromUtf8(rhs); }
 		friend bool operator==(const char *lhs, const path &rhs) { return fromUtf8(lhs) == rhs.inner; }
 		friend bool operator==(const path &lhs, const std::string &rhs) { return lhs.inner == fromUtf8(rhs); }
