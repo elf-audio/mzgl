@@ -10,8 +10,19 @@
 #include "mzAssert.h"
 #include "util.h"
 void OpenGLShader::begin() {
+	reloadIfLost();
 	g.currShader = this;
 	glUseProgram(shaderProgram);
+}
+
+void OpenGLShader::reloadIfLost() {
+	if (shaderProgram != 0 || reloadFailed || vertSource.empty()) return;
+	loadFromString(vertSource, fragSource);
+	if (shaderProgram == 0) {
+		// don't retry every frame if the source genuinely doesn't compile
+		reloadFailed = true;
+		Log::e() << "OpenGLShader: failed to rebuild shader after context loss";
+	}
 }
 void OpenGLShader::end() {
 	g.currShader = nullptr;
@@ -109,6 +120,10 @@ void OpenGLShader::uniform(const std::string &name, const std::vector<glm::mat4>
 }
 
 void OpenGLShader::loadFromString(std::string vertCode, std::string fragCode) {
+	vertSource	 = vertCode;
+	fragSource	 = fragCode;
+	reloadFailed = false;
+
 	if (vertCode.find("#version") == -1) {
 		vertCode = OpenGLShader::getVersionForPlatform(true) + vertCode;
 	}

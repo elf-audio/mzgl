@@ -65,4 +65,12 @@ private:
 
 	uint32_t mvpLocation;
 	uint32_t colorLocation;
+
+	// The shader source is kept so the program can be rebuilt transparently in
+	// begin() after the GL context has been lost (Android screen lock tears the
+	// context down and Graphics::clearUpResources() zeroes shaderProgram).
+	std::string vertSource;
+	std::string fragSource;
+	bool reloadFailed = false;
+	void reloadIfLost();
 };

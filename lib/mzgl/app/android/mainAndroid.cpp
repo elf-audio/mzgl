@@ -12,6 +12,8 @@
 
 #include "androidKeyCodes.h"
 
+#include <mutex>
+
 Graphics graphics;
 
 std::shared_ptr<EventDispatcher> eventDispatcher = nullptr;
@@ -213,7 +215,16 @@ public:
 		auto *_engine = static_cast<RenderEngine *>(appPtr->userData);
 		_engine->handleCmd(cmd);
 	}
+
+	// False until this activity generation owns the shared globals
+	// (app/eventDispatcher/engine/graphics). While false, lifecycle commands
+	// and input must not be forwarded into the app - the globals still belong
+	// to the previous activity instance. The glue still acks lifecycle state
+	// changes internally, so the Java main thread is never blocked by this.
+	bool generationActive = false;
+
 	void handleCmd(int32_t cmd) {
+		if (!generationActive) return;
 		if (!eventDispatcher || !eventDispatcher->app) return;
 		switch (cmd) {
 			case APP_CMD_INIT_WINDOW:
@@ -229,7 +240,11 @@ public:
 				eventDispatcher->androidDrawLoading();
 				eglSwapBuffers(display, surface);
 
-				if (clearedUpGLResources) {
+				// Only forward resized()/willEnterForeground() into the app once
+				// setup() has actually run (setup is deferred to the first
+				// drawFrame, waiting for window insets) - before that the UI tree
+				// doesn't exist yet and resized() null-derefs in doLayout.
+				if (clearedUpGLResources && firstFrameAlreadyRendered) {
 					eventDispatcher->resized();
 					eventDispatcher->willEnterForeground(); // THIS IS IMPORTANT BUT IT MAKES IT CRASH!!!
 					clearedUpGLResources = false;
@@ -305,6 +320,8 @@ std::shared_ptr<App> androidGetApp() {
  * Return 1 if you handle an event, 0 if you don't.
  */
 static int32_t engine_handle_input(struct android_app *androidApp, AInputEvent *event) {
+	auto *_engine = static_cast<RenderEngine *>(androidApp->userData);
+	if (_engine == nullptr || !_engine->generationActive) return 0;
 	if (!eventDispatcher || !eventDispatcher->app) return 0;
 	// converted from Java in openframeworks android
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
@@ -405,23 +422,79 @@ android_app *getAndroidAppPtr() {
 	return engine->androidApp;
 }
 
-void android_main(android_app *state) {
-	// Reset globals from any previous activity lifecycle
-	eventDispatcher = nullptr;
-	app				= nullptr;
-	engine			= nullptr;
+// Android can create the new NativeActivity (and native_app_glue its
+// android_main thread) before the previous activity instance is destroyed.
+// The app/engine/eventDispatcher/graphics globals belong to exactly one
+// activity generation at a time, so a new android_main must not touch them
+// until the previous one has completely torn down.
+//
+// The wait must NOT block this thread's command processing: Android only
+// destroys the old activity after the new one has resumed, and NativeActivity
+// lifecycle callbacks block the Java main thread until this thread's looper
+// reads the corresponding glue command. A blocking wait here therefore
+// deadlocks (new can't resume -> old never destroyed -> gate never opens).
+// Instead the new generation pumps its looper with generationActive == false
+// (commands/input are acked by the glue but not forwarded into the app) and
+// polls for ownership.
+static std::mutex lifecycleMutex;
+static bool instanceRunning = false;
 
-	engine				= std::make_shared<RenderEngine>(state);
-	state->userData		= engine.get();
+static bool tryAcquireGeneration() {
+	std::lock_guard<std::mutex> lock(lifecycleMutex);
+	if (instanceRunning) return false;
+	instanceRunning = true;
+	return true;
+}
+
+static void releaseGeneration() {
+	std::lock_guard<std::mutex> lock(lifecycleMutex);
+	instanceRunning = false;
+}
+
+void android_main(android_app *state) {
+	auto myEngine		= std::make_shared<RenderEngine>(state);
+	state->userData		= myEngine.get();
 	state->onAppCmd		= RenderEngine::handleCmdStatic;
 	state->onInputEvent = engine_handle_input;
-	app					= instantiateApp(graphics);
-	eventDispatcher		= make_shared<EventDispatcher>(app);
+
+	bool loggedWait = false;
+	while (!tryAcquireGeneration()) {
+		if (!loggedWait) {
+			Log::i() << "android_main: waiting for previous activity instance to finish tearing down";
+			loggedWait = true;
+		}
+		android_poll_source *source = nullptr;
+		ALooper_pollOnce(50, nullptr, nullptr, (void **) &source);
+		if (source != nullptr) source->process(state, source);
+		if (state->destroyRequested) {
+			// this activity was destroyed before the previous generation
+			// finished tearing down - we never owned the globals, so there
+			// is nothing to clean up
+			Log::i() << "android_main: destroyed while waiting for previous generation";
+			return;
+		}
+	}
+
+	Log::i() << "android_main: starting activity generation";
+	mzAssert(app == nullptr && engine == nullptr && eventDispatcher == nullptr,
+			 "previous activity generation did not clean up");
+
+	engine			= myEngine;
+	app				= instantiateApp(graphics);
+	eventDispatcher = make_shared<EventDispatcher>(app);
+
+	myEngine->generationActive = true;
+	// if the window/focus commands arrived while we were waiting for the
+	// previous generation, replay them now that the app exists
+	if (state->window != nullptr) {
+		myEngine->handleCmd(APP_CMD_INIT_WINDOW);
+		myEngine->handleCmd(APP_CMD_GAINED_FOCUS);
+	}
 
 	while (!state->destroyRequested) {
 		android_poll_source *source = nullptr;
 
-		auto result = ALooper_pollOnce(engine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
+		auto result = ALooper_pollOnce(myEngine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
 
 		if (result == ALOOPER_POLL_ERROR) {
 			Log::e() << "ALooper_pollOnce returned an error";
@@ -431,9 +504,25 @@ void android_main(android_app *state) {
 
 		if (source != nullptr) source->process(state, source);
 
-		if (engine->ready()) {
-			engine->drawFrame();
+		if (myEngine->ready()) {
+			myEngine->drawFrame();
 		}
 	}
-	engine->terminateDisplay();
+
+	// Tear down on THIS thread, while this generation's ANativeActivity and
+	// EGL context still exist. Previously the app was destroyed lazily by the
+	// *next* activity's android_main ("reset globals"), which ran the App
+	// destructor on the wrong thread while this thread could still be inside
+	// the render loop - the source of a whole family of teardown crashes
+	// (wrong-thread main queue polling, layer tree deleted mid-iteration,
+	// JNI calls through a freed activity, GL teardown racing GL init).
+	Log::i() << "android_main: tearing down activity generation";
+	myEngine->generationActive = false;
+	eventDispatcher			   = nullptr;
+	app						   = nullptr; // App destructor runs here, on its own thread, GL context still current
+	myEngine->terminateDisplay();
+	engine = nullptr;
+	Log::i() << "android_main: teardown complete";
+
+	releaseGeneration();
 }
