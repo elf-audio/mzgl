@@ -55,6 +55,13 @@ using namespace std;
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
+#	if !MZGL_IOS
+	glView.paused	= YES;
+	glView.delegate = nil;
+	[glView removeFromSuperview];
+	glView = nil;
+	eventDispatcher.reset();
+#	endif
 	app.reset();
 	plugin.reset();
 	g.reset();
@@ -111,6 +118,33 @@ using namespace std;
 	[self tryToResize];
 }
 
+#	if !MZGL_IOS
+- (CGFloat)currentBackingScale {
+	NSWindow *window = self.view.window;
+	if (window != nil) {
+		return window.backingScaleFactor;
+	}
+	NSScreen *screen = NSScreen.mainScreen;
+	if (screen != nil) {
+		return screen.backingScaleFactor;
+	}
+	return 1.0;
+}
+
+- (void)viewDidLayout {
+	[super viewDidLayout];
+	if (glView == nil || app == nullptr) {
+		return;
+	}
+	glView.frame  = self.view.bounds;
+	CGFloat scale = [self currentBackingScale];
+	g->pixelScale = scale;
+	g->width	  = self.view.bounds.size.width * scale;
+	g->height	  = self.view.bounds.size.height * scale;
+	eventDispatcher->resized();
+}
+#	endif
+
 - (void)tryToResize {
 	if (self.view.window != nil && glView != nil) {
 		glView.frame = self.view.frame;
@@ -157,11 +191,15 @@ using namespace std;
 #	else
 		eventDispatcher = std::make_shared<EventDispatcher>(app);
 		glView			= [[EventsView alloc] initWithFrame:self.view.frame eventDispatcher:eventDispatcher];
+		glView.embeddedInHost	= YES;
+		glView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 #	endif
 		glView.frame = self.view.frame;
 #	if !MZGL_IOS
-		g->width  = self.view.frame.size.width * 2;
-		g->height = self.view.frame.size.height * 2;
+		CGFloat scale = [self currentBackingScale];
+		g->pixelScale = scale;
+		g->width	  = self.view.frame.size.width * scale;
+		g->height	  = self.view.frame.size.height * scale;
 		eventDispatcher->resized();
 #	endif
 		[self addGLView];
