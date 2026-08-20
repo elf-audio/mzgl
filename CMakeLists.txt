@@ -551,14 +551,21 @@ endif()
 
 if(ANDROID)
 
-  include_directories(${ANDROID_NDK}/sources/android/native_app_glue/)
+  # Vendored copy of the NDK native_app_glue: identical to the r27.0 original
+  # except android_main is NOT declared [[noreturn]] (see the note in the
+  # vendored header - the attribute turns returning from android_main into
+  # undefined behaviour and deletes the glue's own teardown code). Upstream
+  # removed the attribute in r27c/r28+, so once the NDK is bumped past r27.0
+  # this vendored copy can be deleted and these paths pointed back at
+  # ${ANDROID_NDK}/sources/android/native_app_glue/.
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/lib/mzgl/app/android/native_app_glue/)
 
   # is this line needed??
   set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
 
   add_library(
     native_app_glue STATIC
-    ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+    ${CMAKE_CURRENT_LIST_DIR}/lib/mzgl/app/android/native_app_glue/android_native_app_glue.c)
 
   # find_package (oboe REQUIRED CONFIG)
 
