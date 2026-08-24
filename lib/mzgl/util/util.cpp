@@ -432,6 +432,34 @@ static fs::path getVSTBundlePath() {
 #	endif
 #endif
 
+#if defined(__linux__) && !defined(__ANDROID__)
+// Same reasoning as windowsExeDataRoot() below: "../data/" off the process CWD
+// only works when the binary sits directly inside <install>/bin. The CMake build
+// puts it in build/<platform>/bin, several levels below the data folder, so every
+// asset load failed and it ended up segfaulting deep inside SVG parsing. Resolve
+// the folder once relative to the executable instead, walking up until a data/
+// turns up, so it also survives any later CWD change from a file dialog.
+static const std::string &linuxExeDataRoot() {
+	static const std::string root = [] {
+		std::error_code ec;
+		const auto exe = fs::read_symlink("/proc/self/exe", ec);
+		if (!ec) {
+			auto dir = exe.parent_path();
+			// <install>/bin/Koala finds <install>/data one step up,
+			// build/<platform>/bin/Koala finds <repo>/data four steps up.
+			for (int i = 0; i < 6 && !dir.empty(); i++) {
+				const auto candidate = dir / "data";
+				if (fs::is_directory(candidate, ec)) return candidate.string();
+				if (!dir.has_relative_path()) break;
+				dir = dir.parent_path();
+			}
+		}
+		return std::string("../data");
+	}();
+	return root;
+}
+#endif
+
 // TODO: we would have an option for mac to load from its bundle rather than the dataPath (i.e. mac and iOS use same code)
 
 #if defined(_WIN32) && !defined(MZGL_PLUGIN_VST)
@@ -514,10 +542,10 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 			return returnPath;
 		}
 	}
-#elif defined(__RPI)
-	return "../data/" + path;
 #elif defined(_WIN32)
 	return windowsExeDataRoot() + "/" + path;
+#elif defined(__linux__) && !defined(__ANDROID__)
+	return linuxExeDataRoot() + "/" + path;
 #else
 	return "../data/" + path;
 #endif
