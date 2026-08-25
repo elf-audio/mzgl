@@ -178,8 +178,8 @@ static id<MTLDevice> mzglViewDevice() {
 	f.size.height = g.height;
 	self.frame	  = f;
 
-	g.width *= 2;
-	g.height *= 2;
+	g.width *= g.pixelScale;
+	g.height *= g.pixelScale;
 
 	eventDispatcher->app->main.runOnMainThread(true,
 											   [evtDispatcher = eventDispatcher]() { evtDispatcher->resized(); });

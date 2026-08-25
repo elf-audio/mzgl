@@ -81,8 +81,10 @@ struct Blocks {
 #if !TARGET_OS_IOS
 
 - (NSArray<NSNumber *> *)channelCapabilities {
-	NSArray *carray = @[ @2, @2 ];
-	return carray;
+	if (isInstrument) {
+		return @[ @0, @2 ];
+	}
+	return @[ @2, @2 ];
 }
 #endif
 // TODO: Ensure lifecycle of Effect is same as AudioUnit
@@ -497,7 +499,7 @@ struct Blocks {
 		_currentPreset = currentPreset;
 		NSError *err   = nil;
 		if (@available(iOS 13.0, *)) {
-			id state	   = [self presetStateFor:currentPreset error:&err];
+			id state = [self presetStateFor:currentPreset error:&err];
 			if (err) {
 				AULog(@"Got error: %@", err);
 				return;
@@ -606,8 +608,13 @@ struct Blocks {
 // buffer list. The audio unit may process in-place in the input buffers.
 // See the discussion of renderBlock.
 // Partially bridged to the v2 property kAudioUnitProperty_InPlaceProcessing, the v3 property is not settable.
+
 - (BOOL)canProcessInPlace {
+#if TARGET_OS_IOS
 	return YES;
+#else
+	return !isInstrument;
+#endif
 }
 
 #pragma mark - AUAudioUnit (AUAudioUnitImplementation)
