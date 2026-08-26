@@ -8,7 +8,6 @@
 #	include <cstdio>
 #	include <fcntl.h>
 #	include <io.h>
-#	include "mzgl/util/CrashHandler.h"
 
 // When the parent process passes a pipe or file in one of the standard
 // handles (e.g. node's child_process.spawn with stdio:'pipe', or `Koala > log.txt`
@@ -49,24 +48,11 @@ inline void AttachOrAllocConsoleForLogs(bool alloc_if_needed = false) {
 	}
 }
 
-static void dispatchCrash(const mzgl::CrashInfo &info) {
-	const auto &handler = mzgl::getCrashHandler();
-	if (handler) handler(info);
-}
-
-static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *info) {
-	mzgl::CrashInfo ci {};
-	ci.kind				= mzgl::CrashKind::SEH;
-	ci.sehCode			= info->ExceptionRecord->ExceptionCode;
-	ci.exceptionAddress = info->ExceptionRecord->ExceptionAddress;
-	ci.sehPointers		= info;
-	ci.description		= mzgl::sehCodeToString(ci.sehCode);
-	dispatchCrash(ci);
-	return EXCEPTION_EXECUTE_HANDLER;
-}
+// Crash handling note: mzgl no longer installs an unhandled-exception filter.
+// Apps that want crash reporting install their own handlers (Koala uses the
+// elf-audio/crash library, which registers a SEH filter and terminate handler).
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
-	SetUnhandledExceptionFilter(unhandledExceptionFilter);
 	// Attach to the terminal if one exists. No console is created when launched from Explorer.
 	AttachOrAllocConsoleForLogs(false);
 
@@ -110,24 +96,15 @@ int main(int argc, char *argv[]) {
 		GLFWAppRunner app;
 		app.run(argc, argv);
 #endif
-#ifdef _WIN32
 	} catch (const std::exception &e) {
-		mzgl::CrashInfo ci {};
-		ci.kind		   = mzgl::CrashKind::CppException;
-		ci.description = e.what();
-		dispatchCrash(ci);
-	} catch (...) {
-		mzgl::CrashInfo ci {};
-		ci.kind		   = mzgl::CrashKind::UnknownException;
-		ci.description = "unknown";
-		dispatchCrash(ci);
-	}
-#else
-	} catch (const std::exception &e) {
+		// Log, then rethrow: the exception leaves main uncaught, so
+		// std::terminate runs and any installed crash reporter (e.g. the crash
+		// library's terminate handler) records it with type and message.
 		fprintf(stderr, "Unhandled exception: %s\n", e.what());
+		throw;
 	} catch (...) {
 		fprintf(stderr, "Unhandled exception (unknown)\n");
+		throw;
 	}
-#endif
 	return 0;
 }
