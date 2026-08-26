@@ -127,7 +127,7 @@ bool MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn,
 			fn();
 
 			if (logToLockfile) {
-				writeToLockFile(prepend + "6");
+				writeToLockFile(prepend + "699");
 			}
 
 			done.store(true, std::memory_order_release);
