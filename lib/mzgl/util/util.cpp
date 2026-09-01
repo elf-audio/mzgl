@@ -21,7 +21,7 @@
 #include <chrono>
 #include <fstream>
 
-#include <charconv>
+#include <cerrno>
 #include <type_traits>
 
 #include "mzgl_platform.h"
@@ -79,52 +79,47 @@
 
 #include "pathUtil.h"
 
-// std::from_chars<float> where the standard library has it (gcc 11+, msvc),
-// otherwise strtof_l/strtod_l with a fixed "C" locale (older libc++ on
-// apple/android lacks floating-point from_chars; an istringstream fallback is
-// not faithful to stof - it rejects "nan" and trips over trailing text like
-// "7.25px"). Both paths ignore the global C locale, unlike std::stof/strtod.
-#if !(defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L)
+// strtof_l/strtod_l with a fixed "C" locale: exactly the semantics stof/stod
+// are defined in terms of (whitespace, '+', nan/inf, partial parses, ERANGE on
+// overflow), minus the dependence on the global C locale - and the same one
+// implementation on every platform.
+#ifdef _WIN32
+#	include <locale.h>
+
+static _locale_t cNumericLocale() {
+	static _locale_t loc = _create_locale(LC_ALL, "C");
+	return loc;
+}
+#	define mzgl_strtof_l _strtof_l
+#	define mzgl_strtod_l _strtod_l
+#else
 #	include <locale.h>
 #	ifdef __APPLE__
 #		include <xlocale.h>
 #	endif
-#	include <cerrno>
 
 static locale_t cNumericLocale() {
 	static locale_t loc = newlocale(LC_ALL_MASK, "C", (locale_t) nullptr);
 	return loc;
 }
+#	define mzgl_strtof_l strtof_l
+#	define mzgl_strtod_l strtod_l
 #endif
 
 template <typename T>
 static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
-#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
-	const char *b = s.data();
-	const char *e = s.data() + s.size();
-	while (b < e && (*b == ' ' || *b == '\t' || *b == '\n' || *b == '\r')) {
-		++b;
-	}
-	if (b < e && *b == '+') ++b; // from_chars rejects a leading '+', stof allowed it
-	T value		= {};
-	auto result = std::from_chars(b, e, value);
-	if (result.ec != std::errc {} || result.ptr == b) return false;
-	outValue = value;
-	return true;
-#else
 	char *end = nullptr;
 	errno	  = 0;
 	T value;
 	if constexpr (std::is_same_v<T, float>) {
-		value = strtof_l(s.c_str(), &end, cNumericLocale());
+		value = mzgl_strtof_l(s.c_str(), &end, cNumericLocale());
 	} else {
-		value = strtod_l(s.c_str(), &end, cNumericLocale());
+		value = mzgl_strtod_l(s.c_str(), &end, cNumericLocale());
 	}
 	// no number consumed, or out of range (where stof threw out_of_range)
 	if (end == s.c_str() || errno == ERANGE) return false;
 	outValue = value;
 	return true;
-#endif
 }
 
 bool tryParseFloat(const std::string &s, float &outValue) {
