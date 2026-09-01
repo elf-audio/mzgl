@@ -21,6 +21,10 @@
 #include <chrono>
 #include <fstream>
 
+#include <charconv>
+#include <sstream>
+#include <locale>
+
 #include "mzgl_platform.h"
 #include "log.h"
 #include "filesystem.h"
@@ -75,6 +79,55 @@
 #endif
 
 #include "pathUtil.h"
+
+// std::from_chars<float> where the standard library has it (gcc 11+, msvc),
+// otherwise an istringstream imbued with the classic locale (older libc++ on
+// apple/android lacks floating-point from_chars). Both ignore the global C
+// locale, unlike std::stof/strtod.
+template <typename T>
+static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
+	const char *b = s.data();
+	const char *e = s.data() + s.size();
+	while (b < e && (*b == ' ' || *b == '\t' || *b == '\n' || *b == '\r')) {
+		++b;
+	}
+	if (b < e && *b == '+') ++b; // from_chars rejects a leading '+', stof allowed it
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+	T value		= {};
+	auto result = std::from_chars(b, e, value);
+	if (result.ec != std::errc {} || result.ptr == b) return false;
+	outValue = value;
+	return true;
+#else
+	std::istringstream iss(std::string(b, e));
+	iss.imbue(std::locale::classic());
+	T value = {};
+	iss >> value;
+	if (iss.fail()) return false;
+	outValue = value;
+	return true;
+#endif
+}
+
+bool tryParseFloat(const std::string &s, float &outValue) {
+	return tryParseNumberLocaleIndependent(s, outValue);
+}
+
+float parseFloat(const std::string &s, float defaultValue) {
+	float v = defaultValue;
+	tryParseFloat(s, v);
+	return v;
+}
+
+bool tryParseDouble(const std::string &s, double &outValue) {
+	return tryParseNumberLocaleIndependent(s, outValue);
+}
+
+double parseDouble(const std::string &s, double defaultValue) {
+	double v = defaultValue;
+	tryParseDouble(s, v);
+	return v;
+}
 
 void setThreadName(const std::string &name) {
 #if defined(__APPLE__)

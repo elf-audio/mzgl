@@ -48,6 +48,18 @@ int Triangulator::triangulate(vector<vector<glm::vec2>> &verts,
 	// working memory required
 	uint32_t MaxPointCount = 10000;
 
+	size_t totalPoints = 0;
+	for (auto &ring: verts) {
+		totalPoints += ring.size();
+	}
+	if (totalPoints > MaxPointCount) {
+		// MPE_PolyPushPoint doesn't bounds-check its pool - overflowing it
+		// corrupts the heap.
+		Log::e() << "Triangulator received " << totalPoints << " points, more than the maximum of "
+				 << MaxPointCount;
+		return 0;
+	}
+
 	// Request how much memory (in bytes) you should
 	// allocate for the library
 	size_t MemoryRequired = MPE_PolyMemoryRequired(MaxPointCount);
@@ -81,9 +93,13 @@ int Triangulator::triangulate(vector<vector<glm::vec2>> &verts,
 
 	// If you want to add holes to the shape you can do:
 	for (int i = 1; i < verts.size(); i++) {
-		if (verts[0].size() < 3) {
-			Log::e() << "Triangulator received another shape that wasn't valid";
-			return 0;
+		// a degenerate hole (e.g. one collapsed by the dedup above at tiny
+		// scales) would send poly2tri chasing null triangle neighbours - skip
+		// it; its points still get appended to outVerts below so the offsets
+		// bookkeeping stays consistent, they just appear in no triangle.
+		if (verts[i].size() < 3) {
+			Log::e() << "Triangulator skipping degenerate hole ring of " << verts[i].size() << " points";
+			continue;
 		}
 		for (int j = 0; j < verts[i].size(); j++) {
 			MPEPolyPoint *Hole = MPE_PolyPushPoint(&PolyContext);

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include "log.h"
+#include "util.h"
 
 std::string zeroPad2(int number) {
 	return zeroPad(number, 2);
@@ -262,25 +263,21 @@ float stringToFloat(const std::string &conversion,
 					float defaultOnError,
 					NaNBehaviour naNBehaviour) {
 	std::string error;
-	try {
-		auto result = std::stof(conversion);
+	float result = 0.f;
+	if (tryParseFloat(conversion, result)) {
 		if (std::isnan(result)) {
 			if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
-				throw std::runtime_error("nan");
+				error = "caused a NaN";
+			} else if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+				return defaultOnError;
+			} else {
+				return result;
 			}
-			if (naNBehaviour == NaNBehaviour::ResetToDefault) {
-				result = defaultOnError;
-			}
+		} else {
+			return result;
 		}
-		return result;
-	} catch (const std::runtime_error &) {
-		error = "caused a NaN";
-	} catch (const std::invalid_argument &) {
+	} else {
 		error = "caused invalid argument";
-	} catch (const std::out_of_range &) {
-		error = "out of range argument";
-	} catch (...) {
-		error = "unknown error";
 	}
 	Log::e() << "Converting " << conversion << " to float, caused " << error;
 	if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
@@ -294,25 +291,21 @@ double stringToDouble(const std::string &conversion,
 					  double defaultOnError,
 					  NaNBehaviour naNBehaviour) {
 	std::string error;
-	try {
-		auto result = std::stod(conversion);
+	double result = 0.0;
+	if (tryParseDouble(conversion, result)) {
 		if (std::isnan(result)) {
 			if (naNBehaviour == NaNBehaviour::ConsideredAnError) {
-				throw std::runtime_error("nan");
+				error = "caused a NaN";
+			} else if (naNBehaviour == NaNBehaviour::ResetToDefault) {
+				return defaultOnError;
+			} else {
+				return result;
 			}
-			if (naNBehaviour == NaNBehaviour::ResetToDefault) {
-				result = defaultOnError;
-			}
+		} else {
+			return result;
 		}
-		return result;
-	} catch (const std::runtime_error &) {
-		error = "caused a NaN";
-	} catch (const std::invalid_argument &) {
+	} else {
 		error = "caused invalid argument";
-	} catch (const std::out_of_range &) {
-		error = "out of range argument";
-	} catch (...) {
-		error = "unknown error";
 	}
 	Log::e() << "Converting " << conversion << " to double, caused " << error;
 	if (errorBehaviour == ErrorBehaviour::ReturnDefault) {
