@@ -13,6 +13,7 @@
 #include <vector>
 #include "Layer.h"
 #include "stringUtil.h"
+#include "util.h"
 namespace Flexbox {
 
 	class LayoutNode;
@@ -54,7 +55,7 @@ namespace Flexbox {
 
 		bool isAuto(int which = 0) const { return values[which] == "auto"; }
 		const std::string &value(int which = 0) const { return values[which]; }
-		float getValue(int which = 0) const { return stof(values[which]); }
+		float getValue(int which = 0) const { return parseFloat(values[which]); }
 
 		size_t numVals() const { return values.size(); }
 	};

@@ -21,6 +21,16 @@ class App;
 
 void setThreadName(const std::string &name);
 
+// Locale-independent float parsing ('.' is always the decimal separator).
+// std::stof/atof/strtod honour the process's global C locale, which
+// GTK-adjacent code (e.g. glfw's libdecor plugin on linux) can switch to a
+// comma-decimal language at runtime, silently truncating "3.5" to 3.
+// Returns false / defaultValue if no number could be parsed.
+bool tryParseFloat(const std::string &s, float &outValue);
+float parseFloat(const std::string &s, float defaultValue = 0.f);
+bool tryParseDouble(const std::string &s, double &outValue);
+double parseDouble(const std::string &s, double defaultValue = 0.0);
+
 template <typename K, typename V>
 std::optional<K> findKeyByValue(const std::map<K, V> &map, const V &value) {
 	for (const auto &pair: map) {

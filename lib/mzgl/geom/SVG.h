@@ -10,6 +10,7 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <string>
 
 #include "Graphics.h"
 #include <map>

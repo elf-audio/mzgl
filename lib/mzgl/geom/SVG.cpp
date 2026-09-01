@@ -17,6 +17,7 @@
 #include "Triangulator.h"
 #include "log.h"
 #include "stringUtil.h"
+#include "util.h"
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 DISABLE_WARNINGS
@@ -76,7 +77,7 @@ glm::mat3 parseTransform(string tr) {
 		if (a.find("translate") != -1) {
 			auto parts = split(a, "(");
 			auto vals  = split(parts[1], ",");
-			glm::vec2 translation(stof(vals[0]), stof(vals[1]));
+			glm::vec2 translation(parseFloat(vals[0]), parseFloat(vals[1]));
 
 			glm::mat3 m = {1, 0, 0, 0, 1, 0, translation.x, translation.y, 1};
 
@@ -91,7 +92,7 @@ glm::mat3 parseTransform(string tr) {
 			float theta = 0;
 			parts		= split(parts[1], " ");
 			try {
-				float rotation = stof(parts[0]);
+				float rotation = parseFloat(parts[0]);
 				theta		   = rotation * M_PI / 180.f;
 			} catch (const std::exception &e) {
 				Log::e() << "ERROR: rotate transform in svg: " << e.what();
@@ -104,7 +105,7 @@ glm::mat3 parseTransform(string tr) {
 			vec2 offset {0, 0};
 			if (parts.size() == 3) {
 				try {
-					vec2 c {stof(parts[1]), stof(parts[2])};
+					vec2 c {parseFloat(parts[1]), parseFloat(parts[2])};
 					offset.x = c.x * (1 - cosTheta) + c.y * sinTheta;
 					offset.y = c.y * (1 - cosTheta) - c.x * sinTheta;
 				} catch (const std::exception &e) {
@@ -257,7 +258,7 @@ public:
 	void setUseInfo(pu_gi::xml_node &n) {
 		if (n.attribute("stroke-width")) {
 			strokeWeightSet = true;
-			strokeWeight	= n.attribute("stroke-width").as_float();
+			strokeWeight	= parseFloat(n.attribute("stroke-width").value());
 		}
 		if (n.attribute("fill")) {
 			filled = true;
@@ -265,7 +266,7 @@ public:
 				fillColor = *col;
 			}
 			if (n.attribute("fill-opacity")) {
-				fillColor.a = n.attribute("fill-opacity").as_float();
+				fillColor.a = parseFloat(n.attribute("fill-opacity").value());
 			}
 		} else {
 			filled = false;
@@ -278,15 +279,15 @@ public:
 				strokeColor = *col;
 			}
 			if (n.attribute("stroke-opacity")) {
-				strokeColor.a = n.attribute("stroke-opacity").as_float();
+				strokeColor.a = parseFloat(n.attribute("stroke-opacity").value());
 			}
 		}
 		if (n.attribute("transform")) {
 			transform = parseTransform(n.attribute("transform").value());
 		}
 		if (n.attribute("opacity")) {
-			strokeColor.a *= n.attribute("opacity").as_float();
-			fillColor.a *= n.attribute("opacity").as_float();
+			strokeColor.a *= parseFloat(n.attribute("opacity").value());
+			fillColor.a *= parseFloat(n.attribute("opacity").value());
 		}
 	}
 
@@ -301,13 +302,13 @@ private:
 	}
 
 	void parseRect(pu_gi::xml_node &n) {
-		Rectf r(n.attribute("x").as_float(),
-				n.attribute("y").as_float(),
-				n.attribute("width").as_float(),
-				n.attribute("height").as_float());
+		Rectf r(parseFloat(n.attribute("x").value()),
+				parseFloat(n.attribute("y").value()),
+				parseFloat(n.attribute("width").value()),
+				parseFloat(n.attribute("height").value()));
 		float radius = 0;
 		if (n.attribute("rx")) {
-			radius = n.attribute("rx").as_float();
+			radius = parseFloat(n.attribute("rx").value());
 		}
 		verts.push_back(vector<glm::vec2>());
 		if (radius == 0) {
@@ -320,15 +321,15 @@ private:
 	}
 
 	void parseCircle(pu_gi::xml_node &n) {
-		glm::vec2 c(n.attribute("cx").as_float(), n.attribute("cy").as_float());
-		float radius = n.attribute("r").as_float();
+		glm::vec2 c(parseFloat(n.attribute("cx").value()), parseFloat(n.attribute("cy").value()));
+		float radius = parseFloat(n.attribute("r").value());
 		doEllipse(c, radius, radius);
 	}
 
 	void parseEllipse(pu_gi::xml_node &n) {
-		glm::vec2 c(n.attribute("cx").as_float(), n.attribute("cy").as_float());
-		float rx = n.attribute("rx").as_float();
-		float ry = n.attribute("ry").as_float();
+		glm::vec2 c(parseFloat(n.attribute("cx").value()), parseFloat(n.attribute("cy").value()));
+		float rx = parseFloat(n.attribute("rx").value());
+		float ry = parseFloat(n.attribute("ry").value());
 		doEllipse(c, rx, ry);
 	}
 
@@ -346,7 +347,7 @@ private:
 		vector<string> points = split(n.attribute("points").value(), " ");
 		verts.push_back(vector<glm::vec2>(points.size() / 2));
 		for (int i = 0; i < points.size(); i += 2) {
-			verts.back()[i / 2] = glm::vec2(stof(points[i]), stof(points[i + 1]));
+			verts.back()[i / 2] = glm::vec2(parseFloat(points[i]), parseFloat(points[i + 1]));
 		}
 		string tagName = n.name();
 		if (tagName == "polygon") {
@@ -401,7 +402,7 @@ private:
 				case 'm': { // moveto
 					verts.push_back(vector<glm::vec2>());
 					auto xy = split(s, " ");
-					verts.back().push_back(glm::vec2(stof(xy[0]), stof(xy[1])));
+					verts.back().push_back(glm::vec2(parseFloat(xy[0]), parseFloat(xy[1])));
 					break;
 				}
 
@@ -415,20 +416,20 @@ private:
 
 					assert(args.size() == 6);
 
-					glm::vec2 p1(stof(args[0]), stof(args[1]));
-					glm::vec2 p2(stof(args[2]), stof(args[3]));
-					glm::vec2 p3(stof(args[4]), stof(args[5]));
+					glm::vec2 p1(parseFloat(args[0]), parseFloat(args[1]));
+					glm::vec2 p2(parseFloat(args[2]), parseFloat(args[3]));
+					glm::vec2 p3(parseFloat(args[4]), parseFloat(args[5]));
 
 					doBezierCubic(verts.back().back(), p1, p2, p3, verts.back());
 					break;
 				}
 
 				case 'v': // vertical lineto
-					verts.back().push_back({verts.back().back().x, stof(s)});
+					verts.back().push_back({verts.back().back().x, parseFloat(s)});
 					break;
 
 				case 'h': // horizontal lineto
-					verts.back().push_back({stof(s), verts.back().back().y});
+					verts.back().push_back({parseFloat(s), verts.back().back().y});
 					break;
 
 				case 'l': // lineto
@@ -437,7 +438,7 @@ private:
 							<< "ERROR: lineto with less than 2 arguments - could be the figma bug with a nan - search the svg for nan";
 						continue;
 					}
-					verts.back().push_back({stof(args[0]), stof(args[1])});
+					verts.back().push_back({parseFloat(args[0]), parseFloat(args[1])});
 					break;
 			}
 		}
@@ -585,7 +586,7 @@ private:
 			transform = parseTransform(n.attribute("transform").value());
 		}
 		if (n.attribute("opacity")) {
-			opacity = n.attribute("opacity").as_float();
+			opacity = parseFloat(n.attribute("opacity").value());
 		}
 
 		if (n.attribute("fill")) {
@@ -602,7 +603,7 @@ private:
 		}
 
 		if (n.attribute("fill-opacity")) {
-			fillOpacity	   = n.attribute("fill-opacity").as_float();
+			fillOpacity	   = parseFloat(n.attribute("fill-opacity").value());
 			fillOpacitySet = true;
 		}
 
@@ -620,12 +621,12 @@ private:
 		}
 
 		if (n.attribute("stroke-opacity")) {
-			strokeOpacity	 = n.attribute("stroke-opacity").as_float();
+			strokeOpacity	 = parseFloat(n.attribute("stroke-opacity").value());
 			strokeOpacitySet = true;
 		}
 
 		if (n.attribute("stroke-width")) {
-			strokeWeight	= n.attribute("stroke-width").as_float();
+			strokeWeight	= parseFloat(n.attribute("stroke-width").value());
 			strokeWeightSet = true;
 		}
 
