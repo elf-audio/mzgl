@@ -22,8 +22,7 @@
 #include <fstream>
 
 #include <charconv>
-#include <sstream>
-#include <locale>
+#include <type_traits>
 
 #include "mzgl_platform.h"
 #include "log.h"
@@ -81,29 +80,48 @@
 #include "pathUtil.h"
 
 // std::from_chars<float> where the standard library has it (gcc 11+, msvc),
-// otherwise an istringstream imbued with the classic locale (older libc++ on
-// apple/android lacks floating-point from_chars). Both ignore the global C
-// locale, unlike std::stof/strtod.
+// otherwise strtof_l/strtod_l with a fixed "C" locale (older libc++ on
+// apple/android lacks floating-point from_chars; an istringstream fallback is
+// not faithful to stof - it rejects "nan" and trips over trailing text like
+// "7.25px"). Both paths ignore the global C locale, unlike std::stof/strtod.
+#if !(defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L)
+#	include <locale.h>
+#	ifdef __APPLE__
+#		include <xlocale.h>
+#	endif
+#	include <cerrno>
+
+static locale_t cNumericLocale() {
+	static locale_t loc = newlocale(LC_ALL_MASK, "C", (locale_t) nullptr);
+	return loc;
+}
+#endif
+
 template <typename T>
 static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
 	const char *b = s.data();
 	const char *e = s.data() + s.size();
 	while (b < e && (*b == ' ' || *b == '\t' || *b == '\n' || *b == '\r')) {
 		++b;
 	}
 	if (b < e && *b == '+') ++b; // from_chars rejects a leading '+', stof allowed it
-#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
 	T value		= {};
 	auto result = std::from_chars(b, e, value);
 	if (result.ec != std::errc {} || result.ptr == b) return false;
 	outValue = value;
 	return true;
 #else
-	std::istringstream iss(std::string(b, e));
-	iss.imbue(std::locale::classic());
-	T value = {};
-	iss >> value;
-	if (iss.fail()) return false;
+	char *end = nullptr;
+	errno	  = 0;
+	T value;
+	if constexpr (std::is_same_v<T, float>) {
+		value = strtof_l(s.c_str(), &end, cNumericLocale());
+	} else {
+		value = strtod_l(s.c_str(), &end, cNumericLocale());
+	}
+	// no number consumed, or out of range (where stof threw out_of_range)
+	if (end == s.c_str() || errno == ERANGE) return false;
 	outValue = value;
 	return true;
 #endif
