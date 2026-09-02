@@ -360,7 +360,11 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	if (currentDragSourceView == self) currentDragSourceView = nil;
 	[lastLeftMouseEvent release];
 	lastLeftMouseEvent = nil;
-	eventDispatcher->exit();
+	// exit() is app-quit semantics (KoalaApp::exit tears down the audio system,
+	// clears undo, removes temp files...). When embedded in a plugin host the
+	// host owns the processor lifetime and keeps calling process() after the
+	// editor window closes, so only the standalone app may exit here.
+	if (!_embeddedInHost) eventDispatcher->exit();
 	eventDispatcher = nullptr;
 	[super shutdown];
 }

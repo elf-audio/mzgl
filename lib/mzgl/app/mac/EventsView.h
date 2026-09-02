@@ -33,6 +33,8 @@
 // YES when this view is embedded inside a plugin host's window (AUv3 / VST3).
 // In that case the view must not act as a window-drag region and must not
 // filter clicks against the host window's title bar - both of those behaviours
-// only make sense for the standalone app's own borderless window.
+// only make sense for the standalone app's own borderless window. It also
+// stops -shutdown from calling App::exit(): the host owns the plugin's
+// lifetime and keeps processing audio after the editor window is closed.
 @property (nonatomic, assign) BOOL embeddedInHost;
 @end
