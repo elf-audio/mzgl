@@ -86,14 +86,16 @@
 
 #include "pathUtil.h"
 
-// std::from_chars<float> where the standard library has it (gcc 11+, msvc,
-// Xcode 15.3+), otherwise strtof_l/strtod_l pinned to the "C" locale (older
-// libc++ on apple/android lacks floating-point from_chars). Both ignore the
-// global C locale, unlike std::stof/strtod.
+// std::from_chars<float> where the standard library has it (gcc 11+, msvc),
+// otherwise strtof_l/strtod_l pinned to the "C" locale. Apple's libc++ does
+// not define __cpp_lib_to_chars even on Xcode 26, and android's lacks
+// floating-point from_chars, so every Apple/Android build takes the fallback.
+// Both paths ignore the global C locale, unlike std::stof/strtod.
 //
-// Not an istringstream: libc++'s num_get rejects "nan"/"inf" and tokenises
-// "7.25px" as a hex-float ('p' exponent) then fails, so the fallback and
-// from_chars disagreed on inputs the callers rely on.
+// Not an istringstream: libc++'s num_get rejects "nan"/"inf", and older
+// versions (Xcode 16) also tokenise "7.25px" as a hex-float ('p' exponent)
+// then fail, so the fallback disagreed with from_chars on inputs callers
+// rely on.
 template <typename T>
 static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
 	const char *b = s.data();
