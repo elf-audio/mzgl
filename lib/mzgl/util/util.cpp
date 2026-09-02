@@ -23,7 +23,13 @@
 
 #include <charconv>
 #include <sstream>
-#include <locale>
+#include <cerrno>
+#include <clocale>
+#include <cmath>
+#include <type_traits>
+#if defined(__APPLE__)
+#	include <xlocale.h>
+#endif
 
 #include "mzgl_platform.h"
 #include "log.h"
@@ -80,10 +86,14 @@
 
 #include "pathUtil.h"
 
-// std::from_chars<float> where the standard library has it (gcc 11+, msvc),
-// otherwise an istringstream imbued with the classic locale (older libc++ on
-// apple/android lacks floating-point from_chars). Both ignore the global C
-// locale, unlike std::stof/strtod.
+// std::from_chars<float> where the standard library has it (gcc 11+, msvc,
+// Xcode 15.3+), otherwise strtof_l/strtod_l pinned to the "C" locale (older
+// libc++ on apple/android lacks floating-point from_chars). Both ignore the
+// global C locale, unlike std::stof/strtod.
+//
+// Not an istringstream: libc++'s num_get rejects "nan"/"inf" and tokenises
+// "7.25px" as a hex-float ('p' exponent) then fails, so the fallback and
+// from_chars disagreed on inputs the callers rely on.
 template <typename T>
 static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
 	const char *b = s.data();
@@ -99,11 +109,20 @@ static bool tryParseNumberLocaleIndependent(const std::string &s, T &outValue) {
 	outValue = value;
 	return true;
 #else
-	std::istringstream iss(std::string(b, e));
-	iss.imbue(std::locale::classic());
-	T value = {};
-	iss >> value;
-	if (iss.fail()) return false;
+	static const locale_t cLocale = newlocale(LC_ALL_MASK, "C", static_cast<locale_t>(nullptr));
+	const std::string buf(b, e); // strto*_l wants a null terminator
+	char *end = nullptr;
+	errno	  = 0;
+	T value	  = {};
+	if constexpr (std::is_same_v<T, float>) {
+		value = strtof_l(buf.c_str(), &end, cLocale);
+	} else {
+		value = strtod_l(buf.c_str(), &end, cLocale);
+	}
+	if (end == buf.c_str()) return false;
+	// overflow -> fail like from_chars' result_out_of_range; underflow keeps the
+	// (zero/denormal) value, which is what callers expect for tiny numbers.
+	if (errno == ERANGE && std::isinf(value)) return false;
 	outValue = value;
 	return true;
 #endif
