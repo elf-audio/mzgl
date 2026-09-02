@@ -212,6 +212,12 @@ public:
 public:
 	bool isActive() { return draggers.size() > 0; }
 
+	// called after an active dragger moves, with the current touch position in
+	// dragRoot coordinates - including positions outside the window bounds,
+	// which no DropTarget can cover (e.g. to promote to a native OS drag).
+	// The callback may cancel() the dragger.
+	std::function<void(std::shared_ptr<T> dragger, glm::vec2 pos)> draggerMoved;
+
 	DrawingFunction *createDraggerDrawingFunction() {
 		return new DrawingFunction(g, [this](Graphics &g) { drawDraggers(); });
 	}
@@ -265,6 +271,9 @@ public:
 						else if (!isInside && wasInside) entry.target->draggedOut(d);
 					}
 				}
+
+				// may cancel() the dragger, so nothing below may touch d
+				if (draggerMoved) draggerMoved(d, currPos);
 			}
 			return true;
 		}

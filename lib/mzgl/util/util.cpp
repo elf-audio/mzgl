@@ -437,6 +437,12 @@ void setWindowSize(int w, int h) {
 #endif
 }
 
+// the mac implementation lives in EventsView.mm
+#if !defined(__APPLE__) || TARGET_OS_IOS
+bool startNativeFileDrag(const std::string &) {
+	return false;
+}
+#endif
 
 std::string tempDir() {
 #if defined(__APPLE__) // && TARGET_OS_IOS

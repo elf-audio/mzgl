@@ -111,6 +111,13 @@ bool copyDir(const std::string &source, const std::string &destination, std::str
 void deleteOrTrash(const std::string &path);
 
 void setWindowSize(int w, int h);
+
+// hands the in-progress mouse drag over to the OS as a native drag-and-drop
+// of the given file (e.g. out of the window into Finder or a DAW). Only
+// implemented on mac so far - everywhere else returns false. Must be called
+// mid-drag; the OS owns the drag from here and the app won't see the mouseUp
+// (a touchUp is synthesized when the session ends).
+bool startNativeFileDrag(const std::string &filePath);
 // on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
 // this is only for internal, it's so

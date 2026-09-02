@@ -12,8 +12,66 @@
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"
 
+// the view that most recently received a left-mouse down/drag - this is the
+// view a startNativeFileDrag() call refers to (there can be several EventsViews
+// alive at once when running as a plugin with multiple editor windows open).
+// MRC file so no __weak - cleared in shutdown to avoid dangling.
+static EventsView *currentDragSourceView = nil;
+
+// A file promise with a plain file-URL fallback on the same pasteboard item.
+// Promise-aware receivers (Finder, Mail, ...) ask us to write the file into a
+// destination they choose, so they own their copy; receivers that ignore
+// promises (most DAWs) read the URL and get the already-written file as before.
+// userInfo holds the source file's absolute path (NSString).
+@interface MZGLFilePromiseProvider : NSFilePromiseProvider
+@end
+
+@implementation MZGLFilePromiseProvider
+
+- (NSArray<NSPasteboardType> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard {
+	NSMutableArray *types = [[[super writableTypesForPasteboard:pasteboard] mutableCopy] autorelease];
+	[types addObject:NSPasteboardTypeFileURL];
+	return types;
+}
+
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSPasteboardType)type
+										 pasteboard:(NSPasteboard *)pasteboard {
+	if ([type isEqualToString:NSPasteboardTypeFileURL]) return 0;
+	return [super writingOptionsForType:type pasteboard:pasteboard];
+}
+
+- (id)pasteboardPropertyListForType:(NSPasteboardType)type {
+	if ([type isEqualToString:NSPasteboardTypeFileURL]) {
+		return [[NSURL fileURLWithPath:(NSString *) self.userInfo] pasteboardPropertyListForType:type];
+	}
+	return [super pasteboardPropertyListForType:type];
+}
+
+@end
+
+static NSString *utiForFileAtPath(NSString *path) {
+	static NSDictionary<NSString *, NSString *> *utis = nil;
+	if (utis == nil) {
+		utis = [@{
+			@"wav" : @"com.microsoft.waveform-audio",
+			@"aif" : @"public.aiff-audio",
+			@"aiff" : @"public.aiff-audio",
+			@"mp3" : @"public.mp3",
+			@"m4a" : @"com.apple.m4a-audio",
+			@"flac" : @"org.xiph.flac",
+			@"ogg" : @"org.xiph.ogg-audio",
+		} retain];
+	}
+	NSString *uti = utis[path.pathExtension.lowercaseString];
+	return uti != nil ? uti : @"public.data";
+}
+
+@interface EventsView () <NSDraggingSource, NSFilePromiseProviderDelegate>
+@end
+
 @implementation EventsView {
 	NSInteger acceptedDraggingSequenceNo;
+	NSEvent *lastLeftMouseEvent;
 	bool dropped;
 	bool lastShiftState;
 	bool lastFnState;
@@ -192,6 +250,9 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 /// ----------------
 - (void)mouseDown:(NSEvent *)event {
 	if (!_embeddedInHost && eventIsInTitleBar(event)) return;
+	[lastLeftMouseEvent release];
+	lastLeftMouseEvent	  = [event retain];
+	currentDragSourceView = self;
 	auto mouse = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
@@ -237,6 +298,9 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 /// ------------------------
 
 - (void)mouseDragged:(NSEvent *)event {
+	[lastLeftMouseEvent release];
+	lastLeftMouseEvent	  = [event retain];
+	currentDragSourceView = self;
 	auto mouse = [self transformMouse:event];
 
 	eventDispatcher->app->main.runOnMainThread(
@@ -293,6 +357,9 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (void)shutdown {
+	if (currentDragSourceView == self) currentDragSourceView = nil;
+	[lastLeftMouseEvent release];
+	lastLeftMouseEvent = nil;
 	eventDispatcher->exit();
 	eventDispatcher = nullptr;
 	[super shutdown];
@@ -306,6 +373,9 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
+	// a drag that originated in this app is our own drag-out re-entering the
+	// window - reject it so it doesn't get treated as an external file drop
+	if ([sender draggingSource] != nil) return NSDragOperationNone;
 	NSPasteboard *pboard		= [sender draggingPasteboard];
 	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
 														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
@@ -338,6 +408,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
+	if ([sender draggingSource] != nil) return NSDragOperationNone;
 	if (sender.draggingSequenceNumber == acceptedDraggingSequenceNo) {
 		auto p		  = [self pixelPointFromWindowPoint:sender.draggingLocation];
 		auto numItems = sender.numberOfValidItemsForDrop;
@@ -350,6 +421,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	}
 }
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
+	if ([sender draggingSource] != nil) return NO;
 	NSPasteboard *pboard		= [sender draggingPasteboard];
 	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
 														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
@@ -370,6 +442,68 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 		eventDispatcher->fileDragCancelled(0);
 	}
 }
+
+/// ------------------------ native drag-out (NSDraggingSource)
+
+- (BOOL)startFileDrag:(NSString *)path {
+	if (lastLeftMouseEvent == nil) return NO;
+
+	MZGLFilePromiseProvider *provider =
+		[[[MZGLFilePromiseProvider alloc] initWithFileType:utiForFileAtPath(path) delegate:self] autorelease];
+	provider.userInfo = path;
+
+	NSDraggingItem *item = [[[NSDraggingItem alloc] initWithPasteboardWriter:provider] autorelease];
+	NSImage *icon		 = [[NSWorkspace sharedWorkspace] iconForFile:path];
+
+	const CGFloat iconSize = 64;
+	NSPoint p			   = [self convertPoint:lastLeftMouseEvent.locationInWindow fromView:nil];
+	[item setDraggingFrame:NSMakeRect(p.x - iconSize / 2, p.y - iconSize / 2, iconSize, iconSize)
+				  contents:icon];
+
+	NSDraggingSession *session = [self beginDraggingSessionWithItems:@[ item ]
+															   event:lastLeftMouseEvent
+															  source:self];
+
+	session.animatesToStartingPositionsOnCancelOrFail = YES;
+	return YES;
+}
+
+- (NSDragOperation)draggingSession:(NSDraggingSession *)session
+	sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
+	// drag-out is one-way: dropping back inside the app cancels (the image
+	// springs back) rather than triggering the app's own file-drop handling
+	return context == NSDraggingContextOutsideApplication ? NSDragOperationCopy : NSDragOperationNone;
+}
+
+- (void)draggingSession:(NSDraggingSession *)session
+		   endedAtPoint:(NSPoint)screenPoint
+			  operation:(NSDragOperation)operation {
+	// the OS swallowed the mouseUp while it owned the drag - synthesize a
+	// touchUp so the layer system doesn't keep a stuck touch focused
+	NSRect r = [self.window convertRectFromScreen:NSMakeRect(screenPoint.x, screenPoint.y, 0, 0)];
+	auto p	 = [self pixelPointFromWindowPoint:r.origin];
+	eventDispatcher->app->main.runOnMainThread(true,
+											   [self, p]() { eventDispatcher->touchUp(p.x, p.y, 0); });
+}
+
+/// ------------------------ NSFilePromiseProviderDelegate
+
+- (NSString *)filePromiseProvider:(NSFilePromiseProvider *)filePromiseProvider
+				  fileNameForType:(NSString *)fileType {
+	return [(NSString *) filePromiseProvider.userInfo lastPathComponent];
+}
+
+- (void)filePromiseProvider:(NSFilePromiseProvider *)filePromiseProvider
+		  writePromiseToURL:(NSURL *)url
+		  completionHandler:(void (^)(NSError *errorOrNil))completionHandler {
+	NSError *error = nil;
+	[[NSFileManager defaultManager] copyItemAtPath:(NSString *) filePromiseProvider.userInfo
+											toPath:url.path
+											 error:&error];
+	completionHandler(error);
+}
+
+/// ------------------------
 
 - (BOOL)windowShouldClose:(NSWindow *)sender {
 	return YES;
@@ -395,3 +529,10 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 @end
+
+// declared in util.h - non-mac platforms get a stub in util.cpp
+bool startNativeFileDrag(const std::string &filePath) {
+	EventsView *view = currentDragSourceView;
+	if (view == nil) return false;
+	return [view startFileDrag:[NSString stringWithUTF8String:filePath.c_str()]] == YES;
+}
