@@ -21,6 +21,8 @@
 #include "EventDispatcher.h"
 #include "EventsView.h"
 
+#include <algorithm>
+
 #if defined(MZGL_SOKOL) || defined(MZGL_METAL)
 #	import <MetalKit/MetalKit.h>
 #else
@@ -59,12 +61,69 @@ CGFloat backingScaleForView(NSView *view) {
 @end
 
 // ---------------------------------------------------------------------------
-// Host view
-// ---------------------------------------------------------------------------
+// Resize grip - a small bottom-right corner control (like the diagonal lines in
+// Chow/JUCE plugins). AUv2 windows aren't drag-resizable in every host (Logic
+// lets you drag the edge, Ableton Live doesn't), so we draw our own grabber and
+// resize the host view + its window on drag, clamped to the config's min/max.
 @interface MZGL_AUV2_HOST_VIEW_CLASS : NSView
+- (void)userResizeToWidth:(CGFloat)w height:(CGFloat)h;
 - (instancetype)initWithAudioUnit:(mzglau::MzglAUv2Host *)host;
 @end
 
+@interface MZGL_AUV2_RESIZE_GRIP_CLASS : NSView
+@property(nonatomic, weak) MZGL_AUV2_HOST_VIEW_CLASS *hostView;
+@end
+
+@implementation MZGL_AUV2_RESIZE_GRIP_CLASS {
+	NSPoint _startMouseScreen; // screen coords: unaffected by the window resizing mid-drag
+	NSSize _startHostSize;
+}
+
+- (BOOL)isFlipped { return NO; }
+
+// A stroked quarter circle hugging the bottom-right corner, like the iOS resize
+// affordance. Non-flipped coords (origin bottom-left), so the window's corner is
+// this view's bottom-right; centre the arc there and sweep the top-left quarter.
+- (void)drawRect:(NSRect)dirty {
+	const CGFloat w			= self.bounds.size.width;
+	const CGFloat thickness = 4.5;			// 1.5x the previous 3.0
+	const CGFloat inset		= thickness;	// gap from the corner == the stroke thickness
+	const CGFloat radius	= 12.0;			// 1.5x the previous 8.0
+	// Rounded-rect bottom-right corner: arc centre is up-left of the corner, so
+	// the curve is convex toward the bottom-right. Non-flipped coords (origin
+	// bottom-left), so bottom = y 0, right = x w. Sweep 270deg (down) -> 360deg
+	// (right), which traces the bottom-right quarter.
+	const NSPoint centre = NSMakePoint(w - inset - radius, inset + radius);
+	NSBezierPath *p = [NSBezierPath bezierPath];
+	p.lineWidth		= thickness;
+	p.lineCapStyle	= NSLineCapStyleRound;
+	[p appendBezierPathWithArcWithCenter:centre radius:radius startAngle:270 endAngle:360];
+	[[NSColor colorWithWhite:1.0 alpha:0.5] setStroke];
+	[p stroke];
+}
+
+- (void)resetCursorRects {
+	// Not a stock cursor for "resize diagonal"; the crosshair reads as "grab".
+	[self addCursorRect:self.bounds cursor:[NSCursor crosshairCursor]];
+}
+
+- (void)mouseDown:(NSEvent *)event {
+	_startMouseScreen = [NSEvent mouseLocation];
+	_startHostSize	  = self.hostView ? self.hostView.frame.size : NSZeroSize;
+}
+
+- (void)mouseDragged:(NSEvent *)event {
+	if (self.hostView == nil) return;
+	const NSPoint m	 = [NSEvent mouseLocation]; // absolute screen coords
+	const CGFloat dx = m.x - _startMouseScreen.x;
+	const CGFloat dy = m.y - _startMouseScreen.y; // screen y is up; dragging DOWN => dy<0 => taller
+	[self.hostView userResizeToWidth:_startHostSize.width + dx height:_startHostSize.height - dy];
+}
+@end
+
+// ---------------------------------------------------------------------------
+// Host view
+// ---------------------------------------------------------------------------
 @implementation MZGL_AUV2_HOST_VIEW_CLASS {
 	std::shared_ptr<Plugin> plugin;
 	std::shared_ptr<PluginEditor> editor;
@@ -98,6 +157,14 @@ CGFloat backingScaleForView(NSView *view) {
 	eventsView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 	[self addSubview:eventsView];
 
+	// Corner resize grabber, pinned bottom-right, above the GL view.
+	const CGFloat gripSize = 30;
+	MZGL_AUV2_RESIZE_GRIP_CLASS *grip = [[MZGL_AUV2_RESIZE_GRIP_CLASS alloc]
+		initWithFrame:NSMakeRect(self.bounds.size.width - gripSize, 0, gripSize, gripSize)];
+	grip.hostView		= self;
+	grip.autoresizingMask = NSViewMinXMargin | NSViewMaxYMargin; // stay bottom-right
+	[self addSubview:grip];
+
 	dispatcher->resized();
 	if (dispatcher->hasSetup()) {
 		editor->pluginViewAppeared();
@@ -106,6 +173,30 @@ CGFloat backingScaleForView(NSView *view) {
 		eventsView.onFirstDraw = ^{ ed->pluginViewAppeared(); };
 	}
 	return self;
+}
+
+// Drag-resize from the corner grip: clamp to the config, then resize the host
+// window (the AU view fills it via autoresizing). Growing from the window's
+// bottom-left origin, so the window extends up/right.
+- (void)userResizeToWidth:(CGFloat)w height:(CGFloat)h {
+	w = std::max((CGFloat) config.minWidth, std::min((CGFloat) config.maxWidth, w));
+	h = std::max((CGFloat) config.minHeight, std::min((CGFloat) config.maxHeight, h));
+	NSWindow *win = self.window;
+	if (win != nil && win.contentView == self) {
+		// Resize the window keeping its TOP-LEFT corner fixed: macOS windows are
+		// bottom-left anchored, so setContentSize alone grows upward and the
+		// dragged bottom corner runs away from the cursor. Convert the wanted
+		// content size to a frame size and drop the origin so the top edge stays.
+		const NSRect frame		= win.frame;
+		const NSSize frameSize	= [win frameRectForContentRect:NSMakeRect(0, 0, w, h)].size;
+		const CGFloat topEdge	= frame.origin.y + frame.size.height;
+		NSRect nf				= frame;
+		nf.size					= frameSize;
+		nf.origin.y				= topEdge - frameSize.height;
+		[win setFrame:nf display:YES];
+	} else {
+		[self setFrameSize:NSMakeSize(w, h)]; // fallback: resize just our view
+	}
 }
 
 - (void)relayout {
