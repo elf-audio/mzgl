@@ -9,6 +9,7 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
+#import <CoreVideo/CoreVideo.h>
 #include <memory>
 
 //#include "App.h"
@@ -27,6 +28,9 @@ class EventDispatcher;
 - (void)lock;
 - (void)unlock;
 - (void)shutdown;
+// Display-link driven frame render. Declared so plugin views can subclass and
+// hook it (the MTKView backends' equivalent is drawInMTKView:).
+- (void)renderForTime:(CVTimeStamp)time;
 - (std::shared_ptr<App>)getApp;
 - (std::shared_ptr<EventDispatcher>)getEventDispatcher;
 

@@ -1,5 +1,6 @@
 
 #include "App.h"
+#include "PortAudioSystem.h" // typedefs AudioSystem to the desktop backend
 #include <cmath>
 #include "mzAssert.h"
 

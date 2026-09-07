@@ -19,3 +19,5 @@ examples/build/*
 examples/bin/*
 .idea
 lib/mzgl/App.h.pch
+examples/build-xcode/*
+examples/cpm-source-cache

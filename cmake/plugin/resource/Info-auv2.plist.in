@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>@AUV2_PRODUCT_NAME@</string>
+	<key>CFBundleIdentifier</key>
+	<string>@AUV2_BUNDLE_ID@</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>@AUV2_PRODUCT_NAME@</string>
+	<key>CFBundleDisplayName</key>
+	<string>@AUV2_PRODUCT_NAME@</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@AUV2_VERSION@</string>
+	<key>CFBundleVersion</key>
+	<string>@AUV2_VERSION@</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>@AUV2_COPYRIGHT@</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>description</key>
+			<string>@AUV2_DESCRIPTION@</string>
+			<key>factoryFunction</key>
+			<string>@AUV2_FACTORY_FUNCTION@</string>
+			<key>manufacturer</key>
+			<string>@AUV2_MANUFACTURER@</string>
+			<key>name</key>
+			<string>@AUV2_NAME@</string>
+			<key>subtype</key>
+			<string>@AUV2_SUBTYPE@</string>
+			<key>type</key>
+			<string>@AUV2_TYPE@</string>
+			<key>version</key>
+			<integer>@AUV2_VERSION_INT@</integer>
+			<key>sandboxSafe</key>
+			<true/>
+			<key>resourceUsage</key>
+			<dict>
+				<key>network.client</key>
+				<true/>
+				<key>temporary-exception.files.all.read-write</key>
+				<true/>
+			</dict>
+			<key>tags</key>
+			<array>
+@AUV2_TAGS_XML@			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

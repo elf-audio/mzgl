@@ -56,8 +56,11 @@ using namespace std;
 - (void)dealloc {
 	NSLog(@"dealloc AudioUnitViewController");
 #	if !MZGL_IOS
+#		if defined(MZGL_SOKOL) || defined(MZGL_METAL)
+	// MTKView only; the OpenGL EventsView (NSOpenGLView) has neither property.
 	glView.paused	= YES;
 	glView.delegate = nil;
+#		endif
 	[glView removeFromSuperview];
 	glView = nil;
 	eventDispatcher.reset();

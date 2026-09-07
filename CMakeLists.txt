@@ -10,9 +10,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL
   add_compile_options(-fcolor-diagnostics)
 endif()
 
-# if(ANDROID OR WIN32)
-set(CMAKE_CXX_STANDARD 17)
-# else() set(CMAKE_CXX_STANDARD 14) endif()
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -572,7 +570,8 @@ if(ANDROID)
   include_directories(${OBOE_DIR}/include)
 
   # -DAUTO_TEST
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -fno-stack-protector")
+  # (-std comes from CMAKE_CXX_STANDARD above)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fno-stack-protector")
 
   # Export ANativeActivity_onCreate(), Refer to:
   # https://github.com/android-ndk/ndk/issues/381.
