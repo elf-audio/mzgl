@@ -103,8 +103,18 @@ CGFloat backingScaleForView(NSView *view) {
 }
 
 - (void)resetCursorRects {
-	// Not a stock cursor for "resize diagonal"; the crosshair reads as "grab".
-	[self addCursorRect:self.bounds cursor:[NSCursor crosshairCursor]];
+	// AppKit has no public diagonal-resize cursor; the private one is what the
+	// system uses for window corners. Fall back to crosshair if it ever goes away.
+	NSCursor *cursor		= nil;
+	SEL diagonalResizeSel = NSSelectorFromString(@"_windowResizeNorthWestSouthEastCursor");
+	if ([NSCursor respondsToSelector:diagonalResizeSel]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+		cursor = [NSCursor performSelector:diagonalResizeSel];
+#pragma clang diagnostic pop
+	}
+	if (cursor == nil) cursor = [NSCursor crosshairCursor];
+	[self addCursorRect:self.bounds cursor:cursor];
 }
 
 - (void)mouseDown:(NSEvent *)event {
