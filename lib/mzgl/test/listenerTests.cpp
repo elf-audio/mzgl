@@ -62,7 +62,7 @@ SCENARIO("listeners can be added and removed correctly", "[listener]") {
 
 		WHEN("a scoped listener is added") {
 			{
-				ScopedListener<MyListener> sl(c, &l);
+				ScopedListener<MyClass> sl(c, &l);
 				THEN("the listener is in the list") {
 					REQUIRE(c.getNumListeners() == 1);
 				}
@@ -74,8 +74,8 @@ SCENARIO("listeners can be added and removed correctly", "[listener]") {
 		}
 		WHEN("2 scoped listeners are added") {
 			MyListener l1, l2;
-			ScopedListener<MyListener> sl1(c, &l1);
-			ScopedListener<MyListener> sl2(c, &l2);
+			ScopedListener<MyClass> sl1(c, &l1);
+			ScopedListener<MyClass> sl2(c, &l2);
 			THEN("there are 2 listeners total") {
 				REQUIRE(c.getNumListeners() == 2);
 			}
