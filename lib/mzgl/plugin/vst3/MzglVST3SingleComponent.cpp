@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <string>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -88,12 +89,20 @@ tresult PLUGIN_API MzglVST3SingleComponent::initialize(FUnknown *context) {
 	if (config.audioInput) {
 		addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
 	}
-	addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
+	numInternalOutputBusses = std::max(1, plugin->getNumOutputBusses());
+	if (numInternalOutputBusses == 1) {
+		addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
+	} else {
+		for (int32 i = 0; i < numInternalOutputBusses; ++i) {
+			String128 name;
+			UString(name, 128).fromAscii(("Output " + std::to_string(i + 1)).c_str());
+			// only the first bus is active by default; hosts enable the rest on demand
+			addAudioOutput(name, SpeakerArr::kStereo, i == 0 ? BusTypes::kMain : BusTypes::kAux);
+		}
+	}
 	if (config.midiInput) {
 		addEventInput(STR16("MIDI In"), 1);
 	}
-
-	numInternalOutputBusses = std::max(1, plugin->getNumOutputBusses());
 
 	registerParameters();
 
@@ -146,11 +155,12 @@ tresult PLUGIN_API MzglVST3SingleComponent::setBusArrangements(SpeakerArrangemen
 															   SpeakerArrangement *outputs,
 															   int32 numOuts) {
 	const int32 wantedIns = config.audioInput ? 1 : 0;
-	if (numIns == wantedIns && numOuts == 1 && SpeakerArr::getChannelCount(outputs[0]) == 2
-		&& (numIns == 0 || SpeakerArr::getChannelCount(inputs[0]) == 2)) {
-		return SingleComponentEffect::setBusArrangements(inputs, numIns, outputs, numOuts);
+	if (numIns != wantedIns || numOuts != numInternalOutputBusses) return kResultFalse;
+	if (numIns == 1 && SpeakerArr::getChannelCount(inputs[0]) != 2) return kResultFalse;
+	for (int32 i = 0; i < numOuts; ++i) {
+		if (SpeakerArr::getChannelCount(outputs[i]) != 2) return kResultFalse;
 	}
-	return kResultFalse;
+	return SingleComponentEffect::setBusArrangements(inputs, numIns, outputs, numOuts);
 }
 
 void MzglVST3SingleComponent::handleParameterChanges(IParameterChanges *changes) {
@@ -253,15 +263,20 @@ tresult PLUGIN_API MzglVST3SingleComponent::process(ProcessData &data) {
 
 	plugin->process(&interleavedIn, interleavedOuts.data(), channelsPerBus);
 
-	if (data.numOutputs >= 1 && data.outputs[0].numChannels >= 2) {
-		float *left			   = data.outputs[0].channelBuffers32[0];
-		float *right		   = data.outputs[0].channelBuffers32[1];
-		const FloatBuffer &src = interleavedOuts[0];
+	const int32 numOutBusses = std::min(data.numOutputs, numInternalOutputBusses);
+	for (int32 bus = 0; bus < numOutBusses; ++bus) {
+		AudioBusBuffers &out = data.outputs[bus];
+		// inactive busses may be handed to us with no channel buffers
+		if (out.numChannels < 2 || out.channelBuffers32 == nullptr) continue;
+		float *left	 = out.channelBuffers32[0];
+		float *right = out.channelBuffers32[1];
+		if (left == nullptr || right == nullptr) continue;
+		const FloatBuffer &src = interleavedOuts[bus];
 		for (int32 i = 0; i < numSamples; ++i) {
 			left[i]	 = src[i * 2];
 			right[i] = src[i * 2 + 1];
 		}
-		data.outputs[0].silenceFlags = 0;
+		out.silenceFlags = 0;
 	}
 	return kResultOk;
 }
