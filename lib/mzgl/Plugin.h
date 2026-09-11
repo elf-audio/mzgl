@@ -79,7 +79,12 @@ public:
 		} catch (const fs::filesystem_error &err) {
 			Log::e() << "fs error loading factory presets " << err.what();
 		}
-		std::sort(factoryPresets.begin(), factoryPresets.end());
+		// "default" always comes first, the rest alphabetical
+		std::sort(factoryPresets.begin(), factoryPresets.end(), [](const std::string &a, const std::string &b) {
+			if (a == "default") return b != "default";
+			if (b == "default") return false;
+			return a < b;
+		});
 	}
 
 	std::string getExt() { return "." + plugin->getIdentifier() + "preset"; }
