@@ -53,6 +53,10 @@ namespace mzglau {
 
 struct AUv2Config {
 	bool midiInput = false; // forward MIDI events to Plugin::midiReceivedAtTime
+	// Highest sample rate the plugin will accept; 0 = no limit. Hosts (and auval)
+	// probing a higher rate get it rejected at the format level instead of the
+	// plugin trying to render with it.
+	double maxSampleRate = 0.0;
 	// Editor size in points and the range the host may resize it within.
 	int viewWidth  = 420;
 	int viewHeight = 480;
@@ -127,6 +131,9 @@ public:
 								AudioUnitElement inElement,
 								const AudioStreamBasicDescription &inPrevFormat,
 								const AudioStreamBasicDescription &inNewFormat) override;
+	bool ValidFormat(AudioUnitScope inScope,
+					 AudioUnitElement inElement,
+					 const AudioStreamBasicDescription &inNewFormat) override;
 
 protected:
 	// BaseArgs are forwarded to AUBaseT's constructor.

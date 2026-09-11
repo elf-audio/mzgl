@@ -55,6 +55,11 @@ void MzglAUv2Unit<AUBaseT>::setup() {
 	}
 
 	plugin->sendUpdatedParameterToHost = [this](unsigned int i, float v) { pluginParameterChanged(i, v); };
+	// "Running" = between Initialize() and Cleanup(), i.e. the host may be
+	// rendering. Plugins use this to decide whether a state/preset change must
+	// be handed to the audio thread or can be applied directly (same contract
+	// as the VST3 wrapper's setActive and the AUv3's isRunning).
+	plugin->isRunning = [this]() { return this->IsInitialized(); };
 
 	// Factory presets, if the plugin ships any (mzgl PresetManager: files in
 	// data/factory-presets named <identifier>preset).
@@ -82,7 +87,12 @@ void MzglAUv2Unit<AUBaseT>::setup() {
 
 template <class AUBaseT>
 MzglAUv2Unit<AUBaseT>::~MzglAUv2Unit() {
-	if (plugin) plugin->sendUpdatedParameterToHost = nullptr;
+	if (plugin) {
+		plugin->sendUpdatedParameterToHost = nullptr;
+		// The editor may keep the plugin alive after the AU is gone; don't
+		// leave a lambda pointing at this object behind.
+		plugin->isRunning = []() { return false; };
+	}
 	if (factoryPresets) CFRelease(factoryPresets);
 	for (auto &p: factoryPresetStorage) {
 		if (p.presetName) CFRelease(p.presetName);
@@ -114,6 +124,14 @@ OSStatus MzglAUv2Unit<AUBaseT>::Initialize() {
 template <class AUBaseT>
 void MzglAUv2Unit<AUBaseT>::Cleanup() {
 	AUBaseT::Cleanup();
+}
+
+template <class AUBaseT>
+bool MzglAUv2Unit<AUBaseT>::ValidFormat(AudioUnitScope inScope,
+										AudioUnitElement inElement,
+										const AudioStreamBasicDescription &inNewFormat) {
+	if (config.maxSampleRate > 0.0 && inNewFormat.mSampleRate > config.maxSampleRate) return false;
+	return AUBaseT::ValidFormat(inScope, inElement, inNewFormat);
 }
 
 template <class AUBaseT>
