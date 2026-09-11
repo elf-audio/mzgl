@@ -752,45 +752,18 @@ bool SVGDoc::loadFromString(const string &svgData) {
 }
 
 bool SVGDoc::load(string path) {
-	defs.clear();
-	pu_gi::xml_document doc;
-
+	std::string data;
 #ifdef __ANDROID__
-	vector<unsigned char> data;
-	loadAndroidAsset(path, data);
-	auto status = doc.load_buffer(data.data(), data.size());
-
-	if (status.status != pu_gi::status_ok) {
-		Log::e() << "Error: Couldn't load svg from buffer - got " << data.size()
-				 << "bytes - message from pu_gi is " << status.description() << " - at character "
-				 << status.offset;
-		return false;
-	}
+	data	= loadAndroidAssetAsString(path);
+	bool ok = !data.empty();
 #else
-
-	// pu_gixml has no interface for utf8 paths
-	// so first convert utf8 to wchar version
-	wstring unicodePath = fs::path(path).wstring();
-	auto status			= doc.load_file((wchar_t *) (unicodePath.c_str()));
-
-	if (status.status != pu_gi::status_ok) {
-		Log::e() << "ERROR: could not load svg - pu_gi says " << status.description() << " - at character "
-				 << status.offset;
+	bool ok = readStringFromFile(path, data);
+#endif
+	if (!ok) {
+		Log::e() << "ERROR: could not read svg file at " << path;
 		return false;
 	}
-#endif
-
-	pu_gi::xml_node root = doc.document_element();
-
-	parseViewBox(root.attribute("viewBox").value());
-	width  = viewBox.width;
-	height = viewBox.height;
-	parseDefs(root);
-
-	rootGroup = SVGGroup::create(root, defs);
-
-	rootGroup->applyState();
-	return true;
+	return loadFromString(data);
 }
 
 void SVGDoc::getTriangles(vector<glm::vec2> &verts, vector<glm::vec4> &cols, vector<unsigned int> &indices) {
