@@ -126,9 +126,6 @@ set(MZGL_SOURCES
     lib/mzgl/util/pathUtil.cpp
     lib/mzgl/util/stringUtil.cpp
     $<$<PLATFORM_ID:Darwin>:
-    lib/mzgl/audio/juce/JuceAudioSystem.cpp
-    lib/mzgl/audio/juce/lib/juce_BigInteger.cpp
-    lib/mzgl/audio/juce/lib/mzgl_juce_CoreAudio.mm
     lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
     lib/mzgl/midi/appleMidiUtils.cpp
     lib/mzgl/app/mac/MacAppDelegate.mm
@@ -265,8 +262,6 @@ set(HEADERS
     lib/mzgl/audio
     lib/mzgl/audio/mac
     lib/mzgl/audio/portaudio
-    lib/mzgl/audio/juce
-    lib/mzgl/audio/juce/lib
     lib/mzgl/audio/iOS
     lib/mzgl/file
     lib/mzgl/geom
@@ -347,6 +342,14 @@ if(APPLE)
   # the per-file flag makes macOS match.
   list(APPEND MZGL_SOURCES lib/mzgl/gl/Image.mm)
   set_source_files_properties(lib/mzgl/gl/Image.mm
+                              PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+
+  # FilePickerDelegate stores the NSArray of allowed extensions in an ivar. Its
+  # caller (Dialogs.cpp, ARC) releases that array as soon as the local goes out
+  # of scope, so without ARC here the ivar dangles and NSOpenPanel's deferred
+  # panel:shouldEnableURL: XPC callback fast-enumerates freed memory (crashed
+  # the AUv2 in Live when importing a file via the system picker).
+  set_source_files_properties(lib/mzgl/app/mac/MacFilePickerDelegate.mm
                               PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 
   # force ARC - we were doing this but it breaks GLFW at the moment because it
