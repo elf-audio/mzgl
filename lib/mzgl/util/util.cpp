@@ -639,6 +639,10 @@ void setDocsPath(const std::string &path) {
 	isOverridingDocsPath = true;
 	docsPathOverride	 = path;
 }
+
+bool isDocsPathOverridden() {
+	return isOverridingDocsPath;
+}
 //#endif
 
 #ifdef __APPLE__
@@ -751,7 +755,6 @@ void checkForDocumentsDirectoryUpdate() {
 	updateDocumentsDirectory();
 }
 
-bool hasPrintedTheError = false;
 std::string docsPath(const std::string &path) {
 	checkForDocumentsDirectoryUpdate();
 	if (isOverridingDocsPath) {
@@ -762,16 +765,6 @@ std::string docsPath(const std::string &path) {
 	NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask]
 		lastObject];
 	std::string _path = [[url path] UTF8String];
-	if (_path == "/Users/marek/Documents") {
-		_path = "/Users/marek/Library/Containers/com.elf-audio.koala-mac/Data/Documents";
-		if (!hasPrintedTheError) {
-			printf("=======================================================================\n\n"
-				   "Hack to get this working on marek's computer with vscode because vscode "
-				   "running the app in a way that prevents NSFileManager from working properly\n\n"
-				   "=======================================================================\n\n");
-			hasPrintedTheError = true;
-		}
-	}
 	return _path + "/" + path;
 #elif defined(__ANDROID__)
 	return getAndroidExternalDataPath() + "/" + path;

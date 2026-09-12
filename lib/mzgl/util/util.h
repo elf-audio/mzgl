@@ -207,6 +207,8 @@ void hideMouse();
 void initMZGL(std::shared_ptr<App> app);
 
 void setDocsPath(const std::string &newDocsPath);
+/// true once setDocsPath() has been called (tests, headless --docs-path, app-level overrides)
+bool isDocsPathOverridden();
 void setDataPath(const std::string &newDataPath);
 
 void quitApplication();
