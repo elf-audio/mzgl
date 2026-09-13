@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <cmath>
 #include <type_traits>
-#include "log.h"
 
 constexpr inline float mapf(float inp, float inMin, float inMax, float outMin, float outMax, bool clamp = false) {
 	if (inMax - inMin == 0.f) return outMin;
