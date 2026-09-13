@@ -12,10 +12,6 @@ function(mzgl_supress_target_warnings TARGET)
 endfunction(mzgl_supress_target_warnings)
 
 function(mzgl_supress_warnings)
-  if(NOT WIN32)
-    mzgl_supress_target_warnings(ZipFile)
-    mzgl_supress_target_warnings(staticZipper)
-  endif()
   if(NOT ANDROID
      AND NOT WIN32
      AND NOT IOS)

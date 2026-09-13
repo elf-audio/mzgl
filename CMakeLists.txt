@@ -306,10 +306,6 @@ set(YOGA_SOURCES
     lib/yoga/ylog.cpp
     lib/yoga/event/event.cpp)
 
-# need to move to ZipFile CMakeLists if(WIN32) list(APPEND ZIPPER_SOURCES
-# lib/zipper/minizip/iowin32.c) list(APPEND HEADERS lib/zipper/zipper/tps)
-# endif()
-
 option(
   MZGL_UNIT_TEST
   "should this be a unit testing build - omits a main, so catch2 can take control"
@@ -319,9 +315,6 @@ if(MZGL_UNIT_TEST)
   add_compile_definitions(UNIT_TEST DEBUG=1)
   add_compile_options(-g)
 endif(MZGL_UNIT_TEST)
-
-# add_library(zipper STATIC ${ZIPPER_SOURCES}) add_library(boostfs STATIC
-# ${BOOST_SOURCES})
 
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
@@ -404,7 +397,6 @@ if(WIN32)
   list(APPEND MZGL_SOURCES
        # lib/mzgl/app/win64/mainWin.cpp
        lib/mzgl/util/winUtil.cpp lib/mzgl/util/AlignedAllocator.cpp)
-  # moved to ZipFile CMakeLists list(APPEND HEADERS lib/zipper/zipper/tps)
 
 endif()
 
@@ -520,10 +512,7 @@ endif()
 
 set(MZGL_LIBS ZipFile yoga pu_gixml concurrentqueue readerwriterqueue)
 
-if(WIN32)
-  # list(APPEND MZGL_LIBS zlib) target_include_directories(libmzgl PUBLIC
-  # lib/zlib-win)
-else()
+if(NOT WIN32)
   list(APPEND MZGL_LIBS z)
 endif()
 

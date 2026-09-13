@@ -1,69 +1,42 @@
 cmake_minimum_required(VERSION 3.18.1)
 set(CMAKE_CXX_STANDARD 20)
-project(ZipFile)
+project(ZipFile C CXX)
 
-include_directories(
-  ../misc
-  lib/zipper/zipper
-  lib/zipper/minizip
-  lib/zipper/
-  lib/zipper/utf8helper/
-  # lib/zipper/zlib
-  ..)
+# ZipFile / ZipReader / Gzip are thin wrappers over miniz (lib/miniz, single
+# file, MIT). No zlib or other external dependency on any platform.
+add_library(
+  ZipFile STATIC
+  ZipFile.h
+  ZipFile.cpp
+  ZipReader.h
+  ZipReader.cpp
+  Gzip.h
+  Gzip.cpp
+  ZipIO.h
+  lib/miniz/miniz.h
+  lib/miniz/miniz.c)
 
-if(WIN32)
-  add_library(
-    ZipFile STATIC
-    ZipFile.h
-    ZipReader.h
-    ZipFile.cpp
-    ZipStreamer.cpp
-    ZipReader.cpp
-    lib/zipper/zipper/CDirEntry.cpp
-    lib/zipper/zipper/tools.cpp
-    lib/zipper/zipper/unzipper.cpp
-    lib/zipper/zipper/zipper.cpp
-    lib/zipper/minizip/unzip.c
-    lib/zipper/minizip/zip.c
-    lib/zipper/minizip/ioapi.c
-    lib/zipper/minizip/ioapi_buf.c
-    lib/zipper/minizip/ioapi_mem.c
-    # lib/zipper/minizip/iowin32.c
-    # lib/zipper/zipper/tps/dirent.c
-    lib/zipper/zlib/adler32.c
-    lib/zipper/zlib/compress.c
-    lib/zipper/zlib/crc32.c
-    lib/zipper/zlib/deflate.c
-    lib/zipper/zlib/gzclose.c
-    lib/zipper/zlib/gzlib.c
-    lib/zipper/zlib/gzread.c
-    lib/zipper/zlib/gzwrite.c
-    lib/zipper/zlib/infback.c
-    lib/zipper/zlib/inffast.c
-    lib/zipper/zlib/inflate.c
-    lib/zipper/zlib/inftrees.c
-    lib/zipper/zlib/trees.c
-    lib/zipper/zlib/uncompr.c
-    lib/zipper/zlib/zutil.c
-    lib/zipper/utf8helper/win32io_utf8.cpp)
+target_include_directories(
+  ZipFile
+  PUBLIC .
+  PRIVATE lib/miniz ../misc ..)
+
+# Don't let miniz define zlib-named macros (deflate, crc32, ...) - some TUs in
+# the wider project also see the real zlib.h.
+target_compile_definitions(ZipFile PRIVATE MINIZ_NO_ZLIB_COMPATIBLE_NAMES)
+
+# Third-party code: silence its warnings (our own sources build with the
+# project's normal warning flags).
+if(MSVC)
+  set_source_files_properties(lib/miniz/miniz.c PROPERTIES COMPILE_OPTIONS "/w")
 else()
-  add_library(ZipFile STATIC ZipFile.h ZipReader.h ZipFile.cpp ZipStreamer.cpp
-                             ZipReader.cpp)
-
+  set_source_files_properties(lib/miniz/miniz.c PROPERTIES COMPILE_OPTIONS "-w")
 endif()
 
-target_include_directories(ZipFile PUBLIC . lib)
-
-if(WIN32)
-
-  target_include_directories(ZipFile PUBLIC lib/zipper/zlib)
-
-else()
-
-  option(BUILD_TEST "" OFF)
-  add_subdirectory(lib/zipper "zipper-build")
-
-  target_include_directories(ZipFile PUBLIC . lib)
-  target_link_libraries(ZipFile staticZipper)
-
+if(NOT WIN32 AND NOT APPLE)
+  # 64-bit file offsets for fseeko/ftello on 32-bit Linux / Android so miniz
+  # can read archives over 2 GB.
+  set_source_files_properties(
+    lib/miniz/miniz.c PROPERTIES COMPILE_DEFINITIONS
+                                 "_FILE_OFFSET_BITS=64;_LARGEFILE64_SOURCE")
 endif()
