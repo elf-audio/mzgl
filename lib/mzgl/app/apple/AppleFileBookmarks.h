@@ -21,9 +21,11 @@ private:
 		NSData *bookmarkData;
 		NSURL *url = nil;
 		std::string path;
-		Bookmark(NSData *bookmarkData, NSURL *url)
+		bool securityScoped = true;
+		Bookmark(NSData *bookmarkData, NSURL *url, bool securityScoped)
 			: bookmarkData(bookmarkData)
-			, url(url) {
+			, url(url)
+			, securityScoped(securityScoped) {
 			path = [[url path] UTF8String];
 		}
 
@@ -59,6 +61,18 @@ public:
 #endif
 		NSData *bookmarkData =
 			[url bookmarkDataWithOptions:opts includingResourceValuesForKeys:nil relativeToURL:nil error:&err];
+		bool securityScoped = true;
+
+#if !TARGET_OS_IOS
+		if (err != nil) {
+			err			   = nil;
+			bookmarkData   = [url bookmarkDataWithOptions:0
+						  includingResourceValuesForKeys:nil
+										   relativeToURL:nil
+												   error:&err];
+			securityScoped = false;
+		}
+#endif
 
 		if (err) {
 			NSLog(@"Error creating bookmark %@", err);
@@ -76,7 +90,7 @@ public:
 				break;
 			}
 		}
-		bookies.emplace_back(new Bookmark(bookmarkData, url));
+		bookies.emplace_back(new Bookmark(bookmarkData, url, securityScoped));
 		[[NSUserDefaults standardUserDefaults] setObject:serializeBookmarks() forKey:@"bookmarks"];
 		return true;
 	}
@@ -117,8 +131,16 @@ private:
 	NSArray *serializeBookmarks() {
 		NSMutableArray *bs = [[NSMutableArray alloc] init];
 		for (auto &b: bookies) {
+#if TARGET_OS_IOS
 			NSDictionary *book =
 				@ {@"data" : b->bookmarkData, @"path" : [NSString stringWithUTF8String:b->path.c_str()]};
+#else
+			NSDictionary *book = @ {
+				@"data" : b->bookmarkData,
+				@"path" : [NSString stringWithUTF8String:b->path.c_str()],
+				@"securityScoped" : @(b->securityScoped)
+			};
+#endif
 			[bs addObject:book];
 		}
 		return bs;
@@ -133,11 +155,15 @@ private:
 				BOOL isStale = NO;
 				NSError *err = nil;
 
-				NSURLBookmarkResolutionOptions opts =
 #if TARGET_OS_IOS
-					0;
+				const bool securityScoped					= true;
+				const NSURLBookmarkResolutionOptions opts	= 0;
 #else
-					NSURLBookmarkResolutionWithSecurityScope;
+				NSNumber *isScoped							= b[@"securityScoped"];
+				const bool securityScoped					= isScoped == nil || [isScoped boolValue];
+				const NSURLBookmarkResolutionOptions opts	= securityScoped
+																  ? NSURLBookmarkResolutionWithSecurityScope
+																  : 0;
 #endif
 
 				NSURL *url = [NSURL URLByResolvingBookmarkData:b[@"data"]
@@ -156,12 +182,12 @@ private:
 					continue;
 				}
 
-				if (![url startAccessingSecurityScopedResource]) {
+				if (securityScoped && ![url startAccessingSecurityScopedResource]) {
 					NSLog(@"Failed to startAccessingSecurityScopedResource");
 					continue;
 				}
 				printf("GOT SCOPED ACCESS FOR '%s'\n", [[url path] UTF8String]);
-				bookies.emplace_back(new Bookmark(b[@"data"], url));
+				bookies.emplace_back(new Bookmark(b[@"data"], url, securityScoped));
 			}
 		}
 	}
