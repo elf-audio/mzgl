@@ -1,5 +1,4 @@
 #define GLFW_EXPOSE_NATIVE_GLX
-#define GLFW_NATIVE_INCLUDE_NONE
 
 #include "GLFWOS.h"
 #include <glew.h>
@@ -9,6 +8,8 @@
 namespace os {
 
 	auto getNativeWindowHandle(GLFWwindow *window) -> void * {
+		// Only X11 has a GLX window; on Wayland there's no equivalent handle we use.
+		if (glfwGetPlatform() != GLFW_PLATFORM_X11) return nullptr;
 		return (void *) (glfwGetGLXWindow(window)); // FIXME: don't like that cast, it smells
 	}
 

@@ -526,6 +526,12 @@ set(PA_BUILD_SHARED OFF)
 
 if(NOT ANDROID)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
+  # On Linux, build both backends: GLFW picks native Wayland at runtime when available
+  # (crisp HiDPI / fractional scaling) and falls back to X11 otherwise.
+  if(UNIX AND NOT APPLE)
+    set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
+    set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW with X11 support")
+  endif()
   mzgl_save_cmake_log_level()
   add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
   mzgl_restore_cmake_log_level()
