@@ -318,6 +318,10 @@ endif(MZGL_UNIT_TEST)
 
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
+# GCC 16 reports a false-positive -Wuninitialized in xml_document::_move.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(pu_gixml PRIVATE -Wno-error=uninitialized)
+endif()
 
 mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/ZipFile")
 mzgl_save_cmake_log_level()
