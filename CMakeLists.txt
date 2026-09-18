@@ -4,6 +4,12 @@
 set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.18.1)
 project(mzgl)
+
+# GLFW (via mzgl) compiles its Cocoa backend as Objective-C. CMake requires the
+# language to be enabled in the top-level directory of anything linking glfw.
+if(APPLE)
+  enable_language(OBJC)
+endif()
 # makes clang output colours
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL
                                             "Clang")
