@@ -176,9 +176,9 @@ if(IOS)
        lib/mzgl/app/web/MZWebView.cpp)
 endif()
 
-if(NOT ANDROID AND NOT IOS)
-  # GLFW desktop app-runner + glew. Not used on iOS (which runs via app/ios/
-  # mainiOS.mm); glfw3.h pulls in OpenGL/gl.h which doesn't exist on iOS.
+if(NOT ANDROID AND NOT APPLE)
+  # GLFW desktop app-runner (Windows / Linux / web). Apple platforms never use
+  # GLFW: macOS runs the Cocoa app (app/mac/mainMac.mm), iOS runs app/ios/.
   list(
     APPEND
     MZGL_SOURCES
@@ -194,11 +194,10 @@ if(NOT ANDROID AND NOT IOS)
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
     lib/mzgl/app/glfw/GLFWOS_Windows.cpp
-    >
-    $<$<PLATFORM_ID:Darwin>:
-    lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Mac.cpp
-    lib/mzgl/app/glfw/GLFWOS_Mac.cpp
     >)
+endif()
+
+if(NOT ANDROID AND NOT IOS)
   if(USING_OPENGL OR NOT WIN32)
     list(APPEND MZGL_SOURCES lib/glew/src/glew.c)
   endif()
@@ -525,10 +524,18 @@ set(PA_BUILD_STATIC ON)
 set(PA_BUILD_SHARED OFF)
 
 if(NOT ANDROID)
-  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
-  mzgl_save_cmake_log_level()
-  add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
-  mzgl_restore_cmake_log_level()
+  if(NOT APPLE) # macOS uses the Cocoa runner, never GLFW
+    mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
+    # On Linux, build both backends: GLFW picks native Wayland at runtime when available
+    # (crisp HiDPI / fractional scaling) and falls back to X11 otherwise.
+    if(UNIX AND NOT APPLE)
+      set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
+      set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW with X11 support")
+    endif()
+    mzgl_save_cmake_log_level()
+    add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
+    mzgl_restore_cmake_log_level()
+  endif()
 
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
   # add_subdirectory("lib/RtMidi" "rtmidi-build")
@@ -771,7 +778,7 @@ if(WIN32)
   mzgl_restore_cmake_log_level()
 endif()
 if(NOT ANDROID AND NOT IOS)
-  list(APPEND MZGL_LIBS RtMidi glfw)
+  list(APPEND MZGL_LIBS RtMidi $<$<NOT:$<PLATFORM_ID:Darwin>>:glfw>)
 endif()
 
 target_link_libraries(libmzgl ${MZGL_LIBS})
