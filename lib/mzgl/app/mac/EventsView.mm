@@ -14,6 +14,9 @@
 #include "log.h"
 #include "filesystem.h"
 
+#include <algorithm>
+#include <mutex>
+
 // the view that most recently received a left-mouse down/drag - this is the
 // view a startNativeFileDrag() call refers to (there can be several EventsViews
 // alive at once when running as a plugin with multiple editor windows open).
@@ -408,6 +411,19 @@ static std::vector<std::string> filePathsOnPasteboard(NSPasteboard *pboard) {
 	for (NSURL *url in urls) {
 		paths.push_back([[url path] UTF8String]);
 	}
+
+	id legacy = [pboard propertyListForType:@"NSFilenamesPboardType"];
+	if ([legacy isKindOfClass:[NSArray class]]) {
+		for (id path in (NSArray *) legacy) {
+			if (![path isKindOfClass:[NSString class]]) {
+				continue;
+			}
+			std::string p = [(NSString *) path UTF8String];
+			if (std::find(paths.begin(), paths.end(), p) == paths.end()) {
+				paths.push_back(p);
+			}
+		}
+	}
 	return paths;
 }
 
@@ -440,6 +456,38 @@ static NSOperationQueue *promiseReceivingQueue() {
 	}
 	return queue;
 }
+
+static size_t numFilesPromisedBy(NSFilePromiseReceiver *promise) {
+	return std::max<size_t>(std::max(promise.fileNames.count, promise.fileTypes.count), 1);
+}
+
+class PromisedFileBatch {
+public:
+	explicit PromisedFileBatch(size_t numExpectedFiles)
+		: outstanding(numExpectedFiles) {}
+
+	void fileReceived(ScopedUrlRef path) {
+		std::lock_guard<std::mutex> lock(mutex);
+		paths.push_back(std::move(path));
+	}
+
+	std::vector<ScopedUrlRef> fileFinished(size_t numFiles) {
+		std::lock_guard<std::mutex> lock(mutex);
+		if (outstanding > numFiles) {
+			outstanding -= numFiles;
+			return {};
+		}
+		outstanding = 0;
+		auto batch	= std::move(paths);
+		paths.clear();
+		return batch;
+	}
+
+private:
+	std::mutex mutex;
+	size_t outstanding = 0;
+	std::vector<ScopedUrlRef> paths;
+};
 
 static ScopedUrlRef scopedReceivedFile(NSURL *url) {
 	std::string path = [[url path] UTF8String];
@@ -529,19 +577,34 @@ static NSURL *makePromisedFilesDir() {
 }
 
 - (BOOL)receivePromisedFiles:(NSArray<NSFilePromiseReceiver *> *)promises {
-	if (promises.count == 0) return NO;
+	if (promises.count == 0) {
+		return NO;
+	}
 
-	NSURL *destination = makePromisedFilesDir();
-	if (destination == nil) return NO;
+	size_t numExpectedFiles = 0;
+	for (NSFilePromiseReceiver *promise in promises) {
+		numExpectedFiles += numFilesPromisedBy(promise);
+	}
 
-	[promises retain];
-
-	__block NSUInteger outstanding	  = promises.count;
-	NSMutableArray<NSURL *> *received = [[NSMutableArray alloc] init];
-
+	auto batch									= std::make_shared<PromisedFileBatch>(numExpectedFiles);
 	std::shared_ptr<EventDispatcher> dispatcher = eventDispatcher;
 
+	auto deliver = [dispatcher](std::vector<ScopedUrlRef> paths) {
+		if (paths.empty()) {
+			return;
+		}
+		dispatcher->app->main.runOnMainThread(true,
+											  [dispatcher, paths]() { dispatcher->filesDropped(paths, 0); });
+	};
+
+	BOOL receivingAnything = NO;
 	for (NSFilePromiseReceiver *promise in promises) {
+		NSURL *destination = makePromisedFilesDir();
+		if (destination == nil) {
+			deliver(batch->fileFinished(numFilesPromisedBy(promise)));
+			continue;
+		}
+		receivingAnything = YES;
 		[promise receivePromisedFilesAtDestination:destination
 										   options:@{}
 									operationQueue:promiseReceivingQueue()
@@ -550,24 +613,12 @@ static NSURL *makePromisedFilesDir() {
 												  Log::e() << "couldn't receive dropped file: "
 														   << [[error localizedDescription] UTF8String];
 											  } else {
-												  [received addObject:url];
+												  batch->fileReceived(scopedReceivedFile(url));
 											  }
-											  if (--outstanding > 0) return;
-
-											  std::vector<ScopedUrlRef> paths;
-											  for (NSURL *receivedUrl in received) {
-												  paths.push_back(scopedReceivedFile(receivedUrl));
-											  }
-											  [received release];
-											  [promises release];
-											  if (paths.empty()) return;
-
-											  dispatcher->app->main.runOnMainThread(true, [dispatcher, paths]() {
-												  dispatcher->filesDropped(paths, 0);
-											  });
+											  deliver(batch->fileFinished(1));
 											}];
 	}
-	return YES;
+	return receivingAnything;
 }
 - (void)draggingEnded:(id<NSDraggingInfo>)sender {
 	if (!dropped) {
