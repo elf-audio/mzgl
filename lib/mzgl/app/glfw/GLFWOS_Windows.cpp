@@ -1,4 +1,5 @@
 #include "GLFWOS.h"
+#include <Windows.h>
 #ifndef MZGL_SOKOL
 #	include <glew.h>
 #endif
