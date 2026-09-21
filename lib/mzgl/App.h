@@ -38,6 +38,9 @@ public:
 	virtual ~App() {}
 
 	virtual std::string getName() { return "hello"; }
+	// Desktop application ID (reverse-DNS, e.g. "com.example.App"). On Linux it's used as the
+	// Wayland app_id / X11 WM_CLASS and should match the basename of the app's .desktop file.
+	virtual std::string getAppId() { return ""; }
 	// KEYS
 	virtual void keyDown(int key) {}
 	virtual void keyUp(int key) {}

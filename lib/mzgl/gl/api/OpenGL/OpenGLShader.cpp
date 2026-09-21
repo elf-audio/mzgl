@@ -167,7 +167,7 @@ void OpenGLShader::load(const std::string &vertexFilePath, const std::string &fr
 
 std::string OpenGLShader::getVersionForPlatform(bool isVertShader) {
 	std::string version = "#version 150\n"; // this is GL version 3.2
-#if TARGET_OS_IOS || defined(__ANDROID__) || defined(__arm__) || defined(USE_METALANGLE) || defined(__linux__)
+#if TARGET_OS_IOS || defined(__ANDROID__) || defined(USE_METALANGLE) || defined(__linux__)
 	version = "#version 300 es\nprecision highp float;\n";
 #endif
 	return version;
@@ -202,7 +202,7 @@ void OpenGLShader::createProgram(GLuint vertexShader, GLuint fragmentShader) {
 		glAttachShader(shaderProgram, vertexShader);
 		glAttachShader(shaderProgram, fragmentShader);
 
-#if !TARGET_OS_IOS && !defined(__ANDROID__) && !defined(__arm__) && defined(MZGL_GL3)
+#if !TARGET_OS_IOS && !defined(__ANDROID__) && defined(MZGL_GL3)
 		// GL ES3 uses the built-in gl_FragCoord variable name for output,
 		// OpenGL 3 on computer can have arbitarily defined outputs.
 		glBindFragDataLocation(shaderProgram, 0, "fragColor");

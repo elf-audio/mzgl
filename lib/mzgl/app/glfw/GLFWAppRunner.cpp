@@ -194,6 +194,15 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 }
 
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
+	// GLFW reports the cursor in window coordinates, but graphics is sized in framebuffer
+	// pixels. These differ on HiDPI (e.g. Wayland with a scaled output), so convert.
+	int winW, winH, fbW, fbH;
+	glfwGetWindowSize(window, &winW, &winH);
+	glfwGetFramebufferSize(window, &fbW, &fbH);
+	if (winW > 0 && winH > 0) {
+		xpos *= (double) fbW / winW;
+		ypos *= (double) fbH / winH;
+	}
 	windowEventHandler.cursorPos(getEventDispatcher(window), static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
@@ -287,17 +296,9 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #	else
 
-#		ifdef __arm__ // raspberry pi?
-	// so we're going for gles
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#		else
-
 	// this was set to 2.0 before, I bumped it to 3.2 so I can use imgui
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-#		endif
 
 #	endif
 #endif
@@ -340,6 +341,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	}
 
 	Log::d() << "Request window " << (graphics.width) << " x " << (graphics.height);
+
+	const std::string appId = app->getAppId();
+	if (!appId.empty()) {
+		glfwWindowHintString(GLFW_WAYLAND_APP_ID, appId.c_str());
+		glfwWindowHintString(GLFW_X11_CLASS_NAME, appId.c_str());
+		glfwWindowHintString(GLFW_X11_INSTANCE_NAME, appId.c_str());
+	}
 
 	window = glfwCreateWindow(graphics.width, graphics.height, "mzgl", NULL, NULL);
 	if (!window) {
