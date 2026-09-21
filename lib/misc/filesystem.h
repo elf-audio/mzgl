@@ -4,6 +4,9 @@
 #include <fstream>
 #include <string>
 #include <ostream>
+#include <cstdint>
+#include <iterator>
+#include <system_error>
 
 #if defined(_WIN32) || defined(WIN32)
 
@@ -189,15 +192,142 @@ namespace winfs {
 		return path(std::filesystem::temp_directory_path(ec));
 	}
 
-	using std::filesystem::absolute;
-	using std::filesystem::canonical;
+	// Every function that hands a path back must hand back a winfs::path, otherwise
+	// the caller is holding a raw std::filesystem::path again and its string() goes
+	// through the ANSI code page - which throws std::system_error for any character
+	// it can't represent. `auto p = entry.path(); p.filename().string()` on a song
+	// called "🎹 my song" crashed Koala at every launch that way (2.0.8 crash
+	// reports), so directory entries and iterators are wrapped below too.
+	inline path current_path() { return path(std::filesystem::current_path()); }
+	inline path current_path(std::error_code &ec) { return path(std::filesystem::current_path(ec)); }
+	inline void current_path(const path &p) { std::filesystem::current_path(p.inner); }
+	inline void current_path(const path &p, std::error_code &ec) { std::filesystem::current_path(p.inner, ec); }
+	inline path absolute(const path &p) { return path(std::filesystem::absolute(p.inner)); }
+	inline path absolute(const path &p, std::error_code &ec) { return path(std::filesystem::absolute(p.inner, ec)); }
+	inline path canonical(const path &p) { return path(std::filesystem::canonical(p.inner)); }
+	inline path canonical(const path &p, std::error_code &ec) {
+		return path(std::filesystem::canonical(p.inner, ec));
+	}
+
+	class directory_entry {
+	public:
+		directory_entry() = default;
+		directory_entry(const std::filesystem::directory_entry &e)
+			: inner(e) {}
+		directory_entry(std::filesystem::directory_entry &&e)
+			: inner(std::move(e)) {}
+
+		winfs::path path() const { return winfs::path(inner.path()); }
+		// lets fs::is_directory(entry), fs::file_size(entry) etc. keep working
+		operator const std::filesystem::path &() const { return inner.path(); }
+
+		bool exists() const { return inner.exists(); }
+		bool is_directory() const { return inner.is_directory(); }
+		bool is_regular_file() const { return inner.is_regular_file(); }
+		bool is_symlink() const { return inner.is_symlink(); }
+		std::uintmax_t file_size() const { return inner.file_size(); }
+		std::filesystem::file_time_type last_write_time() const { return inner.last_write_time(); }
+		std::filesystem::file_status status() const { return inner.status(); }
+		std::filesystem::file_status symlink_status() const { return inner.symlink_status(); }
+
+		const std::filesystem::directory_entry &std_entry() const { return inner; }
+
+	private:
+		std::filesystem::directory_entry inner;
+	};
+
+	template <class StdIterator>
+	class basic_directory_iterator {
+	public:
+		using iterator_category = std::input_iterator_tag;
+		using value_type		= directory_entry;
+		using difference_type	= std::ptrdiff_t;
+		using pointer			= const directory_entry *;
+		using reference			= const directory_entry &;
+
+		basic_directory_iterator() = default;
+		explicit basic_directory_iterator(const winfs::path &p)
+			: it(p.inner) {
+			refresh();
+		}
+		basic_directory_iterator(const winfs::path &p, std::error_code &ec)
+			: it(p.inner, ec) {
+			refresh();
+		}
+		basic_directory_iterator(const winfs::path &p, std::filesystem::directory_options options)
+			: it(p.inner, options) {
+			refresh();
+		}
+		basic_directory_iterator(const winfs::path &p,
+								 std::filesystem::directory_options options,
+								 std::error_code &ec)
+			: it(p.inner, options, ec) {
+			refresh();
+		}
+
+		reference operator*() const { return current; }
+		pointer operator->() const { return &current; }
+
+		basic_directory_iterator &operator++() {
+			++it;
+			refresh();
+			return *this;
+		}
+		basic_directory_iterator &increment(std::error_code &ec) {
+			it.increment(ec);
+			refresh();
+			return *this;
+		}
+
+		friend bool operator==(const basic_directory_iterator &a, const basic_directory_iterator &b) {
+			return a.it == b.it;
+		}
+		friend bool operator!=(const basic_directory_iterator &a, const basic_directory_iterator &b) {
+			return a.it != b.it;
+		}
+
+		// range-for support, found by ADL like the std ones
+		friend basic_directory_iterator begin(basic_directory_iterator iter) { return iter; }
+		friend basic_directory_iterator end(const basic_directory_iterator &) { return {}; }
+
+	protected:
+		void refresh() { current = (it == StdIterator()) ? directory_entry() : directory_entry(*it); }
+
+		StdIterator it;
+		directory_entry current;
+	};
+
+	using directory_iterator = basic_directory_iterator<std::filesystem::directory_iterator>;
+
+	class recursive_directory_iterator
+		: public basic_directory_iterator<std::filesystem::recursive_directory_iterator> {
+	public:
+		using basic_directory_iterator::basic_directory_iterator;
+
+		int depth() const { return it.depth(); }
+		bool recursion_pending() const { return it.recursion_pending(); }
+		std::filesystem::directory_options options() const { return it.options(); }
+		void disable_recursion_pending() { it.disable_recursion_pending(); }
+		void pop() {
+			it.pop();
+			refresh();
+		}
+		void pop(std::error_code &ec) {
+			it.pop(ec);
+			refresh();
+		}
+
+		friend recursive_directory_iterator begin(recursive_directory_iterator iter) { return iter; }
+		friend recursive_directory_iterator end(const recursive_directory_iterator &) { return {}; }
+	};
+
+	using std::filesystem::directory_options;
+
 	using std::filesystem::copy;
 	using std::filesystem::copy_file;
 	using std::filesystem::copy_options;
 	using std::filesystem::create_directories;
 	using std::filesystem::create_directory;
-	using std::filesystem::current_path;
-	using std::filesystem::directory_iterator;
 	using std::filesystem::exists;
 	using std::filesystem::file_size;
 	using std::filesystem::file_time_type;
@@ -206,7 +336,6 @@ namespace winfs {
 	using std::filesystem::is_regular_file;
 	using std::filesystem::is_symlink;
 	using std::filesystem::last_write_time;
-	using std::filesystem::recursive_directory_iterator;
 	using std::filesystem::remove;
 	using std::filesystem::remove_all;
 	using std::filesystem::rename;
