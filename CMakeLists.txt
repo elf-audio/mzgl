@@ -76,7 +76,6 @@ set(MZGL_SOURCES
     lib/mzgl/gl/drawing/Drawer.cpp
     lib/mzgl/gl/drawing/MitredLine.cpp
     lib/mzgl/gl/drawing/ShapeLUT.cpp
-    lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/midi/MidiMessage.cpp
     lib/mzgl/midi/MidiMessage.h
@@ -519,27 +518,22 @@ cmake_policy(SET CMP0077 NEW)
 set(PA_BUILD_STATIC ON)
 set(PA_BUILD_SHARED OFF)
 
-if(NOT ANDROID)
-  if(NOT APPLE) # macOS uses the Cocoa runner, never GLFW
-    mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
-    # On Linux, build both backends: GLFW picks native Wayland at runtime when available
-    # (crisp HiDPI / fractional scaling) and falls back to X11 otherwise.
-    if(UNIX AND NOT APPLE)
-      set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
-      set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW with X11 support")
-    endif()
-    mzgl_save_cmake_log_level()
-    add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
-    mzgl_restore_cmake_log_level()
+# GLFW and RtMidi are Windows/Linux only: Apple uses the Cocoa/UIKit runners and
+# CoreMIDI, Android uses native_app_glue and AMidi.
+if(NOT ANDROID AND NOT APPLE)
+  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
+  # On Linux, build both backends: GLFW picks native Wayland at runtime when available
+  # (crisp HiDPI / fractional scaling) and falls back to X11 otherwise.
+  if(UNIX)
+    set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
+    set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW with X11 support")
   endif()
+  mzgl_save_cmake_log_level()
+  add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
+  mzgl_restore_cmake_log_level()
 
-if(NOT ANDROID)
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
-  # add_subdirectory("lib/RtMidi" "rtmidi-build")
-  if(APPLE)
-    set_source_files_properties(lib/rtmidi/RtMidi.cpp
-                                PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
-  elseif(USING_OPENGL)
+  if(USING_OPENGL)
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)
@@ -623,7 +617,6 @@ elseif(APPLE)
       target_link_libraries(libmzgl "-framework OpenGLES")
     endif()
   else()
-    add_compile_definitions(__MACOSX_CORE__)
     # No OpenGL.framework: macOS builds are Metal/sokol-Metal only (see
     # GraphicsBackend.cmake), and MZGLView (NSOpenGLView) / glew / GLFW are not
     # compiled on Apple.
@@ -776,8 +769,8 @@ if(WIN32)
   list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
   mzgl_restore_cmake_log_level()
 endif()
-if(NOT ANDROID AND NOT IOS)
-  list(APPEND MZGL_LIBS RtMidi $<$<NOT:$<PLATFORM_ID:Darwin>>:glfw>)
+if(NOT ANDROID AND NOT APPLE)
+  list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
 
 target_link_libraries(libmzgl ${MZGL_LIBS})

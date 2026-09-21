@@ -22,10 +22,6 @@ public:
 class AllMidiDevicesImpl;
 class MainThreadRunner;
 
-// this forces the RtMidi implementation for testing on mac
-// not to be used in production.
-//#define FORCE_RTMIDI
-
 class AllMidiDevices {
 public:
 	// you can disable actual midi for testing or offline rendering by passing in online = false
