@@ -66,9 +66,11 @@ namespace unit_test::dialogs {
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 UIViewController *getTopController(App &app) {
-	UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+	// Prefer the app's own view controller: AUv3 instances share one extension process, so keyWindow
+	// belongs to whichever instance happens to be key, not necessarily the one asking for the dialog.
+	UIViewController *topController = ((__bridge UIViewController *) app.viewController);
 	if (topController == nil) {
-		topController = ((__bridge UIViewController *) app.viewController);
+		topController = [UIApplication sharedApplication].keyWindow.rootViewController;
 	}
 	while (topController.presentedViewController) {
 		topController = topController.presentedViewController;
