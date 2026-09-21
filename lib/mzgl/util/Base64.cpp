@@ -1,5 +1,6 @@
 #include "Base64.h"
 #include <stdexcept>
+#include <cstdint>
 
 std::vector<char> Base64::decode(const std::string &base64) {
 	static const std::string base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

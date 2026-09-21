@@ -76,7 +76,6 @@ set(MZGL_SOURCES
     lib/mzgl/gl/drawing/Drawer.cpp
     lib/mzgl/gl/drawing/MitredLine.cpp
     lib/mzgl/gl/drawing/ShapeLUT.cpp
-    lib/mzgl/midi/Midi.cpp
     lib/mzgl/midi/AllMidiDevices.cpp
     lib/mzgl/midi/MidiMessage.cpp
     lib/mzgl/midi/MidiMessage.h
@@ -133,10 +132,6 @@ set(MZGL_SOURCES
     lib/mzgl/app/mac/EventsView.mm
     lib/mzgl/app/mac/NSBlockButton.m
     lib/mzgl/app/mac/MacFilePickerDelegate.mm
-    # MZGLView (NSOpenGLView) is compiled for every backend: it only renders
-    # under MZGL_OPENGL, but koala's TouchBar category (MZGLView+
-    # TouchBarExtensions.mm) needs the class to exist in all builds.
-    lib/mzgl/app/mac/GL/MZGLView.mm
     lib/mzgl/app/mac/LayerExplorer.mm
     lib/mzgl/app/mac/TextConsole.mm
     lib/mzgl/app/mac/mainMac.mm
@@ -176,9 +171,9 @@ if(IOS)
        lib/mzgl/app/web/MZWebView.cpp)
 endif()
 
-if(NOT ANDROID AND NOT IOS)
-  # GLFW desktop app-runner + glew. Not used on iOS (which runs via app/ios/
-  # mainiOS.mm); glfw3.h pulls in OpenGL/gl.h which doesn't exist on iOS.
+if(NOT ANDROID AND NOT APPLE)
+  # GLFW: macOS runs the Cocoa app (app/mac/mainMac.mm), iOS runs app/ios/.
+  # GLFW desktop app-runner (Windows / Linux / web). Apple platforms never use
   list(
     APPEND
     MZGL_SOURCES
@@ -194,11 +189,10 @@ if(NOT ANDROID AND NOT IOS)
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
     lib/mzgl/app/glfw/GLFWOS_Windows.cpp
-    >
-    $<$<PLATFORM_ID:Darwin>:
-    lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Mac.cpp
-    lib/mzgl/app/glfw/GLFWOS_Mac.cpp
     >)
+endif()
+
+if(NOT ANDROID AND NOT IOS)
   if(USING_OPENGL OR NOT WIN32)
     list(APPEND MZGL_SOURCES lib/glew/src/glew.c)
   endif()
@@ -318,6 +312,10 @@ endif(MZGL_UNIT_TEST)
 
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
+# GCC 16 reports a false-positive -Wuninitialized in xml_document::_move.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(pu_gixml PRIVATE -Wno-error=uninitialized)
+endif()
 
 mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/ZipFile")
 mzgl_save_cmake_log_level()
@@ -520,18 +518,22 @@ cmake_policy(SET CMP0077 NEW)
 set(PA_BUILD_STATIC ON)
 set(PA_BUILD_SHARED OFF)
 
-if(NOT ANDROID)
+# GLFW and RtMidi are Windows/Linux only: Apple uses the Cocoa/UIKit runners and
+# CoreMIDI, Android uses native_app_glue and AMidi.
+if(NOT ANDROID AND NOT APPLE)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
+  # On Linux, build both backends: GLFW picks native Wayland at runtime when available
+  # (crisp HiDPI / fractional scaling) and falls back to X11 otherwise.
+  if(UNIX)
+    set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
+    set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW with X11 support")
+  endif()
   mzgl_save_cmake_log_level()
   add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
   mzgl_restore_cmake_log_level()
 
   add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
-  # add_subdirectory("lib/RtMidi" "rtmidi-build")
-  if(APPLE)
-    set_source_files_properties(lib/rtmidi/RtMidi.cpp
-                                PROPERTIES COMPILE_FLAGS "-Wno-vla-extension")
-  elseif(USING_OPENGL)
+  if(USING_OPENGL)
     find_package(OpenGL REQUIRED)
   endif()
   add_dependencies(libmzgl RtMidi)
@@ -615,10 +617,11 @@ elseif(APPLE)
       target_link_libraries(libmzgl "-framework OpenGLES")
     endif()
   else()
-    add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
+    # No OpenGL.framework: macOS builds are Metal/sokol-Metal only (see
+    # GraphicsBackend.cmake), and MZGLView (NSOpenGLView) / glew / GLFW are not
+    # compiled on Apple.
     target_link_libraries(
       libmzgl
-      "-framework OpenGL"
       "-framework Metal"
       "-framework MetalKit"
       "-framework Accelerate"
@@ -766,7 +769,7 @@ if(WIN32)
   list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
   mzgl_restore_cmake_log_level()
 endif()
-if(NOT ANDROID AND NOT IOS)
+if(NOT ANDROID AND NOT APPLE)
   list(APPEND MZGL_LIBS RtMidi glfw)
 endif()
 
@@ -782,7 +785,6 @@ if(NOT ANDROID)
     # them the macOS test/headless link fails with undefined Metal symbols.
     target_link_libraries(
       libmzgl_unit_test
-      "-framework OpenGL"
       "-framework Metal"
       "-framework MetalKit"
       "-framework Accelerate"

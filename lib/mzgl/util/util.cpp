@@ -579,10 +579,7 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 	return (dataPath / path).string();
 #endif
 
-#if defined(__APPLE__) && defined(MZGL_MAC_GLFW)
-
-	return "data/" + path;
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 
 	if (appBundleId.empty()) {
 		// Resolved once. Normally the bundle's own data/ folder, but an app
@@ -794,14 +791,10 @@ std::string docsPath(const std::string &path) {
 	return retPath;
 
 #elif defined(__linux__)
-#	ifdef __arm__
-	return "/home/pi/Documents/koala/" + path;
-#	else
 	std::string docsPath = "../Documents/Koala";
 	fs::create_directories(docsPath);
 
 	return docsPath + "/" + path;
-#	endif
 #else
 	Log::e() << "docsPath not implemented";
 	return "";

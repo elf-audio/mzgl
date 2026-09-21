@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "RtMidiPorts.h"
+
 class AllMidiDevicesRtMidiImpl
 	: public MidiListener
 	, public AllMidiDevicesImpl {

@@ -10,6 +10,7 @@
 
 #include "DrawingFunction.h"
 #include <memory>
+#include <algorithm>
 
 // this is what your dragger should inherit from
 class Dragger {

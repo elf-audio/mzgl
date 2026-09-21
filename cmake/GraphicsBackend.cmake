@@ -73,6 +73,13 @@ elseif(_mzgl_backend_lower STREQUAL "metal")
   set(USING_METAL ON)
   set(MZGL_BACKEND_COMPILE_DEFS MZGL_METAL MZGL_COMPILED_SHADERS)
 elseif(_mzgl_backend_lower STREQUAL "opengl")
+  if(APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES "iOS")
+    message(
+      FATAL_ERROR
+        "MZGL_GRAPHICS_BACKEND=OpenGL is not supported on macOS any more: the "
+        "GL backend, glew, GLFW and the NSOpenGLView are no longer built there. "
+        "Use Metal (default) or Sokol.")
+  endif()
   set(USING_OPENGL ON)
   set(MZGL_BACKEND_COMPILE_DEFS MZGL_OPENGL)
 else()

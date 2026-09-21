@@ -87,7 +87,7 @@ void Int16Buffer::getMinMax(float &inMin, float &inMax) const {
 }
 
 void Int16Buffer::normalizeAudio() {
-	float inMin, inMax;
+	float inMin = 0.f, inMax = 0.f;
 	getMinMax(inMin, inMax);
 
 	float loudest = std::max(std::abs(inMin), std::abs(inMax));

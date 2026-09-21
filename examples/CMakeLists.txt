@@ -13,7 +13,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment ver
 project("examples")
 
 
-add_compile_definitions(GL_SILENCE_DEPRECATION __MACOSX_CORE__)
+add_compile_definitions(GL_SILENCE_DEPRECATION)
 
 
 # Resolve the graphics backend here too (idempotent) so MZGL_BACKEND_COMPILE_DEFS
