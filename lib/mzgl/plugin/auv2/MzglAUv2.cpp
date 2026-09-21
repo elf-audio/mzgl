@@ -21,6 +21,26 @@ namespace mzglau {
 namespace {
 	const CFStringRef kStateKey = CFSTR("mzgl-plugin-state");
 
+	// CFData over a shared buffer, no copy: the data's byte deallocator drops
+	// the shared_ptr when the host releases it.
+	CFDataRef cfDataSharingBytes(std::shared_ptr<const std::vector<uint8_t>> blob) {
+		if (!blob || blob->empty()) return CFDataCreate(nullptr, nullptr, 0);
+		using Holder = std::shared_ptr<const std::vector<uint8_t>>;
+		auto *holder = new Holder(std::move(blob));
+		CFAllocatorContext ctx {};
+		ctx.info	 = holder;
+		ctx.allocate = [](CFIndex size, CFOptionFlags, void *) -> void * { return malloc(static_cast<size_t>(size)); };
+		ctx.deallocate = [](void *, void *info) { delete static_cast<Holder *>(info); };
+		CFAllocatorRef bytesDeallocator = CFAllocatorCreate(kCFAllocatorDefault, &ctx);
+		CFDataRef data					= CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+													 (*holder)->data(),
+													 static_cast<CFIndex>((*holder)->size()),
+													 bytesDeallocator);
+		CFRelease(bytesDeallocator); // the data holds its own reference
+		if (data == nullptr) delete holder;
+		return data;
+	}
+
 	// Where our .component lives: <Plugin>.component/Contents/MacOS/<Plugin> -> bundle dir.
 	fs::path componentBundlePath() {
 		Dl_info info;
@@ -324,10 +344,10 @@ template <class AUBaseT>
 OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
 	const OSStatus result = AUBaseT::SaveState(outData);
 	if (result != noErr) return result;
-	std::vector<uint8_t> blob;
-	plugin->serialize(blob);
+	// One exactly-sized buffer from the plugin, handed to CF without a copy.
 	auto dict	   = const_cast<CFMutableDictionaryRef>(static_cast<CFDictionaryRef>(*outData));
-	CFDataRef data = CFDataCreate(nullptr, blob.data(), static_cast<CFIndex>(blob.size()));
+	CFDataRef data = cfDataSharingBytes(plugin->serializeShared());
+	if (data == nullptr) return kAudioUnitErr_FailedInitialization;
 	CFDictionarySetValue(dict, kStateKey, data);
 	CFRelease(data);
 	return noErr;
@@ -340,9 +360,16 @@ OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
 	auto dict = static_cast<CFDictionaryRef>(plist);
 	auto data = static_cast<CFDataRef>(CFDictionaryGetValue(dict, kStateKey));
 	if (data != nullptr && CFGetTypeID(data) == CFDataGetTypeID()) {
-		const auto *bytes = CFDataGetBytePtr(data);
-		std::vector<uint8_t> blob(bytes, bytes + CFDataGetLength(data));
-		plugin->deserialize(blob);
+		// Stream straight out of the host's buffer; no copy of the blob.
+		const auto *bytes	= CFDataGetBytePtr(data);
+		const size_t length = static_cast<size_t>(CFDataGetLength(data));
+		size_t pos			= 0;
+		plugin->deserializeStreamed([&](void *out, size_t n) {
+			const size_t take = std::min(n, length - pos);
+			if (take) std::memcpy(out, bytes + pos, take);
+			pos += take;
+			return take;
+		});
 	}
 	mirrorPluginParameters();
 	return noErr;

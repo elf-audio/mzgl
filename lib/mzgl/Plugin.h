@@ -12,6 +12,7 @@
 #include <functional>
 #include <map>
 #include <atomic>
+#include <memory>
 
 #include "util.h"
 #include "util/log.h"
@@ -32,6 +33,27 @@ public:
 	virtual void serializeByNSDictionary(const void *nsdict) {}
 	virtual void deserializeByNSDictionary(const void *nsdict) {}
 	virtual bool wantsToSerializeWithNSDictionary() { return false; }
+
+	// Copy-free variants for hosts that hand over / take a byte stream. The
+	// defaults wrap serialize()/deserialize(); plugins with big state (Koala)
+	// override them so the blob is built once, in place, and restored straight
+	// from the host's bytes.
+	virtual std::shared_ptr<const std::vector<uint8_t>> serializeShared() {
+		auto v = std::make_shared<std::vector<uint8_t>>();
+		serialize(*v);
+		return v;
+	}
+	// `read` fills up to n bytes and returns how many it wrote; 0 = end.
+	virtual void deserializeStreamed(const std::function<size_t(void *, size_t)> &read) {
+		std::vector<uint8_t> data;
+		std::vector<uint8_t> chunk(64 * 1024);
+		for (;;) {
+			const size_t n = read(chunk.data(), chunk.size());
+			if (n == 0) break;
+			data.insert(data.end(), chunk.begin(), chunk.begin() + static_cast<std::ptrdiff_t>(n));
+		}
+		deserialize(data);
+	}
 
 	virtual void loadFromFile(std::string path) {
 		std::vector<uint8_t> data;
