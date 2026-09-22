@@ -37,16 +37,6 @@ CoreMidiDevice::CoreMidiDevice(MIDIEndpointRef endpoint)
 	name = nameOfEndpoint(endpoint);
 }
 
-std::shared_ptr<MidiDevice> getInputDeviceForEndpointRef(const CoreMidiDevice &device,
-														 const std::vector<CoreMidiInRef> &midiIns) {
-	for (const auto &src: midiIns) {
-		if (src->endpoint == device.endpoint) {
-			return src;
-		}
-	}
-	return nullptr;
-}
-
 std::optional<MIDIEndpointRef> getEndpointRefForOutputDevice(const std::shared_ptr<MidiDevice> &device,
 															 const std::vector<CoreMidiOutRef> &midiOuts) {
 	for (ItemCount index = 0; index < MIDIGetNumberOfDestinations(); ++index) {
@@ -223,6 +213,12 @@ void AllMidiDevicesAppleImpl::disconnectOutput(MIDIEndpointRef endpoint) {
 void AllMidiDevicesAppleImpl::connectInput(MIDIEndpointRef endpoint) {
 	Log::d() << "Connecting source " << nameOfEndpoint(endpoint);
 	auto src = CoreMidiIn::create(endpoint);
+	src->parser = std::make_unique<MidiMessageParser>(
+		[this, weakSrc = std::weak_ptr<CoreMidiIn>(src)](const MidiMessageParser::MidiData &data) {
+			if (auto dev = weakSrc.lock()) {
+				midiReceived(dev, MidiMessage(data.data), data.timestamp);
+			}
+		});
 	midiIns.push_back(src);
 
 	notifyConnection(src);
@@ -267,50 +263,17 @@ void AllMidiDevicesAppleImpl::midiReceived(const std::shared_ptr<MidiDevice> &de
 }
 
 void AllMidiDevicesAppleImpl::packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList) {
-	// there is a bug here probably if you were to send multiple streams of data
-	// there is no distinguishing between different devices in regard to pendingMsg.
-	// you'd need one per device.
-	// Log::e() << "Packet list received from " << device.name;
-	auto theDevice = getInputDeviceForEndpointRef(device, midiIns);
-	if (theDevice == nullptr) {
+	auto in = getInput(device.endpoint);
+	if (in == nullptr || in->parser == nullptr) {
 		return;
 	}
 
-	auto sendPending = [this, theDevice](MIDITimeStamp timestamp) {
-		if (pendingMsg.empty()) {
-			return;
-		}
-		midiReceived(theDevice, MidiMessage(pendingMsg), timestamp);
-		pendingMsg.clear();
-	};
-
-	auto isSingleByteMessage = [](uint8_t data) { return data >= 0xF8; };
-	auto isStatusByte		 = [](uint8_t data) { return data & 0x80; };
-
+	// Each packet is a raw byte stream, not necessarily one message - it can hold
+	// several messages, part of one, or data bytes relying on running status
+	// (Bluetooth MIDI devices do this a lot). The per-device parser sorts it out.
 	const MIDIPacket *packet = &packetList->packet[0];
-	for (int whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
-		for (int i = 0; i < packet->length; i++) {
-			if (packet->data[i] == MidiMessageConstants::MIDI_SYSEX) {
-				pendingMsg.clear();
-				pendingMsg.push_back(packet->data[i]);
-			} else if (packet->data[i] == MidiMessageConstants::MIDI_SYSEX_END) {
-				pendingMsg.push_back(packet->data[i]);
-				sendPending(packet->timeStamp);
-			} else if (isSingleByteMessage(packet->data[i])) {
-				pendingMsg.clear();
-				pendingMsg.push_back(packet->data[i]);
-				sendPending(packet->timeStamp);
-			} else if (isStatusByte(packet->data[i])) {
-				sendPending(packet->timeStamp);
-				pendingMsg.push_back(packet->data[i]);
-			} else {
-				pendingMsg.push_back(packet->data[i]);
-				auto expectedLength = MidiMessage::getExpectedMessageLength(pendingMsg[0]);
-				if (expectedLength.has_value() && expectedLength > 0 && pendingMsg.size() >= expectedLength) {
-					sendPending(packet->timeStamp);
-				}
-			}
-		}
+	for (UInt32 whichPacket = 0; whichPacket < packetList->numPackets; ++whichPacket) {
+		in->parser->parse(packet->data, packet->length, packet->timeStamp);
 		packet = MIDIPacketNext(packet);
 	}
 }

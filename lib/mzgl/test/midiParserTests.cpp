@@ -101,9 +101,13 @@ SCENARIO("Running status is handled correctly for simultaneous note-ons", "[midi
 		// This is what Android delivers when 3 notes are pressed simultaneously:
 		// First note has status byte, subsequent notes omit it (running status)
 		const std::vector<MidiMessageParser::MidiByte> runningStatusData {
-			0x90, 0x3C, 0x7F, // note on C4
-			0x3E, 0x7F,       // note on D4 (running status - no 0x90)
-			0x40, 0x7F,       // note on E4 (running status - no 0x90)
+			0x90,
+			0x3C,
+			0x7F, // note on C4
+			0x3E,
+			0x7F, // note on D4 (running status - no 0x90)
+			0x40,
+			0x7F, // note on E4 (running status - no 0x90)
 		};
 
 		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
@@ -204,6 +208,119 @@ SCENARIO("Midi messages for polypressure are valid with channels", "[midi-parser
 				REQUIRE(message.getBytes()[1] == 0x3C);
 				REQUIRE(message.getBytes()[2] == 0x64);
 				REQUIRE(message.isPolyPressure());
+			}
+		}
+	}
+}
+SCENARIO("Running status alternating note on and note off, as a BLE keyboard sends it", "[midi-parser]") {
+	GIVEN("A stream where only the first message carries a status byte") {
+		// CoreMIDI hands Bluetooth MIDI packets through with running status intact,
+		// so after the first note-on every following note is just two data bytes.
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3C, 0x64},
+			{0x90, 0x3C, 0x00},
+			{0x90, 0x3E, 0x50},
+			{0x90, 0x3E, 0x00},
+		};
+
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+
+		WHEN("Each note arrives in its own packet") {
+			const std::vector<MidiMessageParser::MidiByte> p1 {0x90, 0x3C, 0x64};
+			const std::vector<MidiMessageParser::MidiByte> p2 {0x3C, 0x00};
+			const std::vector<MidiMessageParser::MidiByte> p3 {0x3E, 0x50};
+			const std::vector<MidiMessageParser::MidiByte> p4 {0x3E, 0x00};
+			parser.parse(p1.data(), p1.size(), 1);
+			parser.parse(p2.data(), p2.size(), 2);
+			parser.parse(p3.data(), p3.size(), 3);
+			parser.parse(p4.data(), p4.size(), 4);
+			THEN("All four messages come out with the status byte restored") {
+				REQUIRE(messageCounter == 4);
+			}
+		}
+	}
+}
+
+SCENARIO("Realtime bytes in the middle of a message don't corrupt it", "[midi-parser]") {
+	GIVEN("A note-on with a clock byte between its data bytes") {
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0xF8},
+			{0x90, 0x3C, 0x7F},
+			{0xFE},
+			{0x90, 0x3E, 0x7F},
+		};
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+		WHEN("The data is parsed") {
+			parser.parse({0x90, 0x3C, 0xF8, 0x7F, 0x3E, 0xFE, 0x7F}, 666, 0, 0);
+			THEN("Realtime bytes are emitted immediately and the notes stay intact") {
+				REQUIRE(messageCounter == 4);
+			}
+		}
+	}
+}
+
+SCENARIO("A status byte interrupting an incomplete message drops the partial one", "[midi-parser]") {
+	GIVEN("A truncated note-on followed by a full one") {
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3E, 0x40},
+		};
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+		WHEN("The data is parsed") {
+			parser.parse({0x90, 0x3C, 0x90, 0x3E, 0x40}, 666, 0, 0);
+			THEN("Only the complete message is emitted") {
+				REQUIRE(messageCounter == 1);
+			}
+		}
+	}
+}
+
+SCENARIO("Stray data bytes before any status byte are ignored", "[midi-parser]") {
+	GIVEN("Data bytes with no running status established") {
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(data.data == std::vector<MidiMessageParser::MidiByte> {0xB0, 0x07, 0x40});
+			messageCounter++;
+		}};
+		WHEN("The data is parsed") {
+			parser.parse({0x3C, 0x7F, 0x3E, 0xB0, 0x07, 0x40}, 666, 0, 0);
+			THEN("Only the real message is emitted") {
+				REQUIRE(messageCounter == 1);
+			}
+		}
+	}
+}
+
+SCENARIO("System common messages cancel running status", "[midi-parser]") {
+	GIVEN("A note-on, then a song select, then bare data bytes") {
+		const std::vector<std::vector<MidiMessageParser::MidiByte>> expectedMessages {
+			{0x90, 0x3C, 0x7F},
+			{0xF3, 0x05},
+		};
+		int messageCounter = 0;
+		MidiMessageParser parser {[&](const MidiMessageParser::MidiData &data) {
+			REQUIRE(messageCounter < expectedMessages.size());
+			REQUIRE(data.data == expectedMessages[messageCounter]);
+			messageCounter++;
+		}};
+		WHEN("The data is parsed") {
+			parser.parse({0x90, 0x3C, 0x7F, 0xF3, 0x05, 0x3E, 0x7F}, 666, 0, 0);
+			THEN("The trailing data bytes are not attached to the old status") {
+				REQUIRE(messageCounter == 2);
 			}
 		}
 	}

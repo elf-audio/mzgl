@@ -13,6 +13,8 @@
 
 #include <CoreMIDI/CoreMIDI.h>
 #include "MidiMessage.h"
+#include "MidiMessageParser.h"
+#include <memory>
 #include "Midi.h"
 #include "AllMidiDevicesImpl.h"
 class CoreMidiDevice : public MidiDevice {
@@ -28,6 +30,10 @@ public:
 		return std::shared_ptr<CoreMidiIn>(new CoreMidiIn(endpoint));
 	}
 	~CoreMidiIn() override = default;
+
+	// one parser per source so running status and partial messages
+	// from one device never bleed into another's stream
+	std::unique_ptr<MidiMessageParser> parser;
 
 private:
 	explicit CoreMidiIn(MIDIEndpointRef endpoint)
@@ -99,8 +105,6 @@ private:
 	void disconnectInput(MIDIEndpointRef endpoint);
 	CoreMidiInRef getInput(MIDIEndpointRef endpoint);
 	CoreMidiOutRef getOutput(MIDIEndpointRef endpoint);
-
-	std::vector<unsigned char> pendingMsg;
 
 	void midiNotifyAdd(const MIDIObjectAddRemoveNotification *notification);
 	void midiNotifyRemove(const MIDIObjectAddRemoveNotification *notification);
