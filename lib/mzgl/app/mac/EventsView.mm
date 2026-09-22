@@ -11,6 +11,11 @@
 
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"
+#include "log.h"
+#include "filesystem.h"
+
+#include <algorithm>
+#include <mutex>
 
 // the view that most recently received a left-mouse down/drag - this is the
 // view a startNativeFileDrag() call refers to (there can be several EventsViews
@@ -34,8 +39,7 @@ static EventsView *currentDragSourceView = nil;
 	return types;
 }
 
-- (NSPasteboardWritingOptions)writingOptionsForType:(NSPasteboardType)type
-										 pasteboard:(NSPasteboard *)pasteboard {
+- (NSPasteboardWritingOptions)writingOptionsForType:(NSPasteboardType)type pasteboard:(NSPasteboard *)pasteboard {
 	if ([type isEqualToString:NSPasteboardTypeFileURL]) return 0;
 	return [super writingOptionsForType:type pasteboard:pasteboard];
 }
@@ -49,10 +53,10 @@ static EventsView *currentDragSourceView = nil;
 
 @end
 
-static NSString *utiForFileAtPath(NSString *path) {
+static NSDictionary<NSString *, NSString *> *utisByExtension() {
 	static NSDictionary<NSString *, NSString *> *utis = nil;
 	if (utis == nil) {
-		utis = [@{
+		utis = [@ {
 			@"wav" : @"com.microsoft.waveform-audio",
 			@"aif" : @"public.aiff-audio",
 			@"aiff" : @"public.aiff-audio",
@@ -60,13 +64,29 @@ static NSString *utiForFileAtPath(NSString *path) {
 			@"m4a" : @"com.apple.m4a-audio",
 			@"flac" : @"org.xiph.flac",
 			@"ogg" : @"org.xiph.ogg-audio",
+			@"caf" : @"com.apple.coreaudio-format",
 		} retain];
 	}
-	NSString *uti = utis[path.pathExtension.lowercaseString];
+	return utis;
+}
+
+static NSString *utiForFileAtPath(NSString *path) {
+	NSString *uti = utisByExtension()[path.pathExtension.lowercaseString];
 	return uti != nil ? uti : @"public.data";
 }
 
+// Reverse lookup, for putting an extension on a promised file that doesn't
+// have a name yet - see promisedFileNames().
+static NSString *extensionForUTI(NSString *uti) {
+	NSDictionary<NSString *, NSString *> *utis = utisByExtension();
+	for (NSString *extension in utis) {
+		if ([utis[extension] isEqualToString:uti]) return extension;
+	}
+	return nil;
+}
+
 @interface EventsView () <NSDraggingSource, NSFilePromiseProviderDelegate>
+- (BOOL)receivePromisedFiles:(NSArray<NSFilePromiseReceiver *> *)promises;
 @end
 
 @implementation EventsView {
@@ -82,14 +102,16 @@ static NSString *utiForFileAtPath(NSString *path) {
 - (id)initWithFrame:(NSRect)frame eventDispatcher:(std::shared_ptr<EventDispatcher>)evtDispatcher {
 	self = [super initWithFrame:frame eventDispatcher:evtDispatcher];
 	if (self != nil) {
-		dropped			 = false;
-		lastShiftState	 = false;
-		lastFnState		 = false;
-		lastControlState = false;
-		lastOptionState	 = false;
-		lastCommandState = false;
-		_handlesKeyboard = YES;
-		[self registerForDraggedTypes:@[ NSPasteboardTypeFileURL ]];
+		dropped										   = false;
+		lastShiftState								   = false;
+		lastFnState									   = false;
+		lastControlState							   = false;
+		lastOptionState								   = false;
+		lastCommandState							   = false;
+		_handlesKeyboard							   = YES;
+		NSMutableArray<NSPasteboardType> *draggedTypes = [NSMutableArray arrayWithObject:NSPasteboardTypeFileURL];
+		[draggedTypes addObjectsFromArray:[NSFilePromiseReceiver readableDraggedTypes]];
+		[self registerForDraggedTypes:draggedTypes];
 	}
 	return self;
 }
@@ -253,7 +275,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	[lastLeftMouseEvent release];
 	lastLeftMouseEvent	  = [event retain];
 	currentDragSourceView = self;
-	auto mouse = [self transformMouse:event];
+	auto mouse			  = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -301,7 +323,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	[lastLeftMouseEvent release];
 	lastLeftMouseEvent	  = [event retain];
 	currentDragSourceView = self;
-	auto mouse = [self transformMouse:event];
+	auto mouse			  = [self transformMouse:event];
 
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchMoved(mouse.x, mouse.y, 0); });
@@ -376,16 +398,126 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	return eventDispatcher;
 }
 
-- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
-	// a drag that originated in this app is our own drag-out re-entering the
-	// window - reject it so it doesn't get treated as an external file drop
-	if ([sender draggingSource] != nil) return NSDragOperationNone;
-	NSPasteboard *pboard		= [sender draggingPasteboard];
-	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
-														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
+static BOOL isOwnFileDrag(id<NSDraggingInfo> sender) {
+	return [[sender draggingSource] isKindOfClass:[EventsView class]];
+}
+
+static std::vector<std::string> filePathsOnPasteboard(NSPasteboard *pboard) {
+	NSArray<NSURL *> *urls = [pboard readObjectsForClasses:@[ [NSURL class] ]
+												   options:@{
+													   NSPasteboardURLReadingFileURLsOnlyKey : @YES
+												   }];
 	std::vector<std::string> paths;
-	for (NSURL *url in filenames) {
+	for (NSURL *url in urls) {
 		paths.push_back([[url path] UTF8String]);
+	}
+
+	id legacy = [pboard propertyListForType:@"NSFilenamesPboardType"];
+	if ([legacy isKindOfClass:[NSArray class]]) {
+		for (id path in (NSArray *) legacy) {
+			if (![path isKindOfClass:[NSString class]]) {
+				continue;
+			}
+			std::string p = [(NSString *) path UTF8String];
+			if (std::find(paths.begin(), paths.end(), p) == paths.end()) {
+				paths.push_back(p);
+			}
+		}
+	}
+	return paths;
+}
+
+static NSArray<NSFilePromiseReceiver *> *promisesOnPasteboard(NSPasteboard *pboard) {
+	return [pboard readObjectsForClasses:@[ [NSFilePromiseReceiver class] ] options:@ {}];
+}
+
+static std::vector<std::string> promisedFileNames(NSArray<NSFilePromiseReceiver *> *promises) {
+	std::vector<std::string> names;
+	for (NSFilePromiseReceiver *promise in promises) {
+		for (NSString *name in promise.fileNames) {
+			names.push_back([name UTF8String]);
+		}
+		if (promise.fileNames.count > 0) continue;
+		for (NSString *uti in promise.fileTypes) {
+			NSString *extension = extensionForUTI(uti);
+			if (extension == nil) continue;
+			names.push_back([[@"promised." stringByAppendingString:extension] UTF8String]);
+		}
+	}
+	return names;
+}
+
+static NSOperationQueue *promiseReceivingQueue() {
+	static NSOperationQueue *queue = nil;
+	if (queue == nil) {
+		queue							  = [[NSOperationQueue alloc] init];
+		queue.name						  = @"mzgl.file-promise-receiving";
+		queue.maxConcurrentOperationCount = 1;
+	}
+	return queue;
+}
+
+static size_t numFilesPromisedBy(NSFilePromiseReceiver *promise) {
+	return std::max<size_t>(std::max(promise.fileNames.count, promise.fileTypes.count), 1);
+}
+
+class PromisedFileBatch {
+public:
+	explicit PromisedFileBatch(size_t numExpectedFiles)
+		: outstanding(numExpectedFiles) {}
+
+	void fileReceived(ScopedUrlRef path) {
+		std::lock_guard<std::mutex> lock(mutex);
+		paths.push_back(std::move(path));
+	}
+
+	std::vector<ScopedUrlRef> fileFinished(size_t numFiles) {
+		std::lock_guard<std::mutex> lock(mutex);
+		if (outstanding > numFiles) {
+			outstanding -= numFiles;
+			return {};
+		}
+		outstanding = 0;
+		auto batch	= std::move(paths);
+		paths.clear();
+		return batch;
+	}
+
+private:
+	std::mutex mutex;
+	size_t outstanding = 0;
+	std::vector<ScopedUrlRef> paths;
+};
+
+static ScopedUrlRef scopedReceivedFile(NSURL *url) {
+	std::string path = [[url path] UTF8String];
+	return ScopedUrl::createWithCallback(path, [path]() {
+		std::error_code err;
+		fs::remove(path, err);
+		fs::remove(fs::path(path).parent_path(), err);
+	});
+}
+
+static NSURL *makePromisedFilesDir() {
+	NSString *dir  = [[NSString stringWithUTF8String:tempDir().c_str()]
+		 stringByAppendingPathComponent:[@"dropped-" stringByAppendingString:[[NSUUID UUID] UUIDString]]];
+	NSError *error = nil;
+	if (![[NSFileManager defaultManager] createDirectoryAtPath:dir
+								   withIntermediateDirectories:YES
+													attributes:nil
+														 error:&error]) {
+		Log::e() << "couldn't make a directory for dropped files: " << [[error localizedDescription] UTF8String];
+		return nil;
+	}
+	return [NSURL fileURLWithPath:dir];
+}
+
+- (NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender {
+	if (isOwnFileDrag(sender)) return NSDragOperationNone;
+	NSPasteboard *pboard		   = [sender draggingPasteboard];
+	std::vector<std::string> paths = filePathsOnPasteboard(pboard);
+	if (paths.empty()) {
+		paths = promisedFileNames(promisesOnPasteboard(pboard));
 	}
 	dropped = false;
 	if (eventDispatcher->canOpenFiles(paths)) {
@@ -412,7 +544,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 }
 
 - (NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender {
-	if ([sender draggingSource] != nil) return NSDragOperationNone;
+	if (isOwnFileDrag(sender)) return NSDragOperationNone;
 	if (sender.draggingSequenceNumber == acceptedDraggingSequenceNo) {
 		auto p		  = [self pixelPointFromWindowPoint:sender.draggingLocation];
 		auto numItems = sender.numberOfValidItemsForDrop;
@@ -425,21 +557,68 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	}
 }
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
-	if ([sender draggingSource] != nil) return NO;
-	NSPasteboard *pboard		= [sender draggingPasteboard];
-	NSArray<NSURL *> *filenames = [pboard readObjectsForClasses:@[ [NSURL class] ]
-														options:@{NSPasteboardURLReadingFileURLsOnlyKey : @YES}];
+	if (isOwnFileDrag(sender)) return NO;
+	NSPasteboard *pboard = [sender draggingPasteboard];
+
 	std::vector<ScopedUrlRef> paths;
-	for (NSURL *url in filenames) {
-		paths.push_back(ScopedUrl::create([[url path] UTF8String]));
+	for (const auto &path: filePathsOnPasteboard(pboard)) {
+		paths.push_back(ScopedUrl::create(path));
+	}
+
+	if (paths.empty()) {
+		dropped = [self receivePromisedFiles:promisesOnPasteboard(pboard)] == YES;
+		return dropped;
 	}
 
 	dropped = true;
-	eventDispatcher->app->main.runOnMainThread(true, [self, paths]() {
-		eventDispatcher->filesDropped(paths, 0);
-	});
+	eventDispatcher->app->main.runOnMainThread(true, [self, paths]() { eventDispatcher->filesDropped(paths, 0); });
 
 	return true;
+}
+
+- (BOOL)receivePromisedFiles:(NSArray<NSFilePromiseReceiver *> *)promises {
+	if (promises.count == 0) {
+		return NO;
+	}
+
+	size_t numExpectedFiles = 0;
+	for (NSFilePromiseReceiver *promise in promises) {
+		numExpectedFiles += numFilesPromisedBy(promise);
+	}
+
+	auto batch									= std::make_shared<PromisedFileBatch>(numExpectedFiles);
+	std::shared_ptr<EventDispatcher> dispatcher = eventDispatcher;
+
+	auto deliver = [dispatcher](std::vector<ScopedUrlRef> paths) {
+		if (paths.empty()) {
+			return;
+		}
+		dispatcher->app->main.runOnMainThread(true,
+											  [dispatcher, paths]() { dispatcher->filesDropped(paths, 0); });
+	};
+
+	BOOL receivingAnything = NO;
+	for (NSFilePromiseReceiver *promise in promises) {
+		NSURL *destination = makePromisedFilesDir();
+		if (destination == nil) {
+			deliver(batch->fileFinished(numFilesPromisedBy(promise)));
+			continue;
+		}
+		receivingAnything = YES;
+		[promise receivePromisedFilesAtDestination:destination
+										   options:@{}
+									operationQueue:promiseReceivingQueue()
+											reader:^(NSURL *url, NSError *error) {
+											  if (error != nil) {
+												  Log::e() << "couldn't receive dropped file: "
+														   << [[error localizedDescription] UTF8String];
+											  } else {
+												  batch->fileReceived(scopedReceivedFile(url));
+											  }
+											  deliver(batch->fileFinished(1));
+											}];
+	}
+	return receivingAnything;
 }
 - (void)draggingEnded:(id<NSDraggingInfo>)sender {
 	if (!dropped) {
@@ -452,17 +631,16 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 - (BOOL)startFileDrag:(NSString *)path {
 	if (lastLeftMouseEvent == nil) return NO;
 
-	MZGLFilePromiseProvider *provider =
-		[[[MZGLFilePromiseProvider alloc] initWithFileType:utiForFileAtPath(path) delegate:self] autorelease];
-	provider.userInfo = path;
+	MZGLFilePromiseProvider *provider = [[[MZGLFilePromiseProvider alloc] initWithFileType:utiForFileAtPath(path)
+																				  delegate:self] autorelease];
+	provider.userInfo				  = path;
 
 	NSDraggingItem *item = [[[NSDraggingItem alloc] initWithPasteboardWriter:provider] autorelease];
 	NSImage *icon		 = [[NSWorkspace sharedWorkspace] iconForFile:path];
 
 	const CGFloat iconSize = 64;
 	NSPoint p			   = [self convertPoint:lastLeftMouseEvent.locationInWindow fromView:nil];
-	[item setDraggingFrame:NSMakeRect(p.x - iconSize / 2, p.y - iconSize / 2, iconSize, iconSize)
-				  contents:icon];
+	[item setDraggingFrame:NSMakeRect(p.x - iconSize / 2, p.y - iconSize / 2, iconSize, iconSize) contents:icon];
 
 	NSDraggingSession *session = [self beginDraggingSessionWithItems:@[ item ]
 															   event:lastLeftMouseEvent
@@ -486,8 +664,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	// touchUp so the layer system doesn't keep a stuck touch focused
 	NSRect r = [self.window convertRectFromScreen:NSMakeRect(screenPoint.x, screenPoint.y, 0, 0)];
 	auto p	 = [self pixelPointFromWindowPoint:r.origin];
-	eventDispatcher->app->main.runOnMainThread(true,
-											   [self, p]() { eventDispatcher->touchUp(p.x, p.y, 0); });
+	eventDispatcher->app->main.runOnMainThread(true, [self, p]() { eventDispatcher->touchUp(p.x, p.y, 0); });
 }
 
 /// ------------------------ NSFilePromiseProviderDelegate
