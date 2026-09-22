@@ -767,28 +767,35 @@ std::string docsPath(const std::string &path) {
 	return getAndroidExternalDataPath() + "/" + path;
 #elif defined(_WIN32)
 
-	wchar_t *documentsDir;
-	HRESULT result =
-		SHGetKnownFolderPath(FOLDERID_AppDataDocuments, KF_FLAG_CREATE | KF_FLAG_INIT, NULL, &documentsDir);
-	std::string retPath;
+	// ~\Documents\Koala Sampler - the user's real Documents folder (FOLDERID_Documents,
+	// OneDrive-redirected if they've set that up), same convention Ableton uses.
+	// NOT FOLDERID_AppDataDocuments: that was an accidental swap for CSIDL_PERSONAL
+	// in the 2023 UTF-8 paths change and lands in the hidden %LOCALAPPDATA%\Documents.
+	// Koala normally overrides this via setDocsPath() (KoalaWinDocs.cpp, which also
+	// migrates the old folder), so this is only the fallback if that never ran.
+	// Resolved once: this used to call SHGetKnownFolderPath + create_directories
+	// on every docsPath() call.
+	static const std::string base = []() -> std::string {
+		PWSTR documentsDir = nullptr;
+		HRESULT result =
+			SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_CREATE | KF_FLAG_INIT, nullptr, &documentsDir);
+		std::string ret;
+		if (SUCCEEDED(result) && documentsDir != nullptr) {
+			// winfs::path::string() is UTF-8 (u8string), so non-ASCII user names survive.
+			const fs::path root = fs::path {std::filesystem::path {documentsDir}} / "Koala Sampler";
+			ret					= root.string();
+			std::error_code ec;
+			fs::create_directories(root, ec);
+			if (ec) Log::e() << "docsPath: couldn't create " << ret << ": " << ec.message();
+		} else {
+			Log::e() << "docsPath: SHGetKnownFolderPath(FOLDERID_Documents) failed, hr=" << (long) result;
+		}
+		if (documentsDir != nullptr) CoTaskMemFree(documentsDir);
+		return ret;
+	}();
 
-	if (result == S_OK) {
-		std::wstring ws(documentsDir);
-		std::string documentsDirUtf8 = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
-
-		TCHAR szExeFileName[MAX_PATH];
-		GetModuleFileName(NULL, szExeFileName, MAX_PATH);
-		retPath = documentsDirUtf8 + "\\Koala";
-		fs::create_directories(retPath);
-
-		retPath += "\\" + path;
-	} else {
-		Log::e() << "Error: " << result << "\n";
-		retPath = "";
-	}
-	CoTaskMemFree(documentsDir);
-
-	return retPath;
+	if (base.empty()) return "";
+	return base + "\\" + path;
 
 #elif defined(__linux__)
 	std::string docsPath = "../Documents/Koala";
