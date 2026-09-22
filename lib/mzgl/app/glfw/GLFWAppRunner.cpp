@@ -576,6 +576,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	eventDispatcher->exit();
 
+	// Tear the app down here, while the window, GL context and `graphics` are
+	// still alive. Left to ~GLFWAppRunner, members are destroyed in reverse
+	// declaration order, so `graphics` dies before `app` and ~KoalaApp (and
+	// every ~Layer via its root) then touches a dangling Graphics&.
+	app.reset();
+	eventDispatcher.reset();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
