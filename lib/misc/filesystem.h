@@ -222,13 +222,23 @@ namespace winfs {
 		operator const std::filesystem::path &() const { return inner.path(); }
 
 		bool exists() const { return inner.exists(); }
+		bool exists(std::error_code &ec) const { return inner.exists(ec); }
 		bool is_directory() const { return inner.is_directory(); }
+		bool is_directory(std::error_code &ec) const { return inner.is_directory(ec); }
 		bool is_regular_file() const { return inner.is_regular_file(); }
+		bool is_regular_file(std::error_code &ec) const { return inner.is_regular_file(ec); }
 		bool is_symlink() const { return inner.is_symlink(); }
+		bool is_symlink(std::error_code &ec) const { return inner.is_symlink(ec); }
 		std::uintmax_t file_size() const { return inner.file_size(); }
+		std::uintmax_t file_size(std::error_code &ec) const { return inner.file_size(ec); }
 		std::filesystem::file_time_type last_write_time() const { return inner.last_write_time(); }
+		std::filesystem::file_time_type last_write_time(std::error_code &ec) const {
+			return inner.last_write_time(ec);
+		}
 		std::filesystem::file_status status() const { return inner.status(); }
+		std::filesystem::file_status status(std::error_code &ec) const { return inner.status(ec); }
 		std::filesystem::file_status symlink_status() const { return inner.symlink_status(); }
+		std::filesystem::file_status symlink_status(std::error_code &ec) const { return inner.symlink_status(ec); }
 
 		const std::filesystem::directory_entry &std_entry() const { return inner; }
 
