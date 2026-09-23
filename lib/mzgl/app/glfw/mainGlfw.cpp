@@ -83,28 +83,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char *argv[]) {
 #endif
 
-	try {
+	// Deliberately no try/catch here. An exception that escapes run() must
+	// reach the crash reporter *unhandled*: on POSIX that is std::terminate
+	// with the exception current, and on Windows it is the SEH
+	// unhandled-exception filter, which runs during the search phase while
+	// the throw-site stack is still intact and the exception object alive.
+	// A catch-and-rethrow here (even `throw;`) unwinds everything first, and
+	// on MSVC the rethrow never reaches the terminate handler, so the report
+	// would arrive with no type, no message and a stack that ends at main.
 #ifdef __EMSCRIPTEN__
-		// On the web, run() returns immediately after registering the
-		// requestAnimationFrame main loop, but that loop keeps referencing the
-		// runner (eventDispatcher, graphics). Heap-allocate and intentionally
-		// leak it so it outlives this function - the process lives as long as
-		// the page does.
-		auto *app = new GLFWAppRunner();
-		app->run(argc, argv);
+	// On the web, run() returns immediately after registering the
+	// requestAnimationFrame main loop, but that loop keeps referencing the
+	// runner (eventDispatcher, graphics). Heap-allocate and intentionally
+	// leak it so it outlives this function - the process lives as long as
+	// the page does.
+	auto *app = new GLFWAppRunner();
+	app->run(argc, argv);
 #else
-		GLFWAppRunner app;
-		app.run(argc, argv);
+	GLFWAppRunner app;
+	app.run(argc, argv);
 #endif
-	} catch (const std::exception &e) {
-		// Log, then rethrow: the exception leaves main uncaught, so
-		// std::terminate runs and any installed crash reporter (e.g. the crash
-		// library's terminate handler) records it with type and message.
-		fprintf(stderr, "Unhandled exception: %s\n", e.what());
-		throw;
-	} catch (...) {
-		fprintf(stderr, "Unhandled exception (unknown)\n");
-		throw;
-	}
 	return 0;
 }
