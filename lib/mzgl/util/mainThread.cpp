@@ -124,7 +124,16 @@ bool MainThreadRunner::runOnMainThreadAndWait(std::function<void()> fn,
 				writeToLockFile(prepend + "5");
 			}
 
-			fn();
+			// `done` must be set even if fn throws, otherwise the calling
+			// thread spins forever below (and anything that later joins it,
+			// e.g. ~WebSocketServer on quit, deadlocks with it).
+			try {
+				fn();
+			} catch (std::exception &e) {
+				Log::e() << "runOnMainThreadAndWait: exception in main thread fn -> " << e.what();
+			} catch (...) {
+				Log::e() << "runOnMainThreadAndWait: unknown exception in main thread fn";
+			}
 
 			if (logToLockfile) {
 				writeToLockFile(prepend + "699");
