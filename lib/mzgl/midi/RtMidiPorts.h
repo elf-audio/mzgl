@@ -25,8 +25,36 @@ public:
 
 	bool isOpen() { return getPort()->isPortOpen(); }
 
-	void close() { getPort()->closePort(); }
+	// RtMidi reports driver errors from closePort() by throwing, and close()
+	// is called from destructors, where a throw is std::terminate (seen in the
+	// wild: MidiInWinMM::closePort failing midiInUnprepareHeader). Log
+	// instead. Returns false if the close failed - see ~MidiIn for why that
+	// matters.
+	bool close() {
+		try {
+			getPort()->closePort();
+			return true;
+		} catch (const RtMidiError &e) {
+			Log::e() << "Error closing MIDI port '" << name << "': " << e.getMessage();
+		} catch (const std::exception &e) {
+			Log::e() << "Error closing MIDI port '" << name << "': " << e.what();
+		}
+		return false;
+	}
 
+protected:
+	// After a failed closePort() the RtMidi object is half-closed: on WinMM
+	// `connected_` is still true, its critical section is still held and its
+	// sysex buffers are already freed but still listed. Its own destructor
+	// calls closePort() again, which double-frees them. The only safe thing
+	// to do with it is to keep it alive, so leak it deliberately.
+	template <typename T>
+	static void leakAfterFailedClose(std::shared_ptr<T> &port, const std::string &name) {
+		Log::e() << "Keeping RtMidi port '" << name << "' alive after a failed close (would double-free)";
+		new std::shared_ptr<T>(port); // intentional leak
+	}
+
+public:
 	std::string getName() const { return name; }
 	std::vector<std::string> getPortNames() { return MidiPort::getPortNames(direction, false); }
 
@@ -124,7 +152,8 @@ public:
 	}
 
 	virtual ~MidiIn() {
-		if (rtMidiIn) rtMidiIn->closePort();
+		if (!rtMidiIn) return;
+		if (!close()) leakAfterFailedClose(rtMidiIn, name);
 	}
 
 	RtMidi *getPort() override { return rtMidiIn.get(); }
@@ -187,8 +216,8 @@ public:
 	}
 
 	virtual ~MidiOut() {
-		//logger::v() << "Deleting midiout";
-		if (rtMidiOut) rtMidiOut->closePort();
+		if (!rtMidiOut) return;
+		if (!close()) leakAfterFailedClose(rtMidiOut, name);
 	}
 
 	void noteOn(int channel, int pitch, int velocity) {

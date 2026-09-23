@@ -68,12 +68,17 @@ public:
 	}
 
 	~AllMidiDevicesRtMidiImpl() {
-		for (auto m: midiIns) {
-			m.second->close();
-		}
+		// Stop the scanner first - it adds/erases entries in midiIns from its
+		// own thread, so closing the ports while it runs is a race.
 		if (running) {
 			running = false;
 			portScannerThread.join();
+		}
+		// MidiPort::close() swallows RtMidiError: this is a destructor, so a
+		// throw here (e.g. midiInUnprepareHeader failing on Windows) would be
+		// std::terminate.
+		for (auto &m: midiIns) {
+			m.second->close();
 		}
 	}
 
