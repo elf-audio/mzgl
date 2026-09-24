@@ -12,9 +12,8 @@ function(mzgl_supress_target_warnings TARGET)
 endfunction(mzgl_supress_target_warnings)
 
 function(mzgl_supress_warnings)
-  if(NOT ANDROID
-     AND NOT WIN32
-     AND NOT IOS)
+  # PortAudio is only built on Linux and Windows (see CMakeLists.txt).
+  if(TARGET PortAudio)
     mzgl_supress_target_warnings(PortAudio)
   endif()
 endfunction()
