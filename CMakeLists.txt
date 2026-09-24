@@ -370,10 +370,11 @@ if(ANDROID)
        lib/mzgl/app/android/androidUtil.cpp
        lib/mzgl/midi/AllMidiDevicesAndroidImpl.cpp)
 else()
-  # iOS uses AudioSystemIOS (CoreAudio via AVAudioSession), not PortAudio. Building
-  # PortAudioSystem.cpp on iOS both pulls in the (absent) PortAudio lib and makes
-  # its `typedef PortAudioSystem AudioSystem` collide with AudioSystemIOS's.
-  if(NOT IOS)
+  # Apple never uses PortAudio: iOS has AudioSystemIOS (AVAudioSession), macOS has
+  # CoreAudioSystem (see AudioSystem.h). Building PortAudioSystem.cpp there would
+  # pull in the PortAudio lib for nothing and make its `typedef PortAudioSystem
+  # AudioSystem` collide with the platform one.
+  if(NOT APPLE)
     list(APPEND MZGL_SOURCES lib/mzgl/audio/portaudio/PortAudioSystem.cpp)
   endif()
 
@@ -515,8 +516,7 @@ if(NOT WIN32)
 endif()
 
 cmake_policy(SET CMP0077 NEW)
-set(PA_BUILD_STATIC ON)
-set(PA_BUILD_SHARED OFF)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 
 # GLFW and RtMidi are Windows/Linux only: Apple uses the Cocoa/UIKit runners and
 # CoreMIDI, Android uses native_app_glue and AMidi.
@@ -720,9 +720,10 @@ elseif(LINUX)
     ${ALSA_LIBRARIES})
 endif()
 
+# Linux only: Apple uses AudioSystemIOS / CoreAudioSystem, Windows is handled below.
 if(NOT ANDROID
    AND NOT WIN32
-   AND NOT IOS)
+   AND NOT APPLE)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
   mzgl_save_cmake_log_level()
   # PortAudio's CMakeLists declares cmake_minimum_required() below 3.10, which
