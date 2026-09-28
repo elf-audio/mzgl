@@ -32,7 +32,7 @@ public:
 			d.setColor(bgColor);
 			d.drawRect(*this);
 		}
-		std::set<int> downNotes;
+		std::set<int> downNotes = externalDownNotes;
 
 		for (auto &t: touches) {
 			downNotes.insert(t.second);
@@ -121,6 +121,16 @@ public:
 		}
 	}
 
+	// Show notes played from elsewhere (e.g. computer keyboard) as down.
+	// Display only - doesn't fire noteOn/noteOff.
+	void setExternalNoteDown(int note, bool down) {
+		if (down) {
+			externalDownNotes.insert(note);
+		} else {
+			externalDownNotes.erase(note);
+		}
+	}
+
 	std::function<void(int)> noteOff = [](int note) { Log::d() << "note off"; };
 	std::function<void(int)> noteOn	 = [](int note) { Log::d() << "note on"; };
 
@@ -145,6 +155,7 @@ private:
 
 	// touch id to keyboard note
 	std::map<int, int> touches;
+	std::set<int> externalDownNotes;
 	std::vector<int> sharpIndexToChromatic	   = {1, 3, 6, 8, 10};
 	std::vector<float> sharpOffsets			   = {0.7f, 1.8f, 3.7f, 4.75f, 5.8f};
 	std::vector<int> whiteNoteIndexToChromatic = {0, 2, 4, 5, 7, 9, 11};
