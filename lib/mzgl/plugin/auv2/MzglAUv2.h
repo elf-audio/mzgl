@@ -32,6 +32,7 @@
 
 #include <AudioUnitSDK/AUMIDIEffectBase.h>
 #include <AudioUnitSDK/MusicDeviceBase.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
 
 // Realtime-safety annotation introduced in AudioUnitSDK 1.4 (which needs C++23);
 // we build against 1.3, where the overrides are plain.
@@ -167,6 +168,7 @@ private:
 	// Called by the plugin (UI thread) when a knob moves: update the AU's value
 	// and tell listeners (host automation / generic views).
 	void pluginParameterChanged(unsigned int index, float value);
+	void notifyParameterEvent(AudioUnitEventType type, unsigned int index);
 	void mirrorPluginParameters();
 	void applyPreset(int index);
 	void setDataPathToBundle();

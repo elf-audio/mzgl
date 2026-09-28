@@ -285,6 +285,14 @@ struct Blocks {
 		//		AUParameterAutomationEventTypeRelease // up
 		//		[param setValue:f originator: nil atHostTime:0 eventType:(AUParameterAutomationEventType)eventType]);
 	};
+	// touch / release around a user gesture, so hosts can do touch & latch automation
+	eff->sendParameterGestureToHost = [weakSelf](unsigned int i, bool began) {
+		AUParameter *param = [[weakSelf.parameterTree allParameters] objectAtIndex:i];
+		[param setValue:param.value
+			 originator:nil
+			 atHostTime:0
+			  eventType:began ? AUParameterAutomationEventTypeTouch : AUParameterAutomationEventTypeRelease];
+	};
 	//
 
 	//
