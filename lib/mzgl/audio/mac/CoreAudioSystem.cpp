@@ -174,30 +174,8 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	state->formatIn	 = makeInterleavedASBD(sampleRate, state->inChans);
 	state->formatOut = makeInterleavedASBD(sampleRate, state->outChans);
 
-	auto sampleRateChangedCallback = [this]() {
-		if (verbose) {
-			Log::v() << "CoreAudio: Sample rate changed externally, updating state";
-		}
-		updateRunningParameters();
-		restart();
-		notifySampleRateChanged();
-	};
-
-	auto bufferSizeChangedCallback = [this]() {
-		if (verbose) {
-			Log::v() << "CoreAudio: Buffer size changed externally, updating state";
-		}
-		updateRunningParameters();
-		restart();
-	};
-
 	state->deviceListener = std::make_unique<CoreAudioDeviceStateChangeListener>(
-		CoreAudioDeviceStateChangeListener::DeviceAndCallbacks {.device			   = state->deviceIn,
-																.sampleRateChanged = sampleRateChangedCallback,
-																.bufferSizeChanged = bufferSizeChangedCallback},
-		CoreAudioDeviceStateChangeListener::DeviceAndCallbacks {.device			   = state->deviceOut,
-																.sampleRateChanged = sampleRateChangedCallback,
-																.bufferSizeChanged = bufferSizeChangedCallback});
+		std::vector<AudioDeviceID> {state->deviceIn, state->deviceOut}, [this]() { deviceFormatChanged(); });
 }
 
 void CoreAudioSystem::createInputAudioUnit() {
@@ -512,6 +490,32 @@ void CoreAudioSystem::setSampleRate(float _sampleRate) {
 void CoreAudioSystem::setBufferSize(int _size) {
 	bufferSize = _size;
 	restart();
+}
+
+// Called on the main thread when the sample rate or buffer size of our devices changes - by another
+// app, the user in Audio MIDI Setup, or ourselves. There's one notification per device per property,
+// so several arrive for a single change; after the first restart the rest see nothing new.
+void CoreAudioSystem::deviceFormatChanged() {
+	if (!isRunning()) {
+		return;
+	}
+
+	auto newSampleRate	   = getPreferredSampleRate();
+	auto newBufferSize	   = getPreferredNumberOfFrames();
+	bool sampleRateChanged = newSampleRate != state->sampleRate;
+	if (!sampleRateChanged && newBufferSize == state->bufferFrames) {
+		// Our own write, or another app writing a value we already have. Restarting here would
+		// write the device again and wake the other app up, and so on - so don't.
+		return;
+	}
+
+	Log::d() << "CoreAudio: device format changed externally (" << state->sampleRate << "Hz/"
+			 << state->bufferFrames << " -> " << newSampleRate << "Hz/" << newBufferSize << "), restarting";
+	updateRunningParameters();
+	restart();
+	if (sampleRateChanged) {
+		notifySampleRateChanged();
+	}
 }
 
 void CoreAudioSystem::updateRunningParameters() {

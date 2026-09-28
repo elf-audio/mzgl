@@ -289,6 +289,12 @@ static void setDeviceBufferFrames(AudioDeviceID dev, AudioObjectPropertyScope sc
 	}
 	AudioObjectPropertyAddress address {
 		kAudioDevicePropertyBufferFrameSize, scope, kAudioObjectPropertyElementMain};
+	// Don't write an unchanged value: every write notifies all other apps using the device.
+	UInt32 current = 0;
+	UInt32 size	   = sizeof(current);
+	if (AudioObjectGetPropertyData(dev, &address, 0, nullptr, &size, &current) == noErr && current == frames) {
+		return;
+	}
 	AudioObjectSetPropertyData(dev, &address, 0, nullptr, sizeof(frames), &frames);
 }
 
@@ -298,6 +304,11 @@ static void setDeviceSampleRate(AudioDeviceID dev, double sampleRate) {
 	}
 	AudioObjectPropertyAddress address {
 		kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+	// Don't write an unchanged value: the sample rate is shared by every app using the device,
+	// and every write notifies all of them.
+	if (auto current = getDeviceSampleRate(dev); current.has_value() && *current == sampleRate) {
+		return;
+	}
 	Float64 fs = sampleRate;
 	AudioObjectSetPropertyData(dev, &address, 0, nullptr, sizeof(fs), &fs);
 }

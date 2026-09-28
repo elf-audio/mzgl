@@ -2,8 +2,12 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <CoreAudio/CoreAudio.h>
+#include <Block.h>
+#include <dispatch/dispatch.h>
 #include <mach/mach_time.h>
 #include <atomic>
+#include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -12,83 +16,64 @@ struct InterleaveAudioBufferList {
 	AudioBuffer mBuffers[1];
 };
 
+/**
+ * Listens for changes to one property of one CoreAudio object.
+ *
+ * The callback is delivered on the main queue, never on CoreAudio's own
+ * listener thread, so it can safely touch (and restart) the audio system.
+ * It is never called after this object is destroyed, and destroying it from
+ * inside its own callback is fine. Create and destroy on the main thread.
+ */
+class CoreAudioPropertyListener {
+public:
+	CoreAudioPropertyListener(AudioObjectID objectId,
+							  const AudioObjectPropertyAddress &propertyAddress,
+							  std::function<void()> fn)
+		: object {objectId}
+		, address {propertyAddress}
+		, callback {std::make_shared<std::function<void()>>(std::move(fn))} {
+		std::weak_ptr<std::function<void()>> weakCallback = callback;
+		block = Block_copy(^(UInt32, const AudioObjectPropertyAddress *) {
+		  if (auto cb = weakCallback.lock(); cb && *cb) {
+			  (*cb)();
+		  }
+		});
+		AudioObjectAddPropertyListenerBlock(object, &address, dispatch_get_main_queue(), block);
+	}
+
+	~CoreAudioPropertyListener() {
+		AudioObjectRemovePropertyListenerBlock(object, &address, dispatch_get_main_queue(), block);
+		Block_release(block);
+	}
+
+	CoreAudioPropertyListener(const CoreAudioPropertyListener &)			= delete;
+	CoreAudioPropertyListener &operator=(const CoreAudioPropertyListener &) = delete;
+
+private:
+	AudioObjectID object;
+	AudioObjectPropertyAddress address;
+	std::shared_ptr<std::function<void()>> callback;
+	AudioObjectPropertyListenerBlock block {nullptr};
+};
+
+// Calls onChange when the sample rate or buffer size of any of the devices changes.
 struct CoreAudioDeviceStateChangeListener {
-	struct DeviceAndCallbacks {
-		AudioDeviceID device {kAudioObjectUnknown};
-		std::function<void()> sampleRateChanged;
-		std::function<void()> bufferSizeChanged;
-	};
-
-	CoreAudioDeviceStateChangeListener(const DeviceAndCallbacks &inDev, const DeviceAndCallbacks &outDev)
-		: inDevice {inDev}
-		, outDevice {outDev} {
-		if (inDevice.device != kAudioObjectUnknown) {
-			bindIn();
-		}
-		if (outDevice.device != kAudioObjectUnknown) {
-			bindOut();
+	CoreAudioDeviceStateChangeListener(const std::vector<AudioDeviceID> &devices,
+									   const std::function<void()> &onChange) {
+		for (auto device: devices) {
+			if (device == kAudioObjectUnknown) continue;
+			listeners.push_back(std::make_unique<CoreAudioPropertyListener>(device, sampleRateAddress, onChange));
+			listeners.push_back(std::make_unique<CoreAudioPropertyListener>(device, bufferSizeAddress, onChange));
 		}
 	}
 
-	~CoreAudioDeviceStateChangeListener() {
-		if (inDevice.device != kAudioObjectUnknown) {
-			unbindIn();
-		}
-		if (outDevice.device != kAudioObjectUnknown) {
-			unbindOut();
-		}
-	}
-
-	static OSStatus callback(AudioObjectID, UInt32, const AudioObjectPropertyAddress[], void *inClientData) {
-		auto *fn = static_cast<std::function<void()> *>(inClientData);
-		if (fn && *fn) {
-			try {
-				(*fn)();
-			} catch (...) {}
-		}
-		return noErr;
-	}
-
-	void bindIn() {
-		AudioObjectAddPropertyListener(
-			inDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&inSampleRateFn));
-		AudioObjectAddPropertyListener(
-			inDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&inBufferSizeFn));
-	}
-
-	void unbindIn() {
-		AudioObjectRemovePropertyListener(
-			inDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&inSampleRateFn));
-		AudioObjectRemovePropertyListener(
-			inDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&inBufferSizeFn));
-	}
-
-	void bindOut() {
-		AudioObjectAddPropertyListener(
-			outDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&outSampleRateFn));
-		AudioObjectAddPropertyListener(
-			outDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&outBufferSizeFn));
-	}
-
-	void unbindOut() {
-		AudioObjectRemovePropertyListener(
-			outDevice.device, &sampleRateAddress, &callback, static_cast<void *>(&outSampleRateFn));
-		AudioObjectRemovePropertyListener(
-			outDevice.device, &bufferSizeAddress, &callback, static_cast<void *>(&outBufferSizeFn));
-	}
-
-	AudioObjectPropertyAddress sampleRateAddress {
+private:
+	static constexpr AudioObjectPropertyAddress sampleRateAddress {
 		kAudioDevicePropertyNominalSampleRate, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-	AudioObjectPropertyAddress bufferSizeAddress {
+	static constexpr AudioObjectPropertyAddress bufferSizeAddress {
 		kAudioDevicePropertyBufferFrameSize, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
 
-	DeviceAndCallbacks inDevice;
-	DeviceAndCallbacks outDevice;
-
-	std::function<void()> &inSampleRateFn  = inDevice.sampleRateChanged;
-	std::function<void()> &inBufferSizeFn  = inDevice.bufferSizeChanged;
-	std::function<void()> &outSampleRateFn = outDevice.sampleRateChanged;
-	std::function<void()> &outBufferSizeFn = outDevice.bufferSizeChanged;
+	std::vector<std::unique_ptr<CoreAudioPropertyListener>> listeners;
 };
 
 struct CoreAudioState {
@@ -129,49 +114,22 @@ struct CoreAudioState {
 	std::unique_ptr<CoreAudioDeviceStateChangeListener> deviceListener;
 };
 
+// Calls onDevicesChanged when devices are added / removed or the default input / output changes.
 struct CoreAudioDeviceListener {
-	CoreAudioDeviceListener(const std::function<void()> &cb)
-		: onDevicesChanged(cb) {
-		context.fn = &onDevicesChanged;
-
-		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &deviceAddresses, &propProc, &context);
-		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &defaultInputAddress, &propProc, &context);
-		AudioObjectAddPropertyListener(kAudioObjectSystemObject, &defaultOutputAddress, &propProc, &context);
-	}
-
-	~CoreAudioDeviceListener() {
-		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &deviceAddresses, &propProc, &context);
-		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &defaultInputAddress, &propProc, &context);
-		AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &defaultOutputAddress, &propProc, &context);
-		context.fn = nullptr;
+	CoreAudioDeviceListener(const std::function<void()> &onDevicesChanged) {
+		for (auto selector: {kAudioHardwarePropertyDevices,
+							 kAudioHardwarePropertyDefaultInputDevice,
+							 kAudioHardwarePropertyDefaultOutputDevice}) {
+			listeners.push_back(std::make_unique<CoreAudioPropertyListener>(
+				kAudioObjectSystemObject,
+				AudioObjectPropertyAddress {
+					selector, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain},
+				onDevicesChanged));
+		}
 	}
 
 private:
-	struct Context {
-		std::function<void()> *fn {nullptr};
-	};
-
-	static OSStatus propProc(AudioObjectID, UInt32, const AudioObjectPropertyAddress[], void *inClientData) {
-		auto *context = static_cast<Context *>(inClientData);
-		if (context && context->fn && *context->fn) {
-			try {
-				(*context->fn)();
-			} catch (...) {}
-		}
-		return noErr;
-	}
-
-	AudioObjectPropertyAddress deviceAddresses {
-		kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
-	AudioObjectPropertyAddress defaultInputAddress {kAudioHardwarePropertyDefaultInputDevice,
-													kAudioObjectPropertyScopeGlobal,
-													kAudioObjectPropertyElementMain};
-	AudioObjectPropertyAddress defaultOutputAddress {kAudioHardwarePropertyDefaultOutputDevice,
-													 kAudioObjectPropertyScopeGlobal,
-													 kAudioObjectPropertyElementMain};
-
-	std::function<void()> onDevicesChanged;
-	Context context {};
+	std::vector<std::unique_ptr<CoreAudioPropertyListener>> listeners;
 };
 
 static inline uint64_t hostTimeToNanos(uint64_t hostTime) {

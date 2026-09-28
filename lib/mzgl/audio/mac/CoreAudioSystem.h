@@ -49,6 +49,7 @@ private:
 	[[nodiscard]] uint32_t getPreferredNumberOfFrames() const;
 	void updateDefaultIOPorts();
 	void updateRunningParameters();
+	void deviceFormatChanged();
 
 	void setupState(int numInChannels, int numOutChannels);
 	void checkDeviceAvailability();
