@@ -192,7 +192,9 @@ if(NOT ANDROID AND NOT APPLE)
     >)
 endif()
 
-if(NOT ANDROID AND NOT IOS)
+# GL loader for the OpenGL backend, and for Sokol's GL path on Linux. Not on Apple:
+# macOS is Metal / sokol-Metal only (see GraphicsBackend.cmake).
+if(NOT ANDROID AND NOT APPLE)
   if(USING_OPENGL OR NOT WIN32)
     list(APPEND MZGL_SOURCES lib/glew/src/glew.c)
   endif()
