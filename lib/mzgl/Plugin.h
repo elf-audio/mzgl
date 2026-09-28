@@ -252,6 +252,26 @@ public:
 		}
 	}
 
+	// Host automation gestures (touch / latch recording). Call from the UI thread on
+	// touch down / up around the updateHostParameter calls of a user gesture. Nests;
+	// the wrapper only hears the outermost begin and end.
+	std::function<void(unsigned int, bool)> sendParameterGestureToHost;
+
+	void beginHostGesture(unsigned int i) {
+		if (i >= params.size()) return;
+		if (hostGestureDepth.size() < params.size()) hostGestureDepth.resize(params.size(), 0);
+		if (hostGestureDepth[i]++ == 0 && sendParameterGestureToHost) sendParameterGestureToHost(i, true);
+	}
+
+	void endHostGesture(unsigned int i) {
+		if (i >= hostGestureDepth.size() || hostGestureDepth[i] == 0) return;
+		if (--hostGestureDepth[i] == 0 && sendParameterGestureToHost) sendParameterGestureToHost(i, false);
+	}
+
+	// Wrappers wrap a value sent outside a gesture in its own begin/end, so hosts
+	// still record it.
+	bool isInHostGesture(unsigned int i) const { return i < hostGestureDepth.size() && hostGestureDepth[i] > 0; }
+
 	std::function<bool()> isRunning = []() { return true; };
 	std::shared_ptr<PresetManager> getPresetManager() {
 		if (presetManager == nullptr) {
@@ -317,6 +337,7 @@ protected:
 
 private:
 	double sampleRate = 48000.0;
+	std::vector<int> hostGestureDepth; // UI thread only
 };
 
 std::shared_ptr<Plugin> instantiatePlugin();

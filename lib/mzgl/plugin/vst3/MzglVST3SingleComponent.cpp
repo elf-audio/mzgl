@@ -109,10 +109,17 @@ tresult PLUGIN_API MzglVST3SingleComponent::initialize(FUnknown *context) {
 	plugin->sendUpdatedParameterToHost = [this](unsigned int i, float value) {
 		if (!plugin || i >= plugin->getNumParams()) return;
 		const ParamValue n = normalize(i, value);
-		beginEdit(static_cast<ParamID>(i));
+		// outside a user gesture (preset, scene switch) each change is its own edit
+		const bool wrap = !plugin->isInHostGesture(i);
+		if (wrap) beginEdit(static_cast<ParamID>(i));
 		performEdit(static_cast<ParamID>(i), n);
-		endEdit(static_cast<ParamID>(i));
+		if (wrap) endEdit(static_cast<ParamID>(i));
 		EditControllerEx1::setParamNormalized(static_cast<ParamID>(i), n);
+	};
+	plugin->sendParameterGestureToHost = [this](unsigned int i, bool began) {
+		if (!plugin || i >= plugin->getNumParams()) return;
+		if (began) beginEdit(static_cast<ParamID>(i));
+		else endEdit(static_cast<ParamID>(i));
 	};
 
 	interleavedIn.reserve(8192 * 2);
@@ -122,6 +129,7 @@ tresult PLUGIN_API MzglVST3SingleComponent::initialize(FUnknown *context) {
 tresult PLUGIN_API MzglVST3SingleComponent::terminate() {
 	if (plugin) {
 		plugin->sendUpdatedParameterToHost = nullptr;
+		plugin->sendParameterGestureToHost = nullptr;
 	}
 	plugin.reset();
 	return SingleComponentEffect::terminate();

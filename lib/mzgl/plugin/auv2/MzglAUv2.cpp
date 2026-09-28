@@ -75,6 +75,11 @@ void MzglAUv2Unit<AUBaseT>::setup() {
 	}
 
 	plugin->sendUpdatedParameterToHost = [this](unsigned int i, float v) { pluginParameterChanged(i, v); };
+	plugin->sendParameterGestureToHost = [this](unsigned int i, bool began) {
+		notifyParameterEvent(began ? kAudioUnitEvent_BeginParameterChangeGesture
+								   : kAudioUnitEvent_EndParameterChangeGesture,
+							 i);
+	};
 	// "Running" = between Initialize() and Cleanup(), i.e. the host may be
 	// rendering. Plugins use this to decide whether a state/preset change must
 	// be handed to the audio thread or can be applied directly (same contract
@@ -109,6 +114,7 @@ template <class AUBaseT>
 MzglAUv2Unit<AUBaseT>::~MzglAUv2Unit() {
 	if (plugin) {
 		plugin->sendUpdatedParameterToHost = nullptr;
+		plugin->sendParameterGestureToHost = nullptr;
 		// The editor may keep the plugin alive after the AU is gone; don't
 		// leave a lambda pointing at this object behind.
 		plugin->isRunning = []() { return false; };
@@ -317,8 +323,18 @@ void MzglAUv2Unit<AUBaseT>::pluginParameterChanged(unsigned int index, float val
 	lastHostValues[index].store(value);
 	this->Globals()->SetParameter(index, value);
 
+	// Hosts only record touch/latch automation inside a begin/end gesture; a change
+	// outside one (preset, scene switch) gets its own.
+	const bool wrap = !plugin->isInHostGesture(index);
+	if (wrap) notifyParameterEvent(kAudioUnitEvent_BeginParameterChangeGesture, index);
+	notifyParameterEvent(kAudioUnitEvent_ParameterValueChange, index);
+	if (wrap) notifyParameterEvent(kAudioUnitEvent_EndParameterChangeGesture, index);
+}
+
+template <class AUBaseT>
+void MzglAUv2Unit<AUBaseT>::notifyParameterEvent(AudioUnitEventType type, unsigned int index) {
 	AudioUnitEvent event {};
-	event.mEventType						= kAudioUnitEvent_ParameterValueChange;
+	event.mEventType						= type;
 	event.mArgument.mParameter.mAudioUnit	= this->GetComponentInstance();
 	event.mArgument.mParameter.mParameterID = index;
 	event.mArgument.mParameter.mScope		= kAudioUnitScope_Global;
