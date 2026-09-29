@@ -417,7 +417,7 @@ OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
 
 	std::shared_ptr<const std::vector<uint8_t>> blob;
 	std::vector<Serializable::StateFile> files;
-	if (!plugin->serializeSplit(blob, files)) {
+	if (!plugin->serializeWithFiles(blob, files)) {
 		blob = plugin->serializeShared();
 		files.clear();
 	}
@@ -485,7 +485,7 @@ OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
 		if (files.empty()) {
 			plugin->deserializeStreamed(read);
 		} else {
-			plugin->deserializeSplit(read, files);
+			plugin->deserializeWithFiles(read, files);
 		}
 	}
 	mirrorPluginParameters();

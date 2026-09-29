@@ -64,12 +64,12 @@ public:
 		std::shared_ptr<const void> owner;
 	};
 
-	virtual bool serializeSplit(std::shared_ptr<const std::vector<uint8_t>> &outBlob,
+	virtual bool serializeWithFiles(std::shared_ptr<const std::vector<uint8_t>> &outBlob,
 								std::vector<StateFile> &outFiles) {
 		return false;
 	}
 
-	virtual void deserializeSplit(const std::function<size_t(void *, size_t)> &read,
+	virtual void deserializeWithFiles(const std::function<size_t(void *, size_t)> &read,
 								  const std::vector<StateFile> &files) {
 		deserializeStreamed(read);
 	}
