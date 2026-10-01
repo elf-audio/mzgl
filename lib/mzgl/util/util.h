@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <map>
 #include <iterator>
+#include <optional>
 
 class App;
 
@@ -170,8 +171,8 @@ uint64_t getStorageRemainingInBytes();
 
 bool isTabletDevice();
 bool isIPad();
-// returns -1 if not supported
-int64_t getAvailableMemory();
+
+std::optional<int64_t> getAvailableMemory();
 
 struct SafeInsets {
 	int top;

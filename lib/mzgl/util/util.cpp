@@ -41,6 +41,7 @@
 #	include <os/log.h>
 #	include <TargetConditionals.h>
 #	include <Foundation/Foundation.h>
+#	include "util_apple.h"
 #	if TARGET_OS_IOS
 #		import <UIKit/UIKit.h>
 #	else
@@ -53,10 +54,12 @@
 #	include "koalaAndroidUtil.h"
 #elif defined(__linux__)
 #	include "linuxUtil.h"
+#	include "util_linux.h"
 #endif
 
 #ifdef _WIN32
 #	include "winUtil.h"
+#	include "util_windows.h"
 #	include <windows.h>
 #	include <winuser.h>
 #	include <commdlg.h>
@@ -230,10 +233,10 @@ void deleteOrTrash(const std::string &path) {
 	if ([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)]) {
 		NSError *error = nil;
 		if (@available(iOS 11.0, *)) {
-			BOOL success   = [[NSFileManager defaultManager]
-							  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-							  resultingItemURL:nil
-							  error:&error];
+			BOOL success = [[NSFileManager defaultManager]
+				  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+				resultingItemURL:nil
+						   error:&error];
 			if (!success || error) {
 				NSLog(@ "Error moving file to trash: %@", error);
 				stdDeleteFn();
@@ -595,8 +598,7 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 				return own.string();
 			}
 			// <app>/PlugIns/<name>.appex -> <app> on iOS, <app>/Contents on mac
-			const fs::path appRoot =
-				fs::path {[[bundle bundlePath] UTF8String]}.parent_path().parent_path();
+			const fs::path appRoot = fs::path {[[bundle bundlePath] UTF8String]}.parent_path().parent_path();
 			for (const auto &candidate: {appRoot / "data", appRoot / "Resources" / "data"}) {
 				if (fs::exists(candidate)) {
 					return candidate.string();
@@ -642,49 +644,22 @@ bool isDocsPathOverridden() {
 }
 //#endif
 
-#ifdef __APPLE__
-#	include <os/proc.h>
-#	include <mach/mach_host.h>
-#	if !TARGET_OS_IOS
-#		include <sys/sysctl.h>
-#	endif
-#endif
-
-int64_t getAvailableMemory() {
-#if defined(__APPLE__) && TARGET_OS_IOS
-	if (@available(iOS 13.0, *)) {
-		return os_proc_available_memory();
-	}
-	return -1;
-#elif defined(__APPLE__)
-	int request[] = {CTL_HW, HW_MEMSIZE};
-	unsigned long long memory;
-	auto memoryLength = sizeof(memory);
-
-	if (sysctl(request, 2, &memory, &memoryLength, nullptr, 0) == 0) {
-		return static_cast<int64_t>(memory);
-	}
-	Log::e() << "Failed to query available memory";
-	return -1;
+std::optional<int64_t> getAvailableMemory() {
+#if defined(__APPLE__)
+	return appleGetAvailableMemory();
 #elif defined(__ANDROID__)
 	return androidGetAvailableMemory();
 #elif defined(_WIN32)
-	MEMORYSTATUSEX status {};
-	status.dwLength = sizeof(status);
-	if (GlobalMemoryStatusEx(&status)) {
-		// Smaller of free physical RAM and free address space — the real
-		// ceiling on what this process can still allocate.
-		return static_cast<int64_t>(std::min(status.ullAvailPhys, status.ullAvailVirtual));
-	}
-	Log::e() << "Failed to query available memory";
-	return -1;
+	return windowsGetAvailableMemory();
+#elif defined(__linux__)
+	return linuxGetAvailableMemory();
 #else
 	static bool alreadyWarnedAboutGetAvailableMemory = false;
 	if (!alreadyWarnedAboutGetAvailableMemory) {
 		alreadyWarnedAboutGetAvailableMemory = true;
 		Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
 	}
-	return -1;
+	return std::nullopt;
 #endif
 }
 
@@ -821,7 +796,7 @@ std::string appSupportPath(const std::string &path) {
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
 	NSURL *url		  = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
-															inDomains:NSUserDomainMask] lastObject];
+																inDomains:NSUserDomainMask] lastObject];
 	std::string _path = [[url path] UTF8String];
 	_path += "/" + getAppId();
 
@@ -1103,12 +1078,12 @@ void saveFileDialog(const std::string &msg,
 
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
-	ofn.lStructSize	  = sizeof(OPENFILENAME);
-#ifdef MZGL_SOKOL
-	HWND hwnd		  = GetActiveWindow();
-#else
-	HWND hwnd		  = WindowFromDC(wglGetCurrentDC());
-#endif
+	ofn.lStructSize = sizeof(OPENFILENAME);
+#	ifdef MZGL_SOKOL
+	HWND hwnd = GetActiveWindow();
+#	else
+	HWND hwnd = WindowFromDC(wglGetCurrentDC());
+#	endif
 	ofn.hwndOwner	  = hwnd;
 	ofn.hInstance	  = GetModuleHandle(0);
 	ofn.nMaxFileTitle = 31;
@@ -1135,8 +1110,8 @@ void saveFileDialog(const std::string &msg,
 	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
 	// OFN_NOCHANGEDIR: without this, the dialog moves the process CWD to the
 	// selected folder, which breaks every later relative-path data load.
-	ofn.Flags		= OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-	ofn.lpstrTitle	= L"Select Output File";
+	ofn.Flags	   = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+	ofn.lpstrTitle = L"Select Output File";
 
 	if (GetSaveFileNameW(&ofn)) {
 		std::wstring ws(fileName);

@@ -393,18 +393,23 @@ else()
 
 endif()
 
+if(APPLE)
+  list(APPEND MZGL_SOURCES lib/mzgl/util/util_apple.cpp)
+endif()
+
 if(WIN32)
 
   list(APPEND MZGL_SOURCES
        # lib/mzgl/app/win64/mainWin.cpp
-       lib/mzgl/util/winUtil.cpp lib/mzgl/util/AlignedAllocator.cpp)
+       lib/mzgl/util/winUtil.cpp lib/mzgl/util/util_windows.cpp
+       lib/mzgl/util/AlignedAllocator.cpp)
 
 endif()
 
 if(LINUX)
   list(APPEND MZGL_SOURCES
        # lib/mzgl/app/linux/mainLinux.cpp
-       lib/mzgl/util/linuxUtil.cpp)
+       lib/mzgl/util/linuxUtil.cpp lib/mzgl/util/util_linux.cpp)
 endif()
 
 # iOS-only header search paths: the app/ios UIKit views (included from e.g.
