@@ -55,6 +55,24 @@ public:
 		deserialize(data);
 	}
 
+	struct StateFile {
+		std::string name;
+		std::vector<uint8_t> header;
+		const uint8_t *data = nullptr;
+		size_t size			= 0;
+		std::shared_ptr<const void> owner;
+	};
+
+	virtual bool serializeWithFiles(std::shared_ptr<const std::vector<uint8_t>> &outBlob,
+								std::vector<StateFile> &outFiles) {
+		return false;
+	}
+
+	virtual void deserializeWithFiles(const std::function<size_t(void *, size_t)> &read,
+								  const std::vector<StateFile> &files) {
+		deserializeStreamed(read);
+	}
+
 	virtual void loadFromFile(std::string path) {
 		std::vector<uint8_t> data;
 		readFile(path, data);
