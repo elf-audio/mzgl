@@ -41,6 +41,7 @@
 #	include <os/log.h>
 #	include <TargetConditionals.h>
 #	include <Foundation/Foundation.h>
+#	include "util_apple.h"
 #	if TARGET_OS_IOS
 #		import <UIKit/UIKit.h>
 #	else
@@ -53,10 +54,12 @@
 #	include "koalaAndroidUtil.h"
 #elif defined(__linux__)
 #	include "linuxUtil.h"
+#	include "util_linux.h"
 #endif
 
 #ifdef _WIN32
 #	include "winUtil.h"
+#	include "util_windows.h"
 #	include <windows.h>
 #	include <winuser.h>
 #	include <commdlg.h>
@@ -642,49 +645,22 @@ bool isDocsPathOverridden() {
 }
 //#endif
 
-#ifdef __APPLE__
-#	include <os/proc.h>
-#	include <mach/mach_host.h>
-#	if !TARGET_OS_IOS
-#		include <sys/sysctl.h>
-#	endif
-#endif
-
-int64_t getAvailableMemory() {
-#if defined(__APPLE__) && TARGET_OS_IOS
-	if (@available(iOS 13.0, *)) {
-		return os_proc_available_memory();
-	}
-	return -1;
-#elif defined(__APPLE__)
-	int request[] = {CTL_HW, HW_MEMSIZE};
-	unsigned long long memory;
-	auto memoryLength = sizeof(memory);
-
-	if (sysctl(request, 2, &memory, &memoryLength, nullptr, 0) == 0) {
-		return static_cast<int64_t>(memory);
-	}
-	Log::e() << "Failed to query available memory";
-	return -1;
+std::optional<int64_t> getAvailableMemory() {
+#if defined(__APPLE__)
+	return appleGetAvailableMemory();
 #elif defined(__ANDROID__)
 	return androidGetAvailableMemory();
 #elif defined(_WIN32)
-	MEMORYSTATUSEX status {};
-	status.dwLength = sizeof(status);
-	if (GlobalMemoryStatusEx(&status)) {
-		// Smaller of free physical RAM and free address space — the real
-		// ceiling on what this process can still allocate.
-		return static_cast<int64_t>(std::min(status.ullAvailPhys, status.ullAvailVirtual));
-	}
-	Log::e() << "Failed to query available memory";
-	return -1;
+	return windowsGetAvailableMemory();
+#elif defined(__linux__)
+	return linuxGetAvailableMemory();
 #else
 	static bool alreadyWarnedAboutGetAvailableMemory = false;
 	if (!alreadyWarnedAboutGetAvailableMemory) {
 		alreadyWarnedAboutGetAvailableMemory = true;
 		Log::e() << "Warning - getAvailableMemory() doesn't work on this OS";
 	}
-	return -1;
+	return std::nullopt;
 #endif
 }
 
