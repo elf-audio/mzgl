@@ -19,79 +19,27 @@
 namespace mzglau {
 
 namespace {
-	const CFStringRef kStateKey		   = CFSTR("mzgl-plugin-state");
-	const CFStringRef kStateFilesKey   = CFSTR("mzgl-plugin-state-files");
-	const CFStringRef kStateHeadersKey = CFSTR("mzgl-plugin-state-file-headers");
+	const CFStringRef kStateKey	  = CFSTR("mzgl-plugin-state");
+	const CFStringRef kZipDataKey = CFSTR("zipData");
 
 	// CFData over a shared buffer, no copy: the data's byte deallocator drops
 	// the shared_ptr when the host releases it.
-	CFDataRef cfDataSharingOwnedBytes(const uint8_t *bytes, size_t size, std::shared_ptr<const void> owner) {
-		if (bytes == nullptr || size == 0) return CFDataCreate(nullptr, nullptr, 0);
-		using Holder = std::shared_ptr<const void>;
-		auto *holder = new Holder(std::move(owner));
+	CFDataRef cfDataSharingBytes(std::shared_ptr<const std::vector<uint8_t>> blob) {
+		if (!blob || blob->empty()) return CFDataCreate(nullptr, nullptr, 0);
+		using Holder = std::shared_ptr<const std::vector<uint8_t>>;
+		auto *holder = new Holder(std::move(blob));
 		CFAllocatorContext ctx {};
 		ctx.info	 = holder;
 		ctx.allocate = [](CFIndex size, CFOptionFlags, void *) -> void * { return malloc(static_cast<size_t>(size)); };
 		ctx.deallocate = [](void *, void *info) { delete static_cast<Holder *>(info); };
 		CFAllocatorRef bytesDeallocator = CFAllocatorCreate(kCFAllocatorDefault, &ctx);
-		CFDataRef data =
-			CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, bytes, static_cast<CFIndex>(size), bytesDeallocator);
+		CFDataRef data					= CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+													 (*holder)->data(),
+													 static_cast<CFIndex>((*holder)->size()),
+													 bytesDeallocator);
 		CFRelease(bytesDeallocator); // the data holds its own reference
 		if (data == nullptr) delete holder;
 		return data;
-	}
-
-	CFDataRef cfDataSharingBytes(std::shared_ptr<const std::vector<uint8_t>> blob) {
-		if (!blob || blob->empty()) return CFDataCreate(nullptr, nullptr, 0);
-		const uint8_t *bytes = blob->data();
-		const size_t size	 = blob->size();
-		return cfDataSharingOwnedBytes(bytes, size, std::move(blob));
-	}
-
-	std::string cfStringToStd(CFStringRef str) {
-		const CFIndex len = CFStringGetLength(str);
-		const CFIndex max = CFStringGetMaximumSizeForEncoding(len, kCFStringEncodingUTF8) + 1;
-		std::string out(static_cast<size_t>(max), '\0');
-		if (!CFStringGetCString(str, out.data(), max, kCFStringEncodingUTF8)) {
-			return {};
-		}
-		out.resize(std::strlen(out.c_str()));
-		return out;
-	}
-
-	void collectStateFiles(CFDictionaryRef dict, std::vector<Serializable::StateFile> &out) {
-		auto files	 = static_cast<CFDictionaryRef>(CFDictionaryGetValue(dict, kStateFilesKey));
-		auto headers = static_cast<CFDictionaryRef>(CFDictionaryGetValue(dict, kStateHeadersKey));
-		if (files == nullptr || CFGetTypeID(files) != CFDictionaryGetTypeID()) {
-			return;
-		}
-		const CFIndex count = CFDictionaryGetCount(files);
-		if (count == 0) {
-			return;
-		}
-		std::vector<const void *> keys(static_cast<size_t>(count));
-		std::vector<const void *> values(static_cast<size_t>(count));
-		CFDictionaryGetKeysAndValues(files, keys.data(), values.data());
-		const bool haveHeaders = headers != nullptr && CFGetTypeID(headers) == CFDictionaryGetTypeID();
-		for (CFIndex i = 0; i < count; i++) {
-			auto key   = static_cast<CFStringRef>(keys[static_cast<size_t>(i)]);
-			auto value = static_cast<CFDataRef>(values[static_cast<size_t>(i)]);
-			if (CFGetTypeID(key) != CFStringGetTypeID() || CFGetTypeID(value) != CFDataGetTypeID()) {
-				continue;
-			}
-			Serializable::StateFile file;
-			file.name = cfStringToStd(key);
-			file.data = CFDataGetBytePtr(value);
-			file.size = static_cast<size_t>(CFDataGetLength(value));
-			if (haveHeaders) {
-				auto head = static_cast<CFDataRef>(CFDictionaryGetValue(headers, key));
-				if (head != nullptr && CFGetTypeID(head) == CFDataGetTypeID()) {
-					const auto *hb = CFDataGetBytePtr(head);
-					file.header.assign(hb, hb + CFDataGetLength(head));
-				}
-			}
-			out.push_back(std::move(file));
-		}
 	}
 
 	// Where our .component lives: <Plugin>.component/Contents/MacOS/<Plugin> -> bundle dir.
@@ -414,50 +362,15 @@ OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
 	const OSStatus result = AUBaseT::SaveState(outData);
 	if (result != noErr) return result;
 	auto dict = const_cast<CFMutableDictionaryRef>(static_cast<CFDictionaryRef>(*outData));
-
-	std::shared_ptr<const std::vector<uint8_t>> blob;
-	std::vector<Serializable::StateFile> files;
-	if (!plugin->serializeWithFiles(blob, files)) {
-		blob = plugin->serializeShared();
-		files.clear();
+	if (plugin->wantsToSerializeWithNSDictionary()) {
+		plugin->serializeByNSDictionary(dict);
+		return noErr;
 	}
-
 	// One exactly-sized buffer from the plugin, handed to CF without a copy.
-	CFDataRef data = cfDataSharingBytes(blob);
+	CFDataRef data = cfDataSharingBytes(plugin->serializeShared());
 	if (data == nullptr) return kAudioUnitErr_FailedInitialization;
 	CFDictionarySetValue(dict, kStateKey, data);
 	CFRelease(data);
-
-	if (files.empty()) {
-		return noErr;
-	}
-	CFMutableDictionaryRef fileData	   = CFDictionaryCreateMutable(kCFAllocatorDefault,
-																   static_cast<CFIndex>(files.size()),
-																   &kCFTypeDictionaryKeyCallBacks,
-																   &kCFTypeDictionaryValueCallBacks);
-	CFMutableDictionaryRef fileHeaders = CFDictionaryCreateMutable(kCFAllocatorDefault,
-																   static_cast<CFIndex>(files.size()),
-																   &kCFTypeDictionaryKeyCallBacks,
-																   &kCFTypeDictionaryValueCallBacks);
-	for (auto &file: files) {
-		CFStringRef name = CFStringCreateWithBytes(kCFAllocatorDefault,
-												   reinterpret_cast<const UInt8 *>(file.name.data()),
-												   static_cast<CFIndex>(file.name.size()),
-												   kCFStringEncodingUTF8,
-												   false);
-		CFDataRef bytes = cfDataSharingOwnedBytes(file.data, file.size, file.owner);
-		CFDataRef header =
-			CFDataCreate(kCFAllocatorDefault, file.header.data(), static_cast<CFIndex>(file.header.size()));
-		CFDictionarySetValue(fileData, name, bytes);
-		CFDictionarySetValue(fileHeaders, name, header);
-		CFRelease(header);
-		CFRelease(bytes);
-		CFRelease(name);
-	}
-	CFDictionarySetValue(dict, kStateFilesKey, fileData);
-	CFDictionarySetValue(dict, kStateHeadersKey, fileHeaders);
-	CFRelease(fileHeaders);
-	CFRelease(fileData);
 	return noErr;
 }
 
@@ -466,27 +379,25 @@ OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
 	const OSStatus result = AUBaseT::RestoreState(plist);
 	if (result != noErr) return result;
 	auto dict = static_cast<CFDictionaryRef>(plist);
+	if (plugin->wantsToSerializeWithNSDictionary()) {
+		if (CFDictionaryContainsKey(dict, kZipDataKey)) {
+			plugin->deserializeByNSDictionary(dict);
+		}
+		mirrorPluginParameters();
+		return noErr;
+	}
 	auto data = static_cast<CFDataRef>(CFDictionaryGetValue(dict, kStateKey));
 	if (data != nullptr && CFGetTypeID(data) == CFDataGetTypeID()) {
 		// Stream straight out of the host's buffer; no copy of the blob.
 		const auto *bytes	= CFDataGetBytePtr(data);
 		const size_t length = static_cast<size_t>(CFDataGetLength(data));
 		size_t pos			= 0;
-		auto read			= [&](void *out, size_t n) {
-			 const size_t take = std::min(n, length - pos);
-			 if (take) {
-				 std::memcpy(out, bytes + pos, take);
-			 }
-			 pos += take;
-			 return take;
-		};
-		std::vector<Serializable::StateFile> files;
-		collectStateFiles(dict, files);
-		if (files.empty()) {
-			plugin->deserializeStreamed(read);
-		} else {
-			plugin->deserializeWithFiles(read, files);
-		}
+		plugin->deserializeStreamed([&](void *out, size_t n) {
+			const size_t take = std::min(n, length - pos);
+			if (take) std::memcpy(out, bytes + pos, take);
+			pos += take;
+			return take;
+		});
 	}
 	mirrorPluginParameters();
 	return noErr;
