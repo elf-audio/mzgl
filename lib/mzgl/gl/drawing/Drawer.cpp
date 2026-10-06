@@ -481,6 +481,9 @@ void Drawer::commit(VboRef vbo, bool ignoreColor, bool addNormalizedTexCoords) {
 	geom.clear();
 }
 void Drawer::draw(Graphics &g, bool ignoreColor, bool addNormalizedTexCoords) {
+	// Nothing drawn, nothing to draw. The shared vbo still holds whatever was drawn through it
+	// last, so going on would draw that again, wherever the transform is now.
+	if (geom.verts.empty()) return;
 	commit(g.drawerVbo, ignoreColor, addNormalizedTexCoords);
 	if (g.drawerVbo->getNumVerts() > 0) {
 		g.drawerVbo->draw(g);
