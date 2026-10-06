@@ -1,6 +1,5 @@
 #include "winUtil.h"
-#include <codecvt>
-#include <locale>
+#include <algorithm>
 #include <optional>
 #include <thread>
 #include <mutex>
@@ -238,10 +237,14 @@ namespace { ////////////////////////////////////////////////////////////////////
 
 			int textLength_WithNUL {GetWindowTextLength(textEditorHwnd_) + 1};
 			std::vector<wchar_t> text(textLength_WithNUL);
-			GetWindowText(textEditorHwnd_, text.data(), textLength_WithNUL);
-			char output[512];
-			sprintf(output, "%ws", text.data());
-			return output;
+			const int copied = GetWindowText(textEditorHwnd_, text.data(), textLength_WithNUL);
+			// Convert to UTF-8 explicitly. This used to be sprintf("%ws") into a
+			// fixed 512-byte buffer, which narrows through the C locale / ANSI
+			// code page instead - so "é" came back as the single byte 0xE9,
+			// poisoning whatever the text was stored in (pad labels, song
+			// names) with bytes that aren't valid UTF-8 - and overflowed on
+			// long input.
+			return w2n(std::wstring(text.data(), static_cast<size_t>(std::max(copied, 0))));
 		}
 
 		std::optional<Text> text_;
@@ -442,8 +445,7 @@ void windowsChooseEntryDialog(HWND parent,
 
 	std::string filename;
 	if (success) {
-		std::wstring ws(entryName);
-		filename = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(ws);
+		filename = w2n(std::wstring(entryName));
 		CoTaskMemFree(entryName);
 	}
 	completionCallback(success ? filename : "", success);
@@ -533,15 +535,26 @@ std::wstring windowsGetPathForTemporaryFile(std::wstring fileName) {
 	return tempDir + L"\\" + fileName;
 }
 
+// UTF-16 <-> UTF-8 via Win32 rather than std::wstring_convert: codecvt is
+// deprecated since C++17 (gone in C++26) and throws std::range_error on any
+// malformed input, which for text coming back from an edit control or a file
+// dialog is not something we want to propagate. WideCharToMultiByte substitutes
+// U+FFFD for lone surrogates / bad bytes instead.
 std::string w2n(const std::wstring &w) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::string narrow = converter.to_bytes(w);
+	if (w.empty()) return {};
+	const int n = WideCharToMultiByte(CP_UTF8, 0, w.data(), (int) w.size(), nullptr, 0, nullptr, nullptr);
+	if (n <= 0) return {};
+	std::string narrow(n, '\0');
+	WideCharToMultiByte(CP_UTF8, 0, w.data(), (int) w.size(), narrow.data(), n, nullptr, nullptr);
 	return narrow;
 }
 
 std::wstring n2w(const std::string &n) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring wide = converter.from_bytes(n);
+	if (n.empty()) return {};
+	const int len = MultiByteToWideChar(CP_UTF8, 0, n.data(), (int) n.size(), nullptr, 0);
+	if (len <= 0) return {};
+	std::wstring wide(len, L'\0');
+	MultiByteToWideChar(CP_UTF8, 0, n.data(), (int) n.size(), wide.data(), len);
 	return wide;
 }
 
