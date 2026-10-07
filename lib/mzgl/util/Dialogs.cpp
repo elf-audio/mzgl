@@ -15,6 +15,9 @@
 #	include "androidUtil.h"
 #elif defined(_WIN32)
 #	include "winUtil.h"
+#	ifdef MZGL_HAS_WEBVIEW2
+#		include "WindowsWebView.h"
+#	endif
 #elif defined(__linux__)
 #	include "linuxUtil.h"
 #endif
@@ -867,6 +870,25 @@ void Dialogs::chooseImage(std::function<void(bool success, std::string imgPath)>
 static KoalaSchemeNavDelegate *koalaSchemeNavDelegate = nil;
 #endif
 
+#if defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
+// The one dialog-style web view that can be up at a time (as on mac, where it's a
+// view added to the root view). Owned here because launchUrlInWebView /
+// displayHtmlInWebView are fire-and-forget; released when the user closes it.
+static std::shared_ptr<WindowsWebView> windowsDialogWebView;
+
+static void
+	showWindowsWebView(App &app, WindowsWebView::Options options, std::function<void()> completionCallback) {
+	options.appUrlScheme	= "koala";
+	options.userAgentSuffix = "KoalaApp";
+	options.onClosed		= [&app, completionCallback]() {
+		   // defer the release - onClosed fires from inside the impl's close()
+		   app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
+		   if (completionCallback) completionCallback();
+	};
+	windowsDialogWebView = std::make_shared<WindowsWebView>(app, std::move(options));
+}
+#endif
+
 void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completionCallback) const {
 #ifdef AUTO_TEST
 	return;
@@ -1008,6 +1030,10 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 #	endif
 #elif defined(__ANDROID__)
 	androidLaunchUrlInWebView(url);
+#elif defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
+	WindowsWebView::Options options;
+	options.url = url;
+	showWindowsWebView(app, std::move(options), completionCallback);
 #else
 	launchUrl(url);
 #endif
@@ -1107,8 +1133,19 @@ void Dialogs::displayHtmlInWebView(const std::string &html, std::function<void()
 #	endif
 #elif defined(__ANDROID__)
 	androidDisplayHtml(html);
+#elif defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
+	WindowsWebView::Options options;
+	options.html			   = html;
+	options.openLinksInBrowser = true;
+	showWindowsWebView(app, std::move(options), completionCallback);
 #else
-	// other impls here
+	// No embedded web view (linux, or windows without the WebView2 SDK) - like
+	// mac, write the html to a temp file and open it in the default browser.
+	std::string path = tempDir() + "/index.html";
+	if (writeStringToFile(path, html)) {
+		launchUrl(path);
+	}
+	if (completionCallback) completionCallback();
 #endif
 }
 

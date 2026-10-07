@@ -404,6 +404,28 @@ if(WIN32)
        lib/mzgl/util/winUtil.cpp lib/mzgl/util/util_windows.cpp
        lib/mzgl/util/AlignedAllocator.cpp)
 
+  # Embedded web views use the WebView2 SDK (static loader lib), installed via
+  # `vcpkg install webview2:x64-windows-static` - same vcpkg tree as OpenSSL.
+  # Without it the Dialogs fall back to opening pages in the system browser.
+  if(NOT MZGL_WEBVIEW2_ROOT)
+    set(MZGL_WEBVIEW2_ROOT "C:/vcpkg/installed/x64-windows-static")
+  endif()
+  if(EXISTS "${MZGL_WEBVIEW2_ROOT}/include/WebView2.h"
+     AND EXISTS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib")
+    mzgl_print_in_blue("[WEBVIEW2] -> using SDK at ${MZGL_WEBVIEW2_ROOT}")
+    list(APPEND MZGL_SOURCES lib/mzgl/app/web/WindowsWebView.cpp)
+    list(APPEND HEADERS "${MZGL_WEBVIEW2_ROOT}/include")
+    set(MZGL_WEBVIEW2_LIBS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib"
+                           comctl32 shell32 version)
+    add_compile_definitions(MZGL_HAS_WEBVIEW2)
+  else()
+    message(
+      WARNING
+        "WebView2 SDK not found at ${MZGL_WEBVIEW2_ROOT} - embedded web views "
+        "disabled, pages will open in the system browser. Install with "
+        "`vcpkg install webview2:x64-windows-static` or set MZGL_WEBVIEW2_ROOT.")
+  endif()
+
 endif()
 
 if(LINUX)
@@ -667,7 +689,8 @@ elseif(WIN32)
     # Media Foundation - used for AAC/m4a/wma decoding via IMFSourceReader
     mfplat
     mfreadwrite
-    mfuuid)
+    mfuuid
+    ${MZGL_WEBVIEW2_LIBS})
 
   if(USING_SOKOL)
     list(APPEND MZGL_LIBS d3d11 dxgi dxguid)

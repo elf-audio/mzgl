@@ -178,6 +178,29 @@ private:
 	}
 };
 
+#elif defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
+#	include "WindowsWebView.h"
+
+class WindowsWebViewOverlayImpl : public WebViewOverlayImpl {
+public:
+	WindowsWebViewOverlayImpl(App &app,
+							  const std::string &urlToOpen,
+							  std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		WindowsWebView::Options options;
+		options.url				   = url;
+		options.openLinksInBrowser = true;
+		options.showCloseBar	   = false; // the pages have their own close button
+		options.jsCallback		   = jsCallback;
+		options.onClosed		   = [this]() { notifyClosed(); };
+		webView					   = std::make_unique<WindowsWebView>(app, std::move(options));
+	}
+	void callJs(const std::string &jsString) override { webView->callJs(jsString); }
+	~WindowsWebViewOverlayImpl() override = default;
+
+private:
+	std::unique_ptr<WindowsWebView> webView;
+};
 #endif
 
 WebViewOverlay::WebViewOverlay(App &app,
@@ -192,10 +215,12 @@ WebViewOverlay::WebViewOverlay(App &app,
 #	endif
 #elif defined(__ANDROID__)
 	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
+#elif defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
+	impl = std::make_shared<WindowsWebViewOverlayImpl>(app, url, jsCallback);
 #endif
 	if (impl) impl->onClosed = onClosed;
 }
 
 void WebViewOverlay::callJs(const std::string &jsString) {
-	impl->callJs(jsString);
+	if (impl) impl->callJs(jsString);
 }
