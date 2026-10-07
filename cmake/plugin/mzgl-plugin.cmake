@@ -88,15 +88,18 @@ endfunction()
 # VST3
 # ---------------------------------------------------------------------------
 
-# The generic single-component wrapper + Cocoa view. Pass VIEW_ONLY to get just
-# the view (for a plugin that brings its own SingleComponentEffect).
-# The editor view is Cocoa (macOS) for now; on Windows/Linux the DSP side builds
-# but createView() has nothing to return until an IPlugView for those hosts exists.
+# The generic single-component wrapper + the editor view. Pass VIEW_ONLY to get
+# just the view (for a plugin that brings its own SingleComponentEffect).
+# The view is Cocoa on macOS and a sokol/D3D11 child HWND on Windows; on Linux
+# the DSP side builds but createView() has nothing to return until an IPlugView
+# for X11 exists.
 function(mzgl_vst3_wrapper_sources out_var)
   cmake_parse_arguments(ARG "VIEW_ONLY" "" "" ${ARGN})
   set(_srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View.h)
   if(APPLE)
     list(APPEND _srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View.mm)
+  elseif(WIN32)
+    list(APPEND _srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View_win.cpp)
   endif()
   if(NOT ARG_VIEW_ONLY)
     list(APPEND _srcs
@@ -119,6 +122,17 @@ endfunction()
 # Adds the SDK's platform entry point, includes/defines/links for the VST3 SDK,
 # the bundle layout, PkgInfo, data/ and an install() rule into the user's
 # plug-in folder.
+#
+# On Windows the plugin is laid out as a VST3 bundle folder too (the SDK's
+# "bundle" format, understood by every VST3 host):
+#   <build>/<name>.vst3/Contents/x86_64-win/<name>.vst3   the DLL
+#   <build>/<name>.vst3/Contents/Resources/data/          DATA_DIR
+# so dataPath() can find its assets next to the DLL (see MzglVST3View_win.cpp).
+#
+# Sets the MZGL_VST3_BUNDLE_DIR target property to the bundle folder on both
+# platforms, for callers that copy the finished plugin somewhere
+# ($<TARGET_PROPERTY:tgt,MZGL_VST3_BUNDLE_DIR>; same as $<TARGET_BUNDLE_DIR>
+# on macOS).
 function(mzgl_vst3_configure_bundle target)
   cmake_parse_arguments(ARG "" "PRODUCT_NAME;BUNDLE_ID;VERSION;COPYRIGHT;INFO_PLIST;DATA_DIR"
                         "DATA_SUBDIRS;OBJCXX_SOURCES" ${ARGN})
@@ -174,17 +188,88 @@ function(mzgl_vst3_configure_bundle target)
 
     _mzgl_plugin_bundle_post_build(${target} "${ARG_DATA_DIR}" "${ARG_DATA_SUBDIRS}")
     install(TARGETS ${target} DESTINATION "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
+    set_target_properties(${target} PROPERTIES MZGL_VST3_BUNDLE_DIR "$<TARGET_BUNDLE_DIR:${target}>")
 
     # set_source_files_properties is directory-scoped; this runs in the caller's
     # directory, which is where the plugin's CMakeLists lives.
     set_source_files_properties(${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View.mm ${ARG_OBJCXX_SOURCES}
                                 PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
   elseif(WIN32)
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME "${ARG_PRODUCT_NAME}" SUFFIX .vst3)
-    install(TARGETS ${target} DESTINATION "$ENV{PROGRAMFILES}/Common Files/VST3")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64|aarch64)$")
+      set(_arch_dir arm64-win)
+    else()
+      set(_arch_dir x86_64-win)
+    endif()
+    set(_bundle_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.vst3")
+    # A MODULE library's DLL goes to LIBRARY_OUTPUT_DIRECTORY (RUNTIME_ is for
+    # SHARED), so the parent project's global bin/ setting doesn't apply.
+    set_target_properties(${target} PROPERTIES
+      OUTPUT_NAME "${ARG_PRODUCT_NAME}"
+      SUFFIX .vst3
+      LIBRARY_OUTPUT_DIRECTORY "${_bundle_dir}/Contents/${_arch_dir}"
+      PDB_OUTPUT_DIRECTORY "${_bundle_dir}/Contents/${_arch_dir}"
+      MZGL_VST3_BUNDLE_DIR "${_bundle_dir}")
+    if(ARG_DATA_DIR)
+      string(REPLACE ";" "\;" _subdirs "${ARG_DATA_SUBDIRS}")
+      add_custom_command(
+        TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${_bundle_dir}/Contents/Resources/data"
+        COMMAND ${CMAKE_COMMAND} -DSRC=${ARG_DATA_DIR}
+                -DDST=${_bundle_dir}/Contents/Resources/data
+                "-DSUBDIRS=${_subdirs}" -P ${MZGL_PLUGIN_CMAKE_DIR}/copy-plugin-data.cmake
+        COMMENT "[${target}] bundling data/")
+    endif()
+    mzgl_vst3_system_plugin_dir(_install_dir)
+    install(DIRECTORY "${_bundle_dir}" DESTINATION "${_install_dir}")
   else()
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME "${ARG_PRODUCT_NAME}" SUFFIX .so PREFIX "")
+    set_target_properties(${target} PROPERTIES OUTPUT_NAME "${ARG_PRODUCT_NAME}" SUFFIX .so PREFIX ""
+                                               MZGL_VST3_BUNDLE_DIR "$<TARGET_FILE:${target}>")
     install(TARGETS ${target} DESTINATION "$ENV{HOME}/.vst3")
+  endif()
+endfunction()
+
+# mzgl_vst3_system_plugin_dir(<out_var>) - the per-platform VST3 folder a dev
+# build gets copied into so a DAW picks it up straight away.
+function(mzgl_vst3_system_plugin_dir out_var)
+  if(APPLE)
+    set(${out_var} "$ENV{HOME}/Library/Audio/Plug-Ins/VST3" PARENT_SCOPE)
+  elseif(WIN32)
+    if(DEFINED ENV{COMMONPROGRAMFILES})
+      file(TO_CMAKE_PATH "$ENV{COMMONPROGRAMFILES}/VST3" _dir)
+    else()
+      file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}/Common Files/VST3" _dir)
+    endif()
+    set(${out_var} "${_dir}" PARENT_SCOPE)
+  else()
+    set(${out_var} "$ENV{HOME}/.vst3" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# mzgl_vst3_install_after_build(<target>) - POST_BUILD copy of the finished
+# bundle into mzgl_vst3_system_plugin_dir(), replacing what's there, so building
+# the target is all it takes to test it in a DAW. Call it after
+# mzgl_vst3_configure_bundle() and after any other POST_BUILD step that
+# completes the bundle (a re-sign, say) so the copy is complete.
+function(mzgl_vst3_install_after_build target)
+  mzgl_vst3_system_plugin_dir(_dir)
+  get_target_property(_name ${target} OUTPUT_NAME)
+  if(NOT _name)
+    set(_name ${target})
+  endif()
+  if(WIN32 OR APPLE)
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "${_dir}/${_name}.vst3"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_PROPERTY:${target},MZGL_VST3_BUNDLE_DIR>"
+              "${_dir}/${_name}.vst3"
+      COMMENT "Installing ${_name}.vst3 -> ${_dir}")
+  else()
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
+      COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${target}>" "${_dir}/${_name}.vst3"
+      COMMENT "Installing ${_name}.vst3 -> ${_dir}")
   endif()
 endfunction()
 

@@ -7,7 +7,7 @@ D3D11Context::~D3D11Context() {
 	shutdown();
 }
 
-bool D3D11Context::init(HWND hwnd, int width, int height, int sampleCount) {
+bool D3D11Context::init(HWND hwnd, int width, int height, int sampleCount, ID3D11Device *sharedDevice) {
 	this->hwnd		  = hwnd;
 	this->width		  = width;
 	this->height	  = height;
@@ -28,6 +28,18 @@ bool D3D11Context::init(HWND hwnd, int width, int height, int sampleCount) {
 	swapChainDesc.Windowed							 = TRUE;
 	swapChainDesc.SwapEffect						 = DXGI_SWAP_EFFECT_DISCARD;
 	swapChainDesc.Flags								 = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	if (sharedDevice != nullptr) {
+		device = sharedDevice;
+		device->AddRef();
+		device->GetImmediateContext(&deviceContext);
+		if (!createSwapChainForSharedDevice(swapChainDesc)) {
+			shutdown();
+			return false;
+		}
+		createRenderTarget();
+		return true;
+	}
 
 	D3D_FEATURE_LEVEL featureLevel;
 	D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0};
@@ -54,6 +66,29 @@ bool D3D11Context::init(HWND hwnd, int width, int height, int sampleCount) {
 
 	Log::d() << "D3D11 device created, feature level: " << std::hex << featureLevel;
 	createRenderTarget();
+	return true;
+}
+
+// A swap chain for an existing device has to come from the DXGI factory that
+// made the device's adapter: device -> IDXGIDevice -> adapter -> factory.
+bool D3D11Context::createSwapChainForSharedDevice(const DXGI_SWAP_CHAIN_DESC &desc) {
+	IDXGIDevice *dxgiDevice	  = nullptr;
+	IDXGIAdapter *adapter	  = nullptr;
+	IDXGIFactory *factory	  = nullptr;
+	HRESULT hr				  = device->QueryInterface(__uuidof(IDXGIDevice), (void **) &dxgiDevice);
+	if (SUCCEEDED(hr)) hr = dxgiDevice->GetAdapter(&adapter);
+	if (SUCCEEDED(hr)) hr = adapter->GetParent(__uuidof(IDXGIFactory), (void **) &factory);
+	if (SUCCEEDED(hr)) {
+		DXGI_SWAP_CHAIN_DESC mutableDesc = desc;
+		hr								 = factory->CreateSwapChain(device, &mutableDesc, &swapChain);
+	}
+	if (factory) factory->Release();
+	if (adapter) adapter->Release();
+	if (dxgiDevice) dxgiDevice->Release();
+	if (FAILED(hr)) {
+		Log::e() << "Failed to create D3D11 swap chain on shared device: 0x" << std::hex << hr;
+		return false;
+	}
 	return true;
 }
 
@@ -118,8 +153,8 @@ void D3D11Context::resize(int newWidth, int newHeight) {
 	createRenderTarget();
 }
 
-void D3D11Context::present() {
-	swapChain->Present(1, 0); // vsync on
+void D3D11Context::present(bool vsync) {
+	swapChain->Present(vsync ? 1 : 0, 0);
 }
 
 void D3D11Context::shutdown() {

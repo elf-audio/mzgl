@@ -571,8 +571,9 @@ static const std::string &windowsExeDataRoot() {
 #endif
 
 std::string dataPath(const std::string &path, const std::string &appBundleId) {
-	// it's an absolute path, don't do anything to it
-	if (!path.empty() && path[0] == '/') return path;
+	// it's an absolute path, don't do anything to it ("C:\..." on Windows too -
+	// callers sometimes hand back a path dataPath() already resolved)
+	if (!path.empty() && (path[0] == '/' || std::filesystem::path(path).is_absolute())) return path;
 
 	if (isOverridingDataPath) return dataPathOverride + "/" + path;
 

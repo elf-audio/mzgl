@@ -8,10 +8,15 @@ class D3D11Context {
 public:
 	~D3D11Context();
 
-	bool init(HWND hwnd, int width, int height, int sampleCount = 1);
+	// Creates a device + swap chain for hwnd. Pass an existing device to share
+	// it (and its immediate context) and only create a swap chain for this
+	// window - sokol has exactly one sg_setup() per process, bound to one
+	// device, so every swap chain it renders into must come from that device
+	// (plugin editors opened several times in one host, say).
+	bool init(HWND hwnd, int width, int height, int sampleCount = 1, ID3D11Device *sharedDevice = nullptr);
 	void shutdown();
 	void resize(int width, int height);
-	void present();
+	void present(bool vsync = true);
 
 	ID3D11Device *getDevice() const { return device; }
 	ID3D11DeviceContext *getDeviceContext() const { return deviceContext; }
@@ -24,6 +29,7 @@ public:
 	int getSampleCount() const { return sampleCount; }
 
 private:
+	bool createSwapChainForSharedDevice(const DXGI_SWAP_CHAIN_DESC &desc);
 	void createRenderTarget();
 	void releaseRenderTarget();
 

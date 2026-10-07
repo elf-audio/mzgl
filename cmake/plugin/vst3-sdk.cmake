@@ -13,6 +13,9 @@ macro(mzgl_fetch_vst3_sdk)
     set(SMTG_RUN_VST_VALIDATOR OFF CACHE BOOL "" FORCE)
     set(SMTG_CREATE_MODULE_INFO OFF CACHE BOOL "" FORCE)
     set(SMTG_ENABLE_USE_OF_JACK OFF CACHE BOOL "" FORCE)
+    # Match the static CRT (/MT) mzgl's parent projects build with on Windows;
+    # the SDK defaults to /MD, which would give LNK2038 runtime mismatches.
+    set(SMTG_USE_STATIC_CRT ON CACHE BOOL "" FORCE)
 
     include(FetchContent)
     FetchContent_Declare(

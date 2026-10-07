@@ -10,6 +10,11 @@ if(NOT SRC OR NOT DST)
   message(FATAL_ERROR "copy-plugin-data.cmake: SRC and DST must be set")
 endif()
 
+# The caller passes the list as "a\;b\;c". A POSIX shell turns that into
+# "a;b;c"; cmd.exe (Ninja on Windows) leaves the backslashes in, which would
+# make the whole list a single bogus path - normalise here.
+string(REPLACE "\;" ";" SUBDIRS "${SUBDIRS}")
+
 if(NOT SUBDIRS)
   if(EXISTS "${SRC}")
     file(COPY "${SRC}/" DESTINATION "${DST}")
