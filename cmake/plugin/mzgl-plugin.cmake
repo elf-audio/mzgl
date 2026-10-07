@@ -261,7 +261,10 @@ function(mzgl_vst3_install_after_build target)
       TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
       COMMAND ${CMAKE_COMMAND} -E rm -rf "${_dir}/${_name}.vst3"
-      COMMAND ${CMAKE_COMMAND} -E copy_directory "$<TARGET_PROPERTY:${target},MZGL_VST3_BUNDLE_DIR>"
+      # GENEX_EVAL: on macOS the property holds a genex ($<TARGET_BUNDLE_DIR>);
+      # a plain $<TARGET_PROPERTY> would paste it literally into the build file.
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+              "$<GENEX_EVAL:$<TARGET_PROPERTY:${target},MZGL_VST3_BUNDLE_DIR>>"
               "${_dir}/${_name}.vst3"
       COMMENT "Installing ${_name}.vst3 -> ${_dir}")
   else()
