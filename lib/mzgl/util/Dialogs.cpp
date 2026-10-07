@@ -881,9 +881,9 @@ static void
 	options.appUrlScheme	= "koala";
 	options.userAgentSuffix = "KoalaApp";
 	options.onClosed		= [&app, completionCallback]() {
-		   // defer the release - onClosed fires from inside the impl's close()
-		   app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
-		   if (completionCallback) completionCallback();
+		// defer the release - onClosed fires from inside the impl's close()
+		app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
+		if (completionCallback) completionCallback();
 	};
 	windowsDialogWebView = std::make_shared<WindowsWebView>(app, std::move(options));
 }
@@ -910,12 +910,12 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 	// Appends a marker to the User-Agent so koalaver.se can tell it's being shown
 	// inside Koala (e.g. to show the "Open in Koala" button).
 	wvConfig.applicationNameForUserAgent = @"KoalaApp";
-	WKWebView *wv	  = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200) configuration:wvConfig];
-	koalaSchemeNavDelegate		= [[KoalaSchemeNavDelegate alloc] init];
+	WKWebView *wv		   = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 200, 200) configuration:wvConfig];
+	koalaSchemeNavDelegate = [[KoalaSchemeNavDelegate alloc] init];
 	koalaSchemeNavDelegate->app = &app;
 	wv.navigationDelegate		= koalaSchemeNavDelegate;
-	NSURL *URL		  = createURLFromString(url);
-	NSURLRequest *req = [[NSURLRequest alloc] initWithURL:URL];
+	NSURL *URL					= createURLFromString(url);
+	NSURLRequest *req			= [[NSURLRequest alloc] initWithURL:URL];
 	[wv loadRequest:req];
 	[wv setTranslatesAutoresizingMaskIntoConstraints:NO];
 
@@ -972,13 +972,13 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
 
 	  // Instantiate WKWebView on the main thread
-	  WKWebViewConfiguration *wvConfig = [[WKWebViewConfiguration alloc] init];
+	  WKWebViewConfiguration *wvConfig	   = [[WKWebViewConfiguration alloc] init];
 	  wvConfig.applicationNameForUserAgent = @"KoalaApp";
-	  WKWebView *webView	   = [[WKWebView alloc] initWithFrame:wvRect configuration:wvConfig];
-	  koalaSchemeNavDelegate	  = [[KoalaSchemeNavDelegate alloc] init];
-	  koalaSchemeNavDelegate->app = &app;
-	  webView.navigationDelegate  = koalaSchemeNavDelegate;
-	  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+	  WKWebView *webView				   = [[WKWebView alloc] initWithFrame:wvRect configuration:wvConfig];
+	  koalaSchemeNavDelegate			   = [[KoalaSchemeNavDelegate alloc] init];
+	  koalaSchemeNavDelegate->app		   = &app;
+	  webView.navigationDelegate		   = koalaSchemeNavDelegate;
+	  webView.autoresizingMask			   = NSViewWidthSizable | NSViewHeightSizable;
 
 	  // Load content on the main thread but asynchronously to avoid blocking the UI
 	  NSURL *nsUrl			= createURLFromString(url);

@@ -46,10 +46,10 @@ public:
 		targetController = [[UIViewController alloc] init];
 
 		webView					 = [[AppleWebView alloc] initWithFrame:targetController.view.bounds
-			 loadedCallback:[]() {}
-			 jsCallback:jsCallback
-			 closeCallback:[this]() { close(); }
-			 url:[NSString stringWithUTF8String:url.c_str()]];
+			loadedCallback:[]() {}
+			jsCallback:jsCallback
+			closeCallback:[this]() { close(); }
+			url:[NSString stringWithUTF8String:url.c_str()]];
 		webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
 		[targetController.view addSubview:webView];
@@ -87,10 +87,10 @@ public:
 		  NSView *rootView = (__bridge NSView *) app.viewHandle;
 
 		  webView				   = [[AppleWebView alloc] initWithFrame:rootView.bounds
-			   loadedCallback:[]() {}
-			   jsCallback:jsCallback
-			   closeCallback:[this]() { close(); }
-			   url:[NSString stringWithUTF8String:url.c_str()]];
+			  loadedCallback:[]() {}
+			  jsCallback:jsCallback
+			  closeCallback:[this]() { close(); }
+			  url:[NSString stringWithUTF8String:url.c_str()]];
 		  webView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
 		  [rootView addSubview:webView];

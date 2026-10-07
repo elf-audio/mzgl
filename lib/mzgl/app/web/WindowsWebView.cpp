@@ -87,7 +87,7 @@ namespace {
 		// GetDpiForWindow needs a Win10 SDK target; we build for 0x0601 so look it up.
 		using GetDpiForWindowFn = UINT(WINAPI *)(HWND);
 		static auto fn			= reinterpret_cast<GetDpiForWindowFn>(
-			 GetProcAddress(GetModuleHandleW(L"user32.dll"), "GetDpiForWindow"));
+			GetProcAddress(GetModuleHandleW(L"user32.dll"), "GetDpiForWindow"));
 		if (fn != nullptr) return fn(hwnd);
 		HDC dc	 = GetDC(hwnd);
 		UINT dpi = static_cast<UINT>(GetDeviceCaps(dc, LOGPIXELSX));
@@ -250,19 +250,19 @@ private:
 									  GetModuleHandleW(nullptr),
 									  nullptr);
 		font		= CreateFontW(-MulDiv(14, static_cast<int>(dpiForWindow(parent)), 72),
-							  0,
-							  0,
-							  0,
-							  FW_NORMAL,
-							  FALSE,
-							  FALSE,
-							  FALSE,
-							  DEFAULT_CHARSET,
-							  OUT_DEFAULT_PRECIS,
-							  CLIP_DEFAULT_PRECIS,
-							  CLEARTYPE_QUALITY,
-							  DEFAULT_PITCH,
-							  L"Segoe UI Symbol");
+								  0,
+								  0,
+								  0,
+								  FW_NORMAL,
+								  FALSE,
+								  FALSE,
+								  FALSE,
+								  DEFAULT_CHARSET,
+								  OUT_DEFAULT_PRECIS,
+								  CLIP_DEFAULT_PRECIS,
+								  CLEARTYPE_QUALITY,
+								  DEFAULT_PITCH,
+								  L"Segoe UI Symbol");
 		SendMessageW(closeButton, WM_SETFONT, reinterpret_cast<WPARAM>(font), TRUE);
 	}
 

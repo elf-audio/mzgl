@@ -5,8 +5,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 3.18.1)
 project(mzgl)
 # makes clang output colours
-if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL
-                                            "Clang")
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
 endif()
 
@@ -18,13 +17,10 @@ include(cmake/mzgl.cmake)
 
 if(CMAKE_BUILD_TYPE MATCHES DEBUG)
   add_compile_definitions(DEBUG=1)
-
 endif()
 
 set(LINUX FALSE)
-if(NOT ANDROID
-   AND UNIX
-   AND NOT APPLE)
+if(NOT ANDROID AND UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
 
@@ -34,8 +30,10 @@ endif()
 # RtMidi) were wrongly built for iOS. Detect via the toolchain's CMAKE_SYSTEM_NAME
 # or the ios-cmake PLATFORM value (OS64 / OS64COMBINED / SIMULATOR*).
 set(IOS FALSE)
-if(CMAKE_SYSTEM_NAME STREQUAL "iOS"
-   OR PLATFORM MATCHES "^(OS|OS64|OS64COMBINED|SIMULATOR|SIMULATOR64|SIMULATORARM64)$")
+if(
+  CMAKE_SYSTEM_NAME STREQUAL "iOS"
+  OR PLATFORM MATCHES "^(OS|OS64|OS64COMBINED|SIMULATOR|SIMULATOR64|SIMULATORARM64)$"
+)
   set(IOS TRUE)
 endif()
 
@@ -48,100 +46,102 @@ add_compile_definitions(${MZGL_BACKEND_COMPILE_DEFS})
 # PRINT EVERYTHING!!!
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(MZGL_SOURCES
-    lib/mzgl/App.cpp
-    lib/mzgl/animation/Tween.cpp
-    lib/mzgl/audio/AudioSystem.cpp
-    lib/mzgl/geom/Rectf.cpp
-    lib/mzgl/geom/RoundedRect.cpp
-    lib/mzgl/geom/SVG.cpp
-    lib/mzgl/geom/Triangulator.cpp
-    lib/mzgl/geom/geomutils.cpp
-    lib/mzgl/geom/3D/Camera.cpp
-    lib/mzgl/gl/error.cpp
-    lib/mzgl/gl/Fbo.cpp
-    lib/mzgl/gl/Font.cpp
-    lib/mzgl/gl/Graphics.cpp
-    lib/mzgl/gl/colors.cpp
-    # Image-win.cpp carries the stb_image implementation (used by Image.cpp's
-    # loadPngFromData on every platform); it also defines Image::load/save, but
-    # those are #if'd out on Apple where Image.mm (ImageIO) provides them.
-    lib/mzgl/gl/Image-win.cpp
-    lib/mzgl/gl/Image.cpp
-    lib/mzgl/gl/Shader.cpp
-    lib/mzgl/gl/SvgVbo.cpp
-    lib/mzgl/gl/Texture.cpp
-    lib/mzgl/gl/Vbo.cpp
-    lib/mzgl/gl/ScopedMask.cpp
-    lib/mzgl/gl/drawing/Drawer.cpp
-    lib/mzgl/gl/drawing/MitredLine.cpp
-    lib/mzgl/gl/drawing/ShapeLUT.cpp
-    lib/mzgl/midi/AllMidiDevices.cpp
-    lib/mzgl/midi/MidiMessage.cpp
-    lib/mzgl/midi/MidiMessage.h
-    lib/mzgl/midi/MidiCCModeDetector.cpp
-    lib/mzgl/midi/MidiCCModeDetector.h
-    lib/mzgl/midi/MidiCCMessageParser.cpp
-    lib/mzgl/midi/MidiCCMessageParser.h
-    lib/mzgl/midi/MidiMessageParser.cpp
-    lib/mzgl/midi/MidiMessageParser.h
-    lib/mzgl/midi/midiMessagePrinting.cpp
-    lib/mzgl/music/chords.cpp
-    lib/mzgl/music/scales.cpp
-    lib/mzgl/net/netUtil.cpp
-    lib/mzgl/net/FileDownloader.cpp
-    lib/mzgl/net/FileDownloader.h
-    lib/mzgl/ui/widgets/ReorderableGrid.cpp
-    lib/mzgl/ui/Layer.cpp
-    lib/mzgl/ui/Layout.cpp
-    lib/mzgl/ui/Scroller.cpp
-    lib/mzgl/ui/ScrollingList.cpp
-    lib/mzgl/ui/ScrollingListDeletable.cpp
-    lib/mzgl/ui/ScrollingListItem.cpp
-    lib/mzgl/ui/Slider.cpp
-    lib/mzgl/ui/Select.cpp
-    lib/mzgl/ui/FlexboxLayout.cpp
-    lib/mzgl/util/Base64.cpp
-    lib/mzgl/util/Base64.h
-    lib/mzgl/util/DateTime.cpp
-    lib/mzgl/util/UndoManager.cpp
-    lib/mzgl/util/Dialogs.cpp
-    lib/mzgl/util/WebViewOverlay.cpp
-    lib/mzgl/util/Dylib.cpp
-    lib/mzgl/util/errors.cpp
-    lib/mzgl/util/FileWatcher.cpp
-    lib/mzgl/util/FloatBuffer.cpp
-    lib/mzgl/util/Haptics.cpp
-    lib/mzgl/util/Int16Buffer.cpp
-    lib/mzgl/util/log.cpp
-    lib/mzgl/util/maths.cpp
-    lib/mzgl/util/ScopedUrl.cpp
-    lib/mzgl/util/util.cpp
-    lib/mzgl/util/mainThread.cpp
-    lib/mzgl/util/TaskRunner.cpp
-    lib/mzgl/util/TaskRunner.h
-    lib/mzgl/util/mzAssert.cpp
-    lib/mzgl/util/pathUtil.h
-    lib/mzgl/util/pathUtil.cpp
-    lib/mzgl/util/stringUtil.cpp
-    $<$<PLATFORM_ID:Darwin>:
-    lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
-    lib/mzgl/midi/appleMidiUtils.cpp
-    lib/mzgl/app/mac/MacAppDelegate.mm
-    lib/mzgl/app/mac/MacMenuBar.mm
-    lib/mzgl/app/mac/EventsView.mm
-    lib/mzgl/app/mac/NSBlockButton.m
-    lib/mzgl/app/mac/MacFilePickerDelegate.mm
-    lib/mzgl/app/mac/LayerExplorer.mm
-    lib/mzgl/app/mac/TextConsole.mm
-    lib/mzgl/app/mac/mainMac.mm
-    lib/mzgl/app/apple/MZGLWebView.mm
-    lib/mzgl/app/apple/AppleWebView.mm
-    lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
-    lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
-    lib/mzgl/app/web/MacWebView.mm
-    lib/mzgl/app/web/MZWebView.cpp
-    >)
+set(
+  MZGL_SOURCES
+  lib/mzgl/App.cpp
+  lib/mzgl/animation/Tween.cpp
+  lib/mzgl/audio/AudioSystem.cpp
+  lib/mzgl/geom/Rectf.cpp
+  lib/mzgl/geom/RoundedRect.cpp
+  lib/mzgl/geom/SVG.cpp
+  lib/mzgl/geom/Triangulator.cpp
+  lib/mzgl/geom/geomutils.cpp
+  lib/mzgl/geom/3D/Camera.cpp
+  lib/mzgl/gl/error.cpp
+  lib/mzgl/gl/Fbo.cpp
+  lib/mzgl/gl/Font.cpp
+  lib/mzgl/gl/Graphics.cpp
+  lib/mzgl/gl/colors.cpp
+  # Image-win.cpp carries the stb_image implementation (used by Image.cpp's
+  # loadPngFromData on every platform); it also defines Image::load/save, but
+  # those are #if'd out on Apple where Image.mm (ImageIO) provides them.
+  lib/mzgl/gl/Image-win.cpp
+  lib/mzgl/gl/Image.cpp
+  lib/mzgl/gl/Shader.cpp
+  lib/mzgl/gl/SvgVbo.cpp
+  lib/mzgl/gl/Texture.cpp
+  lib/mzgl/gl/Vbo.cpp
+  lib/mzgl/gl/ScopedMask.cpp
+  lib/mzgl/gl/drawing/Drawer.cpp
+  lib/mzgl/gl/drawing/MitredLine.cpp
+  lib/mzgl/gl/drawing/ShapeLUT.cpp
+  lib/mzgl/midi/AllMidiDevices.cpp
+  lib/mzgl/midi/MidiMessage.cpp
+  lib/mzgl/midi/MidiMessage.h
+  lib/mzgl/midi/MidiCCModeDetector.cpp
+  lib/mzgl/midi/MidiCCModeDetector.h
+  lib/mzgl/midi/MidiCCMessageParser.cpp
+  lib/mzgl/midi/MidiCCMessageParser.h
+  lib/mzgl/midi/MidiMessageParser.cpp
+  lib/mzgl/midi/MidiMessageParser.h
+  lib/mzgl/midi/midiMessagePrinting.cpp
+  lib/mzgl/music/chords.cpp
+  lib/mzgl/music/scales.cpp
+  lib/mzgl/net/netUtil.cpp
+  lib/mzgl/net/FileDownloader.cpp
+  lib/mzgl/net/FileDownloader.h
+  lib/mzgl/ui/widgets/ReorderableGrid.cpp
+  lib/mzgl/ui/Layer.cpp
+  lib/mzgl/ui/Layout.cpp
+  lib/mzgl/ui/Scroller.cpp
+  lib/mzgl/ui/ScrollingList.cpp
+  lib/mzgl/ui/ScrollingListDeletable.cpp
+  lib/mzgl/ui/ScrollingListItem.cpp
+  lib/mzgl/ui/Slider.cpp
+  lib/mzgl/ui/Select.cpp
+  lib/mzgl/ui/FlexboxLayout.cpp
+  lib/mzgl/util/Base64.cpp
+  lib/mzgl/util/Base64.h
+  lib/mzgl/util/DateTime.cpp
+  lib/mzgl/util/UndoManager.cpp
+  lib/mzgl/util/Dialogs.cpp
+  lib/mzgl/util/WebViewOverlay.cpp
+  lib/mzgl/util/Dylib.cpp
+  lib/mzgl/util/errors.cpp
+  lib/mzgl/util/FileWatcher.cpp
+  lib/mzgl/util/FloatBuffer.cpp
+  lib/mzgl/util/Haptics.cpp
+  lib/mzgl/util/Int16Buffer.cpp
+  lib/mzgl/util/log.cpp
+  lib/mzgl/util/maths.cpp
+  lib/mzgl/util/ScopedUrl.cpp
+  lib/mzgl/util/util.cpp
+  lib/mzgl/util/mainThread.cpp
+  lib/mzgl/util/TaskRunner.cpp
+  lib/mzgl/util/TaskRunner.h
+  lib/mzgl/util/mzAssert.cpp
+  lib/mzgl/util/pathUtil.h
+  lib/mzgl/util/pathUtil.cpp
+  lib/mzgl/util/stringUtil.cpp
+  $<$<PLATFORM_ID:Darwin>:
+  lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
+  lib/mzgl/midi/appleMidiUtils.cpp
+  lib/mzgl/app/mac/MacAppDelegate.mm
+  lib/mzgl/app/mac/MacMenuBar.mm
+  lib/mzgl/app/mac/EventsView.mm
+  lib/mzgl/app/mac/NSBlockButton.m
+  lib/mzgl/app/mac/MacFilePickerDelegate.mm
+  lib/mzgl/app/mac/LayerExplorer.mm
+  lib/mzgl/app/mac/TextConsole.mm
+  lib/mzgl/app/mac/mainMac.mm
+  lib/mzgl/app/apple/MZGLWebView.mm
+  lib/mzgl/app/apple/AppleWebView.mm
+  lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
+  lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
+  lib/mzgl/app/web/MacWebView.mm
+  lib/mzgl/app/web/MZWebView.cpp
+  >
+)
 
 # iOS-only app/audio sources. The Darwin block above is shared with macOS and
 # provides the apple-common pieces (CoreMIDI, AudioFileApple, WKWebView, AUv3);
@@ -149,34 +149,35 @@ set(MZGL_SOURCES
 # implementations mzgl needs to actually run on iOS, which previously only the
 # hand-tooled mzgl.xcodeproj built.
 if(IOS)
-  list(APPEND MZGL_SOURCES
-       lib/mzgl/audio/iOS/AudioSystemIOS.mm
-       lib/mzgl/app/ios/mainiOS.mm
-       lib/mzgl/app/ios/iOSAppDelegate.mm
-       lib/mzgl/app/ios/MZGLKitView.mm
-       lib/mzgl/app/ios/MZGLKitViewController.mm
-       lib/mzgl/app/ios/MZMetaliOSViewController.mm
-       lib/mzgl/app/ios/TextboxSegmentedViewController.m
-       lib/mzgl/app/ios/UIBlockButton.m
-       lib/AudioShare/AudioShareSDK.m
-       # Apple-shared sources from the $<PLATFORM_ID:Darwin> block above (which is
-       # FALSE on iOS); the mac-only files in that block are correctly omitted.
-       lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
-       lib/mzgl/midi/appleMidiUtils.cpp
-       # MZGLWebView.mm / app/web/MacWebView.mm are AppKit (macOS-only); iOS uses
-       # AppleWebView (UIKit) on top of the cross-platform MZWebView base.
-       lib/mzgl/app/apple/AppleWebView.mm
-       lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
-       lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
-       lib/mzgl/app/web/MZWebView.cpp)
+  list(
+    APPEND MZGL_SOURCES
+    lib/mzgl/audio/iOS/AudioSystemIOS.mm
+    lib/mzgl/app/ios/mainiOS.mm
+    lib/mzgl/app/ios/iOSAppDelegate.mm
+    lib/mzgl/app/ios/MZGLKitView.mm
+    lib/mzgl/app/ios/MZGLKitViewController.mm
+    lib/mzgl/app/ios/MZMetaliOSViewController.mm
+    lib/mzgl/app/ios/TextboxSegmentedViewController.m
+    lib/mzgl/app/ios/UIBlockButton.m
+    lib/AudioShare/AudioShareSDK.m
+    # Apple-shared sources from the $<PLATFORM_ID:Darwin> block above (which is
+    # FALSE on iOS); the mac-only files in that block are correctly omitted.
+    lib/mzgl/midi/AllMidiDevicesAppleImpl.mm
+    lib/mzgl/midi/appleMidiUtils.cpp
+    # MZGLWebView.mm / app/web/MacWebView.mm are AppKit (macOS-only); iOS uses
+    # AppleWebView (UIKit) on top of the cross-platform MZWebView base.
+    lib/mzgl/app/apple/AppleWebView.mm
+    lib/mzgl/app/apple/AUv3/AudioUnitViewController.mm
+    lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
+    lib/mzgl/app/web/MZWebView.cpp
+  )
 endif()
 
 if(NOT ANDROID AND NOT APPLE)
   # GLFW: macOS runs the Cocoa app (app/mac/mainMac.mm), iOS runs app/ios/.
   # GLFW desktop app-runner (Windows / Linux / web). Apple platforms never use
   list(
-    APPEND
-    MZGL_SOURCES
+    APPEND MZGL_SOURCES
     lib/mzgl/app/glfw/GLFWAppRunner.cpp
     lib/mzgl/app/glfw/DesktopWindowEventHandler.h
     lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
@@ -189,7 +190,8 @@ if(NOT ANDROID AND NOT APPLE)
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
     lib/mzgl/app/glfw/GLFWOS_Windows.cpp
-    >)
+    >
+  )
 endif()
 
 # GL loader for the OpenGL backend, and for Sokol's GL path on Linux. Not on Apple:
@@ -202,8 +204,7 @@ endif()
 
 if(USING_SOKOL)
   list(
-    APPEND
-    MZGL_SOURCES
+    APPEND MZGL_SOURCES
     lib/mzgl/gl/api/sokol/SokolAPI.cpp
     lib/mzgl/gl/api/sokol/SokolImplementation.cpp
     lib/mzgl/gl/api/sokol/SokolVbo.cpp
@@ -214,27 +215,30 @@ if(USING_SOKOL)
     >
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/win64/D3D11Context.cpp
-    >)
+    >
+  )
 elseif(USING_METAL)
   list(
-    APPEND
-    MZGL_SOURCES
+    APPEND MZGL_SOURCES
     lib/mzgl/gl/api/metal/MetalAPI.mm
     lib/mzgl/gl/api/metal/MetalShader.mm
     lib/mzgl/gl/api/metal/MetalVbo.mm
     lib/mzgl/gl/api/metal/MetalTexture.mm
     $<$<PLATFORM_ID:Darwin>:
     lib/mzgl/app/mac/Metal/MZMetalView.mm
-    >)
+    >
+  )
   # the Metal backend keeps ObjC objects in C++ members (encoder/pipeline
   # caches) and relies on ARC for their lifetimes
   set_source_files_properties(
-    lib/mzgl/gl/api/metal/MetalAPI.mm lib/mzgl/gl/api/metal/MetalShader.mm
-    lib/mzgl/gl/api/metal/MetalVbo.mm lib/mzgl/gl/api/metal/MetalTexture.mm
-    PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    lib/mzgl/gl/api/metal/MetalAPI.mm
+    lib/mzgl/gl/api/metal/MetalShader.mm
+    lib/mzgl/gl/api/metal/MetalVbo.mm
+    lib/mzgl/gl/api/metal/MetalTexture.mm
+    PROPERTIES COMPILE_FLAGS "-fobjc-arc"
+  )
 else()
-  list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp
-       lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp)
+  list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp)
 endif()
 
 foreach(source IN LISTS MZGL_SOURCES)
@@ -243,69 +247,69 @@ foreach(source IN LISTS MZGL_SOURCES)
   source_group("${source_path_group}" FILES "${source}")
 endforeach()
 
-set(HEADERS
-    lib/mzgl
-    lib/mzgl/animation
-    lib/mzgl/app/android
-    lib/mzgl/app/apple
-    lib/mzgl/app/apple/AUv3
-    lib/mzgl/app/mac
-    lib/mzgl/app/mac/GL
-    lib/mzgl/app/mac/Metal
-    lib/mzgl/app/glfw
-    lib/mzgl/app/win64
-    lib/mzgl/app/web
-    lib/mzgl/audio
-    lib/mzgl/audio/mac
-    lib/mzgl/audio/portaudio
-    lib/mzgl/audio/iOS
-    lib/mzgl/file
-    lib/mzgl/geom
-    lib/mzgl/gl
-    lib/mzgl/gl/api
-    lib/mzgl/gl/api/OpenGL
-    lib/mzgl/gl/api/sokol
-    lib/mzgl/gl/api/metal
-    lib/mzgl/gl/drawing
-    lib/mzgl/midi
-    lib/mzgl/music
-    lib/mzgl/net
-    lib/mzgl/ui
-    lib/mzgl/ui/widgets
-    lib/mzgl/util
-    lib/glm
-    lib
-    lib/glfw/include/GLFW
-    lib/glew/include/GL
-    lib/glew/include
-    lib/portaudio/include
-    lib/fontstash
-    lib/rtmidi
-    lib/sokol
-    lib/pu_gixml/src
-    lib/misc
-    lib/yoga
-    # lib/ghc-filesystem/include
+set(
+  HEADERS
+  lib/mzgl
+  lib/mzgl/animation
+  lib/mzgl/app/android
+  lib/mzgl/app/apple
+  lib/mzgl/app/apple/AUv3
+  lib/mzgl/app/mac
+  lib/mzgl/app/mac/GL
+  lib/mzgl/app/mac/Metal
+  lib/mzgl/app/glfw
+  lib/mzgl/app/win64
+  lib/mzgl/app/web
+  lib/mzgl/audio
+  lib/mzgl/audio/mac
+  lib/mzgl/audio/portaudio
+  lib/mzgl/audio/iOS
+  lib/mzgl/file
+  lib/mzgl/geom
+  lib/mzgl/gl
+  lib/mzgl/gl/api
+  lib/mzgl/gl/api/OpenGL
+  lib/mzgl/gl/api/sokol
+  lib/mzgl/gl/api/metal
+  lib/mzgl/gl/drawing
+  lib/mzgl/midi
+  lib/mzgl/music
+  lib/mzgl/net
+  lib/mzgl/ui
+  lib/mzgl/ui/widgets
+  lib/mzgl/util
+  lib/glm
+  lib
+  lib/glfw/include/GLFW
+  lib/glew/include/GL
+  lib/glew/include
+  lib/portaudio/include
+  lib/fontstash
+  lib/rtmidi
+  lib/sokol
+  lib/pu_gixml/src
+  lib/misc
+  lib/yoga
+  # lib/ghc-filesystem/include
 )
 
 # include_directories() list(APPEND HEADERS "${filesystem_SOURCE_DIR}/include")
-set(YOGA_SOURCES
-    lib/yoga/Utils.cpp
-    lib/yoga/YGConfig.cpp
-    lib/yoga/YGEnums.cpp
-    lib/yoga/YGLayout.cpp
-    lib/yoga/YGNode.cpp
-    lib/yoga/YGNodePrint.cpp
-    lib/yoga/YGStyle.cpp
-    lib/yoga/YGValue.cpp
-    lib/yoga/Yoga.cpp
-    lib/yoga/ylog.cpp
-    lib/yoga/event/event.cpp)
+set(
+  YOGA_SOURCES
+  lib/yoga/Utils.cpp
+  lib/yoga/YGConfig.cpp
+  lib/yoga/YGEnums.cpp
+  lib/yoga/YGLayout.cpp
+  lib/yoga/YGNode.cpp
+  lib/yoga/YGNodePrint.cpp
+  lib/yoga/YGStyle.cpp
+  lib/yoga/YGValue.cpp
+  lib/yoga/Yoga.cpp
+  lib/yoga/ylog.cpp
+  lib/yoga/event/event.cpp
+)
 
-option(
-  MZGL_UNIT_TEST
-  "should this be a unit testing build - omits a main, so catch2 can take control"
-  OFF)
+option(MZGL_UNIT_TEST "should this be a unit testing build - omits a main, so catch2 can take control" OFF)
 
 if(MZGL_UNIT_TEST)
   add_compile_definitions(UNIT_TEST DEBUG=1)
@@ -327,31 +331,27 @@ mzgl_restore_cmake_log_level()
 
 # Apple platforms have a special audio file reader
 if(APPLE)
-
   # Image::load/save use ImageIO/CoreGraphics on Apple (Image.mm), matching the
   # hand-tooled Xcode projects; every other platform uses the stb_image fallback
   # (Image-win.cpp, added in the else branch below). Image.mm is compiled with ARC
   # (it creates autoreleased NSString/NSURL); on iOS the target is ARC-wide already,
   # the per-file flag makes macOS match.
   list(APPEND MZGL_SOURCES lib/mzgl/gl/Image.mm)
-  set_source_files_properties(lib/mzgl/gl/Image.mm
-                              PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+  set_source_files_properties(lib/mzgl/gl/Image.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 
   # FilePickerDelegate stores the NSArray of allowed extensions in an ivar. Its
   # caller (Dialogs.cpp, ARC) releases that array as soon as the local goes out
   # of scope, so without ARC here the ivar dangles and NSOpenPanel's deferred
   # panel:shouldEnableURL: XPC callback fast-enumerates freed memory (crashed
   # the AUv2 in Live when importing a file via the system picker).
-  set_source_files_properties(lib/mzgl/app/mac/MacFilePickerDelegate.mm
-                              PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+  set_source_files_properties(lib/mzgl/app/mac/MacFilePickerDelegate.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 
   # force ARC - we were doing this but it breaks GLFW at the moment because it
   # isn't ARC compatible yet, so we're just selectively compiling with arc for
   # MZGLEffectAU below instead. add_compile_options(-fobjc-arc)
 
   # these are the files that have objective-c in them
-  set_source_files_properties(lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm
-                              PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+  set_source_files_properties(lib/mzgl/app/apple/AUv3/MZGLEffectAU.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
 
   # these are the files that have objective-c in them
   set_source_files_properties(
@@ -364,13 +364,17 @@ if(APPLE)
     lib/mzgl/gl/api/sokol/SokolImplementation.cpp
     lib/mzgl/net/FileDownloader.cpp
     lib/mzgl/util/Haptics.cpp
-    PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc")
+    PROPERTIES COMPILE_FLAGS "-x objective-c++ -fobjc-arc"
+  )
 endif()
 
 if(ANDROID)
-  list(APPEND MZGL_SOURCES lib/mzgl/app/android/mainAndroid.cpp
-       lib/mzgl/app/android/androidUtil.cpp
-       lib/mzgl/midi/AllMidiDevicesAndroidImpl.cpp)
+  list(
+    APPEND MZGL_SOURCES
+    lib/mzgl/app/android/mainAndroid.cpp
+    lib/mzgl/app/android/androidUtil.cpp
+    lib/mzgl/midi/AllMidiDevicesAndroidImpl.cpp
+  )
 else()
   # Apple never uses PortAudio: iOS has AudioSystemIOS (AVAudioSession), macOS has
   # CoreAudioSystem (see AudioSystem.h). Building PortAudioSystem.cpp there would
@@ -382,15 +386,13 @@ else()
 
   if(APPLE)
     if(NOT IOS)
-      list(APPEND MZGL_SOURCES lib/mzgl/audio/mac/CoreAudioSystem.cpp
-           lib/mzgl/audio/mac/CoreAudioSystem.h)
+      list(APPEND MZGL_SOURCES lib/mzgl/audio/mac/CoreAudioSystem.cpp lib/mzgl/audio/mac/CoreAudioSystem.h)
     endif()
   endif()
 
   if(NOT APPLE)
     list(APPEND MZGL_SOURCES lib/mzgl/app/glfw/mainGlfw.cpp)
   endif()
-
 endif()
 
 if(APPLE)
@@ -398,11 +400,13 @@ if(APPLE)
 endif()
 
 if(WIN32)
-
-  list(APPEND MZGL_SOURCES
-       # lib/mzgl/app/win64/mainWin.cpp
-       lib/mzgl/util/winUtil.cpp lib/mzgl/util/util_windows.cpp
-       lib/mzgl/util/AlignedAllocator.cpp)
+  list(
+    APPEND MZGL_SOURCES
+    # lib/mzgl/app/win64/mainWin.cpp
+    lib/mzgl/util/winUtil.cpp
+    lib/mzgl/util/util_windows.cpp
+    lib/mzgl/util/AlignedAllocator.cpp
+  )
 
   # Embedded web views use the WebView2 SDK (static loader lib), installed via
   # `vcpkg install webview2:x64-windows-static` - same vcpkg tree as OpenSSL.
@@ -410,28 +414,32 @@ if(WIN32)
   if(NOT MZGL_WEBVIEW2_ROOT)
     set(MZGL_WEBVIEW2_ROOT "C:/vcpkg/installed/x64-windows-static")
   endif()
-  if(EXISTS "${MZGL_WEBVIEW2_ROOT}/include/WebView2.h"
-     AND EXISTS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib")
+  if(
+    EXISTS "${MZGL_WEBVIEW2_ROOT}/include/WebView2.h"
+    AND EXISTS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib"
+  )
     mzgl_print_in_blue("[WEBVIEW2] -> using SDK at ${MZGL_WEBVIEW2_ROOT}")
     list(APPEND MZGL_SOURCES lib/mzgl/app/web/WindowsWebView.cpp)
     list(APPEND HEADERS "${MZGL_WEBVIEW2_ROOT}/include")
-    set(MZGL_WEBVIEW2_LIBS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib"
-                           comctl32 shell32 version)
+    set(MZGL_WEBVIEW2_LIBS "${MZGL_WEBVIEW2_ROOT}/lib/WebView2LoaderStatic.lib" comctl32 shell32 version)
     add_compile_definitions(MZGL_HAS_WEBVIEW2)
   else()
     message(
       WARNING
-        "WebView2 SDK not found at ${MZGL_WEBVIEW2_ROOT} - embedded web views "
-        "disabled, pages will open in the system browser. Install with "
-        "`vcpkg install webview2:x64-windows-static` or set MZGL_WEBVIEW2_ROOT.")
+      "WebView2 SDK not found at ${MZGL_WEBVIEW2_ROOT} - embedded web views "
+      "disabled, pages will open in the system browser. Install with "
+      "`vcpkg install webview2:x64-windows-static` or set MZGL_WEBVIEW2_ROOT."
+    )
   endif()
-
 endif()
 
 if(LINUX)
-  list(APPEND MZGL_SOURCES
-       # lib/mzgl/app/linux/mainLinux.cpp
-       lib/mzgl/util/linuxUtil.cpp lib/mzgl/util/util_linux.cpp)
+  list(
+    APPEND MZGL_SOURCES
+    # lib/mzgl/app/linux/mainLinux.cpp
+    lib/mzgl/util/linuxUtil.cpp
+    lib/mzgl/util/util_linux.cpp
+  )
 endif()
 
 # iOS-only header search paths: the app/ios UIKit views (included from e.g.
@@ -442,8 +450,12 @@ if(IOS)
 endif()
 
 add_library(
-  libmzgl STATIC ${MZGL_SOURCES} lib/mzgl/midi/midiMessagePrinting.cpp
-                 lib/mzgl/midi/midiMessagePrinting.h)
+  libmzgl
+  STATIC
+  ${MZGL_SOURCES}
+  lib/mzgl/midi/midiMessagePrinting.cpp
+  lib/mzgl/midi/midiMessagePrinting.h
+)
 add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
 target_include_directories(libmzgl PUBLIC ${HEADERS})
 target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
@@ -454,13 +466,15 @@ include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
 
 # COMPILE SOKOL SHADERS List of shader files
-set(SHADER_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/nothing.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/color.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorTexture.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/tex.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/font.glsl"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorFont.glsl")
+set(
+  SHADER_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/nothing.glsl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/color.glsl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorTexture.glsl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/tex.glsl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/font.glsl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/shaders/colorFont.glsl"
+)
 
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")
@@ -469,21 +483,16 @@ set(SOKOL_SHDC "sokol-shdc")
 # (the metal_macos/metal_ios MSL variants) as the Sokol backend, so shader
 # compilation runs for both.
 if(USING_SOKOL OR USING_METAL)
-
   # MZGL_USE_PRECOMPILED_SOKOL_SHADERS lets parent projects skip shader
   # regeneration entirely and use the checked-in xcodeShaders/ headers. Useful
   # when only a newer sokol-shdc is available, since the existing mzgl shaders
   # predate the layout(binding=X) requirement.
   if(MZGL_USE_PRECOMPILED_SOKOL_SHADERS)
-    set(SOKOL_SHDC_FOUND
-        OFF
-        CACHE INTERNAL "" FORCE)
+    set(SOKOL_SHDC_FOUND OFF CACHE INTERNAL "" FORCE)
   else()
     # Also search the common user-local install dir; CI runners often don't have
     # ~/.local/bin on PATH even when sokol-shdc is installed for the user.
-    find_program(SOKOL_SHDC_FOUND
-      NAMES ${SOKOL_SHDC}
-      HINTS "$ENV{USERPROFILE}/.local/bin" "$ENV{HOME}/.local/bin")
+    find_program(SOKOL_SHDC_FOUND NAMES ${SOKOL_SHDC} HINTS "$ENV{USERPROFILE}/.local/bin" "$ENV{HOME}/.local/bin")
   endif()
   if(SOKOL_SHDC_FOUND)
     # Process each shader file
@@ -497,11 +506,13 @@ if(USING_SOKOL OR USING_METAL)
       # the build doesn't depend on sokol-shdc being on PATH at build time.
       add_custom_command(
         OUTPUT ${SHADER_HEADER}
-        COMMAND ${SOKOL_SHDC_FOUND} --reflection --input ${SHADER_SOURCE} --output
-                ${SHADER_HEADER} --slang glsl300es:hlsl5:metal_macos:metal_ios:metal_sim
+        COMMAND
+          ${SOKOL_SHDC_FOUND} --reflection --input ${SHADER_SOURCE} --output ${SHADER_HEADER} --slang
+          glsl300es:hlsl5:metal_macos:metal_ios:metal_sim
         DEPENDS ${SHADER_SOURCE}
         COMMENT "Compiling ${SHADER_SOURCE} to ${SHADER_HEADER}"
-        VERBATIM)
+        VERBATIM
+      )
 
       # Append the output header to a list of all generated headers
       list(APPEND GENERATED_SHADER_HEADERS ${SHADER_HEADER})
@@ -522,14 +533,13 @@ if(USING_SOKOL OR USING_METAL)
     endif()
   else()
     message(STATUS "sokol-shdc not found, using pre-compiled shader headers")
-    target_include_directories(
-      libmzgl
-      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
+    target_include_directories(libmzgl PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
     # Same precompiled headers for the unit-test build of mzgl.
     if(TARGET libmzgl_unit_test)
       target_include_directories(
         libmzgl_unit_test
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders")
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib/mzgl/gl/api/sokol/xcodeShaders"
+      )
     endif()
   endif()
 
@@ -538,7 +548,14 @@ if(USING_SOKOL OR USING_METAL)
   # cmake/GraphicsBackend.cmake.
 endif()
 
-set(MZGL_LIBS ZipFile yoga pu_gixml concurrentqueue readerwriterqueue)
+set(
+  MZGL_LIBS
+  ZipFile
+  yoga
+  pu_gixml
+  concurrentqueue
+  readerwriterqueue
+)
 
 if(NOT WIN32)
   list(APPEND MZGL_LIBS z)
@@ -569,7 +586,6 @@ if(NOT ANDROID AND NOT APPLE)
 endif()
 
 if(ANDROID)
-
   # Vendored copy of the NDK native_app_glue: identical to the r27.0 original
   # except android_main is NOT declared [[noreturn]] (see the note in the
   # vendored header - the attribute turns returning from android_main into
@@ -583,8 +599,10 @@ if(ANDROID)
   set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
 
   add_library(
-    native_app_glue STATIC
-    ${CMAKE_CURRENT_LIST_DIR}/lib/mzgl/app/android/native_app_glue/android_native_app_glue.c)
+    native_app_glue
+    STATIC
+    ${CMAKE_CURRENT_LIST_DIR}/lib/mzgl/app/android/native_app_glue/android_native_app_glue.c
+  )
 
   # find_package (oboe REQUIRED CONFIG)
 
@@ -598,11 +616,9 @@ if(ANDROID)
 
   # Export ANativeActivity_onCreate(), Refer to:
   # https://github.com/android-ndk/ndk/issues/381.
-  set(CMAKE_SHARED_LINKER_FLAGS
-      "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
   list(
-    APPEND
-    MZGL_LIBS
+    APPEND MZGL_LIBS
     # android specific
     android
     native_app_glue
@@ -611,7 +627,8 @@ if(ANDROID)
     oboe
     GLESv3
     log
-    mediandk)
+    mediandk
+  )
 
 elseif(APPLE)
   if(IOS)
@@ -638,7 +655,8 @@ elseif(APPLE)
       "-framework QuartzCore"
       "-framework CoreGraphics"
       "-framework ImageIO"
-      "-framework Foundation")
+      "-framework Foundation"
+    )
     if(USING_OPENGL)
       # The GL backend renders through GLKView/EAGLContext (deprecated but
       # still shipping); Metal/MetalKit stay linked above for the other
@@ -669,7 +687,8 @@ elseif(APPLE)
       # ImageIO + CoreGraphics back Image::load/save (Image.mm) on macOS.
       "-framework ImageIO"
       "-framework CoreGraphics"
-      "-framework IOKit")
+      "-framework IOKit"
+    )
   endif()
 
 elseif(WIN32)
@@ -680,8 +699,7 @@ elseif(WIN32)
   endif()
 
   list(
-    APPEND
-    MZGL_LIBS
+    APPEND MZGL_LIBS
     ${GLFW_LIBRARIES}
     winmm
     dsound
@@ -690,7 +708,8 @@ elseif(WIN32)
     mfplat
     mfreadwrite
     mfuuid
-    ${MZGL_WEBVIEW2_LIBS})
+    ${MZGL_WEBVIEW2_LIBS}
+  )
 
   if(USING_SOKOL)
     list(APPEND MZGL_LIBS d3d11 dxgi dxguid)
@@ -741,37 +760,31 @@ elseif(LINUX)
   endif()
 
   list(
-    APPEND
-    MZGL_LIBS
+    APPEND MZGL_LIBS
     atomic # needed for raspberry pi
     GLESv2
     EGL
     ${GTK_LIBRARIES}
-    ${ALSA_LIBRARIES})
+    ${ALSA_LIBRARIES}
+  )
 endif()
 
 # Linux only: Apple uses AudioSystemIOS / CoreAudioSystem, Windows is handled below.
-if(NOT ANDROID
-   AND NOT WIN32
-   AND NOT APPLE)
+if(NOT ANDROID AND NOT WIN32 AND NOT APPLE)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
   mzgl_save_cmake_log_level()
   # PortAudio's CMakeLists declares cmake_minimum_required() below 3.10, which
   # CMake flags as a deprecation warning. Silence it only while PortAudio is
   # configured, then restore the previous setting.
   set(_mzgl_pa_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
-  set(CMAKE_WARN_DEPRECATED
-      OFF
-      CACHE BOOL "" FORCE)
+  set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
   set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
   add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
   unset(CMAKE_POLICY_VERSION_MINIMUM)
   if(_mzgl_pa_warn_deprecated STREQUAL "")
     unset(CMAKE_WARN_DEPRECATED CACHE)
   else()
-    set(CMAKE_WARN_DEPRECATED
-        "${_mzgl_pa_warn_deprecated}"
-        CACHE BOOL "" FORCE)
+    set(CMAKE_WARN_DEPRECATED "${_mzgl_pa_warn_deprecated}" CACHE BOOL "" FORCE)
   endif()
   list(APPEND MZGL_LIBS PortAudio)
   mzgl_restore_cmake_log_level()
@@ -779,23 +792,17 @@ endif()
 if(WIN32)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/PortAudio")
   mzgl_save_cmake_log_level()
-  set(PA_USE_ASIO
-      ON
-      CACHE BOOL "Enable PortAudio ASIO support" FORCE)
+  set(PA_USE_ASIO ON CACHE BOOL "Enable PortAudio ASIO support" FORCE)
   # See note above: silence PortAudio's pre-3.10 cmake_minimum_required warning.
   set(_mzgl_pa_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
-  set(CMAKE_WARN_DEPRECATED
-      OFF
-      CACHE BOOL "" FORCE)
+  set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
   set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
   add_subdirectory(lib/portaudio "portaudio-build" EXCLUDE_FROM_ALL)
   unset(CMAKE_POLICY_VERSION_MINIMUM)
   if(_mzgl_pa_warn_deprecated STREQUAL "")
     unset(CMAKE_WARN_DEPRECATED CACHE)
   else()
-    set(CMAKE_WARN_DEPRECATED
-        "${_mzgl_pa_warn_deprecated}"
-        CACHE BOOL "" FORCE)
+    set(CMAKE_WARN_DEPRECATED "${_mzgl_pa_warn_deprecated}" CACHE BOOL "" FORCE)
   endif()
   list(APPEND MZGL_LIBS PortAudio $<$<PLATFORM_ID:Windows>:Urlmon Wininet>)
   mzgl_restore_cmake_log_level()
@@ -834,7 +841,8 @@ if(NOT ANDROID)
       # ImageIO + CoreGraphics back Image::load/save (Image.mm) on macOS.
       "-framework ImageIO"
       "-framework CoreGraphics"
-      "-framework IOKit")
+      "-framework IOKit"
+    )
   endif()
 endif()
 
