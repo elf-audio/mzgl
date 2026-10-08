@@ -6,8 +6,10 @@
 //
 //   MzglAUv2Effect      aufx / aumf  - ausdk::AUMIDIEffectBase: stereo in, stereo out,
 //                                      optional MIDI in
-//   MzglAUv2Instrument  aumu         - ausdk::MusicDeviceBase: no audio input, MIDI in,
-//                                      one stereo output bus per Plugin::getNumOutputBusses()
+//   MzglAUv2Instrument  aumu         - ausdk::MusicDeviceBase: one optional stereo input bus
+//                                      (sidechain in Logic/Live, silent when unconnected),
+//                                      MIDI in, one stereo output bus per
+//                                      Plugin::getNumOutputBusses()
 //
 // Per plugin you write a tiny subclass that supplies the ::Plugin and a Config,
 // and declare the component entry point with the SDK macro:
@@ -198,14 +200,17 @@ public:
 };
 
 /**
- * aumu: no audio input, MIDI in, Plugin::getNumOutputBusses() stereo output
- * busses (hosts like Logic expose the extra busses as aux channels).
+ * aumu: one optional stereo input bus (hosts that support it, e.g. Logic and
+ * Live, offer it as a sidechain; it reads as silence when unconnected), MIDI in,
+ * Plugin::getNumOutputBusses() stereo output busses (hosts like Logic expose the
+ * extra busses as aux channels).
  */
 class MzglAUv2Instrument : public MzglAUv2Unit<ausdk::MusicDeviceBase> {
 public:
 	MzglAUv2Instrument(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config);
 
 	UInt32 SupportedNumChannels(const AUChannelInfo **outInfo) override;
+	OSStatus Initialize() override;
 	bool StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) override;
 	bool CanScheduleParameters() const override { return false; }
 	OSStatus Render(AudioUnitRenderActionFlags &ioActionFlags,

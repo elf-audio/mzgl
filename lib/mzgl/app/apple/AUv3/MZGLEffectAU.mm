@@ -82,7 +82,8 @@ struct Blocks {
 
 - (NSArray<NSNumber *> *)channelCapabilities {
 	if (isInstrument) {
-		return @[ @0, @2 ];
+		// Input bus is optional on instruments: plain synth, or stereo sidechain in.
+		return @[ @0, @2, @2, @2 ];
 	}
 	return @[ @2, @2 ];
 }
@@ -538,12 +539,10 @@ struct Blocks {
 // If an audio unit has input, an audio unit's audio input connection points.
 // Subclassers must override this property getter and should return the same object every time.
 // See sample code.
+// Instruments expose the input bus too (sidechain / sampling source); the render
+// block treats it as silence when the host hasn't connected anything to it.
 - (AUAudioUnitBusArray *)inputBusses {
-	if (isInstrument) {
-		return [super inputBusses];
-	} else {
-		return _inputBusArray;
-	}
+	return _inputBusArray;
 }
 
 // An audio unit's audio output connection points.
@@ -699,59 +698,51 @@ struct Blocks {
 
 		  if (outputBusNumber != 0) return noErr;
 
-		  // pull in samples to filter
-		  if (!_isInstrument) {
-			  AUAudioUnitStatus err = input->pullInput(actionFlags, timestamp, frameCount, 0, pullInputBlock);
-			  if (err != 0) {
-				  return err;
-			  }
-
-			  inAudioBufferList = input->mutableAudioBufferList;
-
-			  if (inputBusData.size() != frameCount * inAudioBufferList->mNumberBuffers) {
-				  inputBusData.resize(frameCount * inAudioBufferList->mNumberBuffers);
-			  }
-
-			  // do processing here
-			  // interleave audio channels
-			  if (inAudioBufferList->mNumberBuffers == 1) {
-				  // mono
-				  memcpy(inputBusData.data(), inAudioBufferList->mBuffers[0].mData, sizeof(float) * frameCount);
-			  } else if (inAudioBufferList->mNumberBuffers == 2) {
-				  // stereo
-				  float *L = (float *) inAudioBufferList->mBuffers[0].mData;
-				  float *R = (float *) inAudioBufferList->mBuffers[1].mData;
-
-				  for (int i = 0; i < frameCount; i++) {
-					  inputBusData[i * 2]	  = L[i];
-					  inputBusData[i * 2 + 1] = R[i];
-				  }
-			  }
-
-			  if (outs[0].size() != frameCount * inAudioBufferList->mNumberBuffers) {
-				  int numSampsPerBuff = frameCount * inAudioBufferList->mNumberBuffers;
-				  // as long as buffer size is less than 4096, memory is already allocated
-				  for (auto &o: outs) {
-					  o.resize(numSampsPerBuff);
-				  }
-			  }
-
-			  eff->process(&inputBusData, outs.data(), inAudioBufferList->mNumberBuffers);
-		  } else {
-			  if (inputBusData.size() != frameCount * outAudioBufferList->mNumberBuffers) {
-				  inputBusData.resize(frameCount * outAudioBufferList->mNumberBuffers, 0);
-			  }
-
-			  if (outs[0].size() != frameCount * outAudioBufferList->mNumberBuffers) {
-				  int numSampsPerBuff = frameCount * outAudioBufferList->mNumberBuffers;
-				  // as long as buffer size is less than 4096, memory is already allocated
-				  for (auto &o: outs) {
-					  o.resize(numSampsPerBuff);
-				  }
-			  }
-
-			  eff->process(&inputBusData, outs.data(), outAudioBufferList->mNumberBuffers);
+		  // Pull the input bus. For an effect a failed pull is an error; for an
+		  // instrument the bus is optional (nothing connected / no sidechain
+		  // chosen), so it just reads as silence.
+		  const AUAudioUnitStatus pullErr =
+			  input->pullInput(actionFlags, timestamp, frameCount, 0, pullInputBlock);
+		  if (pullErr != noErr && !_isInstrument) {
+			  return pullErr;
 		  }
+		  const bool haveInput = pullErr == noErr;
+		  if (haveInput) {
+			  inAudioBufferList = input->mutableAudioBufferList;
+		  }
+
+		  // Input and output bus channel counts match (allocateRenderResources
+		  // refuses anything else), so size everything off the output.
+		  const UInt32 numChannels = outAudioBufferList->mNumberBuffers;
+		  if (inputBusData.size() != frameCount * numChannels) {
+			  inputBusData.resize(frameCount * numChannels);
+		  }
+
+		  if (haveInput && inAudioBufferList->mNumberBuffers == 1) {
+			  // mono
+			  memcpy(inputBusData.data(), inAudioBufferList->mBuffers[0].mData, sizeof(float) * frameCount);
+		  } else if (haveInput && inAudioBufferList->mNumberBuffers >= 2) {
+			  // stereo: interleave
+			  float *L = (float *) inAudioBufferList->mBuffers[0].mData;
+			  float *R = (float *) inAudioBufferList->mBuffers[1].mData;
+
+			  for (int i = 0; i < frameCount; i++) {
+				  inputBusData[i * 2]	  = L[i];
+				  inputBusData[i * 2 + 1] = R[i];
+			  }
+		  } else {
+			  inputBusData.zeros();
+		  }
+
+		  if (outs[0].size() != frameCount * numChannels) {
+			  int numSampsPerBuff = frameCount * numChannels;
+			  // as long as buffer size is less than 4096, memory is already allocated
+			  for (auto &o: outs) {
+				  o.resize(numSampsPerBuff);
+			  }
+		  }
+
+		  eff->process(&inputBusData, outs.data(), numChannels);
 
 		  // now do any midi output events
 		  if (eff->getNumMidiOuts() > 0 && blks->midiOut) {
@@ -783,7 +774,13 @@ struct Blocks {
 	  //         See the description of the canProcessInPlace property.
 
 	  // If passed null output buffer pointers, process in-place in the input buffer.
+	  // With no input pulled this cycle (instrument with nothing connected, or a
+	  // bus other than the first) the input bus's own buffer serves as scratch.
 	  if (outAudioBufferList->mBuffers[0].mData == nullptr) {
+		  if (inAudioBufferList == nullptr) {
+			  input->prepareInputBufferList();
+			  inAudioBufferList = input->mutableAudioBufferList;
+		  }
 		  for (UInt32 i = 0; i < outAudioBufferList->mNumberBuffers; ++i) {
 			  outAudioBufferList->mBuffers[i].mData = inAudioBufferList->mBuffers[i].mData;
 		  }

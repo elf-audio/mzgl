@@ -547,7 +547,7 @@ OSStatus MzglAUv2Effect::ProcessBufferLists(AudioUnitRenderActionFlags &ioAction
 }
 
 // ---------------------------------------------------------------------------
-// MzglAUv2Instrument (aumu)
+// MzglAUv2Instrument (aumu): optional stereo input bus (sidechain / sampling source)
 // ---------------------------------------------------------------------------
 UInt32 MzglAUv2Instrument::numOutputBusses(const std::shared_ptr<::Plugin> &plugin) {
 	return static_cast<UInt32>(std::max(1, plugin->getNumOutputBusses()));
@@ -556,13 +556,27 @@ UInt32 MzglAUv2Instrument::numOutputBusses(const std::shared_ptr<::Plugin> &plug
 MzglAUv2Instrument::MzglAUv2Instrument(AudioComponentInstance ci,
 									   std::shared_ptr<::Plugin> plugin,
 									   const AUv2Config &config)
-	: MzglAUv2Unit<ausdk::MusicDeviceBase>(plugin, config, ci, 0u, numOutputBusses(plugin)) {
+	: MzglAUv2Unit<ausdk::MusicDeviceBase>(plugin, config, ci, 1u, numOutputBusses(plugin)) {
 }
 
 UInt32 MzglAUv2Instrument::SupportedNumChannels(const AUChannelInfo **outInfo) {
-	static const AUChannelInfo info[] = {{0, 2}};
+	// The input bus is optional: hosts that don't route anything to an instrument's
+	// input (GarageBand, most of them by default) still see a plain {0 in, 2 out}
+	// synth; Logic/Live offer it as a sidechain and connect it as {2, 2}.
+	static const AUChannelInfo info[] = {{0, 2}, {1, 2}, {2, 2}};
 	if (outInfo != nullptr) *outInfo = info;
-	return 1;
+	return 3;
+}
+
+OSStatus MzglAUv2Instrument::Initialize() {
+	// AUEffectBase checks SupportedNumChannels for the effect; MusicDeviceBase
+	// doesn't, so refuse formats the render plumbing can't handle ourselves.
+	const UInt32 inChannels = Input(0).GetStreamFormat().mChannelsPerFrame;
+	if (inChannels != 1 && inChannels != 2) return kAudioUnitErr_FormatNotSupported;
+	for (UInt32 b = 0; b < Outputs().GetNumberOfElements(); ++b) {
+		if (Output(b).GetStreamFormat().mChannelsPerFrame != 2) return kAudioUnitErr_FormatNotSupported;
+	}
+	return MzglAUv2Unit::Initialize();
 }
 
 bool MzglAUv2Instrument::StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) {
@@ -573,7 +587,15 @@ OSStatus MzglAUv2Instrument::Render(AudioUnitRenderActionFlags &ioActionFlags,
 									const AudioTimeStamp &inTimeStamp,
 									UInt32 inNumberFrames) {
 	beginRender();
-	interleaveInput(nullptr, inNumberFrames);
+	// Pull the (optional) input bus; silence when nothing is connected to it.
+	// A pull that fails mid-stream (upstream unit erroring) also becomes silence
+	// rather than killing the instrument's output.
+	const AudioBufferList *in = nullptr;
+	if (HasInput(0)) {
+		AudioUnitRenderActionFlags inFlags = ioActionFlags;
+		if (PullInput(0, inFlags, inTimeStamp, inNumberFrames) == noErr) in = &Input(0).GetBufferList();
+	}
+	interleaveInput(in, inNumberFrames);
 	runPlugin(inNumberFrames);
 
 	// One Render call fills every output bus. With a single bus AUBase has already
