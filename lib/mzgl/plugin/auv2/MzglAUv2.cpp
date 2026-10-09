@@ -376,11 +376,38 @@ OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
 
 template <class AUBaseT>
 OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
-	const OSStatus result = AUBaseT::RestoreState(plist);
-	if (result != noErr) return result;
 	auto dict = static_cast<CFDictionaryRef>(plist);
+	const bool ourDict = plugin->wantsToSerializeWithNSDictionary() && CFDictionaryContainsKey(dict, kZipDataKey);
+
+	// A state the AUv3 wrote (AUAudioUnit.fullState, e.g. a Logic project
+	// started on iPad) carries "version" = 1 where AUSDK's RestoreState insists
+	// on 0 and refuses the whole dictionary, and its "data" is AUAudioUnit's
+	// parameter blob, not the scope/element layout AUSDK would parse it as.
+	// Normalise the one and drop the other for the base class; the plugin's
+	// real state comes from the dictionary itself below. Our own SaveState
+	// output has version 0 and goes through untouched.
+	SInt32 version = 0;
+	if (auto v = static_cast<CFNumberRef>(CFDictionaryGetValue(dict, CFSTR(kAUPresetVersionKey)));
+		v != nullptr && CFGetTypeID(v) == CFNumberGetTypeID()) {
+		CFNumberGetValue(v, kCFNumberSInt32Type, &version);
+	}
+	OSStatus result = noErr;
+	if (ourDict && version != 0) {
+		CFMutableDictionaryRef forBase = CFDictionaryCreateMutableCopy(nullptr, 0, dict);
+		SInt32 zero					   = 0;
+		CFNumberRef ver				   = CFNumberCreate(nullptr, kCFNumberSInt32Type, &zero);
+		CFDictionarySetValue(forBase, CFSTR(kAUPresetVersionKey), ver);
+		CFRelease(ver);
+		CFDictionaryRemoveValue(forBase, CFSTR(kAUPresetDataKey));
+		result = AUBaseT::RestoreState(forBase);
+		CFRelease(forBase);
+	} else {
+		result = AUBaseT::RestoreState(plist);
+	}
+	if (result != noErr) return result;
+
 	if (plugin->wantsToSerializeWithNSDictionary()) {
-		if (CFDictionaryContainsKey(dict, kZipDataKey)) {
+		if (ourDict) {
 			plugin->deserializeByNSDictionary(dict);
 		}
 		mirrorPluginParameters();
