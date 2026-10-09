@@ -158,6 +158,25 @@ static std::optional<UInt32> getDeviceLatency(AudioDeviceID dev, DeviceType type
 	if (AudioObjectGetPropertyData(dev, &safetyAddress, 0, nullptr, &size, &safety) == noErr) {
 		latency += safety;
 	}
+
+	// the device's streams carry their own latency on top (e.g. USB interface driver buffers)
+	AudioObjectPropertyAddress streamsAddress {
+		kAudioDevicePropertyStreams, deviceTypeToCoreAudioScope(type), kAudioObjectPropertyElementMain};
+	UInt32 streamsSize = 0;
+	if (AudioObjectGetPropertyDataSize(dev, &streamsAddress, 0, nullptr, &streamsSize) == noErr
+		&& streamsSize >= sizeof(AudioStreamID)) {
+		std::vector<AudioStreamID> streams(streamsSize / sizeof(AudioStreamID));
+		if (AudioObjectGetPropertyData(dev, &streamsAddress, 0, nullptr, &streamsSize, streams.data()) == noErr) {
+			AudioObjectPropertyAddress streamLatencyAddress {
+				kAudioStreamPropertyLatency, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMain};
+			UInt32 streamLatency = 0;
+			size				 = static_cast<UInt32>(sizeof(streamLatency));
+			if (AudioObjectGetPropertyData(streams[0], &streamLatencyAddress, 0, nullptr, &size, &streamLatency)
+				== noErr) {
+				latency += streamLatency;
+			}
+		}
+	}
 	return latency;
 }
 

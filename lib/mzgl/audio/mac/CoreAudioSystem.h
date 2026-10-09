@@ -34,6 +34,7 @@ public:
 	[[nodiscard]] AudioPort getOutput() override;
 
 	[[nodiscard]] double getOutputLatency() override;
+	[[nodiscard]] double getInputLatency() override;
 
 	[[nodiscard]] double getNanoSecondsAtBufferBegin() override;
 

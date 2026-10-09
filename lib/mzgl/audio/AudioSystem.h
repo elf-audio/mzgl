@@ -125,6 +125,13 @@ public:
 	virtual AudioPort getOutput();
 
 	virtual double getOutputLatency();
+	// seconds from a sound hitting the input device to it arriving in audioIn()
+	virtual double getInputLatency();
+	// seconds from a sound leaving audioOut() to it coming back in through the
+	// input: the gap between what a player hears and what gets recorded. The
+	// default is device in + out latency plus the two IO buffers; a host that
+	// aligns its buffers (a plugin) returns 0.
+	virtual double getRoundTripLatency();
 
 	// this should restart the system and try to set the samplerate
 	virtual void setSampleRate(float sampleRate);

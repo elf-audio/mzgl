@@ -608,6 +608,19 @@ double CoreAudioSystem::getOutputLatency() {
 	return *frames / sampleRate;
 }
 
+double CoreAudioSystem::getInputLatency() {
+	if (state == nullptr) {
+		return 0.0;
+	}
+
+	auto frames = getDeviceLatency(state->deviceIn, DeviceType::Input);
+	if (!frames.has_value()) {
+		return 0.0;
+	}
+
+	return *frames / sampleRate;
+}
+
 double CoreAudioSystem::getNanoSecondsAtBufferBegin() {
 	return state == nullptr ? 0.0 : static_cast<double>(hostTimeToNanos(state->lastBufferBeginHostTime.load()));
 }

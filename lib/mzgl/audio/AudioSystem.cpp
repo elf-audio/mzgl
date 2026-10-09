@@ -113,6 +113,17 @@ double _AudioSystem::getOutputLatency() {
 	return 0.0;
 }
 
+double _AudioSystem::getInputLatency() {
+	return 0.0;
+}
+
+double _AudioSystem::getRoundTripLatency() {
+	if (sampleRate <= 0) {
+		return 0.0;
+	}
+	return getInputLatency() + getOutputLatency() + 2.0 * bufferSize / sampleRate;
+}
+
 std::vector<std::string> _AudioSystem::getInputDeviceNames() {
 	auto ins = getInputs();
 	std::vector<std::string> names;
