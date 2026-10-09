@@ -1316,10 +1316,11 @@ DRWAV_API drwav_bool32 drwav_guid_equal(const drwav_uint8 a[16], const drwav_uin
 
 /* Compares a four-character-code for the purpose of checking the type of a RIFF chunk. */
 DRWAV_API drwav_bool32 drwav_fourcc_equal(const drwav_uint8* a, const char* b);
-#include "filesystem.h" /* winfs::fromUtf8 for UTF-8 path opening on Windows */
 
 #ifdef __cplusplus
 }
+/* winfs::fromUtf8 for UTF-8 path opening on Windows - a C++ header, so it has to sit outside the extern "C" block */
+#include "filesystem.h"
 #endif
 #endif  /* dr_wav_h */
 
