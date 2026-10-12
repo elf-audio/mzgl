@@ -35,10 +35,24 @@ void quitApplication() {
 @implementation iOSAppDelegate
 @synthesize window;
 
-- (BOOL)application:(UIApplication *)app
+- (UIViewController *)rootViewController {
+	return mzViewController;
+}
+
+- (void)attachWindow:(UIWindow *)win {
+	self.window		  = win;
+	app->windowHandle = (__bridge void *) win;
+}
+
+// Pre-scene hosts only; under the UIScene lifecycle iOSSceneDelegate calls
+// handleOpenURL: directly.
+- (BOOL)application:(UIApplication *)application
 			openURL:(NSURL *)url
 			options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
-	//NSString* urlPath = url.path;
+	return [self handleOpenURL:url];
+}
+
+- (BOOL)handleOpenURL:(NSURL *)url {
 	NSLog(@"openURL: %@", url);
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	std::string urlStr	 = [[url absoluteString] UTF8String];
@@ -93,6 +107,10 @@ void quitApplication() {
 - (BOOL)application:(UIApplication *)application
 	continueUserActivity:(NSUserActivity *)userActivity
 	  restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> *))restorationHandler {
+	return [self handleUserActivity:userActivity];
+}
+
+- (BOOL)handleUserActivity:(NSUserActivity *)userActivity {
 	if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] && userActivity.webpageURL) {
 		auto eventDispatcher = [mzViewController getEventDispatcher];
 		std::string url		 = [[userActivity.webpageURL absoluteString] UTF8String];
@@ -129,9 +147,8 @@ public:
 };
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-	// Override point for customization after application launch.
-	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-
+	// The UIWindow is created by iOSSceneDelegate in scene:willConnectToSession:
+	// (UIScene lifecycle); this only builds the App and its root view controller.
 	try {
 		g = std::make_shared<Graphics>();
 		if (isPlugin()) {
@@ -145,25 +162,19 @@ public:
 		app = std::make_shared<ErrorApp>(*g, e.what());
 	}
 
-	mzViewController		  = [[MZRootViewController alloc] initWithApp:app andGraphics:g];
-	window.rootViewController = mzViewController;
-	app->viewController		  = (__bridge void *) mzViewController;
-	app->windowHandle		  = (__bridge void *) window;
-
-	[window makeKeyAndVisible];
-
-	auto eventDispatcher = [mzViewController getEventDispatcher];
-	NSURL *launchedUrl	 = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
-
-	if (launchedUrl != nil) {
-		[[mzViewController getView] handleNormalOpen:launchedUrl];
-		std::string url = [[launchedUrl absoluteString] UTF8String];
-
-		// this should maybe have a deleter
-		eventDispatcher->openUrl(ScopedUrl::create(url));
-	}
+	mzViewController	= [[MZRootViewController alloc] initWithApp:app andGraphics:g];
+	app->viewController = (__bridge void *) mzViewController;
 
 	return YES;
+}
+
+- (UISceneConfiguration *)application:(UIApplication *)application
+	configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+								   options:(UISceneConnectionOptions *)options {
+	UISceneConfiguration *config = [[UISceneConfiguration alloc] initWithName:@"Default"
+																  sessionRole:connectingSceneSession.role];
+	config.delegateClass		 = NSClassFromString(@"iOSSceneDelegate");
+	return config;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -171,15 +182,23 @@ public:
 	// Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
 }
 
+// Under the UIScene lifecycle these two app-delegate callbacks are no longer sent;
+// iOSSceneDelegate forwards sceneDidEnterBackground / sceneWillEnterForeground to
+// the handle* methods instead.
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-	// Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-	// If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+	[self handleDidEnterBackground];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+	[self handleWillEnterForeground];
+}
+
+- (void)handleDidEnterBackground {
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->didEnterBackground();
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-	// Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+- (void)handleWillEnterForeground {
 	auto eventDispatcher = [mzViewController getEventDispatcher];
 	eventDispatcher->willEnterForeground();
 }

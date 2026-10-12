@@ -154,6 +154,7 @@ if(IOS)
     lib/mzgl/audio/iOS/AudioSystemIOS.mm
     lib/mzgl/app/ios/mainiOS.mm
     lib/mzgl/app/ios/iOSAppDelegate.mm
+    lib/mzgl/app/ios/iOSSceneDelegate.mm
     lib/mzgl/app/ios/MZGLKitView.mm
     lib/mzgl/app/ios/MZGLKitViewController.mm
     lib/mzgl/app/ios/MZMetaliOSViewController.mm
