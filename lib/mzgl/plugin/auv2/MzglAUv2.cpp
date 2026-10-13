@@ -89,20 +89,23 @@ void MzglAUv2Unit<AUBaseT>::setup() {
 
 	// Factory presets, if the plugin ships any (mzgl PresetManager: files in
 	// data/factory-presets named <identifier>preset).
+	// Always publish a (possibly empty) array: out-of-process hosts (Logic 12 runs every
+	// AUv2 in AUHostingService) answer GetPropertyInfo for FactoryPresets themselves, so
+	// a GetProperty that then fails looks like a broken unit and Logic gives up on it.
 	factoryPresetNames = plugin->getPresetManager()->getFactoryPresetNames();
+	// kAudioUnitProperty_FactoryPresets is a CFArray of AUPreset* (hosts cast
+	// the elements); the structs live in factoryPresetStorage for the life
+	// of the audio unit, so the array carries no value callbacks.
+	factoryPresetStorage.resize(factoryPresetNames.size());
+	std::vector<const void *> values;
+	for (size_t i = 0; i < factoryPresetNames.size(); ++i) {
+		factoryPresetStorage[i].presetNumber = static_cast<SInt32>(i);
+		factoryPresetStorage[i].presetName =
+			CFStringCreateWithCString(nullptr, factoryPresetNames[i].c_str(), kCFStringEncodingUTF8);
+		values.push_back(&factoryPresetStorage[i]);
+	}
+	factoryPresets = CFArrayCreate(nullptr, values.data(), static_cast<CFIndex>(values.size()), nullptr);
 	if (!factoryPresetNames.empty()) {
-		// kAudioUnitProperty_FactoryPresets is a CFArray of AUPreset* (hosts cast
-		// the elements); the structs live in factoryPresetStorage for the life
-		// of the audio unit, so the array carries no value callbacks.
-		factoryPresetStorage.resize(factoryPresetNames.size());
-		std::vector<const void *> values;
-		for (size_t i = 0; i < factoryPresetNames.size(); ++i) {
-			factoryPresetStorage[i].presetNumber = static_cast<SInt32>(i);
-			factoryPresetStorage[i].presetName =
-				CFStringCreateWithCString(nullptr, factoryPresetNames[i].c_str(), kCFStringEncodingUTF8);
-			values.push_back(&factoryPresetStorage[i]);
-		}
-		factoryPresets = CFArrayCreate(nullptr, values.data(), static_cast<CFIndex>(values.size()), nullptr);
 		// Advertise preset 0 as current, like the AUv3 does (state stays at the
 		// plugin's defaults until a host actually selects a preset).
 		this->SetAFactoryPresetAsCurrent(factoryPresetStorage[0]);
