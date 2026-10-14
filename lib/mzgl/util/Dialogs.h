@@ -181,6 +181,8 @@ public:
 };
 
 namespace unit_test::dialogs {
+	// true when the process was started with --enable-dialog-spoofing (see addCommandLineFlag)
+	bool dialogSpoofingIsEnabled();
 	bool isDialogOpen();
 	void dismissAlert();
 	void pressOk();
@@ -188,4 +190,7 @@ namespace unit_test::dialogs {
 	void pressButtonOne();
 	void pressButtonTwo();
 	void pressButtonThree();
+	// completes a spoofed textbox / numberbox / textboxWithSegmented as if the user typed text and hit OK
+	void enterText(const std::string &text, int segment = 0);
+	void cancelText();
 } // namespace unit_test::dialogs

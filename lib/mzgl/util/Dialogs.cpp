@@ -39,6 +39,9 @@ namespace unit_test::dialogs {
 	std::function<void()> dialogButtonOnePressed;
 	std::function<void()> dialogButtonTwoPressed;
 	std::function<void()> dialogButtonThreePressed;
+	// set by inputbox / textboxWithSegmented while spoofing; drained by enterText()
+	std::function<void(std::string, bool)> dialogTextEntered;
+	std::function<void(std::string, int, bool)> dialogTextWithSegmentEntered;
 
 	bool dialogOpen = false;
 	bool isDialogOpen() {
@@ -54,6 +57,30 @@ namespace unit_test::dialogs {
 
 	void pressCancel() {
 		dialogCancelPressed();
+	}
+	void enterText(const std::string &text, int segment) {
+		dialogOpen = false;
+		if (dialogTextEntered) {
+			auto cb			  = std::move(dialogTextEntered);
+			dialogTextEntered = nullptr;
+			cb(text, true);
+		} else if (dialogTextWithSegmentEntered) {
+			auto cb						 = std::move(dialogTextWithSegmentEntered);
+			dialogTextWithSegmentEntered = nullptr;
+			cb(text, segment, true);
+		}
+	}
+	void cancelText() {
+		dialogOpen = false;
+		if (dialogTextEntered) {
+			auto cb			  = std::move(dialogTextEntered);
+			dialogTextEntered = nullptr;
+			cb("", false);
+		} else if (dialogTextWithSegmentEntered) {
+			auto cb						 = std::move(dialogTextWithSegmentEntered);
+			dialogTextWithSegmentEntered = nullptr;
+			cb("", 0, false);
+		}
 	}
 	void pressButtonOne() {
 		dialogButtonOnePressed();
@@ -93,6 +120,12 @@ void Dialogs::inputbox(std::string title,
 	completionCallback(title, randi(2) == 0);
 	return;
 #endif
+
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogTextEntered = completionCallback;
+		unit_test::dialogs::dialogOpen		  = true;
+		return;
+	}
 
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
@@ -1408,6 +1441,11 @@ void Dialogs::textboxWithSegmented(std::string title,
 								   std::vector<std::string> options,
 								   int defaultOption,
 								   std::function<void(std::string, int, bool)> completionCallback) const {
+	if (unit_test::dialogs::dialogSpoofingIsEnabled()) {
+		unit_test::dialogs::dialogTextWithSegmentEntered = completionCallback;
+		unit_test::dialogs::dialogOpen					 = true;
+		return;
+	}
 #ifdef __APPLE__
 #	if TARGET_OS_IOS
 	NSString *deviceType = [UIDevice currentDevice].model;
