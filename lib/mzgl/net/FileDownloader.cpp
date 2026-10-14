@@ -39,6 +39,7 @@ void FileDownloader::cancel() {
     NSURLSessionConfiguration *_configuration;
     NSURLSession *_session;
     NSURLSessionDownloadTask *_downloadTask;
+    BOOL _failed;
 }
 
 - (id)initWithURL:(NSURL *)url
@@ -84,9 +85,42 @@ void FileDownloader::cancel() {
     }
 }
 
+// First bytes of the body for the log, so a rejected download says what the
+// server actually sent ("forbidden", an HTML error page, ...).
+static std::string bodySnippet(NSURL *location) {
+    NSData *data = [NSData dataWithContentsOfURL:location];
+    if (data == nil) return "";
+    const auto *bytes = static_cast<const char *>(data.bytes);
+    std::string out;
+    for (NSUInteger i = 0; i < data.length && i < 100; i++) {
+        const char c = bytes[i];
+        out += (c >= 32 && c < 127) ? c : '.';
+    }
+    if (data.length > 100) out += "...";
+    return out;
+}
+
 - (void)URLSession:(NSURLSession *)session
                  downloadTask:(NSURLSessionDownloadTask *)downloadTask
     didFinishDownloadingToURL:(NSURL *)location {
+    // NSURLSession only reports transport failures through
+    // didCompleteWithError. An HTTP 403, 404 or 500 arrives here as a
+    // "finished" download whose body is the server's error message, so check
+    // the status before treating the temp file as the thing we asked for.
+    NSInteger status = 0;
+    if ([downloadTask.response isKindOfClass:[NSHTTPURLResponse class]]) {
+        status = ((NSHTTPURLResponse *) downloadTask.response).statusCode;
+    }
+    if (status != 0 && (status < 200 || status >= 300)) {
+        Log::e() << "Download of " << [[_sourceURL absoluteString] UTF8String] << " failed: HTTP " << status
+                 << " - " << bodySnippet(location);
+        _failed = YES;
+        if (_callbacks.downloadFailed != nullptr) {
+            _callbacks.downloadFailed("The server returned an error (HTTP " + std::to_string(status) + ")");
+        }
+        return;
+    }
+
     NSError *error = nil;
     [[NSFileManager defaultManager] removeItemAtPath:_destinationPath error:nil];
 
@@ -107,7 +141,8 @@ void FileDownloader::cancel() {
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-    if (error != nil) {
+    // A status rejection above already reported this download.
+    if (error != nil && !_failed) {
         Log::e() << "Download of " << [[_sourceURL absoluteString] UTF8String] << " to "
                  << [_destinationPath UTF8String] << " failed because " << [error.localizedDescription UTF8String];
         if (_callbacks.downloadFailed != nullptr) {
