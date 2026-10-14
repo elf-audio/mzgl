@@ -168,6 +168,12 @@ bool hasTransparentTitleBar = true;
 											 selector:@selector(screenDidChange:)
 												 name:NSWindowDidChangeScreenNotification
 											   object:window];
+	// Also fires when the backing scale changes without a screen change
+	// (e.g. Screen Sharing swapping in a retina virtual display).
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(screenDidChange:)
+												 name:NSWindowDidChangeBackingPropertiesNotification
+											   object:window];
 
 	// When driving the app over the test server, force a draw every frame even
 	// when the window is occluded/backgrounded. MTKView normally pauses drawing
@@ -294,10 +300,16 @@ bool hasTransparentTitleBar = true;
 }
 
 - (void)screenDidChange:(NSNotification *)notification {
-	//	NSWindow *window = notification.object;
-	CGFloat scale = window.screen.backingScaleFactor;
-	//	NSLog(@"Window moved to screen with scale: %f", scale);
-	app->g.pixelScale = scale;
+	// The window moved to a screen with a (possibly) different backing scale.
+	// g.width/g.height are in pixels, so they have to be recomputed from the
+	// window's point size at the new scale - otherwise drawing stays at the
+	// old scale while mouse events (converted with the window's current
+	// backingScaleFactor) land in the wrong place. The view's windowResized:
+	// does exactly that recomputation.
+	app->g.pixelScale = window.backingScaleFactor;
+	if ([view respondsToSelector:@selector(windowResized:)]) {
+		[view windowResized:notification];
+	}
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
