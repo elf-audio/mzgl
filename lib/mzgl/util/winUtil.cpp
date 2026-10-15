@@ -1,5 +1,6 @@
 #include "winUtil.h"
 #include <codecvt>
+#include <cstdio>
 #include <locale>
 #include <optional>
 #include <thread>
@@ -498,9 +499,23 @@ public:
 		thread_ = std::thread([url		   = spec_.url,
 							   dst		   = spec_.destinationFilePath,
 							   &bsCallback = bsCallback_,
-							   onComplete  = spec_.onComplete] {
+							   onComplete  = spec_.onComplete,
+							   onError	   = spec_.onError] {
 			ensureThatFileDirectoryExists(dst);
-			URLDownloadToFile(NULL, url.c_str(), dst.c_str(), 0, &bsCallback);
+			// urlmon fails the bind on an HTTP error status (INET_E_DOWNLOAD_FAILURE
+			// and friends) but may still have written the server's error page to
+			// dst, so never hand a failed transfer to the caller as the file.
+			const HRESULT hr = URLDownloadToFile(NULL, url.c_str(), dst.c_str(), 0, &bsCallback);
+			if (FAILED(hr)) {
+				DeleteFileW(dst.c_str());
+				char code[16];
+				snprintf(code, sizeof(code), "0x%08lx", static_cast<unsigned long>(hr));
+				Log::e() << "Download of " << w2n(url) << " failed: HRESULT " << code;
+				if (onError) {
+					onError(std::string {"The download failed (error "} + code + ")");
+					return;
+				}
+			}
 			onComplete();
 		});
 	}

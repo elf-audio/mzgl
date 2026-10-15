@@ -53,6 +53,10 @@ struct WindowsFileDownloadSpec {
 	std::wstring destinationFilePath;
 	std::function<void(float)> onProgress;
 	std::function<void()> onComplete;
+	// Transfer failed (URLDownloadToFile returned an error, which includes an
+	// HTTP error status): the partial file is removed first. Optional; without
+	// it onComplete fires as before and the caller has to inspect the file.
+	std::function<void(std::string)> onError;
 };
 
 struct IWindowsFileDownloadTask {
