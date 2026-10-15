@@ -233,10 +233,10 @@ void deleteOrTrash(const std::string &path) {
 	if ([[NSFileManager defaultManager] respondsToSelector:@selector(trashItemAtURL:resultingItemURL:error:)]) {
 		NSError *error = nil;
 		if (@available(iOS 11.0, *)) {
-			BOOL success   = [[NSFileManager defaultManager]
-							  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
-							  resultingItemURL:nil
-							  error:&error];
+			BOOL success = [[NSFileManager defaultManager]
+				  trashItemAtURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]]
+				resultingItemURL:nil
+						   error:&error];
 			if (!success || error) {
 				NSLog(@ "Error moving file to trash: %@", error);
 				stdDeleteFn();
@@ -599,8 +599,7 @@ std::string dataPath(const std::string &path, const std::string &appBundleId) {
 				return own.string();
 			}
 			// <app>/PlugIns/<name>.appex -> <app> on iOS, <app>/Contents on mac
-			const fs::path appRoot =
-				fs::path {[[bundle bundlePath] UTF8String]}.parent_path().parent_path();
+			const fs::path appRoot = fs::path {[[bundle bundlePath] UTF8String]}.parent_path().parent_path();
 			for (const auto &candidate: {appRoot / "data", appRoot / "Resources" / "data"}) {
 				if (fs::exists(candidate)) {
 					return candidate.string();
@@ -798,7 +797,7 @@ std::string appSupportPath(const std::string &path) {
 #ifdef __APPLE__
 #	if !TARGET_OS_IOS
 	NSURL *url		  = [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory
-															inDomains:NSUserDomainMask] lastObject];
+																inDomains:NSUserDomainMask] lastObject];
 	std::string _path = [[url path] UTF8String];
 	_path += "/" + getAppId();
 
@@ -1034,8 +1033,7 @@ void saveFileDialog(const std::string &msg,
 	  NSModalResponse buttonClicked = -1;
 	  std::string filePath;
 	  @autoreleasepool {
-		  NSSavePanel *saveDialog  = [NSSavePanel savePanel];
-		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
+		  NSSavePanel *saveDialog = [NSSavePanel savePanel];
 		  [saveDialog setMessage:[NSString stringWithUTF8String:msgCopy.c_str()]];
 		  [saveDialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileNameCopy.c_str()]];
 
@@ -1052,8 +1050,6 @@ void saveFileDialog(const std::string &msg,
 		  }
 
 		  buttonClicked = [saveDialog runModal];
-
-		  [context makeCurrentContext];
 
 		  if ([[[saveDialog URL] path] compare:[[saveDialog directoryURL] path]] == NSOrderedSame) {
 			  completionCallback("", false);
@@ -1080,12 +1076,12 @@ void saveFileDialog(const std::string &msg,
 
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
-	ofn.lStructSize	  = sizeof(OPENFILENAME);
-#ifdef MZGL_SOKOL
-	HWND hwnd		  = GetActiveWindow();
-#else
-	HWND hwnd		  = WindowFromDC(wglGetCurrentDC());
-#endif
+	ofn.lStructSize = sizeof(OPENFILENAME);
+#	ifdef MZGL_SOKOL
+	HWND hwnd = GetActiveWindow();
+#	else
+	HWND hwnd = WindowFromDC(wglGetCurrentDC());
+#	endif
 	ofn.hwndOwner	  = hwnd;
 	ofn.hInstance	  = GetModuleHandle(0);
 	ofn.nMaxFileTitle = 31;
@@ -1112,8 +1108,8 @@ void saveFileDialog(const std::string &msg,
 	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
 	// OFN_NOCHANGEDIR: without this, the dialog moves the process CWD to the
 	// selected folder, which breaks every later relative-path data load.
-	ofn.Flags		= OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-	ofn.lpstrTitle	= L"Select Output File";
+	ofn.Flags	   = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
+	ofn.lpstrTitle = L"Select Output File";
 
 	if (GetSaveFileNameW(&ofn)) {
 		std::wstring ws(fileName);

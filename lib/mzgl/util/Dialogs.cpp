@@ -1381,13 +1381,10 @@ void Dialogs::loadFile(std::string msg,
 			  loadDialog.delegate = impikD;
 		  }
 
-		  NSOpenGLContext *context = [NSOpenGLContext currentContext];
 		  [loadDialog setMessage:[NSString stringWithUTF8String:msg.c_str()]];
 		  //			[Dialog setNameFieldStringValue:[NSString stringWithUTF8String:defaultFileName.c_str()]];
 
 		  buttonClicked = [loadDialog runModal];
-
-		  [context makeCurrentContext];
 
 		  if (buttonClicked == NSModalResponseOK) {
 			  filePath = std::string([[[loadDialog URL] path] UTF8String]);
