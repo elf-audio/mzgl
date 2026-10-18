@@ -1,5 +1,6 @@
-// Windows IPlugView: a child HWND of the host's window, rendered with
-// sokol/D3D11 off a WM_TIMER. The macOS counterpart is MzglVST3View.mm.
+// Windows IPlugView: a child HWND of the host's window, rendered with the
+// D3D11 backend (native, or sokol/D3D11) off a WM_TIMER. The macOS
+// counterpart is MzglVST3View.mm.
 #ifdef _WIN32
 
 #include "MzglVST3View.h"
@@ -16,12 +17,16 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#ifndef MZGL_SOKOL
-#	error "The Windows VST3 editor view renders with sokol/D3D11 - build with MZGL_GRAPHICS_BACKEND=Sokol"
-#endif
 #include "D3D11Context.h"
-#include "sokol_gfx.h"
-#include "SokolSetup.h"
+#if defined(MZGL_SOKOL)
+#	include "sokol_gfx.h"
+#	include "SokolSetup.h"
+#elif defined(MZGL_D3D11)
+#	include "D3D11API.h"
+#	include "D3D11Internal.h"
+#else
+#	error "The Windows VST3 editor view renders with D3D11 - build with MZGL_GRAPHICS_BACKEND=D3D11 or Sokol"
+#endif
 
 #include <cstring>
 
@@ -41,11 +46,14 @@ namespace {
 		return reinterpret_cast<HINSTANCE>(&__ImageBase);
 	}
 
-	// sokol has exactly one sg_setup() per DLL, bound to one D3D11 device. The
-	// first editor opened creates the device; later editors (another instance
-	// of the plugin in the same host, or the editor reopened) share it and only
-	// get their own swap chain. Neither the device nor sokol is ever torn down:
-	// mzgl caches sokol resources in statics that would dangle if it were.
+	// One D3D11 device per DLL: the first editor opened creates it, later
+	// editors (another instance of the plugin in the same host, or the editor
+	// reopened) share it and only get their own swap chain. The device is
+	// never torn down. With sokol that is because sokol has exactly one
+	// sg_setup() per DLL and mzgl caches sokol handles in statics; the native
+	// backend keeps per-editor resources alive only as long as the editor, but
+	// the shared device registry (mzglD3D11) is process-global, so the device
+	// stays for the DLL's lifetime too.
 	struct SharedGpu {
 		ID3D11Device *device = nullptr;
 	};
@@ -120,6 +128,8 @@ namespace {
 		return s;
 	}
 
+#if defined(MZGL_SOKOL)
+	constexpr int kSampleCount = mzglSokolSampleCount;
 	sg_pass makePass(const D3D11Context &d3d11, int width, int height) {
 		sg_pass pass					  = {};
 		pass.action.colors[0].load_action = SG_LOADACTION_CLEAR;
@@ -138,6 +148,9 @@ namespace {
 		pass.swapchain.d3d11.depth_stencil_view = d3d11.getDepthStencilView();
 		return pass;
 	}
+#else
+	constexpr int kSampleCount = mzglD3D11SampleCount;
+#endif
 } // namespace
 
 // Needs access to handleMessage (friend of MzglVST3View).
@@ -211,8 +224,8 @@ struct MzglVST3View::Impl {
 		if (editor) {
 			editor->pluginViewDisappeared();
 		}
-		// The editor's layer tree owns sokol resources: destroy it while sokol
-		// (never shut down, see SharedGpu) and the device are still around.
+		// The editor's layer tree owns GPU resources: destroy it while the
+		// device (never shut down, see SharedGpu) is still around.
 		dispatcher.reset();
 		editor.reset();
 		graphics.reset();
@@ -301,11 +314,11 @@ tresult PLUGIN_API MzglVST3View::attached(void *parent, FIDString type) {
 		return kResultFalse;
 	}
 
-	// GPU first: an editor may create sokol resources (Vbos for its SVGs,
-	// say) as soon as it is constructed, not only from setup().
+	// GPU first: an editor may create GPU resources (Vbos for its SVGs, say)
+	// as soon as it is constructed, not only from setup().
 	auto &gpu	= sharedGpu();
 	impl->d3d11 = std::make_unique<D3D11Context>();
-	if (!impl->d3d11->init(impl->hwnd, width, height, mzglSokolSampleCount, gpu.device)) {
+	if (!impl->d3d11->init(impl->hwnd, width, height, kSampleCount, gpu.device)) {
 		Log::e() << "MzglVST3View: D3D11 init failed";
 		impl->teardown();
 		return kResultFalse;
@@ -313,7 +326,7 @@ tresult PLUGIN_API MzglVST3View::attached(void *parent, FIDString type) {
 	if (gpu.device == nullptr) {
 		gpu.device = impl->d3d11->getDevice();
 		gpu.device->AddRef();
-
+#if defined(MZGL_SOKOL)
 		sg_environment env		  = {};
 		env.defaults.sample_count = impl->d3d11->getSampleCount();
 		env.defaults.color_format = SG_PIXELFORMAT_BGRA8;
@@ -321,7 +334,11 @@ tresult PLUGIN_API MzglVST3View::attached(void *parent, FIDString type) {
 		env.d3d11.device		  = impl->d3d11->getDevice();
 		env.d3d11.device_context  = impl->d3d11->getDeviceContext();
 		mzglSokolSetup(env);
+#endif
 	}
+#if defined(MZGL_D3D11)
+	mzglD3D11::setDevice(gpu.device);
+#endif
 
 	// Borrow the controller's plugin so user knob movements and host
 	// parameter automation can flow through the same synth instance.
@@ -354,7 +371,12 @@ void MzglVST3View::renderFrame() {
 	if (!impl->d3d11 || !impl->dispatcher || impl->inFrame) return;
 	impl->inFrame = true;
 
+#if defined(MZGL_SOKOL)
 	sg_begin_pass(makePass(*impl->d3d11, impl->graphics->width, impl->graphics->height));
+#else
+	auto *api = static_cast<D3D11API *>(&impl->graphics->getAPI());
+	api->beginFrame(*impl->d3d11);
+#endif
 	const bool firstFrame = impl->needsSetup;
 	if (firstFrame) {
 		// Same first-draw sequence as MZMetalView: mzgl's main-thread id and
@@ -364,10 +386,35 @@ void MzglVST3View::renderFrame() {
 		impl->needsSetup = false;
 	}
 	impl->dispatcher->runFrame();
+#if defined(MZGL_SOKOL)
 	sg_end_pass();
 	sg_commit();
 	// No vsync: Present(1) would block the host's UI thread for up to a frame.
 	impl->d3d11->present(false);
+#else
+	// No vsync: Present(1) would block the host's UI thread for up to a frame.
+	if (!api->endFrame(false)) {
+		// Device lost (reason logged). The shared device is dead for every
+		// editor in this DLL: the first one to notice makes a fresh device and
+		// publishes it, the others find it already replaced and only recreate
+		// their swap chain on it. Shaders and buffers come back lazily from
+		// their CPU copies; textures are dropped.
+		auto &gpu = sharedGpu();
+		if (gpu.device == impl->d3d11->getDevice()) {
+			gpu.device->Release();
+			gpu.device = nullptr;
+			if (impl->d3d11->recreate(nullptr)) {
+				gpu.device = impl->d3d11->getDevice();
+				gpu.device->AddRef();
+				mzglD3D11::setDevice(gpu.device);
+			} else {
+				Log::e() << "MzglVST3View: D3D11 device recreation failed";
+			}
+		} else if (gpu.device != nullptr) {
+			impl->d3d11->recreate(gpu.device);
+		}
+	}
+#endif
 
 	impl->inFrame = false;
 	if (firstFrame) {

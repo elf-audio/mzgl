@@ -66,6 +66,8 @@ vector<Font *> Font::fonts;
 #	include "sokolFontstash.h"
 #elif defined(MZGL_METAL)
 #	include "metalFontstash.h"
+#elif defined(MZGL_D3D11)
+#	include "d3d11Fontstash.h"
 #else
 #	include "gl3corefontstash.h"
 #endif
@@ -110,6 +112,8 @@ bool Font::load(Graphics &g, const vector<unsigned char> &data, float size) {
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #elif defined(MZGL_METAL)
 	fs = metalFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#elif defined(MZGL_D3D11)
+	fs = d3d11FonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	GetError();
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
@@ -148,6 +152,8 @@ bool Font::load(Graphics &g, string path, float size) {
 	fs = sokolFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #elif defined(MZGL_METAL)
 	fs = metalFonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
+#elif defined(MZGL_D3D11)
+	fs = d3d11FonsCreate(g, 512, 512, FONS_ZERO_TOPLEFT);
 #else
 	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
 #endif
@@ -180,6 +186,10 @@ TextureRef Font::getAtlasTexture(Graphics &g) {
 	metalFONScontext *mtl = (metalFONScontext *) (fs->params.userPtr);
 	metalFons__flushPendingAtlasUpdate(mtl);
 	return Texture::create(g, mtl->textureId, mtl->width, mtl->height);
+#elif defined(MZGL_D3D11)
+	d3d11FONScontext *dx = (d3d11FONScontext *) (fs->params.userPtr);
+	d3d11Fons__flushPendingAtlasUpdate(dx);
+	return Texture::create(g, dx->textureId, dx->width, dx->height);
 #else
 	GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 	return Texture::create(g, gl->tex, gl->width, gl->height);
@@ -436,6 +446,8 @@ void Font::clear() {
 		sokolFonsDelete(fs);
 #elif defined(MZGL_METAL)
 		metalFonsDelete(fs);
+#elif defined(MZGL_D3D11)
+		d3d11FonsDelete(fs);
 #else
 		GLFONScontext *gl = (GLFONScontext *) (fs->params.userPtr);
 		gl->TCOORD_ATTRIB = 0;

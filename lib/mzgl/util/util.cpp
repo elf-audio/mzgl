@@ -1077,7 +1077,7 @@ void saveFileDialog(const std::string &msg,
 	OPENFILENAMEW ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
-#	ifdef MZGL_SOKOL
+#	if defined(MZGL_SOKOL) || defined(MZGL_D3D11)
 	HWND hwnd = GetActiveWindow();
 #	else
 	HWND hwnd = WindowFromDC(wglGetCurrentDC());

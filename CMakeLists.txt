@@ -238,6 +238,15 @@ elseif(USING_METAL)
     lib/mzgl/gl/api/metal/MetalTexture.mm
     PROPERTIES COMPILE_FLAGS "-fobjc-arc"
   )
+elseif(USING_D3D11)
+  list(
+    APPEND MZGL_SOURCES
+    lib/mzgl/gl/api/d3d11/D3D11API.cpp
+    lib/mzgl/gl/api/d3d11/D3D11Shader.cpp
+    lib/mzgl/gl/api/d3d11/D3D11Vbo.cpp
+    lib/mzgl/gl/api/d3d11/D3D11Texture.cpp
+    lib/mzgl/app/win64/D3D11Context.cpp
+  )
 else()
   list(APPEND MZGL_SOURCES lib/mzgl/gl/api/OpenGL/OpenGLAPI.cpp lib/mzgl/gl/api/OpenGL/OpenGLShader.cpp)
 endif()
@@ -272,6 +281,7 @@ set(
   lib/mzgl/gl/api/OpenGL
   lib/mzgl/gl/api/sokol
   lib/mzgl/gl/api/metal
+  lib/mzgl/gl/api/d3d11
   lib/mzgl/gl/drawing
   lib/mzgl/midi
   lib/mzgl/music
@@ -480,10 +490,10 @@ set(
 # Optional: Specify the path if sokol-shdc is not in your PATH
 set(SOKOL_SHDC "sokol-shdc")
 
-# The Metal backend consumes the same sokol-shdc-generated shader headers
-# (the metal_macos/metal_ios MSL variants) as the Sokol backend, so shader
-# compilation runs for both.
-if(USING_SOKOL OR USING_METAL)
+# The Metal and D3D11 backends consume the same sokol-shdc-generated shader
+# headers (the metal_macos/metal_ios MSL and hlsl5 variants) as the Sokol
+# backend, so shader compilation runs for all three.
+if(USING_COMPILED_SHADERS)
   # MZGL_USE_PRECOMPILED_SOKOL_SHADERS lets parent projects skip shader
   # regeneration entirely and use the checked-in xcodeShaders/ headers. Useful
   # when only a newer sokol-shdc is available, since the existing mzgl shaders
@@ -714,6 +724,8 @@ elseif(WIN32)
 
   if(USING_SOKOL)
     list(APPEND MZGL_LIBS d3d11 dxgi dxguid)
+  elseif(USING_D3D11)
+    list(APPEND MZGL_LIBS d3d11 dxgi dxguid d3dcompiler)
   else()
     list(APPEND MZGL_LIBS ${OPENGL_gl_LIBRARY})
   endif()

@@ -32,6 +32,18 @@ using BackendShader		 = MetalShader;
 using BackendVbo		 = MetalVbo;
 using BackendTexture	 = MetalTexture;
 
+#elif defined(MZGL_D3D11)
+
+#	include "D3D11API.h"
+#	include "D3D11Shader.h"
+#	include "D3D11Vbo.h"
+#	include "D3D11Texture.h"
+
+using BackendGraphicsAPI = D3D11API;
+using BackendShader		 = D3D11Shader;
+using BackendVbo		 = D3D11Vbo;
+using BackendTexture	 = D3D11Texture;
+
 #else // MZGL_OPENGL
 
 #	include "OpenGLAPI.h"

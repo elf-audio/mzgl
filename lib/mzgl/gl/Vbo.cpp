@@ -46,6 +46,12 @@ VboRef Vbo::createFromPool(Graphics &g) {
 	auto vbo = new SokolVbo();
 	vbo->setPool(&dynamic_cast<SokolAPI &>(g.getAPI()).getBufferPool());
 	return VboRef(vbo);
+#elif defined(MZGL_D3D11)
+	// streamed through the backend's ring buffer every draw, never promoted
+	// to a static buffer (see D3D11Vbo.h)
+	auto vbo = new D3D11Vbo();
+	vbo->setStreaming(true);
+	return VboRef(vbo);
 #else
 	// no per-frame buffer pool on the other backends - a plain Vbo behaves
 	// identically, it just re-uploads on update

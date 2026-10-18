@@ -13,7 +13,7 @@
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#	ifndef MZGL_SOKOL
+#	if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
 #		include <glew.h>
 #	endif
 #endif // _WIN32 /////////////////////////////////////////////
@@ -40,6 +40,13 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #	include "D3D11Context.h"
 #	include "sokol_gfx.h"
 #	include "SokolSetup.h"
+#	include "Image.h"
+#endif
+
+#if defined(MZGL_D3D11) && defined(_WIN32)
+#	include "D3D11Context.h"
+#	include "D3D11API.h"
+#	include "D3D11Internal.h"
 #endif
 
 #if defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
@@ -212,7 +219,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 
 void window_size_callback(GLFWwindow *window, int width, int height) {
 	auto &g = getGraphics(window);
-#ifndef MZGL_SOKOL
+#if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
 	glViewport(0, 0, width, height);
 #endif
 	g.width	 = width;
@@ -276,7 +283,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-#elif defined(MZGL_SOKOL) && defined(_WIN32)
+#elif (defined(MZGL_SOKOL) || defined(MZGL_D3D11)) && defined(_WIN32)
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 #elif defined(__EMSCRIPTEN__)
@@ -457,6 +464,15 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	initMZGL(app);
 	bool needsSetup = true;
 
+	// Screenshots (Graphics::saveScreen, the test server's save-screen): flag
+	// the request and read the resolved back buffer after the frame's commit,
+	// before present - the same scheme as the Metal view and the D3D11 backend.
+	std::string pendingScreenshot;
+	graphics.deferredSaveScreen = [&pendingScreenshot](const std::string &path) -> bool {
+		pendingScreenshot = path;
+		return true;
+	};
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
 			glfwPollEvents();
@@ -479,6 +495,16 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		sg_end_pass();
 		sg_commit();
 
+		if (!pendingScreenshot.empty()) {
+			std::vector<uint8_t> rgba;
+			if (d3d11.readBackBuffer(rgba)) {
+				ImageRef img = Image::create(d3d11.getWidth(), d3d11.getHeight(), 4);
+				img->data	 = std::move(rgba);
+				img->save(pendingScreenshot);
+			}
+			pendingScreenshot.clear();
+		}
+
 		d3d11.present();
 
 		glfwPollEvents();
@@ -486,6 +512,60 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	sg_shutdown();
 	d3d11.shutdown();
+
+#elif defined(MZGL_D3D11) && defined(_WIN32)
+	// native D3D11 backend for Windows
+	D3D11Context d3d11;
+	{
+		HWND hwnd = (HWND) os::getNativeWindowHandle(window);
+		// 4x MSAA like the other backends: the swap chain stays 1x and the
+		// backend resolves its MSAA render target into it at end of frame.
+		if (!d3d11.init(hwnd, graphics.width, graphics.height, mzglD3D11SampleCount)) {
+			Log::e() << "Failed to initialize D3D11";
+			glfwDestroyWindow(window);
+			glfwTerminate();
+			exit(EXIT_FAILURE);
+		}
+		mzglD3D11::setDevice(d3d11.getDevice());
+	}
+	auto *d3d11Api = static_cast<D3D11API *>(&graphics.getAPI());
+
+	initMZGL(app);
+	bool needsSetup = true;
+
+	while (!glfwWindowShouldClose(window)) {
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+			glfwPollEvents();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+
+		if (framebuferResized) {
+			d3d11.resize(graphics.width, graphics.height);
+			eventDispatcher->resized();
+			framebuferResized = false;
+		}
+
+		d3d11Api->beginFrame(d3d11);
+		if (needsSetup) {
+			eventDispatcher->setup();
+			needsSetup = false;
+		}
+		eventDispatcher->runFrame();
+		if (!d3d11Api->endFrame(true)) {
+			// device lost (reason already logged): a fresh device + swap chain;
+			// the backend recreates its shaders and buffers lazily from their
+			// CPU copies, textures are dropped
+			if (d3d11.recreate()) {
+				mzglD3D11::setDevice(d3d11.getDevice());
+			} else {
+				Log::e() << "D3D11 device recreation failed - exiting";
+				break;
+			}
+		}
+
+		glfwPollEvents();
+	}
 
 #elif defined(MZGL_SOKOL) && defined(__EMSCRIPTEN__)
 	// GLES3 (WebGL2) + Sokol backend for the browser.
@@ -582,6 +662,13 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	// every ~Layer via its root) then touches a dangling Graphics&.
 	app.reset();
 	eventDispatcher.reset();
+
+#if defined(MZGL_D3D11) && defined(_WIN32)
+	// every GPU resource the app owned is gone now: drop the device, then the
+	// swap chain (before its window goes)
+	mzglD3D11::setDevice(nullptr);
+	d3d11.shutdown();
+#endif
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

@@ -1,6 +1,6 @@
 #include "GLFWOS.h"
 #include <Windows.h>
-#ifndef MZGL_SOKOL
+#if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
 #	include <glew.h>
 #endif
 #include "glfw3.h"
@@ -33,7 +33,7 @@ namespace os {
 	}
 
 	auto initializeGLContext() -> void {
-#ifndef MZGL_SOKOL
+#if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
 		glewInit();
 		glEnable(GL_MULTISAMPLE);
 #endif

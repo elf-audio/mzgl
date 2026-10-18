@@ -20,7 +20,7 @@
 #	endif
 #elif defined(_WIN32)
 #	include <Windows.h>
-#	ifndef MZGL_SOKOL
+#	if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
 #		include "glew.h"
 #		include "glfw3native.h"
 #	endif
