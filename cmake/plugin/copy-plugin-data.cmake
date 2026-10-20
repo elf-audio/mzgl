@@ -15,6 +15,11 @@ endif()
 # make the whole list a single bogus path - normalise here.
 string(REPLACE "\;" ";" SUBDIRS "${SUBDIRS}")
 
+# Start from a clean DST so a sub-dir dropped from the list (or a file
+# deleted from SRC) doesn't linger in the bundle from an earlier build.
+file(REMOVE_RECURSE "${DST}")
+file(MAKE_DIRECTORY "${DST}")
+
 if(NOT SUBDIRS)
   if(EXISTS "${SRC}")
     file(COPY "${SRC}/" DESTINATION "${DST}")

@@ -77,10 +77,14 @@ function(_mzgl_plugin_bundle_post_build target data_dir data_subdirs)
       COMMENT "[${target}] bundling data/")
   endif()
   if(APPLE)
+    # Drop the local symbol table outside Debug (nothing in it is needed to run
+    # the plugin, and it roughly halves the binary); the exported-symbols list
+    # already keeps only the VST3/AU entry points as globals.
     add_custom_command(
       TARGET ${target} POST_BUILD
+      COMMAND $<IF:$<CONFIG:Debug>,true,strip> -x $<TARGET_FILE:${target}>
       COMMAND codesign --force --sign - --timestamp=none --deep $<TARGET_BUNDLE_DIR:${target}>
-      COMMENT "[${target}] re-signing (ad hoc)")
+      COMMENT "[${target}] stripping local symbols + re-signing (ad hoc)")
   endif()
 endfunction()
 
@@ -168,7 +172,11 @@ function(mzgl_vst3_configure_bundle target)
   if(APPLE)
     target_link_libraries(${target} PRIVATE "-framework Cocoa")
     target_link_options(${target} PRIVATE
-      "LINKER:-exported_symbols_list,${VST3_SDK_ROOT}/public.sdk/source/main/macexport.exp")
+      "LINKER:-exported_symbols_list,${VST3_SDK_ROOT}/public.sdk/source/main/macexport.exp"
+      # With only the VST3 entry points exported, the linker can discard every
+      # function/data the plugin never reaches (Koala's full source list is
+      # compiled in; most of it is unreachable from a single synth).
+      $<$<NOT:$<CONFIG:Debug>>:LINKER:-dead_strip>)
     set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS
                  ${VST3_SDK_ROOT}/public.sdk/source/main/macexport.exp)
 
