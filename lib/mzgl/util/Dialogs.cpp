@@ -273,7 +273,6 @@ void Dialogs::confirm(std::string title,
 #elif defined(__ANDROID__)
 	androidConfirmDialog(title, msg, okPressed, cancelPressed);
 #elif defined(_WIN32)
-	Log::d() << "Calling here";
 	windowsConfirmDialog(static_cast<HWND>(app.nativeWindowHandle), title, msg, okPressed, cancelPressed);
 #elif defined(__linux__)
 	linuxConfirmDialog(title, msg, okPressed, cancelPressed);

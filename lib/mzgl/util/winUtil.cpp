@@ -6,6 +6,9 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <algorithm>
+#include <cstdint>
+#include <cstring>
 #include <Urlmon.h>
 #include <wininet.h>
 #include "filesystem.h"
@@ -15,6 +18,12 @@
 
 namespace { ///////////////////////////////////////////////////////////////////////
 
+	// A real modal Win32 dialog (DialogBoxIndirectParam over an in-memory
+	// DLGTEMPLATE), i.e. the Windows equivalent of a browser prompt()/confirm():
+	// laid out in dialog units so it scales with DPI, drawn in the system
+	// message font, centred over the owner, with Enter / Esc / Tab / the
+	// title-bar close button handled by the dialog manager.
+
 	struct WindowsDialogBoxResult {
 		std::string text;
 	};
@@ -23,301 +32,341 @@ namespace { ////////////////////////////////////////////////////////////////////
 		struct Button {
 			std::string text;
 			std::function<void(WindowsDialogBoxResult)> onClicked;
-			bool isDefaultPushButton {false};
+			bool isDefaultPushButton {false}; // Enter
+			bool isCancel {false}; // Esc and the title-bar close button
 		};
 		struct TextEditor {
 			std::string defaultText;
 		};
 
-		HWND parent;
+		HWND parent {nullptr};
 		std::string title;
 		std::string text;
 		std::optional<TextEditor> textEditor;
 		std::vector<Button> buttons;
-		float x;
-		float y;
 	};
 
-	struct WM {
-		HWND hwnd;
-		UINT msg;
-		WPARAM w;
-		LPARAM l;
-	};
+	// Dialog units: 4 horizontal / 8 vertical units are one average character
+	// cell of the dialog font, so these are the standard Windows dialog metrics.
+	constexpr short DLG_MIN_WIDTH	 = 240;
+	constexpr short DLG_MARGIN		 = 7;
+	constexpr short BUTTON_WIDTH	 = 50;
+	constexpr short BUTTON_HEIGHT	 = 14;
+	constexpr short BUTTON_GAP		 = 4;
+	constexpr short EDIT_HEIGHT		 = 14;
+	constexpr short TEXT_LINE_HEIGHT = 8;
+	constexpr short TEXT_TO_EDIT_GAP = 5;
+	constexpr WORD ID_TEXT			 = 2000;
+	constexpr WORD ID_EDIT			 = 2001;
+	constexpr WORD ID_FIRST_BUTTON	 = 3000;
 
-	struct DialogBoxData {
-		DialogBoxData(WindowsDialogBoxSetup setup)
-			: font_ {createFont()} {
-			static constexpr auto BUTTON_WIDTH {120.0f};
-			static constexpr auto BUTTON_HEIGHT {24.0f};
-			static constexpr auto PADDING {10.0f};
-			static constexpr auto TEXT_AREA_HEIGHT {40.0f};
-			static constexpr auto TEXT_EDITOR_HEIGHT {24.0f};
+	constexpr WORD CLASS_BUTTON = 0x0080;
+	constexpr WORD CLASS_EDIT	= 0x0081;
+	constexpr WORD CLASS_STATIC = 0x0082;
 
-			const auto calculateWindowHeight = [](bool hasText, bool hasTextEditor) {
-				auto out {BUTTON_HEIGHT + PADDING + PADDING};
-				if (hasTextEditor) {
-					out += hasTextEditor + PADDING;
-				}
-				if (hasText) {
-					out *= 2;
-				}
-				return out;
-			};
-
-			WORD id {100};
-
-			const float buttonAreaWidth {(setup.buttons.size() * (BUTTON_WIDTH + PADDING)) + PADDING};
-
-			rect_.x		 = setup.x;
-			rect_.y		 = setup.y;
-			rect_.width	 = buttonAreaWidth * 1.333f;
-			rect_.height = calculateWindowHeight(!setup.text.empty(), setup.textEditor.has_value());
-
-			float x {(rect_.width / 2) - (buttonAreaWidth / 2)};
-			float y {rect_.height - PADDING - BUTTON_HEIGHT};
-
-			for (const auto buttonSetup: setup.buttons) {
-				Button button;
-				button.id				   = id++;
-				button.onClicked		   = buttonSetup.onClicked;
-				button.text				   = buttonSetup.text;
-				button.rect				   = {x, y, BUTTON_WIDTH, BUTTON_HEIGHT};
-				button.isDefaultPushButton = buttonSetup.isDefaultPushButton;
-				buttons_.push_back(std::move(button));
-				x += BUTTON_WIDTH + PADDING;
-			}
-
-			y -= PADDING;
-
-			if (setup.textEditor) {
-				y -= TEXT_EDITOR_HEIGHT;
-				textEditor_				 = TextEditor {};
-				textEditor_->id			 = id++;
-				textEditor_->defaultText = setup.textEditor->defaultText;
-				textEditor_->rect.moveLeftEdge(PADDING);
-				textEditor_->rect.moveRightEdge(rect_.width - PADDING);
-				textEditor_->rect.moveTopEdge(y);
-				textEditor_->rect.height = TEXT_EDITOR_HEIGHT;
-				y -= PADDING;
-			}
-
-			if (!setup.text.empty()) {
-				text_		= Text {};
-				text_->id	= id++;
-				text_->text = setup.text;
-				text_->rect.moveLeftEdge(PADDING);
-				text_->rect.moveRightEdge(rect_.width - PADDING);
-				text_->rect.moveTopEdge(PADDING);
-				text_->rect.moveBottomEdge(y);
-			}
+	class DialogTemplateBuilder {
+	public:
+		void begin(DWORD style,
+				   short cx,
+				   short cy,
+				   const std::wstring &title,
+				   WORD fontPointSize,
+				   const std::wstring &fontName) {
+			write<DWORD>(style | DS_SETFONT);
+			write<DWORD>(0); // extended style
+			itemCountPos_ = data_.size();
+			write<WORD>(0); // item count, patched in finish()
+			write<short>(0);
+			write<short>(0);
+			write<short>(cx);
+			write<short>(cy);
+			write<WORD>(0); // no menu
+			write<WORD>(0); // default dialog window class
+			writeString(title);
+			write<WORD>(fontPointSize);
+			writeString(fontName);
 		}
 
-		~DialogBoxData() { DeleteObject(font_); }
-
-		auto on_wm_create(WM wm) -> LRESULT {
-			SetWindowLongPtr(wm.hwnd, GWLP_USERDATA, reinterpret_cast<LPARAM>(this));
-			HWND textHandle {0};
-			HWND textEditorHandle {0};
-			std::vector<HWND> buttonHandles {};
-			if (text_) {
-				textHandle = createTextWindow(*text_, wm.hwnd);
-			}
-			if (textEditor_) {
-				textEditorHandle = createTextEditorWindow(*textEditor_, wm.hwnd);
-			}
-			for (const auto button: buttons_) {
-				buttonHandles.push_back(createButtonWindow(button, wm.hwnd));
-			}
-			if (textEditorHandle) {
-				SetFocus(textEditorHandle);
-			}
-			return 0;
+		void addItem(
+			WORD classAtom, DWORD style, short x, short y, short cx, short cy, WORD id, const std::wstring &text) {
+			align4();
+			write<DWORD>(style | WS_CHILD | WS_VISIBLE);
+			write<DWORD>(0);
+			write<short>(x);
+			write<short>(y);
+			write<short>(cx);
+			write<short>(cy);
+			write<WORD>(id);
+			write<WORD>(0xFFFF);
+			write<WORD>(classAtom);
+			writeString(text);
+			write<WORD>(0); // no creation data
+			itemCount_++;
 		}
 
-		auto on_wm_command(WM wm) -> LRESULT {
-			for (const auto button: buttons_) {
-				if (LOWORD(wm.w) == button.id) {
-					if (button.onClicked) {
-						WindowsDialogBoxResult result;
-						result.text = getEditorText();
-						button.onClicked(std::move(result));
-					}
-					DestroyWindow(wm.hwnd);
-					break;
-				}
-			}
-			return 0;
+		const DLGTEMPLATE *finish() {
+			memcpy(data_.data() + itemCountPos_, &itemCount_, sizeof(WORD));
+			return reinterpret_cast<const DLGTEMPLATE *>(data_.data());
 		}
-
-		auto getRect() const { return rect_; }
 
 	private:
-		struct Text {
-			WORD id;
-			std::string text;
-			Rectf rect;
-		};
-
-		struct TextEditor {
-			WORD id;
-			std::string defaultText;
-			Rectf rect;
-		};
-
-		struct Button {
-			WORD id;
-			std::string text;
-			std::function<void(WindowsDialogBoxResult)> onClicked;
-			Rectf rect;
-			bool isDefaultPushButton;
-		};
-
-		static auto createFont() -> HFONT {
-			NONCLIENTMETRICS metrics;
-			metrics.cbSize = sizeof(NONCLIENTMETRICS);
-			SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &metrics, 0);
-			return CreateFontIndirect(&metrics.lfMessageFont);
+		template <class T>
+		void write(T v) {
+			const auto p = reinterpret_cast<const uint8_t *>(&v);
+			data_.insert(data_.end(), p, p + sizeof(T));
+		}
+		void writeString(const std::wstring &s) {
+			for (wchar_t c: s)
+				write<WORD>(c);
+			write<WORD>(0);
+		}
+		void align4() {
+			while (data_.size() % 4 != 0)
+				data_.push_back(0);
 		}
 
-		auto createButtonWindow(Button button, HWND hwnd) -> HWND {
-			DWORD style {WS_VISIBLE | WS_CHILD | WS_TABSTOP};
-			if (button.isDefaultPushButton) {
-				style |= BS_DEFPUSHBUTTON;
-			}
-			const auto buttonHwnd = CreateWindow(TEXT("Button"),
-												 n2w(button.text).c_str(),
-												 style,
-												 button.rect.x,
-												 button.rect.y,
-												 button.rect.width,
-												 button.rect.height,
-												 hwnd,
-												 (HMENU) (button.id),
-												 NULL,
-												 NULL);
-			SendMessage(buttonHwnd, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
-			return buttonHwnd;
-		}
-
-		auto createTextEditorWindow(TextEditor textEditor, HWND hwnd) -> HWND {
-			textEditorHwnd_ = CreateWindow(TEXT("Edit"),
-										   n2w(textEditor.defaultText).c_str(),
-										   WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP,
-										   textEditor.rect.x,
-										   textEditor.rect.y,
-										   textEditor.rect.width,
-										   textEditor.rect.height,
-										   hwnd,
-										   (HMENU) textEditor.id,
-										   NULL,
-										   NULL);
-			SendMessage(textEditorHwnd_, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
-			return textEditorHwnd_;
-		}
-
-		auto createTextWindow(Text text, HWND hwnd) -> HWND {
-			const auto textHwnd = CreateWindow(TEXT("Static"),
-											   n2w(text.text).c_str(),
-											   SS_CENTER | WS_CHILD | WS_VISIBLE,
-											   text.rect.x,
-											   text.rect.y,
-											   text.rect.width,
-											   text.rect.height,
-											   hwnd,
-											   (HMENU) (text.id),
-											   NULL,
-											   NULL);
-			SendMessage(textHwnd, WM_SETFONT, (WPARAM) font_, MAKELPARAM(TRUE, 0));
-			return textHwnd;
-		}
-
-		auto getEditorText() const -> std::string {
-			if (!textEditor_) {
-				return "";
-			}
-
-			int textLength_WithNUL {GetWindowTextLength(textEditorHwnd_) + 1};
-			std::vector<wchar_t> text(textLength_WithNUL);
-			GetWindowText(textEditorHwnd_, text.data(), textLength_WithNUL);
-			char output[512];
-			sprintf(output, "%ws", text.data());
-			return output;
-		}
-
-		std::optional<Text> text_;
-		std::optional<TextEditor> textEditor_;
-		std::vector<Button> buttons_;
-		Rectf rect_;
-		HFONT font_;
-		HWND textEditorHwnd_ {};
+		std::vector<uint8_t> data_;
+		size_t itemCountPos_ {0};
+		WORD itemCount_ {0};
 	};
 
-	LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-		WM wm {hwnd, msg, wParam, lParam};
+	struct DialogFont {
+		std::wstring faceName;
+		WORD pointSize;
+	};
 
-		if (wm.msg == WM_CREATE) {
-			const auto lpcs {reinterpret_cast<LPCREATESTRUCT>(wm.l)};
-			const auto data {reinterpret_cast<DialogBoxData *>(lpcs->lpCreateParams)};
-			return data->on_wm_create(wm);
+	DialogFont messageFont() {
+		NONCLIENTMETRICSW metrics {};
+		metrics.cbSize = sizeof(metrics);
+		if (SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0)
+			&& metrics.lfMessageFont.lfHeight != 0) {
+			const HDC dc  = GetDC(nullptr);
+			const int dpi = GetDeviceCaps(dc, LOGPIXELSY);
+			ReleaseDC(nullptr, dc);
+			const int points = MulDiv(std::abs(metrics.lfMessageFont.lfHeight), 72, dpi);
+			return {metrics.lfMessageFont.lfFaceName, static_cast<WORD>(std::clamp(points, 8, 14))};
 		}
-
-		const auto data {reinterpret_cast<DialogBoxData *>(GetWindowLongPtr(wm.hwnd, GWLP_USERDATA))};
-
-		if (!data) {
-			return DefWindowProc(wm.hwnd, wm.msg, wm.w, wm.l);
-		}
-
-		switch (wm.msg) {
-			case WM_COMMAND: {
-				return data->on_wm_command(wm);
-			}
-			case WM_DESTROY: {
-				delete data;
-				return 0;
-			}
-		}
-
-		Log::d().startSavingToFile("z:/tmp/test.log", true);
-		Log::d() << "here";
-		Log::d().stopSavingToFile();
-
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+		return {L"Segoe UI", 9};
 	}
 
-	auto windowsDialogBox(WindowsDialogBoxSetup setup) -> void {
-		const auto data {new DialogBoxData(setup)};
-		const auto hInstance {GetModuleHandle(NULL)};
+	std::wstring getWindowText(HWND hwnd) {
+		const int length = GetWindowTextLengthW(hwnd);
+		if (length <= 0) return L"";
+		std::vector<wchar_t> buffer(length + 1);
+		GetWindowTextW(hwnd, buffer.data(), length + 1);
+		return std::wstring(buffer.data());
+	}
 
-		DWORD windowStyle {WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE};
+	struct DialogState {
+		const WindowsDialogBoxSetup *setup;
+		WindowsDialogBoxResult result;
+		int chosenButton {-1};
+	};
 
-		RECT requiredRect;
-		requiredRect.left	= data->getRect().x;
-		requiredRect.top	= data->getRect().y;
-		requiredRect.right	= data->getRect().right();
-		requiredRect.bottom = data->getRect().bottom();
+	WORD buttonId(const WindowsDialogBoxSetup::Button &button, size_t index) {
+		if (button.isDefaultPushButton) return IDOK;
+		if (button.isCancel) return IDCANCEL;
+		return static_cast<WORD>(ID_FIRST_BUTTON + index);
+	}
 
-		AdjustWindowRect(&requiredRect, windowStyle, false);
+	int buttonIndexForCommand(const WindowsDialogBoxSetup &setup, WORD id) {
+		for (size_t i = 0; i < setup.buttons.size(); i++) {
+			if (buttonId(setup.buttons[i], i) == id) return static_cast<int>(i);
+		}
+		// Esc / close with no explicit cancel button: treat the last button as the way out
+		if (id == IDCANCEL && !setup.buttons.empty()) return static_cast<int>(setup.buttons.size()) - 1;
+		return -1;
+	}
 
-		WNDCLASS mainWindowClass {0};
+	// The template guesses the message height; once the real font and DPI are
+	// known, measure the text and push everything below it down if needed.
+	void fitMessageText(HWND dlg) {
+		const HWND text = GetDlgItem(dlg, ID_TEXT);
+		if (!text) return;
+		RECT textRect;
+		GetClientRect(text, &textRect);
+		const int currentHeight = textRect.bottom - textRect.top;
 
-		mainWindowClass.lpszClassName = TEXT("mzgl.winDialogBox");
-		mainWindowClass.hInstance	  = hInstance;
-		mainWindowClass.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-		mainWindowClass.lpfnWndProc	  = wndProc;
-		mainWindowClass.hCursor		  = LoadCursor(0, IDC_ARROW);
-		RegisterClass(&mainWindowClass);
-		CreateWindow(mainWindowClass.lpszClassName,
-					 n2w(setup.title).c_str(),
-					 windowStyle,
-					 requiredRect.left,
-					 requiredRect.top,
-					 requiredRect.right - requiredRect.left,
-					 requiredRect.bottom - requiredRect.top,
-					 setup.parent,
+		const HDC dc	   = GetDC(text);
+		const HFONT font   = reinterpret_cast<HFONT>(SendMessageW(text, WM_GETFONT, 0, 0));
+		const HGDIOBJ old  = SelectObject(dc, font);
+		RECT measured	   = textRect;
+		const auto content = getWindowText(text);
+		DrawTextW(dc, content.c_str(), -1, &measured, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
+		SelectObject(dc, old);
+		ReleaseDC(text, dc);
+
+		const int delta = (measured.bottom - measured.top) - currentHeight;
+		if (delta <= 0) return;
+
+		SetWindowPos(
+			text, nullptr, 0, 0, textRect.right - textRect.left, currentHeight + delta, SWP_NOMOVE | SWP_NOZORDER);
+		for (HWND child = GetWindow(dlg, GW_CHILD); child; child = GetWindow(child, GW_HWNDNEXT)) {
+			if (child == text) continue;
+			RECT r;
+			GetWindowRect(child, &r);
+			MapWindowPoints(nullptr, dlg, reinterpret_cast<POINT *>(&r), 2);
+			SetWindowPos(child, nullptr, r.left, r.top + delta, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		}
+		RECT dlgRect;
+		GetWindowRect(dlg, &dlgRect);
+		SetWindowPos(dlg,
+					 nullptr,
 					 0,
-					 hInstance,
-					 data);
+					 0,
+					 dlgRect.right - dlgRect.left,
+					 dlgRect.bottom - dlgRect.top + delta,
+					 SWP_NOMOVE | SWP_NOZORDER);
+	}
+
+	void centreOverOwner(HWND dlg) {
+		const HWND owner = GetWindow(dlg, GW_OWNER);
+		if (!owner) return; // DS_CENTER already put it in the middle of the screen
+		RECT ownerRect, dlgRect;
+		GetWindowRect(owner, &ownerRect);
+		GetWindowRect(dlg, &dlgRect);
+		const int w = dlgRect.right - dlgRect.left;
+		const int h = dlgRect.bottom - dlgRect.top;
+		int x		= ownerRect.left + ((ownerRect.right - ownerRect.left) - w) / 2;
+		int y		= ownerRect.top + ((ownerRect.bottom - ownerRect.top) - h) / 2;
+
+		// keep it on the monitor the owner is on
+		MONITORINFO mi {};
+		mi.cbSize = sizeof(mi);
+		if (GetMonitorInfoW(MonitorFromWindow(owner, MONITOR_DEFAULTTONEAREST), &mi)) {
+			x = std::clamp<int>(x, mi.rcWork.left, std::max<int>(mi.rcWork.left, mi.rcWork.right - w));
+			y = std::clamp<int>(y, mi.rcWork.top, std::max<int>(mi.rcWork.top, mi.rcWork.bottom - h));
+		}
+		SetWindowPos(dlg, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+	}
+
+	INT_PTR CALLBACK dialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+		auto *state = reinterpret_cast<DialogState *>(GetWindowLongPtrW(hwnd, DWLP_USER));
+
+		switch (msg) {
+			case WM_INITDIALOG: {
+				SetWindowLongPtrW(hwnd, DWLP_USER, lParam);
+				fitMessageText(hwnd);
+				centreOverOwner(hwnd);
+				if (const HWND edit = GetDlgItem(hwnd, ID_EDIT)) {
+					SendMessageW(edit, EM_SETSEL, 0, -1);
+					SetFocus(edit);
+					return FALSE; // we set the focus ourselves
+				}
+				return TRUE;
+			}
+			case WM_COMMAND: {
+				if (!state) return FALSE;
+				const int chosen = buttonIndexForCommand(*state->setup, LOWORD(wParam));
+				if (chosen < 0) return FALSE;
+				state->chosenButton = chosen;
+				if (const HWND edit = GetDlgItem(hwnd, ID_EDIT)) {
+					state->result.text = w2n(getWindowText(edit));
+				}
+				EndDialog(hwnd, chosen);
+				return TRUE;
+			}
+			case WM_CLOSE: {
+				// the dialog manager normally turns this into IDCANCEL; be explicit so
+				// the caller always gets its callback
+				SendMessageW(hwnd, WM_COMMAND, IDCANCEL, 0);
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+	// Runs the dialog modally and invokes the chosen button's callback before returning.
+	auto windowsDialogBox(WindowsDialogBoxSetup setup) -> void {
+		// Under the app's common-controls v6 manifest this is what makes Button /
+		// Edit / Static draw with visual styles instead of the Windows 95 look.
+		static const bool comctl32Loaded = (LoadLibraryW(L"comctl32.dll") != nullptr);
+		(void) comctl32Loaded;
+
+		const auto font = messageFont();
+
+		const size_t buttonCount = setup.buttons.size();
+		const short buttonsWidth = static_cast<short>(buttonCount * BUTTON_WIDTH
+													  + (buttonCount > 0 ? (buttonCount - 1) * BUTTON_GAP : 0));
+		const short width		 = std::max<short>(DLG_MIN_WIDTH, buttonsWidth + 2 * DLG_MARGIN);
+		const short contentWidth = width - 2 * DLG_MARGIN;
+
+		// rough first guess at the message height; fitMessageText() corrects it
+		short textHeight = 0;
+		if (!setup.text.empty()) {
+			const int charsPerLine = std::max(1, contentWidth / 5);
+			int lines			   = 0;
+			size_t start		   = 0;
+			while (true) {
+				const size_t nl	 = setup.text.find('\n', start);
+				const size_t len = (nl == std::string::npos ? setup.text.size() : nl) - start;
+				lines += std::max<int>(1, static_cast<int>((len + charsPerLine - 1) / charsPerLine));
+				if (nl == std::string::npos) break;
+				start = nl + 1;
+			}
+			textHeight = static_cast<short>(lines * TEXT_LINE_HEIGHT);
+		}
+
+		short y			  = DLG_MARGIN;
+		const short textY = y;
+		if (textHeight > 0) y += textHeight + TEXT_TO_EDIT_GAP;
+		const short editY = y;
+		if (setup.textEditor) y += EDIT_HEIGHT + DLG_MARGIN;
+		else if (textHeight > 0) y += DLG_MARGIN - TEXT_TO_EDIT_GAP + 2;
+		const short buttonsY = y;
+		const short height	 = buttonsY + BUTTON_HEIGHT + DLG_MARGIN;
+
+		DialogTemplateBuilder tpl;
+		tpl.begin(WS_POPUP | WS_CAPTION | WS_SYSMENU | DS_MODALFRAME | DS_CENTER,
+				  width,
+				  height,
+				  n2w(setup.title),
+				  font.pointSize,
+				  font.faceName);
+		if (textHeight > 0) {
+			tpl.addItem(CLASS_STATIC,
+						SS_LEFT | SS_NOPREFIX,
+						DLG_MARGIN,
+						textY,
+						contentWidth,
+						textHeight,
+						ID_TEXT,
+						n2w(setup.text));
+		}
+		if (setup.textEditor) {
+			tpl.addItem(CLASS_EDIT,
+						ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_TABSTOP,
+						DLG_MARGIN,
+						editY,
+						contentWidth,
+						EDIT_HEIGHT,
+						ID_EDIT,
+						n2w(setup.textEditor->defaultText));
+		}
+		short bx = width - DLG_MARGIN - buttonsWidth;
+		for (size_t i = 0; i < buttonCount; i++) {
+			const auto &button = setup.buttons[i];
+			tpl.addItem(CLASS_BUTTON,
+						(button.isDefaultPushButton ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON) | WS_TABSTOP,
+						bx,
+						buttonsY,
+						BUTTON_WIDTH,
+						BUTTON_HEIGHT,
+						buttonId(button, i),
+						n2w(button.text));
+			bx += BUTTON_WIDTH + BUTTON_GAP;
+		}
+
+		DialogState state {&setup};
+		const INT_PTR rc = DialogBoxIndirectParamW(
+			GetModuleHandleW(nullptr), tpl.finish(), setup.parent, dialogProc, reinterpret_cast<LPARAM>(&state));
+		if (rc == -1) {
+			Log::e() << "DialogBoxIndirectParamW failed: " << GetLastError();
+			state.chosenButton = buttonIndexForCommand(setup, IDCANCEL);
+		}
+		if (state.chosenButton >= 0 && state.chosenButton < static_cast<int>(buttonCount)) {
+			if (const auto &cb = setup.buttons[state.chosenButton].onClicked) cb(std::move(state.result));
+		}
 	}
 
 	void ensureThatFileDirectoryExists(std::wstring filePath) {
@@ -332,7 +381,7 @@ void windowsConfirmDialog(HWND parent,
 						  std::string msg,
 						  std::function<void()> okPressed,
 						  std::function<void()> cancelPressed) {
-	auto response = MessageBoxW(NULL, n2w(msg).c_str(), n2w(title).c_str(), MB_OKCANCEL);
+	auto response = MessageBoxW(parent, n2w(msg).c_str(), n2w(title).c_str(), MB_OKCANCEL);
 	if (response == IDOK) {
 		okPressed();
 	} else {
@@ -355,10 +404,8 @@ void windowsTextboxDialog(HWND parent,
 	setup.text					  = msg;
 	setup.textEditor			  = WindowsDialogBoxSetup::TextEditor {};
 	setup.textEditor->defaultText = text;
-	setup.x						  = 150.0f;
-	setup.y						  = 150.0f;
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"OK", onOk, true});
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel, false, true});
 	windowsDialogBox(std::move(setup));
 }
 
@@ -377,11 +424,9 @@ void windowsTwoOptionCancelDialog(HWND parent,
 	setup.parent = parent;
 	setup.title	 = title;
 	setup.text	 = msg;
-	setup.x		 = 150.0f;
-	setup.y		 = 150.0f;
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne, true});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonTwoText, onButtonTwo});
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel, false, true});
 	windowsDialogBox(std::move(setup));
 }
 
@@ -403,12 +448,10 @@ void windowsThreeOptionCancelDialog(HWND parent,
 	setup.parent = parent;
 	setup.title	 = title;
 	setup.text	 = msg;
-	setup.x		 = 150.0f;
-	setup.y		 = 150.0f;
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonOneText, onButtonOne, true});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonTwoText, onButtonTwo});
 	setup.buttons.push_back(WindowsDialogBoxSetup::Button {buttonThreeText, onButtonThree});
-	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel});
+	setup.buttons.push_back(WindowsDialogBoxSetup::Button {"Cancel", onCancel, false, true});
 	windowsDialogBox(std::move(setup));
 }
 
