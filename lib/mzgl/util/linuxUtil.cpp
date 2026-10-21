@@ -16,15 +16,33 @@ g++ main.cpp `pkg-config --libs --cflags gtk+-2.0`
 
 using namespace std;
 
+// The standalone calls gtk_init() from GLFWAppRunner before any dialog. In a
+// plugin build nothing has initialised GTK (the host may not use it at all),
+// so every dialog entry point checks lazily; if GTK can't start (no display,
+// or a host whose GTK it would clash with) the dialog is skipped instead of
+// crashing in gtk_file_chooser_dialog_new.
+static bool ensureGtkInited() {
+	static const bool ok = [] {
+		if (gtk_init_check(nullptr, nullptr) == TRUE) return true;
+		Log::e() << "linuxUtil: gtk_init_check failed - dialogs unavailable";
+		return false;
+	}();
+	return ok;
+}
+
 void linuxSaveFileDialog(string msg, string defaultFileName, function<void(string, bool)> completionCallback) {
+	if (!ensureGtkInited()) {
+		completionCallback("", false);
+		return;
+	}
 	GtkWidget *dialog		= gtk_file_chooser_dialog_new(msg.c_str(),
-													  nullptr,
-													  GTK_FILE_CHOOSER_ACTION_SAVE,
-													  "Cancel",
-													  GTK_RESPONSE_CANCEL,
-													  "Save",
-													  GTK_RESPONSE_ACCEPT,
-													  nullptr);
+														  nullptr,
+														  GTK_FILE_CHOOSER_ACTION_SAVE,
+														  "Cancel",
+														  GTK_RESPONSE_CANCEL,
+														  "Save",
+														  GTK_RESPONSE_ACCEPT,
+														  nullptr);
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
 	gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
@@ -51,14 +69,18 @@ void linuxSaveFileDialog(string msg, string defaultFileName, function<void(strin
 void linuxLoadFileDialog(string msg,
 						 const vector<string> &allowedExtensions,
 						 function<void(string, bool)> completionCallback) {
+	if (!ensureGtkInited()) {
+		completionCallback({}, false);
+		return;
+	}
 	GtkWidget *dialog		= gtk_file_chooser_dialog_new(msg.c_str(),
-													  nullptr,
-													  GTK_FILE_CHOOSER_ACTION_OPEN,
-													  "Cancel",
-													  GTK_RESPONSE_CANCEL,
-													  "Open",
-													  GTK_RESPONSE_ACCEPT,
-													  nullptr);
+														  nullptr,
+														  GTK_FILE_CHOOSER_ACTION_OPEN,
+														  "Cancel",
+														  GTK_RESPONSE_CANCEL,
+														  "Open",
+														  GTK_RESPONSE_ACCEPT,
+														  nullptr);
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 
 	if (!allowedExtensions.empty()) {
@@ -93,6 +115,10 @@ void linuxLoadFileDialog(string msg,
 
 //void linuxChooseFolderDialog(string msg, const vector<string> &allowedExtensions, function<void(string, bool)> completionCallback) {
 void linuxChooseFolderDialog(std::string msg, std::function<void(std::string, bool)> completionCallback) {
+	if (!ensureGtkInited()) {
+		completionCallback("", false);
+		return;
+	}
 	GtkWidget *dialog = gtk_file_chooser_dialog_new(msg.c_str(),
 													nullptr,
 													GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
@@ -128,6 +154,10 @@ void linuxTextboxDialog(std::string title,
 						std::string msg,
 						std::string text,
 						function<void(string, bool)> completionCallback) {
+	if (!ensureGtkInited()) {
+		completionCallback("", false);
+		return;
+	}
 	GtkWidget *dialog =
 		gtk_dialog_new_with_buttons(title.c_str(), nullptr, (GtkDialogFlags) 0, "OK", 1, "Cancel", 2, nullptr);
 
@@ -158,6 +188,9 @@ void linuxTextboxDialog(std::string title,
 }
 
 void linuxAlertDialog(string title, string msg) {
+	if (!ensureGtkInited()) {
+		return;
+	}
 	auto type		  = GTK_MESSAGE_INFO;
 	auto buttons	  = GTK_BUTTONS_OK;
 	GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, type, buttons, "%s", msg.c_str());
@@ -172,6 +205,10 @@ void linuxConfirmDialog(std::string title,
 						std::string msg,
 						std::function<void()> okPressed,
 						std::function<void()> cancelPressed) {
+	if (!ensureGtkInited()) {
+		cancelPressed();
+		return;
+	}
 	auto type		  = GTK_MESSAGE_QUESTION;
 	auto buttons	  = GTK_BUTTONS_OK_CANCEL;
 	GtkWidget *dialog = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL, type, buttons, "%s", msg.c_str());
@@ -194,6 +231,10 @@ void linuxTwoOptionCancelDialog(std::string title,
 								std::string buttonTwoText,
 								std::function<void()> buttonTwoPressed,
 								std::function<void()> cancelPressed) {
+	if (!ensureGtkInited()) {
+		cancelPressed();
+		return;
+	}
 	GtkWidget *dialog = gtk_dialog_new_with_buttons(title.c_str(),
 													nullptr,
 													(GtkDialogFlags) 0,
@@ -231,6 +272,10 @@ void linuxTwoOptionDialog(std::string title,
 						  std::function<void()> buttonOnePressed,
 						  std::string buttonTwoText,
 						  std::function<void()> buttonTwoPressed) {
+	if (!ensureGtkInited()) {
+		buttonTwoPressed();
+		return;
+	}
 	GtkWidget *dialog = gtk_dialog_new_with_buttons(title.c_str(),
 													nullptr,
 													(GtkDialogFlags) 0,
@@ -267,6 +312,10 @@ void linuxThreeOptionCancelDialog(std::string title,
 								  std::string buttonThreeText,
 								  std::function<void()> buttonThreePressed,
 								  std::function<void()> cancelPressed) {
+	if (!ensureGtkInited()) {
+		cancelPressed();
+		return;
+	}
 	GtkWidget *dialog = gtk_dialog_new_with_buttons(title.c_str(),
 													nullptr,
 													(GtkDialogFlags) 0,

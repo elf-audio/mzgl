@@ -1,0 +1,8 @@
+/* Linux CLAP plugins export only the module entry point; everything else
+   stays local so nothing clashes with the host's own symbols. */
+{
+	global:
+		clap_entry;
+	local:
+		*;
+};

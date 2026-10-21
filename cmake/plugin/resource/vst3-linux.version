@@ -1,0 +1,11 @@
+/* Linux VST3 plugins export only the module entry points; everything else
+   (FLAC, fmt, PortAudio, the whole app compiled into the plugin) stays local
+   so nothing clashes with the host's own symbols. */
+{
+	global:
+		GetPluginFactory;
+		ModuleEntry;
+		ModuleExit;
+	local:
+		*;
+};

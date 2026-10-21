@@ -26,6 +26,7 @@ set(MZGL_PLUGIN_RESOURCE_DIR ${MZGL_PLUGIN_CMAKE_DIR}/resource)
 
 include(${MZGL_PLUGIN_CMAKE_DIR}/vst3-sdk.cmake)
 include(${MZGL_PLUGIN_CMAKE_DIR}/auv2-sdk.cmake)
+include(${MZGL_PLUGIN_CMAKE_DIR}/clap-sdk.cmake)
 include(${MZGL_PLUGIN_MZGL_ROOT}/cmake/GraphicsBackend.cmake)
 
 # ---------------------------------------------------------------------------
@@ -94,9 +95,9 @@ endfunction()
 
 # The generic single-component wrapper + the editor view. Pass VIEW_ONLY to get
 # just the view (for a plugin that brings its own SingleComponentEffect).
-# The view is Cocoa on macOS and a sokol/D3D11 child HWND on Windows; on Linux
-# the DSP side builds but createView() has nothing to return until an IPlugView
-# for X11 exists.
+# The view is Cocoa on macOS, a sokol/D3D11 child HWND on Windows, and an
+# X11/EGL child window on Linux (plugin/linux/X11PluginView, shared with the
+# CLAP gui, driven by the host's IRunLoop).
 function(mzgl_vst3_wrapper_sources out_var)
   cmake_parse_arguments(ARG "VIEW_ONLY" "" "" ${ARGN})
   set(_srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View.h)
@@ -104,6 +105,17 @@ function(mzgl_vst3_wrapper_sources out_var)
     list(APPEND _srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View.mm)
   elseif(WIN32)
     list(APPEND _srcs ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View_win.cpp)
+  else()
+    list(APPEND _srcs
+         ${MZGL_PLUGIN_SRC_DIR}/vst3/MzglVST3View_linux.cpp
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11PluginView.h
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11PluginView.cpp
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.h
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.cpp)
+    # X11Native.cpp includes Xlib, whose global-scope Font/Cursor typedefs
+    # collide with mzgl types - keep it out of any PCH or unity jumbo.
+    set_source_files_properties(${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.cpp
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON SKIP_UNITY_BUILD_INCLUSION ON)
   endif()
   if(NOT ARG_VIEW_ONLY)
     list(APPEND _srcs
@@ -166,7 +178,8 @@ function(mzgl_vst3_configure_bundle target)
 
   target_compile_definitions(${target} PRIVATE MZGL_PLUGIN_VST ${MZGL_BACKEND_COMPILE_DEFS}
                                                $<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
-  target_include_directories(${target} PRIVATE ${MZGL_PLUGIN_SRC_DIR}/vst3 ${VST3_SDK_ROOT})
+  target_include_directories(${target} PRIVATE ${MZGL_PLUGIN_SRC_DIR}/vst3 ${MZGL_PLUGIN_SRC_DIR}/linux
+                                               ${VST3_SDK_ROOT})
   target_link_libraries(${target} PRIVATE sdk sdk_common base pluginterfaces)
 
   if(APPLE)
@@ -230,9 +243,46 @@ function(mzgl_vst3_configure_bundle target)
     mzgl_vst3_system_plugin_dir(_install_dir)
     install(DIRECTORY "${_bundle_dir}" DESTINATION "${_install_dir}")
   else()
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME "${ARG_PRODUCT_NAME}" SUFFIX .so PREFIX ""
-                                               MZGL_VST3_BUNDLE_DIR "$<TARGET_FILE:${target}>")
-    install(TARGETS ${target} DESTINATION "$ENV{HOME}/.vst3")
+    # Linux: the SDK's "bundle" layout, same shape as Windows:
+    #   <build>/<name>.vst3/Contents/<arch>-linux/<name>.so
+    #   <build>/<name>.vst3/Contents/Resources/data/
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(ARM64|arm64|aarch64)$")
+      set(_arch_dir aarch64-linux)
+    else()
+      set(_arch_dir x86_64-linux)
+    endif()
+    set(_bundle_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.vst3")
+    set_target_properties(${target} PROPERTIES
+      OUTPUT_NAME "${ARG_PRODUCT_NAME}"
+      SUFFIX .so
+      PREFIX ""
+      LIBRARY_OUTPUT_DIRECTORY "${_bundle_dir}/Contents/${_arch_dir}"
+      # Shared libs staged next to the .so (libonnxruntime...) resolve via rpath.
+      BUILD_RPATH "$ORIGIN"
+      INSTALL_RPATH "$ORIGIN"
+      MZGL_VST3_BUNDLE_DIR "${_bundle_dir}")
+    # The editor view embeds an X11 child window in the host's.
+    target_link_libraries(${target} PRIVATE X11)
+    # Everything the plugin links is compiled into one .so that gets dlopened
+    # into an arbitrary host: export only the VST3 entry points, keep every
+    # other symbol (FLAC, fmt, GTK glue, ...) out of the host's namespace.
+    target_compile_options(${target} PRIVATE -fvisibility=hidden -fvisibility-inlines-hidden)
+    target_link_options(${target} PRIVATE
+      "LINKER:--version-script=${MZGL_PLUGIN_RESOURCE_DIR}/vst3-linux.version"
+      "LINKER:--exclude-libs,ALL")
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS
+                 ${MZGL_PLUGIN_RESOURCE_DIR}/vst3-linux.version)
+    if(ARG_DATA_DIR)
+      string(REPLACE ";" "\;" _subdirs "${ARG_DATA_SUBDIRS}")
+      add_custom_command(
+        TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${_bundle_dir}/Contents/Resources/data"
+        COMMAND ${CMAKE_COMMAND} -DSRC=${ARG_DATA_DIR}
+                -DDST=${_bundle_dir}/Contents/Resources/data
+                "-DSUBDIRS=${_subdirs}" -P ${MZGL_PLUGIN_CMAKE_DIR}/copy-plugin-data.cmake
+        COMMENT "[${target}] bundling data/")
+    endif()
+    install(DIRECTORY "${_bundle_dir}" DESTINATION "$ENV{HOME}/.vst3")
   endif()
 endfunction()
 
@@ -264,24 +314,18 @@ function(mzgl_vst3_install_after_build target)
   if(NOT _name)
     set(_name ${target})
   endif()
-  if(WIN32 OR APPLE)
-    add_custom_command(
-      TARGET ${target} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
-      COMMAND ${CMAKE_COMMAND} -E rm -rf "${_dir}/${_name}.vst3"
-      # GENEX_EVAL: on macOS the property holds a genex ($<TARGET_BUNDLE_DIR>);
-      # a plain $<TARGET_PROPERTY> would paste it literally into the build file.
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-              "$<GENEX_EVAL:$<TARGET_PROPERTY:${target},MZGL_VST3_BUNDLE_DIR>>"
-              "${_dir}/${_name}.vst3"
-      COMMENT "Installing ${_name}.vst3 -> ${_dir}")
-  else()
-    add_custom_command(
-      TARGET ${target} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
-      COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${target}>" "${_dir}/${_name}.vst3"
-      COMMENT "Installing ${_name}.vst3 -> ${_dir}")
-  endif()
+  # The bundle is a directory on every platform now (macOS .vst3 bundle,
+  # Windows and Linux the SDK's bundle folder layout).
+  add_custom_command(
+    TARGET ${target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${_dir}"
+    COMMAND ${CMAKE_COMMAND} -E rm -rf "${_dir}/${_name}.vst3"
+    # GENEX_EVAL: on macOS the property holds a genex ($<TARGET_BUNDLE_DIR>);
+    # a plain $<TARGET_PROPERTY> would paste it literally into the build file.
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "$<GENEX_EVAL:$<TARGET_PROPERTY:${target},MZGL_VST3_BUNDLE_DIR>>"
+            "${_dir}/${_name}.vst3"
+    COMMENT "Installing ${_name}.vst3 -> ${_dir}")
 endfunction()
 
 # mzgl_add_vst3_plugin(<target>
@@ -312,6 +356,105 @@ function(mzgl_add_vst3_plugin target)
     list(APPEND _fwd OBJCXX_SOURCES ${ARG_OBJCXX_SOURCES})
   endif()
   mzgl_vst3_configure_bundle(${target} ${_fwd})
+endfunction()
+
+# ---------------------------------------------------------------------------
+# CLAP (Linux only today; the DSP layer is portable, the gui adapter is X11)
+# ---------------------------------------------------------------------------
+
+function(mzgl_clap_wrapper_sources out_var)
+  set(_srcs ${MZGL_PLUGIN_SRC_DIR}/clap/MzglClapPlugin.h ${MZGL_PLUGIN_SRC_DIR}/clap/MzglClapPlugin.cpp)
+  if(NOT APPLE AND NOT WIN32)
+    list(APPEND _srcs
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11PluginView.h
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11PluginView.cpp
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.h
+         ${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.cpp)
+    # Same Xlib-typedef quarantine as the VST3 wrapper sources.
+    set_source_files_properties(${MZGL_PLUGIN_SRC_DIR}/linux/X11Native.cpp
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON SKIP_UNITY_BUILD_INCLUSION ON)
+  endif()
+  set(${out_var} ${_srcs} PARENT_SCOPE)
+endfunction()
+
+# mzgl_add_clap_plugin(<target>
+#   PRODUCT_NAME <name>              on-disk name: <name>.clap (+ <name>.clap.resources/)
+#   SOURCES <files>                  must include a mzglclap::mzglClapSpec() definition
+#   [DATA_DIR <dir> [DATA_SUBDIRS <sub>...]]
+#   [EXTRA_DEFINITIONS <d>...] [LINK_LIBRARIES <lib>...])
+#
+# A Linux .clap is a single ELF file (no bundle folder in the spec), so data
+# ships in a sibling directory <name>.clap.resources/data which the wrapper
+# finds via dladdr at runtime. Sets target properties MZGL_CLAP_FILE and
+# MZGL_CLAP_RESOURCES_DIR for packaging, and copies both into ~/.clap on every
+# build (same workflow as mzgl_vst3_install_after_build).
+function(mzgl_add_clap_plugin target)
+  cmake_parse_arguments(ARG "" "PRODUCT_NAME;DATA_DIR"
+                        "SOURCES;DATA_SUBDIRS;EXTRA_DEFINITIONS;LINK_LIBRARIES" ${ARGN})
+  if(APPLE OR WIN32)
+    message(STATUS "mzgl_add_clap_plugin(${target}): Linux only for now - skipped")
+    return()
+  endif()
+  if(NOT ARG_PRODUCT_NAME)
+    set(ARG_PRODUCT_NAME ${target})
+  endif()
+  mzgl_fetch_clap_sdk()
+
+  mzgl_clap_wrapper_sources(_wrapper)
+  add_library(${target} MODULE ${ARG_SOURCES} ${_wrapper})
+  target_link_libraries(${target} PRIVATE libmzgl X11 ${ARG_LINK_LIBRARIES})
+  target_compile_definitions(${target} PRIVATE MZGL_PLUGIN MZGL_PLUGIN_CLAP ${MZGL_BACKEND_COMPILE_DEFS}
+                                               ${ARG_EXTRA_DEFINITIONS})
+  target_include_directories(${target} PRIVATE ${MZGL_PLUGIN_SRC_DIR}/clap ${MZGL_PLUGIN_SRC_DIR}/linux
+                                               ${CLAP_SDK_ROOT}/include)
+
+  set(_clap_file "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.clap")
+  set(_resources_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.clap.resources")
+  set_target_properties(${target} PROPERTIES
+    OUTPUT_NAME "${ARG_PRODUCT_NAME}"
+    PREFIX ""
+    SUFFIX .clap
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    BUILD_RPATH "$ORIGIN"
+    INSTALL_RPATH "$ORIGIN"
+    MZGL_CLAP_FILE "${_clap_file}"
+    MZGL_CLAP_RESOURCES_DIR "${_resources_dir}")
+
+  # Only clap_entry escapes into the host's namespace.
+  target_compile_options(${target} PRIVATE -fvisibility=hidden -fvisibility-inlines-hidden)
+  target_link_options(${target} PRIVATE
+    "LINKER:--version-script=${MZGL_PLUGIN_RESOURCE_DIR}/clap-linux.version"
+    "LINKER:--exclude-libs,ALL")
+  set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS
+               ${MZGL_PLUGIN_RESOURCE_DIR}/clap-linux.version)
+
+  if(ARG_DATA_DIR)
+    string(REPLACE ";" "\;" _subdirs "${ARG_DATA_SUBDIRS}")
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${_resources_dir}/data"
+      COMMAND ${CMAKE_COMMAND} -DSRC=${ARG_DATA_DIR} -DDST=${_resources_dir}/data
+              "-DSUBDIRS=${_subdirs}" -P ${MZGL_PLUGIN_CMAKE_DIR}/copy-plugin-data.cmake
+      COMMENT "[${target}] bundling data/")
+  endif()
+
+  # Copy into the user's CLAP folder on every build, like the VST3 helper.
+  # CI turns this off (a self-hosted runner shares its home directory).
+  option(MZGL_CLAP_INSTALL_TO_USER_FOLDER
+         "Copy built CLAP plugins into the user's ~/.clap after every build" ON)
+  if(MZGL_CLAP_INSTALL_TO_USER_FOLDER)
+    add_custom_command(
+      TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{HOME}/.clap"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_clap_file}" "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.resources"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory "${_resources_dir}"
+              "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.resources"
+      COMMENT "Installing ${ARG_PRODUCT_NAME}.clap -> $ENV{HOME}/.clap")
+  endif()
+
+  install(FILES "${_clap_file}" DESTINATION "$ENV{HOME}/.clap")
+  install(DIRECTORY "${_resources_dir}" DESTINATION "$ENV{HOME}/.clap")
 endfunction()
 
 # ---------------------------------------------------------------------------
