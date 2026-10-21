@@ -1088,24 +1088,37 @@ void saveFileDialog(const std::string &msg,
 	ofn.lpstrFile	  = fileName;
 	ofn.nMaxFile	  = MAX_PATH;
 
-	std::wstring filter		   = L"All Files (*.*)\0*.*\0";
-	std::wstring wideExtension = L"";
-	//	if (!extension.empty()) {
-	//		wideExtension = converter.from_bytes(extension);
-	//		filter		  = wideExtension + L" Files (*." + wideExtension + L")\0*." + wideExtension + L"\0" + filter;
-	//	}
+	// lpstrFilter is a list of "description\0pattern\0" pairs ending in a
+	// double NUL. Build it with explicit NULs - appending L"...\0..." literals
+	// to a std::wstring stops at the first NUL and silently drops the rest,
+	// which left Windows with one garbled entry and an empty pattern.
+	std::wstring filter;
+	auto appendFilter = [&filter](const std::wstring &description, const std::wstring &pattern) {
+		filter += description;
+		filter.push_back(L'\0');
+		filter += pattern;
+		filter.push_back(L'\0');
+	};
 
+	// Callers pass extensions with the leading dot (".koala"); lpstrDefExt
+	// wants it without, as Windows adds its own dot when appending it.
+	std::wstring defaultExtension;
 	for (const auto &extension: allowedExtensions) {
-		if (!extension.empty()) {
-			// Convert each extension to a wide string
-			wideExtension = converter.from_bytes(extension);
-			// Construct the filter part for this extension
-			filter = wideExtension + L" Files (*" + wideExtension + L")\0*" + wideExtension + L"\0" + filter;
+		if (extension.empty()) continue;
+		std::wstring wideExtension = converter.from_bytes(extension);
+		if (wideExtension.front() != L'.') {
+			wideExtension.insert(wideExtension.begin(), L'.');
+		}
+		appendFilter(wideExtension + L" Files (*" + wideExtension + L")", L"*" + wideExtension);
+		if (defaultExtension.empty()) {
+			defaultExtension = wideExtension.substr(1);
 		}
 	}
+	appendFilter(L"All Files (*.*)", L"*.*");
+	filter.push_back(L'\0');
 
-	ofn.lpstrFilter = filter.c_str(); // L"All Files (*.*)\0*.*\0";
-	ofn.lpstrDefExt = wideExtension.c_str(); // Set the default extension
+	ofn.lpstrFilter = filter.c_str();
+	ofn.lpstrDefExt = defaultExtension.empty() ? nullptr : defaultExtension.c_str();
 	// OFN_NOCHANGEDIR: without this, the dialog moves the process CWD to the
 	// selected folder, which breaks every later relative-path data load.
 	ofn.Flags	   = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
