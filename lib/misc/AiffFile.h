@@ -1,3 +1,10 @@
+// Vendored from elf audio's fork of Adam Stark's AudioFile library:
+//   https://github.com/elf-audio/AudioFile   (commit 9b06b1a, upstream 1.1.4 + fixes)
+//   upstream: https://github.com/adamstark/AudioFile
+// The fork adds AIFF-C support (sowt little-endian PCM, NONE/twos, fl32) and
+// skips the pad byte after odd-length chunks. Don't patch this file in place:
+// change it in the fork, run its tests, then copy AudioFile.h back over this one.
+//
 //=======================================================================
 /** @file AudioFile.h
  *  @author Adam Stark
@@ -733,7 +740,7 @@ bool AudioFile<T>::decodeAiffFile (const std::vector<uint8_t>& fileData)
     // COMM CHUNK
     int p = indexOfCommChunk;
     std::string commChunkID (fileData.begin() + p, fileData.begin() + p + 4);
-    //int32_t commChunkSize = fourBytesToInt (fileData, p + 4, Endianness::BigEndian);
+    int32_t commChunkSize = fourBytesToInt (fileData, p + 4, Endianness::BigEndian);
     int16_t numChannels = twoBytesToInt (fileData, p + 8, Endianness::BigEndian);
     int32_t numSamplesPerChannel = fourBytesToInt (fileData, p + 10, Endianness::BigEndian);
     bitDepth = static_cast<int> (twoBytesToInt (fileData, p + 14, Endianness::BigEndian));
@@ -755,6 +762,43 @@ bool AudioFile<T>::decodeAiffFile (const std::vector<uint8_t>& fileData)
     {
         reportError ("ERROR: this AIFF file has an unsupported sample rate");
         return false;
+    }
+    
+    // -----------------------------------------------------------
+    // AIFF-C files carry a compression type after the sample rate. The
+    // uncompressed ones are supported: "NONE" and "twos" are big-endian PCM
+    // like plain AIFF, "sowt" is little-endian PCM (what macOS, Logic and
+    // QuickTime write by default) and "fl32"/"FL32" is big-endian 32-bit float
+    Endianness sampleEndianness = Endianness::BigEndian;
+    bool samplesAreFloat = false;
+    
+    if (audioFormat == AIFFAudioFormat::Compressed)
+    {
+        if (commChunkSize < 22 || static_cast<size_t> (p + 30) > fileData.size())
+        {
+            reportError ("ERROR: this AIFF-C file has no compression type");
+            return false;
+        }
+        
+        std::string compressionType (fileData.begin() + p + 26, fileData.begin() + p + 30);
+        
+        if (compressionType == "NONE" || compressionType == "twos")
+            sampleEndianness = Endianness::BigEndian;
+        else if (compressionType == "sowt")
+            sampleEndianness = Endianness::LittleEndian;
+        else if (compressionType == "fl32" || compressionType == "FL32")
+            samplesAreFloat = true;
+        else
+        {
+            reportError ("ERROR: unsupported AIFF-C compression type '" + compressionType + "'");
+            return false;
+        }
+        
+        if (samplesAreFloat && bitDepth != 32)
+        {
+            reportError ("ERROR: this AIFF-C file says it is 32-bit float but has a bit depth of " + std::to_string (bitDepth));
+            return false;
+        }
     }
     
     // check the number of channels is mono or stereo
@@ -813,14 +857,18 @@ bool AudioFile<T>::decodeAiffFile (const std::vector<uint8_t>& fileData)
             }
             else if (bitDepth == 16)
             {
-                int16_t sampleAsInt = twoBytesToInt (fileData, sampleIndex, Endianness::BigEndian);
+                int16_t sampleAsInt = twoBytesToInt (fileData, sampleIndex, sampleEndianness);
                 T sample = AudioSampleConverter<T>::sixteenBitIntToSample (sampleAsInt);
                 samples[channel].push_back (sample);
             }
             else if (bitDepth == 24)
             {
                 int32_t sampleAsInt = 0;
-                sampleAsInt = (fileData[sampleIndex] << 16) | (fileData[sampleIndex + 1] << 8) | fileData[sampleIndex + 2];
+                
+                if (sampleEndianness == Endianness::BigEndian)
+                    sampleAsInt = (fileData[sampleIndex] << 16) | (fileData[sampleIndex + 1] << 8) | fileData[sampleIndex + 2];
+                else
+                    sampleAsInt = (fileData[sampleIndex + 2] << 16) | (fileData[sampleIndex + 1] << 8) | fileData[sampleIndex];
                 
                 if (sampleAsInt & 0x800000) //  if the 24th bit is set, this is a negative number in 24-bit world
                     sampleAsInt = sampleAsInt | ~0xFFFFFF; // so make sure sign is extended to the 32 bit float
@@ -830,10 +878,10 @@ bool AudioFile<T>::decodeAiffFile (const std::vector<uint8_t>& fileData)
             }
             else if (bitDepth == 32)
             {
-                int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex, Endianness::BigEndian);
+                int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex, sampleEndianness);
                 T sample;
                 
-                if (audioFormat == AIFFAudioFormat::Compressed)
+                if (samplesAreFloat)
                     sample = static_cast<T> (reinterpret_cast<float&> (sampleAsInt));
                 else // assume PCM
                     sample = AudioSampleConverter<T>::thirtyTwoBitIntToSample (sampleAsInt);
@@ -1296,7 +1344,9 @@ int AudioFile<T>::getIndexOfChunk (const std::vector<uint8_t>& source, const std
             assert (false && "Invalid chunk size");
             return -1;
         }
-        i += (dataLen + chunkSize);
+        // RIFF and IFF both pad odd-length chunks with a single byte that is not
+        // counted in the chunk size, so step over it or we land mid-header
+        i += (dataLen + chunkSize + (chunkSize & 1));
     }
 
     return -1;
