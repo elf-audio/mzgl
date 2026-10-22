@@ -7,6 +7,9 @@
 //
 
 #include "netUtil.h"
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
 #include "stringUtil.h"
 #include "util.h"
 #include "log.h"
@@ -59,13 +62,13 @@ std::string downloadUrl(std::string url) {
 #elif defined(_WIN32)
 	std::wstring wurl = n2w(url);
 	URL_COMPONENTSW comps {};
-	comps.dwStructSize		= sizeof(comps);
-	wchar_t host[256]		= {};
-	wchar_t path[2048]		= {};
-	comps.lpszHostName		= host;
-	comps.dwHostNameLength	= ARRAYSIZE(host);
-	comps.lpszUrlPath		= path;
-	comps.dwUrlPathLength	= ARRAYSIZE(path);
+	comps.dwStructSize	   = sizeof(comps);
+	wchar_t host[256]	   = {};
+	wchar_t path[2048]	   = {};
+	comps.lpszHostName	   = host;
+	comps.dwHostNameLength = ARRAYSIZE(host);
+	comps.lpszUrlPath	   = path;
+	comps.dwUrlPathLength  = ARRAYSIZE(path);
 	if (!WinHttpCrackUrl(wurl.c_str(), 0, 0, &comps)) {
 		throw DownloadError(url, "Could not parse URL");
 	}
@@ -79,15 +82,14 @@ std::string downloadUrl(std::string url) {
 	if (hConnect) {
 		DWORD flags = (comps.nScheme == INTERNET_SCHEME_HTTPS) ? WINHTTP_FLAG_SECURE : 0;
 		hRequest	= WinHttpOpenRequest(
-			   hConnect, L"GET", path, nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, flags);
+			hConnect, L"GET", path, nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, flags);
 	}
 
 	std::string body;
 	std::string errMsg;
 	DWORD status = 0;
 	if (hRequest
-		&& WinHttpSendRequest(
-			hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)
+		&& WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)
 		&& WinHttpReceiveResponse(hRequest, nullptr)) {
 		DWORD len = sizeof(status);
 		WinHttpQueryHeaders(hRequest,
@@ -279,33 +281,36 @@ std::string urldecode(const std::string &value) {
 	return result;
 }
 
-static std::string encodeURIComponent(const std::string &input) {
+#include "filesystem.h"
+
+// Builds a file:// URL that a browser engine (WKWebView, WebView2) will
+// actually open. The old version percent-encoded the drive-letter colon and
+// left Windows backslashes in (its normalised copy of the path was shadowed
+// and thrown away), giving file:///C%3A%5CProgram%20Files%5C... which Edge
+// rejects as "can't reach this page".
+std::string pathToFileUrl(const std::string &path) {
+	std::string p = path;
+	try {
+		p = fs::absolute(path).generic_string(); // forward slashes on Windows
+	} catch (const std::exception &e) {
+		Log::e() << "pathToFileUrl: error normalizing path: " << e.what();
+	}
+	std::replace(p.begin(), p.end(), '\\', '/');
+
 	std::ostringstream encoded;
-	for (unsigned char c: input) {
-		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/') {
+	encoded << "file://";
+	// "C:/..." must become "file:///C:/..." (three slashes, empty host)
+	if (p.size() > 1 && p[1] == ':' && isalpha(static_cast<unsigned char>(p[0]))) {
+		encoded << '/';
+	}
+	encoded << std::uppercase << std::hex << std::setfill('0');
+	for (unsigned char c: p) {
+		// RFC 3986 unreserved, plus '/' (path separator) and ':' (drive letter)
+		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/' || c == ':') {
 			encoded << c;
 		} else {
-			encoded << '%' << std::uppercase << std::hex << static_cast<int>(c);
+			encoded << '%' << std::setw(2) << static_cast<int>(c);
 		}
 	}
 	return encoded.str();
-}
-#include "filesystem.h"
-
-std::string pathToFileUrl(const std::string &path) {
-	std::string normalizedPath = path;
-	try {
-		fs::path absPath		   = fs::absolute(path);
-		std::string normalizedPath = absPath.generic_string(); // Converts to forward slashes
-	} catch (const std::exception &e) {
-		Log::e() << "Error normalizing path: " << e.what();
-	}
-	// Handle Windows drive letters
-#ifdef _WIN32
-	if (normalizedPath.size() > 1 && normalizedPath[1] == ':') {
-		normalizedPath.insert(0, "/"); // Prepend a slash before drive letter
-	}
-#endif
-
-	return "file://" + encodeURIComponent(normalizedPath);
 }
