@@ -166,6 +166,10 @@ CGFloat backingScaleForView(NSView *view) {
 	eventsView.embeddedInHost	= YES;
 	eventsView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 	[self addSubview:eventsView];
+	// See MzglVST3View::attached - overlays (pack store web view, mac dialog
+	// sheets) attach to App::viewHandle, which only the standalone's app
+	// delegate sets otherwise.
+	editor->viewHandle = (__bridge void *) eventsView;
 
 	// Corner resize grabber, pinned bottom-right, above the GL view.
 	const CGFloat gripSize = 30;
@@ -230,7 +234,10 @@ CGFloat backingScaleForView(NSView *view) {
 }
 
 - (void)teardown {
-	if (editor) editor->pluginViewDisappeared();
+	if (editor) {
+		editor->pluginViewDisappeared();
+		editor->viewHandle = nullptr;
+	}
 	if (eventsView != nil) {
 		[eventsView shutdown];
 		[eventsView removeFromSuperview];

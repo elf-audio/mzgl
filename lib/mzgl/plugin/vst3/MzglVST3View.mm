@@ -79,6 +79,7 @@ struct MzglVST3View::Impl {
 	void teardown() {
 		if (editor) {
 			editor->pluginViewDisappeared();
+			editor->viewHandle = nullptr;
 		}
 		if (eventsView) {
 			[eventsView shutdown];
@@ -154,6 +155,12 @@ tresult PLUGIN_API MzglVST3View::attached(void *parent, FIDString type) {
 		impl->eventsView.embeddedInHost	  = YES;
 		impl->eventsView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 		[impl->parent addSubview:impl->eventsView];
+		// Overlays that the standalone hangs off the window's content view
+		// (WebViewOverlay for the pack store, Dialogs' mac sheets) attach to
+		// App::viewHandle. MacAppDelegate sets it for the app; in a host we
+		// are that view, so point it at the events view, which the host-owned
+		// parent already resizes.
+		impl->editor->viewHandle = (__bridge void *) impl->eventsView;
 
 		impl->dispatcher->resized();
 		if (impl->dispatcher->hasSetup()) {
