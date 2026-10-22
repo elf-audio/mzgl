@@ -2,6 +2,7 @@
 #include <codecvt>
 #include <cstdio>
 #include <locale>
+#include <memory>
 #include <optional>
 #include <thread>
 #include <mutex>
@@ -387,6 +388,59 @@ void windowsConfirmDialog(HWND parent,
 	} else {
 		cancelPressed();
 	}
+}
+
+namespace {
+	struct AlertThreadArgs {
+		std::wstring title;
+		std::wstring msg;
+		HMODULE module;
+	};
+
+	DWORD WINAPI alertThreadProc(LPVOID param) {
+		std::unique_ptr<AlertThreadArgs> args(static_cast<AlertThreadArgs *>(param));
+		// No owner: an owner HWND would be disabled while the box is up and
+		// would have to belong to this thread. SETFOREGROUND + TOPMOST so it
+		// can't be lost behind the host / browser window the way an unowned
+		// MB_OK was after web activation.
+		MessageBoxW(nullptr, args->msg.c_str(), args->title.c_str(), MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+		HMODULE module = args->module;
+		args.reset();
+		if (module != nullptr) {
+			// Balances the GetModuleHandleExW() in windowsAlertDialog(); the
+			// DLL (a plug-in the host may unload at any time) stays mapped
+			// until this thread is done with it.
+			FreeLibraryAndExitThread(module, 0);
+		}
+		return 0;
+	}
+} // namespace
+
+void windowsAlertDialog(std::string title, std::string msg) {
+	auto args	 = std::make_unique<AlertThreadArgs>();
+	args->title	 = n2w(title);
+	args->msg	 = n2w(msg);
+	args->module = nullptr;
+	if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+							reinterpret_cast<LPCWSTR>(&windowsAlertDialog),
+							&args->module)) {
+		args->module = nullptr;
+	}
+	// A blocking MessageBoxW on the caller's thread runs a nested message
+	// loop. From a plug-in editor's frame that freezes the UI, and if the host
+	// closes the editor meanwhile the box returns into a destroyed app
+	// (KoalaFX activation crash). CreateThread rather than std::thread so the
+	// thread can end via FreeLibraryAndExitThread.
+	HANDLE thread = CreateThread(nullptr, 0, alertThreadProc, args.get(), 0, nullptr);
+	if (thread == nullptr) {
+		Log::e() << "windowsAlertDialog: CreateThread failed: " << GetLastError();
+		if (args->module != nullptr) {
+			FreeLibrary(args->module);
+		}
+		return;
+	}
+	args.release();
+	CloseHandle(thread);
 }
 
 void windowsTextboxDialog(HWND parent,
