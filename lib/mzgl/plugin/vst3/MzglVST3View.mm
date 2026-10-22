@@ -207,10 +207,7 @@ tresult PLUGIN_API MzglVST3View::checkSizeConstraint(ViewRect *rect) {
 	int width  = rect->right - rect->left;
 	int height = rect->bottom - rect->top;
 
-	if (width < config.minWidth) width = config.minWidth;
-	if (width > config.maxWidth) width = config.maxWidth;
-	if (height < config.minHeight) height = config.minHeight;
-	if (height > config.maxHeight) height = config.maxHeight;
+	constrainViewSize(config, config.minWidth, config.minHeight, config.maxWidth, config.maxHeight, width, height);
 
 	rect->right	 = rect->left + width;
 	rect->bottom = rect->top + height;

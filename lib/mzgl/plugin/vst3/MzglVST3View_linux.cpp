@@ -187,10 +187,13 @@ namespace mzglvst {
 
 		const ViewRect minRect = scaledRect(config.minWidth, config.minHeight);
 		const ViewRect maxRect = scaledRect(config.maxWidth, config.maxHeight);
-		if (width < minRect.getWidth()) width = minRect.getWidth();
-		if (width > maxRect.getWidth()) width = maxRect.getWidth();
-		if (height < minRect.getHeight()) height = minRect.getHeight();
-		if (height > maxRect.getHeight()) height = maxRect.getHeight();
+		constrainViewSize(config,
+						  minRect.getWidth(),
+						  minRect.getHeight(),
+						  maxRect.getWidth(),
+						  maxRect.getHeight(),
+						  width,
+						  height);
 
 		rect->right	 = rect->left + width;
 		rect->bottom = rect->top + height;

@@ -601,10 +601,15 @@ namespace mzglclap {
 			return true;
 		}
 
-		bool guiGetResizeHints(const clap_plugin_t *, clap_gui_resize_hints_t *hints) {
+		bool guiGetResizeHints(const clap_plugin_t *p, clap_gui_resize_hints_t *hints) {
+			auto *me					   = self(p);
 			hints->can_resize_horizontally = true;
 			hints->can_resize_vertically   = true;
-			hints->preserve_aspect_ratio   = false;
+			hints->preserve_aspect_ratio   = me->viewCfg.aspectRatio > 0.f;
+			if (hints->preserve_aspect_ratio) {
+				hints->aspect_ratio_width  = (uint32_t) std::lround(me->viewCfg.aspectRatio * 1000.f);
+				hints->aspect_ratio_height = 1000;
+			}
 			return true;
 		}
 
@@ -612,12 +617,17 @@ namespace mzglclap {
 			auto *me		  = self(p);
 			const auto &view  = me->viewCfg;
 			const float scale = me->effectiveScale();
-			*width			  = std::clamp(*width,
-										   (uint32_t) std::lround(view.minWidth * scale),
-										   (uint32_t) std::lround(view.maxWidth * scale));
-			*height			  = std::clamp(*height,
-										   (uint32_t) std::lround(view.minHeight * scale),
-										   (uint32_t) std::lround(view.maxHeight * scale));
+			int w			  = (int) *width;
+			int h			  = (int) *height;
+			constrainViewSize(view,
+							  (int) std::lround(view.minWidth * scale),
+							  (int) std::lround(view.minHeight * scale),
+							  (int) std::lround(view.maxWidth * scale),
+							  (int) std::lround(view.maxHeight * scale),
+							  w,
+							  h);
+			*width	= (uint32_t) w;
+			*height = (uint32_t) h;
 			return true;
 		}
 
