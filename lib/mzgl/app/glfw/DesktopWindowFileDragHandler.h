@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,6 +31,15 @@ namespace file_drag_handler {
 	// window (the VST3 editor's child window). Returns null if OLE / the
 	// registration fails; the error is logged.
 	auto initWithNativeWindow(void *hwnd, Listener::Ptr listener) -> Ptr;
+
+	// Windows only. A drag-out (startNativeFileDrag() in util.h) is queued, not
+	// started on the spot: the caller is deep inside an event dispatch and
+	// DoDragDrop runs a nested message loop until the drop. The window's owner
+	// calls this from its loop at a point with no frame or dispatch in
+	// progress, and the queued drag runs there. `frame` (may be null) is called
+	// at ~60Hz for as long as the drag lasts so the window keeps drawing; the
+	// VST3 editor passes null since its WM_TIMER frames keep firing anyway.
+	void runPendingNativeDrag(const std::function<void()> &frame);
 
 	inline auto makeFileDragListener(EventDispatcher *eventDispatcher) {
 		struct Listener : file_drag_handler::Listener {
