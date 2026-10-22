@@ -26,6 +26,11 @@ namespace file_drag_handler {
 
 	auto init(GLFWwindow *window, Listener::Ptr listener) -> Ptr;
 
+	// Windows only: register the drop target on a native HWND that isn't a GLFW
+	// window (the VST3 editor's child window). Returns null if OLE / the
+	// registration fails; the error is logged.
+	auto initWithNativeWindow(void *hwnd, Listener::Ptr listener) -> Ptr;
+
 	inline auto makeFileDragListener(EventDispatcher *eventDispatcher) {
 		struct Listener : file_drag_handler::Listener {
 			Listener(EventDispatcher *eventDispatcher)

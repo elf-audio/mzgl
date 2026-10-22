@@ -13,6 +13,7 @@
 #	include "winUtil.h"
 #	include "filesystem.h"
 #	include "log.h"
+#	include "DesktopWindowFileDragHandler.h"
 
 #	include <windows.h>
 #	include <windowsx.h>
@@ -196,6 +197,10 @@ namespace mzglvst {
 		bool needsSetup {true};
 		bool inFrame {false};
 
+		// OLE drop target on hwnd, so files dragged from Explorer reach the editor
+		// (fileDragUpdate / filesDropped) exactly as in the GLFW standalone.
+		file_drag_handler::Ptr fileDrag;
+
 		// Mouse state, as DesktopWindowEventHandler keeps it for the GLFW app.
 		float mouseX {0};
 		float mouseY {0};
@@ -221,6 +226,9 @@ namespace mzglvst {
 			if (hwnd != nullptr) {
 				KillTimer(hwnd, kFrameTimerId);
 			}
+			// Revokes the drop target: its listener holds a raw dispatcher pointer,
+			// so it must go before the dispatcher and before the window.
+			fileDrag.reset();
 			if (editor) {
 				editor->pluginViewDisappeared();
 			}
@@ -350,6 +358,8 @@ namespace mzglvst {
 		impl->editor					 = instantiatePluginEditor(*impl->graphics, impl->plugin);
 		impl->editor->nativeWindowHandle = impl->hwnd;
 		impl->dispatcher				 = std::make_shared<EventDispatcher>(impl->editor);
+		impl->fileDrag					 = file_drag_handler::initWithNativeWindow(
+			  impl->hwnd, file_drag_handler::makeFileDragListener(impl->dispatcher.get()));
 
 		impl->needsSetup = true;
 		impl->dispatcher->resized();
