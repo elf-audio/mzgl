@@ -21,6 +21,10 @@ void windowsConfirmDialog(HWND parent,
 						  std::function<void()> okPressed,
 						  std::function<void()> cancelPressed);
 
+// Fire-and-forget native message box: shows on its own thread and returns at
+// once, so the caller never sits in a nested message loop (see Dialogs::alert).
+void windowsAlertDialog(std::string title, std::string msg);
+
 void windowsTwoOptionCancelDialog(HWND parent,
 								  std::string title,
 								  std::string msg,

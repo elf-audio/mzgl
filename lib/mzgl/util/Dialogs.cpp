@@ -290,18 +290,11 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	}
 
 #ifdef _WIN32
-	// we need to convert error message to a wide char message.
-	// first, figure out the length and allocate a wchar_t at that length + 1 (the +1 is for a terminating character)
-	int length		   = strlen(msg.c_str());
-	wchar_t *widearray = new wchar_t[length + 1];
-	memset(widearray, 0, sizeof(wchar_t) * (length + 1));
-	// then, call mbstowcs:
-	// http://www.cplusplus.com/reference/clibrary/cstdlib/mbstowcs/
-	mbstowcs(widearray, msg.c_str(), length);
-	// launch the alert:
-	MessageBoxW(NULL, widearray, L"alert", MB_OK);
-	// clear the allocated memory:
-	delete[] widearray;
+	// Non-blocking, like the other platforms' alerts: a MessageBoxW here would
+	// spin a nested message loop inside the caller (a plug-in editor's frame
+	// for the licensing "activated" notice) and come back into a destroyed
+	// app if the host closed the editor in the meantime.
+	windowsAlertDialog(title, msg);
 #elif defined(__APPLE__)
 
 #	if TARGET_OS_IOS
