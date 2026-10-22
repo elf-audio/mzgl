@@ -466,6 +466,30 @@ void setWindowSize(int w, int h) {
 #endif
 }
 
+// the GLFW (Windows / Linux / web) implementations live in app/glfw/GLFWAppRunner.cpp
+#if defined(__APPLE__) && !TARGET_OS_IOS
+bool isWindowFullscreen(void *windowHandle) {
+	NSWindow *win = (__bridge NSWindow *) windowHandle;
+	return win != nil && (win.styleMask & NSWindowStyleMaskFullScreen) != 0;
+}
+
+void setWindowFullscreen(void *windowHandle, bool fullscreen) {
+	NSWindow *win = (__bridge NSWindow *) windowHandle;
+	if (win == nil || isWindowFullscreen(windowHandle) == fullscreen) return;
+	// not synchronously: this is called from inside the app's setup()/draw,
+	// and the transition re-enters the window delegate (windowResized:)
+	dispatch_async(dispatch_get_main_queue(), ^(void) {
+	  if (isWindowFullscreen((__bridge void *) win) != fullscreen) [win toggleFullScreen:nil];
+	});
+}
+#elif defined(__APPLE__) || defined(__ANDROID__)
+bool isWindowFullscreen(void *) {
+	return false;
+}
+void setWindowFullscreen(void *, bool) {
+}
+#endif
+
 // the mac implementation lives in EventsView.mm, the Windows one in
 // app/glfw/DesktopWindowFileDragHandler_Windows.cpp
 #if (!defined(__APPLE__) || TARGET_OS_IOS) && !defined(_WIN32)

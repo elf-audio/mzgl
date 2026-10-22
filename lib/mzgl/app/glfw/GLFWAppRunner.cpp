@@ -56,6 +56,20 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #	include <emscripten/html5.h>
 #endif
 
+// declared in util.h - the mac implementation lives in util.cpp. Here
+// "fullscreen" is the maximized state (what the title bar button / Win+Up give).
+bool isWindowFullscreen(void *windowHandle) {
+	auto *window = static_cast<GLFWwindow *>(windowHandle);
+	return window != nullptr && glfwGetWindowAttrib(window, GLFW_MAXIMIZED) == GLFW_TRUE;
+}
+
+void setWindowFullscreen(void *windowHandle, bool fullscreen) {
+	auto *window = static_cast<GLFWwindow *>(windowHandle);
+	if (window == nullptr) return;
+	if (fullscreen) glfwMaximizeWindow(window);
+	else glfwRestoreWindow(window);
+}
+
 #if defined(_WIN32) || defined(__linux__)
 void quitApplication() {
 	glfwTerminate();
