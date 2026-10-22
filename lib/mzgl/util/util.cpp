@@ -461,10 +461,17 @@ void setWindowSize(int w, int h) {
 #endif
 }
 
-// the mac implementation lives in EventsView.mm
-#if !defined(__APPLE__) || TARGET_OS_IOS
+// the mac implementation lives in EventsView.mm, the Windows one in
+// app/glfw/DesktopWindowFileDragHandler_Windows.cpp
+#if (!defined(__APPLE__) || TARGET_OS_IOS) && !defined(_WIN32)
 bool startNativeFileDrag(const std::string &) {
 	return false;
+}
+#endif
+#if !defined(_WIN32)
+bool startNativeFileDrag(std::function<std::string()> renderFile) {
+	const auto path = renderFile ? renderFile() : std::string {};
+	return !path.empty() && startNativeFileDrag(path);
 }
 #endif
 

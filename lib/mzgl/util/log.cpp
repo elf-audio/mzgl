@@ -106,7 +106,9 @@ Log::Logger::~Logger() {
 #	endif
 #endif
 	if (isLoggingToFile) {
-		logStream << std::string("[") << levelName << "] " << msg.str();
+		// Flush per line: this log exists to be read while the app (or a plug-in
+		// inside a DAW) is still running, or after it crashed.
+		logStream << std::string("[") << levelName << "] " << msg.str() << std::flush;
 	}
 
 	if (listeners.empty()) return;

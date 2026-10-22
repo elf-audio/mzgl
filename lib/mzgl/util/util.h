@@ -115,11 +115,17 @@ void deleteOrTrash(const std::string &path);
 void setWindowSize(int w, int h);
 
 // hands the in-progress mouse drag over to the OS as a native drag-and-drop
-// of the given file (e.g. out of the window into Finder or a DAW). Only
-// implemented on mac so far - everywhere else returns false. Must be called
-// mid-drag; the OS owns the drag from here and the app won't see the mouseUp
-// (a touchUp is synthesized when the session ends).
+// of the given file (e.g. out of the window into Finder / Explorer or a DAW).
+// Implemented on mac and Windows - everywhere else returns false. Must be
+// called mid-drag; the OS owns the drag from here and the app won't see the
+// mouseUp (a touchUp is synthesized when the session ends).
 bool startNativeFileDrag(const std::string &filePath);
+// Same, but the file is produced on demand: `renderFile` writes it and returns
+// its path ("" on failure). On Windows it only runs once a drop target asks
+// for the file, so a drag that's cancelled or dropped back writes nothing;
+// where the OS needs the path up front (mac's file promise + URL fallback) it
+// runs before the drag starts.
+bool startNativeFileDrag(std::function<std::string()> renderFile);
 // on iOS/mac this'll give the launched url
 std::string getLaunchUrl();
 // this is only for internal, it's so

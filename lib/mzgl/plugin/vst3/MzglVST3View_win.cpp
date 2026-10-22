@@ -439,6 +439,10 @@ namespace mzglvst {
 		switch (msg) {
 			case WM_TIMER:
 				if (wParam != kFrameTimerId) break;
+				// A drag-out queued by startNativeFileDrag() runs here, before
+				// this frame: DoDragDrop pumps messages until the drop, and the
+				// timer's own frames keep drawing meanwhile.
+				file_drag_handler::runPendingNativeDrag(nullptr);
 				renderFrame();
 				// Keyboard focus is only ours while a text field is being edited
 				// (see WM_LBUTTONDOWN); hand it back so host shortcuts keep working.

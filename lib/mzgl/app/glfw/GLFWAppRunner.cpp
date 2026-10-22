@@ -473,19 +473,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		return true;
 	};
 
-	while (!glfwWindowShouldClose(window)) {
-		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
-			glfwPollEvents();
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			continue;
-		}
-
-		if (framebuferResized) {
-			d3d11.resize(graphics.width, graphics.height);
-			eventDispatcher->resized();
-			framebuferResized = false;
-		}
-
+	auto renderFrame = [&]() {
 		sg_begin_pass(makePass());
 		if (needsSetup) {
 			eventDispatcher->setup();
@@ -506,7 +494,27 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		}
 
 		d3d11.present();
+	};
 
+	while (!glfwWindowShouldClose(window)) {
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+			glfwPollEvents();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+
+		if (framebuferResized) {
+			d3d11.resize(graphics.width, graphics.height);
+			eventDispatcher->resized();
+			framebuferResized = false;
+		}
+
+		// A drag-out queued by startNativeFileDrag() runs here, between frames
+		// and outside any event dispatch: DoDragDrop pumps messages until the
+		// drop, drawing frames itself meanwhile.
+		file_drag_handler::runPendingNativeDrag(renderFrame);
+
+		renderFrame();
 		glfwPollEvents();
 	}
 
@@ -533,19 +541,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	initMZGL(app);
 	bool needsSetup = true;
 
-	while (!glfwWindowShouldClose(window)) {
-		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
-			glfwPollEvents();
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			continue;
-		}
-
-		if (framebuferResized) {
-			d3d11.resize(graphics.width, graphics.height);
-			eventDispatcher->resized();
-			framebuferResized = false;
-		}
-
+	auto renderFrame = [&]() -> bool {
 		d3d11Api->beginFrame(d3d11);
 		if (needsSetup) {
 			eventDispatcher->setup();
@@ -560,10 +556,31 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 				mzglD3D11::setDevice(d3d11.getDevice());
 			} else {
 				Log::e() << "D3D11 device recreation failed - exiting";
-				break;
+				return false;
 			}
 		}
+		return true;
+	};
 
+	while (!glfwWindowShouldClose(window)) {
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+			glfwPollEvents();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			continue;
+		}
+
+		if (framebuferResized) {
+			d3d11.resize(graphics.width, graphics.height);
+			eventDispatcher->resized();
+			framebuferResized = false;
+		}
+
+		// A drag-out queued by startNativeFileDrag() runs here, between frames
+		// and outside any event dispatch: DoDragDrop pumps messages until the
+		// drop, drawing frames itself meanwhile.
+		file_drag_handler::runPendingNativeDrag([&renderFrame]() { renderFrame(); });
+
+		if (!renderFrame()) break;
 		glfwPollEvents();
 	}
 
