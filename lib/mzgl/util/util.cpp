@@ -512,6 +512,16 @@ static fs::path getVSTBundlePath() {
 	}
 	return {};
 }
+#	elif defined(__linux__)
+#		include <dlfcn.h>
+static fs::path getVSTBundlePath() {
+	Dl_info info;
+	if (dladdr((void *) &getVSTBundlePath, &info) && info.dli_fname) {
+		// Binary is at .vst3/Contents/<arch>-linux/PluginName.so — go up 3 levels
+		return fs::path(info.dli_fname).parent_path().parent_path().parent_path();
+	}
+	return {};
+}
 #	endif
 #endif
 

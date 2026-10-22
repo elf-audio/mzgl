@@ -777,6 +777,9 @@ elseif(LINUX)
     atomic # needed for raspberry pi
     GLESv2
     EGL
+    # Explicit, not just transitively via GTK/GLFW: KoalaPluginWindow and the
+    # VST3/CLAP editor view call Xlib directly.
+    X11
     ${GTK_LIBRARIES}
     ${ALSA_LIBRARIES}
   )
