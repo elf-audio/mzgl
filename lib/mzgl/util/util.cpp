@@ -431,7 +431,12 @@ void setWindowSize(int w, int h) {
 #	if TARGET_OS_IOS
 	// do nothing. iPhones have fixed window size
 #	else
-	NSWindow *win  = [NSApp mainWindow];
+	// mainWindow is nil while the app is inactive (e.g. driven by the test
+	// server on an unattended Mac) - fall back to the key window, then any window.
+	NSWindow *win = [NSApp mainWindow];
+	if (win == nil) win = [NSApp keyWindow];
+	if (win == nil) win = [[NSApp windows] firstObject];
+	if (win == nil) return;
 	NSRect frame   = win.frame;
 	NSSize newSize = CGSizeMake(w, h);
 
