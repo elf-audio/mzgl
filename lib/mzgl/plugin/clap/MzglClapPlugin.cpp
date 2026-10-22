@@ -65,7 +65,7 @@ namespace mzglclap {
 
 #if defined(__linux__) && !defined(__ANDROID__)
 		std::unique_ptr<mzgl::X11PluginView> view;
-	mzglvst::ViewConfig viewCfg;
+		mzglvst::ViewConfig viewCfg;
 		float guiScale {0.f}; // 0 = host never told us, detect
 		uint32_t guiWidth {0};
 		uint32_t guiHeight {0};
@@ -102,9 +102,9 @@ namespace mzglclap {
 				}
 				requestFlush();
 			};
-		// Not processing yet: products that gate async preset/scene handoff on
-		// isRunning (KoalaFX) apply state directly until activate() flips it.
-		if (spec->onActivate) spec->onActivate(plugin, false);
+			// Not processing yet: products that gate async preset/scene handoff on
+			// isRunning (KoalaFX) apply state directly until activate() flips it.
+			if (spec->onActivate) spec->onActivate(plugin, false);
 
 			interleavedIn.reserve(8192 * 2);
 			return true;
@@ -264,11 +264,11 @@ namespace mzglclap {
 
 #if defined(__linux__) && !defined(__ANDROID__)
 		// The .clap is a bare ELF; its data lives in a sibling folder
-		// <Name>.clap.resources/data (see mzgl_add_clap_plugin).
+		// <Name>.clap.res/data (see mzgl_add_clap_plugin).
 		static std::string bundleDataDir() {
 			Dl_info info;
 			if (dladdr((void *) &bundleDataDir, &info) && info.dli_fname) {
-				return (fs::path(std::string(info.dli_fname) + ".resources") / "data").string();
+				return (fs::path(std::string(info.dli_fname) + ".res") / "data").string();
 			}
 			return {};
 		}
@@ -284,7 +284,7 @@ namespace mzglclap {
 				return false;
 			}
 			view			  = std::make_unique<mzgl::X11PluginView>();
-		viewCfg = spec->makeViewConfig ? spec->makeViewConfig() : spec->view;
+			viewCfg			  = spec->makeViewConfig ? spec->makeViewConfig() : spec->view;
 			const float scale = effectiveScale();
 			guiWidth		  = (uint32_t) std::lround(viewCfg.defaultWidth * scale);
 			guiHeight		  = (uint32_t) std::lround(viewCfg.defaultHeight * scale);
@@ -476,6 +476,11 @@ namespace mzglclap {
 		// exists because a product's own state may not round-trip its live
 		// parameter values (Koala's perform-FX positions aren't part of the
 		// song); the magic also makes garbage/empty states loudly invalid.
+		// Known limitation: byte-exact state reproducibility (clap-validator's
+		// state-reproducibility tests) can flake by one float: an engine whose
+		// apply->get round trip quantizes some values re-saves them slightly
+		// differently after a load. Harmless in hosts; fixing it needs lossless
+		// parameter storage in the engine itself.
 		constexpr uint32_t kStateMagic	 = 0x4d5a4353; // "MZCS"
 		constexpr uint32_t kStateVersion = 1;
 

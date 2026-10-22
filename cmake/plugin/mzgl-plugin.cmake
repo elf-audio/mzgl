@@ -378,15 +378,15 @@ function(mzgl_clap_wrapper_sources out_var)
 endfunction()
 
 # mzgl_add_clap_plugin(<target>
-#   PRODUCT_NAME <name>              on-disk name: <name>.clap (+ <name>.clap.resources/)
+#   PRODUCT_NAME <name>              on-disk name: <name>.clap (+ <name>.clap.res/)
 #   SOURCES <files>                  must include a mzglclap::mzglClapSpec() definition
 #   [DATA_DIR <dir> [DATA_SUBDIRS <sub>...]]
 #   [EXTRA_DEFINITIONS <d>...] [LINK_LIBRARIES <lib>...])
 #
 # A Linux .clap is a single ELF file (no bundle folder in the spec), so data
-# ships in a sibling directory <name>.clap.resources/data which the wrapper
+# ships in a sibling directory <name>.clap.res/data which the wrapper
 # finds via dladdr at runtime. Sets target properties MZGL_CLAP_FILE and
-# MZGL_CLAP_RESOURCES_DIR for packaging, and copies both into ~/.clap on every
+# MZGL_CLAP_RES_DIR for packaging, and copies both into ~/.clap on every
 # build (same workflow as mzgl_vst3_install_after_build).
 function(mzgl_add_clap_plugin target)
   cmake_parse_arguments(ARG "" "PRODUCT_NAME;DATA_DIR"
@@ -409,7 +409,7 @@ function(mzgl_add_clap_plugin target)
                                                ${CLAP_SDK_ROOT}/include)
 
   set(_clap_file "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.clap")
-  set(_resources_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.clap.resources")
+  set(_resources_dir "${CMAKE_CURRENT_BINARY_DIR}/${ARG_PRODUCT_NAME}.clap.res")
   set_target_properties(${target} PROPERTIES
     OUTPUT_NAME "${ARG_PRODUCT_NAME}"
     PREFIX ""
@@ -418,7 +418,7 @@ function(mzgl_add_clap_plugin target)
     BUILD_RPATH "$ORIGIN"
     INSTALL_RPATH "$ORIGIN"
     MZGL_CLAP_FILE "${_clap_file}"
-    MZGL_CLAP_RESOURCES_DIR "${_resources_dir}")
+    MZGL_CLAP_RES_DIR "${_resources_dir}")
 
   # Only clap_entry escapes into the host's namespace.
   target_compile_options(${target} PRIVATE -fvisibility=hidden -fvisibility-inlines-hidden)
@@ -447,9 +447,9 @@ function(mzgl_add_clap_plugin target)
       TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{HOME}/.clap"
       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_clap_file}" "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap"
-      COMMAND ${CMAKE_COMMAND} -E rm -rf "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.resources"
+      COMMAND ${CMAKE_COMMAND} -E rm -rf "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.res"
       COMMAND ${CMAKE_COMMAND} -E copy_directory "${_resources_dir}"
-              "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.resources"
+              "$ENV{HOME}/.clap/${ARG_PRODUCT_NAME}.clap.res"
       COMMENT "Installing ${ARG_PRODUCT_NAME}.clap -> $ENV{HOME}/.clap")
   endif()
 
