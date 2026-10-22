@@ -390,13 +390,18 @@ private:
 
 		webview->add_NavigationCompleted(
 			Callback<ICoreWebView2NavigationCompletedEventHandler>(
-				[](ICoreWebView2 *, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
+				[weak](ICoreWebView2 *, ICoreWebView2NavigationCompletedEventArgs *args) -> HRESULT {
 					BOOL ok							  = FALSE;
 					COREWEBVIEW2_WEB_ERROR_STATUS err = COREWEBVIEW2_WEB_ERROR_STATUS_UNKNOWN;
 					args->get_IsSuccess(&ok);
 					args->get_WebErrorStatus(&err);
 					if (!ok) {
 						Log::e() << "WindowsWebView: navigation failed, error status " << static_cast<int>(err);
+						// Edge's error page has no way out and our own pages carry
+						// the close button (showCloseBar is usually off), so a
+						// failed load would otherwise strand the user in front of
+						// "can't reach this page". Drop the overlay instead.
+						if (auto self = weak.lock()) self->requestClose();
 					}
 					return S_OK;
 				})
