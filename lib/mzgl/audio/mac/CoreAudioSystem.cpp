@@ -131,6 +131,22 @@ void updateChannelCount(int &channelsRequested,
 	}
 }
 
+// Never ask AUHAL for more input channels than the device has. AUHAL doesn't
+// upmix, so a 2-channel client format on a mono device (e.g. Studio Display
+// Microphone) gives mic on the left and silence on the right. Clamping to the
+// device count means the engine sees a mono input and dual-monos it itself.
+void clampToDeviceChannels(int &channelsRequested,
+						   const std::optional<AudioPort> &port,
+						   const std::vector<AudioPort> &allPorts) {
+	if (!port.has_value()) {
+		return;
+	}
+	auto iter = std::find_if(allPorts.begin(), allPorts.end(), [&](auto &&in) { return in.name == port->name; });
+	if (iter != allPorts.end() && iter->numInChannels > 0) {
+		channelsRequested = std::min(channelsRequested, iter->numInChannels);
+	}
+}
+
 void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 	if (!inputPort.has_value() || !outputPort.has_value()) {
 		rescanPorts();
@@ -145,6 +161,7 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 
 	updateChannelCount(numInChannels, inputPort, inputPorts);
 	updateChannelCount(numOutChannels, outputPort, outputPorts);
+	clampToDeviceChannels(numInChannels, inputPort, inputPorts);
 
 	if (verbose) {
 		Log::v() << "CORE AUDIO STARTUP:";
@@ -340,11 +357,11 @@ void CoreAudioSystem::createOutputAudioUnit() {
 	callback.inputProc		 = outputRenderProc;
 	callback.inputProcRefCon = this;
 	result					 = AudioUnitSetProperty(state->audioUnitOut,
-									kAudioUnitProperty_SetRenderCallback,
-									kAudioUnitScope_Input,
-									0,
-									&callback,
-									sizeof(callback));
+													kAudioUnitProperty_SetRenderCallback,
+													kAudioUnitScope_Input,
+													0,
+													&callback,
+													sizeof(callback));
 	if (result != noErr) {
 		mzAssert(result == noErr);
 		throw std::runtime_error("CoreAudio: failed to set callback " + std::to_string(result));
