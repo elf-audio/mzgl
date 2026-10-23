@@ -7,6 +7,7 @@
 //
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -158,10 +159,16 @@ public:
 
 	RtMidi *getPort() override { return rtMidiIn.get(); }
 
-	void callback(double deltatime, std::vector<unsigned char> *message) {
+	void callback(double /*secondsSincePreviousMessage*/, std::vector<unsigned char> *message) {
+		// RtMidi only reports the time since the previous message. Listeners expect an
+		// absolute monotonic timestamp in nanoseconds (std::chrono::steady_clock, the same
+		// clock the app reads for MIDI clock sync), so stamp the arrival time here.
+		const auto arrival = std::chrono::steady_clock::now().time_since_epoch();
+		const auto timestamp =
+			static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(arrival).count());
 		MidiMessage m(*message);
 		for (auto *listener: listeners)
-			listener->midiReceived(shared_from_this(), m, deltatime);
+			listener->midiReceived(shared_from_this(), m, timestamp);
 	}
 
 	void addListener(MidiListener *listener) { listeners.push_back(listener); }
