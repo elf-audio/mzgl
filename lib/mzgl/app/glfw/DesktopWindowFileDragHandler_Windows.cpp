@@ -176,7 +176,11 @@ namespace file_drag_handler {
 						out.push_back(buffer.data());
 					}
 				}
-				DragFinish(hDrop);
+				// No DragFinish() here: that is the WM_DROPFILES API and frees the
+				// HGLOBAL itself. In OLE drag-and-drop the medium belongs to the data
+				// object; ReleaseStgMedium below frees it (GlobalFree when the source
+				// set no pUnkForRelease, as Reaper's media explorer does), so calling
+				// both was a double free.
 			}
 			ReleaseStgMedium(&medium);
 			return out;
