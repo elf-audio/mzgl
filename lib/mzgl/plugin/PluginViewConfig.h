@@ -6,6 +6,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <optional>
+#include <utility>
 
 namespace mzglvst {
 
@@ -21,6 +23,14 @@ namespace mzglvst {
 		// callbacks shrink the host's proposed rect onto it (constrainViewSize below).
 		float aspectRatio = 0.f;
 	};
+
+	// Open at the size the plugin instance remembers (Plugin::getSavedEditorSize,
+	// logical pixels) instead of the configured default, clamped to the limits.
+	inline void applySavedEditorSize(ViewConfig &config, const std::optional<std::pair<int, int>> &saved) {
+		if (!saved || saved->first <= 0 || saved->second <= 0) return;
+		config.defaultWidth	 = std::max(config.minWidth, std::min(config.maxWidth, saved->first));
+		config.defaultHeight = std::max(config.minHeight, std::min(config.maxHeight, saved->second));
+	}
 
 	// Shared by every format's view: clamp a proposed (w, h) to the limits,
 	// then - if the config fixes an aspect ratio - shrink it onto that ratio (the

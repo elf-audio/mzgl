@@ -98,6 +98,9 @@ MzglVST3View::MzglVST3View(MzglVST3PluginProvider *provider, const ViewConfig &_
 	: impl(std::make_unique<Impl>())
 	, provider(provider)
 	, config(_config) {
+	if (provider) {
+		if (auto plugin = provider->getPlugin()) applySavedEditorSize(config, plugin->getSavedEditorSize());
+	}
 	viewRect = {0, 0, config.defaultWidth, config.defaultHeight};
 }
 
@@ -201,6 +204,8 @@ tresult PLUGIN_API MzglVST3View::onSize(ViewRect *newSize) {
 			if (impl->dispatcher) impl->dispatcher->resized();
 		}
 	}
+	// ViewRect is in points on mac = the logical size the plugin keeps
+	if (impl->plugin) impl->plugin->editorSizeChanged(viewRect.getWidth(), viewRect.getHeight());
 	return kResultTrue;
 }
 
