@@ -8,9 +8,11 @@
 #include <limits> // std::numeric_limits
 #include <cmath> // std::isnan()
 #include <string.h> // memset()
+#include <algorithm>
 #ifdef __APPLE__
 #	include <Accelerate/Accelerate.h>
-#elif defined(__ARM_NEON)
+#endif
+#ifdef __ARM_NEON
 #	include <arm_neon.h>
 #endif
 
@@ -18,14 +20,6 @@
 //#include "xsimd/xsimd.hpp"
 
 using namespace std;
-
-void FloatBuffer::linspace(float a, float b, int N) {
-	float h = (b - a) / ((float) N - 1.f);
-	resize(N);
-	for (int i = 0; i < N; i++) {
-		(*this)[i] = a + h * i;
-	}
-}
 
 FloatBuffer::FloatBuffer(size_t sz) {
 	zeros(sz);
@@ -75,27 +69,6 @@ void FloatBuffer::setStereoFromMono(const float *data, int length) {
 	}
 }
 
-int16_t FloatBuffer::floatToInt16(float in) const {
-	return in * 32767.f;
-}
-vector<int16_t> FloatBuffer::getInt16() const {
-	vector<int16_t> buff;
-	buff.resize(size());
-	for (int i = 0; i < size(); i++) {
-		buff[i] = floatToInt16((*this)[i]);
-	}
-	return buff;
-}
-
-FloatBuffer FloatBuffer::stereoToMono() {
-	FloatBuffer ret;
-	ret.resize(size() / 2);
-	for (int i = 0; i < ret.size(); i++) {
-		ret[i] = ((*this)[i * 2] + (*this)[i * 2 + 1]) * 0.5;
-	}
-	return ret;
-}
-
 //void FloatBuffer::save(string path) {
 //	ofstream myfile;
 //	myfile.open (path.c_str());
@@ -130,47 +103,9 @@ FloatBuffer FloatBuffer::stereoToMono() {
 //	}
 //}
 
-float FloatBuffer::sum() const {
-	float total = 0.f;
-	for (int i = 0; i < size(); i++) {
-		total += (*this)[i];
-	}
-	return total;
-}
-void FloatBuffer::square() {
-	for (int i = 0; i < size(); i++) {
-		(*this)[i] *= (*this)[i];
-	}
-}
-float FloatBuffer::mean() const {
-	return sum() / (float) size();
-}
-
 float FloatBuffer::absMax() const {
+	if (empty()) return 0.f;
 	return abs((*this)[findAbsMaxPos()]);
-}
-
-float FloatBuffer::maxValue() const {
-#ifdef __APPLE__
-	float maxVal = -INFINITY;
-	vDSP_Length pos;
-	vDSP_maxvi(data(), 1, &maxVal, &pos, size());
-	return maxVal;
-#else
-
-	return (*this)[findMaxPos()];
-#endif
-}
-
-float FloatBuffer::minValue() const {
-#ifdef __APPLE__
-	float minVal = INFINITY;
-	vDSP_Length pos;
-	vDSP_maxvi(data(), 1, &minVal, &pos, size());
-	return minVal;
-#else
-	return (*this)[findMinPos()];
-#endif
 }
 
 int FloatBuffer::findAbsMaxPos() const {
@@ -185,44 +120,24 @@ int FloatBuffer::findAbsMaxPos() const {
 	return pos;
 }
 
-int FloatBuffer::findMaxPos() const {
-	float maxVal = std::numeric_limits<float>::min();
+float FloatBuffer::maxValue() const {
 #ifdef __APPLE__
+	float maxVal = -INFINITY;
 	vDSP_Length pos;
 	vDSP_maxvi(data(), 1, &maxVal, &pos, size());
+	return maxVal;
 #else
-	int pos = 0;
+	float maxVal = std::numeric_limits<float>::lowest();
 	for (int i = 0; i < size(); i++) {
-		if ((*this)[i] > maxVal) {
-			maxVal = (*this)[i];
-			pos	   = i;
-		}
+		maxVal = std::max(maxVal, (*this)[i]);
 	}
+	return maxVal;
 #endif
-	return static_cast<int>(pos);
-}
-
-int FloatBuffer::findMinPos() const {
-	float minVal = std::numeric_limits<float>::max();
-#ifdef __APPLE__
-	vDSP_Length pos;
-	vDSP_maxvi(data(), 1, &minVal, &pos, size());
-	return minVal;
-#else
-	int pos = 0;
-	for (int i = 0; i < size(); i++) {
-		if ((*this)[i] < minVal) {
-			minVal = (*this)[i];
-			pos	   = i;
-		}
-	}
-#endif
-	return pos;
 }
 
 void FloatBuffer::getMinMax(float &min, float &max) const {
 	min = std::numeric_limits<float>::max();
-	max = std::numeric_limits<float>::min();
+	max = std::numeric_limits<float>::lowest();
 	if (size() == 0) return;
 
 	for (int i = 0; i < size(); i++) {
@@ -237,8 +152,9 @@ void FloatBuffer::getMinMax(float &min, float &max) const {
 
 void FloatBuffer::normalize(float min, float max) {
 	float inMin = std::numeric_limits<float>::max();
-	float inMax = std::numeric_limits<float>::min();
+	float inMax = std::numeric_limits<float>::lowest();
 	getMinMax(inMin, inMax);
+	if (empty() || inMax == inMin) return; // nothing to scale, avoid dividing by zero
 
 	float norm	= 1.f / (inMax - inMin);
 	float scale = max - min;
@@ -260,33 +176,12 @@ void FloatBuffer::normalizeAudio() {
 	(*this) *= gain;
 }
 
-void FloatBuffer::normalizeAudioIfOver0dB() {
-	float inMin, inMax;
-	getMinMax(inMin, inMax);
-
-	float loudest = std::max(abs(inMin), abs(inMax));
-	if (loudest < 1.f) return;
-	if (loudest < 0.000001) {
-		loudest = 0.00001;
-	}
-	float gain = 1.f / loudest;
-	(*this) *= gain;
-}
-
 void FloatBuffer::append(const float *buff, int length) {
 	insert(end(), buff, buff + length);
 }
 
 void FloatBuffer::append(const FloatBuffer &b) {
 	insert(end(), b.begin(), b.end());
-}
-
-void FloatBuffer::setFromLeftChannel(float *buff, int length) {
-	set(buff, length, 0, 2);
-}
-
-void FloatBuffer::setFromRightChannel(float *buff, int length) {
-	set(buff, length, 1, 2);
 }
 
 // mix incoming sample into this one
@@ -326,18 +221,6 @@ void FloatBuffer::mix(const FloatBuffer &other) {
 }
 
 // mix incoming sample into this one
-void FloatBuffer::mixNaive(const FloatBuffer &other) {
-	// make sure both samples are
-	// as long as the longest one
-	if (size() < other.size()) {
-		resize(other.size(), 0.f);
-	}
-
-	for (int i = 0; i < other.size(); i++) {
-		(*this)[i] += other[i];
-	}
-}
-
 void FloatBuffer::random(float min, float max) {
 	for (int i = 0; i < size(); i++) {
 		(*this)[i] = randf(min, max);
@@ -383,7 +266,7 @@ void FloatBuffer::print() const {
 }
 
 void FloatBuffer::fadeIn(int length, int numChans, bool smooth) {
-	if (size() * numChans > length) {
+	if (size() >= length * numChans) {
 		if (numChans == 1) {
 			for (int i = 0; i < length; i++) {
 				float fade = i / (float) length;
@@ -466,7 +349,8 @@ FloatBuffer &FloatBuffer::operator+=(const FloatBuffer &right) {
 FloatBuffer &FloatBuffer::operator-=(const FloatBuffer &right) {
 	assert(size() == right.size());
 #ifdef __APPLE__
-	vDSP_vsub(this->data(), 1, right.data(), 1, this->data(), 1, this->size());
+	// vDSP_vsub(A, B, C) computes C = B - A, so `right` has to be the first operand
+	vDSP_vsub(right.data(), 1, this->data(), 1, this->data(), 1, this->size());
 #else
 	for (int i = 0; i < size(); i++) {
 		(*this)[i] -= right[i];
@@ -492,6 +376,36 @@ FloatBuffer &FloatBuffer::operator*=(const FloatBuffer &right) {
 	return *this;
 }
 
+namespace floatbuffer_kernels {
+	void stereoGainScalar(float *data, size_t size, float lGain, float rGain) noexcept {
+		for (size_t i = 0; i + 1 < size; i += 2) {
+			data[i] *= lGain;
+			data[i + 1] *= rGain;
+		}
+	}
+
+#ifdef __ARM_NEON
+	void stereoGainNeon(float *data, size_t size, float lGain, float rGain) noexcept {
+		const size_t numIterations = size / 8; // each iteration processes 4 stereo pairs
+
+		const float32x4_t lGainVec = vdupq_n_f32(lGain);
+		const float32x4_t rGainVec = vdupq_n_f32(rGain);
+
+		for (size_t i = 0; i < numIterations; i++) {
+			float32x4x2_t stereoPairs = vld2q_f32(data + i * 8);
+			stereoPairs.val[0]		  = vmulq_f32(stereoPairs.val[0], lGainVec);
+			stereoPairs.val[1]		  = vmulq_f32(stereoPairs.val[1], rGainVec);
+			vst2q_f32(data + i * 8, stereoPairs);
+		}
+
+		// Remaining 0-3 stereo pairs. numIterations * 8 is already a float offset, so hand the
+		// tail to the scalar kernel: the old loop here re-doubled the index and wrote past the end.
+		const size_t done = numIterations * 8;
+		stereoGainScalar(data + done, size - done, lGain, rGain);
+	}
+#endif
+} // namespace floatbuffer_kernels
+
 void FloatBuffer::stereoGain(float lGain, float rGain) {
 //#if 0
 #if defined(__APPLE__)
@@ -500,50 +414,10 @@ void FloatBuffer::stereoGain(float lGain, float rGain) {
 	vDSP_vsmul(data() + 1, 2, &rGain, data() + 1, 2, size() / 2);
 
 #elif defined(__ARM_NEON)
-	size_t numIterations = size() / 8; // Each iteration processes 4 stereo pairs
-
-	float32x4_t lGainVec = vdupq_n_f32(lGain);
-	float32x4_t rGainVec = vdupq_n_f32(rGain);
-
-	for (size_t i = 0; i < numIterations; i++) {
-		// Load 4 stereo pairs
-		float32x4x2_t stereoPairs = vld2q_f32(data() + i * 8);
-
-		// Multiply left channel values by lGain
-		stereoPairs.val[0] = vmulq_f32(stereoPairs.val[0], lGainVec);
-
-		// Multiply right channel values by rGain
-		stereoPairs.val[1] = vmulq_f32(stereoPairs.val[1], rGainVec);
-
-		// Store results back
-		vst2q_f32(data() + i * 8, stereoPairs);
-	}
-
-	// Handle any remaining stereo pairs (if size is not a multiple of 4)
-	for (size_t i = numIterations * 8; i < size(); i++) {
-		(*this)[i * 2] *= lGain;
-		(*this)[i * 2 + 1] *= rGain;
-	}
+	floatbuffer_kernels::stereoGainNeon(data(), size(), lGain, rGain);
 #else
-	for (int i = 0; i < size(); i += 2) {
-		(*this)[i] *= lGain;
-		(*this)[i + 1] *= rGain;
-	}
+	floatbuffer_kernels::stereoGainScalar(data(), size(), lGain, rGain);
 #endif
-}
-
-FloatBuffer &FloatBuffer::operator/=(const FloatBuffer &right) {
-	assert(size() == right.size());
-
-#ifdef __APPLE__
-	vDSP_vdiv(this->data(), 1, right.data(), 1, this->data(), 1, this->size());
-#else
-
-	for (int i = 0; i < size(); i++) {
-		(*this)[i] /= right[i];
-	}
-#endif
-	return *this;
 }
 
 FloatBuffer &FloatBuffer::operator+=(const float &right) {
@@ -594,20 +468,6 @@ FloatBuffer &FloatBuffer::operator/=(const float &right) {
 	return *this;
 }
 
-FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r) {
-	assert(l.size() == r.size());
-	FloatBuffer sum = l;
-	sum += r;
-	return sum;
-}
-
-FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r) {
-	assert(l.size() == r.size());
-	FloatBuffer sum = l;
-	sum -= r;
-	return sum;
-}
-
 void FloatBuffer::clamp(float min, float max) {
 #ifdef __APPLE__
 	vDSP_vclip(data(), 1, &min, &max, data(), 1, size());
@@ -644,70 +504,9 @@ float FloatBuffer::interpolate(double p) const noexcept {
 	}
 	if (a < 0) {
 		a = 0;
-		b = 1;
+		b = size() > 1 ? 1 : 0;
 	}
 	return (*this)[a] * (1.f - m) + (*this)[b] * m;
-}
-
-float FloatBuffer::interpolateCubic(double p) const noexcept {
-	int x1 = static_cast<int>(p);
-	int x0 = x1 - 1;
-	int x2 = x1 + 1;
-	int x3 = x1 + 2;
-
-	// Clamp bounds
-	const int N = static_cast<int>(size());
-	x0			= std::max(0, x0);
-	x1			= std::max(0, std::min(x1, N - 1));
-	x2			= std::max(0, std::min(x2, N - 1));
-	x3			= std::max(0, std::min(x3, N - 1));
-
-	float y0 = (*this)[x0];
-	float y1 = (*this)[x1];
-	float y2 = (*this)[x2];
-	float y3 = (*this)[x3];
-
-	float t	 = static_cast<float>(p - x1);
-	float a0 = -0.5f * y0 + 1.5f * y1 - 1.5f * y2 + 0.5f * y3;
-	float a1 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3;
-	float a2 = -0.5f * y0 + 0.5f * y2;
-	float a3 = y1;
-
-	return ((a0 * t + a1) * t + a2) * t + a3;
-}
-
-// Cubic interpolation for stereo interleaved buffer
-void FloatBuffer::interpolateStereoCubic(double position, float &outputLeft, float &outputRight) const noexcept {
-	int index1 = static_cast<int>(std::floor(position));
-	int index0 = index1 - 1;
-	int index2 = index1 + 1;
-	int index3 = index1 + 2;
-
-	float t = static_cast<float>(position - static_cast<double>(index1));
-
-	// Clamp indices to valid range
-	const int maxIndex = static_cast<int>(size() / 2) - 1;
-	index0			   = std::clamp(index0, 0, maxIndex);
-	index1			   = std::clamp(index1, 0, maxIndex);
-	index2			   = std::clamp(index2, 0, maxIndex);
-	index3			   = std::clamp(index3, 0, maxIndex);
-
-	auto sample = [&](int i, int channel) -> float {
-		size_t idx = static_cast<size_t>(i * 2 + channel);
-		if (idx >= size()) return 0.f;
-		return (*this)[idx];
-	};
-
-	auto cubic = [&](float y0, float y1, float y2, float y3, float t) -> float {
-		float a0 = y3 - y2 - y0 + y1;
-		float a1 = y0 - y1 - a0;
-		float a2 = y2 - y0;
-		float a3 = y1;
-		return ((a0 * t + a1) * t + a2) * t + a3;
-	};
-
-	outputLeft	= cubic(sample(index0, 0), sample(index1, 0), sample(index2, 0), sample(index3, 0), t);
-	outputRight = cubic(sample(index0, 1), sample(index1, 1), sample(index2, 1), sample(index3, 1), t);
 }
 
 float FloatBuffer::interpolateWrapping(double index) const noexcept {

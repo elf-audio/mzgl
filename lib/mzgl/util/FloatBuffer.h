@@ -26,6 +26,17 @@
 
 //class FloatBuffer : public std::vector<float, xsimd::aligned_allocator<float>> {
 // class FloatBuffer : public std::vector<float, AlignedAllocator<float>> {
+// The kernels behind FloatBuffer::stereoGain(), exposed so the tests can check them against
+// each other on any machine that compiles them. arm64 Macs define __ARM_NEON too, although
+// stereoGain() itself goes through vDSP there, so the NEON kernel gets tested on Mac CI.
+namespace floatbuffer_kernels {
+	// size is in floats (interleaved stereo). An odd trailing float is left untouched.
+	void stereoGainScalar(float *data, size_t size, float lGain, float rGain) noexcept;
+#ifdef __ARM_NEON
+	void stereoGainNeon(float *data, size_t size, float lGain, float rGain) noexcept;
+#endif
+} // namespace floatbuffer_kernels
+
 class FloatBuffer : public std::vector<float> {
 public:
 	static constexpr auto defaultThresholdForOnsets = 0.05;
@@ -79,8 +90,6 @@ public:
 	void setMonoFromStereo(const FloatBuffer &b) { setMonoFromStereo(b.data(), b.size() / 2); }
 	void setStereoFromMono(const float *data, int length);
 	void setStereoFromMono(const FloatBuffer &b) { setStereoFromMono(b.data(), static_cast<int>(b.size())); }
-	void setFromLeftChannel(float *buff, int length);
-	void setFromRightChannel(float *buff, int length);
 
 	// splits this stereo float buffer into 2 mono float buffers passed in param
 	void splitStereo(FloatBuffer &l, FloatBuffer &r);
@@ -103,44 +112,25 @@ public:
 	void splice(int start, int end, FloatBuffer &outBuff) const;
 	FloatBuffer splice(int start, int end) const;
 
-	int16_t floatToInt16(float in) const;
-	vector<int16_t> getInt16() const;
-
-	FloatBuffer stereoToMono();
-
 	void convertToMono(int originalNumChannels = 2);
 
 	//	void save(std::string path);
 	//	void load(std::string path);
 
-	float sum() const;
-	float mean() const;
-
-	// square each value
-	void square();
-
 	float absMax() const;
 	float maxValue() const;
-	float minValue() const;
-
 	int findAbsMaxPos() const;
-	int findMaxPos() const;
-	int findMinPos() const;
-
 	void getMinMax(float &min, float &max) const;
 
 	void zeros(size_t N = 0);
 	void random(float min = -1, float max = 1);
-	void linspace(float a, float b, int N);
 
 	void mix(const FloatBuffer &other);
-	void mixNaive(const FloatBuffer &other); // no optimization for neon testing
 
 	void normalize(float min = -1, float max = 1);
 
 	// this is like normalize but it doesn't cause a DC offset
 	void normalizeAudio();
-	void normalizeAudioIfOver0dB();
 
 	void clamp(float min = -1, float max = 1);
 
@@ -162,9 +152,6 @@ public:
 
 	void interpolateStereo(double index, float &L, float &R) const noexcept;
 
-	float interpolateCubic(double p) const noexcept;
-
-	void interpolateStereoCubic(double position, float &outputLeft, float &outputRight) const noexcept;
 	// for delay lines
 	float interpolateWrapping(double index) const noexcept;
 
@@ -173,7 +160,6 @@ public:
 	FloatBuffer &operator+=(const FloatBuffer &right);
 	FloatBuffer &operator-=(const FloatBuffer &right);
 	FloatBuffer &operator*=(const FloatBuffer &right);
-	FloatBuffer &operator/=(const FloatBuffer &right);
 	FloatBuffer &operator+=(const float &right);
 	FloatBuffer &operator-=(const float &right);
 	FloatBuffer &operator*=(const float &right);
@@ -181,8 +167,5 @@ public:
 
 	std::optional<size_t> findFirstOnset(float threshold = defaultThresholdForOnsets) const;
 };
-
-FloatBuffer operator+(const FloatBuffer &l, const FloatBuffer &r);
-FloatBuffer operator-(const FloatBuffer &l, const FloatBuffer &r);
 
 using FloatBufferRef = std::shared_ptr<FloatBuffer>;
