@@ -708,6 +708,14 @@ static NSURL *makePromisedFilesDir() {
 	[super windowResized:notification];
 	[super enableDrawing];
 }
+// the fullscreen transitions are not live resizes - pick up the new frame
+// the same way once they've finished
+- (void)windowDidEnterFullScreen:(NSNotification *)notification {
+	[super windowResized:notification];
+}
+- (void)windowDidExitFullScreen:(NSNotification *)notification {
+	[super windowResized:notification];
+}
 
 @end
 

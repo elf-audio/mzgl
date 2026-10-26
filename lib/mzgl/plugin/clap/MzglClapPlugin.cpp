@@ -283,8 +283,9 @@ namespace mzglclap {
 				Log::e() << "MzglClapPlugin: host has no timer support - no editor";
 				return false;
 			}
-			view			  = std::make_unique<mzgl::X11PluginView>();
-			viewCfg			  = spec->makeViewConfig ? spec->makeViewConfig() : spec->view;
+			view	= std::make_unique<mzgl::X11PluginView>();
+			viewCfg = spec->makeViewConfig ? spec->makeViewConfig() : spec->view;
+			if (plugin) applySavedEditorSize(viewCfg, plugin->getSavedEditorSize());
 			const float scale = effectiveScale();
 			guiWidth		  = (uint32_t) std::lround(viewCfg.defaultWidth * scale);
 			guiHeight		  = (uint32_t) std::lround(viewCfg.defaultHeight * scale);
@@ -636,6 +637,11 @@ namespace mzglclap {
 			me->guiWidth  = width;
 			me->guiHeight = height;
 			if (me->view) me->view->resize((int) width, (int) height);
+			if (me->plugin) {
+				// host sizes are physical pixels; the plugin keeps the logical size
+				const float scale = me->effectiveScale();
+				me->plugin->editorSizeChanged((int) std::lround(width / scale), (int) std::lround(height / scale));
+			}
 			return true;
 		}
 

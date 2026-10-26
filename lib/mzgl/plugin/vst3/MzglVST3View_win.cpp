@@ -255,6 +255,9 @@ namespace mzglvst {
 		: impl(std::make_unique<Impl>())
 		, provider(provider)
 		, config(_config) {
+		if (provider) {
+			if (auto plugin = provider->getPlugin()) applySavedEditorSize(config, plugin->getSavedEditorSize());
+		}
 		viewRect = {0, 0, config.defaultWidth, config.defaultHeight};
 	}
 
@@ -628,6 +631,11 @@ namespace mzglvst {
 						 viewRect.getWidth(),
 						 viewRect.getHeight(),
 						 SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+		}
+		// ViewRect is physical pixels here; the plugin keeps the logical size
+		if (impl->plugin && contentScale > 0.f) {
+			impl->plugin->editorSizeChanged((int) (viewRect.getWidth() / contentScale + 0.5f),
+											(int) (viewRect.getHeight() / contentScale + 0.5f));
 		}
 		return kResultTrue;
 	}

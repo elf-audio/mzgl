@@ -126,6 +126,8 @@ bool hasTransparentTitleBar = true;
 		window.styleMask |= NSWindowStyleMaskFullSizeContentView;
 	}
 
+	// green button / setWindowFullscreen() enter the native (Spaces) fullscreen
+	window.collectionBehavior |= NSWindowCollectionBehaviorFullScreenPrimary;
 	window.acceptsMouseMovedEvents = YES;
 	id appName					   = [[NSProcessInfo processInfo] processName];
 
@@ -194,8 +196,8 @@ bool hasTransparentTitleBar = true;
 		if (!hasCommandLineFlag("--background")) {
 			window.level = NSFloatingWindowLevel;
 		}
-		window.collectionBehavior = NSWindowCollectionBehaviorCanJoinAllSpaces
-									| NSWindowCollectionBehaviorStationary;
+		window.collectionBehavior |= NSWindowCollectionBehaviorCanJoinAllSpaces
+									 | NSWindowCollectionBehaviorStationary;
 		[window orderFrontRegardless];
 
 		// Capture the view (lives for the app lifetime) rather than self, to

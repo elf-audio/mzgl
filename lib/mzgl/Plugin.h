@@ -205,6 +205,15 @@ public:
 	virtual int getNumMidiOuts() { return 0; }
 	virtual std::string getMidiOutName(int index) { return ""; }
 
+	// Editor window size, per instance. The desktop format wrappers (VST3 /
+	// AUv2 / CLAP views) report every resize here in logical pixels (points on
+	// mac), and ask getSavedEditorSize() for the size to open at. A plugin that
+	// carries the size in its state hands it back, so each instance reopens the
+	// way its session left it; hosts don't do this for us. nullopt = use the
+	// view's configured default.
+	virtual void editorSizeChanged(int width, int height) {}
+	virtual std::optional<std::pair<int, int>> getSavedEditorSize() { return std::nullopt; }
+
 	// MUST HAPPEN ON AUDIO THREAD! (i.e. within process call
 	void sendMidiMessage(int outputNo, const MidiMessage &m, int delay) {
 		midiOutMessages.emplace_back(outputNo, m, delay);

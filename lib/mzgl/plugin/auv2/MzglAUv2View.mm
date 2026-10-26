@@ -144,14 +144,21 @@ CGFloat backingScaleForView(NSView *view) {
 }
 
 - (instancetype)initWithAudioUnit:(mzglau::MzglAUv2Host *)host {
-	config		= host->getConfig();
+	config = host->getConfig();
+	plugin = host->getPlugin();
+	// Open at the size the instance's state remembers (see Plugin::editorSizeChanged)
+	if (plugin) {
+		if (auto saved = plugin->getSavedEditorSize()) {
+			config.viewWidth  = std::max(config.minWidth, std::min(config.maxWidth, saved->first));
+			config.viewHeight = std::max(config.minHeight, std::min(config.maxHeight, saved->second));
+		}
+	}
 	NSRect frame = NSMakeRect(0, 0, config.viewWidth, config.viewHeight);
 	self		 = [super initWithFrame:frame];
 	if (self == nil) return nil;
 
 	self.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 
-	plugin	   = host->getPlugin();
 	graphics   = std::make_shared<Graphics>();
 	editor	   = instantiatePluginEditor(*graphics, plugin);
 	dispatcher = std::make_shared<EventDispatcher>(editor);
@@ -221,6 +228,10 @@ CGFloat backingScaleForView(NSView *view) {
 	graphics->height	 = self.bounds.size.height * scale;
 	graphics->pixelScale = scale;
 	if (dispatcher) dispatcher->resized();
+	if (plugin) {
+		plugin->editorSizeChanged((int) std::lround(self.bounds.size.width),
+								  (int) std::lround(self.bounds.size.height));
+	}
 }
 
 - (void)setFrameSize:(NSSize)newSize {

@@ -114,6 +114,14 @@ void deleteOrTrash(const std::string &path);
 
 void setWindowSize(int w, int h);
 
+// Desktop standalone window state. windowHandle is App::windowHandle (NSWindow
+// on mac, GLFWwindow on Windows/Linux). "Fullscreen" is the native (Spaces)
+// fullscreen on mac and the maximized state on Windows/Linux. Elsewhere, and
+// for a null handle, isWindowFullscreen() is false and setWindowFullscreen()
+// does nothing.
+bool isWindowFullscreen(void *windowHandle);
+void setWindowFullscreen(void *windowHandle, bool fullscreen);
+
 // hands the in-progress mouse drag over to the OS as a native drag-and-drop
 // of the given file (e.g. out of the window into Finder / Explorer or a DAW).
 // Implemented on mac and Windows - everywhere else returns false. Must be
