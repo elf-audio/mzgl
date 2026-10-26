@@ -94,7 +94,32 @@ namespace unit_test::dialogs {
 } // namespace unit_test::dialogs
 
 #ifdef __APPLE__
-#	if TARGET_OS_IOS
+#	if !TARGET_OS_IOS
+// The window Koala draws into. In a plug-in that is the host's editor window
+// (App::viewHandle is our events view there), never [NSApp mainWindow], which
+// is the DAW's main window: a sheet hung off that leaves our own UI
+// interactive, so the widget that opened the dialog can be torn down before
+// the sheet completes (koala #1926).
+static NSWindow *sheetParentWindow(const App &app) {
+	if (app.viewHandle != nullptr) {
+		NSWindow *window = [(__bridge NSView *) app.viewHandle window];
+		if (window != nil) return window;
+	}
+	return [NSApp mainWindow];
+}
+
+// Presents alert as a sheet over Koala's window; without one (no window yet,
+// headless host) it runs modally so the completion still fires.
+static void presentAlert(NSAlert *alert, const App &app, void (^completion)(NSInteger)) {
+	NSWindow *window = sheetParentWindow(app);
+	if (window == nil) {
+		Log::e() << "No window to attach dialog sheet to, running it modally instead";
+		completion([alert runModal]);
+		return;
+	}
+	[alert beginSheetModalForWindow:window completionHandler:completion];
+}
+#	else
 UIViewController *getTopController(App &app) {
 	// Prefer the app's own view controller: AUv3 instances share one extension process, so keyWindow
 	// belongs to whichever instance happens to be key, not necessarily the one asking for the dialog.
@@ -173,8 +198,7 @@ void Dialogs::inputbox(std::string title,
 		  });
 	  };
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result, label); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result, label); });
 	  [label becomeFirstResponder];
 #		else
         [label becomeFirstResponder];
@@ -263,8 +287,7 @@ void Dialogs::confirm(std::string title,
 		  }
 	  };
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result); });
 #		else
         handleResult([alert runModal]);
 #		endif
@@ -320,13 +343,7 @@ void Dialogs::alert(std::string title, std::string msg) const {
 	  [alert setMessageText:[NSString stringWithUTF8String:msg.c_str()]];
 	  [alert setAlertStyle:NSAlertStyleWarning];
 #		ifndef MZGLAU
-	  NSWindow *window = [NSApp mainWindow];
-	  if (window == nil) {
-		  Log::e() << "No main window found for alert dialog, using runModal instead";
-		  [alert runModal];
-		  return;
-	  }
-	  [alert beginSheetModalForWindow:window completionHandler:^(NSInteger result) { NSLog(@"Success"); }];
+	  presentAlert(alert, app, ^(NSInteger result) {});
 #		else
         [alert runModal];
 #		endif
@@ -408,8 +425,7 @@ void Dialogs::twoOptionCancelDialog(std::string title,
 		  };
 
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result); });
 #		else
         handleResult([alert runModal]);
 #		endif
@@ -493,8 +509,7 @@ void Dialogs::twoOptionDialog(std::string title,
 	  };
 
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result); });
 #		else
         handleResult([alert runModal]);
 #		endif
@@ -595,8 +610,7 @@ void Dialogs::threeOptionCancelDialog(std::string title,
 		  };
 
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result); });
 #		else
         handleResult([alert runModal]);
 #		endif
@@ -708,8 +722,7 @@ void Dialogs::threeOptionDialog(std::string title,
 		  };
 
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result); });
 #		else
             handleResult([alert runModal]);
 #		endif
@@ -1507,8 +1520,7 @@ void Dialogs::textboxWithSegmented(std::string title,
 			  });
 		  };
 #		ifndef MZGLAU
-	  [alert beginSheetModalForWindow:[NSApp mainWindow]
-					completionHandler:^(NSInteger result) { handleResult(result, textField, locationControl); }];
+	  presentAlert(alert, app, ^(NSInteger result) { handleResult(result, textField, locationControl); });
 	  [textField becomeFirstResponder];
 #		else
             [label becomeFirstResponder];
