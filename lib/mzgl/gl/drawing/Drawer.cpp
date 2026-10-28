@@ -317,8 +317,10 @@ void Drawer::drawChevronRight(vec2 c, int radius, int thickness) {
 	float p	 = radius * s2;
 	float t	 = thickness * s2;
 
-	drawQuad(c, c + vec2(-t, t), c + vec2(-p - t, t - p), c + vec2(-p, -p));
-	drawQuad(c, c + vec2(-p, p), c + vec2(-p - t, p - t), c + vec2(-t, -t));
+	// two quads meeting along the chevron's axis (c to the inner tip), so
+	// nothing is drawn twice - overlap shows through at partial alpha
+	drawQuad(c, c + vec2(-p, -p), c + vec2(-p - t, t - p), c + vec2(-2 * t, 0));
+	drawQuad(c, c + vec2(-2 * t, 0), c + vec2(-p - t, p - t), c + vec2(-p, p));
 }
 
 void Drawer::drawChevronLeft(vec2 c, int radius, int thickness) {
@@ -326,8 +328,8 @@ void Drawer::drawChevronLeft(vec2 c, int radius, int thickness) {
 	float p	 = radius * s2;
 	float t	 = thickness * s2;
 
-	drawQuad(c, c + vec2(t, t), c + vec2(p + t, t - p), c + vec2(p, -p));
-	drawQuad(c, c + vec2(p, p), c + vec2(p + t, p - t), c + vec2(t, -t));
+	drawQuad(c, c + vec2(p, -p), c + vec2(p + t, t - p), c + vec2(2 * t, 0));
+	drawQuad(c, c + vec2(2 * t, 0), c + vec2(p + t, p - t), c + vec2(p, p));
 }
 
 void Drawer::drawChevronDown(vec2 c, int radius, int thickness) {
@@ -335,23 +337,23 @@ void Drawer::drawChevronDown(vec2 c, int radius, int thickness) {
 	float p	 = radius * s2;
 	float t	 = thickness * s2;
 
-	drawQuad(c, c + vec2(-p, -p), c + vec2(-p + t, -t - p), c + vec2(t, -t));
-	drawQuad(c, c + vec2(-t, -t), c + vec2(p - t, -p - t), c + vec2(p, -p));
+	drawQuad(c, c + vec2(-p, -p), c + vec2(-p + t, -t - p), c + vec2(0, -2 * t));
+	drawQuad(c, c + vec2(0, -2 * t), c + vec2(p - t, -p - t), c + vec2(p, -p));
 }
 void Drawer::drawChevronUp(vec2 c, int radius, int thickness) {
 	float s2 = 0.707106781186548;
 	float p	 = radius * s2;
 	float t	 = thickness * s2;
 
-	drawQuad(c, c + vec2(-p, p), c + vec2(-p + t, t + p), c + vec2(t, t));
-	drawQuad(c, c + vec2(-t, t), c + vec2(p - t, p + t), c + vec2(p, p));
+	drawQuad(c, c + vec2(-p, p), c + vec2(-p + t, t + p), c + vec2(0, 2 * t));
+	drawQuad(c, c + vec2(0, 2 * t), c + vec2(p - t, p + t), c + vec2(p, p));
 }
 
 void Drawer::drawCircle(glm::vec2 c, float r) {
 	auto startIndex = geom.verts.size();
 
 	// precomputed unit-circle points - no trig per draw (see ShapeLUT)
-	const auto &unit = unitCircleLUT(calcCircleSegments(r));
+	const auto &unit   = unitCircleLUT(calcCircleSegments(r));
 	const int numSteps = (int) unit.size();
 
 	if (filled) {
@@ -431,10 +433,10 @@ void Drawer::drawRoundedRect(const Rectf &r, float radius) {
 void Drawer::drawCircleShadow(const vec2 &c, float r, float shadowRadius) {
 	std::vector<vec2> verts;
 	std::vector<vec4> cols;
-	float outerRadius = r + shadowRadius;
-	vec4 zeroAlpha	  = color;
-	zeroAlpha.a		  = 0;
-	const auto &unit = unitCircleLUT(calcCircleSegments(r));
+	float outerRadius  = r + shadowRadius;
+	vec4 zeroAlpha	   = color;
+	zeroAlpha.a		   = 0;
+	const auto &unit   = unitCircleLUT(calcCircleSegments(r));
 	const int numSteps = (int) unit.size();
 	verts.reserve((numSteps + 1) * 2);
 	cols.reserve((numSteps + 1) * 2);
