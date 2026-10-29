@@ -919,11 +919,89 @@ static void
 	options.appUrlScheme	= "koala";
 	options.userAgentSuffix = "KoalaApp";
 	options.onClosed		= [&app, completionCallback]() {
-		// defer the release - onClosed fires from inside the impl's close()
-		app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
-		if (completionCallback) completionCallback();
+		   // defer the release - onClosed fires from inside the impl's close()
+		   app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
+		   if (completionCallback) completionCallback();
 	};
 	windowsDialogWebView = std::make_shared<WindowsWebView>(app, std::move(options));
+}
+#endif
+
+#if defined(__APPLE__) && !TARGET_OS_IOS
+// The mac in-window web view: a full-size container (web view + ✕ close button)
+// slid in over the root view. launchUrlInWebView and displayHtmlInWebView both use
+// it; `load` sets the navigation delegate and loads the content into the web view.
+static void
+	showMacWebViewOverlay(App &app, void (^load)(WKWebView *webView), std::function<void()> completionCallback) {
+	dispatch_async(dispatch_get_main_queue(), ^{
+	  NSView *rootView = (__bridge NSView *) app.viewHandle;
+
+	  NSView *containerView = [[NSView alloc] initWithFrame:rootView.bounds];
+	  // Make contentView background black
+	  containerView.wantsLayer			  = YES;
+	  containerView.layer.backgroundColor = [NSColor blackColor].CGColor;
+	  containerView.autoresizingMask	  = NSViewWidthSizable | NSViewHeightSizable;
+
+	  int buttonHeight = 20;
+	  int padding	   = 10;
+
+	  NSRect wvRect =
+		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
+
+	  // Instantiate WKWebView on the main thread
+	  WKWebViewConfiguration *wvConfig = [[WKWebViewConfiguration alloc] init];
+	  // Appends a marker to the User-Agent so koalaver.se can tell it's being shown
+	  // inside Koala (e.g. to show the "Open in Koala" button).
+	  wvConfig.applicationNameForUserAgent = @"KoalaApp";
+	  WKWebView *webView				   = [[WKWebView alloc] initWithFrame:wvRect configuration:wvConfig];
+	  webView.autoresizingMask			   = NSViewWidthSizable | NSViewHeightSizable;
+	  load(webView);
+
+	  // Create and configure the close button
+	  NSBlockButton *closeButton =
+		  [[NSBlockButton alloc] initWithFrame:NSMakeRect(rootView.bounds.size.width - 30,
+														  rootView.bounds.size.height - buttonHeight - padding,
+														  buttonHeight,
+														  buttonHeight)];
+	  closeButton.title = @"✕";
+	  [closeButton setButtonType:NSButtonTypeMomentaryPushIn];
+	  [closeButton setBezelStyle:NSBezelStyleInline];
+	  closeButton.font			   = [NSFont systemFontOfSize:16];
+	  closeButton.bordered		   = NO;
+	  closeButton.autoresizingMask = NSViewMinXMargin | NSViewMinYMargin;
+
+	  __weak NSView *weakContainerView = containerView;
+	  [closeButton setActionBlock:^{
+		// Create slide-out animation
+		NSRect endFrame = weakContainerView.frame;
+		endFrame.origin.y -= weakContainerView.bounds.size.height;
+
+		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		  context.duration				   = 0.5;
+		  weakContainerView.animator.frame = endFrame;
+		}
+			completionHandler:^{
+			  [weakContainerView removeFromSuperview];
+			  if (completionCallback) completionCallback();
+			}];
+	  }];
+	  [containerView addSubview:webView];
+	  [containerView addSubview:closeButton];
+	  [rootView addSubview:containerView];
+
+	  // Initial off-screen position for animation
+	  NSRect startFrame = containerView.frame;
+	  NSRect endFrame	= startFrame;
+	  startFrame.origin.y -= startFrame.size.height;
+
+	  containerView.frame = startFrame;
+
+	  // Animate the web view sliding in
+	  [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+		context.duration				 = 0.5;
+		weakContainerView.animator.frame = endFrame;
+	  }];
+	});
 }
 #endif
 
@@ -994,77 +1072,16 @@ void Dialogs::launchUrlInWebView(std::string url, std::function<void()> completi
 
 	[getTopController(app) presentViewController:targetController animated:YES completion:nil];
 #	else // mac
-	dispatch_async(dispatch_get_main_queue(), ^{
-	  NSView *rootView = (__bridge NSView *) app.viewHandle;
-
-	  NSView *containerView = [[NSView alloc] initWithFrame:rootView.bounds];
-	  // Make contentView background black
-	  containerView.wantsLayer			  = YES;
-	  containerView.layer.backgroundColor = [NSColor blackColor].CGColor;
-	  containerView.autoresizingMask	  = NSViewWidthSizable | NSViewHeightSizable;
-
-	  int buttonHeight = 20;
-	  int padding	   = 10;
-
-	  NSRect wvRect =
-		  NSMakeRect(0, 0, rootView.bounds.size.width, rootView.bounds.size.height - buttonHeight - padding * 2);
-
-	  // Instantiate WKWebView on the main thread
-	  WKWebViewConfiguration *wvConfig	   = [[WKWebViewConfiguration alloc] init];
-	  wvConfig.applicationNameForUserAgent = @"KoalaApp";
-	  WKWebView *webView				   = [[WKWebView alloc] initWithFrame:wvRect configuration:wvConfig];
-	  koalaSchemeNavDelegate			   = [[KoalaSchemeNavDelegate alloc] init];
-	  koalaSchemeNavDelegate->app		   = &app;
-	  webView.navigationDelegate		   = koalaSchemeNavDelegate;
-	  webView.autoresizingMask			   = NSViewWidthSizable | NSViewHeightSizable;
-
-	  // Load content on the main thread but asynchronously to avoid blocking the UI
-	  NSURL *nsUrl			= createURLFromString(url);
-	  NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
-	  [webView loadRequest:request];
-
-	  // Create and configure the close button
-	  NSBlockButton *closeButton =
-		  [[NSBlockButton alloc] initWithFrame:NSMakeRect(rootView.bounds.size.width - 30,
-														  rootView.bounds.size.height - buttonHeight - padding,
-														  buttonHeight,
-														  buttonHeight)];
-	  closeButton.title = @"✕";
-	  [closeButton setButtonType:NSButtonTypeMomentaryPushIn];
-	  [closeButton setBezelStyle:NSBezelStyleInline];
-	  closeButton.font			   = [NSFont systemFontOfSize:16];
-	  closeButton.bordered		   = NO;
-	  closeButton.autoresizingMask = NSViewMinXMargin | NSViewMinYMargin;
-
-	  __weak NSView *weakContainerView = containerView;
-	  [closeButton setActionBlock:^{
-		// Create slide-out animation
-		NSRect endFrame = weakContainerView.frame;
-		endFrame.origin.y -= weakContainerView.bounds.size.height;
-
-		[NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-		  context.duration				   = 0.5;
-		  weakContainerView.animator.frame = endFrame;
-		}
-			completionHandler:^{ [weakContainerView removeFromSuperview]; }];
-	  }];
-	  [containerView addSubview:webView];
-	  [containerView addSubview:closeButton];
-	  [rootView addSubview:containerView];
-
-	  // Initial off-screen position for animation
-	  NSRect startFrame = containerView.frame;
-	  NSRect endFrame	= startFrame;
-	  startFrame.origin.y -= startFrame.size.height;
-
-	  containerView.frame = startFrame;
-
-	  // Animate the web view sliding in
-	  [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-		context.duration				 = 0.5;
-		weakContainerView.animator.frame = endFrame;
-	  }];
-	});
+	showMacWebViewOverlay(
+		app,
+		^(WKWebView *webView) {
+		  koalaSchemeNavDelegate	  = [[KoalaSchemeNavDelegate alloc] init];
+		  koalaSchemeNavDelegate->app = &app;
+		  webView.navigationDelegate  = koalaSchemeNavDelegate;
+		  NSURL *nsUrl				  = createURLFromString(url);
+		  [webView loadRequest:[NSURLRequest requestWithURL:nsUrl]];
+		},
+		completionCallback);
 #	endif
 #elif defined(__ANDROID__)
 	androidLaunchUrlInWebView(url);
@@ -1161,13 +1178,16 @@ void Dialogs::displayHtmlInWebView(const std::string &html, std::function<void()
 
 	[getTopController(app) presentViewController:targetController animated:YES completion:nil];
 #	else // mac
-
-	NSString *tmpPath = [NSString stringWithFormat:@"%@/index.html", NSTemporaryDirectory()];
-
-	writeStringToFile([tmpPath UTF8String], html);
-	NSURL *url = [NSURL fileURLWithPath:tmpPath];
-	launchUrl([[url absoluteString] UTF8String]);
-	if (completionCallback) completionCallback();
+	NSString *htmlStr = [NSString stringWithUTF8String:html.c_str()];
+	showMacWebViewOverlay(
+		app,
+		^(WKWebView *webView) {
+		  // Links in the html open in the default browser rather than in place.
+		  navDelegate				 = [[OpenLinksInSafariDelegate alloc] init];
+		  webView.navigationDelegate = navDelegate;
+		  [webView loadHTMLString:htmlStr baseURL:nil];
+		},
+		completionCallback);
 #	endif
 #elif defined(__ANDROID__)
 	androidDisplayHtml(html);
