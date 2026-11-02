@@ -35,6 +35,9 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "util.h"
 #include "log.h"
 #include "GLFWOS.h"
+#ifdef __linux__
+#	include "WaylandTouch.h"
+#endif
 
 #if defined(MZGL_SOKOL) && defined(_WIN32)
 #	include "D3D11Context.h"
@@ -119,8 +122,7 @@ static void emscriptenMainLoop() {
 		int cw = 0, ch = 0;
 		emscripten_get_canvas_element_size("#canvas", &cw, &ch);
 		if (cw != self->graphics.width || ch != self->graphics.height) {
-			emscripten_set_canvas_element_size(
-				"#canvas", self->graphics.width, self->graphics.height);
+			emscripten_set_canvas_element_size("#canvas", self->graphics.width, self->graphics.height);
 		}
 	}
 
@@ -236,6 +238,29 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
 	windowEventHandler.cursorPos(getEventDispatcher(window), static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
+#ifdef __linux__
+static std::unique_ptr<WaylandTouch> waylandTouch;
+
+static void enableWaylandTouch(GLFWwindow *window) {
+	waylandTouch = WaylandTouch::create(window, [window](WaylandTouch::Phase phase, int id, double x, double y) {
+		// window -> framebuffer pixels, same as cursor_position_callback
+		int winW, winH, fbW, fbH;
+		glfwGetWindowSize(window, &winW, &winH);
+		glfwGetFramebufferSize(window, &fbW, &fbH);
+		if (winW > 0 && winH > 0) {
+			x *= (double) fbW / winW;
+			y *= (double) fbH / winH;
+		}
+		auto *ed = getEventDispatcher(window);
+		switch (phase) {
+			case WaylandTouch::Phase::down: ed->touchDown(x, y, id); break;
+			case WaylandTouch::Phase::moved: ed->touchMoved(x, y, id); break;
+			case WaylandTouch::Phase::up: ed->touchUp(x, y, id); break;
+		}
+	});
+}
+#endif
+
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 	windowEventHandler.scroll(getEventDispatcher(window), xoffset, yoffset);
 }
@@ -277,6 +302,9 @@ void GLFWAppRunner::setCallbacks() {
 	//glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwSetFramebufferSizeCallback(window, window_size_callback);
 	glfwSetWindowUserPointer(window, this);
+#ifdef __linux__
+	enableWaylandTouch(window);
+#endif
 }
 
 #ifdef METAL_BACKEND
@@ -448,26 +476,26 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 		mzglSokolSetup(env);
 
 		// Force NVIDIA driver to fully initialize by creating and destroying a dummy texture
-		uint32_t white = 0xFFFFFFFF;
-		sg_image_desc dummyDesc = {};
-		dummyDesc.width			= 1;
-		dummyDesc.height		= 1;
-		dummyDesc.pixel_format	= SG_PIXELFORMAT_RGBA8;
+		uint32_t white				  = 0xFFFFFFFF;
+		sg_image_desc dummyDesc		  = {};
+		dummyDesc.width				  = 1;
+		dummyDesc.height			  = 1;
+		dummyDesc.pixel_format		  = SG_PIXELFORMAT_RGBA8;
 		dummyDesc.data.subimage[0][0] = {&white, sizeof(white)};
-		sg_image dummyImg = sg_make_image(dummyDesc);
+		sg_image dummyImg			  = sg_make_image(dummyDesc);
 		sg_destroy_image(dummyImg);
 	}
 
 	// Helper to build the sokol swapchain pass struct
 	auto makePass = [&]() {
-		sg_pass pass						 = {};
-		pass.action.colors[0].load_action	 = SG_LOADACTION_CLEAR;
-		pass.action.colors[0].clear_value	 = {0.f, 0.f, 0.f, 1.f};
-		pass.swapchain.width				 = graphics.width;
-		pass.swapchain.height		= graphics.height;
-		pass.swapchain.sample_count = d3d11.getSampleCount();
-		pass.swapchain.color_format = SG_PIXELFORMAT_BGRA8;
-		pass.swapchain.depth_format = SG_PIXELFORMAT_NONE;
+		sg_pass pass					  = {};
+		pass.action.colors[0].load_action = SG_LOADACTION_CLEAR;
+		pass.action.colors[0].clear_value = {0.f, 0.f, 0.f, 1.f};
+		pass.swapchain.width			  = graphics.width;
+		pass.swapchain.height			  = graphics.height;
+		pass.swapchain.sample_count		  = d3d11.getSampleCount();
+		pass.swapchain.color_format		  = SG_PIXELFORMAT_BGRA8;
+		pass.swapchain.depth_format		  = SG_PIXELFORMAT_NONE;
 		if (d3d11.getSampleCount() > 1) {
 			pass.swapchain.d3d11.render_view  = d3d11.getMSAARenderTargetView();
 			pass.swapchain.d3d11.resolve_view = d3d11.getRenderTargetView();
@@ -670,7 +698,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			glfwPollEvents();
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		} else {
-#	ifdef _WIN32
+#		ifdef _WIN32
 			// VST3 plugin editors that host their own OpenGL view (Cardinal,
 			// JUCE-OpenGL plugins, etc.) call wglMakeCurrent inside their
 			// WM_PAINT to bind their own context, and never restore ours. Once
@@ -678,7 +706,7 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 			// context and Koala renders black. Re-binding our context every
 			// frame is cheap and immune to whatever the plugin does.
 			glfwMakeContextCurrent(window);
-#	endif
+#		endif
 			eventDispatcher->runFrame();
 
 			glfwSwapBuffers(window);
@@ -695,6 +723,10 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 #endif
 
 	eventDispatcher->exit();
+
+#ifdef __linux__
+	waylandTouch.reset();
+#endif
 
 	// Tear the app down here, while the window, GL context and `graphics` are
 	// still alive. Left to ~GLFWAppRunner, members are destroyed in reverse
