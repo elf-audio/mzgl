@@ -59,6 +59,7 @@ private:
 	void createOutputAudioUnit();
 
 	void restart();
+	void refreshLatencies();
 
 	void printDeviceList() const;
 
