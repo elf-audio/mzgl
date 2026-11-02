@@ -14,6 +14,7 @@
 #include <atomic>
 #include <memory>
 #include <optional>
+#include <thread>
 
 #include "util.h"
 #include "util/log.h"
@@ -242,6 +243,12 @@ public:
 	bool isInstrument() { return pluginIsInstrument; }
 	void hostUpdatedParameter(unsigned int i, float val) {
 		if (i >= params.size() || i < 0) return;
+		// The AUv3 wrapper hears its own pushes: AudioToolbox calls the tree's
+		// implementorValueObserver synchronously inside every [AUParameter setValue:]
+		// (originator or not, gesture events included). That's the plugin's own value
+		// coming back, not the host - taking it as a host write re-applied a perform FX
+		// drag after the slider had been released and switched it off, leaving it stuck.
+		if (pushingToHostOn.load(std::memory_order_relaxed) == std::this_thread::get_id()) return;
 		if (!params[i]->isIgnoringAutomation()) {
 			params[i]->set(val);
 			if (paramChanged) paramChanged(i, val);
@@ -253,6 +260,7 @@ public:
 	void updateHostParameter(unsigned int i, float val) {
 		params[i]->set(val);
 		if (sendUpdatedParameterToHost) {
+			PushingToHost pushing(*this);
 			sendUpdatedParameterToHost(i, val);
 		} else {
 			Log::d() << "error sendUpdatedParameterToHost not implemented";
@@ -267,12 +275,18 @@ public:
 	void beginHostGesture(unsigned int i) {
 		if (i >= params.size()) return;
 		if (hostGestureDepth.size() < params.size()) hostGestureDepth.resize(params.size(), 0);
-		if (hostGestureDepth[i]++ == 0 && sendParameterGestureToHost) sendParameterGestureToHost(i, true);
+		if (hostGestureDepth[i]++ == 0 && sendParameterGestureToHost) {
+			PushingToHost pushing(*this);
+			sendParameterGestureToHost(i, true);
+		}
 	}
 
 	void endHostGesture(unsigned int i) {
 		if (i >= hostGestureDepth.size() || hostGestureDepth[i] == 0) return;
-		if (--hostGestureDepth[i] == 0 && sendParameterGestureToHost) sendParameterGestureToHost(i, false);
+		if (--hostGestureDepth[i] == 0 && sendParameterGestureToHost) {
+			PushingToHost pushing(*this);
+			sendParameterGestureToHost(i, false);
+		}
 	}
 
 	// Wrappers wrap a value sent outside a gesture in its own begin/end, so hosts
@@ -345,6 +359,20 @@ protected:
 private:
 	double sampleRate = 48000.0;
 	std::vector<int> hostGestureDepth; // UI thread only
+
+	// The thread currently inside sendUpdatedParameterToHost / sendParameterGestureToHost,
+	// so hostUpdatedParameter can drop a wrapper's synchronous echo of it while real host
+	// writes (audio thread, the host's own queue) still get through. Per instance: several
+	// instances can share one AUv3 extension process.
+	std::atomic<std::thread::id> pushingToHostOn {};
+	struct PushingToHost {
+		explicit PushingToHost(Plugin &p)
+			: plugin(p)
+			, previous(p.pushingToHostOn.exchange(std::this_thread::get_id(), std::memory_order_relaxed)) {}
+		~PushingToHost() { plugin.pushingToHostOn.store(previous, std::memory_order_relaxed); }
+		Plugin &plugin;
+		std::thread::id previous;
+	};
 };
 
 std::shared_ptr<Plugin> instantiatePlugin();
