@@ -187,6 +187,8 @@ if(NOT ANDROID AND NOT APPLE)
     $<$<PLATFORM_ID:Linux>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Linux.cpp
     lib/mzgl/app/glfw/GLFWOS_Linux.cpp
+    lib/mzgl/app/glfw/WaylandTouch.h
+    lib/mzgl/app/glfw/WaylandTouch.cpp
     >
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
@@ -450,6 +452,7 @@ if(LINUX)
     # lib/mzgl/app/linux/mainLinux.cpp
     lib/mzgl/util/linuxUtil.cpp
     lib/mzgl/util/util_linux.cpp
+    lib/mzgl/app/web/LinuxWebView.cpp
   )
 endif()
 
@@ -747,6 +750,10 @@ elseif(LINUX)
 
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK REQUIRED gtk+-3.0)
+  # touch input on Wayland (app/glfw/WaylandTouch.cpp); GTK3 already pulls it in
+  pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
+  include_directories(${WAYLAND_CLIENT_INCLUDE_DIRS})
+  list(APPEND MZGL_LIBS ${WAYLAND_CLIENT_LINK_LIBRARIES})
 
   # Setup CMake to use GTK+, tell the compiler where to look for headers and to
   # the linker where to look for libraries

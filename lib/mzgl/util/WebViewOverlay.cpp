@@ -201,6 +201,28 @@ public:
 private:
 	std::unique_ptr<WindowsWebView> webView;
 };
+#elif defined(__linux__)
+#	include "LinuxWebView.h"
+
+class LinuxWebViewOverlayImpl : public WebViewOverlayImpl {
+public:
+	LinuxWebViewOverlayImpl(App &app,
+							const std::string &urlToOpen,
+							std::function<void(const std::string &)> theJsCallback)
+		: WebViewOverlayImpl(app, urlToOpen, theJsCallback) {
+		LinuxWebView::Options options;
+		options.url				   = url;
+		options.openLinksInBrowser = true;
+		options.jsCallback		   = jsCallback;
+		options.onClosed		   = [this]() { notifyClosed(); };
+		webView					   = std::make_unique<LinuxWebView>(app, std::move(options));
+	}
+	void callJs(const std::string &jsString) override { webView->callJs(jsString); }
+	~LinuxWebViewOverlayImpl() override = default;
+
+private:
+	std::unique_ptr<LinuxWebView> webView;
+};
 #endif
 
 WebViewOverlay::WebViewOverlay(App &app,
@@ -217,6 +239,8 @@ WebViewOverlay::WebViewOverlay(App &app,
 	impl = std::make_shared<AndroidWebViewOverlayImpl>(app, url, jsCallback);
 #elif defined(_WIN32) && defined(MZGL_HAS_WEBVIEW2)
 	impl = std::make_shared<WindowsWebViewOverlayImpl>(app, url, jsCallback);
+#elif defined(__linux__)
+	impl = std::make_shared<LinuxWebViewOverlayImpl>(app, url, jsCallback);
 #endif
 	if (impl) impl->onClosed = onClosed;
 }
