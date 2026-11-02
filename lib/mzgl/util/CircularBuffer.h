@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string.h>
+#include <vector>
 
 /**
  * This class is missing a lot of things
