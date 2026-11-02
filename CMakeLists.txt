@@ -184,6 +184,7 @@ if(NOT ANDROID AND NOT APPLE)
     lib/mzgl/app/glfw/DesktopWindowEventHandler.cpp
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler.h
     lib/mzgl/app/glfw/GLFWOS.h
+    lib/mzgl/app/glfw/NativeTouch.h
     $<$<PLATFORM_ID:Linux>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Linux.cpp
     lib/mzgl/app/glfw/GLFWOS_Linux.cpp
@@ -193,6 +194,8 @@ if(NOT ANDROID AND NOT APPLE)
     $<$<PLATFORM_ID:Windows>:
     lib/mzgl/app/glfw/DesktopWindowFileDragHandler_Windows.cpp
     lib/mzgl/app/glfw/GLFWOS_Windows.cpp
+    lib/mzgl/app/glfw/Win32Touch.h
+    lib/mzgl/app/glfw/Win32Touch.cpp
     >
   )
 endif()
@@ -718,6 +721,8 @@ elseif(WIN32)
     winmm
     dsound
     ole32
+    # SetWindowSubclass (app/glfw/Win32Touch.cpp)
+    comctl32
     # Media Foundation - used for AAC/m4a/wma decoding via IMFSourceReader
     mfplat
     mfreadwrite

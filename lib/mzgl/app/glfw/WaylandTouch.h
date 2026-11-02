@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include "NativeTouch.h"
 #include <memory>
 
 struct GLFWwindow;
@@ -11,10 +11,10 @@ struct GLFWwindow;
 // default queue, so glfwPollEvents()/glfwWaitEvents() dispatch them on the main thread.
 class WaylandTouch {
 public:
-	enum class Phase { down, moved, up };
+	using Phase = NativeTouch::Phase;
 
 	// x, y are surface-local (window) coordinates, like GLFW's cursor position
-	using Callback = std::function<void(Phase phase, int id, double x, double y)>;
+	using Callback = NativeTouch::Callback;
 
 	// Returns nullptr unless GLFW is running on the Wayland platform.
 	static auto create(GLFWwindow *window, Callback callback) -> std::unique_ptr<WaylandTouch>;

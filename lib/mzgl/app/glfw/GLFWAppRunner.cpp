@@ -37,6 +37,8 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "GLFWOS.h"
 #ifdef __linux__
 #	include "WaylandTouch.h"
+#elif defined(_WIN32)
+#	include "Win32Touch.h"
 #endif
 
 #if defined(MZGL_SOKOL) && defined(_WIN32)
@@ -238,11 +240,17 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
 	windowEventHandler.cursorPos(getEventDispatcher(window), static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
-#ifdef __linux__
-static std::unique_ptr<WaylandTouch> waylandTouch;
+#if defined(__linux__) || defined(_WIN32)
+// Native multitouch, which GLFW doesn't report: WaylandTouch on Linux, Win32Touch on
+// Windows. Both hand over window coordinates and per-finger ids.
+#	ifdef __linux__
+static std::unique_ptr<WaylandTouch> nativeTouch;
+#	else
+static std::unique_ptr<Win32Touch> nativeTouch;
+#	endif
 
-static void enableWaylandTouch(GLFWwindow *window) {
-	waylandTouch = WaylandTouch::create(window, [window](WaylandTouch::Phase phase, int id, double x, double y) {
+static void enableNativeTouch(GLFWwindow *window) {
+	auto callback = [window](NativeTouch::Phase phase, int id, double x, double y) {
 		// window -> framebuffer pixels, same as cursor_position_callback
 		int winW, winH, fbW, fbH;
 		glfwGetWindowSize(window, &winW, &winH);
@@ -253,11 +261,16 @@ static void enableWaylandTouch(GLFWwindow *window) {
 		}
 		auto *ed = getEventDispatcher(window);
 		switch (phase) {
-			case WaylandTouch::Phase::down: ed->touchDown(x, y, id); break;
-			case WaylandTouch::Phase::moved: ed->touchMoved(x, y, id); break;
-			case WaylandTouch::Phase::up: ed->touchUp(x, y, id); break;
+			case NativeTouch::Phase::down: ed->touchDown(x, y, id); break;
+			case NativeTouch::Phase::moved: ed->touchMoved(x, y, id); break;
+			case NativeTouch::Phase::up: ed->touchUp(x, y, id); break;
 		}
-	});
+	};
+#	ifdef __linux__
+	nativeTouch = WaylandTouch::create(window, callback);
+#	else
+	nativeTouch = Win32Touch::create(window, callback);
+#	endif
 }
 #endif
 
@@ -302,8 +315,8 @@ void GLFWAppRunner::setCallbacks() {
 	//glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwSetFramebufferSizeCallback(window, window_size_callback);
 	glfwSetWindowUserPointer(window, this);
-#ifdef __linux__
-	enableWaylandTouch(window);
+#if defined(__linux__) || defined(_WIN32)
+	enableNativeTouch(window);
 #endif
 }
 
@@ -724,8 +737,8 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 
 	eventDispatcher->exit();
 
-#ifdef __linux__
-	waylandTouch.reset();
+#if defined(__linux__) || defined(_WIN32)
+	nativeTouch.reset();
 #endif
 
 	// Tear the app down here, while the window, GL context and `graphics` are
