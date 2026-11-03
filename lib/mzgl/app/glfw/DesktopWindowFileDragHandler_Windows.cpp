@@ -51,6 +51,38 @@ namespace file_drag_handler {
 		return p;
 	}
 
+	// Paths come out as UTF-8 regardless of the process's ANSI code page. The
+	// narrow DragQueryFileA used to be called here, which returns code-page
+	// bytes: Koala.exe only got UTF-8 from it because its manifest sets
+	// activeCodePage UTF-8, and a VST3 inherits the host's code page instead
+	// (FL Studio on a Western machine: 1252, where "ü" is the lone byte 0xFC),
+	// so a dropped "ü.wav" reached the importer as invalid UTF-8 and never
+	// loaded. In a UTF-8 process both routes yield identical bytes.
+	auto pathsFromHdrop(void *hdrop) -> std::vector<std::string> {
+		std::vector<std::string> out;
+		const auto hDrop {static_cast<HDROP>(hdrop)};
+		// This is a magic value passed in to DragQueryFile to get the file count
+		static constexpr UINT FILECOUNT {0xFFFFFFFF};
+		const UINT fileCount {DragQueryFileW(hDrop, FILECOUNT, nullptr, 0)};
+		for (UINT i = 0; i < fileCount; ++i) {
+			const UINT pathLength {DragQueryFileW(hDrop, i, nullptr, 0)};
+			if (pathLength == 0) continue;
+			std::wstring wide(pathLength + 1, L'\0');
+			const UINT copied {DragQueryFileW(hDrop, i, wide.data(), pathLength + 1)};
+			if (copied == 0) continue;
+			wide.resize(copied);
+			// No WC_ERR_INVALID_CHARS: an unpaired surrogate (legal in an NTFS
+			// name) becomes U+FFFD rather than dropping or throwing.
+			const int n =
+				WideCharToMultiByte(CP_UTF8, 0, wide.data(), (int) wide.size(), nullptr, 0, nullptr, nullptr);
+			if (n <= 0) continue;
+			std::string utf8(n, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, wide.data(), (int) wide.size(), utf8.data(), n, nullptr, nullptr);
+			out.push_back(std::move(utf8));
+		}
+		return out;
+	}
+
 	struct DropTarget : public IDropTarget {
 		struct Deleter {
 			auto operator()(DropTarget *ptr) const -> void { ptr->Release(); }
@@ -165,17 +197,7 @@ namespace file_drag_handler {
 			}
 			std::vector<std::string> out;
 			if (medium.tymed == TYMED_HGLOBAL) {
-				// This is a magic value passed in to DragQueryFile to get the file count
-				static constexpr auto FILECOUNT {0xFFFFFFFF};
-				const auto hDrop {static_cast<HDROP>(medium.hGlobal)};
-				const auto fileCount {DragQueryFile(hDrop, FILECOUNT, nullptr, 0)};
-				for (UINT i = 0; i < fileCount; ++i) {
-					const auto pathLength {DragQueryFile(hDrop, i, nullptr, 0)};
-					std::vector<char> buffer(pathLength + 1);
-					if (DragQueryFile(hDrop, i, buffer.data(), pathLength + 1) != 0) {
-						out.push_back(buffer.data());
-					}
-				}
+				out = pathsFromHdrop(medium.hGlobal);
 				// No DragFinish() here: that is the WM_DROPFILES API and frees the
 				// HGLOBAL itself. In OLE drag-and-drop the medium belongs to the data
 				// object; ReleaseStgMedium below frees it (GlobalFree when the source
