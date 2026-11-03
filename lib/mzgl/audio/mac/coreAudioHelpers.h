@@ -105,6 +105,14 @@ struct CoreAudioState {
 	std::atomic<bool> insideCallback {false};
 	std::atomic<uint64_t> lastBufferBeginHostTime {0};
 
+	// device latency + safety offset + stream latency, in seconds. Read by
+	// getOutputLatency() / getInputLatency(), which are called on the audio
+	// thread; written by CoreAudioSystem::refreshLatencies() whenever the
+	// devices are (re)configured, so no CoreAudio property calls happen on
+	// the audio thread (each one is a mach round trip to coreaudiod).
+	std::atomic<double> outputLatencySeconds {0.0};
+	std::atomic<double> inputLatencySeconds {0.0};
+
 	std::atomic<int> inChans {0};
 	std::atomic<int> outChans {0};
 

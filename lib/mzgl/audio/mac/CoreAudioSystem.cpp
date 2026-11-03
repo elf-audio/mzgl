@@ -193,6 +193,7 @@ void CoreAudioSystem::setupState(int numInChannels, int numOutChannels) {
 
 	state->deviceListener = std::make_unique<CoreAudioDeviceStateChangeListener>(
 		std::vector<AudioDeviceID> {state->deviceIn, state->deviceOut}, [this]() { deviceFormatChanged(); });
+	refreshLatencies();
 }
 
 void CoreAudioSystem::createInputAudioUnit() {
@@ -612,30 +613,26 @@ AudioPort CoreAudioSystem::getOutput() {
 	return {};
 }
 
+// Main thread, after the devices are configured. The latency getters are
+// called from the audio thread (MIDI timestamp alignment, Link), where a
+// CoreAudio property query is a syscall and an allocation, so the values
+// are read once here and cached in the state.
+void CoreAudioSystem::refreshLatencies() {
+	if (state == nullptr || sampleRate <= 0) {
+		return;
+	}
+	auto outFrames = getDeviceLatency(state->deviceOut, DeviceType::Output);
+	auto inFrames  = getDeviceLatency(state->deviceIn, DeviceType::Input);
+	state->outputLatencySeconds.store(outFrames.has_value() ? *outFrames / sampleRate : 0.0);
+	state->inputLatencySeconds.store(inFrames.has_value() ? *inFrames / sampleRate : 0.0);
+}
+
 double CoreAudioSystem::getOutputLatency() {
-	if (state == nullptr) {
-		return 0.0;
-	}
-
-	auto frames = getDeviceLatency(state->deviceOut, DeviceType::Output);
-	if (!frames.has_value()) {
-		return 0.0;
-	}
-
-	return *frames / sampleRate;
+	return state == nullptr ? 0.0 : state->outputLatencySeconds.load();
 }
 
 double CoreAudioSystem::getInputLatency() {
-	if (state == nullptr) {
-		return 0.0;
-	}
-
-	auto frames = getDeviceLatency(state->deviceIn, DeviceType::Input);
-	if (!frames.has_value()) {
-		return 0.0;
-	}
-
-	return *frames / sampleRate;
+	return state == nullptr ? 0.0 : state->inputLatencySeconds.load();
 }
 
 double CoreAudioSystem::getNanoSecondsAtBufferBegin() {
