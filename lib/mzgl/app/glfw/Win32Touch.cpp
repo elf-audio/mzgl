@@ -152,7 +152,11 @@ namespace {
 } // namespace
 
 auto Win32Touch::create(GLFWwindow *window, Callback callback) -> std::unique_ptr<Win32Touch> {
-	HWND hwnd = glfwGetWin32Window(window);
+	return createForHwnd(glfwGetWin32Window(window), std::move(callback));
+}
+
+auto Win32Touch::createForHwnd(void *nativeWindow, Callback callback) -> std::unique_ptr<Win32Touch> {
+	HWND hwnd = static_cast<HWND>(nativeWindow);
 	if (hwnd == nullptr) return nullptr;
 
 	HMODULE user32 = GetModuleHandleW(L"user32.dll");

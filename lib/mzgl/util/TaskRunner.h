@@ -36,7 +36,9 @@ public:
 	TaskRunner(const std::string &_name = "TaskRunner", bool _synchronous = false);
 	~TaskRunner();
 
-	void run(TaskSpec spec);
+	// false if the task was rejected because the runner is stopping or stopped:
+	// it will never run and its onDone will never be called
+	bool run(TaskSpec spec);
 	void requestStop(std::chrono::milliseconds timeout = std::chrono::seconds(5));
 
 private:

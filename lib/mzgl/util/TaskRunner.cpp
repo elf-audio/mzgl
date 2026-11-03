@@ -36,21 +36,22 @@ void TaskRunner::createFuture() {
 	});
 }
 
-void TaskRunner::run(TaskRunner::TaskSpec spec) {
+bool TaskRunner::run(TaskRunner::TaskSpec spec) {
 	if (synchronous.load()) {
 		spec.task();
 		if (spec.onDone) {
 			spec.onDone();
 		}
-		return;
+		return true;
 	}
 
 	if (state.load(std::memory_order_acquire) != State::Running) {
 		Log::w() << "TaskRunner '" << name << "' rejecting task; stopping";
-		return;
+		return false;
 	}
 
 	taskQueue.enqueue(std::move(spec));
+	return true;
 }
 
 void TaskRunner::requestStop(std::chrono::milliseconds timeout) {

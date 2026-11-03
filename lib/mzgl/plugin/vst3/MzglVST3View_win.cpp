@@ -14,6 +14,7 @@
 #	include "filesystem.h"
 #	include "log.h"
 #	include "DesktopWindowFileDragHandler.h"
+#	include "Win32Touch.h"
 
 #	include <windows.h>
 #	include <windowsx.h>
@@ -201,6 +202,11 @@ namespace mzglvst {
 		// (fileDragUpdate / filesDropped) exactly as in the GLFW standalone.
 		file_drag_handler::Ptr fileDrag;
 
+		// Native multitouch, as the GLFW standalone has (GLFWAppRunner): without it
+		// Windows mouse-emulates touch on this window - one finger, with the
+		// tap/press-and-hold delay and the hold-to-right-click.
+		std::unique_ptr<Win32Touch> nativeTouch;
+
 		// Mouse state, as DesktopWindowEventHandler keeps it for the GLFW app.
 		float mouseX {0};
 		float mouseY {0};
@@ -227,8 +233,10 @@ namespace mzglvst {
 				KillTimer(hwnd, kFrameTimerId);
 			}
 			// Revokes the drop target: its listener holds a raw dispatcher pointer,
-			// so it must go before the dispatcher and before the window.
+			// so it must go before the dispatcher and before the window. Same for
+			// the touch subclass, whose callback goes through the dispatcher.
 			fileDrag.reset();
+			nativeTouch.reset();
 			if (editor) {
 				editor->pluginViewDisappeared();
 			}
@@ -363,6 +371,28 @@ namespace mzglvst {
 		impl->dispatcher				 = std::make_shared<EventDispatcher>(impl->editor);
 		impl->fileDrag					 = file_drag_handler::initWithNativeWindow(
 			  impl->hwnd, file_drag_handler::makeFileDragListener(impl->dispatcher.get()));
+
+		// x, y arrive in this window's client pixels - the space WM_LBUTTONDOWN's
+		// lParam is in, which the mouse handlers below pass straight through. They
+		// run in our wndProc, under the window's DPI awareness, as mouse messages do.
+		Impl *touchImpl	  = impl.get();
+		impl->nativeTouch = Win32Touch::createForHwnd(
+			impl->hwnd, [touchImpl](NativeTouch::Phase phase, int id, double x, double y) {
+				auto &I = *touchImpl;
+				if (!I.dispatcher) return;
+				const auto fx = static_cast<float>(x);
+				const auto fy = static_cast<float>(y);
+				switch (phase) {
+					case NativeTouch::Phase::down:
+						I.dispatcher->touchDown(fx, fy, id);
+						// as WM_LBUTTONDOWN: a tap that focused a text field takes the keyboard
+						if (I.graphics && I.graphics->textInputReceiver != nullptr) SetFocus(I.hwnd);
+						break;
+					case NativeTouch::Phase::moved: I.dispatcher->touchMoved(fx, fy, id); break;
+					case NativeTouch::Phase::up: I.dispatcher->touchUp(fx, fy, id); break;
+				}
+			});
+		if (!impl->nativeTouch) Log::d() << "VST3 editor: native touch unavailable, touch stays mouse-emulated";
 
 		impl->needsSetup = true;
 		impl->dispatcher->resized();

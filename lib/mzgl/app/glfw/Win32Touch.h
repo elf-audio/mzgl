@@ -25,6 +25,11 @@ public:
 	// (pre-Windows 8), in which case touch stays mouse-emulated as before.
 	static auto create(GLFWwindow *window, Callback callback) -> std::unique_ptr<Win32Touch>;
 
+	// Same, for a native HWND that isn't a GLFW window (the VST3 editor's child
+	// window). Messages arrive through that window's own message loop - in a
+	// plugin, the host's UI thread - so the callback runs there.
+	static auto createForHwnd(void *hwnd, Callback callback) -> std::unique_ptr<Win32Touch>;
+
 	~Win32Touch();
 
 	struct Impl;
