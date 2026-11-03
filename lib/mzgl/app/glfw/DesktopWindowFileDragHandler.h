@@ -41,6 +41,11 @@ namespace file_drag_handler {
 	// VST3 editor passes null since its WM_TIMER frames keep firing anyway.
 	void runPendingNativeDrag(const std::function<void()> &frame);
 
+	// Windows only: the file paths in a CF_HDROP block (an HDROP / its
+	// HGLOBAL), as UTF-8 whatever the process's ANSI code page is. Exposed for
+	// tests; a plugin runs under its host's code page, not Koala's UTF-8 one.
+	auto pathsFromHdrop(void *hdrop) -> std::vector<std::string>;
+
 	inline auto makeFileDragListener(EventDispatcher *eventDispatcher) {
 		struct Listener : file_drag_handler::Listener {
 			Listener(EventDispatcher *eventDispatcher)
