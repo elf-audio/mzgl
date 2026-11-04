@@ -16,10 +16,6 @@
 #include <cstring>
 #include <sys/system_properties.h>
 #include <android/api-level.h>
-#include <android/native_window.h>
-#include <dlfcn.h>
-#include <chrono>
-#include <cmath>
 
 Graphics graphics;
 
@@ -42,40 +38,6 @@ static bool isLowRamDevice() {
 // Only Android 13 (API 33) and newer get MSAA: older OS versions are a rough
 // proxy for older / budget hardware where we'd rather not spend the GPU time.
 static constexpr int mzglAndroidMinMsaaApiLevel = 33;
-
-// Cap rendering at 60fps. On 90/120Hz panels rendering at the native rate
-// costs a lot of GPU (and battery) for little visible gain in Koala's UI.
-static constexpr float mzglAndroidMaxFps = 60.f;
-
-// Ask the system to run this window at mzglAndroidMaxFps (API 30+), which lets
-// it drop a 90/120Hz panel to 60Hz. Looked up at runtime since minSdk < 30.
-static void requestWindowFrameRate(ANativeWindow *window) {
-	if (window == nullptr) return;
-	// 0 == ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT
-	// 1 == ANATIVEWINDOW_CHANGE_FRAME_RATE_ALWAYS: plain setFrameRate() only
-	// switches if the mode change is seamless, which 90->60Hz often isn't.
-	using SetFrameRateWithStrategyFn = int32_t (*)(ANativeWindow *, float, int8_t, int8_t);
-	using SetFrameRateFn			 = int32_t (*)(ANativeWindow *, float, int8_t);
-	// RTLD_DEFAULT doesn't reliably reach libandroid's symbols, so open it explicitly
-	static void *libandroid = dlopen("libandroid.so", RTLD_NOW);
-	static auto setFrameRateWithStrategy =
-		libandroid ? reinterpret_cast<SetFrameRateWithStrategyFn>(
-						 dlsym(libandroid, "ANativeWindow_setFrameRateWithChangeStrategy")) // API 31
-				   : nullptr;
-	static auto setFrameRate =
-		libandroid ? reinterpret_cast<SetFrameRateFn>(dlsym(libandroid, "ANativeWindow_setFrameRate")) // API 30
-				   : nullptr;
-
-	if (setFrameRateWithStrategy != nullptr) {
-		auto res = setFrameRateWithStrategy(window, mzglAndroidMaxFps, 0, 1);
-		Log::i() << "ANativeWindow_setFrameRateWithChangeStrategy(" << mzglAndroidMaxFps << ") -> " << res;
-	} else if (setFrameRate != nullptr) {
-		auto res = setFrameRate(window, mzglAndroidMaxFps, 0);
-		Log::i() << "ANativeWindow_setFrameRate(" << mzglAndroidMaxFps << ") -> " << res;
-	} else {
-		Log::i() << "ANativeWindow_setFrameRate unavailable (API < 30), pacing in software only";
-	}
-}
 
 // Returns the best RGB888 config matching attribs (preferring one with no depth
 // buffer), the first match if none is exactly RGB888/depth 0, or nullptr if the
@@ -226,7 +188,6 @@ public:
 	EGLSurface createSurface(EGLConfig config) {
 		EGLSurface surf;
 		surf = eglCreateWindowSurface(display, config, androidApp->window, nullptr);
-		requestWindowFrameRate(androidApp->window);
 		getSurfaceDims(surf, width, height);
 		graphics.width	= width;
 		graphics.height = height;
@@ -407,29 +368,6 @@ public:
 		}
 	}
 	[[nodiscard]] bool ready() const { return hasFocus; }
-
-	// Frame pacing, in case the display keeps running faster than
-	// mzglAndroidMaxFps (setFrameRate is only a hint, and needs API 30).
-	// eglSwapBuffers still syncs to vsync; this just skips vsyncs that come
-	// too soon after the last frame. A bit of slack so a 60Hz panel's vsync
-	// jitter never makes us skip a frame there.
-	using Clock = std::chrono::steady_clock;
-	Clock::time_point lastFrameTime {};
-	static constexpr auto minFrameInterval =
-		std::chrono::duration<double>(1.0 / mzglAndroidMaxFps) - std::chrono::microseconds(2500);
-
-	// ms to wait before the next frame is due (0 = draw now)
-	[[nodiscard]] int msUntilNextFrame() const {
-		auto remaining = minFrameInterval - (Clock::now() - lastFrameTime);
-		if (remaining <= Clock::duration::zero()) return 0;
-		return (int) std::ceil(std::chrono::duration<double, std::milli>(remaining).count());
-	}
-
-	void drawFrameIfDue() {
-		if (msUntilNextFrame() > 0) return;
-		lastFrameTime = Clock::now();
-		drawFrame();
-	}
 	bool firstFrameAlreadyRendered = false;
 	float insetsWaitStartTime	   = 0.f;
 };
@@ -617,9 +555,7 @@ void android_main(android_app *state) {
 	while (!state->destroyRequested) {
 		android_poll_source *source = nullptr;
 
-		// when drawing, sleep until the next frame is due (input still wakes us)
-		auto result = ALooper_pollOnce(
-			myEngine->ready() ? myEngine->msUntilNextFrame() : -1, nullptr, nullptr, (void **) &source);
+		auto result = ALooper_pollOnce(myEngine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
 
 		if (result == ALOOPER_POLL_ERROR) {
 			Log::e() << "ALooper_pollOnce returned an error";
@@ -630,7 +566,7 @@ void android_main(android_app *state) {
 		if (source != nullptr) source->process(state, source);
 
 		if (myEngine->ready()) {
-			myEngine->drawFrameIfDue();
+			myEngine->drawFrame();
 		}
 	}
 
