@@ -1218,10 +1218,17 @@ void Dialogs::share(std::string message, std::string path, std::function<void(bo
 	UIActivityViewController *activityViewController =
 		[[UIActivityViewController alloc] initWithActivityItems:@[ URL ] applicationActivities:nil];
 
+	// Report when the share sheet is dismissed (completed = the user actually
+	// shared/saved), not when it appears, so callers can show follow-up UI.
+	activityViewController.completionWithItemsHandler =
+		^(UIActivityType activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+		  if (completionCallback) completionCallback(completed);
+		};
+
 	UIViewController *vc = getTopController(app);
 
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-		[vc presentViewController:activityViewController animated:YES completion:^{ completionCallback(true); }];
+		[vc presentViewController:activityViewController animated:YES completion:nil];
 	}
 	//if iPad
 	else {
