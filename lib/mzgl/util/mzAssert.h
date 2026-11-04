@@ -32,7 +32,13 @@
 			}                                                                                                     \
 		} while (0)
 #	define selectMzAssert(_1, _2, NAME, ...) NAME
-#	define mzAssert(...)					  selectMzAssert(__VA_ARGS__, mzAssertWithMessage, mzAssertNoMessage)(__VA_ARGS__)
+// MSVC's traditional preprocessor hands __VA_ARGS__ on as ONE argument, so
+// without the extra expansion pass selectMzAssert always picks
+// mzAssertNoMessage, and mzAssert(cond, msg) becomes bool a = (cond, msg):
+// a comma expression that never fires (and doesn't compile if msg uses <<)
+#	define mzAssertExpand(x) x
+#	define mzAssert(...)                                                                                         \
+		mzAssertExpand(selectMzAssert(__VA_ARGS__, mzAssertWithMessage, mzAssertNoMessage)(__VA_ARGS__))
 
 #else
 #	define mzAssert(...)			 {};
