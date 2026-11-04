@@ -88,10 +88,22 @@ EGLConfig chooseConfig(EGLDisplay display) {
 								  mzglAndroidSampleCount,
 								  EGL_NONE};
 
+	// Developer override, for A/B testing and trying old devices:
+	//   adb shell setprop debug.mzgl.msaa 0   -> force off
+	//   adb shell setprop debug.mzgl.msaa 1   -> force on (skips the gates below)
+	//   adb shell setprop debug.mzgl.msaa ""  -> default behaviour
+	// Read when the window surface is created, so relaunch the app after changing it.
+	char msaaOverride[PROP_VALUE_MAX] = {0};
+	__system_property_get("debug.mzgl.msaa", msaaOverride);
+	const bool forceOff = strcmp(msaaOverride, "0") == 0;
+	const bool forceOn	= strcmp(msaaOverride, "1") == 0;
+
 	const int apiLevel = android_get_device_api_level();
-	if (isLowRamDevice()) {
+	if (forceOff) {
+		Log::i() << "MSAA disabled by debug.mzgl.msaa=0";
+	} else if (!forceOn && isLowRamDevice()) {
 		Log::i() << "Low-RAM (Android Go) device, not using MSAA";
-	} else if (apiLevel < mzglAndroidMinMsaaApiLevel) {
+	} else if (!forceOn && apiLevel < mzglAndroidMinMsaaApiLevel) {
 		Log::i() << "API level " << apiLevel << " (Android 12L or older), not using MSAA";
 	} else if (auto config = chooseConfigWith(display, msaaAttribs)) {
 		EGLint samples = 0;
