@@ -13,6 +13,8 @@
 #include "androidKeyCodes.h"
 
 #include <mutex>
+#include <cstring>
+#include <sys/system_properties.h>
 
 Graphics graphics;
 
@@ -23,6 +25,14 @@ std::shared_ptr<App> app						 = nullptr;
 // On tile-based mobile GPUs the extra samples live in on-chip tile memory and
 // are resolved on write-out, so there's no full-size multisample buffer in RAM.
 static constexpr EGLint mzglAndroidSampleCount = 4;
+
+// Android Go / low-RAM devices (what ActivityManager.isLowRamDevice() reports).
+// These have the weakest GPUs, so skip MSAA there.
+static bool isLowRamDevice() {
+	char value[PROP_VALUE_MAX] = {0};
+	__system_property_get("ro.config.low_ram", value);
+	return strcmp(value, "true") == 0;
+}
 
 // Returns the best RGB888 config matching attribs (preferring one with no depth
 // buffer), the first match if none is exactly RGB888/depth 0, or nullptr if the
@@ -73,14 +83,17 @@ EGLConfig chooseConfig(EGLDisplay display) {
 								  mzglAndroidSampleCount,
 								  EGL_NONE};
 
-	if (auto config = chooseConfigWith(display, msaaAttribs)) {
+	if (isLowRamDevice()) {
+		Log::i() << "Low-RAM (Android Go) device, not using MSAA";
+	} else if (auto config = chooseConfigWith(display, msaaAttribs)) {
 		EGLint samples = 0;
 		eglGetConfigAttrib(display, config, EGL_SAMPLES, &samples);
 		Log::i() << "Using multisampled EGL config (" << samples << "x MSAA)";
 		return config;
+	} else {
+		Log::w() << "No " << mzglAndroidSampleCount
+				 << "x MSAA EGL config available, falling back to no antialiasing";
 	}
-
-	Log::w() << "No " << mzglAndroidSampleCount << "x MSAA EGL config available, falling back to no antialiasing";
 
 	const EGLint attribs[] = {EGL_SURFACE_TYPE,
 							  EGL_WINDOW_BIT,
