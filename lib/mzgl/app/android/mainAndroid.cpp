@@ -19,16 +19,69 @@ Graphics graphics;
 std::shared_ptr<EventDispatcher> eventDispatcher = nullptr;
 std::shared_ptr<App> app						 = nullptr;
 
+// Matches iOS/macOS (mzglMetalSampleCount): 4x MSAA on the window surface.
+// On tile-based mobile GPUs the extra samples live in on-chip tile memory and
+// are resolved on write-out, so there's no full-size multisample buffer in RAM.
+static constexpr EGLint mzglAndroidSampleCount = 4;
+
+// Returns the best RGB888 config matching attribs (preferring one with no depth
+// buffer), the first match if none is exactly RGB888/depth 0, or nullptr if the
+// driver offers no config at all for these attribs.
+static EGLConfig chooseConfigWith(EGLDisplay display, const EGLint *attribs) {
+	EGLint numConfigs = 0;
+	if (eglChooseConfig(display, attribs, nullptr, 0, &numConfigs) == EGL_FALSE || numConfigs <= 0) {
+		return nullptr;
+	}
+	std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
+	if (eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs) == EGL_FALSE
+		|| numConfigs <= 0) {
+		return nullptr;
+	}
+
+	for (int i = 0; i < numConfigs; i++) {
+		auto &cfg = supportedConfigs[i];
+		EGLint r, g, b, d;
+		if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
+			&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
+			&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
+			&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
+			Log::i() << "Found " << numConfigs << " configs, using config " << i;
+			return cfg;
+		}
+	}
+
+	Log::w() << "Found " << numConfigs << " configs but none RGB888/depth 0, so going with first (default)";
+	return supportedConfigs[0];
+}
+
 EGLConfig chooseConfig(EGLDisplay display) {
-	EGLConfig config = nullptr;
+	// Try a multisampled config first; drivers that can't do it return no
+	// matches and we fall back to the plain single-sample config.
+	const EGLint msaaAttribs[] = {EGL_SURFACE_TYPE,
+								  EGL_WINDOW_BIT,
+								  EGL_BLUE_SIZE,
+								  8,
+								  EGL_GREEN_SIZE,
+								  8,
+								  EGL_RED_SIZE,
+								  8,
+								  EGL_RENDERABLE_TYPE,
+								  EGL_OPENGL_ES2_BIT,
+								  EGL_SAMPLE_BUFFERS,
+								  1,
+								  EGL_SAMPLES,
+								  mzglAndroidSampleCount,
+								  EGL_NONE};
 
-	EGLint numConfigs;
+	if (auto config = chooseConfigWith(display, msaaAttribs)) {
+		EGLint samples = 0;
+		eglGetConfigAttrib(display, config, EGL_SAMPLES, &samples);
+		Log::i() << "Using multisampled EGL config (" << samples << "x MSAA)";
+		return config;
+	}
 
-	/*
-     * Here specify the attributes of the desired configuration.
-     * Below, we select an EGLConfig with at least 8 bits per color
-     * component compatible with on-screen windows
-     */
+	Log::w() << "No " << mzglAndroidSampleCount << "x MSAA EGL config available, falling back to no antialiasing";
+
 	const EGLint attribs[] = {EGL_SURFACE_TYPE,
 							  EGL_WINDOW_BIT,
 							  EGL_BLUE_SIZE,
@@ -39,36 +92,11 @@ EGLConfig chooseConfig(EGLDisplay display) {
 							  8,
 							  EGL_RENDERABLE_TYPE,
 							  EGL_OPENGL_ES2_BIT,
-							  //            EGL_NATIVE_RENDERABLE, EGL_TRUE,
-							  //            EGL_RENDERABLE_TYPE,
-							  // EGL_ALPHA_SIZE, 8,
 							  EGL_NONE};
 
-	/* Here, the application chooses the configuration it desires.
-         * find the best match if possible, otherwise use the very first one
-         */
-	eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
-	std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-	eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
-
-	auto i = 0;
-
-	for (; i < numConfigs; i++) {
-		auto &cfg = supportedConfigs[i];
-		EGLint r, g, b, d;
-		if (eglGetConfigAttrib(display, cfg, EGL_RED_SIZE, &r)
-			&& eglGetConfigAttrib(display, cfg, EGL_GREEN_SIZE, &g)
-			&& eglGetConfigAttrib(display, cfg, EGL_BLUE_SIZE, &b)
-			&& eglGetConfigAttrib(display, cfg, EGL_DEPTH_SIZE, &d) && r == 8 && g == 8 && b == 8 && d == 0) {
-			config = supportedConfigs[i];
-			break;
-		}
-	}
-
-	Log::i() << "Found " << numConfigs << " configs, using config " << i;
-	if (i == numConfigs) {
-		Log::w() << "Didn't find a supported config, so going with first (default)";
-		config = supportedConfigs[0];
+	auto config = chooseConfigWith(display, attribs);
+	if (config == nullptr) {
+		Log::e() << "eglChooseConfig returned no usable configs";
 	}
 	return config;
 }
