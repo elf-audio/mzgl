@@ -15,6 +15,7 @@
 #include <mutex>
 #include <cstring>
 #include <sys/system_properties.h>
+#include <android/api-level.h>
 
 Graphics graphics;
 
@@ -33,6 +34,10 @@ static bool isLowRamDevice() {
 	__system_property_get("ro.config.low_ram", value);
 	return strcmp(value, "true") == 0;
 }
+
+// Only Android 13 (API 33) and newer get MSAA: older OS versions are a rough
+// proxy for older / budget hardware where we'd rather not spend the GPU time.
+static constexpr int mzglAndroidMinMsaaApiLevel = 33;
 
 // Returns the best RGB888 config matching attribs (preferring one with no depth
 // buffer), the first match if none is exactly RGB888/depth 0, or nullptr if the
@@ -83,8 +88,11 @@ EGLConfig chooseConfig(EGLDisplay display) {
 								  mzglAndroidSampleCount,
 								  EGL_NONE};
 
+	const int apiLevel = android_get_device_api_level();
 	if (isLowRamDevice()) {
 		Log::i() << "Low-RAM (Android Go) device, not using MSAA";
+	} else if (apiLevel < mzglAndroidMinMsaaApiLevel) {
+		Log::i() << "API level " << apiLevel << " (Android 12L or older), not using MSAA";
 	} else if (auto config = chooseConfigWith(display, msaaAttribs)) {
 		EGLint samples = 0;
 		eglGetConfigAttrib(display, config, EGL_SAMPLES, &samples);
