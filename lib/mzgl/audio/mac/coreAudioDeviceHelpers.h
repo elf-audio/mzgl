@@ -137,6 +137,23 @@ static std::optional<UInt32> getDeviceFrameSize(AudioDeviceID dev) {
 	return std::nullopt;
 }
 
+static std::optional<AudioValueRange> getDeviceBufferFrameSizeRange(AudioDeviceID dev) {
+	if (dev == kAudioObjectUnknown) {
+		return std::nullopt;
+	}
+
+	AudioObjectPropertyAddress address {kAudioDevicePropertyBufferFrameSizeRange,
+										kAudioObjectPropertyScopeGlobal,
+										kAudioObjectPropertyElementMain};
+	AudioValueRange range {};
+	auto size = static_cast<UInt32>(sizeof(range));
+
+	if (AudioObjectGetPropertyData(dev, &address, 0, nullptr, &size, &range) == noErr) {
+		return range;
+	}
+	return std::nullopt;
+}
+
 static std::optional<UInt32> getDeviceLatency(AudioDeviceID dev, DeviceType type) {
 	if (dev == kAudioObjectUnknown) {
 		return std::nullopt;

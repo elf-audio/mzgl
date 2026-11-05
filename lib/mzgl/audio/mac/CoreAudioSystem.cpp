@@ -381,6 +381,10 @@ void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
 		stop();
 	}
 
+	hasBeenSetup	 = true;
+	setupInChannels	 = numInChannels;
+	setupOutChannels = numOutChannels;
+
 	try {
 		checkDeviceAvailability();
 		setupState(numInChannels, numOutChannels);
@@ -396,8 +400,21 @@ void CoreAudioSystem::setup(int numInChannels, int numOutChannels) {
 
 void CoreAudioSystem::start() {
 	if (state == nullptr) {
-		Log::e() << "CoreAudioSystem state is null, cannot start. You must call setup(int, int) first.";
-		return;
+		if (!hasBeenSetup) {
+			Log::e() << "CoreAudioSystem state is null, cannot start. You must call setup(int, int) first.";
+			return;
+		}
+		// stop() disposes the audio units, so starting again after it means setting up again. This
+		// also picks up any device, sample rate or buffer size change made while we were stopped.
+		try {
+			setup(setupInChannels, setupOutChannels);
+		} catch (...) {
+			Log::e() << "CoreAudioSystem failed to set up again on start";
+			return;
+		}
+		if (state == nullptr) {
+			return;
+		}
 	}
 
 	if (state->running.load()) {
@@ -508,6 +525,39 @@ void CoreAudioSystem::setSampleRate(float _sampleRate) {
 void CoreAudioSystem::setBufferSize(int _size) {
 	bufferSize = _size;
 	restart();
+}
+
+// Powers of two within the frame size range of the current devices. Input and output are set to the
+// same buffer size, so only sizes both accept are offered. The current size is always included, as
+// another app (or Audio MIDI Setup) may have set one that isn't a power of two.
+std::vector<int> CoreAudioSystem::getAvailableBufferSizes() {
+	constexpr int smallest = 32;
+	constexpr int largest  = 4096;
+
+	auto minFrames = smallest;
+	auto maxFrames = largest;
+	for (const auto &port: {inputPort, outputPort}) {
+		if (!port.has_value() || (port->numInChannels == 0 && port->numOutChannels == 0)) {
+			continue;
+		}
+		if (auto range = getDeviceBufferFrameSizeRange(port->portId); range.has_value()) {
+			minFrames = std::max(minFrames, static_cast<int>(range->mMinimum));
+			maxFrames = std::min(maxFrames, static_cast<int>(range->mMaximum));
+		}
+	}
+
+	std::vector<int> sizes;
+	for (auto frames = smallest; frames <= largest; frames *= 2) {
+		if (frames >= minFrames && frames <= maxFrames) {
+			sizes.push_back(frames);
+		}
+	}
+
+	auto current = static_cast<int>(bufferSize);
+	if (current > 0 && std::find(sizes.begin(), sizes.end(), current) == sizes.end()) {
+		sizes.insert(std::upper_bound(sizes.begin(), sizes.end(), current), current);
+	}
+	return sizes;
 }
 
 // Called on the main thread when the sample rate or buffer size of our devices changes - by another

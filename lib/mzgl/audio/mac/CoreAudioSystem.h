@@ -27,6 +27,7 @@ public:
 
 	void setSampleRate(float sampleRate) override;
 	void setBufferSize(int size) override;
+	[[nodiscard]] std::vector<int> getAvailableBufferSizes() override;
 
 	[[nodiscard]] bool setInput(const AudioPort &audioInput) override;
 	[[nodiscard]] bool setOutput(const AudioPort &audioOutput) override;
@@ -72,4 +73,9 @@ private:
 	std::vector<AudioPort> outputPorts;
 
 	bool verbose {false};
+
+	// What setup() was last called with, so start() can rebuild after stop() tore everything down.
+	bool hasBeenSetup {false};
+	int setupInChannels {0};
+	int setupOutChannels {0};
 };
