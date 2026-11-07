@@ -1,6 +1,8 @@
 
 #include "androidUtil.h"
 #include <functional>
+#include <map>
+#include <mutex>
 #include <string>
 #include <util/log.h>
 #include "util.h"
@@ -728,8 +730,13 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 						  uint64_t timestamp,
 						  int32_t deviceId,
 						  int32_t portId) {
+	// Android calls this on a separate thread per connected port (BLE on its own too), so the map
+	// needs a lock. Parsers are never erased and map nodes don't move, so each port parses on its
+	// own thread outside the lock
 	static std::map<std::pair<int32_t, int32_t>, MidiMessageParser> parsers;
+	static std::mutex parsersMutex;
 
+	std::unique_lock lock(parsersMutex);
 	auto key  = std::make_pair(deviceId, portId);
 	auto iter = parsers.find(key);
 
@@ -757,8 +764,10 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 			}}));
 		iter = parsers.find(key);
 	}
+	auto &parser = iter->second;
+	lock.unlock();
 
-	iter->second.parse(midiMessage, timestamp, deviceId, portId);
+	parser.parse(midiMessage, timestamp, deviceId, portId);
 }
 
 std::vector<unsigned char> copyRawMidiData(jbyte *rawMidiData, jsize size) {

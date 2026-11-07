@@ -71,14 +71,20 @@ public:
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
 
 private:
-	void connect(const std::shared_ptr<AndroidMidiDevice> &device,
-				 std::vector<std::shared_ptr<AndroidMidiDevice>> &devices);
-	void disconnect(const std::shared_ptr<AndroidMidiDevice> &device,
-					std::vector<std::shared_ptr<AndroidMidiDevice>> &devices);
+	using Devices		  = std::vector<std::shared_ptr<AndroidMidiDevice>>;
+	using DevicesSnapshot = std::shared_ptr<const Devices>;
+
+	// call on the main thread
+	void connect(const std::shared_ptr<AndroidMidiDevice> &device, DevicesSnapshot &devices);
+	void disconnect(const std::shared_ptr<AndroidMidiDevice> &device, DevicesSnapshot &devices);
+	[[nodiscard]] static DevicesSnapshot load(const DevicesSnapshot &devices);
 
 	void runOnMainThread(const std::function<void(AllMidiDevicesAndroidImpl &)> &fun);
 
-	std::vector<std::shared_ptr<AndroidMidiDevice>> midiInputs;
-	std::vector<std::shared_ptr<AndroidMidiDevice>> midiOutputs;
+	// the main thread swaps in a new list on connect/disconnect; MIDI receive threads (one per Android
+	// port) and senders read whichever list was current, through load(). They used to share one vector
+	// that the main thread push_back'd and erased under them
+	DevicesSnapshot midiInputs {std::make_shared<const Devices>()};
+	DevicesSnapshot midiOutputs {std::make_shared<const Devices>()};
 	MainThreadRunner *mainThreadRunner {nullptr};
 };

@@ -16,29 +16,34 @@ void AllMidiDevicesAndroidImpl::messageReceived(const std::shared_ptr<MidiDevice
 	}
 }
 
-void removeDeviceFromDeviceList(const std::shared_ptr<AndroidMidiDevice> &device,
-								std::vector<std::shared_ptr<AndroidMidiDevice>> &devices) {
-	devices.erase(std::remove_if(std::begin(devices),
-								 std::end(devices),
-								 [&](auto &&otherDevice) { return *device == *otherDevice; }),
-				  std::end(devices));
+AllMidiDevicesAndroidImpl::DevicesSnapshot AllMidiDevicesAndroidImpl::load(const DevicesSnapshot &devices) {
+	return std::atomic_load(&devices);
 }
 
 void AllMidiDevicesAndroidImpl::connect(const std::shared_ptr<AndroidMidiDevice> &device,
-										std::vector<std::shared_ptr<AndroidMidiDevice>> &devices) {
+										DevicesSnapshot &devices) {
 	mzAssert(mainThreadRunner != nullptr && mainThreadRunner->isMainThread());
-	if (std::find_if(
-			std::cbegin(devices), std::cend(devices), [&](auto &&otherDevice) { return *otherDevice == *device; })
-		== std::cend(devices)) {
-		devices.push_back(device);
+	const auto current = load(devices);
+	if (std::find_if(std::cbegin(*current),
+					 std::cend(*current),
+					 [&](auto &&otherDevice) { return *otherDevice == *device; })
+		== std::cend(*current)) {
+		auto updated = std::make_shared<Devices>(*current);
+		updated->push_back(device);
+		std::atomic_store(&devices, DevicesSnapshot {std::move(updated)});
 		notifyConnection(device);
 	}
 }
 
 void AllMidiDevicesAndroidImpl::disconnect(const std::shared_ptr<AndroidMidiDevice> &device,
-										   std::vector<std::shared_ptr<AndroidMidiDevice>> &devices) {
+										   DevicesSnapshot &devices) {
 	mzAssert(mainThreadRunner != nullptr && mainThreadRunner->isMainThread());
-	removeDeviceFromDeviceList(device, devices);
+	auto updated = std::make_shared<Devices>(*load(devices));
+	updated->erase(std::remove_if(std::begin(*updated),
+								  std::end(*updated),
+								  [&](auto &&otherDevice) { return *device == *otherDevice; }),
+				   std::end(*updated));
+	std::atomic_store(&devices, DevicesSnapshot {std::move(updated)});
 	notifyDisconnection(device);
 }
 
@@ -59,7 +64,8 @@ void AllMidiDevicesAndroidImpl::outputDeviceDisconnected(const std::shared_ptr<A
 }
 
 void AllMidiDevicesAndroidImpl::sendMessage(const MidiMessage &message) {
-	for (auto &output: midiOutputs) {
+	const auto outputs = load(midiOutputs);
+	for (auto &output: *outputs) {
 		sendMessage(output, message, std::nullopt);
 	}
 }
@@ -68,7 +74,8 @@ void AllMidiDevicesAndroidImpl::sendMessage(const std::shared_ptr<MidiDevice> &d
 											const MidiMessage &message,
 											std::optional<uint64_t> timeStampInNanoSeconds) {
 	if (auto theDevice = dynamic_cast<AndroidMidiDevice *>(device.get())) {
-		for (auto output: midiOutputs) {
+		const auto outputs = load(midiOutputs);
+		for (auto &output: *outputs) {
 			if (*output == *theDevice) {
 				androidSendMidi(message.getBytes(), theDevice->deviceIdentifier, theDevice->devicePort, timeStampInNanoSeconds);
 			}
@@ -77,9 +84,11 @@ void AllMidiDevicesAndroidImpl::sendMessage(const std::shared_ptr<MidiDevice> &d
 }
 
 std::vector<std::shared_ptr<MidiDevice>> AllMidiDevicesAndroidImpl::getConnectedMidiDevices() const {
+	const auto inputs  = load(midiInputs);
+	const auto outputs = load(midiOutputs);
 	std::vector<std::shared_ptr<MidiDevice>> devices;
-	devices.insert(std::end(devices), std::begin(midiInputs), std::end(midiInputs));
-	devices.insert(std::end(devices), std::begin(midiOutputs), std::end(midiOutputs));
+	devices.insert(std::end(devices), std::begin(*inputs), std::end(*inputs));
+	devices.insert(std::end(devices), std::begin(*outputs), std::end(*outputs));
 	return devices;
 }
 
