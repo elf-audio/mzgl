@@ -42,6 +42,14 @@ public:
 					 const MidiMessage &m,
 					 std::optional<uint64_t> delayInNanoSeconds);
 
+	// sends to every connected device that shouldSendTo() accepts, without copying the device list
+	// where the platform allows (Android). Safe to call from the audio thread there; keep the
+	// predicate's captures to a couple of pointers so std::function doesn't allocate
+	void sendMessageToMatching(const MidiMessage &m,
+							   std::optional<uint64_t> delayInNanoSeconds,
+							   const std::function<bool(const MidiDevice &)> &shouldSendTo);
+
+	// builds a new list each call: for UI and setup, not per-message code
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const;
 
 private:

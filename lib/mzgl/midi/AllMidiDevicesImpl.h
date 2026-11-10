@@ -25,6 +25,18 @@ public:
 							 const MidiMessage &m,
 							 std::optional<uint64_t> delayInNanoSeconds) = 0;
 
+	// send message to every connected device that shouldSendTo() accepts. Implementations that can
+	// walk their device list in place override this so a send doesn't build a list first
+	virtual void sendMessageToMatching(const MidiMessage &m,
+									   std::optional<uint64_t> delayInNanoSeconds,
+									   const std::function<bool(const MidiDevice &)> &shouldSendTo) {
+		for (auto &device: getConnectedMidiDevices()) {
+			if (shouldSendTo(*device)) {
+				sendMessage(device, m, delayInNanoSeconds);
+			}
+		}
+	}
+
 	void addConnectionListener(MidiConnectionListener *listener) { connectionListeners.push_back(listener); }
 	void removeConnectionListener(MidiConnectionListener *listener) {
 		connectionListeners.erase(std::remove(connectionListeners.begin(), connectionListeners.end(), listener),

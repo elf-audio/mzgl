@@ -83,6 +83,30 @@ void AllMidiDevicesAndroidImpl::sendMessage(const std::shared_ptr<MidiDevice> &d
 	}
 }
 
+void AllMidiDevicesAndroidImpl::sendMessageToMatching(
+	const MidiMessage &message,
+	std::optional<uint64_t> timeStampInNanoSeconds,
+	const std::function<bool(const MidiDevice &)> &shouldSendTo) {
+	const auto outputs = load(midiOutputs);
+	for (auto &output: *outputs) {
+		if (shouldSendTo(*output)) {
+			androidSendMidi(
+				message.getBytes(), output->deviceIdentifier, output->devicePort, timeStampInNanoSeconds);
+		}
+	}
+}
+
+std::shared_ptr<MidiDevice> AllMidiDevicesAndroidImpl::findInputDevice(AndroidMidiIdentifier deviceId,
+																	   AndroidMidiIdentifier portId) const {
+	const auto inputs = load(midiInputs);
+	for (auto &input: *inputs) {
+		if (input->deviceIdentifier == deviceId && input->devicePort == portId) {
+			return input;
+		}
+	}
+	return nullptr;
+}
+
 std::vector<std::shared_ptr<MidiDevice>> AllMidiDevicesAndroidImpl::getConnectedMidiDevices() const {
 	const auto inputs  = load(midiInputs);
 	const auto outputs = load(midiOutputs);

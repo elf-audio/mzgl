@@ -741,21 +741,20 @@ void androidParseMidiData(vector<unsigned char> midiMessage,
 	auto iter = parsers.find(key);
 
 	if (iter == std::cend(parsers)) {
+		// the port's device, looked up on its first message and again only once it has gone (the
+		// device list holds the strong reference, so this expires on disconnect). Only this port's
+		// receive thread touches it
+		auto cachedDevice = std::make_shared<std::weak_ptr<MidiDevice>>();
 		parsers.insert(std::make_pair(
-			key, MidiMessageParser {[key, deviceId, portId](const MidiMessageParser::MidiData &data) {
+			key, MidiMessageParser {[cachedDevice, deviceId, portId](const MidiMessageParser::MidiData &data) {
 				if (auto impl = midiImpl.lock()) {
-					auto devices	= impl->getConnectedMidiDevices();
-					auto deviceIter = std::find_if(
-						std::begin(devices), std::end(devices), [deviceId, portId](auto &&deviceToTest) {
-							if (auto *androidInput = dynamic_cast<AndroidMidiDevice *>(deviceToTest.get())) {
-								return androidInput->deviceIdentifier == deviceId
-									   && androidInput->devicePort == portId
-									   && androidInput->direction == MidiDevice::Direction::Input;
-							}
-							return false;
-						});
-					if (deviceIter != std::end(devices)) {
-						impl->messageReceived(*deviceIter, MidiMessage {data.data}, data.timestamp);
+					auto device = cachedDevice->lock();
+					if (device == nullptr) {
+						device		  = impl->findInputDevice(deviceId, portId);
+						*cachedDevice = device;
+					}
+					if (device != nullptr) {
+						impl->messageReceived(device, MidiMessage {data.data}, data.timestamp);
 					} else {
 						Log::e() << "Didnt find device " << std::to_string(deviceId) << " and port "
 								 << std::to_string(portId);

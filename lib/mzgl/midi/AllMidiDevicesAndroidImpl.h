@@ -68,7 +68,14 @@ public:
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
 					 std::optional<uint64_t> timeStampInNanoSeconds) override;
+	void sendMessageToMatching(const MidiMessage &m,
+							   std::optional<uint64_t> timeStampInNanoSeconds,
+							   const std::function<bool(const MidiDevice &)> &shouldSendTo) override;
 	std::vector<std::shared_ptr<MidiDevice>> getConnectedMidiDevices() const override;
+
+	// the connected input for an Android device id + port, or nullptr
+	[[nodiscard]] std::shared_ptr<MidiDevice> findInputDevice(AndroidMidiIdentifier deviceId,
+															  AndroidMidiIdentifier portId) const;
 
 private:
 	using Devices		  = std::vector<std::shared_ptr<AndroidMidiDevice>>;
@@ -81,9 +88,10 @@ private:
 
 	void runOnMainThread(const std::function<void(AllMidiDevicesAndroidImpl &)> &fun);
 
-	// the main thread swaps in a new list on connect/disconnect; MIDI receive threads (one per Android
-	// port) and senders read whichever list was current, through load(). They used to share one vector
-	// that the main thread push_back'd and erased under them
+	// the main thread swaps in a new list on connect/disconnect; senders (which include the audio
+	// thread, for MIDI clock out) and MIDI receive threads read whichever list was current, through
+	// load(), without copying it or taking a mutex. They used to share one vector that the main thread
+	// push_back'd and erased under them
 	DevicesSnapshot midiInputs {std::make_shared<const Devices>()};
 	DevicesSnapshot midiOutputs {std::make_shared<const Devices>()};
 	MainThreadRunner *mainThreadRunner {nullptr};

@@ -85,6 +85,13 @@ void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device,
 		impl->sendMessage(device, m, delayInNanoSeconds);
 	}
 }
+void AllMidiDevices::sendMessageToMatching(const MidiMessage &m,
+										   std::optional<uint64_t> delayInNanoSeconds,
+										   const std::function<bool(const MidiDevice &)> &shouldSendTo) {
+	if (online) {
+		impl->sendMessageToMatching(m, delayInNanoSeconds, shouldSendTo);
+	}
+}
 void AllMidiDevices::removeListener(MidiListener *listener) {
 	if (online) {
 		impl->removeListener(listener);
