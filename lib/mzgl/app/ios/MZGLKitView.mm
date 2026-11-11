@@ -13,6 +13,7 @@
 #include "mzgl/util/log.h"
 #include "Vbo.h"
 #include "PluginEditor.h"
+#include "PluginKeyPolicy.h"
 #if defined(MZGL_SOKOL)
 #	include "sokol_gfx.h"
 #	include "SokolSetup.h"
@@ -442,6 +443,33 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
         touchPoint.y *= app->g.pixelScale;
         eventDispatcher->touchDown(touchPoint.x, touchPoint.y, touchIndex);
     }
+    [self claimHardwareKeyboardIfWanted];
+}
+
+#pragma mark - hardware keyboard
+
+// As an AUv3 our view lives in the host's window, where key presses go to the
+// host unless something of ours is first responder. So when the editor opts in
+// (App::pluginAcceptsKeyEvents) a touch makes us first responder; presses we
+// don't want (PluginKeyPolicy.h) carry on up the responder chain to the host.
+// The standalone app is left exactly as it was.
+- (BOOL)canBecomeFirstResponder {
+    if (isPlugin()) return app->pluginAcceptsKeyEvents();
+    return [super canBecomeFirstResponder];
+}
+
+- (void)claimHardwareKeyboardIfWanted {
+    if (!isPlugin() || !app->pluginAcceptsKeyEvents()) return;
+    // the hidden text field holds first responder while a text field is edited
+    if (self.isFirstResponder || hiddenTextField.isFirstResponder) return;
+    [self becomeFirstResponder];
+}
+
+// NO = this key belongs to the host
+- (BOOL)shouldCaptureKey:(UIKey *)key mzKey:(int)k API_AVAILABLE(ios(13.4)) {
+    if (!isPlugin()) return YES;
+    const bool commandDown = (key.modifierFlags & UIKeyModifierCommand) != 0;
+    return mzgl::pluginShouldCaptureKey(*app, k, commandDown);
 }
 
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -492,6 +520,7 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
             UIKey *key = press.key;
             if (key != nil) {
                 int k = uikeyToMz(key);
+                if (![self shouldCaptureKey:key mzKey:k]) continue;
                 if (k != -1) {
                     //                  Log::d() << "KeyCode: " << k << " UIKey.keycode = " << key.keyCode;
                     eventDispatcher->keyDown(k);
@@ -518,15 +547,18 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
 
             if (key != nil) {
                 int k = uikeyToMz(key);
+                // The app always hears the release (the matching press may have
+                // been ours even if cmd went down since); the host hears the
+                // ones it owns too.
                 if (k != -1) {
                     eventDispatcher->keyUp(k);
                 }
-                handled = true;
+                if ([self shouldCaptureKey:key mzKey:k]) handled = true;
             }
         }
     }
     if (!handled) {
-        [super pressesBegan:presses withEvent:event];
+        [super pressesEnded:presses withEvent:event];
     }
 }
 @end

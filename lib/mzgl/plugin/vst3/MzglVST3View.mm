@@ -151,8 +151,9 @@ tresult PLUGIN_API MzglVST3View::attached(void *parent, FIDString type) {
 		impl->eventsView = [[MzglVST3EventsView alloc] initWithFrame:frame
 													   eventDispatcher:impl->dispatcher];
 		// In a VST3 host (Live, etc.), the host owns global keyboard
-		// shortcuts. Don't steal them.
-		impl->eventsView.handlesKeyboard = NO;
+		// shortcuts: only keep the keys PluginKeyPolicy.h allows, and only
+		// if the editor opts in (PluginEditor::pluginAcceptsKeyEvents).
+		impl->eventsView.filtersKeysForHost = YES;
 		// We're embedded in the host's window: never treat clicks as a
 		// window-drag and track the parent's size like the AUv3 path does.
 		impl->eventsView.embeddedInHost	  = YES;

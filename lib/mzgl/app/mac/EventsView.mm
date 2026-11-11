@@ -11,11 +11,14 @@
 
 #include "NSEventDispatcher.h"
 #include "EventDispatcher.h"
+#include "PluginKeyPolicy.h"
 #include "log.h"
 #include "filesystem.h"
 
 #include <algorithm>
 #include <mutex>
+
+int nsEventToKey(NSEvent *evt);
 
 // the view that most recently received a left-mouse down/drag - this is the
 // view a startNativeFileDrag() call refers to (there can be several EventsViews
@@ -120,12 +123,34 @@ static NSString *extensionForUTI(NSString *uti) {
 	return !_embeddedInHost;
 }
 
+// Whether key events are ours to look at right now. In a host that follows the
+// editor's opt-in (and any text field being edited), so it can change at runtime.
+- (BOOL)wantsKeyboard {
+	if (!_handlesKeyboard) return NO;
+	if (_filtersKeysForHost) return mzgl::pluginWantsKeyboardFocus(*eventDispatcher->app);
+	return YES;
+}
+
+// NO = this key belongs to the host: pass it up the responder chain.
+- (BOOL)shouldCaptureKeyEvent:(NSEvent *)event {
+	if (!_filtersKeysForHost) return YES;
+	const bool commandDown = (event.modifierFlags & NSEventModifierFlagCommand) != 0;
+	return mzgl::pluginShouldCaptureKey(*eventDispatcher->app, nsEventToKey(event), commandDown);
+}
+
+// A click doesn't make us first responder while wantsKeyboard is NO, which it
+// still is when that click is the one focusing a text field - catch up after.
+- (void)claimKeyboardIfWanted {
+	if (!_filtersKeysForHost || ![self wantsKeyboard]) return;
+	if (self.window != nil && self.window.firstResponder != self) [self.window makeFirstResponder:self];
+}
+
 - (BOOL)acceptsFirstResponder {
-	return _handlesKeyboard;
+	return [self wantsKeyboard];
 }
 
 - (BOOL)becomeFirstResponder {
-	return _handlesKeyboard;
+	return [self wantsKeyboard];
 }
 
 // this is for vst so the window becomes focused and accepts
@@ -156,10 +181,12 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)flagsChanged:(NSEvent *)event {
-	if (!_handlesKeyboard) {
+	if (![self wantsKeyboard]) {
 		[super flagsChanged:event];
 		return;
 	}
+	// in a host the modifiers are the host's too - we only track them
+	if (_filtersKeysForHost) [super flagsChanged:event];
 	if ((event.modifierFlags & NSEventModifierFlagShift) && !lastShiftState) {
 		lastShiftState = true;
 
@@ -206,7 +233,7 @@ int nsEventToKey(NSEvent *evt) {
 }
 
 - (void)keyDown:(NSEvent *)event {
-	if (!_handlesKeyboard) {
+	if (![self wantsKeyboard] || ![self shouldCaptureKeyEvent:event]) {
 		[super keyDown:event];
 		return;
 	}
@@ -236,10 +263,13 @@ int nsEventToKey(NSEvent *evt) {
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)keyUp:(NSEvent *)event {
-	if (!_handlesKeyboard) {
+	if (![self wantsKeyboard]) {
 		[super keyUp:event];
 		return;
 	}
+	// The app always hears the release (the matching press may have been ours
+	// even if a modifier went down since); the host hears the ones it owns too.
+	if (![self shouldCaptureKeyEvent:event]) [super keyUp:event];
 	auto keyCode = nsEventToKey(event);
 	eventDispatcher->app->main.runOnMainThread(true, [self, keyCode]() { eventDispatcher->keyUp(keyCode); });
 	NSEventDispatcher::instance().dispatch(event, self);
@@ -278,6 +308,7 @@ static BOOL eventIsInTitleBar(NSEvent *event) {
 	auto mouse			  = [self transformMouse:event];
 	eventDispatcher->app->main.runOnMainThread(
 		true, [self, mouse]() { eventDispatcher->touchDown(mouse.x, mouse.y, 0); });
+	[self claimKeyboardIfWanted];
 	NSEventDispatcher::instance().dispatch(event, self);
 }
 - (void)rightMouseDown:(NSEvent *)event {

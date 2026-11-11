@@ -36,7 +36,12 @@ namespace mzgl {
 		float scrollY {0};
 		bool shift {false};
 		bool alt {false};
+		bool ctrl {false};
 		unsigned long keysym {0};
+		// Raw key event fields, kept so forwardKeyToParent() can re-send it.
+		unsigned int keycode {0};
+		unsigned int keyState {0};
+		unsigned long keyTime {0};
 		std::string textUtf8;
 	};
 
@@ -63,6 +68,8 @@ namespace mzgl {
 		// true = take keyboard focus (a text field is active), false = hand it
 		// back to the parent so host shortcuts keep working.
 		void setInputFocus(bool takeIt);
+		// Re-send a KeyDown/KeyUp we don't want to the parent (host) window.
+		void forwardKeyToParent(const X11NativeEvent &event);
 
 		// The shared X connection's fd (one connection serves every instance).
 		static int connectionFd();

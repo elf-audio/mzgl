@@ -169,7 +169,7 @@ CGFloat backingScaleForView(NSView *view) {
 	graphics->pixelScale = scale;
 
 	eventsView					= [[MZGL_AUV2_EVENTS_VIEW_CLASS alloc] initWithFrame:self.bounds eventDispatcher:dispatcher];
-	eventsView.handlesKeyboard	= NO; // the host owns global shortcuts
+	eventsView.filtersKeysForHost = YES; // the host owns global shortcuts - see PluginKeyPolicy.h
 	eventsView.embeddedInHost	= YES;
 	eventsView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 	[self addSubview:eventsView];

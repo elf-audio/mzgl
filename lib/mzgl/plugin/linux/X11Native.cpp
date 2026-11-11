@@ -277,6 +277,25 @@ namespace mzgl {
 		XFlush(shared.display);
 	}
 
+	void X11Native::forwardKeyToParent(const X11NativeEvent &event) {
+		auto &shared = SharedX11::get();
+		if (impl->window == 0 || impl->parent == 0) return;
+		const bool down = event.type == X11NativeEvent::Type::KeyDown;
+		if (!down && event.type != X11NativeEvent::Type::KeyUp) return;
+		XEvent ev			= {};
+		ev.xkey.type		= down ? KeyPress : KeyRelease;
+		ev.xkey.display		= shared.display;
+		ev.xkey.window		= impl->parent;
+		ev.xkey.root		= DefaultRootWindow(shared.display);
+		ev.xkey.subwindow	= impl->window;
+		ev.xkey.time		= (Time) event.keyTime;
+		ev.xkey.state		= event.keyState;
+		ev.xkey.keycode		= event.keycode;
+		ev.xkey.same_screen = True;
+		XSendEvent(shared.display, impl->parent, True, down ? KeyPressMask : KeyReleaseMask, &ev);
+		XFlush(shared.display);
+	}
+
 	int X11Native::connectionFd() {
 		auto &shared = SharedX11::get();
 		if (shared.display == nullptr && !shared.ensure()) return -1;
@@ -344,6 +363,10 @@ namespace mzgl {
 					event.type	 = X11NativeEvent::Type::KeyDown;
 					event.shift	 = (ev.xkey.state & ShiftMask) != 0;
 					event.alt	 = (ev.xkey.state & Mod1Mask) != 0;
+					event.ctrl	 = (ev.xkey.state & ControlMask) != 0;
+					event.keycode  = ev.xkey.keycode;
+					event.keyState = ev.xkey.state;
+					event.keyTime  = (unsigned long) ev.xkey.time;
 					event.keysym = (unsigned long) XLookupKeysym(&ev.xkey, 0);
 					// Printable input via the window's input method when there is
 					// one (dead keys, compose, non-latin layouts), else latin-1.
@@ -366,6 +389,10 @@ namespace mzgl {
 
 				case KeyRelease:
 					event.type	 = X11NativeEvent::Type::KeyUp;
+					event.ctrl	 = (ev.xkey.state & ControlMask) != 0;
+					event.keycode  = ev.xkey.keycode;
+					event.keyState = ev.xkey.state;
+					event.keyTime  = (unsigned long) ev.xkey.time;
 					event.keysym = (unsigned long) XLookupKeysym(&ev.xkey, 0);
 					return true;
 

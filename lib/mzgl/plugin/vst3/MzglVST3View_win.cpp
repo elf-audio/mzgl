@@ -9,6 +9,7 @@
 #	include "PluginEditor.h"
 #	include "Graphics.h"
 #	include "EventDispatcher.h"
+#	include "PluginKeyPolicy.h"
 #	include "util.h"
 #	include "winUtil.h"
 #	include "filesystem.h"
@@ -120,6 +121,10 @@ namespace mzglvst {
 				case VK_NEXT: return MZ_KEY_DECREMENT;
 				default: return static_cast<int>(vk);
 			}
+		}
+
+		bool isModifierKey(int mzKey) {
+			return mzKey == MZ_KEY_SHIFT || mzKey == MZ_KEY_CTRL || mzKey == MZ_KEY_ALT || mzKey == MZ_KEY_CMD;
 		}
 
 		std::string utf16ToUtf8(const std::wstring &w) {
@@ -385,8 +390,8 @@ namespace mzglvst {
 				switch (phase) {
 					case NativeTouch::Phase::down:
 						I.dispatcher->touchDown(fx, fy, id);
-						// as WM_LBUTTONDOWN: a tap that focused a text field takes the keyboard
-						if (I.graphics && I.graphics->textInputReceiver != nullptr) SetFocus(I.hwnd);
+						// as WM_LBUTTONDOWN: take the keyboard if the editor wants it
+						if (I.editor && mzgl::pluginWantsKeyboardFocus(*I.editor)) SetFocus(I.hwnd);
 						break;
 					case NativeTouch::Phase::moved: I.dispatcher->touchMoved(fx, fy, id); break;
 					case NativeTouch::Phase::up: I.dispatcher->touchUp(fx, fy, id); break;
@@ -477,9 +482,10 @@ namespace mzglvst {
 				// timer's own frames keep drawing meanwhile.
 				file_drag_handler::runPendingNativeDrag(nullptr);
 				renderFrame();
-				// Keyboard focus is only ours while a text field is being edited
-				// (see WM_LBUTTONDOWN); hand it back so host shortcuts keep working.
-				if (I.graphics && I.graphics->textInputReceiver == nullptr && GetFocus() == I.hwnd) {
+				// Keyboard focus is only ours while the editor wants key events or a
+				// text field is being edited (see WM_LBUTTONDOWN); otherwise hand
+				// it back so host shortcuts keep working.
+				if (I.editor && !mzgl::pluginWantsKeyboardFocus(*I.editor) && GetFocus() == I.hwnd) {
 					SetFocus(I.parent);
 				}
 				return 0;
@@ -534,10 +540,11 @@ namespace mzglvst {
 				if (!I.anyButtonDown()) SetCapture(I.hwnd);
 				I.buttons[b] = true;
 				I.dispatcher->touchDown(I.mouseX, I.mouseY, Impl::touchIdForButton(b));
-				// Like the macOS view we leave keyboard focus with the host (it
-				// owns the global shortcuts) - except while a text field is active,
-				// which the click may just have focused.
-				if (I.graphics && I.graphics->textInputReceiver != nullptr) {
+				// Keyboard focus stays with the host (it owns the global shortcuts)
+				// unless the editor opted in to key events or a text field is
+				// active, which the click may just have focused. With focus, the
+				// keys PluginKeyPolicy.h refuses are passed on to the host below.
+				if (I.editor && mzgl::pluginWantsKeyboardFocus(*I.editor)) {
 					SetFocus(I.hwnd);
 				}
 				return 0;
@@ -585,7 +592,17 @@ namespace mzglvst {
 
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN: {
-				if (!I.dispatcher || !I.graphics) return 0;
+				if (!I.dispatcher || !I.graphics || !I.editor) return 0;
+				{
+					// The host's keys (ctrl combos, space - see PluginKeyPolicy.h) go
+					// on to its window. Modifiers go both ways: we track their state,
+					// and they are the host's too.
+					const int key		= vkToMzglKey(wParam);
+					const bool modifier = isModifierKey(key);
+					const bool ours = mzgl::pluginShouldCaptureKey(*I.editor, key, GetKeyState(VK_CONTROL) < 0);
+					if (!ours || modifier) PostMessage(I.parent, msg, wParam, lParam);
+					if (!ours && !modifier) return 0;
+				}
 				// Editing keys for the focused text field; printable characters
 				// arrive as WM_CHAR.
 				if (I.graphics->textInputReceiver != nullptr) {
@@ -611,8 +628,14 @@ namespace mzglvst {
 			}
 			case WM_KEYUP:
 			case WM_SYSKEYUP: {
-				if (!I.dispatcher) return 0;
-				I.dispatcher->keyUp(vkToMzglKey(wParam));
+				if (!I.dispatcher || !I.editor) return 0;
+				const int key = vkToMzglKey(wParam);
+				// The app always hears the release (the matching press may have been
+				// ours even if ctrl went down since); the host hears its own too.
+				if (isModifierKey(key) || !mzgl::pluginShouldCaptureKey(*I.editor, key, GetKeyState(VK_CONTROL) < 0)) {
+					PostMessage(I.parent, msg, wParam, lParam);
+				}
+				I.dispatcher->keyUp(key);
 				return 0;
 			}
 			case WM_CHAR: {

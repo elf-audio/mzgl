@@ -44,6 +44,11 @@ public:
 	// KEYS
 	virtual void keyDown(int key) {}
 	virtual void keyUp(int key) {}
+	// Plugin editors only: whether to take hardware-keyboard events while embedded
+	// in a host, rather than leaving them all to the host. Read on every key, so
+	// it can follow a user setting. See util/PluginKeyPolicy.h for which keys the
+	// host keeps regardless.
+	virtual bool pluginAcceptsKeyEvents() const { return false; }
 
 	virtual void iosViewWillPause(bool pausing) {}
 

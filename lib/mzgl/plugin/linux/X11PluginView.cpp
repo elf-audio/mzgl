@@ -13,6 +13,7 @@
 #	include "PluginEditor.h"
 #	include "Graphics.h"
 #	include "EventDispatcher.h"
+#	include "PluginKeyPolicy.h"
 #	include "util.h"
 #	include "log.h"
 #	include "filesystem.h"
@@ -80,6 +81,10 @@ namespace mzgl {
 			}
 		}
 
+		bool isModifierKey(int mzKey) {
+			return mzKey == MZ_KEY_SHIFT || mzKey == MZ_KEY_CTRL || mzKey == MZ_KEY_ALT || mzKey == MZ_KEY_CMD;
+		}
+
 	} // namespace
 
 	struct X11PluginView::Impl {
@@ -145,9 +150,10 @@ namespace mzgl {
 				editor->pluginViewAppeared();
 			}
 
-			// Keyboard focus is only ours while a text field is being edited (see
-			// ButtonDown); hand it back so the host's shortcuts keep working.
-			if (graphics && graphics->textInputReceiver == nullptr && focused) {
+			// Keyboard focus is only ours while the editor wants key events or a
+			// text field is being edited (see ButtonDown); otherwise hand it back
+			// so the host's shortcuts keep working.
+			if (editor && !mzgl::pluginWantsKeyboardFocus(*editor) && focused) {
 				native.setInputFocus(false);
 			}
 		}
@@ -202,10 +208,11 @@ namespace mzgl {
 					I.mouseY	   = ev.y;
 					I.buttons[b]   = true;
 					I.dispatcher->touchDown(I.mouseX, I.mouseY, touchIdForButton(b));
-					// Like the mac/win views, keyboard focus stays with the host -
-					// except while a text field is active, which this click may
-					// just have focused.
-					if (I.graphics && I.graphics->textInputReceiver != nullptr) {
+					// Like the mac/win views, keyboard focus stays with the host
+					// unless the editor opted in to key events or a text field is
+					// active, which this click may just have focused. With focus,
+					// the keys PluginKeyPolicy.h refuses are re-sent to the host.
+					if (I.editor && mzgl::pluginWantsKeyboardFocus(*I.editor)) {
 						I.native.setInputFocus(true);
 					}
 					break;
@@ -226,7 +233,17 @@ namespace mzgl {
 				}
 
 				case T::KeyDown: {
-					if (!I.dispatcher || !I.graphics) break;
+					if (!I.dispatcher || !I.graphics || !I.editor) break;
+					{
+						// The host's keys (ctrl combos, space) go on to its window.
+						// Modifiers go both ways: we track their state, and they
+						// are the host's too.
+						const int key		= keysymToMzglKey(ev.keysym);
+						const bool modifier = isModifierKey(key);
+						const bool ours		= mzgl::pluginShouldCaptureKey(*I.editor, key, ev.ctrl);
+						if (!ours || modifier) I.native.forwardKeyToParent(ev);
+						if (!ours && !modifier) break;
+					}
 					if (I.graphics->textInputReceiver != nullptr) {
 						if (ev.keysym == kKeyBackSpace || ev.keysym == kKeyDelete) {
 							I.dispatcher->textBackspace();
@@ -257,10 +274,14 @@ namespace mzgl {
 				}
 
 				case T::KeyUp: {
-					if (!I.dispatcher) break;
-					if (const int key = keysymToMzglKey(ev.keysym); key != 0) {
-						I.dispatcher->keyUp(key);
+					if (!I.dispatcher || !I.editor) break;
+					const int key = keysymToMzglKey(ev.keysym);
+					// The app always hears the release (the matching press may have
+					// been ours even if ctrl went down since); the host hears its own.
+					if (isModifierKey(key) || !mzgl::pluginShouldCaptureKey(*I.editor, key, ev.ctrl)) {
+						I.native.forwardKeyToParent(ev);
 					}
+					if (key != 0) I.dispatcher->keyUp(key);
 					break;
 				}
 

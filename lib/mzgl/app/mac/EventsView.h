@@ -30,6 +30,11 @@
 // owns keyboard shortcuts and the plugin shouldn't steal them.
 @property (nonatomic, assign) BOOL handlesKeyboard;
 
+// YES for a plugin editor in someone else's host (VST3 / AUv2): the view only
+// keeps the keys mzgl::pluginShouldCaptureKey() allows and passes the rest up
+// the responder chain to the host. Only meaningful while handlesKeyboard is YES.
+@property (nonatomic, assign) BOOL filtersKeysForHost;
+
 // YES when this view is embedded inside a plugin host's window (AUv3 / VST3).
 // In that case the view must not act as a window-drag region and must not
 // filter clicks against the host window's title bar - both of those behaviours
