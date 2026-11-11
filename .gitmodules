@@ -7,6 +7,6 @@
 [submodule "lib/glfw"]
 	path = lib/glfw
 	url = https://github.com/glfw/glfw
-[submodule "lib/rtmidi"]
-	path = lib/rtmidi
-	url = https://github.com/thestk/rtmidi.git
+[submodule "lib/libremidi"]
+	path = lib/libremidi
+	url = https://github.com/celtera/libremidi.git

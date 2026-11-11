@@ -27,7 +27,7 @@ endif()
 # iOS detection. The old check `if(DEFINED ${PLATFORM} AND ${PLATFORM} STREQUAL
 # "OS64")` double-expanded ${PLATFORM} (to e.g. `if(DEFINED OS64 AND ...)`), so
 # IOS stayed FALSE under the iOS toolchain and desktop-only deps (GLFW, PortAudio,
-# RtMidi) were wrongly built for iOS. Detect via the toolchain's CMAKE_SYSTEM_NAME
+# libremidi) were wrongly built for iOS. Detect via the toolchain's CMAKE_SYSTEM_NAME
 # or the ios-cmake PLATFORM value (OS64 / OS64COMBINED / SIMULATOR*).
 set(IOS FALSE)
 if(
@@ -301,7 +301,6 @@ set(
   lib/glew/include
   lib/portaudio/include
   lib/fontstash
-  lib/rtmidi
   lib/sokol
   lib/pu_gixml/src
   lib/misc
@@ -408,6 +407,7 @@ else()
 
   if(NOT APPLE)
     list(APPEND MZGL_SOURCES lib/mzgl/app/glfw/mainGlfw.cpp)
+    list(APPEND MZGL_SOURCES lib/mzgl/midi/AllMidiDevicesLibremidiImpl.cpp)
   endif()
 endif()
 
@@ -581,7 +581,7 @@ endif()
 cmake_policy(SET CMP0077 NEW)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 
-# GLFW and RtMidi are Windows/Linux only: Apple uses the Cocoa/UIKit runners and
+# GLFW and libremidi are Windows/Linux only: Apple uses the Cocoa/UIKit runners and
 # CoreMIDI, Android uses native_app_glue and AMidi.
 if(NOT ANDROID AND NOT APPLE)
   mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/glfw")
@@ -595,11 +595,27 @@ if(NOT ANDROID AND NOT APPLE)
   add_subdirectory(lib/glfw "glfw-build" EXCLUDE_FROM_ALL)
   mzgl_restore_cmake_log_level()
 
-  add_library(RtMidi OBJECT lib/rtmidi/RtMidi.cpp)
+  # Only the backends AllMidiDevicesLibremidiImpl uses: WinMM on Windows (Windows MIDI Services
+  # routes it when enabled), the ALSA sequencer on Linux.
+  mzgl_print_in_blue("[SUBMODULE] -> Adding submodule lib/libremidi")
+  set(LIBREMIDI_NO_WINUWP ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_WINMIDI ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_DOWNLOAD_CPPWINRT OFF CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_JACK ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_PIPEWIRE ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_NETWORK ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_KEYBOARD ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_UDEV ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_BOOST ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_EXPORTS ON CACHE BOOL "" FORCE)
+  set(LIBREMIDI_NO_WARNINGS ON CACHE BOOL "" FORCE)
+  mzgl_save_cmake_log_level()
+  add_subdirectory(lib/libremidi "libremidi-build" EXCLUDE_FROM_ALL)
+  mzgl_restore_cmake_log_level()
+
   if(USING_OPENGL)
     find_package(OpenGL REQUIRED)
   endif()
-  add_dependencies(libmzgl RtMidi)
 endif()
 
 if(ANDROID)
@@ -710,7 +726,7 @@ elseif(APPLE)
 
 elseif(WIN32)
 
-  add_compile_definitions(_WIN32_WINNT=0x0601 __WINDOWS_MM__)
+  add_compile_definitions(_WIN32_WINNT=0x0601)
   if(USING_OPENGL)
     add_compile_definitions(GLEW_STATIC)
   endif()
@@ -719,6 +735,8 @@ elseif(WIN32)
     APPEND MZGL_LIBS
     ${GLFW_LIBRARIES}
     winmm
+    # CM_Register_Notification (midi/AllMidiDevicesLibremidiImpl.cpp)
+    cfgmgr32
     dsound
     ole32
     # SetWindowSubclass (app/glfw/Win32Touch.cpp)
@@ -739,7 +757,6 @@ elseif(WIN32)
   endif()
 
 elseif(LINUX)
-  add_compile_definitions(__LINUX_ALSA__)
   find_package(ALSA REQUIRED)
 
   # -mfpu=neon-vfpv4
@@ -836,7 +853,7 @@ if(WIN32)
   mzgl_restore_cmake_log_level()
 endif()
 if(NOT ANDROID AND NOT APPLE)
-  list(APPEND MZGL_LIBS RtMidi glfw)
+  list(APPEND MZGL_LIBS libremidi glfw)
 endif()
 
 target_link_libraries(libmzgl ${MZGL_LIBS})

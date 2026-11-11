@@ -18,7 +18,7 @@
 #elif defined(__ANDROID__)
 #	include "AllMidiDevicesAndroidImpl.h"
 #else
-#	include "AllMidiDevicesRtMidiImpl.h"
+#	include "AllMidiDevicesLibremidiImpl.h"
 #endif
 
 AllMidiDevices::AllMidiDevices(bool online)
@@ -29,14 +29,18 @@ AllMidiDevices::AllMidiDevices(bool online)
 #elif defined(__APPLE__)
 		impl = std::make_shared<AllMidiDevicesAppleImpl>();
 #else
-		impl = std::make_shared<AllMidiDevicesRtMidiImpl>();
+		impl = std::make_shared<AllMidiDevicesLibremidiImpl>();
 #endif
 	}
 }
 
 void AllMidiDevices::setMainThreadRunner(MainThreadRunner *runner) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
 	if (auto ptr = dynamic_cast<AllMidiDevicesAndroidImpl *>(impl.get())) {
+		ptr->setMainThreadRunner(runner);
+	}
+#elif !defined(__APPLE__)
+	if (auto ptr = dynamic_cast<AllMidiDevicesLibremidiImpl *>(impl.get())) {
 		ptr->setMainThreadRunner(runner);
 	}
 #endif
