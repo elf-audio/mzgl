@@ -509,20 +509,6 @@ float FloatBuffer::interpolate(double p) const noexcept {
 	return (*this)[a] * (1.f - m) + (*this)[b] * m;
 }
 
-float FloatBuffer::interpolateWrapping(double index) const noexcept {
-	int i = index;
-	int j = index + 1;
-	if (j >= size()) {
-		j -= size();
-		if (i >= size()) {
-			i -= size();
-		}
-	}
-	float frac = index - i;
-
-	return (*this)[i] * (1.f - frac) + (*this)[j] * frac;
-}
-
 void FloatBuffer::interpolateStereo(double position, float &outputLeft, float &outputRight) const noexcept {
 	auto index1		   = static_cast<int>(std::floor(position));
 	auto index2		   = index1 + 1;

@@ -152,8 +152,19 @@ public:
 
 	void interpolateStereo(double index, float &L, float &R) const noexcept;
 
-	// for delay lines
-	float interpolateWrapping(double index) const noexcept;
+	// for delay lines. index must be in [0, size()] - size() itself wraps to 0.
+	// inline because it is called per sample
+	float interpolateWrapping(double index) const noexcept {
+		const int sz = static_cast<int>(size());
+		int i		 = static_cast<int>(index);
+		// take the fraction before wrapping i, or an index of exactly size() gives frac == size()
+		const float frac = static_cast<float>(index - i);
+		if (i >= sz) i -= sz;
+		int j = i + 1;
+		if (j >= sz) j -= sz;
+
+		return (*this)[i] * (1.f - frac) + (*this)[j] * frac;
+	}
 
 	void print() const;
 

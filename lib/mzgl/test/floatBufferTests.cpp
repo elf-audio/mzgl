@@ -382,6 +382,8 @@ TEST_CASE("FloatBuffer interpolation edge cases", "[float-buffer][interp]") {
 	SECTION("wrapping interpolation wraps at the end") {
 		CHECK(r.interpolateWrapping(1.5) == Catch::Approx(2.5f));
 		CHECK(r.interpolateWrapping(3.5) == Catch::Approx(2.5f)); // between 4 and 1
+		// an index of exactly size() wraps to the first sample (delay lines hit this through float rounding)
+		CHECK(r.interpolateWrapping(4.0) == Catch::Approx(1.f));
 	}
 	SECTION("stereo linear at and past the end returns something finite") {
 		FloatBuffer st = fb({1.f, 10.f, 2.f, 20.f, 3.f, 30.f});
