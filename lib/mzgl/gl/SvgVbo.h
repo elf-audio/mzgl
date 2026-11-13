@@ -7,10 +7,11 @@
 //
 
 #pragma once
+#include "Graphics.h"
 #include "Vbo.h"
 #include <string>
 #include <memory>
-#include "SVG.h"
+#include "SvgDocument.h"
 #include "Geometry.h"
 
 class SvgVbo;
@@ -19,6 +20,9 @@ typedef std::shared_ptr<SvgVbo> SvgVboRef;
 /**
  * I want to deprecate the SvgVbo object, and just have vbo's, and use the createVbo...()
  * functions here, its a bit cleaner.
+ *
+ * The createVbo...() functions that take a size (width, height, max dimension)
+ * centre the artwork on the origin and tessellate it for that size in pixels.
  */
 class SvgVbo {
 public:
@@ -37,10 +41,14 @@ public:
 	static SvgVboRef create(std::string path, float scale, bool ignoreColor) {
 		return SvgVboRef(new SvgVbo(path, scale, ignoreColor));
 	}
-	static SvgVboRef create(SVGDoc &d, bool ignoreColor = false) { return SvgVboRef(new SvgVbo(d, ignoreColor)); }
 	static VboRef createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor);
 
 	static VboRef createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor);
+
+	// for anything the functions above don't cover: transform maps the document
+	// (viewBox origin at 0,0) to where it's drawn, in pixels - build one from
+	// SvgDocument::centredWith...()
+	static VboRef createVbo(const SvgDocument &doc, const glm::mat3 &transform, bool ignoreColor);
 
 	void draw(Graphics &g, float x = 0, float y = 0);
 	void drawCentred(Graphics &g, glm::vec2 p) { draw(g, p.x - width / 2, p.y - height / 2); }
@@ -52,9 +60,8 @@ public:
 private:
 	SvgVbo(std::string path, float scale, bool ignoreColor);
 	SvgVbo(const std::string &svgString, bool mustBeTrue, float scale, bool ignoreColor);
-	SvgVbo(SVGDoc &d, bool ignoreColor = false); // d should be const
 	VboRef vbo;
-	void loadFromSvg(SVGDoc &d, bool ignoreColor = false); // d should be const
+	void loadFromSvg(const SvgDocument &d, float scale, bool ignoreColor);
 };
 
 class SvgTriangles;
@@ -63,15 +70,11 @@ typedef std::shared_ptr<SvgTriangles> SvgTrianglesRef;
 class SvgTriangles {
 public:
 	static SvgTrianglesRef create(std::string path) { return SvgTrianglesRef(new SvgTriangles(path)); }
-	void getTriangles(std::vector<glm::vec2> &verts, std::vector<glm::vec2> &indices);
 	float width	 = 0;
 	float height = 0;
 
 	Geometry geometry;
 
 private:
-	std::vector<glm::vec2> verts;
-	std::vector<glm::vec4> cols;
-	std::vector<unsigned int> indices;
 	SvgTriangles(std::string path);
 };

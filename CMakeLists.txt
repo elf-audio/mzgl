@@ -53,9 +53,7 @@ set(
   lib/mzgl/audio/AudioSystem.cpp
   lib/mzgl/geom/Rectf.cpp
   lib/mzgl/geom/RoundedRect.cpp
-  lib/mzgl/geom/SVG.cpp
   lib/mzgl/geom/SvgDocument.cpp
-  lib/mzgl/geom/Triangulator.cpp
   lib/mzgl/geom/geomutils.cpp
   lib/mzgl/geom/3D/Camera.cpp
   lib/mzgl/gl/error.cpp

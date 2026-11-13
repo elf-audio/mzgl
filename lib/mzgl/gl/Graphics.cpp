@@ -491,18 +491,32 @@ void Graphics::warpMaskForScissor(Rectf &a) {
 	// currently does nothing
 }
 
-#include "Triangulator.h"
+#include "tesselator.h"
 void Graphics::drawShape(const std::vector<vec2> &shape) {
 	if (shape.empty()) return;
 	if (isFilling()) {
-		Triangulator t;
-		std::vector<std::vector<vec2>> verts = {shape};
-		Geometry geom;
-		t.triangulate(verts, geom.verts, geom.indices);
-		VboRef vbo = Vbo::create();
-
-		vbo->setGeometry(geom);
-		vbo->draw(*this, Vbo::PrimitiveType::Triangles);
+		if (shape.size() < 3) return;
+		TESStesselator *tess = tessNewTess(nullptr);
+		if (tess == nullptr) return;
+		tessAddContour(tess, 2, shape.data(), sizeof(vec2), static_cast<int>(shape.size()));
+		const TESSreal normal[3] = {0, 0, 1};
+		if (tessTesselate(tess, TESS_WINDING_ODD, TESS_POLYGONS, 3, 2, normal)) {
+			const TESSreal *verts	 = tessGetVertices(tess);
+			const TESSindex *indices = tessGetElements(tess);
+			Geometry geom;
+			for (int i = 0; i < tessGetVertexCount(tess); i++) {
+				geom.verts.emplace_back(verts[i * 2], verts[i * 2 + 1]);
+			}
+			for (int i = 0; i < tessGetElementCount(tess) * 3; i++) {
+				geom.indices.push_back(static_cast<uint32_t>(indices[i]));
+			}
+			if (!geom.indices.empty()) {
+				VboRef vbo = Vbo::create();
+				vbo->setGeometry(geom);
+				vbo->draw(*this, Vbo::PrimitiveType::Triangles);
+			}
+		}
+		tessDeleteTess(tess);
 	} else {
 		auto verts = shape;
 		verts.push_back(verts[0]);

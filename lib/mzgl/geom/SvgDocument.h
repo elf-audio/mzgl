@@ -2,7 +2,7 @@
 //  SvgDocument.h
 //  mzgl
 //
-//  SVG -> triangles, second generation (the first is SVG.h / Triangulator.h).
+//  SVG -> triangles.
 //
 //  The document keeps its paths as curves, so parsing happens once and
 //  tessellate() can be called for any size: curves are flattened in OUTPUT

@@ -8,106 +8,104 @@
 
 #include "SvgVbo.h"
 
-#include "SVG.h"
+#include "SvgDocument.h"
 #include "util.h"
 #include "log.h"
 
 using namespace std;
 
-static VboRef vboFromDoc(SVGDoc &doc, float maxDim, bool ignoreColor) {
-	vec2 tr = -vec2(doc.width / 2, doc.height / 2);
-	doc.translate(tr.x, tr.y);
+namespace {
+	// The functions that take a size in pixels tessellate for that size. The
+	// ones that take a bare scale factor don't say how big the result ends up
+	// on screen - callers go on to g.scale() it or scale the geometry - so
+	// those get a tolerance relative to the artwork instead: as smooth as
+	// SvgDocument's default at 500 px across, whatever size it's built at.
+	float scaleIndependentTolerance(const SvgDocument &doc, float sx, float sy) {
+		const float maxDim = std::max(std::abs(doc.width * sx), std::abs(doc.height * sy));
+		return std::max(maxDim / 2000.f, 1e-4f);
+	}
 
-	float actualMaxDim = std::max(doc.width, doc.height);
+	VboRef vboFromGeometry(const Geometry &geometry) {
+		auto vbo = Vbo::create();
+		vbo->setGeometry(geometry);
+		return vbo;
+	}
 
-	doc.scale(maxDim / actualMaxDim);
-	return SvgVbo::create(doc, ignoreColor)->getVbo();
-}
+	VboRef vboFromString(const std::string &svgCode,
+						 bool ignoreColor,
+						 const std::function<glm::mat3(const SvgDocument &)> &transform) {
+		SvgDocument doc;
+		if (!doc.parse(svgCode) || doc.width <= 0 || doc.height <= 0) {
+			return nullptr;
+		}
+		return SvgVbo::createVbo(doc, transform(doc), ignoreColor);
+	}
 
-static VboRef vboFromDocWithHeight(SVGDoc &doc, float height, bool ignoreColor) {
-	vec2 tr = -vec2(doc.width / 2, doc.height / 2);
-	doc.translate(tr.x, tr.y);
+#ifdef __ANDROID__
+	string resolvePath(const string &path) {
+		return path;
+	}
+#else
+	string resolvePath(const string &path) {
+		return dataPath(path);
+	}
+#endif
+} // namespace
 
-	doc.scale(height / doc.height);
-	return SvgVbo::create(doc, ignoreColor)->getVbo();
-}
-
-static VboRef vboFromDocWithWidth(SVGDoc &doc, float width, bool ignoreColor) {
-	vec2 tr = -vec2(doc.width / 2, doc.height / 2);
-	doc.translate(tr.x, tr.y);
-
-	doc.scale(width / doc.width);
-	return SvgVbo::create(doc, ignoreColor)->getVbo();
-}
-
-static VboRef vboFromDocWithScale(SVGDoc &doc, float scale, bool ignoreColor) {
-	vec2 tr = -vec2(doc.width / 2, doc.height / 2);
-	doc.translate(tr.x, tr.y);
-	doc.scale(scale);
-	return SvgVbo::create(doc, ignoreColor)->getVbo();
-}
-
-static VboRef vboFromDocWithWidthAndHeight(SVGDoc &doc, float width, float height, bool ignoreColor) {
-	vec2 tr = -vec2(doc.width / 2, doc.height / 2);
-	doc.translate(tr.x, tr.y);
-	doc.scale(width / doc.width, height / doc.height);
-	return SvgVbo::create(doc, ignoreColor)->getVbo();
+VboRef SvgVbo::createVbo(const SvgDocument &doc, const glm::mat3 &transform, bool ignoreColor) {
+	SvgDocument::Options options;
+	options.colors = !ignoreColor;
+	Geometry geometry;
+	doc.tessellate(transform, geometry, options);
+	return vboFromGeometry(geometry);
 }
 
 VboRef SvgVbo::createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.load(path)) {
+	SvgDocument doc;
+	if (!doc.load(path) || doc.width <= 0 || doc.height <= 0) {
 		return nullptr;
 	}
-	return vboFromDoc(doc, maxDim, ignoreColor);
+	return createVbo(doc, doc.centredWithMaxDim(maxDim), ignoreColor);
 }
 
 VboRef SvgVbo::createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.loadFromString(svgCode)) {
-		return nullptr;
-	}
-	return vboFromDoc(doc, maxDim, ignoreColor);
+	return vboFromString(svgCode, ignoreColor, [&](const SvgDocument &d) { return d.centredWithMaxDim(maxDim); });
 }
 
 VboRef SvgVbo::createVboFromStringWithHeight(const std::string &svgCode, float height, bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.loadFromString(svgCode)) {
-		return nullptr;
-	}
-	return vboFromDocWithHeight(doc, height, ignoreColor);
+	return vboFromString(svgCode, ignoreColor, [&](const SvgDocument &d) { return d.centredWithHeight(height); });
 }
 
 VboRef SvgVbo::createVboFromStringWithWidth(const std::string &svgCode, float width, bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.loadFromString(svgCode)) {
-		return nullptr;
-	}
-	return vboFromDocWithWidth(doc, width, ignoreColor);
+	return vboFromString(svgCode, ignoreColor, [&](const SvgDocument &d) { return d.centredWithWidth(width); });
 }
 
 VboRef SvgVbo::createVboFromStringWithScale(const std::string &svgCode, float scale, bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.loadFromString(svgCode)) {
+	SvgDocument doc;
+	if (!doc.parse(svgCode) || doc.width <= 0 || doc.height <= 0) {
 		return nullptr;
 	}
-	return vboFromDocWithScale(doc, scale, ignoreColor);
+	SvgDocument::Options options;
+	options.colors	  = !ignoreColor;
+	options.tolerance = scaleIndependentTolerance(doc, scale, scale);
+	Geometry geometry;
+	doc.tessellate(doc.centredWithScale(scale), geometry, options);
+	return vboFromGeometry(geometry);
 }
 
 VboRef SvgVbo::createVboFromStringWithWidthAndHeight(const std::string &svgCode,
 													 float width,
 													 float height,
 													 bool ignoreColor) {
-	SVGDoc doc;
-	if (!doc.loadFromString(svgCode)) {
-		return nullptr;
-	}
-	return vboFromDocWithWidthAndHeight(doc, width, height, ignoreColor);
+	return vboFromString(svgCode, ignoreColor, [&](const SvgDocument &d) {
+		return d.centredWithScale(width / d.width, height / d.height);
+	});
 }
 
 void SvgVbo::draw(Graphics &g, float x, float y) {
 	if (vbo == nullptr) {
 		Log::e() << "SvgVbo: vbo is null";
+		return;
 	}
 
 	if (x != 0 || y != 0) {
@@ -118,61 +116,49 @@ void SvgVbo::draw(Graphics &g, float x, float y) {
 	}
 }
 
-SvgVbo::SvgVbo(SVGDoc &d, bool ignoreColor) {
-	loadFromSvg(d, ignoreColor);
-}
+// top left at the origin, 2 * scale times the document's size
+void SvgVbo::loadFromSvg(const SvgDocument &svg, float scale, bool ignoreColor) {
+	const float s = 2 * scale;
+	width		  = svg.width * s;
+	height		  = svg.height * s;
 
-void SvgVbo::loadFromSvg(SVGDoc &svg, bool ignoreColor) {
-	vbo = Vbo::create();
-	//vbo.clear();
-	width  = svg.width;
-	height = svg.height;
-
+	SvgDocument::Options options;
+	options.colors	  = !ignoreColor;
+	options.tolerance = scaleIndependentTolerance(svg, s, s);
 	Geometry geometry;
-
-	svg.getTriangles(geometry.verts, geometry.cols, geometry.indices);
-
-	if (ignoreColor) geometry.cols.clear();
-	vbo->setGeometry(geometry);
+	svg.tessellate(glm::mat3 {s, 0, 0, 0, s, 0, 0, 0, 1}, geometry, options);
+	vbo = vboFromGeometry(geometry);
 }
+
 SvgVbo::SvgVbo(const string &svgString, bool mustBeTrue, float scale, bool ignoreColor) {
-	SVGDoc svg;
-	if (svg.loadFromString(svgString)) {
-		svg.scale(2 * scale);
-		loadFromSvg(svg, ignoreColor);
+	SvgDocument svg;
+	if (svg.parse(svgString)) {
+		loadFromSvg(svg, scale, ignoreColor);
 	} else {
 		Log::e() << "ERROR: couldn't load SVG from string";
 	}
 }
 
 SvgVbo::SvgVbo(string path, float scale, bool ignoreColor) {
-#ifdef __ANDROID__
-	string p = path;
-#else
-	string p = dataPath(path);
-#endif
-
-	SVGDoc svg;
+	const string p = resolvePath(path);
+	SvgDocument svg;
 	if (svg.load(p)) {
-		svg.scale(2 * scale);
-		loadFromSvg(svg, ignoreColor);
+		loadFromSvg(svg, scale, ignoreColor);
 	} else {
 		Log::e() << "ERROR: couldn't load SVG file " << p;
 	}
 }
 
 SvgTriangles::SvgTriangles(string path) {
-#ifdef __ANDROID__
-	string p = path;
-#else
-	string p = dataPath(path);
-#endif
-	SVGDoc svg;
+	const string p = resolvePath(path);
+	SvgDocument svg;
 	if (svg.load(p)) {
-		svg.scale(2);
-		width  = svg.width;
-		height = svg.height;
-		svg.getTriangles(geometry.verts, geometry.cols, geometry.indices);
+		const float s = 2;
+		width		  = svg.width * s;
+		height		  = svg.height * s;
+		SvgDocument::Options options;
+		options.tolerance = scaleIndependentTolerance(svg, s, s);
+		svg.tessellate(glm::mat3 {s, 0, 0, 0, s, 0, 0, 0, 1}, geometry, options);
 	} else {
 		Log::e() << "ERROR: couldn't load SVG file " << p;
 	}
