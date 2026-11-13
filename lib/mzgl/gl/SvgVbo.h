@@ -7,40 +7,39 @@
 //
 
 #pragma once
+#include "Graphics.h"
 #include "Vbo.h"
 #include <string>
 #include <memory>
-#include "SVG.h"
+#include "SvgDocument.h"
 #include "Geometry.h"
+#include "svgFactories.h"
+#include "DisableAllWarnings.h"
 
-class SvgVbo;
-typedef std::shared_ptr<SvgVbo> SvgVboRef;
+#define MZGL_SVGVBO_DEPRECATED                                                                                    \
+	"SvgVbo is built at a scale factor and scaled again when drawn, so it can't be tessellated for its real size. " \
+	"Use svg::createVboWith...() (svgFactories.h) with the size in pixels and keep the VboRef."
+
+class [[deprecated(MZGL_SVGVBO_DEPRECATED)]] SvgVbo;
+// naming the class here would warn in every file that includes this header
+DISABLE_WARNINGS
+using SvgVboRef [[deprecated(MZGL_SVGVBO_DEPRECATED)]] = std::shared_ptr<SvgVbo>;
+RESTORE_WARNINGS
 
 /**
- * I want to deprecate the SvgVbo object, and just have vbo's, and use the createVbo...()
- * functions here, its a bit cleaner.
+ * DEPRECATED - a vbo of an svg plus its size, built at `scale` (times 2) with
+ * its top left at the origin. The functions that used to live here as statics
+ * are in svgFactories.h (namespace svg) and are what new code should use.
  */
-class SvgVbo {
+class [[deprecated(MZGL_SVGVBO_DEPRECATED)]] SvgVbo {
 public:
-	static SvgVboRef fromSvgString(const std::string &data, float scale, bool ignoreColor) {
-		return SvgVboRef(new SvgVbo(data, true, scale, ignoreColor));
+	static std::shared_ptr<SvgVbo> fromSvgString(const std::string &data, float scale, bool ignoreColor) {
+		return std::shared_ptr<SvgVbo>(new SvgVbo(data, true, scale, ignoreColor));
 	}
 
-	static VboRef createVboFromStringWithScale(const std::string &svgCode, float scale, bool ignoreColor);
-	static VboRef createVboFromStringWithHeight(const std::string &svgCode, float height, bool ignoreColor);
-	static VboRef createVboFromStringWithWidth(const std::string &svgCode, float width, bool ignoreColor);
-	static VboRef createVboFromStringWithWidthAndHeight(const std::string &svgCode,
-														float width,
-														float height,
-														bool ignoreColor);
-
-	static SvgVboRef create(std::string path, float scale, bool ignoreColor) {
-		return SvgVboRef(new SvgVbo(path, scale, ignoreColor));
+	static std::shared_ptr<SvgVbo> create(std::string path, float scale, bool ignoreColor) {
+		return std::shared_ptr<SvgVbo>(new SvgVbo(path, scale, ignoreColor));
 	}
-	static SvgVboRef create(SVGDoc &d, bool ignoreColor = false) { return SvgVboRef(new SvgVbo(d, ignoreColor)); }
-	static VboRef createVboFromStringWithMaxDim(const std::string &svgCode, float maxDim, bool ignoreColor);
-
-	static VboRef createVboWithMaxDim(const std::string &path, float maxDim, bool ignoreColor);
 
 	void draw(Graphics &g, float x = 0, float y = 0);
 	void drawCentred(Graphics &g, glm::vec2 p) { draw(g, p.x - width / 2, p.y - height / 2); }
@@ -52,26 +51,27 @@ public:
 private:
 	SvgVbo(std::string path, float scale, bool ignoreColor);
 	SvgVbo(const std::string &svgString, bool mustBeTrue, float scale, bool ignoreColor);
-	SvgVbo(SVGDoc &d, bool ignoreColor = false); // d should be const
 	VboRef vbo;
-	void loadFromSvg(SVGDoc &d, bool ignoreColor = false); // d should be const
+	void loadFromSvg(const SvgDocument &d, float scale, bool ignoreColor);
 };
 
 class SvgTriangles;
 typedef std::shared_ptr<SvgTriangles> SvgTrianglesRef;
 
+/**
+ * The triangles of an svg at twice its document size, top left at the origin,
+ * for callers that scale and recolour the geometry themselves. Same caveat as
+ * SvgVbo: it doesn't know the final size. SvgDocument::tessellate() straight
+ * into a Drawer's geometry does the same job at the right size.
+ */
 class SvgTriangles {
 public:
 	static SvgTrianglesRef create(std::string path) { return SvgTrianglesRef(new SvgTriangles(path)); }
-	void getTriangles(std::vector<glm::vec2> &verts, std::vector<glm::vec2> &indices);
 	float width	 = 0;
 	float height = 0;
 
 	Geometry geometry;
 
 private:
-	std::vector<glm::vec2> verts;
-	std::vector<glm::vec4> cols;
-	std::vector<unsigned int> indices;
 	SvgTriangles(std::string path);
 };

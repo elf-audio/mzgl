@@ -53,8 +53,7 @@ set(
   lib/mzgl/audio/AudioSystem.cpp
   lib/mzgl/geom/Rectf.cpp
   lib/mzgl/geom/RoundedRect.cpp
-  lib/mzgl/geom/SVG.cpp
-  lib/mzgl/geom/Triangulator.cpp
+  lib/mzgl/geom/SvgDocument.cpp
   lib/mzgl/geom/geomutils.cpp
   lib/mzgl/geom/3D/Camera.cpp
   lib/mzgl/gl/error.cpp
@@ -69,6 +68,7 @@ set(
   lib/mzgl/gl/Image.cpp
   lib/mzgl/gl/Shader.cpp
   lib/mzgl/gl/SvgVbo.cpp
+  lib/mzgl/gl/svgFactories.cpp
   lib/mzgl/gl/Texture.cpp
   lib/mzgl/gl/Vbo.cpp
   lib/mzgl/gl/ScopedMask.cpp
@@ -333,6 +333,20 @@ endif(MZGL_UNIT_TEST)
 
 add_library(yoga STATIC ${YOGA_SOURCES})
 add_library(pu_gixml OBJECT lib/pu_gixml/src/pu_gixml.cpp)
+
+# libtess2 (fetched by cmake/dependencies.cmake), for geom/SvgDocument.cpp
+add_library(
+  tess2 OBJECT
+  ${libtess2_DEPS_DIR}/Source/bucketalloc.c
+  ${libtess2_DEPS_DIR}/Source/dict.c
+  ${libtess2_DEPS_DIR}/Source/geom.c
+  ${libtess2_DEPS_DIR}/Source/mesh.c
+  ${libtess2_DEPS_DIR}/Source/priorityq.c
+  ${libtess2_DEPS_DIR}/Source/sweep.c
+  ${libtess2_DEPS_DIR}/Source/tess.c
+)
+target_include_directories(tess2 PRIVATE ${libtess2_DEPS_DIR}/Include)
+set_target_properties(tess2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # GCC 16 reports a false-positive -Wuninitialized in xml_document::_move.
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_compile_options(pu_gixml PRIVATE -Wno-error=uninitialized)
@@ -570,6 +584,7 @@ set(
   ZipFile
   yoga
   pu_gixml
+  tess2
   concurrentqueue
   readerwriterqueue
 )

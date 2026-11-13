@@ -136,8 +136,12 @@ function(mzgl_add_named_package PACKAGE_STRING)
     https://github.com/${DEVELOPER}/${NAME}/archive/${SHA}.zip DOWNLOAD_ONLY
     True)
 
-  add_library(${TARGET} INTERFACE IMPORTED GLOBAL)
-  target_include_directories(${TARGET} SYSTEM INTERFACE ${${TARGET}_SOURCE_DIR})
+  # mzgl_add_packages() runs once for mzgl and again for a project that includes
+  # mzgl's cmake helpers itself (Koala does)
+  if(NOT TARGET ${TARGET})
+    add_library(${TARGET} INTERFACE IMPORTED GLOBAL)
+    target_include_directories(${TARGET} SYSTEM INTERFACE ${${TARGET}_SOURCE_DIR})
+  endif()
   include_directories(SYSTEM INTERFACE ${${TARGET}_SOURCE_DIR})
 
   set(ENV{${TARGET}_SOURCE_DIR} "${TARGET}_SOURCE_DIR}")
