@@ -553,17 +553,28 @@ void android_main(android_app *state) {
 	}
 
 	while (!state->destroyRequested) {
-		android_poll_source *source = nullptr;
+		// Handle everything that's waiting before drawing. The java main thread blocks until this
+		// thread picks each lifecycle command up, so taking one per frame (as this used to) left
+		// it waiting behind whole frames when several were queued - an ANR on a slow frame.
+		// Blocks for the first event only when there's nothing to draw
+		int timeoutMillis = myEngine->ready() ? 0 : -1;
+		while (!state->destroyRequested) {
+			android_poll_source *source = nullptr;
+			auto result = ALooper_pollOnce(timeoutMillis, nullptr, nullptr, (void **) &source);
 
-		auto result = ALooper_pollOnce(myEngine->ready() ? 0 : -1, nullptr, nullptr, (void **) &source);
+			if (result == ALOOPER_POLL_ERROR) {
+				Log::e() << "ALooper_pollOnce returned an error";
+				mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
+				break;
+			}
 
-		if (result == ALOOPER_POLL_ERROR) {
-			Log::e() << "ALooper_pollOnce returned an error";
-			mzAssert(result != ALOOPER_POLL_ERROR, "ALooper_pollOnce returned an error");
-			continue;
+			if (source != nullptr) source->process(state, source);
+
+			// < 0 is a timeout or a bare wake: nothing more is waiting
+			if (result < 0) break;
+			timeoutMillis = 0;
 		}
-
-		if (source != nullptr) source->process(state, source);
+		if (state->destroyRequested) break;
 
 		if (myEngine->ready()) {
 			myEngine->drawFrame();
