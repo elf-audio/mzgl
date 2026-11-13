@@ -369,22 +369,27 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 
 	mzAssert(bytes.size() < 65536);
 
+	// One SysEx goes out as consecutive MIDISend calls of at most 48 bytes, in
+	// order, on the calling thread. 48 bytes is one full 64-byte USB-MIDI event
+	// packet; a device with a small endpoint buffer was seen to lose a byte from
+	// a single large send. MIDISendSysex is not used: it is asynchronous, so two
+	// messages sent back to back are separate requests that CoreMIDI may
+	// interleave, and it throttles to the endpoint's nominal SysEx speed.
 	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
-		auto request = new MIDISysexSendRequest;
-
-		sysexData.push_back(std::pair(request, std::vector<uint8_t>(bytes.size())));
-
-		request->data = sysexData.back().second.data();
-		memcpy((void *) request->data, (void *) bytes.data(), bytes.size());
-
-		request->bytesToSend	  = static_cast<UInt32>(bytes.size());
-		request->completionProc	  = &cleanupSysex;
-		request->completionRefCon = this;
-		request->complete		  = false;
-		request->destination	  = *endpoint;
-
-		auto result = MIDISendSysex(request);
-		NSLogError(result, "Sending MIDI sysex");
+		static constexpr size_t maxBytesPerSend = 48;
+		for (size_t at = 0; at < bytes.size(); at += maxBytesPerSend) {
+			const auto count = std::min(maxBytesPerSend, bytes.size() - at);
+			Byte packetBuffer[256];
+			auto *packetList   = reinterpret_cast<MIDIPacketList *>(packetBuffer);
+			MIDIPacket *packet = MIDIPacketListInit(packetList);
+			packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, 0, count, bytes.data() + at);
+			if (packet == nullptr) {
+				NSLog(@"Failed to build a MIDI sysex packet");
+				return;
+			}
+			auto result = MIDISend(outputPort, *endpoint, packetList);
+			NSLogError(result, "Sending MIDI sysex");
+		}
 	}
 }
 
