@@ -39,6 +39,9 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #	include "WaylandTouch.h"
 #elif defined(_WIN32)
 #	include "Win32Touch.h"
+#	ifdef MZGL_SINGLE_INSTANCE
+#		include "SingleInstance_Windows.h"
+#	endif
 #endif
 
 #if defined(MZGL_SOKOL) && defined(_WIN32)
@@ -454,6 +457,17 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	// Platform-specific file drag/drop handler.
 	DesktopWindowFileDragHandler windowFileDragHandler {
 		window, file_drag_handler::makeFileDragListener(eventDispatcher.get())};
+
+#if defined(_WIN32) && defined(MZGL_SINGLE_INSTANCE)
+	// Files double-clicked while we're running arrive here from the launch that
+	// Windows started for them (see SingleInstance_Windows.h) - open them the
+	// way a file handed to the app by the OS is opened everywhere else.
+	if (single_instance::appliesTo(getCommandLineArgs())) {
+		single_instance::listen(app->nativeWindowHandle, [dispatcher = eventDispatcher](const std::string &path) {
+			dispatcher->openUrl(ScopedUrl::create(path));
+		});
+	}
+#endif
 
 #ifdef __linux__
 	gtk_init(&argc, &argv);
