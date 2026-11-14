@@ -195,6 +195,8 @@ if(NOT ANDROID AND NOT APPLE)
     lib/mzgl/app/glfw/GLFWOS_Windows.cpp
     lib/mzgl/app/glfw/Win32Touch.h
     lib/mzgl/app/glfw/Win32Touch.cpp
+    lib/mzgl/app/glfw/SingleInstance_Windows.h
+    lib/mzgl/app/glfw/SingleInstance_Windows.cpp
     >
   )
 endif()
@@ -494,6 +496,15 @@ target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 include_directories(libmzgl PUBLIC ${HEADERS})
 include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_compile_definitions(libmzgl_unit_test PUBLIC -DUNIT_TEST -DDEBUG)
+
+# Windows standalone apps: a second launch (a double-clicked associated file)
+# hands its files to the copy already running and exits, instead of starting
+# another one. Off unless the app asks for it. See
+# lib/mzgl/app/glfw/SingleInstance_Windows.h.
+option(MZGL_WIN_SINGLE_INSTANCE "Windows: run one copy of the standalone app, later launches hand off to it" OFF)
+if(WIN32 AND MZGL_WIN_SINGLE_INSTANCE)
+  target_compile_definitions(libmzgl PRIVATE MZGL_SINGLE_INSTANCE)
+endif()
 
 # COMPILE SOKOL SHADERS List of shader files
 set(

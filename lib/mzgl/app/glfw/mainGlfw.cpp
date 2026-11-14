@@ -8,6 +8,9 @@
 #	include <cstdio>
 #	include <fcntl.h>
 #	include <io.h>
+#	ifdef MZGL_SINGLE_INSTANCE
+#		include "SingleInstance_Windows.h"
+#	endif
 
 // When the parent process passes a pipe or file in one of the standard
 // handles (e.g. node's child_process.spawn with stdio:'pipe', or `Koala > log.txt`
@@ -78,6 +81,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	argvVec.push_back(nullptr); // POSIX-style sentinel
 	int argc	= static_cast<int>(argStorage.size());
 	char **argv = argvVec.data();
+
+#	ifdef MZGL_SINGLE_INSTANCE
+	// Already running? Give that copy our file(s) and leave, before anything
+	// (audio, autosave, a window) is touched.
+	if (single_instance::handOffToRunningInstance(argStorage)) {
+		return 0;
+	}
+#	endif
 
 #else
 int main(int argc, char *argv[]) {
