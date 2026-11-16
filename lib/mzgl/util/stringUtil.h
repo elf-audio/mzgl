@@ -82,9 +82,6 @@ std::string to_string(const T a_value, const int n);
 std::string zeroPad(int number, int width);
 std::string zeroPad2(int number);
 
-std::string time_point_to_string(const std::chrono::system_clock::time_point &tp);
-std::chrono::system_clock::time_point string_to_time_point(const std::string &s);
-std::string timestampString();
 
 std::vector<std::string> tokenize(const std::string &path, const char delimiter);
 
