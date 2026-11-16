@@ -1,39 +1,55 @@
 #include "tests.h"
-#include "stringUtil.h"
 #include "util.h"
-#include <chrono>
 #include <regex>
 
-TEST_CASE("formatTime writes a time out with a strftime format", "[util][time]") {
-	// 2026-11-14 09:46:38 UTC
-	const std::time_t t = 1794649598;
-	REQUIRE(formatTime(t, "%Y-%m-%d %H:%M:%S", TimeZone::UTC) == "2026-11-14 09:46:38");
-	REQUIRE(formatTime(t, "%d %b %Y", TimeZone::UTC) == "14 Nov 2026");
-	REQUIRE(formatTime(0, "%Y-%m-%d %H:%M:%S", TimeZone::UTC) == "1970-01-01 00:00:00");
+namespace {
+	// 2026-11-14 09:46:38 UTC, and a winter and a summer noon (where clocks change, those differ)
+	constexpr std::time_t november = 1794649598;
+	constexpr std::time_t january  = 1768478400; // 2026-01-15 12:00:00 UTC
+	constexpr std::time_t july	   = 1784116800; // 2026-07-15 12:00:00 UTC
+} // namespace
 
-	// local time is whatever the machine says, but always the same shape
-	REQUIRE(std::regex_match(formatTime(t, "%Y-%m-%d %H:%M:%S"), std::regex(R"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)")));
+TEST_CASE("a timestamp is UTC and says so", "[util][time]") {
+	REQUIRE(timestampString(november) == "2026-11-14 09:46:38 UTC");
+	REQUIRE(timestampString(0) == "1970-01-01 00:00:00 UTC");
+	REQUIRE(timestampString(july) == "2026-07-15 12:00:00 UTC");
+	REQUIRE(std::regex_match(timestampString(), std::regex(R"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC)")));
 }
 
-TEST_CASE("the ready-made timestamps have the shapes their users rely on", "[util][time]") {
-	REQUIRE(std::regex_match(utcTimestampString(), std::regex(R"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC)")));
-	REQUIRE(std::regex_match(timestampString(), std::regex(R"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)")));
-
-	// nothing a file system would object to
-	const auto forFilename = filenameTimestampString();
-	REQUIRE(std::regex_match(forFilename, std::regex(R"(\d{4}-\d\d-\d\d--\d\d\.\d\d\.\d\d)")));
-	REQUIRE(forFilename.find(':') == std::string::npos);
-	REQUIRE(forFilename.find(' ') == std::string::npos);
+TEST_CASE("a timestamp reads back as the time it was written from", "[util][time]") {
+	for (auto time: {november, january, july, std::time(nullptr)}) {
+		REQUIRE(timeFromTimestampString(timestampString(time)) == time);
+	}
+	REQUIRE(timeFromTimestampString("2026-11-14 09:46:38 UTC") == november);
+	REQUIRE(timeFromTimestampString("not a time") == 0);
+	REQUIRE(timeFromTimestampString("") == 0);
 }
 
-TEST_CASE("a time point survives being written and read back", "[util][time]") {
-	// to the second, which is all the text form holds
-	const auto now = std::chrono::system_clock::from_time_t(std::time(nullptr));
-	REQUIRE(string_to_time_point(time_point_to_string(now)) == now);
+TEST_CASE("an old timestamp with no zone on it is read as local time", "[util][time]") {
+	// what used to be written: the same text, minus " UTC", in whatever zone the
+	// machine was in. Build one for this machine and check it lands on the right
+	// instant - in summer too, which used to come back an hour late.
+	for (auto time: {january, july}) {
+		std::tm local {};
+#ifdef _WIN32
+		localtime_s(&local, &time);
+#else
+		localtime_r(&time, &local);
+#endif
+		char text[32];
+		std::strftime(text, sizeof(text), "%Y-%m-%d %H:%M:%S", &local);
+		REQUIRE(timeFromTimestampString(text) == time);
+	}
+}
 
-	// in winter and in summer: where clocks change, a summer time used to come back an hour late
-	const auto january = std::chrono::system_clock::from_time_t(1768478400); // 2026-01-15 12:00 UTC
-	const auto july	   = std::chrono::system_clock::from_time_t(1784116800); // 2026-07-15 12:00 UTC
-	REQUIRE(string_to_time_point(time_point_to_string(january)) == january);
-	REQUIRE(string_to_time_point(time_point_to_string(july)) == july);
+TEST_CASE("the filename timestamp has nothing a file system would object to", "[util][time]") {
+	const auto stamp = filenameTimestampString();
+	REQUIRE(std::regex_match(stamp, std::regex(R"(\d{4}-\d\d-\d\d--\d\d\.\d\d\.\d\d)")));
+	REQUIRE(stamp.find(':') == std::string::npos);
+	REQUIRE(stamp.find(' ') == std::string::npos);
+}
+
+TEST_CASE("the friendly time is day, month name, year, hours and minutes", "[util][time]") {
+	// local time, so only the shape is fixed
+	REQUIRE(std::regex_match(friendlyTimeString(november), std::regex(R"(\d\d [A-Z][a-z]{2} \d{4} \d\d:\d\d)")));
 }

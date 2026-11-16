@@ -31,10 +31,6 @@ std::string to_string(float value, int precision) {
 	return out.str();
 }
 
-std::string timestampString() {
-	return formatTimeNow("%Y-%m-%d %H:%M:%S");
-}
-
 std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces) {
 	std::ostringstream out;
 
@@ -190,21 +186,6 @@ std::string trimBack(const std::string &src) {
 //--------------------------------------------------
 std::string trim(const std::string &src) {
 	return trimFront(trimBack(src));
-}
-
-std::string time_point_to_string(const std::chrono::system_clock::time_point &tp) {
-	// local time - string_to_time_point() below reads it back the same way
-	return formatTime(std::chrono::system_clock::to_time_t(tp), "%Y-%m-%d %H:%M:%S");
-}
-
-std::chrono::system_clock::time_point string_to_time_point(const std::string &s) {
-	std::tm tm = {};
-	std::istringstream ss(s);
-	ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-	// let mktime work out whether daylight saving applied. Left at 0 ("it
-	// didn't") a summer time came back an hour late, every time it was read.
-	tm.tm_isdst = -1;
-	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
 
 bool startsWith(const std::string &stringToSearch, const std::string &prefix) {

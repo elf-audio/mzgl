@@ -710,30 +710,62 @@ std::optional<int64_t> getAvailableMemory() {
 #endif
 }
 
-std::string formatTime(std::time_t time, const char *format, TimeZone zone) {
-	std::tm parts {};
+namespace {
+	constexpr auto timestampFormat = "%Y-%m-%d %H:%M:%S";
+	constexpr auto utcSuffix	   = " UTC";
+
+	// the one place a time is turned into text
+	std::string formatTime(std::time_t time, const char *format, bool utc) {
+		std::tm parts {};
 #ifdef _WIN32
-	if (zone == TimeZone::UTC) gmtime_s(&parts, &time);
-	else localtime_s(&parts, &time);
+		if (utc) gmtime_s(&parts, &time);
+		else localtime_s(&parts, &time);
 #else
-	if (zone == TimeZone::UTC) gmtime_r(&time, &parts);
-	else localtime_r(&time, &parts);
+		if (utc) gmtime_r(&time, &parts);
+		else localtime_r(&time, &parts);
 #endif
-	std::ostringstream oss;
-	oss << std::put_time(&parts, format);
-	return oss.str();
+		std::ostringstream oss;
+		oss << std::put_time(&parts, format);
+		return oss.str();
+	}
+} // namespace
+
+std::string timestampString(std::time_t time) {
+	return formatTime(time, timestampFormat, true) + utcSuffix;
 }
 
-std::string formatTimeNow(const char *format, TimeZone zone) {
-	return formatTime(std::time(nullptr), format, zone);
+std::string timestampString() {
+	return timestampString(std::time(nullptr));
 }
 
-std::string utcTimestampString() {
-	return formatTimeNow("%Y-%m-%d %H:%M:%S UTC", TimeZone::UTC);
+std::time_t timeFromTimestampString(const std::string &timestamp) {
+	std::tm parts {};
+	std::istringstream in(timestamp);
+	in >> std::get_time(&parts, timestampFormat);
+	if (in.fail()) return 0;
+
+	const bool isUtc = timestamp.size() >= std::strlen(utcSuffix)
+					   && timestamp.compare(timestamp.size() - std::strlen(utcSuffix), std::string::npos, utcSuffix)
+							  == 0;
+	if (isUtc) {
+#ifdef _WIN32
+		return _mkgmtime(&parts);
+#else
+		return timegm(&parts);
+#endif
+	}
+	// an old one, written in local time. Let mktime work out whether daylight
+	// saving applied: told it didn't (0), a summer time comes back an hour late.
+	parts.tm_isdst = -1;
+	return std::mktime(&parts);
 }
 
 std::string filenameTimestampString() {
-	return formatTimeNow("%Y-%m-%d--%H.%M.%S");
+	return formatTime(std::time(nullptr), "%Y-%m-%d--%H.%M.%S", true);
+}
+
+std::string friendlyTimeString(std::time_t time) {
+	return formatTime(time, "%d %b %Y %H:%M", false);
 }
 
 fs::path findNewestSubdirectory(const fs::path &parentPath) {

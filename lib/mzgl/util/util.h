@@ -220,20 +220,23 @@ void showMouse();
 void hideMouse();
 
 ////////////////////////////////////////////////////////////////////////////////
-///// Time as text. Everything that prints a date or time goes through
-///// formatTime(), which (unlike std::localtime / std::gmtime) is thread safe.
-enum class TimeZone { Local, UTC };
+///// Time as text. These are the only ways a date or time is written out, and
+///// (unlike std::localtime / std::gmtime) they're all thread safe.
 
-/// `time` written out with a strftime format, e.g. "%Y-%m-%d %H:%M:%S"
-std::string formatTime(std::time_t time, const char *format, TimeZone zone = TimeZone::Local);
-/// the same for the time right now
-std::string formatTimeNow(const char *format, TimeZone zone = TimeZone::Local);
+/// A timestamp: "2026-11-14 09:46:38 UTC". Always UTC, and says so. This is
+/// what gets stored in files. Now, or the time given.
+std::string timestampString();
+std::string timestampString(std::time_t time);
+/// Reads one back. Also takes the same thing without " UTC" on the end, which
+/// is how they used to be written, in local time.
+std::time_t timeFromTimestampString(const std::string &timestamp);
 
-/// now, in UTC, as "2026-11-14 09:46:38 UTC"
-std::string utcTimestampString();
-/// now, in local time, in a form that's safe in a file name on every platform
-/// (no spaces or colons): "2026-11-14--09.46.38"
+/// Now (UTC), in a form that's safe in a file name on every platform - no
+/// spaces or colons: "2026-11-14--09.46.38"
 std::string filenameTimestampString();
+
+/// A time for showing to the user, in their own time zone: "14 Nov 2026 09:46"
+std::string friendlyTimeString(std::time_t time);
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// internal! Should definitely go elsewhere
