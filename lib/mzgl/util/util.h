@@ -10,6 +10,7 @@
 
 #include <string>
 #include <cstdint>
+#include <ctime>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -217,6 +218,22 @@ void setCursor(Cursor cursor);
 
 void showMouse();
 void hideMouse();
+
+////////////////////////////////////////////////////////////////////////////////
+///// Time as text. Everything that prints a date or time goes through
+///// formatTime(), which (unlike std::localtime / std::gmtime) is thread safe.
+enum class TimeZone { Local, UTC };
+
+/// `time` written out with a strftime format, e.g. "%Y-%m-%d %H:%M:%S"
+std::string formatTime(std::time_t time, const char *format, TimeZone zone = TimeZone::Local);
+/// the same for the time right now
+std::string formatTimeNow(const char *format, TimeZone zone = TimeZone::Local);
+
+/// now, in UTC, as "2026-11-14 09:46:38 UTC"
+std::string utcTimestampString();
+/// now, in local time, in a form that's safe in a file name on every platform
+/// (no spaces or colons): "2026-11-14--09.46.38"
+std::string filenameTimestampString();
 
 ////////////////////////////////////////////////////////////////////////////////
 ///// internal! Should definitely go elsewhere

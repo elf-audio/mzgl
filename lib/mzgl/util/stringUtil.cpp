@@ -32,10 +32,7 @@ std::string to_string(float value, int precision) {
 }
 
 std::string timestampString() {
-	auto now = std::time(nullptr);
-	char buffer[20];
-	std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
-	return std::string(buffer);
+	return formatTimeNow("%Y-%m-%d %H:%M:%S");
 }
 
 std::string toDecimalPlacesIfNeeded(float value, int decimalPlaces) {
@@ -196,23 +193,17 @@ std::string trim(const std::string &src) {
 }
 
 std::string time_point_to_string(const std::chrono::system_clock::time_point &tp) {
-	// Convert time_point to time_t
-	std::time_t time_t_format = std::chrono::system_clock::to_time_t(tp);
-
-	// Convert time_t to tm for local time
-	std::tm tm_format = *std::localtime(&time_t_format);
-
-	// Create a string stream to format the date and time
-	std::ostringstream oss;
-	oss << std::put_time(&tm_format, "%Y-%m-%d %H:%M:%S");
-
-	return oss.str();
+	// local time - string_to_time_point() below reads it back the same way
+	return formatTime(std::chrono::system_clock::to_time_t(tp), "%Y-%m-%d %H:%M:%S");
 }
 
 std::chrono::system_clock::time_point string_to_time_point(const std::string &s) {
 	std::tm tm = {};
 	std::istringstream ss(s);
 	ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+	// let mktime work out whether daylight saving applied. Left at 0 ("it
+	// didn't") a summer time came back an hour late, every time it was read.
+	tm.tm_isdst = -1;
 	return std::chrono::system_clock::from_time_t(std::mktime(&tm));
 }
 

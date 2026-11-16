@@ -710,13 +710,30 @@ std::optional<int64_t> getAvailableMemory() {
 #endif
 }
 
-std::string nowAsString() {
-	auto now				= std::chrono::system_clock::now();
-	std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-	std::tm *timeInfo		= std::localtime(&currentTime);
+std::string formatTime(std::time_t time, const char *format, TimeZone zone) {
+	std::tm parts {};
+#ifdef _WIN32
+	if (zone == TimeZone::UTC) gmtime_s(&parts, &time);
+	else localtime_s(&parts, &time);
+#else
+	if (zone == TimeZone::UTC) gmtime_r(&time, &parts);
+	else localtime_r(&time, &parts);
+#endif
 	std::ostringstream oss;
-	oss << std::put_time(timeInfo, "%Y-%m-%d--%H.%M.%S");
+	oss << std::put_time(&parts, format);
 	return oss.str();
+}
+
+std::string formatTimeNow(const char *format, TimeZone zone) {
+	return formatTime(std::time(nullptr), format, zone);
+}
+
+std::string utcTimestampString() {
+	return formatTimeNow("%Y-%m-%d %H:%M:%S UTC", TimeZone::UTC);
+}
+
+std::string filenameTimestampString() {
+	return formatTimeNow("%Y-%m-%d--%H.%M.%S");
 }
 
 fs::path findNewestSubdirectory(const fs::path &parentPath) {
@@ -741,7 +758,7 @@ void updateDocumentsDirectory() {
 	fs::path documentsDir = testDir;
 
 	if (hasCommandLineFlag("--reset-documents-directory")) {
-		documentsDir = testDir / nowAsString();
+		documentsDir = testDir / filenameTimestampString();
 		if (fs::exists(documentsDir)) {
 			fs::remove_all(documentsDir);
 		}
