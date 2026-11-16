@@ -101,7 +101,6 @@ set(
   lib/mzgl/ui/FlexboxLayout.cpp
   lib/mzgl/util/Base64.cpp
   lib/mzgl/util/Base64.h
-  lib/mzgl/util/DateTime.cpp
   lib/mzgl/util/UndoManager.cpp
   lib/mzgl/util/Dialogs.cpp
   lib/mzgl/util/WebViewOverlay.cpp
