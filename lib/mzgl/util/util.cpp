@@ -714,14 +714,16 @@ namespace {
 	constexpr auto timestampFormat = "%Y-%m-%d %H:%M:%S";
 	constexpr auto utcSuffix	   = " UTC";
 
+	enum class TimeZone { Local, UTC };
+
 	// the one place a time is turned into text
-	std::string formatTime(std::time_t time, const char *format, bool utc) {
+	std::string formatTime(std::time_t time, const char *format, TimeZone zone) {
 		std::tm parts {};
 #ifdef _WIN32
-		if (utc) gmtime_s(&parts, &time);
+		if (zone == TimeZone::UTC) gmtime_s(&parts, &time);
 		else localtime_s(&parts, &time);
 #else
-		if (utc) gmtime_r(&time, &parts);
+		if (zone == TimeZone::UTC) gmtime_r(&time, &parts);
 		else localtime_r(&time, &parts);
 #endif
 		std::ostringstream oss;
@@ -731,7 +733,7 @@ namespace {
 } // namespace
 
 std::string timestampString(std::time_t time) {
-	return formatTime(time, timestampFormat, true) + utcSuffix;
+	return formatTime(time, timestampFormat, TimeZone::UTC) + utcSuffix;
 }
 
 std::string timestampString() {
@@ -761,11 +763,11 @@ std::time_t timeFromTimestampString(const std::string &timestamp) {
 }
 
 std::string filenameTimestampString() {
-	return formatTime(std::time(nullptr), "%Y-%m-%d--%H.%M.%S", true);
+	return formatTime(std::time(nullptr), "%Y-%m-%d--%H.%M.%S", TimeZone::UTC);
 }
 
 std::string friendlyTimeString(std::time_t time) {
-	return formatTime(time, "%d %b %Y %H:%M", false);
+	return formatTime(time, "%d %b %Y %H:%M", TimeZone::Local);
 }
 
 fs::path findNewestSubdirectory(const fs::path &parentPath) {
