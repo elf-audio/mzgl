@@ -89,6 +89,10 @@ void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device,
 		impl->sendMessage(device, m, delayInNanoSeconds);
 	}
 }
+bool AllMidiDevices::sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count) {
+	return online && impl->sendRawBytes(device, bytes, count);
+}
+
 void AllMidiDevices::sendMessageToMatching(const MidiMessage &m,
 										   std::optional<uint64_t> delayInNanoSeconds,
 										   const std::function<bool(const MidiDevice &)> &shouldSendTo) {

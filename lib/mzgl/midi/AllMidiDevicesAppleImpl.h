@@ -75,6 +75,7 @@ public:
 	void midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
+	bool sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count) override;
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
 					 std::optional<uint64_t> timeStampInNanoSeconds) override;
