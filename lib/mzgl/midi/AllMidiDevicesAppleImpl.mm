@@ -349,6 +349,25 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	}
 }
 
+// one MIDIPacket, one MIDISend, now
+bool AllMidiDevicesAppleImpl::sendRawBytes(const std::shared_ptr<MidiDevice> &device,
+										   const uint8_t *bytes,
+										   size_t count) {
+	if (count == 0 || count >= 65536) return false;
+	auto endpoint = getEndpointRefForOutputDevice(device, midiOuts);
+	if (!endpoint.has_value()) return false;
+
+	static constexpr auto packetExtraSpace = 100;
+	std::vector<Byte> packetBuffer(count + packetExtraSpace);
+	auto *packetList   = reinterpret_cast<MIDIPacketList *>(packetBuffer.data());
+	MIDIPacket *packet = MIDIPacketListInit(packetList);
+	packet			   = MIDIPacketListAdd(packetList, packetBuffer.size(), packet, 0, count, bytes);
+	if (packet == nullptr) return false;
+	auto result = MIDISend(outputPort, *endpoint, packetList);
+	NSLogError(result, "Sending raw MIDI bytes");
+	return result == noErr;
+}
+
 void AllMidiDevicesAppleImpl::removeSysexData(MIDISysexSendRequest *request) {
 	sysexData.erase(std::remove_if(std::begin(sysexData),
 								   std::end(sysexData),
