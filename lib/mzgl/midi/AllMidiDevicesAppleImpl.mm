@@ -373,8 +373,20 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 	std::optional<uint64_t> delayNs;
 	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
 		SInt32 bytesPerSecond = 0;
-		if (MIDIObjectGetIntegerProperty(*endpoint, kMIDIPropertyMaxSysExSpeed, &bytesPerSecond) != noErr
-			|| bytesPerSecond <= 0) {
+		{
+			std::lock_guard<std::mutex> lock(sysexPacingMutex);
+			if (auto declared = sysexSpeedOverride.find(*endpoint); declared != sysexSpeedOverride.end()) {
+				if (declared->second <= 0) {
+					// declared unpaced: straight out, in order, like any other message
+					sendBytes(device, midiMessage, std::nullopt);
+					return;
+				}
+				bytesPerSecond = declared->second;
+			}
+		}
+		if (bytesPerSecond <= 0
+			&& (MIDIObjectGetIntegerProperty(*endpoint, kMIDIPropertyMaxSysExSpeed, &bytesPerSecond) != noErr
+				|| bytesPerSecond <= 0)) {
 			bytesPerSecond = 3125;
 		}
 		const auto now = static_cast<uint64_t>(
@@ -389,6 +401,14 @@ void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &devic
 		if (start > now) delayNs = start - now;
 	}
 	sendBytes(device, midiMessage, delayNs);
+}
+
+void AllMidiDevicesAppleImpl::setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond) {
+	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
+		std::lock_guard<std::mutex> lock(sysexPacingMutex);
+		sysexSpeedOverride[*endpoint] = bytesPerSecond;
+		sysexFreeAtNs.erase(*endpoint);
+	}
 }
 
 bool midiMessageHasValidBytes(const MidiMessage &midiMessage) {

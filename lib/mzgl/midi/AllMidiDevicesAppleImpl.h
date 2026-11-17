@@ -77,6 +77,7 @@ public:
 	void midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
+	void setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond) override;
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
 					 std::optional<uint64_t> timeStampInNanoSeconds) override;
@@ -116,4 +117,6 @@ private:
 	// when each destination will have taken the SysEx already sent to it (see sendSysex)
 	std::mutex sysexPacingMutex;
 	std::unordered_map<MIDIEndpointRef, uint64_t> sysexFreeAtNs;
+	// destinations whose speed the app has declared (setSysexSpeed); 0 = unpaced
+	std::unordered_map<MIDIEndpointRef, int> sysexSpeedOverride;
 };

@@ -25,6 +25,12 @@ public:
 							 const MidiMessage &m,
 							 std::optional<uint64_t> delayInNanoSeconds) = 0;
 
+	// How fast this device takes SysEx, in bytes a second, for platforms that pace
+	// it (Apple: see sendSysex). Overrides the system's rating for the device,
+	// which is a MIDI cable's 3125 unless a driver says otherwise. 0 = no pacing:
+	// a device on a fast link that takes SysEx as quickly as it can be sent.
+	virtual void setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond) {}
+
 	// send message to every connected device that shouldSendTo() accepts. Implementations that can
 	// walk their device list in place override this so a send doesn't build a list first
 	virtual void sendMessageToMatching(const MidiMessage &m,
