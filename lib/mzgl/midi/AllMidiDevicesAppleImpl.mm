@@ -6,6 +6,8 @@
 //  Copyright © 2021 Marek Bereza. All rights reserved.
 //
 
+#include <mutex>
+#include <chrono>
 #include "AllMidiDevicesAppleImpl.h"
 #include <Foundation/Foundation.h>
 #include <mach/mach_time.h>
@@ -354,14 +356,39 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	}
 }
 
-// SysEx goes out like any other message: one MIDISend, now, in order with
-// whatever was sent before it. MIDISendSysex is not used. It is asynchronous,
-// so SysEx sent back to back are separate requests that can overlap, and long
-// messages sent through it were seen never to arrive at a device that takes
-// the same bytes from MIDISend every time. (JUCE sends SysEx with MIDISend too.)
+// SysEx goes out with MIDISend, like any other message, but paced: each one is
+// scheduled to start once the device has had time to take the one before, at
+// the destination's kMIDIPropertyMaxSysExSpeed (3125 bytes a second unless the
+// driver says otherwise, which is what a MIDI cable carries).
+//
+// Two things this has to get right, and each was got wrong once:
+//  - order. MIDISendSysex is asynchronous: SysEx sent back to back are separate
+//    requests that can overlap, and long messages sent through it never arrived
+//    at one device that takes the same bytes from MIDISend every time.
+//  - pace. Sending everything at once drowns a slow device: an SP-404MKII sent
+//    the settings of all its pads in one burst kept only some of them.
+// A single message is never split or slowed, only spaced from the next.
 void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &device,
 										const MidiMessage &midiMessage) {
-	sendBytes(device, midiMessage, std::nullopt);
+	std::optional<uint64_t> delayNs;
+	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
+		SInt32 bytesPerSecond = 0;
+		if (MIDIObjectGetIntegerProperty(*endpoint, kMIDIPropertyMaxSysExSpeed, &bytesPerSecond) != noErr
+			|| bytesPerSecond <= 0) {
+			bytesPerSecond = 3125;
+		}
+		const auto now = static_cast<uint64_t>(
+			std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch())
+				.count());
+		const auto takesNs = static_cast<uint64_t>(midiMessage.getBytes().size()) * 1'000'000'000ULL
+							 / static_cast<uint64_t>(bytesPerSecond);
+		std::lock_guard<std::mutex> lock(sysexPacingMutex);
+		auto &freeAtNs	 = sysexFreeAtNs[*endpoint];
+		const auto start = std::max(now, freeAtNs);
+		freeAtNs		 = start + takesNs;
+		if (start > now) delayNs = start - now;
+	}
+	sendBytes(device, midiMessage, delayNs);
 }
 
 bool midiMessageHasValidBytes(const MidiMessage &midiMessage) {

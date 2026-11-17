@@ -8,6 +8,8 @@
 
 #pragma once
 #include <vector>
+#include <mutex>
+#include <unordered_map>
 #include <string>
 #include <thread>
 
@@ -111,4 +113,7 @@ private:
 				   const MidiMessage &midiMessage,
 				   std::optional<uint64_t> timeStampInNanoSeconds);
 	void sendSysex(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
+	// when each destination will have taken the SysEx already sent to it (see sendSysex)
+	std::mutex sysexPacingMutex;
+	std::unordered_map<MIDIEndpointRef, uint64_t> sysexFreeAtNs;
 };
