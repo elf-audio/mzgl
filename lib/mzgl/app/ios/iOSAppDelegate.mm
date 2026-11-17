@@ -150,7 +150,7 @@ public:
 	// (UIScene lifecycle); this only builds the App and its root view controller.
 	try {
 		g = std::make_shared<Graphics>();
-		if (isPlugin()) {
+		if (usesMZGLPluginEntryPoints()) {
 			plugin = instantiatePlugin();
 			app	   = instantiatePluginEditor(*g, plugin);
 		} else {

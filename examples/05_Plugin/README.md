@@ -8,7 +8,7 @@ A stereo gain with a single automatable parameter, built as a **VST3**, an
 ```
 src/GainPlugin.h      the ::Plugin - parameters, process(), state (de)serialisation
 src/GainEditor.h      the PluginEditor (an mzgl App) - draws the fader, talks to the host
-src/entryPoints.cpp   instantiatePlugin() / instantiatePluginEditor() / isPlugin()
+src/entryPoints.cpp   instantiatePlugin() / instantiatePluginEditor() / usesMZGLPluginEntryPoints()
 src/GainVST3.cpp      VST3 glue: MzglVST3SingleComponent subclass + class factory (~40 lines)
 src/GainAUv2.cpp      AUv2 glue: MzglAUv2Effect subclass + AUSDK_COMPONENT_ENTRY (~25 lines)
 src/version.h         strings for the VST3 factory
