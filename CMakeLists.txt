@@ -67,7 +67,6 @@ set(
   lib/mzgl/gl/Image-win.cpp
   lib/mzgl/gl/Image.cpp
   lib/mzgl/gl/Shader.cpp
-  lib/mzgl/gl/SvgVbo.cpp
   lib/mzgl/gl/svgFactories.cpp
   lib/mzgl/gl/Texture.cpp
   lib/mzgl/gl/Vbo.cpp

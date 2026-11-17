@@ -54,7 +54,7 @@ public:
 					Stats *stats = nullptr) const;
 	void tessellate(const glm::mat3 &transform, Geometry &geom) const { tessellate(transform, geom, Options {}); }
 
-	// the transforms SvgVbo uses: artwork centred on the origin, then sized
+	// the transforms svgFactories.h uses: artwork centred on the origin, then sized
 	[[nodiscard]] glm::mat3 centredWithScale(float sx, float sy) const;
 	[[nodiscard]] glm::mat3 centredWithScale(float s) const { return centredWithScale(s, s); }
 	[[nodiscard]] glm::mat3 centredWithWidth(float w) const { return centredWithScale(w / width); }
