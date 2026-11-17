@@ -42,10 +42,9 @@ public:
 					 const MidiMessage &m,
 					 std::optional<uint64_t> delayInNanoSeconds);
 
-	// Hands the bytes to the device as they are, in one call to the platform's
-	// driver, for callers that split a long message themselves. False where the
-	// platform has no such call (or when offline): send the whole message instead.
-	bool sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count);
+	// How fast this device takes SysEx, in bytes a second, where sending is paced.
+	// Overrides the system's rating for it; 0 = no pacing. See AllMidiDevicesImpl.
+	void setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond);
 
 	// sends to every connected device that shouldSendTo() accepts, without copying the device list
 	// where the platform allows (Android). Safe to call from the audio thread there; keep the

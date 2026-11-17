@@ -89,8 +89,8 @@ void AllMidiDevices::sendMessage(const std::shared_ptr<MidiDevice> &device,
 		impl->sendMessage(device, m, delayInNanoSeconds);
 	}
 }
-bool AllMidiDevices::sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count) {
-	return online && impl->sendRawBytes(device, bytes, count);
+void AllMidiDevices::setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond) {
+	if (online) impl->setSysexSpeed(device, bytesPerSecond);
 }
 
 void AllMidiDevices::sendMessageToMatching(const MidiMessage &m,

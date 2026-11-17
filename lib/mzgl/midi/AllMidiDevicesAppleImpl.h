@@ -8,6 +8,8 @@
 
 #pragma once
 #include <vector>
+#include <mutex>
+#include <unordered_map>
 #include <string>
 #include <thread>
 
@@ -75,7 +77,7 @@ public:
 	void midiReceived(const std::shared_ptr<MidiDevice> &device, const MidiMessage &msg, uint64_t timestamp);
 
 	void sendMessage(const MidiMessage &m) override;
-	bool sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count) override;
+	void setSysexSpeed(const std::shared_ptr<MidiDevice> &device, int bytesPerSecond) override;
 	void sendMessage(const std::shared_ptr<MidiDevice> &device,
 					 const MidiMessage &m,
 					 std::optional<uint64_t> timeStampInNanoSeconds) override;
@@ -87,13 +89,11 @@ public:
 	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
 	void midiNotify(const MIDINotification *notification);
 
-	void removeSysexData(MIDISysexSendRequest *request);
 
 private:
 	std::vector<CoreMidiInRef> midiIns;
 	std::vector<CoreMidiOutRef> midiOuts;
 
-	std::vector<std::pair<MIDISysexSendRequest *, std::vector<uint8_t>>> sysexData;
 
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;
@@ -114,4 +114,9 @@ private:
 				   const MidiMessage &midiMessage,
 				   std::optional<uint64_t> timeStampInNanoSeconds);
 	void sendSysex(const std::shared_ptr<MidiDevice> &device, const MidiMessage &midiMessage);
+	// when each destination will have taken the SysEx already sent to it (see sendSysex)
+	std::mutex sysexPacingMutex;
+	std::unordered_map<MIDIEndpointRef, uint64_t> sysexFreeAtNs;
+	// destinations whose speed the app has declared (setSysexSpeed); 0 = unpaced
+	std::unordered_map<MIDIEndpointRef, int> sysexSpeedOverride;
 };
