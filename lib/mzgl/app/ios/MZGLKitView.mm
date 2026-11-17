@@ -357,6 +357,15 @@ int uikeyToMz(UIKey *key) {
 API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITextFieldDelegate>
 @end
 
+// Whether this view is running inside a host, i.e. in an AUv3 app extension.
+// Not isPlugin(): that says the app is built on Plugin + PluginEditor, which is
+// also true of a standalone app, and libmzgl is one library shared by the app
+// and its extension so MZGL_PLUGIN can't tell them apart here either.
+static bool isHostedInAppExtension() {
+    static const bool hosted = [[[NSBundle mainBundle] bundlePath] hasSuffix:@".appex"];
+    return hosted;
+}
+
 @implementation EventsView {
     NSMutableDictionary *activeTouches;
     // Invisible input sink: the Metal view can't host a visible UITextField, so
@@ -454,12 +463,12 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
 // don't want (PluginKeyPolicy.h) carry on up the responder chain to the host.
 // The standalone app is left exactly as it was.
 - (BOOL)canBecomeFirstResponder {
-    if (isPlugin()) return app->pluginAcceptsKeyEvents();
+    if (isHostedInAppExtension()) return app->pluginAcceptsKeyEvents();
     return [super canBecomeFirstResponder];
 }
 
 - (void)claimHardwareKeyboardIfWanted {
-    if (!isPlugin() || !app->pluginAcceptsKeyEvents()) return;
+    if (!isHostedInAppExtension() || !app->pluginAcceptsKeyEvents()) return;
     // the hidden text field holds first responder while a text field is edited
     if (self.isFirstResponder || hiddenTextField.isFirstResponder) return;
     [self becomeFirstResponder];
@@ -467,7 +476,7 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
 
 // NO = this key belongs to the host
 - (BOOL)shouldCaptureKey:(UIKey *)key mzKey:(int)k API_AVAILABLE(ios(13.4)) {
-    if (!isPlugin()) return YES;
+    if (!isHostedInAppExtension()) return YES;
     const bool commandDown = (key.modifierFlags & UIKeyModifierCommand) != 0;
     return mzgl::pluginShouldCaptureKey(*app, k, commandDown);
 }
