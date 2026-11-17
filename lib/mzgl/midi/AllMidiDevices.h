@@ -42,11 +42,6 @@ public:
 					 const MidiMessage &m,
 					 std::optional<uint64_t> delayInNanoSeconds);
 
-	// Hands the bytes to the device as they are, in one call to the platform's
-	// driver, for callers that split a long message themselves. False where the
-	// platform has no such call (or when offline): send the whole message instead.
-	bool sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count);
-
 	// sends to every connected device that shouldSendTo() accepts, without copying the device list
 	// where the platform allows (Android). Safe to call from the audio thread there; keep the
 	// predicate's captures to a couple of pointers so std::function doesn't allocate

@@ -339,7 +339,12 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 		timestamp			      = mach_absolute_time() + delayInHostTicks;
 	}
 
-	packet = MIDIPacketListAdd(packetList, sizeof(packetBuffer), packet, timestamp, bytes.size(), bytes.data());
+	// (the list's size is the buffer's, not sizeof the vector: that capped a message at a few bytes)
+	packet = MIDIPacketListAdd(packetList, packetBuffer.size(), packet, timestamp, bytes.size(), bytes.data());
+	if (packet == nullptr) {
+		NSLog(@"MIDI message too large to send");
+		return;
+	}
 
 	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
 		auto result = MIDISend(outputPort, *endpoint, packetList);
@@ -349,62 +354,14 @@ void AllMidiDevicesAppleImpl::sendBytes(const std::shared_ptr<MidiDevice> &devic
 	}
 }
 
-// one MIDIPacket, one MIDISend, now
-bool AllMidiDevicesAppleImpl::sendRawBytes(const std::shared_ptr<MidiDevice> &device,
-										   const uint8_t *bytes,
-										   size_t count) {
-	if (count == 0 || count >= 65536) return false;
-	auto endpoint = getEndpointRefForOutputDevice(device, midiOuts);
-	if (!endpoint.has_value()) return false;
-
-	static constexpr auto packetExtraSpace = 100;
-	std::vector<Byte> packetBuffer(count + packetExtraSpace);
-	auto *packetList   = reinterpret_cast<MIDIPacketList *>(packetBuffer.data());
-	MIDIPacket *packet = MIDIPacketListInit(packetList);
-	packet			   = MIDIPacketListAdd(packetList, packetBuffer.size(), packet, 0, count, bytes);
-	if (packet == nullptr) return false;
-	auto result = MIDISend(outputPort, *endpoint, packetList);
-	NSLogError(result, "Sending raw MIDI bytes");
-	return result == noErr;
-}
-
-void AllMidiDevicesAppleImpl::removeSysexData(MIDISysexSendRequest *request) {
-	sysexData.erase(std::remove_if(std::begin(sysexData),
-								   std::end(sysexData),
-								   [request](auto &&element) { return element.first == request; }),
-					std::end(sysexData));
-}
-
-static void cleanupSysex(MIDISysexSendRequest *request) {
-	if (AllMidiDevicesAppleImpl *handler = static_cast<AllMidiDevicesAppleImpl *>(request->completionRefCon)) {
-		handler->removeSysexData(request);
-	}
-	delete request;
-}
-
+// SysEx goes out like any other message: one MIDISend, now, in order with
+// whatever was sent before it. MIDISendSysex is not used. It is asynchronous,
+// so SysEx sent back to back are separate requests that can overlap, and long
+// messages sent through it were seen never to arrive at a device that takes
+// the same bytes from MIDISend every time. (JUCE sends SysEx with MIDISend too.)
 void AllMidiDevicesAppleImpl::sendSysex(const std::shared_ptr<MidiDevice> &device,
 										const MidiMessage &midiMessage) {
-	auto bytes = midiMessage.getBytes();
-
-	mzAssert(bytes.size() < 65536);
-
-	if (auto endpoint = getEndpointRefForOutputDevice(device, midiOuts); endpoint.has_value()) {
-		auto request = new MIDISysexSendRequest;
-
-		sysexData.push_back(std::pair(request, std::vector<uint8_t>(bytes.size())));
-
-		request->data = sysexData.back().second.data();
-		memcpy((void *) request->data, (void *) bytes.data(), bytes.size());
-
-		request->bytesToSend	  = static_cast<UInt32>(bytes.size());
-		request->completionProc	  = &cleanupSysex;
-		request->completionRefCon = this;
-		request->complete		  = false;
-		request->destination	  = *endpoint;
-
-		auto result = MIDISendSysex(request);
-		NSLogError(result, "Sending MIDI sysex");
-	}
+	sendBytes(device, midiMessage, std::nullopt);
 }
 
 bool midiMessageHasValidBytes(const MidiMessage &midiMessage) {

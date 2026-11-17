@@ -25,14 +25,6 @@ public:
 							 const MidiMessage &m,
 							 std::optional<uint64_t> delayInNanoSeconds) = 0;
 
-	// Hands `count` bytes to the device as they are, in one call to the platform's
-	// driver: no framing, no validation. For a caller that must control how a long
-	// message is split across sends (a device that needs SysEx in small pieces).
-	// False where the platform can't do that; send the whole message normally then.
-	virtual bool sendRawBytes(const std::shared_ptr<MidiDevice> &device, const uint8_t *bytes, size_t count) {
-		return false;
-	}
-
 	// send message to every connected device that shouldSendTo() accepts. Implementations that can
 	// walk their device list in place override this so a send doesn't build a list first
 	virtual void sendMessageToMatching(const MidiMessage &m,
