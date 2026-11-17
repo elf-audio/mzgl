@@ -358,9 +358,10 @@ API_AVAILABLE(ios(11)) @interface EventsView () <UIDropInteractionDelegate, UITe
 @end
 
 // Whether this view is running inside a host, i.e. in an AUv3 app extension.
-// Not isPlugin(): that says the app is built on Plugin + PluginEditor, which is
-// also true of a standalone app, and libmzgl is one library shared by the app
-// and its extension so MZGL_PLUGIN can't tell them apart here either.
+// Not usesMZGLPluginEntryPoints(): that says the app is built on Plugin +
+// PluginEditor, which is also true of a standalone app, and libmzgl is one
+// library shared by the app and its extension so MZGL_PLUGIN can't tell them
+// apart here either.
 static bool isHostedInAppExtension() {
     static const bool hosted = [[[NSBundle mainBundle] bundlePath] hasSuffix:@".appex"];
     return hosted;

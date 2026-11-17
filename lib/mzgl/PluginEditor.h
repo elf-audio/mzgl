@@ -34,4 +34,8 @@ public:
 
 // entry point for plugin editor
 std::shared_ptr<PluginEditor> instantiatePluginEditor(Graphics &g, std::shared_ptr<Plugin> plugin);
-bool isPlugin();
+// Supplied by the app: true if it starts through instantiatePlugin() +
+// instantiatePluginEditor() rather than instantiateApp(). That is how the app is
+// built, not where it runs - a standalone app can return true, so this does not
+// mean "embedded in a host".
+bool usesMZGLPluginEntryPoints();
