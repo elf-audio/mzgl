@@ -7,16 +7,8 @@
 
 class MainThreadRunner::LambdaQueue : public moodycamel::ConcurrentQueue<std::function<void()>> {};
 
-class MainThreadRunner::ProducerTokenWrapper {
-public:
-	explicit ProducerTokenWrapper(LambdaQueue &queue)
-		: token(queue) {}
-	moodycamel::ProducerToken token;
-};
-
 MainThreadRunner::MainThreadRunner() {
 	mainThreadQueue = std::make_shared<LambdaQueue>();
-	producerToken	= std::make_unique<ProducerTokenWrapper>(*mainThreadQueue);
 }
 
 MainThreadRunner::~MainThreadRunner() {
@@ -44,7 +36,9 @@ bool MainThreadRunner::runOnMainThread(std::function<void()> fn) {
 	}
 
 	pending.fetch_add(1, std::memory_order_acq_rel);
-	if (!mainThreadQueue->enqueue(producerToken->token, std::move(fn))) {
+	// no producer token: any thread calls this, and a moodycamel token may only be used by one
+	// thread at a time. Sharing one corrupted the queue when two threads enqueued together
+	if (!mainThreadQueue->enqueue(std::move(fn))) {
 		pending.fetch_sub(1, std::memory_order_acq_rel);
 		std::lock_guard<std::mutex> lk(waitMx);
 		waitCv.notify_all();
@@ -60,7 +54,9 @@ bool MainThreadRunner::runOnNextMainLoop(std::function<void()> fn) {
 	}
 
 	pending.fetch_add(1, std::memory_order_acq_rel);
-	if (!mainThreadQueue->enqueue(producerToken->token, std::move(fn))) {
+	// no producer token: any thread calls this, and a moodycamel token may only be used by one
+	// thread at a time. Sharing one corrupted the queue when two threads enqueued together
+	if (!mainThreadQueue->enqueue(std::move(fn))) {
 		pending.fetch_sub(1, std::memory_order_acq_rel);
 		std::lock_guard<std::mutex> lk(waitMx);
 		waitCv.notify_all();
