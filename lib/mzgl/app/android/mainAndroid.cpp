@@ -224,7 +224,7 @@ public:
 			graphics.onShowKeyboard = [](TextInputReceiver *r) {
 				androidShowKeyboard(r ? r->getText() : std::string());
 			};
-			graphics.onHideKeyboard = []() { androidHideKeyboard(); };
+			graphics.onHideKeyboard	  = []() { androidHideKeyboard(); };
 			firstFrameAlreadyRendered = true;
 		}
 
@@ -560,7 +560,7 @@ void android_main(android_app *state) {
 		int timeoutMillis = myEngine->ready() ? 0 : -1;
 		while (!state->destroyRequested) {
 			android_poll_source *source = nullptr;
-			auto result = ALooper_pollOnce(timeoutMillis, nullptr, nullptr, (void **) &source);
+			auto result					= ALooper_pollOnce(timeoutMillis, nullptr, nullptr, (void **) &source);
 
 			if (result == ALOOPER_POLL_ERROR) {
 				Log::e() << "ALooper_pollOnce returned an error";

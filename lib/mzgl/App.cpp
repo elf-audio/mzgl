@@ -13,11 +13,10 @@ extern "C" void glfwSetWindowTitle(GLFWwindow *window, const char *title);
 void App::setWindowTitle(const std::string &title) {
 #if MZGL_MAC
 	if (windowHandle == nullptr) return;
-	NSWindow *win = (__bridge NSWindow *) windowHandle;
+	NSWindow *win		  = (__bridge NSWindow *) windowHandle;
 	std::string titleCopy = title;
-	dispatch_async(dispatch_get_main_queue(), ^(void) {
-	  [win setTitle:[NSString stringWithUTF8String:titleCopy.c_str()]];
-	});
+	dispatch_async(dispatch_get_main_queue(),
+				   ^(void) { [win setTitle:[NSString stringWithUTF8String:titleCopy.c_str()]]; });
 #elif MZGL_WIN || MZGL_LINUX
 	if (windowHandle == nullptr) return;
 	glfwSetWindowTitle(static_cast<GLFWwindow *>(windowHandle), title.c_str());

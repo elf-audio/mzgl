@@ -22,7 +22,7 @@ using namespace std;
 
 void NVG::init() {
 	if (inited) return;
-		//	#ifdef DEMO_MSAA
+	//	#ifdef DEMO_MSAA
 #ifdef NANOVG_GL3_IMPLEMENTATION
 	vg = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_DEBUG);
 #else

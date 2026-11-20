@@ -72,8 +72,8 @@ public:
 	// texId is a handle into the process-global Metal texture registry;
 	// samplerKey packs the sampler desc (filter/wrap bits, see MetalTexture).
 	void setBoundTexture(uint32_t texId, uint32_t samplerKey) {
-		boundTexture	 = texId;
-		boundSamplerKey	 = samplerKey;
+		boundTexture	= texId;
+		boundSamplerKey = samplerKey;
 	}
 	[[nodiscard]] uint32_t getBoundTexture() const { return boundTexture; }
 	[[nodiscard]] uint32_t getBoundSamplerKey() const { return boundSamplerKey; }

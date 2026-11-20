@@ -368,7 +368,7 @@ bool androidAACEncoderFeed(void *handle, const int16_t *samples, int numSamples)
 	const uint32_t chunkSamples		  = (totalSamples < maxSamplesPerChunk) ? totalSamples : maxSamplesPerChunk;
 	const uint32_t byteBuffSize		  = chunkSamples * 2;
 
-	auto *byteBuffer	= new uint8_t[byteBuffSize];
+	auto *byteBuffer	 = new uint8_t[byteBuffSize];
 	jobject nativeBuffer = jni->NewDirectByteBuffer(byteBuffer, byteBuffSize);
 	if (nativeBuffer == nullptr) {
 		delete[] byteBuffer;
@@ -382,7 +382,7 @@ bool androidAACEncoderFeed(void *handle, const int16_t *samples, int numSamples)
 		const uint32_t samplesToCopy = (dataLeft < chunkSamples) ? dataLeft : chunkSamples;
 		uint32_t outPos				 = 0;
 		for (uint32_t i = 0; i < samplesToCopy; ++i) {
-			const int16_t s		  = samples[inputPos++];
+			const int16_t s		 = samples[inputPos++];
 			byteBuffer[outPos++] = static_cast<uint8_t>(s);
 			byteBuffer[outPos++] = static_cast<uint8_t>(s >> 8);
 		}
@@ -821,8 +821,8 @@ JNIEXPORT void JNICALL Java_com_elf_MZGLBleMidiManager_midiReceived(
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_fileDownloadStarted(JNIEnv *env, jobject thiz, jstring url) {
-	androidGetApp()->main.runOnMainThread(true,
-		[download = jstringToString(env, url)]() { notifyFileDownloadStarted(download); });
+	androidGetApp()->main.runOnMainThread(
+		true, [download = jstringToString(env, url)]() { notifyFileDownloadStarted(download); });
 }
 
 JNIEXPORT void JNICALL Java_com_elf_MZGLActivity_fileDownloadComplete(JNIEnv *env,

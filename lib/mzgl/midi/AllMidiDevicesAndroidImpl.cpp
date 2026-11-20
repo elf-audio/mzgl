@@ -77,7 +77,10 @@ void AllMidiDevicesAndroidImpl::sendMessage(const std::shared_ptr<MidiDevice> &d
 		const auto outputs = load(midiOutputs);
 		for (auto &output: *outputs) {
 			if (*output == *theDevice) {
-				androidSendMidi(message.getBytes(), theDevice->deviceIdentifier, theDevice->devicePort, timeStampInNanoSeconds);
+				androidSendMidi(message.getBytes(),
+								theDevice->deviceIdentifier,
+								theDevice->devicePort,
+								timeStampInNanoSeconds);
 			}
 		}
 	}

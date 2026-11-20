@@ -134,10 +134,10 @@ namespace {
 
 		bool hasStroke = false;
 		glm::vec3 stroke {0, 0, 0};
-		float strokeAlpha	= 1;
-		float strokeOpacity = 1;
-		float strokeWidth	= 1;
-		float miterLimit	= 4;
+		float strokeAlpha	   = 1;
+		float strokeOpacity	   = 1;
+		float strokeWidth	   = 1;
+		float miterLimit	   = 4;
 		SvgDocument::Cap cap   = SvgDocument::Cap::Butt;
 		SvgDocument::Join join = SvgDocument::Join::Miter;
 
@@ -178,7 +178,7 @@ namespace {
 	}
 
 	void applyProperty(Style &st, std::string_view name, std::string_view value) {
-		value = trim(value);
+		value		= trim(value);
 		auto number = [&](float fallback) {
 			const char *p = value.data();
 			float v		  = fallback;
@@ -578,15 +578,15 @@ struct SvgParser {
 	void emitShape(const Style &st, const SvgDocument::Affine &xf, uint32_t firstCmd, uint32_t firstCoord) {
 		const auto numCmds = static_cast<uint32_t>(doc.cmds.size()) - firstCmd;
 		SvgDocument::Shape s;
-		s.firstCmd	 = firstCmd;
-		s.numCmds	 = numCmds;
-		s.firstCoord = firstCoord;
-		s.transform	 = xf;
-		s.fill		 = vec4(st.fill, st.fillAlpha * st.fillOpacity * st.opacity);
-		s.stroke	 = vec4(st.stroke, st.strokeAlpha * st.strokeOpacity * st.opacity);
-		s.hasFill	 = st.hasFill && s.fill.a > 0;
-		s.hasStroke	 = st.hasStroke && s.stroke.a > 0 && st.strokeWidth > 0;
-		s.evenOdd	 = st.evenOdd;
+		s.firstCmd	  = firstCmd;
+		s.numCmds	  = numCmds;
+		s.firstCoord  = firstCoord;
+		s.transform	  = xf;
+		s.fill		  = vec4(st.fill, st.fillAlpha * st.fillOpacity * st.opacity);
+		s.stroke	  = vec4(st.stroke, st.strokeAlpha * st.strokeOpacity * st.opacity);
+		s.hasFill	  = st.hasFill && s.fill.a > 0;
+		s.hasStroke	  = st.hasStroke && s.stroke.a > 0 && st.strokeWidth > 0;
+		s.evenOdd	  = st.evenOdd;
 		s.strokeWidth = st.strokeWidth;
 		s.miterLimit  = st.miterLimit;
 		s.cap		  = st.cap;
@@ -883,16 +883,17 @@ namespace {
 						// Wang's bound: the number of uniform steps that keeps the
 						// polyline within tolerance of the curve. A straight "curve"
 						// (as Figma exports plenty of) comes out as one segment.
-						const vec2 dd0 = p0 - 2.f * p1 + p2;
-						const vec2 dd1 = p1 - 2.f * p2 + p3;
-						const float dd = std::sqrt(std::max(glm::dot(dd0, dd0), glm::dot(dd1, dd1)));
-						const int steps =
-							std::clamp(static_cast<int>(std::ceil(std::sqrt(0.75f * dd / flattenTolerance))), 1, 512);
+						const vec2 dd0	= p0 - 2.f * p1 + p2;
+						const vec2 dd1	= p1 - 2.f * p2 + p3;
+						const float dd	= std::sqrt(std::max(glm::dot(dd0, dd0), glm::dot(dd1, dd1)));
+						const int steps = std::clamp(
+							static_cast<int>(std::ceil(std::sqrt(0.75f * dd / flattenTolerance))), 1, 512);
 						const float dt = 1.f / static_cast<float>(steps);
 						for (int s = 1; s < steps; s++) {
 							const float t = dt * static_cast<float>(s);
 							const float u = 1.f - t;
-							addPoint(u * u * u * p0 + 3.f * u * u * t * p1 + 3.f * u * t * t * p2 + t * t * t * p3);
+							addPoint(u * u * u * p0 + 3.f * u * u * t * p1 + 3.f * u * t * t * p2
+									 + t * t * t * p3);
 						}
 						addPoint(p3);
 						cur = p3;
@@ -909,10 +910,10 @@ namespace {
 		}
 
 		static float distanceToSegmentSquared(vec2 p, vec2 a, vec2 b) {
-			const vec2 ab	   = b - a;
+			const vec2 ab	  = b - a;
 			const float lenSq = glm::dot(ab, ab);
-			const float t	   = lenSq > 0 ? std::clamp(glm::dot(p - a, ab) / lenSq, 0.f, 1.f) : 0.f;
-			const vec2 d	   = p - (a + ab * t);
+			const float t	  = lenSq > 0 ? std::clamp(glm::dot(p - a, ab) / lenSq, 0.f, 1.f) : 0.f;
+			const vec2 d	  = p - (a + ab * t);
 			return glm::dot(d, d);
 		}
 
@@ -922,11 +923,11 @@ namespace {
 			if (contours.empty()) return;
 			auto &c = contours.back();
 			if (c.count < 3) return;
-			vec2 *p				 = points.data() + c.start;
-			const float tolSq	 = simplifyTolerance * simplifyTolerance;
-			const uint32_t n	 = c.count;
-			uint32_t kept		 = 1;
-			uint32_t anchor		 = 0;
+			vec2 *p			  = points.data() + c.start;
+			const float tolSq = simplifyTolerance * simplifyTolerance;
+			const uint32_t n  = c.count;
+			uint32_t kept	  = 1;
+			uint32_t anchor	  = 0;
 			for (uint32_t i = 2; i < n; i++) {
 				bool within = i - anchor <= 32; // bounds the work on long straight runs
 				for (uint32_t j = anchor + 1; within && j < i; j++) {
@@ -1028,11 +1029,13 @@ namespace {
 
 		// fan round `centre`, sweeping `from` (relative to centre) through `angle`
 		// to reach vertex `last`, pivoting on `pivot`
-		void arcFan(vec2 centre, vec2 from, float angle, uint32_t pivot, uint32_t first, uint32_t last, const vec4 &col) {
+		void arcFan(
+			vec2 centre, vec2 from, float angle, uint32_t pivot, uint32_t first, uint32_t last, const vec4 &col) {
 			const int steps = arcSteps(glm::length(from), angle);
 			uint32_t prev	= first;
 			for (int i = 1; i < steps; i++) {
-				const uint32_t v = vert(centre + rotate(from, angle * static_cast<float>(i) / static_cast<float>(steps)), col);
+				const uint32_t v =
+					vert(centre + rotate(from, angle * static_cast<float>(i) / static_cast<float>(steps)), col);
 				tri(pivot, prev, v);
 				prev = v;
 			}
@@ -1066,7 +1069,7 @@ namespace {
 			}
 
 			// the turn is towards +normal when cr > 0, so the outside of the corner is -normal
-			const float side   = cr < 0 ? 1.f : -1.f;
+			const float side	= cr < 0 ? 1.f : -1.f;
 			const bool hasMiter = dot > -0.9999f; // otherwise it doubles back on itself
 			vec2 miter(0, 0);
 			float miterRatio = 1e9f;
@@ -1126,9 +1129,9 @@ namespace {
 
 			const size_t numSegments = closed ? n : n - 1;
 			auto direction			 = [&](size_t i, float &len) {
-				  const vec2 d = p[(i + 1) % n] - p[i];
-				  len		   = glm::length(d);
-				  return d / len;
+				const vec2 d = p[(i + 1) % n] - p[i];
+				len			 = glm::length(d);
+				return d / len;
 			};
 
 			float lenPrev = 0, lenNext = 0;
@@ -1150,7 +1153,7 @@ namespace {
 			}
 
 			for (size_t i = 1; i < numSegments; i++) {
-				lenPrev = lenNext;
+				lenPrev			 = lenNext;
 				const vec2 dNext = direction(i, lenNext);
 				Pair end {}, begin {};
 				join(p[i], dPrev, lenPrev, dNext, lenNext, hw, shape, end, begin);
@@ -1185,7 +1188,8 @@ void SvgDocument::tessellate(const glm::mat3 &transform,
 							 Geometry &geom,
 							 const Options &options,
 							 Stats *stats) const {
-	const Affine xf {transform[0][0], transform[0][1], transform[1][0], transform[1][1], transform[2][0], transform[2][1]};
+	const Affine xf {
+		transform[0][0], transform[0][1], transform[1][0], transform[1][1], transform[2][0], transform[2][1]};
 
 	// a guess that's right for line art and a decent head start for curves
 	geom.verts.reserve(geom.verts.size() + coords.size() / 2);

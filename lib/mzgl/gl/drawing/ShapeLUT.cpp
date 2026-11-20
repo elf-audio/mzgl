@@ -9,22 +9,22 @@
 
 namespace {
 
-constexpr float kPi		= static_cast<float>(M_PI);
-constexpr float kTwoPi	= static_cast<float>(2.0 * M_PI);
+	constexpr float kPi	   = static_cast<float>(M_PI);
+	constexpr float kTwoPi = static_cast<float>(2.0 * M_PI);
 
-// A set of precomputed tables at increasing segment counts plus a picker
-// that returns the smallest one with >= the requested count.
-struct LUTSet {
-	std::vector<int> counts;
-	std::vector<std::vector<glm::vec2>> tables;
+	// A set of precomputed tables at increasing segment counts plus a picker
+	// that returns the smallest one with >= the requested count.
+	struct LUTSet {
+		std::vector<int> counts;
+		std::vector<std::vector<glm::vec2>> tables;
 
-	const std::vector<glm::vec2> &pick(int want) const {
-		for (size_t i = 0; i < counts.size(); i++) {
-			if (counts[i] >= want) return tables[i];
+		const std::vector<glm::vec2> &pick(int want) const {
+			for (size_t i = 0; i < counts.size(); i++) {
+				if (counts[i] >= want) return tables[i];
+			}
+			return tables.back();
 		}
-		return tables.back();
-	}
-};
+	};
 
 } // namespace
 

@@ -36,13 +36,13 @@ using UndoableRef = std::shared_ptr<Undoable>;
 
 class UndoManagerListener {
 public:
-	virtual ~UndoManagerListener() = default;
+	virtual ~UndoManagerListener()		= default;
 	virtual void undoRedoStateChanged() = 0;
 };
 
 class UndoManager : public Listenable<UndoManagerListener> {
 public:
-	static constexpr int MAX_UNDO_LEVELS		= 40;
+	static constexpr int MAX_UNDO_LEVELS		 = 40;
 	static constexpr size_t DEFAULT_MEMORY_LIMIT = 100 * 1024 * 1024; // 100MB
 
 	UndoManager(size_t memoryLimit = DEFAULT_MEMORY_LIMIT);

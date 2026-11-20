@@ -50,7 +50,7 @@ public:
 		desc.usage			= SG_USAGE_STREAM;
 		if (isIndex) desc.type = SG_BUFFERTYPE_INDEXBUFFER;
 		PooledBuffer pb;
-		pb.buffer	= sg_make_buffer(desc);
+		pb.buffer = sg_make_buffer(desc);
 		SokolBufferTracker::track(pb.buffer, capacity, true);
 		pb.capacity = capacity;
 		totalCreated++;
@@ -101,8 +101,7 @@ public:
 		if (sg_isvalid()) {
 			for (int b = 0; b < NUM_BUCKETS; b++) {
 				for (auto *freeList: {&vertexFreeLists[b], &indexFreeLists[b]}) {
-					while (!freeList->empty()
-						   && frameCounter - freeList->front().freedAt > kMaxIdleFrames) {
+					while (!freeList->empty() && frameCounter - freeList->front().freedAt > kMaxIdleFrames) {
 						sg_destroy_buffer(freeList->front().pb.buffer);
 						SokolBufferTracker::untrack(freeList->front().pb.buffer);
 						freeList->erase(freeList->begin());
@@ -120,8 +119,7 @@ public:
 		if (++g_texLogCounter >= 120) {
 			g_texLogCounter = 0;
 			Log::d() << "[TEXPOOL] live_images=" << liveImg << " peak=" << g_texPeak
-					 << " live_samplers=" << sg_dbg_live_samplers()
-					 << " live_buffers=" << sg_dbg_live_buffers();
+					 << " live_samplers=" << sg_dbg_live_samplers() << " live_buffers=" << sg_dbg_live_buffers();
 		}
 #endif
 	}
@@ -143,10 +141,12 @@ public:
 		};
 		for (auto *lists: {&vertexFreeLists, &indexFreeLists})
 			for (auto &list: *lists)
-				for (auto &b: list) destroy(b.pb.buffer);
+				for (auto &b: list)
+					destroy(b.pb.buffer);
 		for (auto *lists: {&vertexPendingLists, &indexPendingLists})
 			for (auto &list: *lists)
-				for (auto &b: list) destroy(b.buffer);
+				for (auto &b: list)
+					destroy(b.buffer);
 	}
 
 	int pooledCount	 = 0;
@@ -168,9 +168,7 @@ private:
 	void ensureCommitListener() {
 		if (commitListenerAttached) return;
 		if (!sg_isvalid()) return;
-		commitListener.func		= [](void *userData) {
-			static_cast<SokolBufferPool *>(userData)->endFrame();
-		};
+		commitListener.func		 = [](void *userData) { static_cast<SokolBufferPool *>(userData)->endFrame(); };
 		commitListener.user_data = this;
 		sg_add_commit_listener(commitListener);
 		commitListenerAttached = true;

@@ -15,13 +15,11 @@ namespace {
 	}
 
 	// tessellates at 1:1 with the viewBox origin at 0,0
-	Geometry tessellate(const std::string &code,
-						float scale		= 1,
-						float tolerance = 0.05f) {
+	Geometry tessellate(const std::string &code, float scale = 1, float tolerance = 0.05f) {
 		SvgDocument doc;
 		REQUIRE(doc.parse(code));
 		SvgDocument::Options options;
-		options.tolerance	 = tolerance;
+		options.tolerance = tolerance;
 		Geometry geom;
 		doc.tessellate(glm::mat3 {scale, 0, 0, 0, scale, 0, 0, 0, 1}, geom, options);
 		REQUIRE(geom.indices.size() % 3 == 0);
@@ -97,7 +95,8 @@ TEST_CASE("svg document: path commands", "[svg-doc]") {
 		REQUIRE(pathArea("M0 0 h10 v10 h-10 z h-10 v-10 h10 z") == Catch::Approx(200));
 	}
 	SECTION("arcs") {
-		REQUIRE(pathArea("M0 50 A50 50 0 1 1 100 50 A50 50 0 1 1 0 50 Z") == Catch::Approx(pi * 2500).epsilon(0.005));
+		REQUIRE(pathArea("M0 50 A50 50 0 1 1 100 50 A50 50 0 1 1 0 50 Z")
+				== Catch::Approx(pi * 2500).epsilon(0.005));
 		// flags with no separators
 		REQUIRE(pathArea("M0 50a50 50 0 11100 0a50 50 0 11-100 0z") == Catch::Approx(pi * 2500).epsilon(0.005));
 	}
@@ -148,9 +147,9 @@ TEST_CASE("svg document: strokes", "[svg-doc]") {
 		auto extent = [](const std::string &attrs) {
 			const auto g = tessellate(svg("<path d=\"M0 40 L100 50 L0 60\" fill=\"none\" stroke=\"#fff\" "
 										  "stroke-width=\"4\" "
-										  + attrs + "/>",
+											  + attrs + "/>",
 										  "viewBox=\"0 0 400 100\""));
-			float maxX = 0;
+			float maxX	 = 0;
 			for (auto v: g.verts)
 				maxX = std::max(maxX, v.x);
 			return maxX;
@@ -171,15 +170,18 @@ TEST_CASE("svg document: style and structure", "[svg-doc]") {
 		REQUIRE(g.cols[0] == glm::vec4(0, 0, 0, 1));
 		g = tessellate(svg("<g fill=\"none\"><rect width=\"10\" height=\"10\"/></g>"));
 		REQUIRE(g.verts.empty());
-		g = tessellate(svg("<g fill=\"white\" opacity=\"0.5\"><rect width=\"10\" height=\"10\" fill-opacity=\"0.5\"/></g>"));
+		g = tessellate(
+			svg("<g fill=\"white\" opacity=\"0.5\"><rect width=\"10\" height=\"10\" fill-opacity=\"0.5\"/></g>"));
 		REQUIRE(g.cols[0] == glm::vec4(1, 1, 1, 0.25f));
 	}
 	SECTION("style attribute beats presentation attributes") {
-		const auto g = tessellate(svg("<rect width=\"10\" height=\"10\" fill=\"#f00\" style=\"fill: #00ff00; opacity:.5\"/>"));
+		const auto g = tessellate(
+			svg("<rect width=\"10\" height=\"10\" fill=\"#f00\" style=\"fill: #00ff00; opacity:.5\"/>"));
 		REQUIRE(g.cols[0] == glm::vec4(0, 1, 0, 0.5f));
 	}
 	SECTION("transforms") {
-		auto g = tessellate(svg("<g transform=\"translate(10 20) scale(2)\"><rect width=\"10\" height=\"10\"/></g>"));
+		auto g =
+			tessellate(svg("<g transform=\"translate(10 20) scale(2)\"><rect width=\"10\" height=\"10\"/></g>"));
 		REQUIRE(area(g) == Catch::Approx(400));
 		REQUIRE(g.verts[0] == glm::vec2(10, 20));
 		g = tessellate(svg("<rect width=\"10\" height=\"10\" transform=\"rotate(90, 0, 0)\"/>"));
@@ -206,8 +208,9 @@ TEST_CASE("svg document: style and structure", "[svg-doc]") {
 		REQUIRE(doc.height == 16);
 	}
 	SECTION("use, defs") {
-		const auto g = tessellate(svg("<defs><rect id=\"r\" width=\"10\" height=\"10\"/></defs>"
-									  "<use href=\"#r\" x=\"20\" fill=\"#f00\"/><use xlink:href=\"#r\" y=\"50\"/>"));
+		const auto g =
+			tessellate(svg("<defs><rect id=\"r\" width=\"10\" height=\"10\"/></defs>"
+						   "<use href=\"#r\" x=\"20\" fill=\"#f00\"/><use xlink:href=\"#r\" y=\"50\"/>"));
 		REQUIRE(area(g) == Catch::Approx(200));
 		REQUIRE(g.verts[0] == glm::vec2(20, 0));
 	}

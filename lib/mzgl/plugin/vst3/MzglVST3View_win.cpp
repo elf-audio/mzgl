@@ -375,7 +375,7 @@ namespace mzglvst {
 		impl->editor->nativeWindowHandle = impl->hwnd;
 		impl->dispatcher				 = std::make_shared<EventDispatcher>(impl->editor);
 		impl->fileDrag					 = file_drag_handler::initWithNativeWindow(
-			  impl->hwnd, file_drag_handler::makeFileDragListener(impl->dispatcher.get()));
+			impl->hwnd, file_drag_handler::makeFileDragListener(impl->dispatcher.get()));
 
 		// x, y arrive in this window's client pixels - the space WM_LBUTTONDOWN's
 		// lParam is in, which the mouse handlers below pass straight through. They
@@ -632,7 +632,8 @@ namespace mzglvst {
 				const int key = vkToMzglKey(wParam);
 				// The app always hears the release (the matching press may have been
 				// ours even if ctrl went down since); the host hears its own too.
-				if (isModifierKey(key) || !mzgl::pluginShouldCaptureKey(*I.editor, key, GetKeyState(VK_CONTROL) < 0)) {
+				if (isModifierKey(key)
+					|| !mzgl::pluginShouldCaptureKey(*I.editor, key, GetKeyState(VK_CONTROL) < 0)) {
 					PostMessage(I.parent, msg, wParam, lParam);
 				}
 				I.dispatcher->keyUp(key);

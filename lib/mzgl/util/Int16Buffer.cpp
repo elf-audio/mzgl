@@ -106,7 +106,7 @@ std::optional<size_t> Int16Buffer::findFirstOnset(float threshold) const {
 	}
 
 	size_t sampleCounter = 0;
-	
+
 	const auto thresholdInt16 = static_cast<int16_t>(threshold * 32767.f);
 	for (int i = 0; i < size(); i++) {
 		if (std::abs(d[i]) > thresholdInt16) {
@@ -118,7 +118,6 @@ std::optional<size_t> Int16Buffer::findFirstOnset(float threshold) const {
 
 	return std::nullopt;
 }
-
 
 float Int16Buffer::interpolate(double p) const noexcept {
 	int a	= p;

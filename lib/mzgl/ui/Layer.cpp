@@ -12,13 +12,13 @@
 #include "mzAssert.h"
 
 #ifndef MZGL_LAYER_HIERARCHY_CHECKS
-#define MZGL_LAYER_HIERARCHY_CHECKS 0
+#	define MZGL_LAYER_HIERARCHY_CHECKS 0
 #endif
 
 #if MZGL_LAYER_HIERARCHY_CHECKS
-#include <atomic>
-#include <thread>
-#include <typeinfo>
+#	include <atomic>
+#	include <thread>
+#	include <typeinfo>
 
 static std::atomic<size_t> drawThreadHash {0};
 static std::atomic<const Layer *> drawnRoot {nullptr};
@@ -48,7 +48,8 @@ static void checkMutatedOnDrawThread(const char *op, const Layer *parent, const 
 						 layerIdentity(parent) + " / " + layerIdentity(child));
 }
 #else
-static inline void checkMutatedOnDrawThread(const char *, const Layer *, const Layer *) {}
+static inline void checkMutatedOnDrawThread(const char *, const Layer *, const Layer *) {
+}
 #endif
 
 #ifdef DEBUG
@@ -180,8 +181,7 @@ void Layer::__draw() {
 void Layer::drawSelfAndChildren() {
 #if MZGL_LAYER_HIERARCHY_CHECKS
 	if (parent == nullptr) {
-		drawThreadHash.store(std::hash<std::thread::id> {}(std::this_thread::get_id()),
-							 std::memory_order_relaxed);
+		drawThreadHash.store(std::hash<std::thread::id> {}(std::this_thread::get_id()), std::memory_order_relaxed);
 		drawnRoot.store(this, std::memory_order_relaxed);
 	}
 #endif

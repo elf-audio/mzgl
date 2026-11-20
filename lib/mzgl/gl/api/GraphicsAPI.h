@@ -11,8 +11,8 @@ public:
 	GraphicsAPI(const GraphicsAPI &)			= delete;
 	GraphicsAPI &operator=(const GraphicsAPI &) = delete;
 
-	virtual ~GraphicsAPI()									 = default;
-	virtual void init()										 = 0;
+	virtual ~GraphicsAPI() = default;
+	virtual void init()	   = 0;
 
 	// Human-readable name of the active graphics backend, e.g. "OpenGL" or "Sokol (D3D11)"
 	[[nodiscard]] virtual std::string getBackendName() const = 0;

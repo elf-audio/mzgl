@@ -20,8 +20,8 @@ CLANG_IGNORE_WARNINGS_END
 // they're recreated transparently on the next draw). This bounds sokol
 // buffer-pool slot usage to roughly "what's been on screen recently".
 namespace {
-	constexpr int64_t kLazyMaxAgeMs		 = 4000;
-	constexpr int64_t kLazySweepEveryMs	 = 1000;
+	constexpr int64_t kLazyMaxAgeMs		= 4000;
+	constexpr int64_t kLazySweepEveryMs = 1000;
 
 	struct LazySweep {
 		std::mutex mut;
@@ -304,13 +304,13 @@ void SokolVbo::drawInterleaved(Graphics &g, Vbo::PrimitiveType mode, size_t numI
 	if (g.currShader && !g.currShader->isDefaultShader) {
 		shader = dynamic_cast<SokolShader *>(g.currShader);
 	} else if (hasCol && hasUv) {
-		shader = dynamic_cast<SokolShader *>(
-			g.currShader == g.colorFontShader.get() ? g.colorFontShader.get() : g.colorTextureShader.get());
+		shader = dynamic_cast<SokolShader *>(g.currShader == g.colorFontShader.get() ? g.colorFontShader.get()
+																					 : g.colorTextureShader.get());
 	} else if (hasCol) {
 		shader = dynamic_cast<SokolShader *>(g.colorShader.get());
 	} else if (hasUv) {
 		shader = dynamic_cast<SokolShader *>(g.currShader == g.fontShader.get() ? g.fontShader.get()
-																				 : g.texShader.get());
+																				: g.texShader.get());
 	} else {
 		shader = dynamic_cast<SokolShader *>(g.nothingShader.get());
 	}

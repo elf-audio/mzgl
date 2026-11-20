@@ -42,7 +42,7 @@ namespace SokolBufferTracker {
 		// off by default; flip programmatically or launch with
 		// MZGL_TRACK_GPU_BUFFERS=1 in the environment
 		bool g_enabled = getenv("MZGL_TRACK_GPU_BUFFERS") != nullptr;
-	}
+	} // namespace
 
 	void setTrackingEnabled(bool enabled) {
 		g_enabled = enabled;
@@ -114,9 +114,9 @@ namespace SokolBufferTracker {
 				SymInitialize(GetCurrentProcess(), nullptr, TRUE);
 			});
 			char buf[sizeof(SYMBOL_INFO) + 512];
-			auto *sym		  = reinterpret_cast<SYMBOL_INFO *>(buf);
-			sym->SizeOfStruct = sizeof(SYMBOL_INFO);
-			sym->MaxNameLen	  = 511;
+			auto *sym			 = reinterpret_cast<SYMBOL_INFO *>(buf);
+			sym->SizeOfStruct	 = sizeof(SYMBOL_INFO);
+			sym->MaxNameLen		 = 511;
 			DWORD64 displacement = 0;
 			if (SymFromAddr(GetCurrentProcess(), (DWORD64) addr, &displacement, sym)) {
 				char out[600];
@@ -126,8 +126,8 @@ namespace SokolBufferTracker {
 #	else
 			Dl_info info;
 			if (dladdr(addr, &info) && info.dli_sname != nullptr) {
-				int status		= 0;
-				char *demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
+				int status		 = 0;
+				char *demangled	 = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
 				std::string name = (status == 0 && demangled != nullptr) ? demangled : info.dli_sname;
 				if (demangled != nullptr) free(demangled);
 				char off[32];
@@ -185,11 +185,11 @@ namespace SokolBufferTracker {
 
 	std::string dump() {
 		struct Group {
-			int count	  = 0;
-			int64_t bytes = 0;
-			int pooled	  = 0;
-			int never	  = 0; // never drawn
-			int recent	  = 0; // drawn in last 60 frames
+			int count	   = 0;
+			int64_t bytes  = 0;
+			int pooled	   = 0;
+			int never	   = 0; // never drawn
+			int recent	   = 0; // drawn in last 60 frames
 			int64_t ageSum = 0; // sum of (now - createdAt); low avg => churning every frame
 			Stack stack;
 		};
@@ -233,15 +233,13 @@ namespace SokolBufferTracker {
 		sorted.reserve(groups.size());
 		for (auto &[k, g]: groups)
 			sorted.push_back(g);
-		std::sort(sorted.begin(), sorted.end(), [](const Group &a, const Group &b) {
-			return a.count > b.count;
-		});
+		std::sort(sorted.begin(), sorted.end(), [](const Group &a, const Group &b) { return a.count > b.count; });
 
 		std::ostringstream out;
 		out << "=== SokolBufferTracker: " << total << " live buffers, " << bytes / 1024 << " KB total, "
 			<< totalPooled << " pool-owned, " << groups.size() << " unique stacks | drawn: last-frame "
-			<< drawnLastFrame << ", last-60f " << drawn60 << ", last-300f " << drawn300 << ", never "
-			<< neverDrawn << " (frame " << frameNow << ") ===\n\n";
+			<< drawnLastFrame << ", last-60f " << drawn60 << ", last-300f " << drawn300 << ", never " << neverDrawn
+			<< " (frame " << frameNow << ") ===\n\n";
 		int gi = 0;
 		for (auto &g: sorted) {
 			out << "--- group " << gi++ << ": " << g.count << " buffers, " << g.bytes / 1024 << " KB"
@@ -250,8 +248,7 @@ namespace SokolBufferTracker {
 				<< (g.count ? g.ageSum / g.count : 0) << "f ---\n";
 			// skip frame 0 (the capture helper itself)
 			for (int i = 1; i < g.stack.n; i++) {
-				out << "  [" << i << "] " << g.stack.frames[i] << " " << symbolicate(g.stack.frames[i])
-					<< "\n";
+				out << "  [" << i << "] " << g.stack.frames[i] << " " << symbolicate(g.stack.frames[i]) << "\n";
 			}
 			out << "\n";
 		}
@@ -263,13 +260,17 @@ namespace SokolBufferTracker {
 #else // no backtrace facility on this platform - stubs
 
 namespace SokolBufferTracker {
-	void setTrackingEnabled(bool) {}
+	void setTrackingEnabled(bool) {
+	}
 	bool trackingEnabled() {
 		return false;
 	}
-	void track(sg_buffer, int, bool) {}
-	void untrack(sg_buffer) {}
-	void touch(sg_buffer) {}
+	void track(sg_buffer, int, bool) {
+	}
+	void untrack(sg_buffer) {
+	}
+	void touch(sg_buffer) {
+	}
 	std::string dump() {
 		return "SokolBufferTracker not supported on this platform\n";
 	}

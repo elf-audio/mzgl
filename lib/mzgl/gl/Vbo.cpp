@@ -72,7 +72,6 @@ Vbo &Vbo::setGeometry(const Geometry &geom) {
 	return *this;
 }
 
-
 Vbo::Vbo() {
 #ifdef __ANDROID__
 	vbos.push_back(this);

@@ -18,638 +18,646 @@
 
 namespace mzglau {
 
-namespace {
-	const CFStringRef kStateKey	  = CFSTR("mzgl-plugin-state");
-	const CFStringRef kZipDataKey = CFSTR("zipData");
+	namespace {
+		const CFStringRef kStateKey	  = CFSTR("mzgl-plugin-state");
+		const CFStringRef kZipDataKey = CFSTR("zipData");
 
-	// CFData over a shared buffer, no copy: the data's byte deallocator drops
-	// the shared_ptr when the host releases it.
-	CFDataRef cfDataSharingBytes(std::shared_ptr<const std::vector<uint8_t>> blob) {
-		if (!blob || blob->empty()) return CFDataCreate(nullptr, nullptr, 0);
-		using Holder = std::shared_ptr<const std::vector<uint8_t>>;
-		auto *holder = new Holder(std::move(blob));
-		CFAllocatorContext ctx {};
-		ctx.info	 = holder;
-		ctx.allocate = [](CFIndex size, CFOptionFlags, void *) -> void * { return malloc(static_cast<size_t>(size)); };
-		ctx.deallocate = [](void *, void *info) { delete static_cast<Holder *>(info); };
-		CFAllocatorRef bytesDeallocator = CFAllocatorCreate(kCFAllocatorDefault, &ctx);
-		CFDataRef data					= CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-													 (*holder)->data(),
-													 static_cast<CFIndex>((*holder)->size()),
-													 bytesDeallocator);
-		CFRelease(bytesDeallocator); // the data holds its own reference
-		if (data == nullptr) delete holder;
-		return data;
-	}
-
-	// Where our .component lives: <Plugin>.component/Contents/MacOS/<Plugin> -> bundle dir.
-	fs::path componentBundlePath() {
-		Dl_info info;
-		if (!dladdr((void *) &componentBundlePath, &info) || info.dli_fname == nullptr) return {};
-		return fs::path(info.dli_fname).parent_path().parent_path().parent_path();
-	}
-} // namespace
-
-// ---------------------------------------------------------------------------
-// MzglAUv2Unit<AUBaseT>
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-template <class... BaseArgs>
-MzglAUv2Unit<AUBaseT>::MzglAUv2Unit(std::shared_ptr<::Plugin> _plugin, const AUv2Config &_config, BaseArgs &&...baseArgs)
-	: AUBaseT(std::forward<BaseArgs>(baseArgs)...)
-	, plugin(std::move(_plugin))
-	, config(_config) {
-	setup();
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::setup() {
-	setDataPathToBundle();
-
-	const auto numParams = static_cast<UInt32>(plugin->getNumParams());
-	this->Globals()->UseIndexedParameters(numParams);
-	lastHostValues = std::make_unique<std::atomic<float>[]>(numParams);
-	for (UInt32 i = 0; i < numParams; ++i) {
-		const float v = plugin->getParam(i)->get();
-		this->Globals()->SetParameter(i, v);
-		lastHostValues[i].store(v);
-	}
-
-	plugin->sendUpdatedParameterToHost = [this](unsigned int i, float v) { pluginParameterChanged(i, v); };
-	plugin->sendParameterGestureToHost = [this](unsigned int i, bool began) {
-		notifyParameterEvent(began ? kAudioUnitEvent_BeginParameterChangeGesture
-								   : kAudioUnitEvent_EndParameterChangeGesture,
-							 i);
-	};
-	// "Running" = between Initialize() and Cleanup(), i.e. the host may be
-	// rendering. Plugins use this to decide whether a state/preset change must
-	// be handed to the audio thread or can be applied directly (same contract
-	// as the VST3 wrapper's setActive and the AUv3's isRunning).
-	plugin->isRunning = [this]() { return this->IsInitialized(); };
-
-	// Factory presets, if the plugin ships any (mzgl PresetManager: files in
-	// data/factory-presets named <identifier>preset).
-	// Always publish a (possibly empty) array: out-of-process hosts (Logic 12 runs every
-	// AUv2 in AUHostingService) answer GetPropertyInfo for FactoryPresets themselves, so
-	// a GetProperty that then fails looks like a broken unit and Logic gives up on it.
-	factoryPresetNames = plugin->getPresetManager()->getFactoryPresetNames();
-	// kAudioUnitProperty_FactoryPresets is a CFArray of AUPreset* (hosts cast
-	// the elements); the structs live in factoryPresetStorage for the life
-	// of the audio unit, so the array carries no value callbacks.
-	factoryPresetStorage.resize(factoryPresetNames.size());
-	std::vector<const void *> values;
-	for (size_t i = 0; i < factoryPresetNames.size(); ++i) {
-		factoryPresetStorage[i].presetNumber = static_cast<SInt32>(i);
-		factoryPresetStorage[i].presetName =
-			CFStringCreateWithCString(nullptr, factoryPresetNames[i].c_str(), kCFStringEncodingUTF8);
-		values.push_back(&factoryPresetStorage[i]);
-	}
-	factoryPresets = CFArrayCreate(nullptr, values.data(), static_cast<CFIndex>(values.size()), nullptr);
-	if (!factoryPresetNames.empty()) {
-		// Advertise preset 0 as current, like the AUv3 does (state stays at the
-		// plugin's defaults until a host actually selects a preset).
-		this->SetAFactoryPresetAsCurrent(factoryPresetStorage[0]);
-	}
-
-	interleavedIn.reserve(8192 * 2);
-}
-
-template <class AUBaseT>
-MzglAUv2Unit<AUBaseT>::~MzglAUv2Unit() {
-	if (plugin) {
-		plugin->sendUpdatedParameterToHost = nullptr;
-		plugin->sendParameterGestureToHost = nullptr;
-		// The editor may keep the plugin alive after the AU is gone; don't
-		// leave a lambda pointing at this object behind.
-		plugin->isRunning = []() { return false; };
-	}
-	if (factoryPresets) CFRelease(factoryPresets);
-	for (auto &p: factoryPresetStorage) {
-		if (p.presetName) CFRelease(p.presetName);
-	}
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::setDataPathToBundle() {
-	// libmzgl's dataPath() knows nothing about component bundles; point it at
-	// our Contents/Resources/data (same trick as MzglVST3View.mm).
-	const fs::path bundle = componentBundlePath();
-	if (bundle.empty()) return;
-	setDataPath((bundle / "Contents" / "Resources" / "data").string());
-}
-
-// ---------------------------------------------------------------------------
-// Lifecycle / format
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::Initialize() {
-	const OSStatus result = AUBaseT::Initialize();
-	if (result != noErr) return result;
-	// (AUEffectBase has GetSampleRate(); AUBase itself doesn't, so read the output format.)
-	plugin->setSampleRate(this->Output(0).GetStreamFormat().mSampleRate);
-	plugin->init(2, 2);
-	return noErr;
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::Cleanup() {
-	AUBaseT::Cleanup();
-}
-
-template <class AUBaseT>
-bool MzglAUv2Unit<AUBaseT>::ValidFormat(AudioUnitScope inScope,
-										AudioUnitElement inElement,
-										const AudioStreamBasicDescription &inNewFormat) {
-	if (config.maxSampleRate > 0.0 && inNewFormat.mSampleRate > config.maxSampleRate) return false;
-	return AUBaseT::ValidFormat(inScope, inElement, inNewFormat);
-}
-
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::ChangeStreamFormat(AudioUnitScope inScope,
-												   AudioUnitElement inElement,
-												   const AudioStreamBasicDescription &inPrevFormat,
-												   const AudioStreamBasicDescription &inNewFormat) {
-	const OSStatus result = AUBaseT::ChangeStreamFormat(inScope, inElement, inPrevFormat, inNewFormat);
-	if (result == noErr && inScope == kAudioUnitScope_Output) {
-		plugin->setSampleRate(inNewFormat.mSampleRate);
-	}
-	return result;
-}
-
-// ---------------------------------------------------------------------------
-// Properties
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::GetPropertyInfo(AudioUnitPropertyID inID,
-												AudioUnitScope inScope,
-												AudioUnitElement inElement,
-												UInt32 &outDataSize,
-												bool &outWritable) {
-	if (inScope == kAudioUnitScope_Global) {
-		switch (inID) {
-			case kAudioUnitProperty_CocoaUI:
-				outDataSize = sizeof(AudioUnitCocoaViewInfo);
-				outWritable = false;
-				return noErr;
-			case kMzglAUv2Property_Instance:
-				outDataSize = sizeof(void *);
-				outWritable = false;
-				return noErr;
-			default:
-				break;
+		// CFData over a shared buffer, no copy: the data's byte deallocator drops
+		// the shared_ptr when the host releases it.
+		CFDataRef cfDataSharingBytes(std::shared_ptr<const std::vector<uint8_t>> blob) {
+			if (!blob || blob->empty()) return CFDataCreate(nullptr, nullptr, 0);
+			using Holder = std::shared_ptr<const std::vector<uint8_t>>;
+			auto *holder = new Holder(std::move(blob));
+			CFAllocatorContext ctx {};
+			ctx.info	 = holder;
+			ctx.allocate = [](CFIndex size, CFOptionFlags, void *) -> void * {
+				return malloc(static_cast<size_t>(size));
+			};
+			ctx.deallocate					= [](void *, void *info) { delete static_cast<Holder *>(info); };
+			CFAllocatorRef bytesDeallocator = CFAllocatorCreate(kCFAllocatorDefault, &ctx);
+			CFDataRef data					= CFDataCreateWithBytesNoCopy(
+				kCFAllocatorDefault, (*holder)->data(), static_cast<CFIndex>((*holder)->size()), bytesDeallocator);
+			CFRelease(bytesDeallocator); // the data holds its own reference
+			if (data == nullptr) delete holder;
+			return data;
 		}
-	}
-	return AUBaseT::GetPropertyInfo(inID, inScope, inElement, outDataSize, outWritable);
-}
 
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::GetProperty(AudioUnitPropertyID inID,
-											AudioUnitScope inScope,
-											AudioUnitElement inElement,
-											void *outData) {
-	if (inScope == kAudioUnitScope_Global) {
-		switch (inID) {
-			case kAudioUnitProperty_CocoaUI: {
-				const fs::path bundle = componentBundlePath();
-				if (bundle.empty()) return kAudioUnitErr_InvalidProperty;
-				CFURLRef url = CFURLCreateFromFileSystemRepresentation(
-					nullptr, reinterpret_cast<const UInt8 *>(bundle.c_str()), static_cast<CFIndex>(bundle.string().size()),
-					true);
-				auto *info						 = static_cast<AudioUnitCocoaViewInfo *>(outData);
-				info->mCocoaAUViewBundleLocation = url;
-				info->mCocoaAUViewClass[0] =
-					CFStringCreateWithCString(nullptr, MZGL_AUV2_VIEW_FACTORY_CLASS_NAME, kCFStringEncodingUTF8);
-				return noErr;
-			}
-			case kMzglAUv2Property_Instance:
-				*static_cast<MzglAUv2Host **>(outData) = this;
-				return noErr;
-			default:
-				break;
+		// Where our .component lives: <Plugin>.component/Contents/MacOS/<Plugin> -> bundle dir.
+		fs::path componentBundlePath() {
+			Dl_info info;
+			if (!dladdr((void *) &componentBundlePath, &info) || info.dli_fname == nullptr) return {};
+			return fs::path(info.dli_fname).parent_path().parent_path().parent_path();
 		}
-	}
-	return AUBaseT::GetProperty(inID, inScope, inElement, outData);
-}
+	} // namespace
 
-// ---------------------------------------------------------------------------
-// Parameters
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::GetParameterInfo(AudioUnitScope inScope,
-												 AudioUnitParameterID inParameterID,
-												 AudioUnitParameterInfo &outParameterInfo) {
-	if (inScope != kAudioUnitScope_Global || inParameterID >= plugin->getNumParams()) {
-		return kAudioUnitErr_InvalidParameter;
+	// ---------------------------------------------------------------------------
+	// MzglAUv2Unit<AUBaseT>
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	template <class... BaseArgs>
+	MzglAUv2Unit<AUBaseT>::MzglAUv2Unit(std::shared_ptr<::Plugin> _plugin,
+										const AUv2Config &_config,
+										BaseArgs &&...baseArgs)
+		: AUBaseT(std::forward<BaseArgs>(baseArgs)...)
+		, plugin(std::move(_plugin))
+		, config(_config) {
+		setup();
 	}
-	auto p = plugin->getParam(inParameterID);
 
-	outParameterInfo.flags = kAudioUnitParameterFlag_IsWritable | kAudioUnitParameterFlag_IsReadable
-							 | kAudioUnitParameterFlag_CanRamp;
-	ausdk::AUBase::FillInParameterName(
-		outParameterInfo, CFStringCreateWithCString(nullptr, p->name.c_str(), kCFStringEncodingUTF8), true);
-	outParameterInfo.minValue	  = p->from;
-	outParameterInfo.maxValue	  = p->to;
-	outParameterInfo.defaultValue = p->defaultValue;
-	outParameterInfo.unit		  = kAudioUnitParameterUnit_Generic;
-	switch (p->type) {
-		case PluginParameter::Type::Indexed:
-			outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
-			outParameterInfo.flags |= kAudioUnitParameterFlag_ValuesHaveStrings;
-			break;
-		case PluginParameter::Type::Int:
-			outParameterInfo.unit = (p->from == 0.f && p->to == 1.f) ? kAudioUnitParameterUnit_Boolean
-																	 : kAudioUnitParameterUnit_Indexed;
-			break;
-		default:
-			if (p->unit == "dB") outParameterInfo.unit = kAudioUnitParameterUnit_Decibels;
-			else if (p->unit == "Hz") outParameterInfo.unit = kAudioUnitParameterUnit_Hertz;
-			else if (p->unit == "ms") outParameterInfo.unit = kAudioUnitParameterUnit_Milliseconds;
-			else if (p->unit == "s") outParameterInfo.unit = kAudioUnitParameterUnit_Seconds;
-			else if (p->unit == "%") outParameterInfo.unit = kAudioUnitParameterUnit_Percent;
-			else if (!p->unit.empty()) {
-				outParameterInfo.unit	  = kAudioUnitParameterUnit_CustomUnit;
-				outParameterInfo.unitName = CFStringCreateWithCString(nullptr, p->unit.c_str(), kCFStringEncodingUTF8);
-			}
-			break;
-	}
-	return noErr;
-}
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::setup() {
+		setDataPathToBundle();
 
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::GetParameterValueStrings(AudioUnitScope inScope,
-														 AudioUnitParameterID inParameterID,
-														 CFArrayRef *outStrings) {
-	if (inScope != kAudioUnitScope_Global || inParameterID >= plugin->getNumParams()) {
-		return kAudioUnitErr_InvalidParameter;
-	}
-	auto p = plugin->getParam(inParameterID);
-	if (p->type != PluginParameter::Type::Indexed || p->options.empty()) return kAudioUnitErr_InvalidProperty;
-	if (outStrings == nullptr) return noErr;
-	CFMutableArrayRef arr = CFArrayCreateMutable(nullptr, 0, &kCFTypeArrayCallBacks);
-	for (auto &o: p->options) {
-		CFStringRef s = CFStringCreateWithCString(nullptr, o.c_str(), kCFStringEncodingUTF8);
-		CFArrayAppendValue(arr, s);
-		CFRelease(s);
-	}
-	*outStrings = arr;
-	return noErr;
-}
-
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::SetParameter(AudioUnitParameterID inID,
-											 AudioUnitScope inScope,
-											 AudioUnitElement inElement,
-											 AudioUnitParameterValue inValue,
-											 UInt32 inBufferOffsetInFrames) {
-	const OSStatus result = AUBaseT::SetParameter(inID, inScope, inElement, inValue, inBufferOffsetInFrames);
-	if (result == noErr && inScope == kAudioUnitScope_Global && inID < plugin->getNumParams()) {
-		lastHostValues[inID].store(inValue);
-		plugin->hostUpdatedParameter(inID, inValue);
-	}
-	return result;
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::pullHostParameters() {
-	const auto n = static_cast<UInt32>(plugin->getNumParams());
-	for (UInt32 i = 0; i < n; ++i) {
-		const float v = this->Globals()->GetParameter(i);
-		if (v != lastHostValues[i].load()) {
+		const auto numParams = static_cast<UInt32>(plugin->getNumParams());
+		this->Globals()->UseIndexedParameters(numParams);
+		lastHostValues = std::make_unique<std::atomic<float>[]>(numParams);
+		for (UInt32 i = 0; i < numParams; ++i) {
+			const float v = plugin->getParam(i)->get();
+			this->Globals()->SetParameter(i, v);
 			lastHostValues[i].store(v);
-			plugin->hostUpdatedParameter(i, v);
+		}
+
+		plugin->sendUpdatedParameterToHost = [this](unsigned int i, float v) { pluginParameterChanged(i, v); };
+		plugin->sendParameterGestureToHost = [this](unsigned int i, bool began) {
+			notifyParameterEvent(began ? kAudioUnitEvent_BeginParameterChangeGesture
+									   : kAudioUnitEvent_EndParameterChangeGesture,
+								 i);
+		};
+		// "Running" = between Initialize() and Cleanup(), i.e. the host may be
+		// rendering. Plugins use this to decide whether a state/preset change must
+		// be handed to the audio thread or can be applied directly (same contract
+		// as the VST3 wrapper's setActive and the AUv3's isRunning).
+		plugin->isRunning = [this]() { return this->IsInitialized(); };
+
+		// Factory presets, if the plugin ships any (mzgl PresetManager: files in
+		// data/factory-presets named <identifier>preset).
+		// Always publish a (possibly empty) array: out-of-process hosts (Logic 12 runs every
+		// AUv2 in AUHostingService) answer GetPropertyInfo for FactoryPresets themselves, so
+		// a GetProperty that then fails looks like a broken unit and Logic gives up on it.
+		factoryPresetNames = plugin->getPresetManager()->getFactoryPresetNames();
+		// kAudioUnitProperty_FactoryPresets is a CFArray of AUPreset* (hosts cast
+		// the elements); the structs live in factoryPresetStorage for the life
+		// of the audio unit, so the array carries no value callbacks.
+		factoryPresetStorage.resize(factoryPresetNames.size());
+		std::vector<const void *> values;
+		for (size_t i = 0; i < factoryPresetNames.size(); ++i) {
+			factoryPresetStorage[i].presetNumber = static_cast<SInt32>(i);
+			factoryPresetStorage[i].presetName =
+				CFStringCreateWithCString(nullptr, factoryPresetNames[i].c_str(), kCFStringEncodingUTF8);
+			values.push_back(&factoryPresetStorage[i]);
+		}
+		factoryPresets = CFArrayCreate(nullptr, values.data(), static_cast<CFIndex>(values.size()), nullptr);
+		if (!factoryPresetNames.empty()) {
+			// Advertise preset 0 as current, like the AUv3 does (state stays at the
+			// plugin's defaults until a host actually selects a preset).
+			this->SetAFactoryPresetAsCurrent(factoryPresetStorage[0]);
+		}
+
+		interleavedIn.reserve(8192 * 2);
+	}
+
+	template <class AUBaseT>
+	MzglAUv2Unit<AUBaseT>::~MzglAUv2Unit() {
+		if (plugin) {
+			plugin->sendUpdatedParameterToHost = nullptr;
+			plugin->sendParameterGestureToHost = nullptr;
+			// The editor may keep the plugin alive after the AU is gone; don't
+			// leave a lambda pointing at this object behind.
+			plugin->isRunning = []() { return false; };
+		}
+		if (factoryPresets) CFRelease(factoryPresets);
+		for (auto &p: factoryPresetStorage) {
+			if (p.presetName) CFRelease(p.presetName);
 		}
 	}
-}
 
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::pluginParameterChanged(unsigned int index, float value) {
-	if (index >= plugin->getNumParams()) return;
-	lastHostValues[index].store(value);
-	this->Globals()->SetParameter(index, value);
-
-	// Hosts only record touch/latch automation inside a begin/end gesture; a change
-	// outside one (preset, scene switch) gets its own.
-	const bool wrap = !plugin->isInHostGesture(index);
-	if (wrap) notifyParameterEvent(kAudioUnitEvent_BeginParameterChangeGesture, index);
-	notifyParameterEvent(kAudioUnitEvent_ParameterValueChange, index);
-	if (wrap) notifyParameterEvent(kAudioUnitEvent_EndParameterChangeGesture, index);
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::notifyParameterEvent(AudioUnitEventType type, unsigned int index) {
-	AudioUnitEvent event {};
-	event.mEventType						= type;
-	event.mArgument.mParameter.mAudioUnit	= this->GetComponentInstance();
-	event.mArgument.mParameter.mParameterID = index;
-	event.mArgument.mParameter.mScope		= kAudioUnitScope_Global;
-	event.mArgument.mParameter.mElement		= 0;
-	AUEventListenerNotify(nullptr, nullptr, &event);
-}
-
-// The plugin's parameters may have moved (state restore, preset): mirror them
-// into the AU's parameter cache.
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::mirrorPluginParameters() {
-	for (UInt32 i = 0; i < plugin->getNumParams(); ++i) {
-		const float v = plugin->getParam(i)->get();
-		this->Globals()->SetParameter(i, v);
-		lastHostValues[i].store(v);
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::setDataPathToBundle() {
+		// libmzgl's dataPath() knows nothing about component bundles; point it at
+		// our Contents/Resources/data (same trick as MzglVST3View.mm).
+		const fs::path bundle = componentBundlePath();
+		if (bundle.empty()) return;
+		setDataPath((bundle / "Contents" / "Resources" / "data").string());
 	}
-}
 
-// ---------------------------------------------------------------------------
-// State / presets
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
-	const OSStatus result = AUBaseT::SaveState(outData);
-	if (result != noErr) return result;
-	auto dict = const_cast<CFMutableDictionaryRef>(static_cast<CFDictionaryRef>(*outData));
-	if (plugin->wantsToSerializeWithNSDictionary()) {
-		plugin->serializeByNSDictionary(dict);
+	// ---------------------------------------------------------------------------
+	// Lifecycle / format
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::Initialize() {
+		const OSStatus result = AUBaseT::Initialize();
+		if (result != noErr) return result;
+		// (AUEffectBase has GetSampleRate(); AUBase itself doesn't, so read the output format.)
+		plugin->setSampleRate(this->Output(0).GetStreamFormat().mSampleRate);
+		plugin->init(2, 2);
 		return noErr;
 	}
-	// One exactly-sized buffer from the plugin, handed to CF without a copy.
-	CFDataRef data = cfDataSharingBytes(plugin->serializeShared());
-	if (data == nullptr) return kAudioUnitErr_FailedInitialization;
-	CFDictionarySetValue(dict, kStateKey, data);
-	CFRelease(data);
-	return noErr;
-}
 
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
-	auto dict = static_cast<CFDictionaryRef>(plist);
-	const bool ourDict = plugin->wantsToSerializeWithNSDictionary() && CFDictionaryContainsKey(dict, kZipDataKey);
-
-	// A state the AUv3 wrote (AUAudioUnit.fullState, e.g. a Logic project
-	// started on iPad) carries "version" = 1 where AUSDK's RestoreState insists
-	// on 0 and refuses the whole dictionary, and its "data" is AUAudioUnit's
-	// parameter blob, not the scope/element layout AUSDK would parse it as.
-	// Normalise the one and drop the other for the base class; the plugin's
-	// real state comes from the dictionary itself below. Our own SaveState
-	// output has version 0 and goes through untouched.
-	SInt32 version = 0;
-	if (auto v = static_cast<CFNumberRef>(CFDictionaryGetValue(dict, CFSTR(kAUPresetVersionKey)));
-		v != nullptr && CFGetTypeID(v) == CFNumberGetTypeID()) {
-		CFNumberGetValue(v, kCFNumberSInt32Type, &version);
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::Cleanup() {
+		AUBaseT::Cleanup();
 	}
-	OSStatus result = noErr;
-	if (ourDict && version != 0) {
-		CFMutableDictionaryRef forBase = CFDictionaryCreateMutableCopy(nullptr, 0, dict);
-		SInt32 zero					   = 0;
-		CFNumberRef ver				   = CFNumberCreate(nullptr, kCFNumberSInt32Type, &zero);
-		CFDictionarySetValue(forBase, CFSTR(kAUPresetVersionKey), ver);
-		CFRelease(ver);
-		CFDictionaryRemoveValue(forBase, CFSTR(kAUPresetDataKey));
-		result = AUBaseT::RestoreState(forBase);
-		CFRelease(forBase);
-	} else {
-		result = AUBaseT::RestoreState(plist);
-	}
-	if (result != noErr) return result;
 
-	if (plugin->wantsToSerializeWithNSDictionary()) {
-		if (ourDict) {
-			plugin->deserializeByNSDictionary(dict);
+	template <class AUBaseT>
+	bool MzglAUv2Unit<AUBaseT>::ValidFormat(AudioUnitScope inScope,
+											AudioUnitElement inElement,
+											const AudioStreamBasicDescription &inNewFormat) {
+		if (config.maxSampleRate > 0.0 && inNewFormat.mSampleRate > config.maxSampleRate) return false;
+		return AUBaseT::ValidFormat(inScope, inElement, inNewFormat);
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::ChangeStreamFormat(AudioUnitScope inScope,
+													   AudioUnitElement inElement,
+													   const AudioStreamBasicDescription &inPrevFormat,
+													   const AudioStreamBasicDescription &inNewFormat) {
+		const OSStatus result = AUBaseT::ChangeStreamFormat(inScope, inElement, inPrevFormat, inNewFormat);
+		if (result == noErr && inScope == kAudioUnitScope_Output) {
+			plugin->setSampleRate(inNewFormat.mSampleRate);
+		}
+		return result;
+	}
+
+	// ---------------------------------------------------------------------------
+	// Properties
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::GetPropertyInfo(AudioUnitPropertyID inID,
+													AudioUnitScope inScope,
+													AudioUnitElement inElement,
+													UInt32 &outDataSize,
+													bool &outWritable) {
+		if (inScope == kAudioUnitScope_Global) {
+			switch (inID) {
+				case kAudioUnitProperty_CocoaUI:
+					outDataSize = sizeof(AudioUnitCocoaViewInfo);
+					outWritable = false;
+					return noErr;
+				case kMzglAUv2Property_Instance:
+					outDataSize = sizeof(void *);
+					outWritable = false;
+					return noErr;
+				default: break;
+			}
+		}
+		return AUBaseT::GetPropertyInfo(inID, inScope, inElement, outDataSize, outWritable);
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::GetProperty(AudioUnitPropertyID inID,
+												AudioUnitScope inScope,
+												AudioUnitElement inElement,
+												void *outData) {
+		if (inScope == kAudioUnitScope_Global) {
+			switch (inID) {
+				case kAudioUnitProperty_CocoaUI: {
+					const fs::path bundle = componentBundlePath();
+					if (bundle.empty()) return kAudioUnitErr_InvalidProperty;
+					CFURLRef url =
+						CFURLCreateFromFileSystemRepresentation(nullptr,
+																reinterpret_cast<const UInt8 *>(bundle.c_str()),
+																static_cast<CFIndex>(bundle.string().size()),
+																true);
+					auto *info						 = static_cast<AudioUnitCocoaViewInfo *>(outData);
+					info->mCocoaAUViewBundleLocation = url;
+					info->mCocoaAUViewClass[0]		 = CFStringCreateWithCString(
+						nullptr, MZGL_AUV2_VIEW_FACTORY_CLASS_NAME, kCFStringEncodingUTF8);
+					return noErr;
+				}
+				case kMzglAUv2Property_Instance: *static_cast<MzglAUv2Host **>(outData) = this; return noErr;
+				default: break;
+			}
+		}
+		return AUBaseT::GetProperty(inID, inScope, inElement, outData);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Parameters
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::GetParameterInfo(AudioUnitScope inScope,
+													 AudioUnitParameterID inParameterID,
+													 AudioUnitParameterInfo &outParameterInfo) {
+		if (inScope != kAudioUnitScope_Global || inParameterID >= plugin->getNumParams()) {
+			return kAudioUnitErr_InvalidParameter;
+		}
+		auto p = plugin->getParam(inParameterID);
+
+		outParameterInfo.flags = kAudioUnitParameterFlag_IsWritable | kAudioUnitParameterFlag_IsReadable
+								 | kAudioUnitParameterFlag_CanRamp;
+		ausdk::AUBase::FillInParameterName(
+			outParameterInfo, CFStringCreateWithCString(nullptr, p->name.c_str(), kCFStringEncodingUTF8), true);
+		outParameterInfo.minValue	  = p->from;
+		outParameterInfo.maxValue	  = p->to;
+		outParameterInfo.defaultValue = p->defaultValue;
+		outParameterInfo.unit		  = kAudioUnitParameterUnit_Generic;
+		switch (p->type) {
+			case PluginParameter::Type::Indexed:
+				outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
+				outParameterInfo.flags |= kAudioUnitParameterFlag_ValuesHaveStrings;
+				break;
+			case PluginParameter::Type::Int:
+				outParameterInfo.unit = (p->from == 0.f && p->to == 1.f) ? kAudioUnitParameterUnit_Boolean
+																		 : kAudioUnitParameterUnit_Indexed;
+				break;
+			default:
+				if (p->unit == "dB") outParameterInfo.unit = kAudioUnitParameterUnit_Decibels;
+				else if (p->unit == "Hz") outParameterInfo.unit = kAudioUnitParameterUnit_Hertz;
+				else if (p->unit == "ms") outParameterInfo.unit = kAudioUnitParameterUnit_Milliseconds;
+				else if (p->unit == "s") outParameterInfo.unit = kAudioUnitParameterUnit_Seconds;
+				else if (p->unit == "%") outParameterInfo.unit = kAudioUnitParameterUnit_Percent;
+				else if (!p->unit.empty()) {
+					outParameterInfo.unit = kAudioUnitParameterUnit_CustomUnit;
+					outParameterInfo.unitName =
+						CFStringCreateWithCString(nullptr, p->unit.c_str(), kCFStringEncodingUTF8);
+				}
+				break;
+		}
+		return noErr;
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::GetParameterValueStrings(AudioUnitScope inScope,
+															 AudioUnitParameterID inParameterID,
+															 CFArrayRef *outStrings) {
+		if (inScope != kAudioUnitScope_Global || inParameterID >= plugin->getNumParams()) {
+			return kAudioUnitErr_InvalidParameter;
+		}
+		auto p = plugin->getParam(inParameterID);
+		if (p->type != PluginParameter::Type::Indexed || p->options.empty()) return kAudioUnitErr_InvalidProperty;
+		if (outStrings == nullptr) return noErr;
+		CFMutableArrayRef arr = CFArrayCreateMutable(nullptr, 0, &kCFTypeArrayCallBacks);
+		for (auto &o: p->options) {
+			CFStringRef s = CFStringCreateWithCString(nullptr, o.c_str(), kCFStringEncodingUTF8);
+			CFArrayAppendValue(arr, s);
+			CFRelease(s);
+		}
+		*outStrings = arr;
+		return noErr;
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::SetParameter(AudioUnitParameterID inID,
+												 AudioUnitScope inScope,
+												 AudioUnitElement inElement,
+												 AudioUnitParameterValue inValue,
+												 UInt32 inBufferOffsetInFrames) {
+		const OSStatus result = AUBaseT::SetParameter(inID, inScope, inElement, inValue, inBufferOffsetInFrames);
+		if (result == noErr && inScope == kAudioUnitScope_Global && inID < plugin->getNumParams()) {
+			lastHostValues[inID].store(inValue);
+			plugin->hostUpdatedParameter(inID, inValue);
+		}
+		return result;
+	}
+
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::pullHostParameters() {
+		const auto n = static_cast<UInt32>(plugin->getNumParams());
+		for (UInt32 i = 0; i < n; ++i) {
+			const float v = this->Globals()->GetParameter(i);
+			if (v != lastHostValues[i].load()) {
+				lastHostValues[i].store(v);
+				plugin->hostUpdatedParameter(i, v);
+			}
+		}
+	}
+
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::pluginParameterChanged(unsigned int index, float value) {
+		if (index >= plugin->getNumParams()) return;
+		lastHostValues[index].store(value);
+		this->Globals()->SetParameter(index, value);
+
+		// Hosts only record touch/latch automation inside a begin/end gesture; a change
+		// outside one (preset, scene switch) gets its own.
+		const bool wrap = !plugin->isInHostGesture(index);
+		if (wrap) notifyParameterEvent(kAudioUnitEvent_BeginParameterChangeGesture, index);
+		notifyParameterEvent(kAudioUnitEvent_ParameterValueChange, index);
+		if (wrap) notifyParameterEvent(kAudioUnitEvent_EndParameterChangeGesture, index);
+	}
+
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::notifyParameterEvent(AudioUnitEventType type, unsigned int index) {
+		AudioUnitEvent event {};
+		event.mEventType						= type;
+		event.mArgument.mParameter.mAudioUnit	= this->GetComponentInstance();
+		event.mArgument.mParameter.mParameterID = index;
+		event.mArgument.mParameter.mScope		= kAudioUnitScope_Global;
+		event.mArgument.mParameter.mElement		= 0;
+		AUEventListenerNotify(nullptr, nullptr, &event);
+	}
+
+	// The plugin's parameters may have moved (state restore, preset): mirror them
+	// into the AU's parameter cache.
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::mirrorPluginParameters() {
+		for (UInt32 i = 0; i < plugin->getNumParams(); ++i) {
+			const float v = plugin->getParam(i)->get();
+			this->Globals()->SetParameter(i, v);
+			lastHostValues[i].store(v);
+		}
+	}
+
+	// ---------------------------------------------------------------------------
+	// State / presets
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::SaveState(CFPropertyListRef *outData) {
+		const OSStatus result = AUBaseT::SaveState(outData);
+		if (result != noErr) return result;
+		auto dict = const_cast<CFMutableDictionaryRef>(static_cast<CFDictionaryRef>(*outData));
+		if (plugin->wantsToSerializeWithNSDictionary()) {
+			plugin->serializeByNSDictionary(dict);
+			return noErr;
+		}
+		// One exactly-sized buffer from the plugin, handed to CF without a copy.
+		CFDataRef data = cfDataSharingBytes(plugin->serializeShared());
+		if (data == nullptr) return kAudioUnitErr_FailedInitialization;
+		CFDictionarySetValue(dict, kStateKey, data);
+		CFRelease(data);
+		return noErr;
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::RestoreState(CFPropertyListRef plist) {
+		auto dict = static_cast<CFDictionaryRef>(plist);
+		const bool ourDict =
+			plugin->wantsToSerializeWithNSDictionary() && CFDictionaryContainsKey(dict, kZipDataKey);
+
+		// A state the AUv3 wrote (AUAudioUnit.fullState, e.g. a Logic project
+		// started on iPad) carries "version" = 1 where AUSDK's RestoreState insists
+		// on 0 and refuses the whole dictionary, and its "data" is AUAudioUnit's
+		// parameter blob, not the scope/element layout AUSDK would parse it as.
+		// Normalise the one and drop the other for the base class; the plugin's
+		// real state comes from the dictionary itself below. Our own SaveState
+		// output has version 0 and goes through untouched.
+		SInt32 version = 0;
+		if (auto v = static_cast<CFNumberRef>(CFDictionaryGetValue(dict, CFSTR(kAUPresetVersionKey)));
+			v != nullptr && CFGetTypeID(v) == CFNumberGetTypeID()) {
+			CFNumberGetValue(v, kCFNumberSInt32Type, &version);
+		}
+		OSStatus result = noErr;
+		if (ourDict && version != 0) {
+			CFMutableDictionaryRef forBase = CFDictionaryCreateMutableCopy(nullptr, 0, dict);
+			SInt32 zero					   = 0;
+			CFNumberRef ver				   = CFNumberCreate(nullptr, kCFNumberSInt32Type, &zero);
+			CFDictionarySetValue(forBase, CFSTR(kAUPresetVersionKey), ver);
+			CFRelease(ver);
+			CFDictionaryRemoveValue(forBase, CFSTR(kAUPresetDataKey));
+			result = AUBaseT::RestoreState(forBase);
+			CFRelease(forBase);
+		} else {
+			result = AUBaseT::RestoreState(plist);
+		}
+		if (result != noErr) return result;
+
+		if (plugin->wantsToSerializeWithNSDictionary()) {
+			if (ourDict) {
+				plugin->deserializeByNSDictionary(dict);
+			}
+			mirrorPluginParameters();
+			return noErr;
+		}
+		auto data = static_cast<CFDataRef>(CFDictionaryGetValue(dict, kStateKey));
+		if (data != nullptr && CFGetTypeID(data) == CFDataGetTypeID()) {
+			// Stream straight out of the host's buffer; no copy of the blob.
+			const auto *bytes	= CFDataGetBytePtr(data);
+			const size_t length = static_cast<size_t>(CFDataGetLength(data));
+			size_t pos			= 0;
+			plugin->deserializeStreamed([&](void *out, size_t n) {
+				const size_t take = std::min(n, length - pos);
+				if (take) std::memcpy(out, bytes + pos, take);
+				pos += take;
+				return take;
+			});
 		}
 		mirrorPluginParameters();
 		return noErr;
 	}
-	auto data = static_cast<CFDataRef>(CFDictionaryGetValue(dict, kStateKey));
-	if (data != nullptr && CFGetTypeID(data) == CFDataGetTypeID()) {
-		// Stream straight out of the host's buffer; no copy of the blob.
-		const auto *bytes	= CFDataGetBytePtr(data);
-		const size_t length = static_cast<size_t>(CFDataGetLength(data));
-		size_t pos			= 0;
-		plugin->deserializeStreamed([&](void *out, size_t n) {
-			const size_t take = std::min(n, length - pos);
-			if (take) std::memcpy(out, bytes + pos, take);
-			pos += take;
-			return take;
-		});
-	}
-	mirrorPluginParameters();
-	return noErr;
-}
 
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::GetPresets(CFArrayRef *outData) const {
-	if (factoryPresets == nullptr) return kAudioUnitErr_InvalidProperty;
-	if (outData != nullptr) {
-		*outData = factoryPresets;
-		CFRetain(factoryPresets);
-	}
-	return noErr;
-}
-
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::NewFactoryPresetSet(const AUPreset &inNewFactoryPreset) {
-	const auto idx = inNewFactoryPreset.presetNumber;
-	if (idx < 0 || static_cast<size_t>(idx) >= factoryPresetNames.size()) return kAudioUnitErr_InvalidPropertyValue;
-	applyPreset(idx);
-	this->SetAFactoryPresetAsCurrent(inNewFactoryPreset);
-	return noErr;
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::applyPreset(int index) {
-	plugin->getPresetManager()->loadFactoryPreset(index);
-	mirrorPluginParameters();
-	this->PropertyChanged(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
-}
-
-// ---------------------------------------------------------------------------
-// MIDI
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-OSStatus MzglAUv2Unit<AUBaseT>::HandleMIDIEvent(UInt8 inStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame)
-	AUSDK_RTSAFE {
-	if (!config.midiInput) return noErr;
-	plugin->midiReceivedAtTime(MidiMessage {static_cast<uint8_t>(inStatus | (inChannel & 0x0f)), inData1, inData2},
-							   inStartFrame);
-	return noErr;
-}
-
-// ---------------------------------------------------------------------------
-// Render plumbing
-// ---------------------------------------------------------------------------
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::beginRender() {
-	plugin->hasStarted = true;
-	pullHostParameters();
-
-	Float64 beat = 0, tempo = 0;
-	if (this->CallHostBeatAndTempo(&beat, &tempo) == noErr) {
-		if (tempo > 0) plugin->bpm = tempo;
-		plugin->beatPosition = beat;
-	}
-	Boolean playing = false, changed = false;
-	Float64 sampleInLoop = 0;
-	Boolean looping		 = false;
-	Float64 loopStart = 0, loopEnd = 0;
-	if (this->CallHostTransportState(&playing, &changed, &sampleInLoop, &looping, &loopStart, &loopEnd) == noErr) {
-		plugin->setHostIsPlaying(playing);
-	}
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::interleaveInput(const AudioBufferList *in, UInt32 frames) {
-	interleavedIn.resize(static_cast<size_t>(frames) * 2);
-	if (in == nullptr || in->mNumberBuffers == 0) {
-		interleavedIn.zeros();
-		return;
-	}
-	if (in->mNumberBuffers >= 2) {
-		const float *l = static_cast<const float *>(in->mBuffers[0].mData);
-		const float *r = static_cast<const float *>(in->mBuffers[1].mData);
-		for (UInt32 i = 0; i < frames; ++i) {
-			interleavedIn[i * 2]	 = l[i];
-			interleavedIn[i * 2 + 1] = r[i];
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::GetPresets(CFArrayRef *outData) const {
+		if (factoryPresets == nullptr) return kAudioUnitErr_InvalidProperty;
+		if (outData != nullptr) {
+			*outData = factoryPresets;
+			CFRetain(factoryPresets);
 		}
-	} else if (in->mBuffers[0].mNumberChannels >= 2) {
-		// already interleaved stereo
-		std::memcpy(interleavedIn.data(), in->mBuffers[0].mData, sizeof(float) * frames * 2);
-	} else {
-		const float *m = static_cast<const float *>(in->mBuffers[0].mData);
-		for (UInt32 i = 0; i < frames; ++i) {
-			interleavedIn[i * 2] = interleavedIn[i * 2 + 1] = m[i];
+		return noErr;
+	}
+
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::NewFactoryPresetSet(const AUPreset &inNewFactoryPreset) {
+		const auto idx = inNewFactoryPreset.presetNumber;
+		if (idx < 0 || static_cast<size_t>(idx) >= factoryPresetNames.size())
+			return kAudioUnitErr_InvalidPropertyValue;
+		applyPreset(idx);
+		this->SetAFactoryPresetAsCurrent(inNewFactoryPreset);
+		return noErr;
+	}
+
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::applyPreset(int index) {
+		plugin->getPresetManager()->loadFactoryPreset(index);
+		mirrorPluginParameters();
+		this->PropertyChanged(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+	}
+
+	// ---------------------------------------------------------------------------
+	// MIDI
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	OSStatus MzglAUv2Unit<AUBaseT>::HandleMIDIEvent(
+		UInt8 inStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) AUSDK_RTSAFE {
+		if (!config.midiInput) return noErr;
+		plugin->midiReceivedAtTime(
+			MidiMessage {static_cast<uint8_t>(inStatus | (inChannel & 0x0f)), inData1, inData2}, inStartFrame);
+		return noErr;
+	}
+
+	// ---------------------------------------------------------------------------
+	// Render plumbing
+	// ---------------------------------------------------------------------------
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::beginRender() {
+		plugin->hasStarted = true;
+		pullHostParameters();
+
+		Float64 beat = 0, tempo = 0;
+		if (this->CallHostBeatAndTempo(&beat, &tempo) == noErr) {
+			if (tempo > 0) plugin->bpm = tempo;
+			plugin->beatPosition = beat;
+		}
+		Boolean playing = false, changed = false;
+		Float64 sampleInLoop = 0;
+		Boolean looping		 = false;
+		Float64 loopStart = 0, loopEnd = 0;
+		if (this->CallHostTransportState(&playing, &changed, &sampleInLoop, &looping, &loopStart, &loopEnd)
+			== noErr) {
+			plugin->setHostIsPlaying(playing);
 		}
 	}
-}
 
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::runPlugin(UInt32 frames) {
-	const size_t interleavedSize = static_cast<size_t>(frames) * 2;
-	const int numOutBusses		 = std::max(1, plugin->getNumOutputBusses());
-	if (static_cast<int>(interleavedOuts.size()) != numOutBusses) interleavedOuts.resize(numOutBusses);
-	for (auto &o: interleavedOuts) o.resize(interleavedSize);
-	plugin->process(&interleavedIn, interleavedOuts.data(), 2);
-}
-
-template <class AUBaseT>
-void MzglAUv2Unit<AUBaseT>::deinterleaveOutput(AudioBufferList &out, int bus, UInt32 frames) const {
-	const bool have = bus >= 0 && bus < static_cast<int>(interleavedOuts.size());
-	if (out.mNumberBuffers >= 2) {
-		float *l = static_cast<float *>(out.mBuffers[0].mData);
-		float *r = static_cast<float *>(out.mBuffers[1].mData);
-		if (!have) {
-			std::fill_n(l, frames, 0.f);
-			std::fill_n(r, frames, 0.f);
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::interleaveInput(const AudioBufferList *in, UInt32 frames) {
+		interleavedIn.resize(static_cast<size_t>(frames) * 2);
+		if (in == nullptr || in->mNumberBuffers == 0) {
+			interleavedIn.zeros();
 			return;
 		}
-		const FloatBuffer &src = interleavedOuts[bus];
-		for (UInt32 i = 0; i < frames; ++i) {
-			l[i] = src[i * 2];
-			r[i] = src[i * 2 + 1];
-		}
-	} else if (out.mNumberBuffers == 1) {
-		float *m = static_cast<float *>(out.mBuffers[0].mData);
-		if (out.mBuffers[0].mNumberChannels >= 2) {
-			if (have) std::memcpy(m, interleavedOuts[bus].data(), sizeof(float) * frames * 2);
-			else std::fill_n(m, frames * 2, 0.f);
-			return;
-		}
-		if (!have) {
-			std::fill_n(m, frames, 0.f);
-			return;
-		}
-		const FloatBuffer &src = interleavedOuts[bus];
-		for (UInt32 i = 0; i < frames; ++i) {
-			m[i] = 0.5f * (src[i * 2] + src[i * 2 + 1]);
+		if (in->mNumberBuffers >= 2) {
+			const float *l = static_cast<const float *>(in->mBuffers[0].mData);
+			const float *r = static_cast<const float *>(in->mBuffers[1].mData);
+			for (UInt32 i = 0; i < frames; ++i) {
+				interleavedIn[i * 2]	 = l[i];
+				interleavedIn[i * 2 + 1] = r[i];
+			}
+		} else if (in->mBuffers[0].mNumberChannels >= 2) {
+			// already interleaved stereo
+			std::memcpy(interleavedIn.data(), in->mBuffers[0].mData, sizeof(float) * frames * 2);
+		} else {
+			const float *m = static_cast<const float *>(in->mBuffers[0].mData);
+			for (UInt32 i = 0; i < frames; ++i) {
+				interleavedIn[i * 2] = interleavedIn[i * 2 + 1] = m[i];
+			}
 		}
 	}
-}
 
-template class MzglAUv2Unit<ausdk::AUMIDIEffectBase>;
-template class MzglAUv2Unit<ausdk::MusicDeviceBase>;
-
-// ---------------------------------------------------------------------------
-// MzglAUv2Effect (aufx / aumf)
-// ---------------------------------------------------------------------------
-MzglAUv2Effect::MzglAUv2Effect(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config)
-	: MzglAUv2Unit<ausdk::AUMIDIEffectBase>(std::move(plugin), config, ci, false) {
-}
-
-UInt32 MzglAUv2Effect::SupportedNumChannels(const AUChannelInfo **outInfo) {
-	static const AUChannelInfo info[] = {{2, 2}};
-	if (outInfo != nullptr) *outInfo = info;
-	return 1;
-}
-
-OSStatus MzglAUv2Effect::ProcessBufferLists(AudioUnitRenderActionFlags &ioActionFlags,
-											const AudioBufferList &inBuffer,
-											AudioBufferList &outBuffer,
-											UInt32 inFramesToProcess) AUSDK_RTSAFE {
-	beginRender();
-	interleaveInput(&inBuffer, inFramesToProcess);
-	runPlugin(inFramesToProcess);
-	deinterleaveOutput(outBuffer, 0, inFramesToProcess);
-	return noErr;
-}
-
-// ---------------------------------------------------------------------------
-// MzglAUv2Instrument (aumu): optional stereo input bus (sidechain / sampling source)
-// ---------------------------------------------------------------------------
-UInt32 MzglAUv2Instrument::numOutputBusses(const std::shared_ptr<::Plugin> &plugin) {
-	return static_cast<UInt32>(std::max(1, plugin->getNumOutputBusses()));
-}
-
-MzglAUv2Instrument::MzglAUv2Instrument(AudioComponentInstance ci,
-									   std::shared_ptr<::Plugin> plugin,
-									   const AUv2Config &config)
-	: MzglAUv2Unit<ausdk::MusicDeviceBase>(plugin, config, ci, 1u, numOutputBusses(plugin)) {
-}
-
-UInt32 MzglAUv2Instrument::SupportedNumChannels(const AUChannelInfo **outInfo) {
-	// The input bus is optional: hosts that don't route anything to an instrument's
-	// input (GarageBand, most of them by default) still see a plain {0 in, 2 out}
-	// synth; Logic/Live offer it as a sidechain and connect it as {2, 2}.
-	static const AUChannelInfo info[] = {{0, 2}, {1, 2}, {2, 2}};
-	if (outInfo != nullptr) *outInfo = info;
-	return 3;
-}
-
-OSStatus MzglAUv2Instrument::Initialize() {
-	// AUEffectBase checks SupportedNumChannels for the effect; MusicDeviceBase
-	// doesn't, so refuse formats the render plumbing can't handle ourselves.
-	const UInt32 inChannels = Input(0).GetStreamFormat().mChannelsPerFrame;
-	if (inChannels != 1 && inChannels != 2) return kAudioUnitErr_FormatNotSupported;
-	for (UInt32 b = 0; b < Outputs().GetNumberOfElements(); ++b) {
-		if (Output(b).GetStreamFormat().mChannelsPerFrame != 2) return kAudioUnitErr_FormatNotSupported;
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::runPlugin(UInt32 frames) {
+		const size_t interleavedSize = static_cast<size_t>(frames) * 2;
+		const int numOutBusses		 = std::max(1, plugin->getNumOutputBusses());
+		if (static_cast<int>(interleavedOuts.size()) != numOutBusses) interleavedOuts.resize(numOutBusses);
+		for (auto &o: interleavedOuts)
+			o.resize(interleavedSize);
+		plugin->process(&interleavedIn, interleavedOuts.data(), 2);
 	}
-	return MzglAUv2Unit::Initialize();
-}
 
-bool MzglAUv2Instrument::StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) {
-	return !IsInitialized();
-}
-
-OSStatus MzglAUv2Instrument::Render(AudioUnitRenderActionFlags &ioActionFlags,
-									const AudioTimeStamp &inTimeStamp,
-									UInt32 inNumberFrames) {
-	beginRender();
-	// Pull the (optional) input bus; silence when nothing is connected to it.
-	// A pull that fails mid-stream (upstream unit erroring) also becomes silence
-	// rather than killing the instrument's output.
-	const AudioBufferList *in = nullptr;
-	if (HasInput(0)) {
-		AudioUnitRenderActionFlags inFlags = ioActionFlags;
-		if (PullInput(0, inFlags, inTimeStamp, inNumberFrames) == noErr) in = &Input(0).GetBufferList();
+	template <class AUBaseT>
+	void MzglAUv2Unit<AUBaseT>::deinterleaveOutput(AudioBufferList &out, int bus, UInt32 frames) const {
+		const bool have = bus >= 0 && bus < static_cast<int>(interleavedOuts.size());
+		if (out.mNumberBuffers >= 2) {
+			float *l = static_cast<float *>(out.mBuffers[0].mData);
+			float *r = static_cast<float *>(out.mBuffers[1].mData);
+			if (!have) {
+				std::fill_n(l, frames, 0.f);
+				std::fill_n(r, frames, 0.f);
+				return;
+			}
+			const FloatBuffer &src = interleavedOuts[bus];
+			for (UInt32 i = 0; i < frames; ++i) {
+				l[i] = src[i * 2];
+				r[i] = src[i * 2 + 1];
+			}
+		} else if (out.mNumberBuffers == 1) {
+			float *m = static_cast<float *>(out.mBuffers[0].mData);
+			if (out.mBuffers[0].mNumberChannels >= 2) {
+				if (have) std::memcpy(m, interleavedOuts[bus].data(), sizeof(float) * frames * 2);
+				else std::fill_n(m, frames * 2, 0.f);
+				return;
+			}
+			if (!have) {
+				std::fill_n(m, frames, 0.f);
+				return;
+			}
+			const FloatBuffer &src = interleavedOuts[bus];
+			for (UInt32 i = 0; i < frames; ++i) {
+				m[i] = 0.5f * (src[i * 2] + src[i * 2 + 1]);
+			}
+		}
 	}
-	interleaveInput(in, inNumberFrames);
-	runPlugin(inNumberFrames);
 
-	// One Render call fills every output bus. With a single bus AUBase has already
-	// prepared (or pointed us at the host's) buffer list; with several, AUBase
-	// always renders into its own per-element buffers and copies each bus to the
-	// host as it is pulled (see AUBase::DoRenderBus), so prepare them all here.
-	const UInt32 numBusses = Outputs().GetNumberOfElements();
-	for (UInt32 b = 0; b < numBusses; ++b) {
-		AudioBufferList &abl = numBusses > 1 ? Output(b).PrepareBuffer(inNumberFrames) : Output(b).GetBufferList();
-		deinterleaveOutput(abl, static_cast<int>(b), inNumberFrames);
+	template class MzglAUv2Unit<ausdk::AUMIDIEffectBase>;
+	template class MzglAUv2Unit<ausdk::MusicDeviceBase>;
+
+	// ---------------------------------------------------------------------------
+	// MzglAUv2Effect (aufx / aumf)
+	// ---------------------------------------------------------------------------
+	MzglAUv2Effect::MzglAUv2Effect(AudioComponentInstance ci,
+								   std::shared_ptr<::Plugin> plugin,
+								   const AUv2Config &config)
+		: MzglAUv2Unit<ausdk::AUMIDIEffectBase>(std::move(plugin), config, ci, false) {
 	}
-	return noErr;
-}
+
+	UInt32 MzglAUv2Effect::SupportedNumChannels(const AUChannelInfo **outInfo) {
+		static const AUChannelInfo info[] = {{2, 2}};
+		if (outInfo != nullptr) *outInfo = info;
+		return 1;
+	}
+
+	OSStatus MzglAUv2Effect::ProcessBufferLists(AudioUnitRenderActionFlags &ioActionFlags,
+												const AudioBufferList &inBuffer,
+												AudioBufferList &outBuffer,
+												UInt32 inFramesToProcess) AUSDK_RTSAFE {
+		beginRender();
+		interleaveInput(&inBuffer, inFramesToProcess);
+		runPlugin(inFramesToProcess);
+		deinterleaveOutput(outBuffer, 0, inFramesToProcess);
+		return noErr;
+	}
+
+	// ---------------------------------------------------------------------------
+	// MzglAUv2Instrument (aumu): optional stereo input bus (sidechain / sampling source)
+	// ---------------------------------------------------------------------------
+	UInt32 MzglAUv2Instrument::numOutputBusses(const std::shared_ptr<::Plugin> &plugin) {
+		return static_cast<UInt32>(std::max(1, plugin->getNumOutputBusses()));
+	}
+
+	MzglAUv2Instrument::MzglAUv2Instrument(AudioComponentInstance ci,
+										   std::shared_ptr<::Plugin> plugin,
+										   const AUv2Config &config)
+		: MzglAUv2Unit<ausdk::MusicDeviceBase>(plugin, config, ci, 1u, numOutputBusses(plugin)) {
+	}
+
+	UInt32 MzglAUv2Instrument::SupportedNumChannels(const AUChannelInfo **outInfo) {
+		// The input bus is optional: hosts that don't route anything to an instrument's
+		// input (GarageBand, most of them by default) still see a plain {0 in, 2 out}
+		// synth; Logic/Live offer it as a sidechain and connect it as {2, 2}.
+		static const AUChannelInfo info[] = {{0, 2}, {1, 2}, {2, 2}};
+		if (outInfo != nullptr) *outInfo = info;
+		return 3;
+	}
+
+	OSStatus MzglAUv2Instrument::Initialize() {
+		// AUEffectBase checks SupportedNumChannels for the effect; MusicDeviceBase
+		// doesn't, so refuse formats the render plumbing can't handle ourselves.
+		const UInt32 inChannels = Input(0).GetStreamFormat().mChannelsPerFrame;
+		if (inChannels != 1 && inChannels != 2) return kAudioUnitErr_FormatNotSupported;
+		for (UInt32 b = 0; b < Outputs().GetNumberOfElements(); ++b) {
+			if (Output(b).GetStreamFormat().mChannelsPerFrame != 2) return kAudioUnitErr_FormatNotSupported;
+		}
+		return MzglAUv2Unit::Initialize();
+	}
+
+	bool MzglAUv2Instrument::StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) {
+		return !IsInitialized();
+	}
+
+	OSStatus MzglAUv2Instrument::Render(AudioUnitRenderActionFlags &ioActionFlags,
+										const AudioTimeStamp &inTimeStamp,
+										UInt32 inNumberFrames) {
+		beginRender();
+		// Pull the (optional) input bus; silence when nothing is connected to it.
+		// A pull that fails mid-stream (upstream unit erroring) also becomes silence
+		// rather than killing the instrument's output.
+		const AudioBufferList *in = nullptr;
+		if (HasInput(0)) {
+			AudioUnitRenderActionFlags inFlags = ioActionFlags;
+			if (PullInput(0, inFlags, inTimeStamp, inNumberFrames) == noErr) in = &Input(0).GetBufferList();
+		}
+		interleaveInput(in, inNumberFrames);
+		runPlugin(inNumberFrames);
+
+		// One Render call fills every output bus. With a single bus AUBase has already
+		// prepared (or pointed us at the host's) buffer list; with several, AUBase
+		// always renders into its own per-element buffers and copies each bus to the
+		// host as it is pulled (see AUBase::DoRenderBus), so prepare them all here.
+		const UInt32 numBusses = Outputs().GetNumberOfElements();
+		for (UInt32 b = 0; b < numBusses; ++b) {
+			AudioBufferList &abl =
+				numBusses > 1 ? Output(b).PrepareBuffer(inNumberFrames) : Output(b).GetBufferList();
+			deinterleaveOutput(abl, static_cast<int>(b), inNumberFrames);
+		}
+		return noErr;
+	}
 
 } // namespace mzglau

@@ -919,9 +919,9 @@ static void
 	options.appUrlScheme	= "koala";
 	options.userAgentSuffix = "KoalaApp";
 	options.onClosed		= [&app, completionCallback]() {
-		   // defer the release - onClosed fires from inside the impl's close()
-		   app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
-		   if (completionCallback) completionCallback();
+		// defer the release - onClosed fires from inside the impl's close()
+		app.main.runOnMainThread([]() { windowsDialogWebView = nullptr; });
+		if (completionCallback) completionCallback();
 	};
 	windowsDialogWebView = std::make_shared<WindowsWebView>(app, std::move(options));
 }

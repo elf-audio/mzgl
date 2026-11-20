@@ -33,22 +33,14 @@ namespace mzgl::midi {
 			: ptr(std::move(initial)) {}
 
 #ifdef __cpp_lib_atomic_shared_ptr
-		std::shared_ptr<T> load() const {
-			return ptr.load();
-		}
-		void store(std::shared_ptr<T> value) {
-			ptr.store(std::move(value));
-		}
+		std::shared_ptr<T> load() const { return ptr.load(); }
+		void store(std::shared_ptr<T> value) { ptr.store(std::move(value)); }
 
 	private:
 		std::atomic<std::shared_ptr<T>> ptr;
 #else
-		std::shared_ptr<T> load() const {
-			return std::atomic_load(&ptr);
-		}
-		void store(std::shared_ptr<T> value) {
-			std::atomic_store(&ptr, std::move(value));
-		}
+		std::shared_ptr<T> load() const { return std::atomic_load(&ptr); }
+		void store(std::shared_ptr<T> value) { std::atomic_store(&ptr, std::move(value)); }
 
 	private:
 		std::shared_ptr<T> ptr;

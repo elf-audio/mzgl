@@ -73,7 +73,7 @@ SCENARIO_METHOD(SampleDataProviderFixture,
 SCENARIO_METHOD(SampleDataProviderFixture,
 				"SampleDataProvider::operator[] returns the same float values SampleData does",
 				"[sample-data-provider]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 5-sample " + formatName(fmt) + " ramp and a provider over it") {
 			auto sd = filledRamp(fmt, 5, -0.5f, 0.25f);
 			SampleDataProvider provider(sd);
@@ -89,7 +89,7 @@ SCENARIO_METHOD(SampleDataProviderFixture,
 SCENARIO_METHOD(SampleDataProviderFixture,
 				"SampleDataProvider::splice fills the output buffer with the requested half-open range",
 				"[sample-data-provider]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 6-sample " + formatName(fmt) + " ramp and a provider over it") {
 			auto sd = filledRamp(fmt, 6, 0.0f, 0.1f); // 0.0, 0.1, 0.2, 0.3, 0.4, 0.5
 			SampleDataProvider provider(sd);
@@ -115,7 +115,7 @@ SCENARIO_METHOD(SampleDataProviderFixture,
 SCENARIO_METHOD(SampleDataProviderFixture,
 				"SampleDataProvider::getSamples(FloatBuffer&) fills a pre-sized buffer starting at startPos",
 				"[sample-data-provider]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 5-sample " + formatName(fmt) + " ramp and a 3-slot output buffer") {
 			auto sd = filledRamp(fmt, 5, 0.0f, 0.1f); // 0.0, 0.1, 0.2, 0.3, 0.4
 			SampleDataProvider provider(sd);
@@ -141,7 +141,7 @@ SCENARIO_METHOD(SampleDataProviderFixture,
 SCENARIO_METHOD(SampleDataProviderFixture,
 				"SampleDataProvider::getSamples(float *) fills a raw pointer with `length` samples",
 				"[sample-data-provider]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 5-sample " + formatName(fmt) + " ramp and a stack-allocated 3-float buffer") {
 			auto sd = filledRamp(fmt, 5, 0.0f, 0.1f);
 			SampleDataProvider provider(sd);
@@ -220,7 +220,7 @@ SCENARIO_METHOD(SampleDataProviderFixture,
 		}
 	}
 
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24}) {
 		GIVEN("a " + formatName(fmt) + " SampleData and a provider over it") {
 			auto sd = makeSized(fmt, 4);
 			SampleDataProvider provider(sd);

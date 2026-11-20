@@ -17,8 +17,11 @@ namespace os {
 		if (fn) fn();
 	}
 
-	auto attachWindow(GLFWwindow *window, void *nativeParentWindowHandle) -> void {}
-	auto detachWindow(GLFWwindow *window) -> void {}
-	auto setWindowSize(GLFWwindow *window, int width, int height) -> void {}
+	auto attachWindow(GLFWwindow *window, void *nativeParentWindowHandle) -> void {
+	}
+	auto detachWindow(GLFWwindow *window) -> void {
+	}
+	auto setWindowSize(GLFWwindow *window, int width, int height) -> void {
+	}
 
 } // namespace os

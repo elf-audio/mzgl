@@ -63,8 +63,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// --start-test-server reach hasCommandLineFlag(). lpCmdLine from
 	// WinMain omits argv[0] and may be mangled for unicode args - use
 	// CommandLineToArgvW(GetCommandLineW(), ...) which gives us argv[0] too.
-	int wargc			   = 0;
-	LPWSTR *wargv		   = CommandLineToArgvW(GetCommandLineW(), &wargc);
+	int wargc	  = 0;
+	LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
 	std::vector<std::string> argStorage;
 	std::vector<char *> argvVec;
 	argStorage.reserve(wargc > 0 ? wargc : 1);
@@ -77,7 +77,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	if (wargv != nullptr) LocalFree(wargv);
 	if (argStorage.empty()) argStorage.emplace_back("mzgl");
-	for (auto &a : argStorage) argvVec.push_back(a.data());
+	for (auto &a: argStorage)
+		argvVec.push_back(a.data());
 	argvVec.push_back(nullptr); // POSIX-style sentinel
 	int argc	= static_cast<int>(argStorage.size());
 	char **argv = argvVec.data();

@@ -37,7 +37,7 @@ enum class HostApi {
 struct AudioHostApi {
 	HostApi kind = HostApi::Unknown;
 	int typeId	 = -1; // backend-specific id (PaHostApiTypeId on Windows)
-	std::string name;  // display name
+	std::string name; // display name
 	bool isValid() const { return typeId != -1; }
 };
 

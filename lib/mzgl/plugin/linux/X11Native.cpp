@@ -106,15 +106,14 @@ namespace mzgl {
 			}
 		};
 
-	
-	// window -> its input context, so the static nextEvent() can run the
-	// right Xutf8LookupString for whichever instance the KeyPress targets.
-	std::map<Window, XIC> &xicRegistry() {
-		static std::map<Window, XIC> xics;
-		return xics;
-	}
+		// window -> its input context, so the static nextEvent() can run the
+		// right Xutf8LookupString for whichever instance the KeyPress targets.
+		std::map<Window, XIC> &xicRegistry() {
+			static std::map<Window, XIC> xics;
+			return xics;
+		}
 
-} // namespace
+	} // namespace
 
 	struct X11Native::Impl {
 		Window parent {0};
@@ -227,7 +226,7 @@ namespace mzgl {
 								  XNClientWindow,
 								  impl->window,
 								  nullptr);
-								 if (impl->xic != nullptr) xicRegistry()[impl->window] = impl->xic;
+			if (impl->xic != nullptr) xicRegistry()[impl->window] = impl->xic;
 		}
 
 		XFlush(shared.display);
@@ -360,14 +359,14 @@ namespace mzgl {
 				}
 
 				case KeyPress: {
-					event.type	 = X11NativeEvent::Type::KeyDown;
-					event.shift	 = (ev.xkey.state & ShiftMask) != 0;
-					event.alt	 = (ev.xkey.state & Mod1Mask) != 0;
-					event.ctrl	 = (ev.xkey.state & ControlMask) != 0;
+					event.type	   = X11NativeEvent::Type::KeyDown;
+					event.shift	   = (ev.xkey.state & ShiftMask) != 0;
+					event.alt	   = (ev.xkey.state & Mod1Mask) != 0;
+					event.ctrl	   = (ev.xkey.state & ControlMask) != 0;
 					event.keycode  = ev.xkey.keycode;
 					event.keyState = ev.xkey.state;
 					event.keyTime  = (unsigned long) ev.xkey.time;
-					event.keysym = (unsigned long) XLookupKeysym(&ev.xkey, 0);
+					event.keysym   = (unsigned long) XLookupKeysym(&ev.xkey, 0);
 					// Printable input via the window's input method when there is
 					// one (dead keys, compose, non-latin layouts), else latin-1.
 					char buf[64] = {};
@@ -388,12 +387,12 @@ namespace mzgl {
 				}
 
 				case KeyRelease:
-					event.type	 = X11NativeEvent::Type::KeyUp;
-					event.ctrl	 = (ev.xkey.state & ControlMask) != 0;
+					event.type	   = X11NativeEvent::Type::KeyUp;
+					event.ctrl	   = (ev.xkey.state & ControlMask) != 0;
 					event.keycode  = ev.xkey.keycode;
 					event.keyState = ev.xkey.state;
 					event.keyTime  = (unsigned long) ev.xkey.time;
-					event.keysym = (unsigned long) XLookupKeysym(&ev.xkey, 0);
+					event.keysym   = (unsigned long) XLookupKeysym(&ev.xkey, 0);
 					return true;
 
 				default: continue; // ConfigureNotify etc: nothing to translate

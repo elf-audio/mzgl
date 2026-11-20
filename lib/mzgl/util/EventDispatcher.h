@@ -18,7 +18,7 @@
 #include <string>
 
 #if defined(__APPLE__)
-#include <mach/mach.h>
+#	include <mach/mach.h>
 // Resident memory (phys_footprint) in MB, or -1 on failure. Apple-only.
 static inline double mzPhysFootprintMB() {
 	task_vm_info_data_t info;
@@ -167,7 +167,6 @@ public:
 	bool hasCalledSetup = false;
 
 	void runFrame() {
-
 		app->g.setupView();
 		app->updateInternal();
 
@@ -184,10 +183,10 @@ public:
 		app->g.frameNum++;
 
 		if (perfEnabled) {
-			auto _t0   = std::chrono::steady_clock::now();
+			auto _t0 = std::chrono::steady_clock::now();
 			draw();
-			auto _t1   = std::chrono::steady_clock::now();
-			double ms  = std::chrono::duration<double, std::milli>(_t1 - _t0).count();
+			auto _t1  = std::chrono::steady_clock::now();
+			double ms = std::chrono::duration<double, std::milli>(_t1 - _t0).count();
 			perfRecord(ms, s);
 		} else {
 			draw();
@@ -197,22 +196,21 @@ public:
 	// --- draw-call perf instrumentation (enabled with --perf-log) ---
 	// Times just the draw() call (UI render command submission, excludes vsync/swap)
 	// and prints a one-line summary once per second to stdout for offline parsing.
-	bool perfEnabled		= hasCommandLineFlag("--perf-log");
-	bool perfStarted		= false;
-	double perfRunStart		= 0.0;
-	double perfWindowStart	= 0.0;
+	bool perfEnabled		  = hasCommandLineFlag("--perf-log");
+	bool perfStarted		  = false;
+	double perfRunStart		  = 0.0;
+	double perfWindowStart	  = 0.0;
 	uint64_t perfFramesWindow = 0;
-	double perfMsWindow		= 0.0;
-	double perfMinWindow	= 1e30;
-	double perfMaxWindow	= 0.0;
+	double perfMsWindow		  = 0.0;
+	double perfMinWindow	  = 1e30;
+	double perfMaxWindow	  = 0.0;
 
 	void perfRecord(double drawMs, double now) {
 		if (!perfStarted) {
 			perfStarted		= true;
 			perfRunStart	= now;
 			perfWindowStart = now;
-			printf("[PERF] backend=%s draw-call timing started\n",
-				   app->g.getAPI().getBackendName().c_str());
+			printf("[PERF] backend=%s draw-call timing started\n", app->g.getAPI().getBackendName().c_str());
 			fflush(stdout);
 		}
 		perfFramesWindow++;
@@ -222,8 +220,8 @@ public:
 
 		double winElapsed = now - perfWindowStart;
 		if (winElapsed >= 1.0) {
-			double avg = perfMsWindow / static_cast<double>(perfFramesWindow);
-			double fps = static_cast<double>(perfFramesWindow) / winElapsed;
+			double avg	 = perfMsWindow / static_cast<double>(perfFramesWindow);
+			double fps	 = static_cast<double>(perfFramesWindow) / winElapsed;
 			double rssMB = -1.0;
 #if defined(__APPLE__)
 			rssMB = mzPhysFootprintMB();

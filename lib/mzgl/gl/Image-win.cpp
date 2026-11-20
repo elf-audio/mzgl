@@ -60,9 +60,8 @@ bool Image::load(const string &path,
 		stbi_image_free(image);
 		return false;
 	}
-	const size_t totalBytes = static_cast<size_t>(outWidth)
-							  * static_cast<size_t>(outHeight)
-							  * static_cast<size_t>(outNumChannels);
+	const size_t totalBytes =
+		static_cast<size_t>(outWidth) * static_cast<size_t>(outHeight) * static_cast<size_t>(outNumChannels);
 	outData.resize(totalBytes);
 	memcpy(outData.data(), image, totalBytes);
 	stbi_image_free(image);

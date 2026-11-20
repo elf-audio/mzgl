@@ -38,9 +38,9 @@ public:
 
 	SampleData() = default;
 
-	SampleData(const SampleData &) = default;
-	SampleData(SampleData &&) noexcept = default;
-	SampleData &operator=(const SampleData &) = default;
+	SampleData(const SampleData &)				  = default;
+	SampleData(SampleData &&) noexcept			  = default;
+	SampleData &operator=(const SampleData &)	  = default;
 	SampleData &operator=(SampleData &&) noexcept = default;
 
 	// Construct from a typed buffer. Adopts the format the buffer was
@@ -85,9 +85,7 @@ public:
 	int bytesPerSample() const noexcept { return ::bytesPerSample(format); }
 
 	// Logical sample count (numFrames * numChannels).
-	size_t size() const noexcept {
-		return raw.size() > kTailPad ? (raw.size() - kTailPad) / bytesPerSample() : 0;
-	}
+	size_t size() const noexcept { return raw.size() > kTailPad ? (raw.size() - kTailPad) / bytesPerSample() : 0; }
 	bool empty() const noexcept { return raw.size() <= kTailPad; }
 
 	void clear() noexcept { raw.clear(); }
@@ -116,9 +114,7 @@ public:
 	// knows the format and wants typed access via the helpers below.
 	uint8_t *bytes() noexcept { return raw.data(); }
 	const uint8_t *bytes() const noexcept { return raw.data(); }
-	size_t byteSize() const noexcept {
-		return raw.size() > kTailPad ? raw.size() - kTailPad : 0;
-	}
+	size_t byteSize() const noexcept { return raw.size() > kTailPad ? raw.size() - kTailPad : 0; }
 
 	// Typed pointer accessors. Caller is responsible for matching format.
 	const int8_t *asI8() const noexcept { return reinterpret_cast<const int8_t *>(raw.data()); }
@@ -147,18 +143,14 @@ public:
 
 	void assignValue(size_t i, float v) noexcept {
 		switch (format) {
-			case SampleFormat::I8:
-				asI8()[i] = static_cast<int8_t>(std::clamp(v, -1.f, 1.f) * 127.f);
-				break;
-			case SampleFormat::I16:
-				asI16()[i] = static_cast<int16_t>(std::clamp(v, -1.f, 1.f) * 32767.f);
-				break;
+			case SampleFormat::I8: asI8()[i] = static_cast<int8_t>(std::clamp(v, -1.f, 1.f) * 127.f); break;
+			case SampleFormat::I16: asI16()[i] = static_cast<int16_t>(std::clamp(v, -1.f, 1.f) * 32767.f); break;
 			case SampleFormat::I24: {
-				int32_t s = static_cast<int32_t>(std::clamp(v, -1.f, 1.f) * 8388607.f);
+				int32_t s  = static_cast<int32_t>(std::clamp(v, -1.f, 1.f) * 8388607.f);
 				uint8_t *p = asI24() + i * 3;
-				p[0] = static_cast<uint8_t>(s & 0xFF);
-				p[1] = static_cast<uint8_t>((s >> 8) & 0xFF);
-				p[2] = static_cast<uint8_t>((s >> 16) & 0xFF);
+				p[0]	   = static_cast<uint8_t>(s & 0xFF);
+				p[1]	   = static_cast<uint8_t>((s >> 8) & 0xFF);
+				p[2]	   = static_cast<uint8_t>((s >> 16) & 0xFF);
 				break;
 			}
 			case SampleFormat::F32: asF32()[i] = v; break;
@@ -173,7 +165,8 @@ public:
 	FloatBuffer toFloatBuffer() const {
 		FloatBuffer out;
 		out.resize(size(), 0.f);
-		for (size_t i = 0; i < size(); ++i) out[i] = (*this)[i];
+		for (size_t i = 0; i < size(); ++i)
+			out[i] = (*this)[i];
 		return out;
 	}
 
@@ -197,7 +190,8 @@ public:
 		const size_t startIdx = size();
 		const size_t addCount = other.size();
 		resize(startIdx + addCount);
-		for (size_t i = 0; i < addCount; ++i) assignValue(startIdx + i, other[i]);
+		for (size_t i = 0; i < addCount; ++i)
+			assignValue(startIdx + i, other[i]);
 	}
 
 	// Convenience: append samples from a FloatBuffer (may transcode).
@@ -214,7 +208,8 @@ public:
 		}
 		const size_t startIdx = size();
 		resize(startIdx + other.size());
-		for (size_t i = 0; i < other.size(); ++i) assignValue(startIdx + i, other[i]);
+		for (size_t i = 0; i < other.size(); ++i)
+			assignValue(startIdx + i, other[i]);
 	}
 
 	// Splice [startSample, endSample) into a new SampleData, same format.
@@ -243,12 +238,14 @@ public:
 
 	// Normalize so the loudest sample sits at full scale.
 	void normalizeAudio() {
-		float peak = 0.f;
+		float peak	   = 0.f;
 		const size_t n = size();
-		for (size_t i = 0; i < n; ++i) peak = std::max(peak, std::abs((*this)[i]));
+		for (size_t i = 0; i < n; ++i)
+			peak = std::max(peak, std::abs((*this)[i]));
 		if (peak == 0.f || peak >= 1.f) return;
 		const float gain = 1.f / peak;
-		for (size_t i = 0; i < n; ++i) assignValue(i, (*this)[i] * gain);
+		for (size_t i = 0; i < n; ++i)
+			assignValue(i, (*this)[i] * gain);
 	}
 
 	// Find the first sample (frame index, not sample index) whose
@@ -291,15 +288,18 @@ public:
 	void splice(int start, int end, FloatBuffer &outBuff) const override {
 		const int n = end - start;
 		outBuff.resize(static_cast<size_t>(n));
-		for (int i = 0; i < n; ++i) outBuff[i] = data[static_cast<size_t>(start + i)];
+		for (int i = 0; i < n; ++i)
+			outBuff[i] = data[static_cast<size_t>(start + i)];
 	}
 
 	void getSamples(int startPos, FloatBuffer &buffToFill) const override {
-		for (size_t i = 0; i < buffToFill.size(); ++i) buffToFill[i] = data[startPos + i];
+		for (size_t i = 0; i < buffToFill.size(); ++i)
+			buffToFill[i] = data[startPos + i];
 	}
 
 	void getSamples(int start, int length, float *outData) const override {
-		for (int i = 0; i < length; ++i) outData[i] = data[static_cast<size_t>(start + i)];
+		for (int i = 0; i < length; ++i)
+			outData[i] = data[static_cast<size_t>(start + i)];
 	}
 
 	void findMinMax(int from, int to, float &min, float &max) const override {

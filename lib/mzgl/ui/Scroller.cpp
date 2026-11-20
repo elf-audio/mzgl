@@ -4,27 +4,27 @@
 #include <cmath>
 
 namespace {
-// UIKit "Normal" deceleration: 0.998 per ms.
-constexpr float kDecelerationPerMs = 0.998f;
-// Rubber-band constant. Higher = stronger resistance / lower asymptote (max overshoot = dim/c).
-// Apple's reported value is 0.55 (asymptote ~1.82 viewport). Bumped for tighter feel.
-constexpr float kRubberBandC = 3.0f;
-// Spring (critically damped: c = 2*sqrt(k)).
-constexpr float kSpringK = 250.0f;
-constexpr float kSpringC = 31.62f;
-// Velocity sample window for fling.
-constexpr double kVelocityWindow = 0.1;
-// On release, last sample must be within this to fling.
-constexpr double kFlingMaxSampleAge = 0.05;
-// Per-frame dt clamp (avoid huge steps after stalls).
-constexpr double kMaxDt = 1.0 / 30.0;
+	// UIKit "Normal" deceleration: 0.998 per ms.
+	constexpr float kDecelerationPerMs = 0.998f;
+	// Rubber-band constant. Higher = stronger resistance / lower asymptote (max overshoot = dim/c).
+	// Apple's reported value is 0.55 (asymptote ~1.82 viewport). Bumped for tighter feel.
+	constexpr float kRubberBandC = 3.0f;
+	// Spring (critically damped: c = 2*sqrt(k)).
+	constexpr float kSpringK = 250.0f;
+	constexpr float kSpringC = 31.62f;
+	// Velocity sample window for fling.
+	constexpr double kVelocityWindow = 0.1;
+	// On release, last sample must be within this to fling.
+	constexpr double kFlingMaxSampleAge = 0.05;
+	// Per-frame dt clamp (avoid huge steps after stalls).
+	constexpr double kMaxDt = 1.0 / 30.0;
 
-// Apple rubber-band: content offset given finger overshoot past edge.
-// y = F * dim / (F * c + dim)  — at F=0 maps 1:1, asymptotes to dim/c.
-float rubberBandOffset(float fingerOvershoot, float dim) {
-	if (dim <= 0.f) return 0.f;
-	return fingerOvershoot * dim / (fingerOvershoot * kRubberBandC + dim);
-}
+	// Apple rubber-band: content offset given finger overshoot past edge.
+	// y = F * dim / (F * c + dim)  — at F=0 maps 1:1, asymptotes to dim/c.
+	float rubberBandOffset(float fingerOvershoot, float dim) {
+		if (dim <= 0.f) return 0.f;
+		return fingerOvershoot * dim / (fingerOvershoot * kRubberBandC + dim);
+	}
 } // namespace
 
 Scroller::Scroller(Graphics &g)
@@ -66,8 +66,7 @@ void Scroller::setRevealPinned(bool pinned) {
 
 void Scroller::updateReveal() {
 	if (!revealHeader) return;
-	revealAmt = revealPinned ? revealHeaderHeight
-							 : std::clamp(content->y, 0.f, revealHeaderHeight);
+	revealAmt = revealPinned ? revealHeaderHeight : std::clamp(content->y, 0.f, revealHeaderHeight);
 	// position in scroller-local space: slides down from just above the top
 	revealHeader->set(0.f, revealAmt - revealHeaderHeight, width, revealHeaderHeight);
 	revealHeader->visible = revealAmt > 0.5f;
@@ -173,7 +172,7 @@ void Scroller::draw() {
 void Scroller::drawSelfAndChildren() {
 	if (!visible) return;
 	if (revealHeader) updateReveal(); // position the header child before it's drawn
-	Layer::drawSelfAndChildren();	  // draws content + the header child (clipped to bounds)
+	Layer::drawSelfAndChildren(); // draws content + the header child (clipped to bounds)
 	if (drawingScrollbar) {
 		drawScrollbar();
 	}
@@ -331,8 +330,7 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 		float threshold = revealHeaderHeight * 0.5f;
 		if (!revealPinned && content->y >= threshold) {
 			setRevealPinned(true);
-		} else if (revealPinned && content->y < threshold && revealCollapseOnScroll
-				   && revealCollapseOnScroll()) {
+		} else if (revealPinned && content->y < threshold && revealCollapseOnScroll && revealCollapseOnScroll()) {
 			setRevealPinned(false);
 		}
 	}

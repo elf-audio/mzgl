@@ -24,10 +24,10 @@ FONS_DEF void metalFonsDelete(FONScontext *ctx);
 
 struct metalFONScontext {
 	TextureRef texture;
-	uint32_t textureId = 0;
-	int width		   = 0;
-	int height		   = 0;
-	Graphics *g		   = nullptr;
+	uint32_t textureId		= 0;
+	int width				= 0;
+	int height				= 0;
+	Graphics *g				= nullptr;
 	int lastFrameNumUpdated = -1;
 	bool dirty				= false;
 	unsigned char *data		= nullptr;

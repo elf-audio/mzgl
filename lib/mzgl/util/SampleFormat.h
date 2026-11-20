@@ -13,7 +13,7 @@
 #include <cstring>
 
 enum class SampleFormat : uint8_t {
-	I8,	 // signed 8-bit, 1 byte/sample
+	I8, // signed 8-bit, 1 byte/sample
 	I16, // signed 16-bit, 2 bytes/sample
 	I24, // signed 24-bit packed little-endian, 3 bytes/sample
 	F32, // 32-bit float, 4 bytes/sample

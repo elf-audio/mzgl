@@ -68,15 +68,15 @@ public:
 			}
 			pixelData = rgbaData.data();
 		}
-		sg_range dataRange		= {};
-		dataRange.ptr			= pixelData;
-		dataRange.size			= static_cast<size_t>(w * h * 4);
-		sg_image_desc imageDesc = {};
-		imageDesc.width			= w;
-		imageDesc.height		= h;
-		imageDesc.pixel_format	= SG_PIXELFORMAT_RGBA8;
+		sg_range dataRange			  = {};
+		dataRange.ptr				  = pixelData;
+		dataRange.size				  = static_cast<size_t>(w * h * 4);
+		sg_image_desc imageDesc		  = {};
+		imageDesc.width				  = w;
+		imageDesc.height			  = h;
+		imageDesc.pixel_format		  = SG_PIXELFORMAT_RGBA8;
 		imageDesc.data.subimage[0][0] = dataRange;
-		image = sg_make_image(imageDesc);
+		image						  = sg_make_image(imageDesc);
 	}
 	void createMipMaps() override {}
 	void bind() override {
@@ -119,7 +119,7 @@ private:
 		image	= {};
 		sampler = {0};
 	}
-	bool bound = false;
+	bool bound		   = false;
 	sg_image image	   = {};
 	sg_sampler sampler = {};
 };

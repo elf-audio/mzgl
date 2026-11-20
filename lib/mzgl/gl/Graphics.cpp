@@ -309,12 +309,12 @@ void Graphics::drawCircle(glm::vec2 c, float r) {
 void Graphics::drawCircle(float x, float y, float r) {
 	static constexpr auto circleResolution = 100;
 	auto circleResolationFun			   = [] {
-		  std::array<std::pair<float, float>, circleResolution + 1> values {};
-		  for (int i = 0; i <= circleResolution; ++i) {
-			  float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
-			  values[i] = {std::cos(phi), std::sin(phi)};
-		  }
-		  return values;
+		std::array<std::pair<float, float>, circleResolution + 1> values {};
+		for (int i = 0; i <= circleResolution; ++i) {
+			float phi = M_PI * 2.f * i / static_cast<float>(circleResolution);
+			values[i] = {std::cos(phi), std::sin(phi)};
+		}
+		return values;
 	};
 	static const std::array<std::pair<float, float>, circleResolution + 1> sinCos = circleResolationFun();
 
@@ -658,13 +658,13 @@ void Graphics::clearUpResources() {
 void Graphics::destroyResources() {
 #ifdef __ANDROID__
 	Log::d() << "destroying GL resources";
-	drawerVbo = nullptr;
-	nothingShader		= nullptr;
-	colorShader			= nullptr;
-	colorTextureShader	= nullptr;
-	texShader			= nullptr;
-	fontShader			= nullptr;
-	colorFontShader		= nullptr;
+	drawerVbo		   = nullptr;
+	nothingShader	   = nullptr;
+	colorShader		   = nullptr;
+	colorTextureShader = nullptr;
+	texShader		   = nullptr;
+	fontShader		   = nullptr;
+	colorFontShader	   = nullptr;
 	deallocateFont();
 	currShader = nullptr;
 

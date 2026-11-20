@@ -26,10 +26,10 @@ public:
 
 	struct Buffer {
 		std::vector<uint8_t> cpuData;
-		int size	 = 0; // element count
-		int unitSize = 0; // bytes per element
-		bool isIndex = false;
-		void *gpu	 = nullptr; // retained id<MTLBuffer>, created lazily at draw
+		int size	  = 0; // element count
+		int unitSize  = 0; // bytes per element
+		bool isIndex  = false;
+		void *gpu	  = nullptr; // retained id<MTLBuffer>, created lazily at draw
 		bool gpuDirty = false;
 
 		template <typename T>

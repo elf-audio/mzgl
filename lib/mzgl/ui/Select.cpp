@@ -86,12 +86,12 @@ void Select::draw() {
 	g.noFill();
 	g.drawRect(*this);
 
-	float rowH     = expanded ? collapsedHeight : height;
-	float textY    = y + rowH * 0.7f;
+	float rowH	   = expanded ? collapsedHeight : height;
+	float textY	   = y + rowH * 0.7f;
 	float textPad  = 8.f;
 	float arrowPad = 28.f;
 	int maxTextW   = static_cast<int>(width - textPad - arrowPad);
-	Font &font     = g.getFont();
+	Font &font	   = g.getFont();
 
 	if (!expanded) {
 		// Draw label and selected value
@@ -143,8 +143,8 @@ void Select::draw() {
 bool Select::touchDown(float x, float y, int id) {
 	if (options.empty()) return false;
 
-	touchStart		  = glm::vec2(x, y);
-	touchHasMoved	  = false;
+	touchStart		   = glm::vec2(x, y);
+	touchHasMoved	   = false;
 	wasExpandedOnTouch = expanded;
 
 	if (!expanded) {

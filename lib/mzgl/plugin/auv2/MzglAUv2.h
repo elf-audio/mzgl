@@ -54,171 +54,174 @@ class Plugin;
 
 namespace mzglau {
 
-struct AUv2Config {
-	bool midiInput = false; // forward MIDI events to Plugin::midiReceivedAtTime
-	// Highest sample rate the plugin will accept; 0 = no limit. Hosts (and auval)
-	// probing a higher rate get it rejected at the format level instead of the
-	// plugin trying to render with it.
-	double maxSampleRate = 0.0;
-	// Editor size in points and the range the host may resize it within.
-	int viewWidth  = 420;
-	int viewHeight = 480;
-	int minWidth   = 240;
-	int minHeight  = 240;
-	int maxWidth   = 4096;
-	int maxHeight  = 4096;
-};
+	struct AUv2Config {
+		bool midiInput = false; // forward MIDI events to Plugin::midiReceivedAtTime
+		// Highest sample rate the plugin will accept; 0 = no limit. Hosts (and auval)
+		// probing a higher rate get it rejected at the format level instead of the
+		// plugin trying to render with it.
+		double maxSampleRate = 0.0;
+		// Editor size in points and the range the host may resize it within.
+		int viewWidth  = 420;
+		int viewHeight = 480;
+		int minWidth   = 240;
+		int minHeight  = 240;
+		int maxWidth   = 4096;
+		int maxHeight  = 4096;
+	};
 
-// Custom property (>= 64000 per Apple) through which the Cocoa view factory,
-// running in the host process, fetches the C++ audio unit it belongs to.
-constexpr AudioUnitPropertyID kMzglAUv2Property_Instance = 64001;
+	// Custom property (>= 64000 per Apple) through which the Cocoa view factory,
+	// running in the host process, fetches the C++ audio unit it belongs to.
+	constexpr AudioUnitPropertyID kMzglAUv2Property_Instance = 64001;
 
-// What the Cocoa view needs from the audio unit, whatever its AU base class.
-class MzglAUv2Host {
-public:
-	virtual ~MzglAUv2Host()										= default;
-	virtual std::shared_ptr<::Plugin> getPlugin() const		= 0;
-	virtual const AUv2Config &getConfig() const				= 0;
-};
+	// What the Cocoa view needs from the audio unit, whatever its AU base class.
+	class MzglAUv2Host {
+	public:
+		virtual ~MzglAUv2Host()								= default;
+		virtual std::shared_ptr<::Plugin> getPlugin() const = 0;
+		virtual const AUv2Config &getConfig() const			= 0;
+	};
 
-/**
+	/**
  * Everything the two wrappers share: parameters both ways, ClassInfo state via
  * Plugin::serialize, factory presets from the mzgl PresetManager, transport,
  * MIDI, the Cocoa UI property and the interleave/deinterleave plumbing.
  * AUBaseT is ausdk::AUMIDIEffectBase or ausdk::MusicDeviceBase (both AUBase +
  * AUMIDIBase); the subclasses below add the format-specific render entry point.
  */
-template <class AUBaseT>
-class MzglAUv2Unit
-	: public AUBaseT
-	, public MzglAUv2Host {
-public:
-	~MzglAUv2Unit() override;
+	template <class AUBaseT>
+	class MzglAUv2Unit
+		: public AUBaseT
+		, public MzglAUv2Host {
+	public:
+		~MzglAUv2Unit() override;
 
-	std::shared_ptr<::Plugin> getPlugin() const override { return plugin; }
-	const AUv2Config &getConfig() const override { return config; }
+		std::shared_ptr<::Plugin> getPlugin() const override { return plugin; }
+		const AUv2Config &getConfig() const override { return config; }
 
-	// AUBase
-	OSStatus Initialize() override;
-	void Cleanup() override;
+		// AUBase
+		OSStatus Initialize() override;
+		void Cleanup() override;
 
-	OSStatus GetPropertyInfo(AudioUnitPropertyID inID,
+		OSStatus GetPropertyInfo(AudioUnitPropertyID inID,
+								 AudioUnitScope inScope,
+								 AudioUnitElement inElement,
+								 UInt32 &outDataSize,
+								 bool &outWritable) override;
+		OSStatus GetProperty(AudioUnitPropertyID inID,
 							 AudioUnitScope inScope,
 							 AudioUnitElement inElement,
-							 UInt32 &outDataSize,
-							 bool &outWritable) override;
-	OSStatus GetProperty(AudioUnitPropertyID inID,
-						 AudioUnitScope inScope,
+							 void *outData) override;
+
+		OSStatus GetParameterInfo(AudioUnitScope inScope,
+								  AudioUnitParameterID inParameterID,
+								  AudioUnitParameterInfo &outParameterInfo) override;
+		OSStatus GetParameterValueStrings(AudioUnitScope inScope,
+										  AudioUnitParameterID inParameterID,
+										  CFArrayRef *outStrings) override;
+		OSStatus SetParameter(AudioUnitParameterID inID,
+							  AudioUnitScope inScope,
+							  AudioUnitElement inElement,
+							  AudioUnitParameterValue inValue,
+							  UInt32 inBufferOffsetInFrames) override;
+
+		OSStatus SaveState(CFPropertyListRef *outData) override;
+		OSStatus RestoreState(CFPropertyListRef plist) override;
+
+		OSStatus GetPresets(CFArrayRef *outData) const override;
+		OSStatus NewFactoryPresetSet(const AUPreset &inNewFactoryPreset) override;
+
+		OSStatus ChangeStreamFormat(AudioUnitScope inScope,
+									AudioUnitElement inElement,
+									const AudioStreamBasicDescription &inPrevFormat,
+									const AudioStreamBasicDescription &inNewFormat) override;
+		bool ValidFormat(AudioUnitScope inScope,
 						 AudioUnitElement inElement,
-						 void *outData) override;
+						 const AudioStreamBasicDescription &inNewFormat) override;
 
-	OSStatus GetParameterInfo(AudioUnitScope inScope,
-							  AudioUnitParameterID inParameterID,
-							  AudioUnitParameterInfo &outParameterInfo) override;
-	OSStatus GetParameterValueStrings(AudioUnitScope inScope,
-									  AudioUnitParameterID inParameterID,
-									  CFArrayRef *outStrings) override;
-	OSStatus SetParameter(AudioUnitParameterID inID,
-						  AudioUnitScope inScope,
-						  AudioUnitElement inElement,
-						  AudioUnitParameterValue inValue,
-						  UInt32 inBufferOffsetInFrames) override;
+	protected:
+		// BaseArgs are forwarded to AUBaseT's constructor.
+		template <class... BaseArgs>
+		MzglAUv2Unit(std::shared_ptr<::Plugin> plugin, const AUv2Config &config, BaseArgs &&...baseArgs);
 
-	OSStatus SaveState(CFPropertyListRef *outData) override;
-	OSStatus RestoreState(CFPropertyListRef plist) override;
+		// AUMIDIBase
+		OSStatus HandleMIDIEvent(UInt8 inStatus,
+								 UInt8 inChannel,
+								 UInt8 inData1,
+								 UInt8 inData2,
+								 UInt32 inStartFrame) AUSDK_RTSAFE override;
 
-	OSStatus GetPresets(CFArrayRef *outData) const override;
-	OSStatus NewFactoryPresetSet(const AUPreset &inNewFactoryPreset) override;
+		// --- render plumbing for the subclasses (audio thread) ---
+		// Sync host parameters + transport into the plugin at the start of a block.
+		void beginRender();
+		// Fill interleavedIn from a (de)interleaved stereo/mono buffer list, or with
+		// silence when in == nullptr.
+		void interleaveInput(const AudioBufferList *in, UInt32 frames);
+		// Run the plugin: interleavedIn -> interleavedOuts (one per output bus).
+		void runPlugin(UInt32 frames);
+		// Write output bus `bus` into a host buffer list (planar or interleaved,
+		// stereo or mono). Busses the plugin doesn't have come out silent.
+		void deinterleaveOutput(AudioBufferList &out, int bus, UInt32 frames) const;
 
-	OSStatus ChangeStreamFormat(AudioUnitScope inScope,
-								AudioUnitElement inElement,
-								const AudioStreamBasicDescription &inPrevFormat,
-								const AudioStreamBasicDescription &inNewFormat) override;
-	bool ValidFormat(AudioUnitScope inScope,
-					 AudioUnitElement inElement,
-					 const AudioStreamBasicDescription &inNewFormat) override;
+		std::shared_ptr<::Plugin> plugin;
+		AUv2Config config;
 
-protected:
-	// BaseArgs are forwarded to AUBaseT's constructor.
-	template <class... BaseArgs>
-	MzglAUv2Unit(std::shared_ptr<::Plugin> plugin, const AUv2Config &config, BaseArgs &&...baseArgs);
+	private:
+		void setup();
+		// Push every host-side parameter value that differs from what the plugin
+		// last saw into the plugin (covers scheduled/ramped automation too).
+		void pullHostParameters();
+		// Called by the plugin (UI thread) when a knob moves: update the AU's value
+		// and tell listeners (host automation / generic views).
+		void pluginParameterChanged(unsigned int index, float value);
+		void notifyParameterEvent(AudioUnitEventType type, unsigned int index);
+		void mirrorPluginParameters();
+		void applyPreset(int index);
+		void setDataPathToBundle();
 
-	// AUMIDIBase
-	OSStatus HandleMIDIEvent(UInt8 inStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame)
-		AUSDK_RTSAFE override;
+		std::unique_ptr<std::atomic<float>[]> lastHostValues;
+		std::vector<std::string> factoryPresetNames;
+		std::vector<AUPreset> factoryPresetStorage;
+		CFArrayRef factoryPresets {nullptr};
 
-	// --- render plumbing for the subclasses (audio thread) ---
-	// Sync host parameters + transport into the plugin at the start of a block.
-	void beginRender();
-	// Fill interleavedIn from a (de)interleaved stereo/mono buffer list, or with
-	// silence when in == nullptr.
-	void interleaveInput(const AudioBufferList *in, UInt32 frames);
-	// Run the plugin: interleavedIn -> interleavedOuts (one per output bus).
-	void runPlugin(UInt32 frames);
-	// Write output bus `bus` into a host buffer list (planar or interleaved,
-	// stereo or mono). Busses the plugin doesn't have come out silent.
-	void deinterleaveOutput(AudioBufferList &out, int bus, UInt32 frames) const;
+		FloatBuffer interleavedIn;
+		std::vector<FloatBuffer> interleavedOuts;
+	};
 
-	std::shared_ptr<::Plugin> plugin;
-	AUv2Config config;
+	/** aufx / aumf: stereo in -> stereo out (first output bus), optional MIDI in. */
+	class MzglAUv2Effect : public MzglAUv2Unit<ausdk::AUMIDIEffectBase> {
+	public:
+		MzglAUv2Effect(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config);
 
-private:
-	void setup();
-	// Push every host-side parameter value that differs from what the plugin
-	// last saw into the plugin (covers scheduled/ramped automation too).
-	void pullHostParameters();
-	// Called by the plugin (UI thread) when a knob moves: update the AU's value
-	// and tell listeners (host automation / generic views).
-	void pluginParameterChanged(unsigned int index, float value);
-	void notifyParameterEvent(AudioUnitEventType type, unsigned int index);
-	void mirrorPluginParameters();
-	void applyPreset(int index);
-	void setDataPathToBundle();
+		UInt32 SupportedNumChannels(const AUChannelInfo **outInfo) override;
+		OSStatus ProcessBufferLists(AudioUnitRenderActionFlags &ioActionFlags,
+									const AudioBufferList &inBuffer,
+									AudioBufferList &outBuffer,
+									UInt32 inFramesToProcess) AUSDK_RTSAFE override;
 
-	std::unique_ptr<std::atomic<float>[]> lastHostValues;
-	std::vector<std::string> factoryPresetNames;
-	std::vector<AUPreset> factoryPresetStorage;
-	CFArrayRef factoryPresets {nullptr};
+		bool SupportsTail() AUSDK_RTSAFE override { return true; }
+		Float64 GetTailTime() AUSDK_RTSAFE override { return 0.0; }
+	};
 
-	FloatBuffer interleavedIn;
-	std::vector<FloatBuffer> interleavedOuts;
-};
-
-/** aufx / aumf: stereo in -> stereo out (first output bus), optional MIDI in. */
-class MzglAUv2Effect : public MzglAUv2Unit<ausdk::AUMIDIEffectBase> {
-public:
-	MzglAUv2Effect(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config);
-
-	UInt32 SupportedNumChannels(const AUChannelInfo **outInfo) override;
-	OSStatus ProcessBufferLists(AudioUnitRenderActionFlags &ioActionFlags,
-								const AudioBufferList &inBuffer,
-								AudioBufferList &outBuffer,
-								UInt32 inFramesToProcess) AUSDK_RTSAFE override;
-
-	bool SupportsTail() AUSDK_RTSAFE override { return true; }
-	Float64 GetTailTime() AUSDK_RTSAFE override { return 0.0; }
-};
-
-/**
+	/**
  * aumu: one optional stereo input bus (hosts that support it, e.g. Logic and
  * Live, offer it as a sidechain; it reads as silence when unconnected), MIDI in,
  * Plugin::getNumOutputBusses() stereo output busses (hosts like Logic expose the
  * extra busses as aux channels).
  */
-class MzglAUv2Instrument : public MzglAUv2Unit<ausdk::MusicDeviceBase> {
-public:
-	MzglAUv2Instrument(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config);
+	class MzglAUv2Instrument : public MzglAUv2Unit<ausdk::MusicDeviceBase> {
+	public:
+		MzglAUv2Instrument(AudioComponentInstance ci, std::shared_ptr<::Plugin> plugin, const AUv2Config &config);
 
-	UInt32 SupportedNumChannels(const AUChannelInfo **outInfo) override;
-	OSStatus Initialize() override;
-	bool StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) override;
-	bool CanScheduleParameters() const override { return false; }
-	OSStatus Render(AudioUnitRenderActionFlags &ioActionFlags,
-					const AudioTimeStamp &inTimeStamp,
-					UInt32 inNumberFrames) override;
+		UInt32 SupportedNumChannels(const AUChannelInfo **outInfo) override;
+		OSStatus Initialize() override;
+		bool StreamFormatWritable(AudioUnitScope scope, AudioUnitElement element) override;
+		bool CanScheduleParameters() const override { return false; }
+		OSStatus Render(AudioUnitRenderActionFlags &ioActionFlags,
+						const AudioTimeStamp &inTimeStamp,
+						UInt32 inNumberFrames) override;
 
-private:
-	static UInt32 numOutputBusses(const std::shared_ptr<::Plugin> &plugin);
-};
+	private:
+		static UInt32 numOutputBusses(const std::shared_ptr<::Plugin> &plugin);
+	};
 
 } // namespace mzglau

@@ -52,4 +52,3 @@ void SokolAPI::clear(vec4 c) {
 	vbo->draw(g);
 	g.setBlending(wasBlending);
 }
-

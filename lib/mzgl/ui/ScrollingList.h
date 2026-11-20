@@ -36,8 +36,7 @@ public:
 	const std::string &getSearchQuery() const { return searchQuery; }
 	// how one item is tested against the (non-empty) query. Default:
 	// case-insensitive substring match on item->name.
-	std::function<bool(const std::shared_ptr<ScrollingListItem> &item, const std::string &query)>
-		searchMatches;
+	std::function<bool(const std::shared_ptr<ScrollingListItem> &item, const std::string &query)> searchMatches;
 
 	void unselect();
 	std::shared_ptr<ScrollingListItem> getSelectedItem();
@@ -95,7 +94,7 @@ protected:
 
 private:
 	std::vector<std::shared_ptr<ScrollingListItem>> allItems; // full, unfiltered set
-	std::vector<std::shared_ptr<ScrollingListItem>> items;	  // currently visible (filtered)
+	std::vector<std::shared_ptr<ScrollingListItem>> items; // currently visible (filtered)
 	std::string searchQuery;
 	void applyFilter(); // rebuild `items` from allItems + searchQuery, then relayout
 	Layer *emptyMessageLayer = nullptr;

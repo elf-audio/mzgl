@@ -36,11 +36,11 @@ private:
 
 	std::string label;
 	std::vector<std::string> options;
-	int selectedIndex	 = 0;
-	bool expanded		 = false;
+	int selectedIndex	  = 0;
+	bool expanded		  = false;
 	float collapsedHeight = 0;
-	int hoveredIndex	 = -1;
+	int hoveredIndex	  = -1;
 	glm::vec2 touchStart;
-	bool touchHasMoved	  = false;
+	bool touchHasMoved		= false;
 	bool wasExpandedOnTouch = false;
 };

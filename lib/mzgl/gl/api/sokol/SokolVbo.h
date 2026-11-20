@@ -35,7 +35,7 @@ public:
 	static bool lazyModeEnabled() { return lazyModeOn; }
 
 protected:
-	void registerLazy();   // idempotent, adds to the global sweep registry
+	void registerLazy(); // idempotent, adds to the global sweep registry
 	void unregisterLazy(); // called from destructor
 	static int64_t nowMs();
 

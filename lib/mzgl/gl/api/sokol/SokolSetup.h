@@ -13,19 +13,20 @@ constexpr int mzglSokolSampleCount = 4;
 // so the logger and pool sizes only live in one place - callers just supply
 // the backend-specific sg_environment.
 inline void mzglSokolSetup(const sg_environment &environment) {
-	// one global instance of sokol 
+	// one global instance of sokol
 	if (sg_isvalid()) return;
 
-	sg_desc desc			= {};
-	desc.environment		= environment;
-	desc.logger.func		= slog_func;
-	desc.buffer_pool_size	= 8192; // sokol default is 128
-	desc.shader_pool_size	= 128; // sokol default is 32
-	desc.pipeline_pool_size = 512; // sokol default of 64 is too small (one pipeline per shader/blend/primitive combo)
-	desc.image_pool_size	= 256; // sokol default of 128 is too small - font atlases, AUv3 plugin icons,
-									// waveform/sample textures all consume image slots at runtime. Exhausting the
-									// pool makes sg_make_image return SG_INVALID_ID and textures render as black rects.
-									// 256 is comfortably above peak concurrent images; the pool is just CPU-side
-									// handle bookkeeping (~100 bytes/slot), no GPU/texture memory.
+	sg_desc desc		  = {};
+	desc.environment	  = environment;
+	desc.logger.func	  = slog_func;
+	desc.buffer_pool_size = 8192; // sokol default is 128
+	desc.shader_pool_size = 128; // sokol default is 32
+	desc.pipeline_pool_size =
+		512; // sokol default of 64 is too small (one pipeline per shader/blend/primitive combo)
+	desc.image_pool_size = 256; // sokol default of 128 is too small - font atlases, AUv3 plugin icons,
+	// waveform/sample textures all consume image slots at runtime. Exhausting the
+	// pool makes sg_make_image return SG_INVALID_ID and textures render as black rects.
+	// 256 is comfortably above peak concurrent images; the pool is just CPU-side
+	// handle bookkeeping (~100 bytes/slot), no GPU/texture memory.
 	sg_setup(desc);
 }

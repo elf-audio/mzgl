@@ -1,0 +1,22 @@
+# Files clang-format must leave alone: third-party code and generated files.
+
+# third-party
+lib/AudioShare/**
+lib/glew/**
+lib/glfw/**
+lib/glm/**
+lib/libremidi/**
+lib/misc/**
+lib/nanovg/**
+lib/portaudio/**
+lib/pu_gixml/**
+lib/sokol/**
+lib/yoga/**
+lib/ZipFile/lib/**
+lib/mzgl/app/android/native_app_glue/**
+lib/mzgl/gl/error.h
+
+# generated
+lib/mzgl/gl/DefaultFont.inc.h
+lib/mzgl/gl/api/OpenGL/OpenGLDefaultShaders.h
+lib/mzgl/gl/api/sokol/xcodeShaders/**

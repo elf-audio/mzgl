@@ -62,8 +62,12 @@ public:
 	[[nodiscard]] bool isRunning() override { return running.load(); }
 	[[nodiscard]] bool isInsideAudioCallback() override { return insideCallback.load(); }
 
-	std::vector<AudioPort> getInputs() override { return {makePort("Threaded Dummy In", numInChannels, 0, true, false)}; }
-	std::vector<AudioPort> getOutputs() override { return {makePort("Threaded Dummy Out", 0, numOutChannels, false, true)}; }
+	std::vector<AudioPort> getInputs() override {
+		return {makePort("Threaded Dummy In", numInChannels, 0, true, false)};
+	}
+	std::vector<AudioPort> getOutputs() override {
+		return {makePort("Threaded Dummy Out", 0, numOutChannels, false, true)};
+	}
 
 private:
 	static AudioPort makePort(const std::string &name, int ins, int outs, bool defIn, bool defOut) {
@@ -83,11 +87,13 @@ private:
 		// what `inputCallback` reads from. We zero both each tick - the engine
 		// fills output, and any fake-mic synthesis happens inside the engine's
 		// own audioOut (see KoalaAudioEngine fakeMic path).
-		std::vector<float> inBuf(static_cast<size_t>(bufferSize) * static_cast<size_t>(std::max(1, numInChannels)));
-		std::vector<float> outBuf(static_cast<size_t>(bufferSize) * static_cast<size_t>(std::max(1, numOutChannels)));
+		std::vector<float> inBuf(static_cast<size_t>(bufferSize)
+								 * static_cast<size_t>(std::max(1, numInChannels)));
+		std::vector<float> outBuf(static_cast<size_t>(bufferSize)
+								  * static_cast<size_t>(std::max(1, numOutChannels)));
 
-		using clock		= std::chrono::steady_clock;
-		auto bufferNs	= std::chrono::nanoseconds {static_cast<int64_t>(1'000'000'000.0 * bufferSize / sampleRate)};
+		using clock	  = std::chrono::steady_clock;
+		auto bufferNs = std::chrono::nanoseconds {static_cast<int64_t>(1'000'000'000.0 * bufferSize / sampleRate)};
 		auto nextWakeAt = clock::now();
 
 		while (running.load()) {

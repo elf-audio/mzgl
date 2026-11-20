@@ -89,11 +89,9 @@ public:
 	void packetListReceived(const CoreMidiDevice &device, const MIDIPacketList *packetList);
 	void midiNotify(const MIDINotification *notification);
 
-
 private:
 	std::vector<CoreMidiInRef> midiIns;
 	std::vector<CoreMidiOutRef> midiOuts;
-
 
 	std::atomic<bool> running {false};
 	std::thread portScannerThread;

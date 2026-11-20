@@ -40,7 +40,9 @@ namespace sample_readers {
 	inline float read_i24(const SampleData &s, int i) noexcept {
 		return decodeI24(s.asI24() + i * 3);
 	}
-	inline float read_f32(const SampleData &s, int i) noexcept { return s.asF32()[i]; }
+	inline float read_f32(const SampleData &s, int i) noexcept {
+		return s.asF32()[i];
+	}
 
 	// ---- per-format scalar writes ----
 
@@ -51,13 +53,15 @@ namespace sample_readers {
 		s.asI16()[i] = static_cast<int16_t>(std::clamp(v, -1.f, 1.f) * 32767.f);
 	}
 	inline void write_i24(SampleData &s, int i, float v) noexcept {
-		int32_t x	= static_cast<int32_t>(std::clamp(v, -1.f, 1.f) * 8388607.f);
-		uint8_t *p	= s.asI24() + i * 3;
-		p[0]		= static_cast<uint8_t>(x & 0xFF);
-		p[1]		= static_cast<uint8_t>((x >> 8) & 0xFF);
-		p[2]		= static_cast<uint8_t>((x >> 16) & 0xFF);
+		int32_t x  = static_cast<int32_t>(std::clamp(v, -1.f, 1.f) * 8388607.f);
+		uint8_t *p = s.asI24() + i * 3;
+		p[0]	   = static_cast<uint8_t>(x & 0xFF);
+		p[1]	   = static_cast<uint8_t>((x >> 8) & 0xFF);
+		p[2]	   = static_cast<uint8_t>((x >> 16) & 0xFF);
 	}
-	inline void write_f32(SampleData &s, int i, float v) noexcept { s.asF32()[i] = v; }
+	inline void write_f32(SampleData &s, int i, float v) noexcept {
+		s.asF32()[i] = v;
+	}
 
 	// ---- frame-read helper bound to a per-format scalar reader ----
 

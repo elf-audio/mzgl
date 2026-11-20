@@ -58,9 +58,9 @@ auto DesktopWindowEventHandler::filesDropped(EventDispatcher *eventDispatcher, s
 auto DesktopWindowEventHandler::getModifier(int key) const -> Modifier {
 	switch (key) {
 		case GLFW_KEY_LEFT_ALT: return Modifier::left_alt;
-		case GLFW_KEY_RIGHT_ALT: return Modifier ::right_alt;
+		case GLFW_KEY_RIGHT_ALT: return Modifier::right_alt;
 		case GLFW_KEY_LEFT_SHIFT: return Modifier::left_shift;
-		case GLFW_KEY_RIGHT_SHIFT: return Modifier ::right_shift;
+		case GLFW_KEY_RIGHT_SHIFT: return Modifier::right_shift;
 	}
 	return Modifier::none;
 }

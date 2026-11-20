@@ -9,58 +9,58 @@
 
 namespace {
 
-constexpr uint32_t LOCAL_FILE_HEADER_SIG	= 0x04034b50;
-constexpr uint64_t LOCAL_FILE_HEADER_SIZE	= 30;
-constexpr uint64_t LOCAL_FILE_HEADER_FN_OFS = 26; // offset of the filename length field
+	constexpr uint32_t LOCAL_FILE_HEADER_SIG	= 0x04034b50;
+	constexpr uint64_t LOCAL_FILE_HEADER_SIZE	= 30;
+	constexpr uint64_t LOCAL_FILE_HEADER_FN_OFS = 26; // offset of the filename length field
 
-constexpr int COMPRESSION_STORE	  = 0;
-constexpr int COMPRESSION_DEFLATE = 8;
+	constexpr int COMPRESSION_STORE	  = 0;
+	constexpr int COMPRESSION_DEFLATE = 8;
 
-uint16_t readLE16(const unsigned char *p) {
-	return static_cast<uint16_t>(p[0] | (p[1] << 8));
-}
-uint32_t readLE32(const unsigned char *p) {
-	return static_cast<uint32_t>(p[0]) | (static_cast<uint32_t>(p[1]) << 8) | (static_cast<uint32_t>(p[2]) << 16)
-		   | (static_cast<uint32_t>(p[3]) << 24);
-}
-
-struct MzReader {
-	mz_zip_archive zip;
-	FILE *file		 = nullptr;
-	bool initialised = false;
-
-	MzReader() { mz_zip_zero_struct(&zip); }
-	~MzReader() {
-		if (initialised) mz_zip_reader_end(&zip);
-		if (file != nullptr) fclose(file);
+	uint16_t readLE16(const unsigned char *p) {
+		return static_cast<uint16_t>(p[0] | (p[1] << 8));
 	}
-	MzReader(const MzReader &)			  = delete;
-	MzReader &operator=(const MzReader &) = delete;
-
-	// Throws on failure.
-	void open(const std::string &zipPath) {
-		file = zipio::openFile(fs::path(zipPath), "rb");
-		if (file == nullptr) {
-			throw std::runtime_error("Can't read zip file '" + zipPath + "'");
-		}
-		// We look entries up by index, so skip miniz's sorted name index.
-		if (!mz_zip_reader_init_cfile(&zip, file, 0, MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY)) {
-			throw std::runtime_error("Can't read zip central directory of '" + zipPath
-									 + "': " + mz_zip_get_error_string(mz_zip_get_last_error(&zip)));
-		}
-		initialised = true;
+	uint32_t readLE32(const unsigned char *p) {
+		return static_cast<uint32_t>(p[0]) | (static_cast<uint32_t>(p[1]) << 8)
+			   | (static_cast<uint32_t>(p[2]) << 16) | (static_cast<uint32_t>(p[3]) << 24);
 	}
 
-	std::string entryName(mz_uint index) {
-		auto len = mz_zip_reader_get_filename(&zip, index, nullptr, 0);
-		std::string name(len, '\0');
-		if (len > 0) {
-			mz_zip_reader_get_filename(&zip, index, name.data(), len);
-			name.resize(len - 1);
+	struct MzReader {
+		mz_zip_archive zip;
+		FILE *file		 = nullptr;
+		bool initialised = false;
+
+		MzReader() { mz_zip_zero_struct(&zip); }
+		~MzReader() {
+			if (initialised) mz_zip_reader_end(&zip);
+			if (file != nullptr) fclose(file);
 		}
-		return name;
-	}
-};
+		MzReader(const MzReader &)			  = delete;
+		MzReader &operator=(const MzReader &) = delete;
+
+		// Throws on failure.
+		void open(const std::string &zipPath) {
+			file = zipio::openFile(fs::path(zipPath), "rb");
+			if (file == nullptr) {
+				throw std::runtime_error("Can't read zip file '" + zipPath + "'");
+			}
+			// We look entries up by index, so skip miniz's sorted name index.
+			if (!mz_zip_reader_init_cfile(&zip, file, 0, MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY)) {
+				throw std::runtime_error("Can't read zip central directory of '" + zipPath
+										 + "': " + mz_zip_get_error_string(mz_zip_get_last_error(&zip)));
+			}
+			initialised = true;
+		}
+
+		std::string entryName(mz_uint index) {
+			auto len = mz_zip_reader_get_filename(&zip, index, nullptr, 0);
+			std::string name(len, '\0');
+			if (len > 0) {
+				mz_zip_reader_get_filename(&zip, index, name.data(), len);
+				name.resize(len - 1);
+			}
+			return name;
+		}
+	};
 
 } // namespace
 

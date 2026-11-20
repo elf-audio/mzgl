@@ -31,7 +31,7 @@ public:
 }
 
 - (id)init {
-	self = [super init];
+	self			  = [super init];
 	feedbackGenerator = [[UISelectionFeedbackGenerator alloc] init];
 	[feedbackGenerator prepare];
 	return self;
@@ -61,7 +61,7 @@ public:
 
 	void lightTap() override { [happer lightTap]; }
 };
-#elif TARGET_OS_MAC==1
+#elif TARGET_OS_MAC == 1
 #	include <AppKit/AppKit.h>
 
 class HapticsMac : public HapticsImpl {

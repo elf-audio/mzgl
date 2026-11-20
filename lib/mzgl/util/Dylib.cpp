@@ -27,7 +27,7 @@ void *Dylib::getFunctionPointer(const std::string &funcName) {
 void *Dylib::get(const std::string &funcName) {
 	void *ptrFunc = dlsym(dylib, funcName.c_str());
 	if (ptrFunc != nullptr) {
-		return ((void *(*) ()) ptrFunc)();
+		return ((void *(*)()) ptrFunc)();
 	} else {
 		printf("Couldn't find the %s() function\n", funcName.c_str());
 		return nullptr;

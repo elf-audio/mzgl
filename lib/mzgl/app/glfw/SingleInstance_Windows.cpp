@@ -79,9 +79,9 @@ namespace single_instance {
 		// an empty path means "nothing to open, just come to the front"
 		bool sendFile(HWND listener, const std::wstring &path) {
 			COPYDATASTRUCT data {};
-			data.dwData = copyDataMagic;
-			data.cbData = static_cast<DWORD>(path.size() * sizeof(wchar_t));
-			data.lpData = const_cast<wchar_t *>(path.data());
+			data.dwData		 = copyDataMagic;
+			data.cbData		 = static_cast<DWORD>(path.size() * sizeof(wchar_t));
+			data.lpData		 = const_cast<wchar_t *>(path.data());
 			DWORD_PTR result = 0;
 			const auto sent	 = SendMessageTimeoutW(listener,
 												   WM_COPYDATA,

@@ -41,15 +41,21 @@ void registerShaders(SokolShaderRegistry &registry) {
 	registry.registerShader("colorTexture",
 							&colorTexture_shader::colorTexture_shader_desc,
 							&colorTexture_shader::colorTexture_uniformblock_size,
-							&colorTexture_shader::colorTexture_uniform_offset, &colorTexture_shader::colorTexture_attr_slot);
-	registry.registerShader(
-		"tex", &tex_shader::tex_shader_desc, &tex_shader::tex_uniformblock_size, &tex_shader::tex_uniform_offset, &tex_shader::tex_attr_slot);
+							&colorTexture_shader::colorTexture_uniform_offset,
+							&colorTexture_shader::colorTexture_attr_slot);
+	registry.registerShader("tex",
+							&tex_shader::tex_shader_desc,
+							&tex_shader::tex_uniformblock_size,
+							&tex_shader::tex_uniform_offset,
+							&tex_shader::tex_attr_slot);
 	registry.registerShader("font",
 							&font_shader::font_shader_desc,
 							&font_shader::font_uniformblock_size,
-							&font_shader::font_uniform_offset, &font_shader::font_attr_slot);
+							&font_shader::font_uniform_offset,
+							&font_shader::font_attr_slot);
 	registry.registerShader("colorFont",
 							&colorFont_shader::colorFont_shader_desc,
 							&colorFont_shader::colorFont_uniformblock_size,
-							&colorFont_shader::colorFont_uniform_offset, &colorFont_shader::colorFont_attr_slot);
+							&colorFont_shader::colorFont_uniform_offset,
+							&colorFont_shader::colorFont_attr_slot);
 }

@@ -20,7 +20,7 @@ public:
 		targetRect = *this;
 		index	   = slot;
 	}
-	
+
 	void startDragging(vec2 start, int _touchId) {
 		touchStart = start;
 		touchId	   = _touchId;

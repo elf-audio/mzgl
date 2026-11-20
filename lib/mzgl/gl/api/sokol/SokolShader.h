@@ -107,9 +107,7 @@ public:
 	// shader doesn't use that attribute.
 	int attrSlot(const std::string &attrName) const;
 
-	PipelineRef getPipeline(const std::vector<SokolVertexAttr> &attrs,
-							bool usingIndices,
-							sg_primitive_type mode);
+	PipelineRef getPipeline(const std::vector<SokolVertexAttr> &attrs, bool usingIndices, sg_primitive_type mode);
 	std::vector<uint8_t> vertUniforms;
 	std::vector<uint8_t> fragUniforms;
 	std::string name;

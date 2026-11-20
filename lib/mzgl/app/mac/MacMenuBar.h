@@ -21,10 +21,8 @@ public:
 	MacMenu(std::string name)
 		: name(name) {}
 	std::shared_ptr<MacMenuItem> addItem(std::string title, std::string shortcut, std::function<void()> action);
-	std::shared_ptr<MacMenuItem> addItem(std::string title,
-										 std::string shortcut,
-										 KeyModifier modifier,
-										 std::function<void()> action);
+	std::shared_ptr<MacMenuItem>
+		addItem(std::string title, std::string shortcut, KeyModifier modifier, std::function<void()> action);
 	void addSeparator();
 	void clear();
 };

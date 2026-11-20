@@ -82,7 +82,6 @@ std::string to_string(const T a_value, const int n);
 std::string zeroPad(int number, int width);
 std::string zeroPad2(int number);
 
-
 std::vector<std::string> tokenize(const std::string &path, const char delimiter);
 
 enum class NaNBehaviour { ConsideredAnError, ResetToDefault, Allowed };

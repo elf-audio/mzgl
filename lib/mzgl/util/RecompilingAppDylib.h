@@ -32,7 +32,7 @@ public:
 		if (dylib.open(dylibPath)) {
 			void *funcPtr = dylib.getFunctionPointer("getPluginPtr");
 			if (funcPtr != nullptr) {
-				App *app = static_cast<App *>(((App * (*) (Graphics &) ) funcPtr)(g));
+				App *app = static_cast<App *>(((App * (*)(Graphics &) ) funcPtr)(g));
 				if (recompiled) {
 					recompiled(std::shared_ptr<App>(app));
 				}

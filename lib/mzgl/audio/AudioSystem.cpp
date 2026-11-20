@@ -53,8 +53,6 @@ AudioPort _AudioSystem::getOutput() {
 	return AudioPort();
 }
 
-
-
 void _AudioSystem::setSampleRate(float sampleRate) {
 	bool wasRunning = isRunning();
 	if (wasRunning) stop();

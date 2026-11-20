@@ -6,7 +6,9 @@ namespace file_drag_handler {
 
 	struct Handler {};
 
-	auto Deleter::operator()(Handler *ptr) const -> void { delete ptr; }
+	auto Deleter::operator()(Handler *ptr) const -> void {
+		delete ptr;
+	}
 
 	auto init(GLFWwindow *window, Listener::Ptr listener) -> Ptr {
 		return std::unique_ptr<Handler, Deleter>(new Handler {}, Deleter {});

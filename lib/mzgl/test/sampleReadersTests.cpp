@@ -44,11 +44,11 @@ SCENARIO_METHOD(SampleReadersFixture,
 				"[sample-readers]") {
 	const std::vector<float> testValues = {-1.0f, -0.75f, -0.5f, -0.1f, 0.0f, 0.1f, 0.5f, 0.75f, 1.0f};
 
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a " + formatName(fmt) + " SampleData with one slot per test value") {
-			auto sd		   = makeSized(fmt, testValues.size());
-			auto writeFn   = sample_readers::resolveWriteSample(fmt);
-			auto readFn	   = sample_readers::resolveReadSample(fmt);
+			auto sd		 = makeSized(fmt, testValues.size());
+			auto writeFn = sample_readers::resolveWriteSample(fmt);
+			auto readFn	 = sample_readers::resolveReadSample(fmt);
 
 			WHEN("each test value is written via the resolved write function") {
 				for (size_t i = 0; i < testValues.size(); ++i) {
@@ -68,15 +68,15 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"Scalar reads agree with SampleData::operator[] for each format",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a " + formatName(fmt) + " SampleData populated via assignValue") {
-			auto sd		 = makeSized(fmt, 4);
+			auto sd = makeSized(fmt, 4);
 			sd.assignValue(0, -0.5f);
 			sd.assignValue(1, 0.0f);
 			sd.assignValue(2, 0.25f);
 			sd.assignValue(3, 1.0f);
 
-			auto readFn	 = sample_readers::resolveReadSample(fmt);
+			auto readFn = sample_readers::resolveReadSample(fmt);
 
 			THEN("the resolved read function returns the same values as operator[]") {
 				for (size_t i = 0; i < sd.size(); ++i) {
@@ -90,7 +90,7 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"Integer-format scalar writes clamp out-of-range values",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24}) {
 		GIVEN("a two-sample " + formatName(fmt) + " buffer") {
 			auto sd		 = makeSized(fmt, 2);
 			auto writeFn = sample_readers::resolveWriteSample(fmt);
@@ -132,7 +132,7 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"readFrame on a mono SampleData duplicates the sample into both L and R",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 3-frame mono " + formatName(fmt) + " SampleData with known sample values") {
 			auto sd = makeSized(fmt, 3);
 			sd.assignValue(0, 0.1f);
@@ -163,13 +163,13 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"readFrame on a stereo SampleData splits channel 0 into L and channel 1 into R",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 2-frame stereo " + formatName(fmt) + " SampleData with distinct L and R per frame") {
 			auto sd = makeSized(fmt, 4); // 2 frames * 2 channels
-			sd.assignValue(0, 0.3f);	 // frame 0, L
-			sd.assignValue(1, -0.3f);	 // frame 0, R
-			sd.assignValue(2, 0.6f);	 // frame 1, L
-			sd.assignValue(3, -0.6f);	 // frame 1, R
+			sd.assignValue(0, 0.3f); // frame 0, L
+			sd.assignValue(1, -0.3f); // frame 0, R
+			sd.assignValue(2, 0.6f); // frame 1, L
+			sd.assignValue(3, -0.6f); // frame 1, R
 
 			auto frameReadFn = sample_readers::resolveReadFrame(fmt);
 
@@ -203,7 +203,7 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"resolveReadSample returns the function appropriate for the given format",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a " + formatName(fmt) + " SampleData populated with a known value") {
 			auto sd = makeSized(fmt, 1);
 			sd.assignValue(0, 0.5f);
@@ -225,7 +225,7 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"resolveWriteSample returns the function appropriate for the given format",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("an empty " + formatName(fmt) + " SampleData with one slot") {
 			auto sd = makeSized(fmt, 1);
 
@@ -247,7 +247,7 @@ SCENARIO_METHOD(SampleReadersFixture,
 SCENARIO_METHOD(SampleReadersFixture,
 				"resolveReadFrame returns the function appropriate for the given format",
 				"[sample-readers]") {
-	for (auto fmt : {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
+	for (auto fmt: {SampleFormat::I8, SampleFormat::I16, SampleFormat::I24, SampleFormat::F32}) {
 		GIVEN("a 1-frame stereo " + formatName(fmt) + " SampleData with distinct L and R") {
 			auto sd = makeSized(fmt, 2);
 			sd.assignValue(0, 0.4f);

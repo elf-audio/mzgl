@@ -366,11 +366,11 @@ static UInt32 getDeviceMaxFrameSize(AudioUnit au) {
 
 static AudioStreamBasicDescription makeInterleavedASBD(double sampleRate, int channels) {
 	AudioStreamBasicDescription f {};
-	f.mSampleRate  = sampleRate;
-	f.mFormatID	   = kAudioFormatLinearPCM;
-	f.mFormatFlags = static_cast<UInt32>(kAudioFormatFlagIsFloat)
-					 | static_cast<UInt32>(kAudioFormatFlagsNativeEndian)
-					 | static_cast<UInt32>(kAudioFormatFlagIsPacked);
+	f.mSampleRate		= sampleRate;
+	f.mFormatID			= kAudioFormatLinearPCM;
+	f.mFormatFlags		= static_cast<UInt32>(kAudioFormatFlagIsFloat)
+						  | static_cast<UInt32>(kAudioFormatFlagsNativeEndian)
+						  | static_cast<UInt32>(kAudioFormatFlagIsPacked);
 	f.mFramesPerPacket	= 1;
 	f.mChannelsPerFrame = std::max(1, channels);
 	f.mBitsPerChannel	= 8 * sizeof(float);

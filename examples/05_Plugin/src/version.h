@@ -4,7 +4,7 @@
 #ifndef GAIN_VERSION
 #	define GAIN_VERSION "0.0.0"
 #endif
-#define GAIN_VERSION_STR GAIN_VERSION
+#define GAIN_VERSION_STR	   GAIN_VERSION
 
 #define stringPluginName	   "mzgl Gain"
 #define stringOriginalFilename "mzgl Gain.vst3"

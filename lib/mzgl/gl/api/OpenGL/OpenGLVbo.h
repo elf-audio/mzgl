@@ -237,7 +237,8 @@ public:
 		auto glMode = primitiveTypeToGLMode(mode);
 		if (instances > 1) {
 			if (indexBuffer.valid()) {
-				glDrawElementsInstanced(glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(instances));
+				glDrawElementsInstanced(
+					glMode, (GLsizei) indexBuffer.size, GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(instances));
 			} else {
 				glDrawArraysInstanced(glMode, 0, (GLsizei) vertexBuffer.size, static_cast<GLsizei>(instances));
 			}

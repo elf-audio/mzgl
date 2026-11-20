@@ -95,6 +95,6 @@ protected:
 
 	// resting top offset for content->y: 0 normally, headerHeight when pinned.
 	float topLimit() const { return revealPinned ? revealHeaderHeight : 0.f; }
-	void updateReveal();	 // recompute revealAmt + position the header child
+	void updateReveal(); // recompute revealAmt + position the header child
 	void drawRevealHeader(); // draw header explicitly (subclasses with custom draw)
 };

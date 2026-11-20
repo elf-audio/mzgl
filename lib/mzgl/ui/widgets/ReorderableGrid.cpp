@@ -76,7 +76,7 @@ void ReorderableGrid::doLayout(int numCols) {
 void ReorderableGrid::draw() {
 	ScopedAlphaBlend bl(g, true);
 	ScopedTranslate tr(g, x, y);
-	
+
 	for (auto &sl: slotPositions) {
 		drawSlotPosition(sl);
 	}

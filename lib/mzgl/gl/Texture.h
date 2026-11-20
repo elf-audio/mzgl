@@ -40,7 +40,7 @@ public:
 	virtual void createMipMaps()																		 = 0;
 
 	static TextureRef create(Graphics &g, uint32_t textureID = 0, int width = 0, int height = 0);
-	
+
 	static TextureRef create(Graphics &g, std::string path);
 
 	static TextureRef create(Graphics &g, const std::vector<unsigned char> &pngData);

@@ -130,12 +130,11 @@ void UndoManager::beginGesture() {
 	gestureGroup = std::make_shared<GroupUndoable>();
 }
 
-
 void UndoManager::endGesture() {
 	if (gestureGroup == nullptr) {
 		return;
 	}
-	auto group = gestureGroup;
+	auto group	 = gestureGroup;
 	gestureGroup = nullptr;
 	if (!std::dynamic_pointer_cast<GroupUndoable>(group)->empty()) {
 		commit(group);
@@ -207,8 +206,7 @@ void UndoManager::subtractMemoryUsage(size_t bytes) {
 
 void UndoManager::evictOldEntriesIfNeeded() {
 	// Evict from front while either limit is exceeded
-	while (!undoStack.empty()
-		   && (undoStack.size() > MAX_UNDO_LEVELS || currentMemoryUsage > memoryLimit)) {
+	while (!undoStack.empty() && (undoStack.size() > MAX_UNDO_LEVELS || currentMemoryUsage > memoryLimit)) {
 		// Calculate position of undoPos in the stack
 		size_t posIndex = std::distance(undoStack.begin(), undoPos);
 

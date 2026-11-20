@@ -18,7 +18,7 @@ public:
 	// called after app is constructed and ready to draw
 	// e.g. you can allocate GPU primitives now
 	void setup() override { printf("Setup called\n"); }
-    
+
 	void draw() override {
 		// set background colour to dark red
 		g.clear(0.2, 0, 0);

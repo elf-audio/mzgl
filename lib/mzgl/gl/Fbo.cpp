@@ -12,20 +12,20 @@
 // backends have no render-to-texture path yet)
 #ifdef MZGL_OPENGL
 
-#include "Fbo.h"
-#include "glm/gtc/matrix_transform.hpp"
-#include "Graphics.h"
-#include "util.h"
-#include <iostream>
-#include "error.h"
-#include "log.h"
-#include "mzOpenGL.h"
+#	include "Fbo.h"
+#	include "glm/gtc/matrix_transform.hpp"
+#	include "Graphics.h"
+#	include "util.h"
+#	include <iostream>
+#	include "error.h"
+#	include "log.h"
+#	include "mzOpenGL.h"
 
 using namespace std;
 
 // with help from http://www.songho.ca/opengl/gl_fbo.html
 
-#include "Graphics.h"
+#	include "Graphics.h"
 
 bool checkFramebufferStatus(GLuint fbo) {
 	// check FBO status

@@ -6,7 +6,7 @@
 typedef const sg_shader_desc *(*ShaderDescFn)(sg_backend backend);
 typedef size_t (*UniformBlocksizeFn)(sg_shader_stage stage, const char *ub_name);
 typedef int (*UniformOffsetFn)(sg_shader_stage stage, const char *ub_name, const char *u_name);
-typedef int (*AttrSlotFn)(const char* attr_name);
+typedef int (*AttrSlotFn)(const char *attr_name);
 
 class SokolAPI;
 class Graphics;
@@ -30,7 +30,7 @@ public:
 		, descFunc(descFunc)
 		, uniformblockSizeFunc(uniformblockSizeFunc)
 		, uniformOffsetFunc(uniformOffsetFunc)
-		, attrSlotFunc(attrSlotFunc){}
+		, attrSlotFunc(attrSlotFunc) {}
 	std::string name;
 	ShaderDescFn descFunc;
 	UniformBlocksizeFn uniformblockSizeFunc;
@@ -69,7 +69,6 @@ public:
 
 		mzAssertFail("Couldn't find shader with name '" + name + "'");
 		return nullptr;
-
 	}
 
 	std::vector<std::shared_ptr<ShaderDef>> shaderRegistry;

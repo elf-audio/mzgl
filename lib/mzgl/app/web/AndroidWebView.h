@@ -16,8 +16,7 @@ public:
 	AndroidWebView(App *app);
 	virtual ~AndroidWebView();
 
-	void show(
-		const std::string &path, std::function<void()> callbacks = []() {}) override;
+	void show(const std::string &path, std::function<void()> callbacks = []() {}) override;
 
 	/**
 	 * Call a javascript function inside the html.

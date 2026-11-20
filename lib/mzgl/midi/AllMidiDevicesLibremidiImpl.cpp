@@ -96,7 +96,7 @@ namespace mzgl::midi {
 			libremidi::input_configuration conf;
 			conf.on_message = [this](libremidi::message &&m) { received(m); };
 			conf.on_error	= [this](std::string_view text, const auto &) {
-				  Log::e() << "MIDI input '" << name << "': " << text;
+				Log::e() << "MIDI input '" << name << "': " << text;
 			};
 			conf.on_warning = [this](std::string_view text, const auto &) {
 				Log::w() << "MIDI input '" << name << "': " << text;
@@ -341,12 +341,8 @@ namespace mzgl::midi {
 #endif
 		}
 
-		[[nodiscard]] std::vector<libremidi::input_port> inputs() const {
-			return observer.get_input_ports();
-		}
-		[[nodiscard]] std::vector<libremidi::output_port> outputs() const {
-			return observer.get_output_ports();
-		}
+		[[nodiscard]] std::vector<libremidi::input_port> inputs() const { return observer.get_input_ports(); }
+		[[nodiscard]] std::vector<libremidi::output_port> outputs() const { return observer.get_output_ports(); }
 
 	private:
 		std::function<void()> onChange;

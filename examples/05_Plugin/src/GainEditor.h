@@ -51,7 +51,7 @@ public:
 	}
 
 	void touchDown(float x, float y, int id) override {
-		Rectf hit = trackRect();
+		Rectf hit		= trackRect();
 		const float pad = 20.f * g.pixelScale;
 		hit.x -= pad;
 		hit.width += pad * 2.f;

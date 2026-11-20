@@ -65,8 +65,7 @@ namespace {
 	// three bytes one at a time, sign-extends the high byte, ORs the parts
 	// together, then divides by 2^23 for the float scale.
 	inline float decodeI24_old(const uint8_t *p) noexcept {
-		const int32_t v =
-			(int32_t(int8_t(p[2])) << 16) | (int32_t(p[1]) << 8) | int32_t(p[0]);
+		const int32_t v = (int32_t(int8_t(p[2])) << 16) | (int32_t(p[1]) << 8) | int32_t(p[0]);
 		return v * (1.0f / 8388608.0f);
 	}
 
@@ -93,7 +92,7 @@ TEST_CASE("decodeI24 matches the original shift-based form at the int24 boundari
 		-128,
 		32767,
 		-32768,
-		8388607,	// max int24
+		8388607, // max int24
 		-8388608, // min int24
 		8388606,
 		-8388607,
@@ -106,7 +105,7 @@ TEST_CASE("decodeI24 matches the original shift-based form at the int24 boundari
 		~0x7FFFFF & 0x555555,
 	};
 
-	for (auto v : values) {
+	for (auto v: values) {
 		packI24(v, buf.data());
 		const float decoded_new = decodeI24(buf.data());
 		const float decoded_old = decodeI24_old(buf.data());
@@ -115,15 +114,14 @@ TEST_CASE("decodeI24 matches the original shift-based form at the int24 boundari
 	}
 }
 
-TEST_CASE("decodeI24 is bit-identical across a comprehensive int24 sweep",
-		  "[sample-format][decode-i24]") {
+TEST_CASE("decodeI24 is bit-identical across a comprehensive int24 sweep", "[sample-format][decode-i24]") {
 	// Sweep every 257th value across the full int24 range. 257 is coprime
 	// with 2^k so it hits every sign-bit pattern. That's 65,278 distinct
 	// values — fast (a few ms) but exhaustive enough to catch any error in
 	// the sign-extend boundary.
 	std::array<uint8_t, 8> buf {};
 
-	int mismatches = 0;
+	int mismatches	  = 0;
 	int32_t first_bad = 0;
 	for (int32_t v = -8388608; v <= 8388607; v += 257) {
 		packI24(v, buf.data());
@@ -138,8 +136,7 @@ TEST_CASE("decodeI24 is bit-identical across a comprehensive int24 sweep",
 	REQUIRE(mismatches == 0);
 }
 
-TEST_CASE("decodeI24 sweeps all sign-bit transitions exactly",
-		  "[sample-format][decode-i24]") {
+TEST_CASE("decodeI24 sweeps all sign-bit transitions exactly", "[sample-format][decode-i24]") {
 	// Walk every value in [-1024, +1024] — covers both the small-positive
 	// and small-negative regions plus the sign-bit boundary at 0.
 	std::array<uint8_t, 8> buf {};
@@ -152,8 +149,7 @@ TEST_CASE("decodeI24 sweeps all sign-bit transitions exactly",
 	}
 }
 
-TEST_CASE("decodeI24 sweeps the int24 negative boundary",
-		  "[sample-format][decode-i24]") {
+TEST_CASE("decodeI24 sweeps the int24 negative boundary", "[sample-format][decode-i24]") {
 	// The most likely failure mode of the sign-extend trick is "almost-zero
 	// negative" or "near-int24-min" values where the upper byte's MSB
 	// matters. Hit those exhaustively.

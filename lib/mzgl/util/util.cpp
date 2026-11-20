@@ -746,9 +746,9 @@ std::time_t timeFromTimestampString(const std::string &timestamp) {
 	in >> std::get_time(&parts, timestampFormat);
 	if (in.fail()) return 0;
 
-	const bool isUtc = timestamp.size() >= std::strlen(utcSuffix)
-					   && timestamp.compare(timestamp.size() - std::strlen(utcSuffix), std::string::npos, utcSuffix)
-							  == 0;
+	const bool isUtc =
+		timestamp.size() >= std::strlen(utcSuffix)
+		&& timestamp.compare(timestamp.size() - std::strlen(utcSuffix), std::string::npos, utcSuffix) == 0;
 	if (isUtc) {
 #ifdef _WIN32
 		return _mkgmtime(&parts);

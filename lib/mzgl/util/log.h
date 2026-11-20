@@ -30,7 +30,7 @@
 #endif
 class LogListener {
 public:
-	virtual ~LogListener() = default;
+	virtual ~LogListener()							= default;
 	virtual void stringLogged(const std::string &m) = 0;
 };
 
@@ -39,7 +39,7 @@ namespace Log {
 	class Logger {
 	public:
 		static constexpr auto userLogLevel = LogLevel::Debug;
-		Logger() = default;
+		Logger()						   = default;
 		template <class T>
 		Logger &operator<<(const T &value) {
 			msg << value;

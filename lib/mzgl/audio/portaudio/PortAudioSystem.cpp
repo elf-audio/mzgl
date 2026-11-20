@@ -240,8 +240,7 @@ bool PortAudioSystem::setIOPort(const AudioPort &audioPort, bool isOutput) {
 
 		// for input changes, retry once with the input's own native sample rate
 		// — the most common failure is shared-mode WASAPI mix-format mismatch
-		if (!isOutput && streamConfigStatus_ != StreamConfigurationStatus::OK
-			&& inPort.defaultSampleRate > 0) {
+		if (!isOutput && streamConfigStatus_ != StreamConfigurationStatus::OK && inPort.defaultSampleRate > 0) {
 			sampleRate = inPort.defaultSampleRate;
 			configureStream();
 		}
@@ -706,8 +705,8 @@ void PortAudioSystem::setHostApi(HostApi kind) {
 	hostApiTypeId = typeId;
 
 	// invalidate current ports so configureStream picks new defaults
-	inPort	= AudioPort();
-	outPort = AudioPort();
+	inPort		  = AudioPort();
+	outPort		  = AudioPort();
 	isInPortDummy = false;
 	sampleRate	  = 0;
 
@@ -738,10 +737,10 @@ vector<double> PortAudioSystem::getAvailableSampleRates() {
 
 	for (auto sr: candidates) {
 		PaStreamParameters params;
-		params.device					  = devId;
-		params.channelCount				  = min(devInfo->maxOutputChannels, 2);
-		params.sampleFormat				  = paFloat32;
-		params.suggestedLatency			  = 0;
+		params.device					 = devId;
+		params.channelCount				 = min(devInfo->maxOutputChannels, 2);
+		params.sampleFormat				 = paFloat32;
+		params.suggestedLatency			 = 0;
 		params.hostApiSpecificStreamInfo = nullptr;
 
 		if (params.channelCount > 0) {
