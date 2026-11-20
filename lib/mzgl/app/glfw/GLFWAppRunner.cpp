@@ -463,9 +463,15 @@ void GLFWAppRunner::run(int argc, char *argv[]) {
 	// Windows started for them (see SingleInstance_Windows.h) - open them the
 	// way a file handed to the app by the OS is opened everywhere else.
 	if (single_instance::appliesTo(getCommandLineArgs())) {
-		single_instance::listen(app->nativeWindowHandle, [dispatcher = eventDispatcher](const std::string &path) {
-			dispatcher->openUrl(ScopedUrl::create(path));
-		});
+		// Weak: the callback lives in a static until atexit, and must not keep the
+		// dispatcher (and so the app) alive past the teardown at the end of run().
+		single_instance::listen(
+			app->nativeWindowHandle,
+			[weakDispatcher = std::weak_ptr<EventDispatcher>(eventDispatcher)](const std::string &path) {
+				if (auto dispatcher = weakDispatcher.lock()) {
+					dispatcher->openUrl(ScopedUrl::create(path));
+				}
+			});
 	}
 #endif
 
