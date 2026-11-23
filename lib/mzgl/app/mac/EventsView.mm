@@ -243,9 +243,28 @@ int nsEventToKey(NSEvent *evt) {
 		NSString *chars = [event characters];
 		std::string s	= chars ? std::string([chars UTF8String]) : std::string();
 		unichar first	= [chars length] > 0 ? [chars characterAtIndex:0] : 0;
-		eventDispatcher->app->main.runOnMainThread(true, [self, s, first]() {
-			Graphics &g = eventDispatcher->app->g;
+		const bool cmd	= (event.modifierFlags & NSEventModifierFlagCommand) != 0;
+		eventDispatcher->app->main.runOnMainThread(true, [self, s, first, cmd]() {
+			using CaretMove = TextInputReceiver::CaretMove;
+			Graphics &g		= eventDispatcher->app->g;
 			if (g.textInputReceiver == nullptr) return;
+			// Arrows, home/end and friends arrive as "characters" in AppKit's
+			// private-use function-key range (0xF700-0xF8FF). They are editing
+			// keys, never text.
+			if (first >= 0xF700 && first <= 0xF8FF) {
+				if (first == NSLeftArrowFunctionKey) {
+					eventDispatcher->textMoveCaret(cmd ? CaretMove::Start : CaretMove::Left);
+				} else if (first == NSRightArrowFunctionKey) {
+					eventDispatcher->textMoveCaret(cmd ? CaretMove::End : CaretMove::Right);
+				} else if (first == NSHomeFunctionKey || first == NSUpArrowFunctionKey) {
+					eventDispatcher->textMoveCaret(CaretMove::Start);
+				} else if (first == NSEndFunctionKey || first == NSDownArrowFunctionKey) {
+					eventDispatcher->textMoveCaret(CaretMove::End);
+				} else if (first == NSDeleteFunctionKey) {
+					eventDispatcher->textDeleteForward();
+				}
+				return;
+			}
 			if (first == 8 || first == 127) { // backspace / delete
 				eventDispatcher->textBackspace();
 			} else if (first == 13 || first == 10 || first == 3) { // return / newline / enter
