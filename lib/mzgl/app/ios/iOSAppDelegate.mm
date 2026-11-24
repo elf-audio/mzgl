@@ -170,9 +170,14 @@ public:
 - (UISceneConfiguration *)application:(UIApplication *)application
 	configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
 								   options:(UISceneConnectionOptions *)options {
-	UISceneConfiguration *config = [[UISceneConfiguration alloc] initWithName:@"Default"
+	// Only the app's own window scene gets our delegate. An external display (a monitor on a cable,
+	// AirPlay) connects as a scene of its own with a non-interactive role. Left without a delegate,
+	// iOS mirrors the device's screen onto it. Given iOSSceneDelegate, it took the one root view
+	// controller for its own window: the app showed on the monitor and the device went black.
+	const BOOL isAppScene = [connectingSceneSession.role isEqualToString:UIWindowSceneSessionRoleApplication];
+	UISceneConfiguration *config = [[UISceneConfiguration alloc] initWithName:(isAppScene ? @"Default" : nil)
 																  sessionRole:connectingSceneSession.role];
-	config.delegateClass		 = NSClassFromString(@"iOSSceneDelegate");
+	if (isAppScene) config.delegateClass = NSClassFromString(@"iOSSceneDelegate");
 	return config;
 }
 
