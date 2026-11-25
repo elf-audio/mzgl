@@ -115,9 +115,13 @@ namespace mzgl {
 
 	} // namespace
 
+	constexpr long kBaseEventMask = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask
+									| PointerMotionMask | FocusChangeMask;
+
 	struct X11Native::Impl {
 		Window parent {0};
 		Window window {0};
+		bool receivesKeys {false};
 		Colormap colormap {0};
 		EGLSurface surface {EGL_NO_SURFACE};
 		EGLContext context {EGL_NO_CONTEXT};
@@ -183,8 +187,8 @@ namespace mzgl {
 		impl->colormap = XCreateColormap(shared.display, impl->parent, visual->visual, AllocNone);
 		XSetWindowAttributes attrs {};
 		attrs.colormap	   = impl->colormap;
-		attrs.event_mask   = ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask
-							 | PointerMotionMask | KeyPressMask | KeyReleaseMask | FocusChangeMask;
+		attrs.event_mask   = kBaseEventMask; // no key events until setReceivesKeys(true)
+		impl->receivesKeys = false;
 		attrs.border_pixel = 0;
 		impl->window	   = XCreateWindow(shared.display,
 										   impl->parent,
@@ -269,6 +273,15 @@ namespace mzgl {
 		XFlush(shared.display);
 	}
 
+	void X11Native::setReceivesKeys(bool receive) {
+		auto &shared = SharedX11::get();
+		if (impl->window == 0 || impl->receivesKeys == receive) return;
+		impl->receivesKeys = receive;
+		XSelectInput(
+			shared.display, impl->window, kBaseEventMask | (receive ? (KeyPressMask | KeyReleaseMask) : 0));
+		XFlush(shared.display);
+	}
+
 	void X11Native::setInputFocus(bool takeIt) {
 		auto &shared = SharedX11::get();
 		if (impl->window == 0) return;
@@ -321,8 +334,14 @@ namespace mzgl {
 					event.type = X11NativeEvent::Type::Exposed;
 					return true;
 
-				case FocusIn: event.type = X11NativeEvent::Type::FocusGained; return true;
-				case FocusOut: event.type = X11NativeEvent::Type::FocusLost; return true;
+				case FocusIn:
+				case FocusOut:
+					// NotifyPointer: focus is on an ancestor (the host) and the
+					// pointer merely moved over us - we don't hold focus.
+					if (ev.xfocus.detail == NotifyPointer) continue;
+					event.type =
+						ev.type == FocusIn ? X11NativeEvent::Type::FocusGained : X11NativeEvent::Type::FocusLost;
+					return true;
 
 				case MotionNotify:
 					event.type = X11NativeEvent::Type::Motion;

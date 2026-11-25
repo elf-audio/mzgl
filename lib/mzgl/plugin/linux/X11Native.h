@@ -70,6 +70,13 @@ namespace mzgl {
 		void setInputFocus(bool takeIt);
 		// Re-send a KeyDown/KeyUp we don't want to the parent (host) window.
 		void forwardKeyToParent(const X11NativeEvent &event);
+		// Whether our window selects key events. X delivers a key to the deepest
+		// window under the pointer that selects it (when the pointer is inside
+		// the focus window), so selecting them all the time would take keys from
+		// the host just because the mouse is over the editor - mac/win editors
+		// only get keys once clicked. So it's on only while we hold focus; the
+		// rest of the time keys reach the host's window natively.
+		void setReceivesKeys(bool receive);
 
 		// The shared X connection's fd (one connection serves every instance).
 		static int connectionFd();

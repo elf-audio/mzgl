@@ -17,6 +17,10 @@
 #	include "util.h"
 #	include "log.h"
 #	include "filesystem.h"
+#	include "backendDefines.h"
+#	if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
+#		include "mzOpenGL.h"
+#	endif
 
 #	include <map>
 
@@ -97,6 +101,10 @@ namespace mzgl {
 
 		bool needsSetup {true};
 		bool inFrame {false};
+		// A host resize that lands mid-frame (e.g. from inside runFrame) is
+		// applied at the start of the next one rather than dropped.
+		int pendingWidthPx {0};
+		int pendingHeightPx {0};
 		bool focused {false};
 
 		// Mouse state, as DesktopWindowEventHandler keeps it for the GLFW app.
@@ -134,6 +142,17 @@ namespace mzgl {
 			if (!native.makeCurrent()) return;
 			inFrame = true;
 
+			if (pendingWidthPx > 0 && pendingHeightPx > 0) {
+				applySize(pendingWidthPx, pendingHeightPx);
+				pendingWidthPx = pendingHeightPx = 0;
+			}
+#	if !defined(MZGL_SOKOL) && !defined(MZGL_D3D11)
+			// A GL context only takes its viewport from the drawable on first
+			// makeCurrent, so after a host resize we'd keep drawing into the old
+			// rectangle. Set it every frame, like GLFWAppRunner does on resize.
+			if (graphics) glViewport(0, 0, (GLsizei) graphics->width, (GLsizei) graphics->height);
+#	endif
+
 			const bool firstFrame = needsSetup;
 			if (firstFrame) {
 				// Same first-draw sequence as the Windows view and MZMetalView:
@@ -153,9 +172,24 @@ namespace mzgl {
 			// Keyboard focus is only ours while the editor wants key events or a
 			// text field is being edited (see ButtonDown); otherwise hand it back
 			// so the host's shortcuts keep working.
-			if (editor && !mzgl::pluginWantsKeyboardFocus(*editor) && focused) {
+			// Key events follow (see X11Native::setReceivesKeys): on while we hold
+			// focus and want keys (the setting may have changed while focused),
+			// off with focus - FocusLost and the hand-back here.
+			const bool wantsKeys = editor && mzgl::pluginWantsKeyboardFocus(*editor);
+			if (wantsKeys && focused) {
+				native.setReceivesKeys(true);
+			} else if (!wantsKeys && focused) {
+				native.setReceivesKeys(false);
 				native.setInputFocus(false);
 			}
+		}
+
+		void applySize(int widthPx, int heightPx) {
+			if (!graphics) return;
+			if (graphics->width == widthPx && graphics->height == heightPx) return;
+			graphics->width	 = widthPx;
+			graphics->height = heightPx;
+			if (dispatcher) dispatcher->resized();
 		}
 
 		void handleEvent(const X11NativeEvent &ev) {
@@ -164,8 +198,14 @@ namespace mzgl {
 			switch (ev.type) {
 				case T::Exposed: renderFrame(); break;
 
-				case T::FocusGained: I.focused = true; break;
-				case T::FocusLost: I.focused = false; break;
+				case T::FocusGained:
+					I.focused = true;
+					if (I.editor && mzgl::pluginWantsKeyboardFocus(*I.editor)) I.native.setReceivesKeys(true);
+					break;
+				case T::FocusLost:
+					I.focused = false;
+					I.native.setReceivesKeys(false);
+					break;
 
 				case T::Motion: {
 					if (!I.dispatcher) break;
@@ -213,6 +253,7 @@ namespace mzgl {
 					// active, which this click may just have focused. With focus,
 					// the keys PluginKeyPolicy.h refuses are re-sent to the host.
 					if (I.editor && mzgl::pluginWantsKeyboardFocus(*I.editor)) {
+						I.native.setReceivesKeys(true);
 						I.native.setInputFocus(true);
 					}
 					break;
@@ -387,10 +428,12 @@ namespace mzgl {
 	void X11PluginView::resize(int widthPx, int heightPx) {
 		if (!impl->native.created() || widthPx <= 0 || heightPx <= 0) return;
 		impl->native.resizeWindow(widthPx, heightPx);
-		if (impl->graphics && !impl->inFrame) {
-			impl->graphics->width  = widthPx;
-			impl->graphics->height = heightPx;
-			if (impl->dispatcher) impl->dispatcher->resized();
+		if (impl->inFrame) {
+			impl->pendingWidthPx  = widthPx;
+			impl->pendingHeightPx = heightPx;
+		} else {
+			impl->applySize(widthPx, heightPx);
+			impl->renderFrame(); // redraw now rather than show a stretched frame until the timer
 		}
 	}
 
