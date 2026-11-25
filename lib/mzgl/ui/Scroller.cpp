@@ -307,6 +307,10 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 	// Direct position update — trackpad/wheel deltas already encode finger motion + OS momentum.
 	// Accumulating into velocity caused trailing decay even when fingers rested motionless.
 	contentVelocity.y = 0.f;
+	// Scrolling down the list takes over from any pin/unpin snap, as a finger landing
+	// does in touchDown. Without this the snap keeps hauling the list back to the top
+	// for as long as the wheel is turning.
+	if (scrollY < 0.f) revealSettling = false;
 
 	// A wheel/trackpad has no discrete release event, so (unlike touch) it can't
 	// rely on touchUp to pin the reveal header. Let it scroll straight into the
@@ -331,7 +335,12 @@ bool Scroller::mouseScrolled(float x, float y, float scrollX, float scrollY) {
 		if (!revealPinned && content->y >= threshold) {
 			setRevealPinned(true);
 		} else if (revealPinned && content->y < threshold && revealCollapseOnScroll && revealCollapseOnScroll()) {
-			setRevealPinned(false);
+			// Nothing worth keeping in the header: let it ride off with the content, as
+			// touchDown does. No settle spring - that would snap the list back to the top.
+			revealPinned   = false;
+			revealSettling = false;
+			if (g.textInputReceiver != nullptr) g.hideKeyboard();
+			if (onRevealUnpinned) onRevealUnpinned();
 		}
 	}
 	return true;

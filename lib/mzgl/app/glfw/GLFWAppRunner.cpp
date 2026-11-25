@@ -182,10 +182,20 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 	// arrive separately via char_callback).
 	if ((action == GLFW_PRESS || action == GLFW_REPEAT) && getGraphics(window).textInputReceiver != nullptr) {
 		auto *ed = getEventDispatcher(window);
-		if (key == GLFW_KEY_BACKSPACE || key == GLFW_KEY_DELETE) {
+		if (key == GLFW_KEY_BACKSPACE) {
 			ed->textBackspace();
 			return;
 		}
+		if (key == GLFW_KEY_DELETE) {
+			ed->textDeleteForward();
+			return;
+		}
+		if (key == GLFW_KEY_HOME || key == GLFW_KEY_END) {
+			ed->textMoveCaret(key == GLFW_KEY_HOME ? TextInputReceiver::CaretMove::Start
+												   : TextInputReceiver::CaretMove::End);
+			return;
+		}
+		if (ed->textKeyDown(convertGlfwKeyToMzgl(key))) return;
 		if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
 			ed->textDone();
 			return;

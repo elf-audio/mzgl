@@ -245,10 +245,15 @@ namespace mzgl {
 						if (!ours && !modifier) break;
 					}
 					if (I.graphics->textInputReceiver != nullptr) {
-						if (ev.keysym == kKeyBackSpace || ev.keysym == kKeyDelete) {
+						if (ev.keysym == kKeyBackSpace) {
 							I.dispatcher->textBackspace();
 							break;
 						}
+						if (ev.keysym == kKeyDelete) {
+							I.dispatcher->textDeleteForward();
+							break;
+						}
+						if (I.dispatcher->textKeyDown(keysymToMzglKey(ev.keysym))) break;
 						if (ev.keysym == kKeyReturn || ev.keysym == kKeyKPEnter) {
 							I.dispatcher->textDone();
 							break;

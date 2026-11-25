@@ -606,10 +606,20 @@ namespace mzglvst {
 				// Editing keys for the focused text field; printable characters
 				// arrive as WM_CHAR.
 				if (I.graphics->textInputReceiver != nullptr) {
-					if (wParam == VK_BACK || wParam == VK_DELETE) {
+					if (wParam == VK_BACK) {
 						I.dispatcher->textBackspace();
 						return 0;
 					}
+					if (wParam == VK_DELETE) {
+						I.dispatcher->textDeleteForward();
+						return 0;
+					}
+					if (wParam == VK_HOME || wParam == VK_END) {
+						I.dispatcher->textMoveCaret(wParam == VK_HOME ? TextInputReceiver::CaretMove::Start
+																	  : TextInputReceiver::CaretMove::End);
+						return 0;
+					}
+					if (I.dispatcher->textKeyDown(vkToMzglKey(wParam))) return 0;
 					if (wParam == VK_RETURN) {
 						I.dispatcher->textDone();
 						return 0;

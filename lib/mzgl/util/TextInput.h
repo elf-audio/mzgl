@@ -30,6 +30,12 @@ public:
 	virtual void insertText(const std::string &utf8) = 0;
 	virtual void deleteBackward()					 = 0;
 
+	// Caret editing on those same platforms. Optional: a receiver that keeps its
+	// caret at the end can ignore them.
+	enum class CaretMove { Left, Right, Start, End };
+	virtual void moveCaret(CaretMove move) {}
+	virtual void deleteForward() {}
+
 	// Return / Enter / done pressed on the keyboard.
 	virtual void onTextDone() {}
 

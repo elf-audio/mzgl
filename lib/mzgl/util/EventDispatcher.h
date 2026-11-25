@@ -69,6 +69,25 @@ public:
 	void textDone() {
 		if (app->g.textInputReceiver) app->g.textInputReceiver->onTextDone();
 	}
+	void textMoveCaret(TextInputReceiver::CaretMove move) {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->moveCaret(move);
+	}
+	void textDeleteForward() {
+		if (app->g.textInputReceiver) app->g.textInputReceiver->deleteForward();
+	}
+	// Arrow keys while a text field is focused: left/right move its caret, and
+	// up/down are swallowed too so they can't drive whatever list sits behind
+	// the field. Returns true if the key was consumed and must not be dispatched.
+	bool textKeyDown(int key) {
+		if (app->g.textInputReceiver == nullptr) return false;
+		switch (key) {
+			case MZ_KEY_LEFT: textMoveCaret(TextInputReceiver::CaretMove::Left); return true;
+			case MZ_KEY_RIGHT: textMoveCaret(TextInputReceiver::CaretMove::Right); return true;
+			case MZ_KEY_UP:
+			case MZ_KEY_DOWN: return true;
+			default: return false;
+		}
+	}
 
 	void iosViewWillPause(bool pausing) { app->iosViewWillPause(pausing); }
 
