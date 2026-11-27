@@ -8,13 +8,18 @@
 
 macro(mzgl_fetch_auv2_sdk)
   if(NOT TARGET ausdk)
-    include(FetchContent)
-    FetchContent_Declare(
-      audiounitsdk
-      GIT_REPOSITORY https://github.com/apple/AudioUnitSDK.git
-      GIT_TAG AudioUnitSDK-1.3.0
-      GIT_SHALLOW TRUE)
-    FetchContent_MakeAvailable(audiounitsdk)
+    # Through CPM when loaded, so the clone lives in the persistent CPM source
+    # cache (~/.cpm) instead of build/_deps, which CI wipes every run.
+    set(_mzgl_ausdk_args GIT_REPOSITORY https://github.com/apple/AudioUnitSDK.git
+                         GIT_TAG AudioUnitSDK-1.3.0 GIT_SHALLOW TRUE)
+    if(COMMAND CPMAddPackage)
+      CPMAddPackage(NAME audiounitsdk ${_mzgl_ausdk_args} DOWNLOAD_ONLY YES)
+    else()
+      include(FetchContent)
+      FetchContent_Declare(audiounitsdk ${_mzgl_ausdk_args})
+      FetchContent_MakeAvailable(audiounitsdk)
+    endif()
+    set_property(GLOBAL PROPERTY MZGL_AUV2_SDK_ROOT "${audiounitsdk_SOURCE_DIR}")
 
     file(GLOB _ausdk_sources "${audiounitsdk_SOURCE_DIR}/src/AudioUnitSDK/*.cpp")
     add_library(ausdk STATIC ${_ausdk_sources})
@@ -26,8 +31,7 @@ macro(mzgl_fetch_auv2_sdk)
     target_link_libraries(ausdk PUBLIC "-framework AudioToolbox" "-framework AudioUnit"
                                        "-framework CoreAudio" "-framework CoreFoundation")
   else()
-    include(FetchContent)
-    FetchContent_GetProperties(audiounitsdk)
+    get_property(audiounitsdk_SOURCE_DIR GLOBAL PROPERTY MZGL_AUV2_SDK_ROOT)
   endif()
 
   set(AUV2_SDK_ROOT ${audiounitsdk_SOURCE_DIR})
