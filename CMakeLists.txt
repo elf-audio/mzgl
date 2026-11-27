@@ -487,7 +487,8 @@ add_library(
   lib/mzgl/midi/midiMessagePrinting.cpp
   lib/mzgl/midi/midiMessagePrinting.h
 )
-add_library(libmzgl_unit_test STATIC ${MZGL_SOURCES})
+# Only built when something links it (tests, koala-headless, ...).
+add_library(libmzgl_unit_test STATIC EXCLUDE_FROM_ALL ${MZGL_SOURCES})
 target_include_directories(libmzgl PUBLIC ${HEADERS})
 target_include_directories(libmzgl_unit_test PUBLIC ${HEADERS})
 target_include_directories(libmzgl PUBLIC ${HEADERS})
